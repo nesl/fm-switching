@@ -431,3 +431,61 @@ share admission and does fire on that base. The accurate statement is narrower: 
 consumer is absent by construction there (Rule 2 `unexpressible`), the ORDERING consumer is present
 and is the whole of rung 3's contribution. Measured at 4,512 differing decisions, replicated
 independently by THREE sessions to the digit.
+
+---
+
+## 2026-11-23 06:45Z INCIDENT: I pushed a commit that made origin/main UNIMPORTABLE, and every arm died at cell start
+
+WHAT HAPPENED. The rung-4 registration line I added to arms.py, `from arms_v6cf import V6CF_ARMS`,
+pulls in cf_protect_defer, which calls `cf_objective.attainment_margin` AT IMPORT TIME
+(cf_protect_defer.py:150). THAT FUNCTION EXISTS ONLY IN AN UNCOMMITTED LOCAL EDIT to
+v5/cf_objective.py and is in NO commit; `git log -S` finds it nowhere. On origin the import raised
+AttributeError, so EVERY ARM DIED AT CELL START. Five rung-3 cells were killed at launch and
+auto-skipped before the H100 stopped the driver.
+
+WHY EVERY ONE OF MY RUNG-4 PROOFS MISSED IT, and this is the lesson rather than the outage. All of
+them ran in the shared worktree, which HAS the uncommitted change, so the import succeeded locally
+and COULD NOT have failed there. A proof that runs on a tree containing more than what is committed
+proves nothing about the committed tree. Worker D warned me of exactly this hazard hours earlier,
+that this worktree carries uncommitted v5/cf_objective.py edits and that running from it would
+attribute my edits to another change. I took the narrow reading, about digest attribution, and
+missed the general one.
+
+THE FIX WAS THE REVERT, NOT THE PUSH, AND THAT CHOICE IS THE RECORD'S POINT. Pushing the
+cf_objective edit would have restored the import in one line. It is half-finished D177 work whose
+HARM side was never converted. UNPROVEN POLICY CODE MUST NOT GO IN TO UNBLOCK A GPU, including my
+own, including at 23:00 with the machine idle. The registration comes back only when that change is
+committed WITH its own proof, or when cf_protect_defer stops depending on it at import time. The
+revert is COMMENTED rather than deleted, with the reason in place, so the next session does not
+re-add it and rediscover this at the cost of another idle GPU. Rung 4's cell list is un-gated and
+was unaffected.
+
+VERIFIED ON COMMITTED CODE, not on the worktree that hid the problem: the fixed arms.py has no live
+arms_v6cf import; on origin, cf_protect_defer is imported at module level ONLY by arms_v6cf.py and
+by cf_pd_tests.py, a standalone script the harness never touches; arms_v6cf is referenced only by
+arms.py (now commented) and the standalone cf_pd_* scripts. The H100 then confirmed on its FULL
+committed checkout at 67dd0514: `import arms` succeeds, 187 arms, every rung-3 and _kv0.5 name
+present.
+
+COST: GPU 2 idle from 22:45 to 22:48, three minutes, because the H100 stopped the driver promptly,
+UN-SKIPPED the five killed cells so they were recoverable, and set a HOLD so the cron watchdog could
+not restart into the same loop. Auto-skip plus a watchdog restart would have burned the night.
+
+THE PERMANENT IMPROVEMENT THAT CAME OUT OF IT, and it is the H100's: driver v29 now carries an
+INFRASTRUCTURE-FAILURE GUARD. A cell that produces no cell.json within 120 s STOPS THE DRIVER and
+sets HOLD, instead of being auto-skipped. So a launch-time break can no longer silently consume a
+queue. That is a better outcome than the incident was a cost.
+
+TWO RULES I WOULD ADOPT FROM THIS, for the user to accept or reject:
+1. A PROOF MUST RUN ON A TREE CONTAINING ONLY WHAT IS COMMITTED. Tonight's digest proofs are safe
+   because they matched committed bars, which is the direction that cannot be faked by a dirty
+   tree; an IMPORT or a REGISTRATION proof has no such protection and must use a clean checkout.
+2. ANY COMMIT THAT ADDS A MODULE-LEVEL IMPORT TO arms.py SHOULD BE PRECEDED BY AN IMPORT CHECK ON A
+   CLEAN CHECKOUT OF THE CANDIDATE TREE. arms.py is on the critical path of every cell, so an
+   import error there is not a bug in one arm, it is an outage.
+
+FOR THE RECORD, the first rung-3 result, which landed before the break: covex-v6-fair-c5attr s4
+gives robot on time 122/132 against the c5attr base's 117 and base's 35, SS 337/357, dashcam MEETS
+at pooled 0.507 with worst device 0.473 where the c5attr base FAILS at 0.263, by_deadline 0.629, and
+robot late 8 inside the bound of 10. So at s4 the ordering consumer improves robot slightly AND
+converts the dashcam verdict from FAIL to MEETS. One seed; the remaining four are the test.
