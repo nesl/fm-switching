@@ -1,0 +1,274 @@
+{
+  "survey": "d189_outage_emulation_survey",
+  "decision": "D189 item 2",
+  "subject": "D150 SYNC (4) per-device link and outage emulation, and D150 SYNC (3) device-side buffering and post-outage resync",
+  "is_measurement": false,
+  "label": "READ-ONLY SURVEY of committed code at origin/main. No code was written, no cell was run, no sweep was posted. Every file:line below is read from `git show origin/main:<path>`, never from the working tree.",
+  "ref_surveyed": "b20cb15f9b44ae2af2a97f5053734f372bccac58",
+
+  "verdict": "ABSENT (outage emulation), PARTIALLY BUILT (per-device link emulation, with no outage term)",
+  "verdict_one_line": "The link is emulated per device as a CONSTANT (bandwidth, RTT, FIFO uplink). There is no outage emulation of any kind in the live2 harness; the single link-state field the arms can read is hard-coded True, the device-side outage buffer does not exist, and the one planner that implements the D150 SYNC (3) choice has never been called by any arm.",
+
+  "register_note": "Marked at the point of use. READ = quoted from committed source. INFERRED = concluded from naming or absence of a grep hit, never from a filename alone. Every ABSENT claim below names the read site that could not be found.",
+
+  "D150_text_verbatim_source": "research/policy_design_log.md:166 (D150, 2026-11-20)",
+  "D150_SYNC_3_4_5": {
+    "SYNC (3)": "outage: the device answers alone and keeps its raw frames since the last confirmed sync (stated assumption); on reconnect the policy prioritises whose backlog to prefill (value + deficit), and for a question before catch-up chooses question-first (pre-outage history + recent frames, D54), wait, or leave to the device, with backlog ordering oldest-first for append-only KV",
+    "SYNC (4)": "links are emulated in the harness per device (bandwidth, RTT, outages; identical across arms), with a SYNTHETIC swept outage model (10 / 30 / 60 / 120 s; independent vs correlated), labelled synthetic since no outage traces exist (P6)",
+    "SYNC (5)": "outage scenarios are evaluated AFTER the core v2 grid (memory sweep, 3 s deadline)"
+  },
+
+  "q1_what_exists": {
+    "per_device_link_emulation": {
+      "status": "BUILT, CONSTANT",
+      "evidence_read": [
+        "experiments/orchestration/live2/fleet/links.py:38-40 UPLINK_MBPS = 13.6, RTT_MS = 44.0, DOWNLINK_MBPS = 13.6 (downlink labelled ASSUMPTION, NOT A MEASUREMENT at links.py:13-20)",
+        "experiments/orchestration/live2/fleet/links.py:45-67 upload_s / serialise_s / pull_s / deliver_s, the D75 timing rules",
+        "experiments/orchestration/live2/fleet/links.py:76-85 LinkSpec, per device, docstring 'Uniform in round 1 (D75) but per-device for later rounds'",
+        "experiments/orchestration/live2/fleet/links.py:104-131 UplinkQueue, ONE uplink per device shared serially FIFO, queueing delay recorded per transfer",
+        "experiments/orchestration/live2/fleet/emulator.py:68 `import links as LK`; :245 link_by_device parameter; :259 self.links; :271-274 link(device_id); :314, :318, :348 the READS that charge pull_s and deliver_s into event times"
+      ],
+      "note": "This is a real read, not a write-only field: emulator.py:314/318/348 consume LinkSpec to shift event times. The link is therefore live. It is also the only link quantity that is live."
+    },
+    "outage_emulation": {
+      "status": "ABSENT",
+      "decisive_quote_read": "experiments/orchestration/live2/fleet/links.py:9-11 — 'uplink 13.6 Mbit/s the committed uplink of StudyE4, StudyE9/E9b and StudyCTRL1/1b/1c (\"uplink 13.6 Mbit/s, RTT 0.044 s\"), fixed, no variability, no outages'",
+      "evidence_read": [
+        "links.py has no outage, drop, disconnect, down, up/down-state or availability term anywhere in its 131 lines; LinkSpec (links.py:77-85) has exactly three fields: uplink_mbps, rtt_ms, downlink_mbps.",
+        "fleet/emulator.py: a case-insensitive grep for outage|drop|connected|reachab|offline over the committed file returns ONE hit, emulator.py:512, which is a comment about a dropped recall record and has nothing to do with the link.",
+        "fleet/trace.py (1,072 lines): no outage term. Its seeded RNG streams are rng_clip, rng_sess, rng_stag, rng_join (trace.py:440-443) and a per-(seed, device) re-ask stream (trace.py:839). There is no outage stream.",
+        "fleet/data_sources.py, fleet/events.py, fleet/eligibility.py: no outage term.",
+        "experiments/orchestration/live2/run_live2_real.py:84-169: the runner has no --outage, --link, --outage-s, --outage-mode or --correlated flag. There is no way to ask a live2 cell for an outage."
+      ],
+      "inferred": "No file in experiments/orchestration/live2/ is named for network, link state, uplink state, outage, reachability or connectivity other than fleet/links.py, which disclaims outages in its own docstring."
+    },
+    "the_one_link_state_field_an_arm_can_see": {
+      "status": "CONSTANT True",
+      "definition_read": "experiments/orchestration/baselines/interface.py:88-92 — `@dataclass(frozen=True) class NetworkState: connected: bool; uplink_bps: float; rtt_s: float`",
+      "attachment_read": "experiments/orchestration/baselines/interface.py:95-105 — NetworkState is a field of EpisodicStream ONLY.",
+      "the_write_read": "experiments/orchestration/live2/cstate.py:595-596 — `network=NetworkState(connected=True, uplink_bps=d.uplink_mbps * 1e6 / 8.0, rtt_s=d.rtt_ms / 1000.0)`. `connected=True` is a LITERAL. Nothing in cstate.py ever constructs a NetworkState with connected False.",
+      "consequence": "`connected` is a CONSTANT in CLAUDE.md Step 2's sense across every committed live2 cell. Every branch guarded by `not s.network.connected` is dead code in live2.",
+      "second_consequence_read": "experiments/orchestration/baselines/interface.py:120-135 — RecallQuery has NO network field. The recall (robot) path, which is exactly what D150 SYNC is about, carries no link state at all, not even a constant one. Only the dashcam/alert EpisodicStream carries NetworkState."
+    },
+    "write_only_fields_found": [
+      {
+        "field": "Link.reachable",
+        "declared": "experiments/orchestration/policy/state.py:25 — `reachable: bool = True`",
+        "writes": [
+          "experiments/orchestration/live2/arms_policy.py:633 — `d.link.reachable = bool(s.network.connected)`",
+          "experiments/orchestration/policy/coordinator.py:793 — `dev.link.reachable = False` (in on_outage)",
+          "experiments/orchestration/policy/coordinator.py:804 — `dev.link.reachable = True` (in on_reconnect)"
+        ],
+        "read_site_searched_for_and_NOT_FOUND": "A read of `.reachable` that changes a decision. `git grep -n reachable origin/main -- experiments/orchestration/policy/*.py experiments/orchestration/live2/*.py` returns only the one declaration and the three writes above; every other hit is the unrelated word 'reachable' in a comment, or the distinct field `p_reachable_within_hs`.",
+        "classification": "WRITE-ONLY FIELD. ABSENT in CLAUDE.md Step 2's sense. It is non-zero, it varies by condition, it is instrumentable, and it implements no causal link."
+      },
+      {
+        "field": "Link.p_reachable_within_hs",
+        "declared": "experiments/orchestration/policy/state.py:26 — `p_reachable_within_hs: float = 1.0`",
+        "reads_that_DO_exist": [
+          "experiments/orchestration/policy/closed_form.py:202 — passed as p_reachable",
+          "experiments/orchestration/policy/rollout.py:690 and :756 — passed as p_reachable",
+          "experiments/orchestration/policy/continuation.py:174,182 — the state value is MULTIPLIED by p_reachable"
+        ],
+        "writes": "policy/coordinator.py:794 (on_outage, to the caller's p_reconnect) and :805 (on_reconnect, to 1.0). Nothing else writes it.",
+        "classification": "LIVE READ, CONSTANT VALUE. Because on_outage is never reached in a live2 cell (see q4), p_reachable_within_hs holds its default 1.0 in every committed run, so the continuation term it scales is identical in every branch. CONSTANT, hence a Step 2 stopping condition for any claim that rests on it."
+      }
+    ],
+    "e31_proxy_declared_at_point_of_use": {
+      "proxy": "E31 Part C derived reachability from Irish 5G State=D/I, an application download-activity flag.",
+      "status_read": "research/EXPERIMENTS.md E31b row: 'Parts C and D of E31 were invalid (State=D/I is app activity not reachability...)'. E31 Parts C/D are INVALID and are NOT cited anywhere in this survey.",
+      "valid_successor_read": "experiments/cost/e31b_network.py:150-155 — CellID-based reachability, `cell_id == '-1'` means no serving cell. E31b verdict in EXPERIMENTS.md: cell_id=-1 is 14.4 percent of time, gaps 1-3 s (p95 = 2 s); duration-filtered sustained events (>=30 s) are 2 in 28,551 s, frac_really_disconnected 0.024 percent.",
+      "why_this_matters_for_the_proposed_cells": "The only VALID committed reachability signal produces outages of p50 1 s and max 3 s. A 30 s or 120 s outage is NOT in that distribution. D150 SYNC (4) already anticipated this by ruling the duration grid SYNTHETIC and requiring it to be labelled so (P6: 'No committed series exists.'). Any 30 s / 120 s cell is a synthetic sensitivity, never an empirical regime, and must be labelled at the point of use."
+    },
+    "prior_art_that_does_exist": {
+      "study": "StudyE6b-mobility (research/EXPERIMENTS.md:216, PERFORMED, Stage A and Stage B both complete; not INVALID)",
+      "harness": "experiments/orchestration/study_e6b_traces.py and study_e6b_mobility.py — OFFLINE REPLAY of committed results, CPU only, NOT the live2 fleet emulator and NOT the 7-arm comparison.",
+      "what_it_built_read": [
+        "study_e6b_traces.py:7 outdoor_driving: Irish 5G, outage second == (cell_id == -1), E31b's valid signal",
+        "study_e6b_traces.py:10 indoor: herolab, outage second == median RSSI < -75 dBm (RSSI_OUTAGE_DBM = -75.0 at :27)",
+        "study_e6b_traces.py:11-13, 89-105 synthetic_<f>: a two-state process, outage runs resampled from the Irish empirical distribution, connected runs geometric, at target stationary fractions, LABELLED SYNTHETIC",
+        "study_e6b_mobility.py:588 a pre-registered negative control at outage fraction 0",
+        "study_e6b_mobility.py:635,666 outage_seconds_in_last_60s / outage_seconds_in_window instrumentation"
+      ],
+      "what_it_did_NOT_build": "A per-device, cross-device-correlated outage schedule. `git grep -n -i correlated` over study_e6b_traces.py and study_e6b_mobility.py returns NOTHING. E6b draws one array per SESSION, independently; there is no correlated mode and no device dimension. D150 SYNC (4)'s 'independent vs correlated' axis is unbuilt everywhere in the repo.",
+      "reusable": "Yes: the trace generator, the empirical run-length distribution, the synthetic two-state process and the outage-fraction-0 negative control are all committed and directly portable into fleet/trace.py's seeded-stream pattern."
+    }
+  },
+
+  "q2_is_an_outage_identical_across_arms": {
+    "answer": "The question does not yet have a subject: there is NO outage source of randomness in the live2 harness, so there is nothing that could be perturbed and nothing that is yet guaranteed identical. This is ABSENT, not a pass.",
+    "source_of_randomness_today": "NONE for link state. The only link values an arm sees are the literal constants of links.py:38-40, routed through cstate.py:595.",
+    "what_the_existing_pattern_would_give_you_if_built_there": {
+      "read": "experiments/orchestration/live2/fleet/trace.py:440-443 — `rng_clip = random.Random(f\"{seed}|clips\")`, `rng_sess`, `rng_stag`, `rng_join`, each a DEDICATED stream keyed on the seed alone; and trace.py:804-806, 839 — the re-ask RNG is `random.Random(\"reask|%d|%s|%s\" % (seed, dev, sid))`, with the committed comment 'The RNG is a DEDICATED stream keyed on (seed, device), never the generator's own rng, so ... every arm given the same cell arguments gets the same re-asks'.",
+      "read_2": "experiments/orchestration/live2/fleet/trace.py:395 — generate_trace is 'Deterministic in `seed` alone given (n_devices, ratio, run_s, stagger_s)'.",
+      "read_3": "experiments/orchestration/live2/fleet/trace.py:50-58 and :59-64 — the EP-G episode frame list and the per-frame robot upload schedule are emitted IN THE TRACE precisely so that cross-arm digest identity holds 'BY CONSTRUCTION rather than by coordinator discipline'.",
+      "implication": "An outage schedule emitted in trace.py from a dedicated `random.Random(f\"{seed}|outage\")` stream, written into trace.jsonl and covered by `fairness_digest` (trace.py:65-69), would be identical per seed for every arm BY CONSTRUCTION and no arm's behaviour could perturb it. An outage schedule drawn in the emulator or the coordinator instead could be perturbed by arm behaviour and would make every cross-arm outage comparison meaningless."
+    },
+    "hazard_to_pre_register": "D150 SYNC (4) says 'identical across arms'. That property must be PROVED, not assumed: the trace-level fairness digest (fleet/emulator.py:37-42, a mismatch is a stop condition and run() raises) is the existing instrument for it, and an outage schedule must be inside that digest or the proof does not cover it."
+  },
+
+  "q3_do_devices_keep_raw_frames_and_resync": {
+    "answer": "NO. Not implemented anywhere.",
+    "device_side_buffer": {
+      "status": "ABSENT",
+      "read_site_searched_for_and_NOT_FOUND": "Any device-side store of captured-but-unsent raw frames with a bound. `git grep -n -i 'confirmed sync|raw frames|device buffer|buffer|unsent'` over experiments/orchestration/live2/ returns: arms_policy.py:690 (a held monitoring call, a release decision, not an outage buffer), coordinator.py:341 (a reconciliation comment), procsplit.py:121 (an OS pipe buffer), and the d179/d187 release-recheck diagnostics and tests, which concern a SKIPPED release under D179 share rules and not a link outage. None of these is a link-outage buffer.",
+      "bound": "n/a, the buffer does not exist",
+      "overflow_behaviour": "n/a, the buffer does not exist"
+    },
+    "the_nearest_thing_that_does_exist": {
+      "code_read": "experiments/orchestration/policy/coordinator.py:791-810, on_outage / on_reconnect.",
+      "what_it_actually_does": "on_outage sets dev.link.reachable = False and p_reachable_within_hs, then MOVES the COORDINATOR'S pending items for that device out of fleet.pending into a `dev.__dict__['_paused']` list; on_reconnect puts them all back into fleet.pending.",
+      "why_it_is_not_D150_SYNC_3": "It parks coordinator-side pending REQUESTS. It is not a device-side store of raw frames since the last confirmed sync, there is no sync watermark, there is no bound, there is no overflow rule, nothing is charged, and no frame bytes exist in it. Marking the register: this is an unbounded coordinator-side pause list, not a device buffer.",
+      "and_it_is_unreachable": "on_outage's only non-test caller is arms_policy.py:635, inside `if not s.network.connected:` at :634, and `connected` is the literal True of cstate.py:595. on_reconnect has NO caller at all outside experiments/orchestration/policy/tests/test_rollout_coordinator.py:263 and tests/test_scenario.py:26."
+    },
+    "the_post_outage_decision_that_IS_implemented": {
+      "code_read": "experiments/orchestration/live2/v5/cf_planner.py:697-802, `plan_sync`, with SYNC_CANDIDATES = ('QUESTION_FIRST', 'WAIT', 'LEAVE_TO_DEVICE') at cf_planner.py:150. It implements D150 SYNC (3)'s three options and prices them (:743-789), and spec v5 section 7.5 (research/policy_spec_v5.md:335-346) specifies the oldest-first backlog ordering.",
+      "callers": "cf_planner.py:387 (its own internal dispatch), v5/cf_proofs.py:662-667 and :934-938, v5/d171_proofs.py:304-306. NO ARM.",
+      "committed_statement_of_this": "reports/policy_fidelity.md:148-150 — '| `plan_sync` | `cf_planner.py:333` dispatch and `cf_proofs.py:611` **only** |' and 'No arm has ever called `plan_state` or `plan_sync`, including the one I wrote today.'",
+      "and_it_is_declared_not_built_in_the_shipped_arm": "experiments/orchestration/live2/arms_v6cf.py:15 and :527 — `not_built=['keep-ready set', 'admit with protected victim', 'plan_sync']`; same declaration at cf_protect_defer.py:11 and :583.",
+      "classification": "UNEXERCISED (CLAUDE.md Rule 2). The mechanism is reachable in code and has proofs on synthetic inputs, but no condition in any committed cell reaches it, because no arm calls it and no outage exists to trigger it.",
+      "additional_blocker_read": "cf_planner.py:722-729 — `acc_question_first` is a REQUIRED DECLARED INPUT; with no committed accuracy for a question-first answer the planner substitutes cloud RECENT and labels the substitution, and the docstring states 'A v5 outage result may not be read without that number being either measured or ruled.' D157 (3) (policy_design_log.md:175) DEFERRED exactly this to the outage scenarios and recorded it as OPEN. So the question-first accuracy is an open ruling that gates reading any outage result."
+    }
+  },
+
+  "q4_what_does_each_baseline_do_during_an_outage": {
+    "headline": "KEY FINDING, AND IT IS TRUE. Not one of the seven arms can observe an outage in the recall path, and five of the seven cannot observe a link state at all. An arm that cannot observe an outage cannot have a policy for one, so a 7-arm outage comparison run on the harness as committed would measure only how each arm's existing scheduling happens to respond to requests that silently fail or run late.",
+    "shared_premise": "The only link-state channel into an arm is EpisodicStream.network (interface.py:105), it exists on the dashcam/alert stream only, RecallQuery has no network field (interface.py:120-135), and its `connected` is hard-coded True at cstate.py:595.",
+    "arms": [
+      {
+        "arm": "llf",
+        "definition_read": "experiments/orchestration/live2/arms.py:329-330 (name), ARM_NAMES at arms.py:645, factory at arms.py:586",
+        "sees_a_link_state": "NO. `git grep -n network` over experiments/orchestration/live2/arms.py returns nothing.",
+        "what_it_would_actually_do": "Order by (deadline - service) and nothing else. During an outage it observes only requests that fail or time out."
+      },
+      {
+        "arm": "mooncake",
+        "definition_read": "arms_published.py:62 (import), :189-190 (wrap of baselines/mooncake_adapted.py::MooncakeAdapted)",
+        "sees_a_link_state": "NO. `git grep -n network` over baselines/mooncake_adapted.py returns nothing."
+      },
+      {
+        "arm": "simplestream",
+        "definition_read": "arms_published.py:50 (import), :264-265 (wrap of baselines/simplestream_adapted.py::SimpleStreamAdapted)",
+        "sees_a_link_state": "NO. `git grep -n network` over baselines/simplestream_adapted.py returns nothing."
+      },
+      {
+        "arm": "eco-llm",
+        "definition_read": "arms_published.py:56 (import), :179-180 (wrap of baselines/ecollm_adapted.py::ECOLLMAdapted)",
+        "sees_a_link_state": "YES, one read: baselines/ecollm_adapted.py:125 — `if row['mode'] == 'local' or not s.network.connected:`",
+        "but": "The guard is on the dashcam stream only and its input is the constant True, so the branch is dead in every committed live2 cell. CONSTANT."
+      },
+      {
+        "arm": "covex-v6-base",
+        "definition_read": "arm_names_v6.py:39 (rung 0, 'hybrid-F-lhreq-noc3 rules'), alias map arm_names_v6.py:71",
+        "sees_a_link_state": "NO. `git grep -n network` over experiments/orchestration/live2/hybrid/ and arms_v6*.py and arms_warmall.py returns nothing."
+      },
+      {
+        "arm": "covex-v6-rules",
+        "definition_read": "arm_names_v6.py:42 (rung 1, '+ chunked just-in-time warming + saturation guard'), alias map arm_names_v6.py:72 (was v5-rules-2)",
+        "sees_a_link_state": "NO. Same grep, no hits in arms_v5rules.py or arms_v5rules2.py.",
+        "note": "Its saturation guard (spec v6 section 5, policy_spec_v6.md line 44 of the quoted block) reads observed first-token lag and queued deadline work. Under a long outage those signals would move, so covex-v6-rules would REACT to an outage through a congestion signal, but it would be reacting to engine health and never to a link state. That is an alternative explanation to name in advance for any outage result (CLAUDE.md Step 5)."
+      },
+      {
+        "arm": "always-cloud-fcfs",
+        "definition_read": "arms.py:12 (table), arms.py:102-105 (`class AlwaysCloudFcfsArm(Live2ArmMixin, NAIVE.AlwaysCloudFCFS)`, live2_source 'baselines/naive.py::AlwaysCloudFCFS AS COMMITTED'), registered at arms.py:575",
+        "sees_a_link_state": "NO. `git grep -n network` over baselines/naive.py returns nothing.",
+        "note": "This is the arm whose outage behaviour is most interesting (it has no device fallback at all), and it is also the arm with the least ability to see one."
+      }
+    ],
+    "arms_policy_is_the_only_arm_family_wired_to_the_outage_handler": {
+      "read": "experiments/orchestration/live2/arms_policy.py:629-635 — it mirrors the stream link into its own fleet model and calls self.co.on_outage(...) when not connected.",
+      "but": "arms_policy is the `policy-core` family (arms.py:643), NOT one of the seven arms the user listed, and its trigger is the constant True, so even there the call never fires."
+    }
+  },
+
+  "q5_verdict_and_missing_pieces": {
+    "verdict": "ABSENT for outage emulation; PARTIALLY BUILT for per-device link emulation (constants only, no outage term). NOT complete and NOT proven. No committed test, no proof JSON and no E-id row exists for a live2 outage scenario.",
+    "proof_search": {
+      "committed_test_searched_for": "A test exercising an outage in experiments/orchestration/live2/fleet/tests/ (test_live2_fleet.py, test_scale.py) or experiments/orchestration/live2/tests/. NOT FOUND: no outage term in any of them. The only outage tests in the repo are experiments/orchestration/policy/tests/test_rollout_coordinator.py:259-263 and tests/test_scenario.py:22-57, which call on_outage/on_reconnect directly on the v3 policy Fleet object and never go through the live2 emulator.",
+      "proof_json_searched_for": "A results/orchestration/live2/ JSON for an outage cell or an outage digest proof. NOT FOUND.",
+      "e_id_searched_for": "A research/EXPERIMENTS.md row for a live2 or v6 outage scenario. NOT FOUND. The only outage experiment with an E-id is StudyE6b-mobility (EXPERIMENTS.md:216), which is an OFFLINE REPLAY on a different harness with different arms, and whose Stage B conclusion is about keeping the DEVICE warm, not about the 7-arm live2 comparison.",
+      "spec_status_read": "research/policy_spec_v6.md, Inputs table: '| **link state** | per-device bandwidth, RTT, outage | emulated per device, identical across arms | D150 SYNC (4); uniform 13.6 Mbit/s for the core grid |'. The spec itself scopes outage OUT of the core grid, consistent with D150 SYNC (5). So the absence is a scheduled absence, not an oversight.",
+      "graveyard_check": "research/GRAVEYARD.md has no entry for outage, reachability or connectivity. Nothing here is a closed candidate."
+    },
+    "missing_pieces": [
+      {
+        "id": "M1",
+        "piece": "An outage schedule in the trace, seeded per trace and covered by the fairness digest",
+        "where": "fleet/trace.py, a new dedicated stream alongside trace.py:440-443, written into trace_meta.json and trace.jsonl, and added to fairness_digest (trace.py:65-69)",
+        "needs": "A per-device on/off second-grid, the synthetic duration grid of D150 SYNC (4) (the user's subset: 30 s and 120 s), and an independent-vs-correlated switch across devices. The correlated mode exists NOWHERE in the repo and must be designed, not ported.",
+        "hours": "4 to 6"
+      },
+      {
+        "id": "M2",
+        "piece": "The emulator must honour the schedule",
+        "where": "fleet/links.py (an outage interval list on LinkSpec and an outage-aware UplinkQueue.send that defers a transfer to the end of the outage rather than serialising through it) and fleet/emulator.py:271-274, :314, :318, :348 (the four existing link reads)",
+        "needs": "A decision, which is a METHODOLOGICAL change and must be ruled: what happens to a monitor_frame, a history_batch, a pull_request and a cloud_answer that is in flight when the link drops. Dropped, deferred, or failed-and-retried are three different experiments.",
+        "hours": "5 to 8"
+      },
+      {
+        "id": "M3",
+        "piece": "A real link state in the observation, including on the recall path",
+        "where": "experiments/orchestration/baselines/interface.py (RecallQuery gains a link-state field, or Observation gains a per-device link map) and experiments/orchestration/live2/cstate.py:595 (stop hard-coding connected=True)",
+        "needs": "interface.py is the shared frozen contract that every baseline arm reads, so this touches all seven arms' input surface. It is the single highest-risk edit in the list: the committed baseline matrix and every digest proof keyed on the observation would need re-gating.",
+        "hours": "6 to 10, plus re-gating"
+      },
+      {
+        "id": "M4",
+        "piece": "A device-side raw-frame buffer with a bound and an overflow rule (D150 SYNC (3))",
+        "where": "fleet/emulator.py device side; does not exist today in any form",
+        "needs": "A sync watermark, a byte or frame bound, an overflow rule, and a ruling on whether the buffered backlog is charged to the uplink on reconnect. All four are design decisions, not implementation. The nearest existing code, policy/coordinator.py:791-810, is an unbounded coordinator-side pause list and is not a substitute.",
+        "hours": "6 to 9"
+      },
+      {
+        "id": "M5",
+        "piece": "Resync / catch-up ordering, and wiring plan_sync to an arm",
+        "where": "v5/cf_planner.py:697-802 exists and is unit-proved; it needs a caller. arms_v6cf.py:527 and cf_protect_defer.py:583 currently DECLARE it not built.",
+        "needs": "A caller in the covex arm, plus the catch_up_s, pre_outage_tokens, recent_frame_tokens and full_tokens quantities actually computed from the buffer of M4 rather than passed as proof literals.",
+        "hours": "5 to 8"
+      },
+      {
+        "id": "M6",
+        "piece": "The question-first accuracy number, which gates READING any outage result",
+        "where": "cf_planner.py:722-729 requires acc_question_first; D157 (3) (policy_design_log.md:175) deferred it to the outage scenarios and recorded it OPEN",
+        "needs": "A USER RULING or a measurement. Not an implementation task. Without it every outage result carries a labelled substitution.",
+        "hours": "0 engineering; blocked on a ruling"
+      },
+      {
+        "id": "M7",
+        "piece": "Mechanism verification and the proofs (CLAUDE.md Steps 0 to 5) before any sweep",
+        "where": "a new proofs script under experiments/orchestration/live2/",
+        "needs": "Step 2b in particular: two conditions on one cell, diffed decision logs, a non-zero differing-decision count. Given that the whole subject here is a write-only field and a constant, this is the step that cannot be skipped.",
+        "hours": "4 to 6"
+      }
+    ],
+    "total_estimate_hours": "30 to 47 engineering hours, plus one user ruling (M6) and two methodological rulings (M2's in-flight rule, M4's bound and overflow rule), plus re-gating of the committed observation-keyed digest proofs after M3.",
+    "what_it_competes_with": "Today's policy work: rung-2 and rung-3 follow-up, and a user ruling on v5/cf_objective.py and rung 4. D150 SYNC (5) and spec v6's own inputs table both say the outage scenarios come AFTER the core grid, so the project's own standing ruling already orders this behind the rung work. Nothing in this survey argues for reordering it.",
+    "proposed_cell_list": "NOT POSTED AND NOT PROPOSED AS RUNNABLE. The user's described list (outage 30 s and 120 s, independent vs correlated across devices, 7 arms including always-cloud-fcfs, seeds 4 and 5 = 2 x 2 x 7 x 2 = 56 cells) cannot be run on the harness as committed: with connected hard-coded True, all 56 cells would be byte-identical to the no-outage cells, which is an ABSENT LINK and not a result. The list becomes meaningful only after M1 through M5, and only reads as a result after M6. The proofs such a list would need are recorded under 'proofs_a_future_cell_list_would_need' below, so they exist on the record before anything is built.",
+    "proofs_a_future_cell_list_would_need": [
+      "Schedule identity across arms: the per-seed outage schedule digest must be equal for all 7 arms, and must be inside trace.py's fairness_digest so emulator.run() raises on a mismatch (fleet/emulator.py:37-42).",
+      "Step 2b, the switch reaches a decision: one cell, outage on versus off, diffed decision logs, with the number of differing decisions and the first one reported. Identical logs mean ABSENT LINK, never a negative.",
+      "Non-constancy of the link state: a census showing NetworkState.connected is False for the expected number of seconds per device, which is the direct check that cstate.py:595's literal has actually been removed.",
+      "Characteristic-decision count per arm (CLAUDE.md 'Citing results'): for each of the 7 arms, the count of the decision kind it would make BECAUSE of the outage, confirmed non-zero. For five of the seven that count is structurally zero today and would stay zero without M3.",
+      "Negative control (Step 4): outage fraction 0 must reproduce the committed no-outage cells EXACTLY. StudyE6b already has this control and it passed exactly (study_e6b_mobility.py:588), so the precedent and the bar both exist.",
+      "Positive control (consistency check 7): a known-good committed arm, run through the outage-capable harness at outage fraction 0, must reproduce its committed headline. If it does not, the harness is broken, not the arm.",
+      "Buffer accounting: per device, frames buffered during the outage must equal frames uploaded after reconnect plus frames dropped to the bound, with the bound and the overflow count reported, not summed away.",
+      "Synthetic label at the point of use: every 30 s and 120 s cell labelled SYNTHETIC per D150 SYNC (4) and P6, with E31b's valid signal (p50 1 s, max 3 s, frac_really_disconnected 0.024 percent) quoted beside it so no reader takes the duration grid for an empirical one.",
+      "Question-first accuracy: either the measured number or the user's ruling, recorded before scoring; otherwise cf_planner.py:722-729's substitution label travels with every number."
+    ]
+  },
+
+  "claim_linkage": {
+    "FORMULATION_scoping_check": "Nothing surveyed here is scoped out by research/FORMULATION.md. The E31 Part D KV-portability trap is not touched: no KV moves across tiers in any of this.",
+    "bears_on": "D150 SYNC (3), (4), (5); research/policy_spec_v6.md section 3 'link state' input; research/policy_spec_v5.md sections 7.5 and 9.",
+    "supports_or_weakens": "This survey makes no claim about any policy. It reports build state only."
+  },
+
+  "_provenance": {
+    "git_commit": "b20cb15f9b44ae2af2a97f5053734f372bccac58",
+    "script": "none (read-only survey, no script written; every citation is `git show origin/main:<path>`)",
+    "model": "n/a",
+    "device": "flash (CPU; no GPU, no server, no inference)",
+    "n": "n/a (no cells run)",
+    "timestamp": "2026-11-23T00:00:00.000000"
+  }
+}

@@ -93,27 +93,9 @@ def start_server(host_gib, scheduling_policy=None, extra_flags=None):
     # (committed before any cell of runs/C5DIAG_CELLS runs); it is a DIAGNOSTIC, never a headline, it is
     # server-wide so it changes every arm in the cells it is used for, and the committed configuration is the one
     # with NO extra flags. The allowlist stays an allowlist: an unlisted flag still STOPS.
-    # D189 (user ruling, relayed 2026-11-23): the REAL-ENGINE 0.25x KV entry. The committed
-    # _kv0.5 and _kv0.25 tags shrink only the HARNESS'S LOGICAL pool: the H100 confirmed from the
-    # _kv0.5 server logs that vLLM's own GPU KV cache stayed at 62,944 tokens throughout, so that
-    # sweep is a belief-and-enforcement condition and NOT a real memory condition. To shrink the
-    # ENGINE, 62,944 tokens is 3,934 blocks of 16, so 984 blocks is 15,744 tokens. --max-model-len
-    # must come with it, because vLLM 0.31 REFUSES TO START when the KV cache cannot hold one
-    # max_model_len request (v1/core/kv_cache_utils.py around 916-927).
-    #
-    # CONSEQUENCE, ruled and NOT worked around: prompts over 15,744 become ENGINE REFUSALS. Those
-    # are already handled correctly by the committed scorer rather than needing a policy change:
-    # `scorer/score.py:refused_request_ids` nulls the delivery of a request that never returned an
-    # answer, so the DEVICE answer stands and the question is a miss, and that function's own
-    # motivating example is an OVER-CONTEXT request with a 38,821-token prefill. So
-    # `hybrid_arm.CONTEXT_LIMIT_TOKENS = 32768` is deliberately LEFT ALONE: it is a module constant
-    # every arm reads, changing it would alter the frozen base for all of them, and the refusal
-    # path already produces the right score. The refusals must be REPORTED SEPARATELY per cell.
-    _REAL_KV025 = ["--num-gpu-blocks-override", "984", "--max-model-len", "15744"]
     if extra_flags:
         if list(extra_flags) not in (["--long-prefill-token-threshold", "1024"],
-                                     ["--long-prefill-token-threshold", "2048"],
-                                     _REAL_KV025):
+                                     ["--long-prefill-token-threshold", "2048"]):
             raise SystemExit(f"unsupported extra server flags {extra_flags!r}: STOP")
         flags = flags + list(extra_flags)
     os.environ["PYTHONPATH"] = str(M.PLUGIN_DIR)
@@ -122,14 +104,9 @@ def start_server(host_gib, scheduling_policy=None, extra_flags=None):
     srv = X.Server("32BI", flags)
     info = srv.start()
     os.environ.pop("PYTHONPATH", None)
-    # The pool check stays a STOP, and its EXPECTATION is conditional only for the one allowlisted
-    # real-0.25x entry: with --num-gpu-blocks-override 984 the engine reports 15,744 rather than
-    # GPU_KV, so comparing against GPU_KV would STOP every such cell. Any other value still STOPS,
-    # and the DEFAULT path is byte-for-byte the previous behaviour.
-    _expect_kv = 15744 if list(extra_flags or []) == _REAL_KV025 else GPU_KV
-    if info.get("kv_cache_tokens") != _expect_kv:
+    if info.get("kv_cache_tokens") != GPU_KV:
         srv.stop()
-        raise SystemExit(f"GPU pool {info.get('kv_cache_tokens')} != expected {_expect_kv}: STOP")
+        raise SystemExit(f"GPU pool {info.get('kv_cache_tokens')}: STOP")
     return srv, dict(command=info.get("server_cmd"), flag_diff=diff, restart_started=t0, up_at=time.time(),
                      startup_s=info.get("startup_s"), log=str(srv.logpath), host_gib=host_gib,
                      scheduling_policy=(scheduling_policy or "fcfs"),
