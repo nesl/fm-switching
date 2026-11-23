@@ -1,0 +1,68 @@
+{
+ "_status": "DRAFT, NOT FROZEN AND NOT TO BE COMMITTED AS A PRE-REGISTRATION YET. Two blocking questions below must be answered first, because each changes every bar NUMBER. Freezing a pre-registration with an open comparator in it would be worse than not freezing one: the whole value of the frozen hash is that the bars could not have been chosen after the fact.",
+ "_study": "StudyLADDER-FINAL",
+ "_what": "the three final rungs, per seed at 1x, with the bars D208 states and the Gate A exposure beside them",
+ "arms": {"rung_2": "covex-v6-state-final", "rung_3": "covex-v6-fair-final", "rung_4": "covex-v6-final"},
+ "_built_on_commit": "62b8a7eb1088656220d08b5b624b564f44ac412c (origin/main when the modules were built and the name proof run)",
+
+ "BLOCKER_1_the_word_base_means_two_different_arms": {
+  "what_D208_says": "covex-v6-fair-final must pass the three D179 checks against `covex-v6-base`",
+  "what_every_committed_verdict_means_by_base": "hybrid-F-lhreq-noc3",
+  "evidence": {
+   "scorer_default": "d179_rung2_verdict.py --base-arm default is hybrid-F-lhreq-noc3",
+   "d179_rung2_verdict.json": "arms.base = hybrid-F-lhreq-noc3",
+   "d185_rung3_verdict.json": "arms.base = hybrid-F-lhreq-noc3",
+   "d196_rr_s4_verdict.json": "arms.base = hybrid-F-lhreq-noc3",
+   "so": "robot_base 35, 27, 41, 19 at seeds 4 to 7 in d196_rr_four_seed_verdict.json is hybrid-F-lhreq-noc3's robot on-time, NOT covex-v6-base's, and the -rr bar of 114 at s4 was derived as 35 + 0.90 x (122 - 35) on that arm"},
+  "why_it_cannot_be_guessed": "the two readings give different bar numbers for every seed, and only one of them keeps the final ladder's verdicts comparable with the committed rung-2, rung-3 and -rr verdicts, which is the entire purpose of having a bar.",
+  "reading_a_PRESERVES_COMPARABILITY": "base means hybrid-F-lhreq-noc3, as in every committed verdict. covex-v6-base stays what it is in proof (a): a byte-identity comparator, a different role.",
+  "reading_b_LITERAL": "base means covex-v6-base. Then the reference numbers must be recomputed for that arm, and NOTE there is NO committed covex-v6-base cell at 1x with the plain `_L3_epg_rq30` tag in the tree (only _kv0.5 and _lpt2048), so a covex-v6-base 1x cell would have to be RUN before any bar could be stated.",
+  "also_a_definition_audit_hit": "CLAUDE.md consistency check 4 asks for any name used with two different definitions across experiments to be reported. This is one, and it is load-bearing."
+ },
+
+ "BLOCKER_2_session_A_has_not_landed": {
+  "what_D208_says": "build on the commit that contains Session A, and the touch-price fix WILL MOVE rung 3's and rung 4's digests",
+  "measured_on_the_tip_62b8a7eb": {
+   "hit_22_TOUCH_PRICE_MODE": "BUILT BUT DEFAULT OFF. touch_policy.py:108 reads TOUCH_PRICE_MODE = \"reload-proxy\" with the comment \"DEFAULT, the committed behaviour; nothing changes\", and the corrected price touch_price_gpu_s_d162 is reached only when the mode is \"d162-warm-hit\". So the fix exists and is NOT in force, and no digest has moved yet.",
+   "hit_6_gpu_kv_fraction": "NOT FIXED. cstate.py:663 still reads the metrics key with a silent 0.0 default and does not fail loud.",
+   "hit_26_host_belief": "NOT FIXED. cstate.py:673 _host_fraction is still an aggregate sum over sessions."},
+  "consequence": "a ladder cell run now is measured on PRE-FIX code. If the mode is flipped to d162-warm-hit afterwards, every rung-2, rung-3 and rung-4 cell is superseded and must be rerun, which is D209 (1)'s own parity rule.",
+  "what_does_NOT_change_when_it_lands": "the BAR DEFINITIONS, because D208's bars are stated RELATIVE to arms measured in the same run (rung 3 against rung 2's gain, rung 4 against rung 3's gain). Only the base reference and the measured numbers move. That is why this draft can be completed the moment blocker 1 is answered, whatever Session A does.",
+  "what_DOES_change": "the ladder cells themselves, and the Step 2b and proof (c) counts measured from them."
+ },
+
+ "the_bars_AS_DEFINED_numbers_pending_blocker_1": {
+  "scored_by": "the COMMITTED scorer d179_rung2_verdict.py, unchanged, per seed, recorded by sha; one canonical scorer version per D209 (1)",
+  "per_seed_at_1x": true,
+  "covex_v6_fair_final_rung_3": [
+   "CHECK 1 alert: mean per-episode alert attainment ABOVE base's",
+   "CHECK 2 robot: on-time at least base + 0.90 x (covex-v6-state-final's on-time minus base), the D190 (3) retention form and the same arithmetic the -rr bars used",
+   "CHECK 3 single-shot: at least 90 percent within 2 s",
+   "REPORTED BESIDE, not a bar: late alert instants, with their denominator"],
+  "covex_v6_final_rung_4": [
+   "alert: mean per-episode attainment ABOVE covex-v6-fair-final's",
+   "robot: on-time at least base + 0.90 x (covex-v6-fair-final's on-time minus base), D190 (3)",
+   "REPORTED BESIDE: the Gate A EXPOSURE and the OVERRUN MAGNITUDE per D206 (1), with the retired would-have-missed count kept only as a labelled identity column"],
+  "covex_v6_state_final_rung_2": "NO BAR OF ITS OWN, by D208. It is the reference rung 3's retention bar is computed from, and its s5 to s7 run WITH covex-v6-fair-final rather than on their own verdict.",
+  "fail_fast": "D196: s4 alone first per rung. A rung continues to s5 to s7 ONLY if its s4 passes its bars.",
+  "every_result_reported_whatever_its_direction": true
+ },
+
+ "proofs_owed_before_any_cell": {
+  "a": "covex-v6-base, covex-v6-rules and every reported baseline BYTE-IDENTICAL to their committed digests on the committed recipe. ESCALATE AND STOP if any moves. Hit 6 is the one allowed exception, and the probe now makes a baseline move MORE likely than first thought because gpu_kv_fraction is 0.0 in every live cell on this build.",
+  "b": "Step 2b per rung on the dry s4 cell, with COUNTS BY MECHANISM so a reader can see which switch moved what",
+  "c": "the id(obs) fix: how many rung-2 decisions it changes on dry s4, against covex-v6-state-uo-c5attr",
+  "d": "Gate A for covex-v6-final as exposure plus overrun magnitude",
+  "name_proof": "DONE: d208_ladder_name_proof.json, all_pass true, with a negative control that an unregistered name does NOT resolve, and the factory identity of all nine protected committed names unchanged before and after registration"
+ },
+
+ "_step_0_what_would_invalidate_this_run": [
+  "the comparator changing: BLOCKER 1, open",
+  "a default being restored: BLOCKER 2, open, and it is the touch price that rung 2, 3 and 4 all read",
+  "the base reference arm having no cell at the tag the bar is stated at: TRUE under reading b, checked",
+  "a mechanism being unreachable at this size: two reported in d208_inheritance.json, the RELOAD lever and gpu_kv_fraction, neither papered over"
+ ],
+ "_provenance": {"script": "hand-written draft; arms built by arms_final_ladder.py and verified by d208_ladder_name_proof.py",
+                 "device": "flash (CPU only)", "model": "n/a",
+                 "origin_main_sha_read": "62b8a7eb1088656220d08b5b624b564f44ac412c"}
+}

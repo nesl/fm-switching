@@ -1,0 +1,109 @@
+{
+ "_what": "D208 final-ladder name proof, with a negative control and the no-shadowing check",
+ "registered": [
+  "covex-v6-fair-final",
+  "covex-v6-final",
+  "covex-v6-state-final"
+ ],
+ "n_registry_after": 212,
+ "rungs": {
+  "covex-v6-state-final": {
+   "resolves": true,
+   "class": "V6StateFinal",
+   "mro": [
+    "V6StateFinal",
+    "V6StateUoC5AttrArm",
+    "V6StateArm",
+    "object"
+   ],
+   "built_from_committed_arm": "covex-v6-state-uo-c5attr",
+   "qcache_key_fix_D188": true,
+   "release_recheck_D179_4": false,
+   "release_recheck_types": null,
+   "deficit_feed_present": false,
+   "deficit_gain": null,
+   "planner_weight_source": "NoPlannerDeficitFeed",
+   "planner_source_is_declared_constant": true
+  },
+  "covex-v6-fair-final": {
+   "resolves": true,
+   "class": "V6FairFinalWired",
+   "mro": [
+    "V6FairFinalWired",
+    "_PlannerFeedMixin",
+    "V6FairFinal",
+    "_AlertRecheckMixin",
+    "V6FairFeed_covex_v6_state_final",
+    "DeficitFeedMixin",
+    "V6StateFinal",
+    "V6StateUoC5AttrArm"
+   ],
+   "built_from_committed_arm": "covex-v6-fair-c5attr plus covex-v6-fair-c5attr-rr",
+   "qcache_key_fix_D188": true,
+   "release_recheck_D179_4": true,
+   "release_recheck_types": [
+    "alert"
+   ],
+   "deficit_feed_present": true,
+   "deficit_gain": 2.0,
+   "planner_weight_source": "PlannerDeficitWeights",
+   "planner_source_is_declared_constant": false
+  },
+  "covex-v6-final": {
+   "resolves": true,
+   "class": "V6Final",
+   "mro": [
+    "V6Final",
+    "_Rung4Mixin",
+    "_ProtectDeferMixin",
+    "V6FairFinalWired",
+    "_PlannerFeedMixin",
+    "V6FairFinal",
+    "_AlertRecheckMixin",
+    "V6FairFeed_covex_v6_state_final"
+   ],
+   "built_from_committed_arm": "covex-v6-cf-c5attr",
+   "qcache_key_fix_D188": true,
+   "release_recheck_D179_4": true,
+   "release_recheck_types": [
+    "alert"
+   ],
+   "deficit_feed_present": true,
+   "deficit_gain": 2.0,
+   "planner_weight_source": "PlannerDeficitWeights",
+   "planner_source_is_declared_constant": false,
+   "legs_w_source_live": true,
+   "legs_and_limb_read_THE_SAME_feed_object": true,
+   "_identity_register": "the legs and the planner limb read ONE object, so their weights are equal BY CONSTRUCTION with maximum absolute difference exactly 0. That is an IDENTITY, not a measurement of agreement."
+  }
+ },
+ "negative_control": {
+  "name": "covex-v6-final-THIS-NAME-IS-NOT-REGISTERED",
+  "in_registry": false,
+  "resolved": false,
+  "verdict": "PASS: an unregistered name does NOT resolve, so the proof can fail"
+ },
+ "no_committed_name_shadowed": {
+  "protected": [
+   "covex-v6",
+   "covex-v6-state",
+   "covex-v6-fair",
+   "covex-v6-base",
+   "covex-v6-rules",
+   "covex-v6-state-uo-c5attr",
+   "covex-v6-fair-c5attr",
+   "covex-v6-fair-c5attr-rr",
+   "covex-v6-cf-c5attr"
+  ],
+  "n_checked": 9,
+  "factory_identity_unchanged": true,
+  "_why_this_matters": "arms.ARMS is a dict, so a second registration under a committed key REPLACES it. covex-v6-state carries six committed cell directories and a results/INDEX.md citation, so a replacement would silently re-point every reader of those cells at a different policy. This is what D208's -final suffix prevents, and arms_final_ladder.register() raises on a clash rather than relying on this check alone."
+ },
+ "all_pass": true,
+ "_provenance": {
+  "script": "d208_ladder_name_proof.py",
+  "device": "flash (CPU only)",
+  "model": "n/a",
+  "n": 3
+ }
+}

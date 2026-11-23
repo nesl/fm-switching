@@ -1,0 +1,323 @@
+#!/usr/bin/env python3
+"""THE FINAL THREE-RUNG LADDER (D208), REGISTERED BESIDE THE COMMITTED ARMS AND NEVER REPLACING ONE.
+
+    rung 2   covex-v6-state-final   covex-v6-state-uo-c5attr + the D188 (2) id(obs) cache-key fix
+    rung 3   covex-v6-fair-final    rung 2 + the D185 per-device deficit feed (ordering consumer)
+                                           + the STATE PLANNER reading that same feed (D206 (2))
+                                           + the ALERT release re-check (D179 (4), the -rr switch)
+    rung 4   covex-v6-final         rung 3 + the two counterfactual decisions, protect-and-defer
+                                           and question deferral, with the planner limb on the
+                                           same feed (D206 (3))
+
+WHY THE NAMES CARRY `-final` AND WHY THAT IS NOT COSMETIC. `covex-v6-state`, `covex-v6-fair` and
+`covex-v6` ARE ALREADY REGISTERED NAMES, and `covex-v6-state` carries SIX committed cell
+directories (s4, s4_rerun, s5, s6, s7, s7_rerun) and a `results/INDEX.md` citation. `arms.ARMS` is
+a dict, so a second registration under one of those keys REPLACES rather than adds, and every
+reader of those six committed cells would silently be comparing against a different policy. The
+user ruled the suffix (D208, option 2) for exactly that reason. The paper's labels are mapped at
+write-up; the code names stay as they are here.
+
+NOTHING IN THIS MODULE RE-IMPLEMENTS A MECHANISM. Every rung is composed from the committed module
+that already owns its mechanism, which is why this file is short:
+
+    the id(obs) fix        `arms_v6state.QCACHE_KEY_FIX_SWITCH`, built and proven under D188 (2)
+                           and OFF BY DEFAULT. D188 (2) says it must stay off "until the final
+                           rung-2 arm and its comparators are rerun TOGETHER with it ON", and this
+                           ladder is that rerun. Keyed on `(epoch, now_s)`, which cannot alias.
+    the deficit feed       `arms_v6fairfeed.DeficitFeedMixin` over a rung-2 base, unchanged
+    the planner limb       `planner_deficit_weights.wire_planner`, ONE copy, shared with rung 4
+    the release re-check   `arms_v6rr._AlertRecheckMixin` and `release_recheck`, unchanged
+    protect-and-defer      `arms_v6cf._ProtectDeferMixin` over `cf_protect_defer`, unchanged
+    question deferral      `arms_v6cfr3._Rung4Mixin` over `cf_request_defer`, unchanged
+
+MRO, AND WHY IT IS IN THIS ORDER. Each rung puts the mechanism it ADDS leftmost, so that mechanism
+runs FIRST and calls `super().decide` down into the rung below. The ladder therefore fires bottom
+up on every epoch and each added rule sees the action the rung beneath it actually produced.
+Reversing any pair would make a compound revise an action the lower rung had not yet ordered.
+
+TWO-PHASE CONSTRUCTION, because the feed does not exist at `__init__` time. `_fairfeed_init` builds
+`self._feed`, so anything that closes over the feed is wired AFTER it, and every switch is then
+READ BACK through its own strict reader so a construction that did not take RAISES here rather than
+producing a plausible null. Every switch in this file is an arm-scoped INSTANCE attribute: a truthy
+CLASS attribute raises in all three strict readers, because a class-level switch would turn a rung
+on for every arm that inherits it and make the cells incomparable.
+
+WHAT IS NOT IN THIS LADDER, SAID HERE RATHER THAN DISCOVERED LATER. No ablations (D210). No 0.25x
+variants (D209 (4) and the user's hold). No share admission, because the c5attr rung-2 base carries
+none and the flexible-split consumer of the deficit feed is therefore ABSENT BY CONSTRUCTION on
+this base (`share_admission._share_ok` returns before `SA.allowed`), which is Rule 2's
+`unexpressible` and NOT a mechanism this ladder dropped.
+"""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+from typing import Any, Dict, List
+
+HERE = Path(__file__).resolve().parent
+for _p in (str(HERE), str(HERE / "v5"), str(HERE / "fleet"), str(HERE / "hybrid"),
+           str(HERE.parent / "baselines")):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+import arms_v6c5 as C5                                                         # noqa: E402
+import arms_v6cf as VCF                                                        # noqa: E402
+import arms_v6cfr3 as R4                                                       # noqa: E402
+import arms_v6fairfeed as FF                                                   # noqa: E402
+import arms_v6rr as RRARM                                                      # noqa: E402
+import arms_v6state as VS                                                      # noqa: E402
+import deficit_gain_d178 as GAIND                                              # noqa: E402
+import planner_deficit_weights as PDW                                          # noqa: E402
+import release_recheck as RR                                                   # noqa: E402
+
+LADDER_VERSION = "covex-v6-final-ladder-1.0"
+
+RUNG2 = "covex-v6-state-final"
+RUNG3 = "covex-v6-fair-final"
+RUNG4 = "covex-v6-final"
+
+# The committed arm each final rung is built FROM, for the mapping row the user asked for.
+BUILT_FROM = {RUNG2: "covex-v6-state-uo-c5attr",
+              RUNG3: "covex-v6-fair-c5attr plus covex-v6-fair-c5attr-rr",
+              RUNG4: "covex-v6-cf-c5attr"}
+
+
+class LadderSwitchError(RuntimeError):
+    """A final-rung switch did not take on the instance it was set on."""
+
+
+# ---------------------------------------------------------------------------------------------
+# rung 2
+
+
+class V6StateFinal(C5.V6StateUoC5AttrArm):
+    """rung 2: the c5attr rung-2 arm with the D188 (2) cache-key fix ON.
+
+    The fix itself is NOT here. It is `arms_v6state._queued_behind`'s own switch, and this class
+    exists only so rung 3 has a BASE CLASS to be mixed over: `arms_v6fairfeed.make_class` takes a
+    class, not a factory. The switch is set on the INSTANCE by `make_rung2` and by every rung above
+    it, never on this class, because `arms_v6state.qcache_key_fix_enabled` RAISES on a truthy class
+    attribute and it is right to.
+    """
+
+
+def _set_qcache_fix(arm: Any) -> None:
+    """Turn the D188 (2) fix on for THIS INSTANCE and read it back through the strict reader."""
+    object.__setattr__(arm, VS.QCACHE_KEY_FIX_SWITCH, True)
+    # the resolved cache must not already hold the OFF answer from an earlier call
+    arm.__dict__.pop("_qcache_key_fix_resolved", None)
+    if not VS.qcache_key_fix_enabled(arm):                                 # pragma: no cover
+        raise LadderSwitchError(
+            "%s did not take on the instance of %s, so the final ladder would have run with the "
+            "id(obs) memory-address cache key that D188 (2) exists to remove"
+            % (VS.QCACHE_KEY_FIX_SWITCH, type(arm).__name__))
+
+
+def make_rung2(name: str = RUNG2, *, qcache_key_fix: bool = True, **kw: Any) -> Any:
+    arm = V6StateFinal(name=name, **kw)
+    if qcache_key_fix:
+        _set_qcache_fix(arm)
+    return arm
+
+
+# ---------------------------------------------------------------------------------------------
+# rung 3
+
+# Registered ADDITIVELY into the feed module's base map, the pattern `arms_v6cfr3` uses on
+# `arms_v6cf.BASES`: it adds a third key and changes neither of the two already there, so
+# `covex-v6-fair-c5attr` and `covex-v6-fair-shares` cannot move.
+FF.BASES.setdefault(RUNG2, V6StateFinal)
+FF.BASE_HAS_WEIGHT_READER.setdefault(RUNG2, False)
+
+
+def _build_rung3_class() -> Any:
+    feed_over_rung2 = FF.make_class(RUNG2)
+    return type("V6FairFinal", (RRARM._AlertRecheckMixin, feed_over_rung2),
+                {"__doc__": ("rung 3: %s plus the deficit feed, the planner limb on that feed and "
+                             "the ALERT release re-check" % (RUNG2,)),
+                 "_fairfeed_base_name": RUNG2})
+
+
+class _PlannerFeedMixin:
+    """`_cf_engine` with the STATE PLANNER reading this rung's own live feed (D206 (2), (3)).
+
+    The base builds the engine with `cf_objective.NoPlannerDeficitFeed`, which is the correct
+    DECLARATION for a rung whose feed does not reach the planner and is wrong for these rungs. The
+    swap goes through the ONE shared `wire_planner`, so rung 3 and rung 4 cannot do it two ways.
+
+    MEASURED CONSEQUENCE, so nobody reads this as cosmetic: on the dry s4 cell the same swap moves
+    687 of 60,473 rung-3 state decisions (63,242 weight reads, 0 unresolved, 53,597 above the w = 1
+    floor), recorded in `d200_r3_planner_weight_probe.json`. That measurement was made on the
+    PRE-FINAL rung-3 arm and is what D208 applies here.
+    """
+
+    def _cf_engine(self) -> Any:
+        return PDW.wire_planner(self, super()._cf_engine())                # type: ignore[misc]
+
+    def planner_weight_report(self) -> Dict[str, Any]:
+        src = getattr(self, "_planner_w_source", None)
+        return src.as_dict() if src is not None else {"source": None, "wired": False}
+
+
+def _build_rung3_final() -> Any:
+    base = _build_rung3_class()
+    return type("V6FairFinalWired", (_PlannerFeedMixin, base), {"__doc__": base.__doc__})
+
+
+V6FairFinal = _build_rung3_final()
+
+
+def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
+               recheck_types: Any = RRARM.RECHECK_TYPES,
+               deficit_feed: bool = True, gain: float = GAIND.GAIN,
+               ordering: bool = True, split: bool = True,
+               planner_reads_feed: bool = True, qcache_key_fix: bool = True,
+               **kw: Any) -> Any:
+    """Build rung 3. Four switches, each set on the instance and each read back."""
+    arm = V6FairFinal(name=name, **kw)
+    if qcache_key_fix:
+        _set_qcache_fix(arm)
+    arm._fairfeed_init(deficit_feed=deficit_feed, gain=gain, ordering=ordering, split=split)
+    object.__setattr__(arm, RR.SWITCH_ATTR, bool(release_recheck))
+    if release_recheck:
+        object.__setattr__(arm, RR.TYPES_ATTR, tuple(recheck_types))
+    if RR.arm_enables(arm) != bool(release_recheck):                       # pragma: no cover
+        raise RR.ReleaseRecheckSwitchError(
+            "%s did not take on the instance of %s" % (RR.SWITCH_ATTR, type(arm).__name__))
+    if release_recheck and tuple(RR.types_for(arm)) != tuple(recheck_types):  # pragma: no cover
+        raise RR.ReleaseRecheckSwitchError(
+            "%s did not take: reads %r" % (RR.TYPES_ATTR, RR.types_for(arm)))
+    # the prerequisite the COORDINATOR refuses on, checked at construction so the failure lands in
+    # a proof and not 80 s into a live cell
+    if release_recheck and not bool(vars(arm).get("live2_d162_pricing")):  # pragma: no cover
+        raise RRARM.PrerequisiteNotMet(
+            "%s enables %s without live2_d162_pricing, which the coordinator refuses"
+            % (name, RR.SWITCH_ATTR))
+    arm._planner_reads_feed_declared = bool(planner_reads_feed)
+    if planner_reads_feed:
+        # wire it NOW rather than lazily, so a wiring failure raises in construction
+        arm._cf_engine()
+        if getattr(arm._planner_w_source, "IS_DECLARED_CONSTANT", True):   # pragma: no cover
+            raise LadderSwitchError("the rung-3 planner limb kept the declared constant")
+    return arm
+
+
+# ---------------------------------------------------------------------------------------------
+# rung 4
+
+# `_ProtectDeferMixin.live2_describe` reads `arms_v6cf.BASES[self._pd_base_key]`, so the new base
+# is registered there too, additively.
+R4_BASE_KEY = "fair_final"
+VCF.BASES.setdefault(R4_BASE_KEY, {
+    "module": __name__,
+    "cls": "V6Final",
+    "base_arm": RUNG3,
+    "why": ("rung 3 of the final ladder: the deficit feed with BOTH the ordering consumer and the "
+            "state planner reading it, plus the alert release re-check"),
+})
+
+
+def _build_rung4_final() -> Any:
+    return type("V6Final", (R4._Rung4Mixin, VCF._ProtectDeferMixin, V6FairFinal),
+                {"_pd_base_key": R4_BASE_KEY,
+                 "__doc__": "rung 4: %s plus both counterfactual decisions" % (RUNG3,)})
+
+
+V6Final = _build_rung4_final()
+
+
+def make_rung4(name: str = RUNG4, *, protect_defer: bool = True, request_defer: bool = True,
+               live_weight: bool = True, release_recheck: bool = True,
+               recheck_types: Any = RRARM.RECHECK_TYPES,
+               deficit_feed: bool = True, gain: float = GAIND.GAIN,
+               ordering: bool = True, split: bool = True,
+               planner_reads_feed: bool = True, qcache_key_fix: bool = True,
+               control_harm_zero: bool = False, control_margin_huge: bool = False,
+               **kw: Any) -> Any:
+    """Build rung 4. Rung 3's four switches plus the two counterfactual legs and the w_d wiring."""
+    arm = V6Final(name=name, protect_defer=protect_defer,
+                  control_harm_zero=control_harm_zero,
+                  control_margin_huge=control_margin_huge, **kw)
+    if qcache_key_fix:
+        _set_qcache_fix(arm)
+    arm._fairfeed_init(deficit_feed=deficit_feed, gain=gain, ordering=ordering, split=split)
+    object.__setattr__(arm, RR.SWITCH_ATTR, bool(release_recheck))
+    if release_recheck:
+        object.__setattr__(arm, RR.TYPES_ATTR, tuple(recheck_types))
+    if RR.arm_enables(arm) != bool(release_recheck):                       # pragma: no cover
+        raise RR.ReleaseRecheckSwitchError("%s did not take" % (RR.SWITCH_ATTR,))
+    # the question-deferral leg's own state and its own arm-scoped switch, exactly as rung 4's
+    # committed module sets them
+    arm.rd_decisions: List[Dict[str, Any]] = []
+    arm.rd_nets: List[float] = []
+    arm.rd_bars: List[float] = []
+    arm.rd_trace_kept = None
+    arm.rd_trace_crossed = None
+    for obj in arm._pd_targets():
+        object.__setattr__(obj, R4.RD.SWITCH_ATTR, bool(request_defer))
+    if R4.RD.arm_enables(arm) != bool(request_defer):                      # pragma: no cover
+        raise R4.RD.RequestDeferSwitchError("%s did not take" % (R4.RD.SWITCH_ATTR,))
+    # the two legs' own w_d, the committed accessor, read back exactly as `arms_v6cfr3.make` does
+    if live_weight:
+        arm._pd_w_of = lambda did, _a=arm: R4._weight_of(_a, did)
+        arm._pd_w_source = R4.W_SOURCE_LIVE
+    else:
+        arm._pd_w_of = R4.PD.default_w_of
+        arm._pd_w_source = R4.W_SOURCE_CONST1
+    probe = "robo000"
+    got = float(arm._pd_w_of(probe))
+    arm.W_WIRED_PROOF = {"accessor": getattr(arm._pd_w_of, "__qualname__", repr(arm._pd_w_of)),
+                         "live_weight": bool(live_weight), "probe_device": probe,
+                         "probe_value_at_construction": got,
+                         "bar_at_probe": got * R4.PD.MARGIN_CF_ON_TIME,
+                         "feed_present": hasattr(arm, "_feed"),
+                         "feed_gain": float(getattr(arm, "_feed_gain", float("nan"))),
+                         "note": ("1.0 at construction is CORRECT: no opportunity has been offered "
+                                  "yet, so every shortfall is 0 and every weight is at the D178 "
+                                  "(2) floor. What must be true here is that the ACCESSOR is the "
+                                  "live one; that the VALUE moves is a run-time property.")}
+    if live_weight and not hasattr(arm, "_feed"):                          # pragma: no cover
+        raise R4.WeightWiringError("live_weight was asked for and no feed is present")
+    arm._planner_reads_feed_declared = bool(planner_reads_feed)
+    if planner_reads_feed:
+        arm._cf_engine()
+        if getattr(arm._planner_w_source, "IS_DECLARED_CONSTANT", True):   # pragma: no cover
+            raise LadderSwitchError("the rung-4 planner limb kept the declared constant")
+    return arm
+
+
+# ---------------------------------------------------------------------------------------------
+# registration: ADDITIVE, and it must never shadow a committed name
+
+FINAL_LADDER_ARMS: Dict[str, Any] = {
+    RUNG2: (lambda **kw: make_rung2(RUNG2, **kw)),
+    RUNG3: (lambda **kw: make_rung3(RUNG3, **kw)),
+    RUNG4: (lambda **kw: make_rung4(RUNG4, **kw)),
+}
+
+# The committed names this module must NOT touch. `register` refuses if any of them is in its own
+# key set, which is the check that makes "registered beside, never replacing" a property of the
+# code rather than of a reading of it.
+PROTECTED_NAMES = ("covex-v6", "covex-v6-state", "covex-v6-fair", "covex-v6-base",
+                   "covex-v6-rules", "covex-v6-state-uo-c5attr", "covex-v6-fair-c5attr",
+                   "covex-v6-fair-c5attr-rr", "covex-v6-cf-c5attr")
+
+
+def register() -> List[str]:
+    """Additive registration, with the collision check that D208 turns on."""
+    import arms as A
+    clash = sorted(set(FINAL_LADDER_ARMS) & set(PROTECTED_NAMES))
+    if clash:                                                              # pragma: no cover
+        raise LadderSwitchError(
+            "the final ladder would REPLACE committed arm name(s) %r. arms.ARMS is a dict, so a "
+            "second registration under a committed key re-points every reader of that arm's "
+            "committed cells. D208 ruled the -final suffix for exactly this reason." % (clash,))
+    before = {n: A.ARMS.get(n) for n in PROTECTED_NAMES if n in A.ARMS}
+    A.ARMS.update(FINAL_LADDER_ARMS)
+    after = {n: A.ARMS.get(n) for n in PROTECTED_NAMES if n in A.ARMS}
+    if before != after:                                                    # pragma: no cover
+        raise LadderSwitchError("registration changed a protected arm's factory")
+    return sorted(FINAL_LADDER_ARMS)
+
+
+ARMS = FINAL_LADDER_ARMS
