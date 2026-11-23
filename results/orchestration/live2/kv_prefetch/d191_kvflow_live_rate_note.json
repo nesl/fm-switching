@@ -37,14 +37,27 @@
   "engine_kv_pool_tokens": 62944,
   "D144_2_check": "23 errors of 9,358 requests is 0.25 percent, well under D144 (2)'s 5 percent saturation-labelling threshold, so the run is NOT labelled saturated by the ERROR rule. It is saturated on LOAD and on sitting at its own floor, which is a different and weaker statement and should be written as such.",
   "floor_caveat": "an arm AT its floor orders against other arms uninformatively, the same caveat already attached to lmcache s6 at 0.083 against a 0.058 floor",
-  "OPEN_and_asked_of_the_H100": "the 23 null-status requests are the D175 refusal signature. Confirm they appear in scorer/score.py:refused_request_ids and that none replaced a device answer, as was done for lmcache s6's two. The error direction FLATTERS the arm, and 23 is an order of magnitude more than the two that case tested, so it is worth checking rather than assuming the earlier confirmation generalises."
+  "null_status_requests_RESOLVED": {
+   "verdict": "CONFIRMED NULLED, and here the fix BIT rather than being a no-op",
+   "checked_by": "the H100, on the cell's own outcomes, not inferred from the lmcache precedent",
+   "all_23_meet_the_second_clause": "http_status null with prompt_tokens and output_tokens both absent, so scorer/score.py:542-549 nulls their cloud delivery BEFORE any check runs",
+   "query_type": "all 23 are DASHCAM monitors; none robot or assistance",
+   "coordinator_flagged_on_time": {
+    "false": 21,
+    "true": 2
+   },
+   "WHY_THIS_MATTERS": "Unlike lmcache s6, where both null-status requests already carried cloud_payload.on_time FALSE and the fix changed nothing, TWO of these 23 were flagged ON TIME by the coordinator. So D175 (1) REMOVED two on-time dashcam deliveries that would otherwise have FLATTERED a published baseline. The scorer's pooled dashcam 0.069 already excludes them.",
+   "consequence_for_the_design_log": "D175 (1) records 'measured impact on committed numbers is zero'. That statement was TRUE for the cells committed when it was written and is NOT a claim that the guard is inert. This is the FIRST measured instance of it changing a number: 2 deliveries on kvflow-prefetch s4. The log entry should not be read as 'the refusal path never bites', and any future cell must be scored with the guard rather than on the assumption that it is a no-op.",
+   "generalisation_tested": "the confirmation now rests on 23 requests across a saturated arm, not on the 2 of the lmcache case, which is why it was worth checking rather than assuming"
+  }
  },
  "_provenance": {
   "git_commit": "c21278c854de3850620b09a143736efd14f27f37",
   "script": "none, a record of two measurements",
   "device": "live cell measured on the H100; dry proof measured on flash",
   "n": 2,
-  "timestamp": "2026-11-23T10:06:13.163784",
-  "register_of_this_file": "the dry figures are re-read from the committed proof; the live figures are relayed by the H100 from its cell and are NOT independently verified on this box"
+  "timestamp": "2026-11-23T10:08:06.231641",
+  "register_of_this_file": "the dry figures are re-read from the committed proof; the live figures are relayed by the H100 from its cell and are NOT independently verified on this box",
+  "amended": "null-status question closed by the H100's check on the cell's own outcomes; the live figures remain relayed and not independently verified on this box"
  }
 }
