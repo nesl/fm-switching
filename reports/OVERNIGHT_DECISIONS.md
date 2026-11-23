@@ -182,3 +182,52 @@ NOT A CONTROL. "Assistance must not move" was unfalsifiable in the presence of a
 should have been written as "assistance's OWN PREDICTED u must not move", which is checkable and
 passes 371 of 371 and 382 of 382. Future pre-registrations should state controls on quantities the
 mechanism owns, not on outcomes it shares.
+
+---
+
+## 2026-11-23 04:30Z OPEN ITEM FOR THE USER (D188 (1)): the recall floor was derived in the wrong regime, and re-deriving it naively would make things WORSE
+
+USER RULING D188 (1): the floors and W_max STAY FROZEN tonight (alert 1,622.1, recall 655.8,
+assistance 242.8, flexible 1,802.6, W_max 4,323.3). They are NOT re-derived overnight. The issue is
+recorded here with its evidence for tomorrow's discussion, which the user will decide ON MECHANISM
+and NOT on the r2 verdict.
+
+THE DISCREPANCY, computed from the frozen constants and tonight's measured medians.
+
+D181 derives each floor by Little's law, floor = lambda x median uncached x median first token, from
+the four committed covex-v6-base cells. For recall that is 0.0373 x 7,717 x 2.279 = 656.0, matching
+the frozen 655.8. But 7,717 is the BASE arm's COLD question cost, because the base does no warming.
+Rung-2 questions are WARM, and tonight's engine-reported medians are 1,177 (uo), 1,438 (shares) and
+about 1,178 (r1).
+
+Re-deriving on those warm numbers, using the committed D162 first-token model:
+
+  uo     u 1,177 -> first token 0.2825 s -> floor  12.4 tokens   53x smaller
+  shares u 1,438 -> first token 0.3301 s -> floor  17.7 tokens   37x smaller
+  r1     u 1,178 -> first token 0.2827 s -> floor  12.4 tokens   53x smaller
+
+At a mid estimate of u = 1,300 the recall floor would be 14.8 tokens, freeing 641 tokens into the
+flexible pool, which would grow from 1,802.6 to 2,443.6, that is from 41.7 to 56.5 percent of W_max.
+
+ALERT IS NOT AFFECTED THE SAME WAY and should not be swept into the same correction: its median of
+374 uncached is ALREADY a warm number, because EP-G episodes are 89.3 percent cached at p50. So the
+alert floor of 1,622.1 and W_max itself rest on the right regime. This is a RECALL-specific defect,
+not a general one.
+
+THE NON-OBVIOUS CONSEQUENCE, WHICH IS THE REASON THIS NEEDS A MECHANISM DISCUSSION RATHER THAN AN
+ARITHMETIC FIX. Shrinking the recall floor would make recall MORE oversize, not less. A type's own
+share is floor plus its cut of the flexible pool. Today recall's share is 655.8 + 600.9 = 1,256.7,
+and a warm recall of about 1,300 tokens sits at roughly 1.03x its share. With the floor re-derived
+to 14.8 the share would fall to about 616, and the SAME request would sit at about 2.1x its share,
+that is MORE DEEPLY OVERSIZE. Since D179 (3) admits an oversize request only when nothing else of
+its type is in flight, recall would be serialised MORE often, not less.
+
+THE UNDERLYING TENSION, stated plainly for tomorrow: FLOORS ARE SIZED FOR AVERAGE CONCURRENT WORK by
+Little's law, while the ADMISSION TEST COMPARES A SINGLE REQUEST against the share. Those are
+different quantities. A floor that correctly describes expected concurrency can be far too small to
+admit one typical request, and that gap is what pushes a type onto the oversize path. Any re-derivation
+should decide which of the two jobs the floor is doing, rather than making the Little's-law number
+more accurate and inheriting the admission consequence by accident.
+
+NOTHING WAS CHANGED. The constants are as frozen, with both D180 bounds still import-time assertions
+in share_capacity.py, and r1 and r2 both ran on them.
