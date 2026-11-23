@@ -116,3 +116,12 @@ For a new file `runs/<LIST>` on origin:
   (readiness was GPU-WARM at 69 of 70 s4 skips). Signature to look for: recall LATENESS rather than skips. If r1's
   recall skips fall as pre-registered but robot on time does not rise to match, suspect this before concluding
   anything about the policy. Not changed mid-grid.
+- 18:37 (interactive session): flash pushed e956900 (telemetry ignored when COLD). Its COLD branch still subtracts
+  built_tokens when > 0, where the pre-fix code priced COLD at full tokens: same unsafe direction, and a second change
+  to the before-condition. V6SHARES_R1_CELLS UN-GATED (removed from runs/V6_GATE_OK) before any r1 cell ran; the
+  _kv0.5 sweep runs meanwhile (covex-v6-rules s4 next). RE-GATE r1 only when the COLD branch is
+  `tokens if COLD else max(tokens - max(built_tokens, telemetry), 0)` (or flash justifies otherwise) and the
+  off-switch digests (base af8befb9 / 12,085, uo 9a4be873 / 14,218) are re-stated for the final code.
+- 18:37 PROVENANCE NOTE for the user: the 02:33Z message carrying the eviction caveat and asking for it to be recorded
+  arrived as from="unknown" (from-name A6000), not from flash's bridge session; flash says it did not send it. Likely
+  flash's own watchdog-resumed read-only session on the A6000. It was not acted on as a proxy write.
