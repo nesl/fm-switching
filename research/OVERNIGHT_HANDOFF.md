@@ -1,3 +1,84 @@
+# OVERNIGHT HANDOFF (D187). READ THIS FIRST.
+
+## STATE AT 09:15Z (01:15 PST) 2026-11-23: NO AUTONOMOUS WORK REMAINS. A RESUMED SESSION SHOULD STAND DOWN.
+
+EVERYTHING D187 ASKED FOR IS DONE OR IS WAITING ON A USER DECISION. If you are a watchdog-resumed
+session, read this section, confirm the three facts below, and STOP. Do not invent new work, and do
+not re-run anything: the GPU is busy with the _kv0.5 sweep, which runs autonomously on the H100 and
+needs nothing from this box.
+
+THE THREE FACTS TO CONFIRM, each cheap:
+  1. origin/main carries reports/MORNING_SUMMARY_2026-11-23.md (a30147c2 or later), which includes
+     the rung-2 verdict, the rung-3 verdict on all four seeds, the rung-4 block, every overnight
+     decision, and the open items.
+  2. The H100 is running the _kv0.5 sweep (llf s4 landed at 3867119e). GPU not idle.
+  3. No cell list is awaiting a proof from this box.
+If all three hold, there is nothing to do. Touch ops/heartbeat and exit.
+
+WHAT IS FINISHED, with its commit:
+  RUNG 2  SETTLED. c5attr is rung 2 under D184; no shares version met all three checks at all four
+          seeds. r1 is the best shares version (check 2: 0.7229 / 0.9773 / 0.7727 / 0.8906) and is
+          the TRADE-OFF ABLATION. r2 is REFUTED by its own pre-registered failure condition.
+          Verdict in research/EXPERIMENTS.md StudyD179-SHARES and in the morning summary.
+  RUNG 3  RUN AND SCORED, four seeds, at 3a6fb3e0. Check 2 PASSES EVERYWHERE (99 to 106 percent
+          retention), check 3 PASSES EVERYWHERE, check 1 FAILS at s4, s6 and s7 (by 0.0013, 0.0299
+          and 0.0788). Meets all three at s5 only, so by the same rule it does not qualify.
+  RUNG 4  BUILT AND PROVED, INCLUDING Step 2b at 0.25x on the c5attr base, cell list posted with a
+          matched-memory control. IT CANNOT RUN, and must not be unblocked overnight: see below.
+
+THE FINDING THAT MATTERS MOST, and it is about the problem rather than any arm: shares and r1 pass
+check 1 everywhere and fail check 2 everywhere; rung 3 passes check 2 everywhere and fails check 1 at
+three seeds. ALERTS AND ROBOT TRADE AGAINST EACH OTHER UNDER BOTH MECHANISMS, IN OPPOSITE
+DIRECTIONS. That argues the binding constraint is the shared resource, not either policy's logic.
+
+## WHY YOU MUST NOT ITERATE FURTHER WITHOUT THE USER
+
+RUNG 3's failing margins at s4 (0.0013) and s6 (0.0299) are INSIDE the run-to-run variance measured
+tonight (0.05 to 0.06 on pooled dashcam, from the gain-0 control against the committed c5attr base,
+which are decision-identical dry). So rung 3 is AT PARITY on alerts at those seeds. Chasing a 0.0013
+shortfall would be TUNING TOWARD PASSING, which D187 (3) forbids outright. Only s7's 0.0788 is
+clearly outside the noise.
+
+RUNG 4 is blocked because `arms_v6cf` imports `cf_protect_defer`, which calls
+`cf_objective.attainment_margin` AT IMPORT TIME, and that function exists ONLY in an UNCOMMITTED
+edit in the shared worktree at /tmp/claude-1001/mapwt. Its registration was REVERTED at 67dd0514
+after it made origin/main unimportable and killed five cells at launch. DO NOT re-add the
+registration. DO NOT push that edit: it is half-finished D177 work whose harm side was never
+converted, and unproven policy code must not go in to unblock a GPU.
+
+## THE RULE THAT CAUSED THE ONE OUTAGE TONIGHT, repeated because it is easy to miss
+
+A PROOF MUST RUN ON A TREE CONTAINING ONLY WHAT IS COMMITTED. The shared worktree has uncommitted
+live-path edits (arms.py, coordinator.py, hybrid_arm.py, share_admission.py, v5/cf_objective.py).
+Digest proofs there are safe ONLY because matching a committed bar is the one direction a dirty tree
+cannot fake. An IMPORT or REGISTRATION proof has no such protection and must use a clean checkout.
+
+## OPEN ITEMS, ALL FOR THE USER, none to be actioned overnight
+
+  1. Floors and W_max: the recall floor was derived from the BASE arm's COLD questions (7,717
+     uncached); rung-2 questions are warm at 1,177 to 1,438, which would give 12 to 18 instead of
+     655.8. ALERT IS UNAFFECTED. Shrinking it would make recall MORE oversize, because a share is
+     floor plus a cut of the flexible pool. Decide which job the floor is doing first.
+  2. The arms_v6state id(obs) cache fix: prepared behind `live2_qcache_key_fix`, DEFAULT OFF, used
+     in no cell. It CHANGES rung-2 decisions at seed 6. Live effect cannot be bounded from dry
+     replays. Enabling it means rerunning the final rung-2 arm AND its comparators together.
+  3. The assistance image grid: no D-row authorises the per-type cost; resizing would help the arm
+     under test, which is why it was not done.
+  4. check 1 is a ONE-SIDED test with no tolerance, and three rung-3 verdicts turn on margins at or
+     inside measured variance. Whether it should carry a tolerance is methodological.
+  5. The gzipped coordinator_result reads as ABSENT in the scorer with no error. A guard that FAILS
+     LOUDLY would be better than a quiet fallback.
+  6. Two over-broad `mv` allow rules in .claude/settings.local.json, flagged by Claude Code itself.
+
+## WATCHDOG NOTE
+
+Each `claude -c -p` resume is ONE-SHOT: it does its work and exits, so the heartbeat goes stale and
+the next cron tick restarts another. That is why the restart counter climbs even when nothing is
+wrong. With no autonomous work left, the correct behaviour for a resume is to confirm the three
+facts above and exit, which costs one cheap check rather than a wasted iteration.
+
+---
+
 ## STATE AT 00:02 PST, 2026-11-23, from a watchdog-resumed session. READ THIS BEFORE TOUCHING RUNG 3.
 
 THE RUNG-3 GRID IS PROGRESSING NORMALLY AND MUST NOT BE RERUN. Completed and VALID:
