@@ -21,7 +21,7 @@ exec 9>$ST/lock; flock -n 9 || exit 0
 OUT=results/orchestration/live2/frozen_test/runs
 LOG=results/orchestration/live2/frozen_test/frozen_grid.log
 WL=$ST/watchdog.log
-DRIVER=experiments/orchestration/study_frozen_grid_driver_v28.sh
+DRIVER=experiments/orchestration/study_frozen_grid_driver_v29.sh
 GPU=4f1d7e47
 HP='^/home/pragya/.venvs/fm-switching-vllm/bin/python[0-9.]* experiments/orchestration/live2/(run_live2_real|offload_verify)\.py'
 DRY=${DRY:-0}
@@ -37,7 +37,8 @@ elif tmux has-session -t $SESS 2>/dev/null || pgrep -u pragya -f "$DPAT" >/dev/n
   w "driver: running"
 else
   restart=1
-  if [ -f $OUT/STOP ]; then
+  if [ -f $ST/HOLD ]; then w "driver: absent, HOLD file present (operator hold, e.g. a broken import on origin), not restarting"; restart=0; fi
+  if [ $restart = 1 ] && [ -f $OUT/STOP ]; then
     age=$(( $(date +%s) - $(stat -c %Y $OUT/STOP) ))
     if [ $age -lt 1800 ]; then w "driver: absent, STOP is ${age}s old (operator stop), not restarting"; restart=0
     else act "rm -f $OUT/STOP"; [ "$DRY" = 1 ] || echo "[$(date '+%F %T')] WATCHDOG (D187): stale STOP (${age}s, no driver) removed" >> $LOG; fi
