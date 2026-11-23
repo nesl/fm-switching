@@ -103,6 +103,11 @@ def _ss_perdev_min(cell_block):
     return round(min(fr), 6) if fr else None
 
 
+# D205: the seven delivered_scores constant-0.0 readers are superseded; drop from every figure.
+SUPERSEDED = {"inar-vl", "hybrid-llm", "routellm", "confidence-cascade", "thinking-qwenvl-atdm",
+              "uniscale", "B4-query-type-routing"}
+
+
 def scan():
     rows = []
     stubs = []
@@ -113,6 +118,8 @@ def scan():
             stubs.append((name, "name did not match the rq30 cell pattern"))
             continue
         raw = m["arm"]
+        if raw in SUPERSEDED:  # D205: drop superseded arms from every table and figure
+            continue
         seed = int(m["seed"])
         mem = "0.5x" if m["kv"] else "1x"
         fam = FAMILY.get(raw, raw)

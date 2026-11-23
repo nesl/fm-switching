@@ -41,8 +41,9 @@ ARMS = [
     ("streamscout", "streamscout"),
     ("querystream-proactive", "querystream-proactive"),
     ("eco-llm", "eco-llm"),
-    ("confidence-cascade", "confidence-cascade"),
+    # confidence-cascade removed: SUPERSEDED under D205 (delivered_scores constant 0.0 reader).
     ("warm-all-lru", "warm-all-lru"),
+    ("fair-c5attr-rr", "covex-v6-fair-c5attr-rr"),  # D208: joins rung 3
 ]
 
 
