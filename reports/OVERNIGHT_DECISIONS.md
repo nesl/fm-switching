@@ -61,3 +61,51 @@ TWO SMALLER ITEMS FROM THE SAME READ:
 2. In the `b7-edf-feasibility` s4 cell, 74 of 8,058 alert requests deviate from the EP-G law, while
    the four base cells are 0 of 39,945. Not diagnosed and not used for any number here; flagged as a
    cheap check for whoever owns b7.
+
+---
+
+## 2026-11-23 02:40Z DECISION, PROVISIONAL: the watchdog's restart condition was wrong in both directions, and its restarts cannot do the work
+
+WHAT HAPPENED. The watchdog installed under D187 (5) restarted on the condition "does the tmux
+session `fmsw-overnight` exist". It spawned three sessions in twenty minutes (02:12, 02:20, 02:30)
+and would have spent its whole six-per-hour budget. The condition was wrong in BOTH directions at
+once:
+
+1. The session actually doing the work was never in tmux. It is attached to the user's client, so
+   it cannot move itself there, and to the watchdog it therefore looked DOWN while it was working.
+2. Each spawned `claude -c -p` EXITS when its prompt completes, so the tmux session vanishes within
+   a minute and the next cron tick spawns another. The restart condition was self-refilling.
+
+THE CORRECTION, applied: a HEARTBEAT gate. A live worker touches `ops/heartbeat`; if it is fresher
+than 1,800 s the watchdog does not restart. Tested both ways and logged: fresh gives "OK worker
+heartbeat 0s old, not restarting", and an artificially staled heartbeat still fires the restart, so
+the gate did not simply disable the watchdog.
+
+THE MORE IMPORTANT FINDING, AND IT IS A PERMISSIONS QUESTION FOR THE USER, NOT SOMETHING TO ROUTE
+AROUND. The sessions the watchdog spawns are effectively READ-ONLY. A watchdog-resumed session
+reported being refused repo writes, refused even `sed` and `grep` READS under `/tmp/claude-1001/`
+where the whole workflow lives, and prompted for `tmux ls`. The H100 independently reproduced the
+same thing on its own box. So a faithful restart produces a session that cannot continue the work.
+Nothing was changed to work around that, per D187 (5)'s "using only the permission settings already
+configured".
+
+WHAT THE SPAWNED SESSION DID WITH THE ONE CHANNEL IT HAD, which is worth recording because it was
+correct. It read the handoff, independently found a real defect in the cold-pricing fix (the engine
+telemetry was being subtracted on the COLD branch, where it is stale because nothing resets it on
+eviction), could not apply the correction, and sent it to the H100 with the exact replacement code
+so nobody would have to rediscover it. It also declined to ask the H100 to commit on its behalf and
+said so. The H100 verified the defect from the code itself rather than acting on relay, and refused
+the proxy write. BOTH behaved correctly.
+
+A CORRECTION TO MY OWN EARLIER REPORT: I told the user that a message the H100 received, which I had
+not sent, was "the one event tonight I cannot account for". It is now accounted for. It came from my
+own watchdog-spawned session on this box, which is why it arrived with a different session id and
+the name "A6000" and described itself as read-only. There was no spoofing and nothing unexplained.
+
+A SECOND CORRECTION, to the fix itself: my first attempt at the COLD guard subtracted `built_tokens`
+on the COLD branch whenever it was non-zero, which changed COLD pricing in the UNSAFE direction (an
+evicted session's build pieces are evicted with it) and added a second change on top of the
+telemetry fix, so an r1-against-shares comparison would have carried two changes rather than one.
+The H100 caught it and also noted that my four test cases did not cover COLD with `built_tokens` > 0
+- the single case that distinguishes the two forms. The final form leaves COLD exactly as it was and
+changes only the warm branch, verified case by case.

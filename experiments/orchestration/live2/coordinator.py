@@ -1243,11 +1243,17 @@ class Live2Coordinator:
         #
         # Gating on COLD keeps the fix exactly where the fault was: readiness is GPU-WARM at 69 of
         # the 70 mispriced skips at s4, so the repriced path still covers them.
-        _cold = (s.residency_readiness() == "COLD")
-        _tel = 0 if _cold else int(getattr(s, "last_telemetry_cached_tokens", 0) or 0)
-        _prefix = max(int(getattr(s, "built_tokens", 0) or 0), _tel)
-        _uncached = (int(tokens) if _cold and not _prefix
-                     else max(int(tokens) - _prefix, 0))
+        # COLD IS LEFT EXACTLY AS IT WAS. The previous form of this correction subtracted
+        # `built_tokens` on the COLD branch whenever it was non-zero, which changed COLD pricing in
+        # the UNSAFE direction (an evicted session's build pieces are evicted with it, so
+        # subtracting them understates u) and added a SECOND change on top of the telemetry fix, so
+        # an r1 against shares comparison would have carried two. Caught by the H100, which also
+        # noted that my four test cases did not cover COLD with built_tokens > 0, which is the one
+        # case that distinguishes the two forms. Only the WARM branch changes.
+        _uncached = (int(tokens) if s.residency_readiness() == "COLD"
+                     else max(int(tokens)
+                              - max(int(getattr(s, "built_tokens", 0) or 0),
+                                    int(getattr(s, "last_telemetry_cached_tokens", 0) or 0)), 0))
         if self._d162_pricing:
             cost = DP.price_gpu_s(_uncached, self._uncached_in_flight, self._charge_mode)
         # ---- D179 (4) RELEASE RE-CHECK, RECALL AND ASSISTANCE PATHS (session B). BEGIN block --

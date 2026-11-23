@@ -55,6 +55,63 @@
   "model": null,
   "device": "flash_cpu",
   "n": 16,
-  "timestamp": "2026-11-22T18:30:41.419272"
+  "timestamp": "2026-11-22T18:41:42.221400"
+ },
+ "_SUPERSEDED_DIGESTS_NOTE": "The digests below were first measured on 04aecb8a and re-measured UNCHANGED on the final code after two corrections to the fix. They are re-stated rather than assumed to carry over, because a digest measured on superseded code is not evidence about the code that runs.",
+ "final_code": {
+  "commit": "the commit carrying this file",
+  "what_changed_after_04aecb8a": [
+   "e9569009: the engine telemetry is trusted only while the session is NOT believed COLD, because last_telemetry_cached_tokens is written on a completed request (engine_actions.py:358) and is NEVER RESET ON EVICTION, so on an evicted session it reports a prefix the engine no longer holds. Subtracting it there understates u and ADMITS a request that cannot make its deadline, the mirror image of the bug the block exists to fix. Found by the H100 from the code.",
+   "this commit: the COLD branch is restored to its pre-fix behaviour EXACTLY. The e9569009 form still subtracted built_tokens on the COLD branch whenever it was non-zero, which changed COLD pricing in the unsafe direction (an evicted session's build pieces are evicted with it) and added a SECOND change on top of the telemetry fix, so an r1-against-shares comparison would have carried two changes rather than one. Also found by the H100, which noted that my four test cases did not cover COLD with built_tokens > 0, the one case distinguishing the forms."
+  ],
+  "case_table_final": [
+   {
+    "case": "WARM, telemetry 24480 (the fault being fixed)",
+    "pre_fix": 20456,
+    "final": 1096,
+    "changed": true
+   },
+   {
+    "case": "COLD, built_tokens 5120 (the case my tests missed)",
+    "pre_fix": 25576,
+    "final": 25576,
+    "changed": false
+   },
+   {
+    "case": "COLD, built_tokens 0",
+    "pre_fix": 25576,
+    "final": 25576,
+    "changed": false
+   },
+   {
+    "case": "COLD, no prefix at all",
+    "pre_fix": 25576,
+    "final": 25576,
+    "changed": false
+   },
+   {
+    "case": "WARM, no telemetry yet",
+    "pre_fix": 20456,
+    "final": 20456,
+    "changed": false
+   }
+  ],
+  "exactly_one_branch_changes": "the WARM branch, which is where all 69 of the 70 mispriced s4 skips sit",
+  "off_switch_identity_RE_MEASURED": [
+   {
+    "arm": "covex-v6-base",
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "identical_to_committed": true
+   },
+   {
+    "arm": "covex-v6-state-uo",
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "state_decisions": 60934,
+    "identical_to_committed": true,
+    "why_decisive": "check 2's comparator; no release re-check, so the repriced quantity reaches only its budget charge, and budget_refusal is ABSENT in all eight rung-2 cells"
+   }
+  ]
  }
 }
