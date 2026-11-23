@@ -348,6 +348,15 @@ class HybridArm:
     # The warning at the top of this file applies directly: do not put a made-up number into the
     # ordering index of a frozen policy. That is why this is a separate leading key rather than a
     # factor folded into `idx`, which would have changed the frozen C1 index itself.
+    def _device_of(self, session_id):
+        """Device id for a recall/assistance session, via the roster's own mapping.
+
+        `RecallQuery` carries no device_id (its fields are query_id, session_id, category,
+        arrival_s, deadline_s, evidence, readiness, readiness_tokens, device_answer_confidence,
+        question_id), so the device has to be resolved rather than read.
+        """
+        return ((self._roster or {}).get("session_device", {}) or {}).get(session_id)
+
     def _deficit_order_key(self, device_id, kind):
         """Negative per-device deficit weight, so a LARGER w_d sorts FIRST. 0.0 when inactive."""
         return 0.0
@@ -370,8 +379,15 @@ class HybridArm:
             # D182: `device_id` carried so the ordering hook can key PER DEVICE. Without it the
             # hook receives None for every dashcam item and a per-device weight collapses to one
             # value, which would have looked like an ordering that fired and did nothing.
+            # `EpisodicStream` has no device_id field; its stream_id IS the device id, which is
+            # how `roster.get(s.stream_id)` already resolves this object elsewhere in this method.
+            # The previous `getattr(s, "device_id", None)` returned None on EVERY call, so the
+            # ordering hook saw one distinct argument value across 10,956 invocations and a
+            # per-device weight collapsed to a single number. That is the exact failure this field
+            # was added to prevent, and it was caught by counting the hook's distinct arguments
+            # rather than by reading the code.
             items.append(dict(kind="dash", id=s.stream_id, dl=dl, slack=slack, work=epi_s, risk=risk,
-                              device_id=getattr(s, "device_id", None),
+                              device_id=s.stream_id,
                               value=(self.values or {}).get("dashcam", 0.09)))
         rec_dec: Dict[str, RecallAction] = {}
         pending_risk: List[Any] = []
@@ -380,7 +396,8 @@ class HybridArm:
             c6_recall = any(getattr(q, "category", None) not in self._ss_types for q in obs.recall)
         c6_live = self.sw["c6"] and self._scorer is not None and c6_recall and self._c6_prepare(obs)
         for q in sorted(obs.recall, key=lambda x: (
-                self._deficit_order_key(getattr(x, "device_id", None), "recall"), x.deadline_s)):
+                self._deficit_order_key(self._device_of(getattr(x, "session_id", None)), "recall"),
+                x.deadline_s)):
             est = float(C.recall_ttft_s(max(q.readiness_tokens, 1), q.readiness))
             qs = q.slack_s(now)
             slack = qs - est
@@ -455,7 +472,7 @@ class HybridArm:
                 pending_risk.append((q.query_id, float(q.deadline_s), d.decision == "CLOUD"))
             if d.decision == "CLOUD":
                 items.append(dict(kind="recall", id=q.query_id, dl=q.deadline_s, slack=slack, risk=risk,
-                                  device_id=getattr(q, "device_id", None),
+                                  device_id=self._device_of(q.session_id),
                                   work=float(C.recall_gpu_s(max(q.readiness_tokens, 1), q.readiness)),
                                   value=(self._ss_values.get(q.category, 1e-3) if is_ss
                                          else (self.values or {}).get("recall", 0.1))))
