@@ -972,5 +972,14 @@
   "n": 4,
   "timestamp": "2026-11-23T00:37:37.449339+00:00",
   "_note": "git_commit is the origin/main commit the comparators were pinned at; the content pins are the per-file blob shas, which cannot move"
+ },
+ "pin_commit_reconciliation": {
+  "_why_this_field_exists": "the commit label and the content pins were taken at different moments and the difference is recorded rather than quietly corrected, because a sha in the wrong register survives every other check",
+  "pins_taken_at_origin_main_commit": "e9bb556d490a887cd9f4e7d8245b82be3bcef8d4",
+  "parent_of_the_commit_that_registered_this_file": "6eb1e34a03800d681ee64a85abdd2f193e9e9cca",
+  "origin_moved_while_the_scorer_was_being_built": true,
+  "all_48_pinned_blobs_unchanged_at_the_registering_commit": true,
+  "verified_how": "git rev-parse <registering commit>:<cell>/<file> for all 48 pinned files, each equal to the blob sha recorded under pinned_comparators",
+  "consequence": "none for the comparison: the comparator CONTENT is the same object under both commits. The commit label under `pinned_at_origin_main_commit` is the earlier of the two and is kept as recorded rather than rewritten"
  }
 }

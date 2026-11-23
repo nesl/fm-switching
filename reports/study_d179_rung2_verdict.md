@@ -40,6 +40,13 @@ Pinned at `origin/main` = `e9bb556d490a887cd9f4e7d8245b82be3bcef8d4`, and pinned
 blob shas (8 cells x 6 files) are in the registered JSON under `pinned_comparators`, and the
 files the positive control actually read were verified identical to those blobs, 48 of 48.
 
+`origin/main` moved while this was being built, so the commit that registers this work has parent
+`6eb1e34a03800d681ee64a85abdd2f193e9e9cca`, one commit later than the label above. All 48 pinned
+blobs are unchanged at that commit, verified file by file, so the comparator CONTENT is the same
+object under both. The discrepancy is recorded in the registered JSON under
+`pin_commit_reconciliation` rather than quietly corrected: a sha in the wrong register is not a
+wrong computation and would survive every arithmetic check.
+
 The base identity is read, not assumed: `d181_share_floors.json`'s `source` field states
 "hybrid-F-lhreq-noc3 (covex-v6-base) seeds 4 to 7", and only a single off-grid
 `covex-v6-base_n16_s5_..._lpt2048` directory carries the `covex-v6-base` name on origin.
