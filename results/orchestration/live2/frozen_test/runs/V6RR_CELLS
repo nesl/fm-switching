@@ -1,69 +1,35 @@
-# D190 (5) covex-v6-fair-c5attr-rr: rung 3 plus the ALERT release re-check (D179 (4)).
-# ONE CELL, s4 ALONE, by the user's fail-fast ruling. s5 to s7 are posted only on the scoring of s4.
-# Lines starting # are NOT run. 1x memory, no server flags, posted knobs, tag _L3_epg_rq30.
+# covex-v6-fair-c5attr-rr, seeds 5 to 7, POSTED AFTER s4 PASSED ALL FOUR PRE-REGISTERED BARS.
 #
-# Pre-registration: reports/study_alert_release_recheck.md (committed BEFORE any cell, at 512a8354)
-# Proofs:           results/orchestration/live2/frozen_test/d190_rr_proofs.json (fa92195e)
-# Measured on a clean `git archive` checkout of 512a8354, one dry cell per process, concurrency 1,
-# fmtk, the committed cf_pd_one_cell.py --cutoff-off recipe, load recorded per cell.
+# D196 (2) made s5 to s7 conditional on s4, and this is the pre-registered rule being APPLIED rather
+# than a fresh decision. s4 scored with the COMMITTED scorer `d179_rung2_verdict.py`, unchanged,
+# positive control PASS on 2 of 2 cells EXACT:
 #
-# WHAT THE ARM IS: rung 3 (covex-v6-fair-c5attr) plus ONE switch, release_recheck for the ALERT
-# type only. An alert instant that can no longer make its 1 s deadline has its QUESTION skipped at
-# wire time and the device's answer stands; THE FRAME STAYS IN THE EPISODE and is carried by
-# reference on the next request, so that request's n_new rises by it (asserted on the real request
-# body in tests/test_release_recheck.py). NO share admission, NO floors (D188's are parked and the
-# reason is structural: they exist only inside share admission), NO recall or assistance re-check.
+#   1. PORT RULE: release_infeasible_alert 1,947 live (1,869 dry). The mechanism FIRES LIVE, so the
+#      result is not an absent link.
+#   2. PRIMARY: late alert instants 2,290 -> 373, an 84 percent FALL, and on-time alerts ROSE by
+#      2,485 (6,066 -> 8,551). The freed capacity reached the alerts behind the skips, so the
+#      pre-registered failure condition (skips happen, late count does not move) did NOT occur.
+#   3. MEAN PER-EPISODE ALERT ATTAINMENT 0.6256 against rung 3's 0.4412, so +0.1844 ABOVE the bar of
+#      "above 0.441". Fraction of episodes at or above the 0.25 target 0.611 -> 0.8357; pooled
+#      attainment 0.5074 -> 0.7194.
+#   4. ROBOT ON TIME 126 of 132 against a bar of 114 and rung 3's 122. SINGLE-SHOT 352 of 357 =
+#      98.6 percent against a bar of 90 percent.
 #
-# WHY: of the 2,290 sent-and-late alert instants in the committed rung-3 s4 cell, 84.1 percent are
-# dominant-blocked by OTHER ALERT FRAMES and only 6.9 percent by recall questions
-# (d190_rung4_margin_diagnosis.json). Rung 4's question-deferral leg acts on the 6.9 percent and is
-# reach-limited there. This acts on the 84.1 percent.
+# THE RESULT THAT MATTERS MOST, AND IT BEARS ON THE PAPER'S FRAMING: this arm is ABOVE RUNG 3 ON BOTH
+# AXES AT ONCE. Alert attainment +0.1844 AND robot on time +4, with assistance held at 98.6 percent.
+# Every earlier rule-based C5 fix (shares, r1, c5attr, deficit ordering) traded alert against recall
+# along one curve, which is what D190 and D198 framed as the thing only the counterfactual could
+# escape. A RULE ESCAPED IT. The reason is visible in the mechanism rather than lucky: this is the
+# first fix AIMED AT THE MEASURED BOUND, the 84 percent of late alert instants blocked by OTHER
+# ALERTS (d190_rung4_margin_diagnosis.json), instead of at the 6.9 percent blocked by recall
+# questions. So the curve was a property of where the earlier fixes acted, not of rule-based fixes.
 #
-# PROOFS, ALL PASS:
-#   positive controls   covex-v6-base af8befb9420ad86a / 12,085, covex-v6-state-uo-c5attr
-#                       9a4be873eb3c5fba / 14,218, covex-v6-fair-c5attr 12e4f73ce0ebd865 / 13,812,
-#                       each EXACTLY its committed value, with this arm registered in the same
-#                       processes. The additive type gate defaults to all three types, so no other
-#                       arm can move, and these digests are the proof of that.
-#   off-switch identity covex-v6-fair-c5attr-rr-off = 12e4f73ce0ebd865 / 13,812, ZERO differing
-#                       rows against the COMMITTED RUNG-3 bar. Also the Step 4 negative control.
-#   STEP 2B             15,439 setwise, 13,344 positional. FIRST DIFFERENCE AT INDEX 8 IS THE
-#                       MECHANISM'S OWN CHANNEL: on the SAME opportunity opp0000003 the on arm
-#                       emits release_infeasible where the off arm emits release_monitor. 1,869
-#                       release_infeasible rows on, 0 off. opp0000003 is also the first late alert
-#                       instant in the committed rung-3 s4 attribution, so the first skip is real.
-#   PORT RULE           1,869 alert questions skipped, NON-ZERO. release_infeasible_recall and
-#                       release_infeasible_assistance never incremented, so alert-only held all cell.
-#   dry s4              10,919 re-check evaluations, all alert; 9,050 feasible; 1,869 skipped.
-#   traced pair         both requests carry uncached = 42; the SKIPPED one has
-#                       queued_uncached_ahead = 7,051 and the FEASIBLE one 0. Alert questions are
-#                       skipped because of THE QUEUE AHEAD, not their own size.
-#   self-inflicted loss 14 of 1,869 skips (0.75 percent) would have made their deadline at the
-#                       committed fit's own p50 factor 1.026069 (predicted_p50 0.2519 / actual_p50
-#                       0.2455, READ from cost_model_gate_d162.json). 54 within 10 percent of the
-#                       deadline, 311 within 50 percent, 1,290 over 2x the remaining time. Overrun
-#                       min 1.0073, median 2.357, 955 distinct values. GATE CLEARED BY THE USER.
-#   scope ablation      covex-v6-fair-c5attr-rr-alltypes (r1's type set, NOT this arm) skips 30
-#                       recall and 36 assistance questions AND ITS ALERT SKIPS FALL from 1,869 to
-#                       1,291, because the recall skips change the queue the alert re-check sees.
-#                       The two type sets are NOT NESTED IN EFFECT.
+# ONE REGISTER TO KEEP: the skips are DECISIONS and the late count is a SCORER quantity. 1,947 skips
+# is not 1,947 late instants prevented; the 84 percent fall is the scored outcome and is the number
+# that bears on the claim.
 #
-# PRE-REGISTERED, IN THIS ORDER:
-#   1. PORT RULE FIRST: count the alert questions skipped by the re-check. ZERO IS AN ABSENT LINK
-#      and is reported as such, never as a negative about the policy.
-#   2. PRIMARY: LATE ALERT INSTANTS MUST FALL against rung 3's 2,290 late of 8,356 sent.
-#   3. mean per-episode alert attainment ABOVE rung 3's s4 value of 0.441.
-#   4. robot on time at least 114 (rung 3's 122 against base 35, so 35 + 0.90 x 87 = 113.3), AND
-#      single-shot at least 90 percent within 2 s. Report the raw count and the retention.
-#   FAILURE CONDITION: if late alerts do not fall, the mechanism is REPORTED AS NOT WORKING. Never
-#   tuned. No threshold, no type set and no predictor is changed in response to a result.
-#
-# *** A REGISTER WARNING FOR WHOEVER READS THE RESULT. The 1,869 figure above is a count of
-# DECISIONS in a DRY cell. It is NOT 1,869 late instants prevented. A skipped question means the
-# DEVICE answers that instant; whether the LATE COUNT falls depends on what the freed capacity does
-# for the alert instants behind it, and that is a SCORER quantity this cell exists to measure. The
-# honest failure mode is exactly that the skips happen and the late count does not move, which is
-# the pre-registered failure condition above. Do not read skips as recoveries.
-#
-# D188 freezes stand: floors and W_max frozen, live2_qcache_key_fix NOT enabled, the id(obs) fix OFF.
-covex-v6-fair-c5attr-rr 16 4 _L3_epg_rq30
+# Seeds 5 to 7 at 1x, no server flags, posted knobs. The three bars above are re-applied PER SEED,
+# and any seed that fails is reported as a failure at that seed rather than averaged away.
+covex-v6-fair-c5attr-rr 16 5 _L3_epg_rq30
+covex-v6-fair-c5attr-rr 16 6 _L3_epg_rq30
+covex-v6-fair-c5attr-rr 16 7 _L3_epg_rq30
