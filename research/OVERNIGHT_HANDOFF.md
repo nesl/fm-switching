@@ -1,5 +1,82 @@
 # OVERNIGHT HANDOFF (D187). READ THIS FIRST.
 
+## 03:45Z UPDATE, written by a WATCHDOG-RESUMED session
+
+THE RESUME WORKED. The interactive session died (the user warned SSH might crash); the heartbeat
+went stale at 1,170 s and the watchdog started this session at 03:30:01Z with
+--permission-mode auto. This session HAS write access: it has read the cells, written an artefact
+and pushed. So the user's auto-mode ruling closed the gap that made earlier restarts useless.
+Whoever reads this next: touch ops/heartbeat when you start, or the watchdog will spawn a second
+worker in ten minutes.
+
+STATE: r1 s4 and s5 are on origin. s6 and s7 were still running. The H100 is autonomous and does
+not need this session.
+
+### r1 RESULTS SO FAR, against the pre-registered check at c7c60e5b
+
+  s4: robot on time 60 -> 95 (uo 118, base 35); recall skips 70 -> 34 (bar was <= 13, NOT met);
+      check 2 retention 72 percent (bar 90), FAIL; checks 1 and 3 PASS; no lateness (2 late).
+  s5: recall skips 48 -> 15, so the fix works HARDER at s5 than at s4.
+
+The failure condition does NOT apply: both headline counters moved, so the mispriced-size
+explanation is confirmed in direction and incomplete in size.
+
+### THE RESIDUAL IS A QUEUE QUESTION, NOT A SIZE QUESTION (42aeb03d)
+
+Read DIRECTLY from release_infeasible_events, which the P0 instrumentation shipped with the fix.
+TWO HYPOTHESES REFUTED, including the user's and mine:
+
+  USER'S (warms and touches never update last_telemetry_cached_tokens): REFUTED. Only 7 of 34 s4
+  prefixes are multiples of the 1,024 build-piece size; the rest are values built_tokens cannot
+  produce. The corrector's guard at coordinator.py:1702 is SESSION-based, not KIND-based.
+
+  MINE (the telemetry lags because history grows between completions): REFUTED by the same values,
+  and already weakened by the user's arithmetic (a 6,900-token gap needs ~76 frames of growth).
+
+  BELIEF COLD WHILE ENGINE WARM: 0 of 34 at s4, 3 of 15 at s5. Not the main lever at either seed.
+
+  THE FINDING: at s4 the size term ALONE exceeds the slack in only 9 of 34 skips. The other 25 are
+  feasible on their own size and are refused only once queued_uncached_ahead is added (p50 1,496,
+  max 9,839). At s5 it is 7 by size and 8 by queue.
+
+### THE NEXT CANDIDATE FIX, AND WHY IT WAS NOT APPLIED
+
+The re-check passes queued_uncached_ahead=self._uncached_in_flight, which drains at COMPLETION and
+so carries the DECODE TAIL of requests whose prefill is already done. The work actually ahead in the
+prefill queue is the submit-to-FIRST-TOKEN quantity, which the coordinator already tracks as the
+D179 W tracker. share_admission.py's own docstring says _uncached_in_flight is "the right queue
+input for the D174 budget charge and the wrong resource here"; that was applied to W and NOT to the
+re-check.
+
+DO NOT APPLY IT WITHOUT SETTLING THIS FIRST: the D162 fit's own regressor definition is NOT
+recoverable from the committed artefacts. cost_model_gate_d162.json records the coefficient and that
+the term varies, but not whether the regressor was completion-based or first-token-based. Swapping
+the input would change a FITTED model's input on an unestablished premise AND would lower the
+predicted first-token time, admitting more requests, which is the direction that flatters the arm
+under test. D187 (3) forbids that. WHAT WOULD SETTLE IT: the regressor definition in the D162
+fitting script or its input frame. If the fit used a first-token queue, swapping is a correction; if
+completion-based, swapping is a recalibration and the coefficient must be refitted.
+
+DIRECTION DISCIPLINE: understating the queue is the UNSAFE direction, admitting work that cannot
+fit, which surfaces as LATENESS. r1 s4 has only 2 late robot requests, so there is no lateness
+budget to spend.
+
+### NEXT STEP
+
+1. When r1 s6 and s7 land, score all four with the COMMITTED pre-registered scorer, unchanged:
+     conda run -n fmtk python experiments/orchestration/live2/d179_rung2_verdict.py \
+       --runs <dir> --out results/orchestration/live2/frozen_test/d179_rung2_verdict_r1.json \
+       --report reports/study_d179_rung2_verdict_r1.md \
+       --pins results/orchestration/live2/frozen_test/d179_rung2_verdict_prereg.json
+   Base cells are hybrid-F-lhreq-noc3_n16_s{4,5,6,7}_1200s_h27_3t_L3_epg_rq30 (D172 names).
+   READ THE `positive control: PASS (8/8 cells exact)` LINE FIRST.
+2. If check 2 still fails at 3 or more seeds, D184 applies by about 05:00: c5attr becomes rung 2,
+   shares is reported as a trade-off ablation, and rungs 3 and 4 build on c5attr.
+
+---
+
+## EARLIER STATE, KEPT FOR CONTEXT
+
 ## STATE AT 03:05Z. THE WORK IS NOT BLOCKED ON THIS SESSION.
 
 THE GPU WORK IS AUTONOMOUS AND DOES NOT NEED ME. V6SHARES_R1_CELLS is gated by the H100 at
