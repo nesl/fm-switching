@@ -1,5 +1,58 @@
 # OVERNIGHT HANDOFF (D187). READ THIS FIRST.
 
+## STATE AT 04:55Z (20:55 local), written by a WATCHDOG-RESUMED session
+
+I am a watchdog-resumed session. The previous interactive session stopped at about 04:38Z; its
+heartbeat went stale at 698 s and the watchdog started me at 04:50:01Z in tmux `fmsw-overnight`
+with `--permission-mode auto`. I claimed `ops/heartbeat` immediately so no second session spawns.
+NOTHING WAS LEFT HALF-APPLIED IN THE LIVE PATH.
+
+### THE SCOREBOARD
+
+check 2 retention, bar 0.90, scored by the committed pre-registered scorer:
+
+  version                 s4      s5      s6      s7     passes
+  shares (pre-fix)      0.30    0.56    0.33    0.28     0 of 4
+  r1 (cold-pricing)     0.7229  0.9773  0.7727  0.8906   1 of 4   <- BEST SHARES VERSION
+  r2 (queue-register)   0.53    pending pending pending  0 of 1 so far
+
+Checks 1 and 3 PASS at all four seeds for both r1 and r2 s4. Only check 2 fails.
+
+### r2 s4 WENT THE WRONG WAY, and the pre-registered reading is "fired and did not help"
+
+robot on time 79 against r1's 95; `release_infeasible_recall` 47 against r1's 34, where the
+pre-registration expected it to FALL. THE LINK DID FIRE: median `queued_uncached_ahead` at the
+skips fell from 1,496 to 1,101, so the corrected input reached the decision. The refusals are now
+SIZE-dominated (median est_first_token 1.855 s against 1.758 s remaining). The likely system
+explanation, NOT yet measured: a more permissive re-check admits more work, which raises W, which
+makes share admission deny more (`share_deny_recall` 467 -> 643), so the arm settles at a worse
+equilibrium. HARM BOUND HELD: 4 late against a bound of 10.
+
+TWO CAVEATS THAT MUST TRAVEL WITH THAT NUMBER: it is ONE SEED, and live-trajectory variance between
+r1 and r2 at the same seed is NOT MEASURED. A 0.72 to 0.53 swing could be partly noise.
+
+### THE NEXT STEP
+
+1. When r2 s5, s6, s7 land, score all four with the COMMITTED scorer, unchanged, passing
+   `--shares-arm covex-v6-state-shares-r2`. The scorer exposes the arm as a parameter, so r2 is
+   scored WITHOUT editing a pre-registered instrument. Read the
+   `positive control: PASS (8/8 cells exact)` line FIRST.
+2. BEFORE SCORING r2, DECOMPRESS `coordinator_result.json.gz` TO `coordinator_result.json` in each
+   r2 run directory. My own P0 serialisation made that file large enough that the harness now
+   gzips it, and the scorer reads a missing file as `{}` with NO ERROR, so every diagnostic from it
+   silently reads as ABSENT. The three CHECKS are unaffected (they come from `cell.json`'s
+   `score.score.sweep[0]` and `outcomes.jsonl.gz`). Recorded in OVERNIGHT_DECISIONS.md.
+3. Apply the FALLBACK TRIGGER below exactly as written.
+
+### WHAT IS NOT DONE, and is optional tonight
+
+D188 (2), preparing the `id(obs)` cache fix behind an OFF switch with its proofs, was started and
+its agent was STOPPED when the previous session ended. IT LANDED NOTHING: no commit, and
+`live2_qcache_key_fix` appears nowhere in `arms_v6state.py`. The live path is untouched, which is
+the state the user's ruling requires tonight. It can be redone tomorrow or by a later session; it
+is NOT a blocker for the r2 verdict or the fallback.
+
+
 ## THE FALLBACK TRIGGER. READ THIS BEFORE SCORING ANYTHING.
 
 USER CORRECTION 2026-11-23: an earlier version of this file said D184 applies "if check 2 still
