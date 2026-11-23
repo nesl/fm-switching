@@ -1,49 +1,78 @@
 # D187 RUNG 4: protect-and-defer, on the c5attr rung-2 base. One cell per line: "arm n seed tag".
-# Lines starting # are NOT run.
+# Lines starting # are NOT run. SUPERSEDES the first posting of this file, whose header cited the
+# WRONG BASE; see the correction below.
 #
-# RUN AFTER RUNG 3, AHEAD OF THE REMAINING _kv0.5 CELLS. Posted by the main flash session under
-# D187 overnight autonomy. Proofs: results/orchestration/live2/frozen_test/d187_cfpd_c5attr_proofs.json
+# RUN AFTER RUNG 3, AHEAD OF THE REMAINING _kv0.5 CELLS.
+# Proofs: results/orchestration/live2/frozen_test/d187_cfpd_c5attr_proofs.json
 #
-# THE TAG CARRIES _kv0.25 DELIBERATELY AND MUST NOT BE DROPPED. At DEFAULT (1x) memory this
-# mechanism moves ZERO decisions: measured tonight on this very base, covex-v6-cf-pd-c5attr with
-# the switch ON gives 9a4be873eb3c5fba / 14,218, IDENTICAL to the switch-off arm and to the
-# committed covex-v6-state-uo-c5attr base. cf_pd_proofs.json already declared that an ABSENT LINK
-# (Rule 2 unexercised), and tonight's run reproduces it independently. SO A 1x CELL IS A
-# GUARANTEED NULL and would spend four live cells rediscovering a documented absent link.
-# It fires at 0.25x, the spec section 10 REGISTERED sweep: 1,478 differing decisions, 17 request
-# deferrals, 2 chunks, 19 protects, with both Step 4 controls collapsing exactly to the OFF digest.
+# A CORRECTION TO THE FIRST POSTING, STATED FIRST BECAUSE IT WAS THE REASON THE H100 REFUSED TO
+# GATE. That header cited 1,478 differing decisions, 17 request deferrals, 2 chunks and 19 protects
+# as evidence that this compound fires at 0.25x on the c5attr base. THOSE NUMBERS ARE FROM THE
+# SHARES BASE. For the c5attr arm the only Step 2b in cf_pd_proofs.json is at 1x: 0 differing,
+# absent_link true. It is the second time tonight that a shares-base number was offered as evidence
+# about the c5attr base, and I wrote this one after criticising the first. The numbers below are
+# measured ON THIS BASE.
 #
-# THE CAVEAT THAT BOUNDS EVERY NUMBER FROM THESE CELLS, and it must travel with them exactly as the
-# driver requires for _kv0.5: _kv0.25 changes the HARNESS'S LOGICAL POOL ONLY, the coordinator's
-# belief plus enforcement at --gpu-kv-tokens 15736, with --kv-capacity-enforced. THE ENGINE'S REAL
-# vLLM ALLOCATION IS PINNED AND UNCHANGED. Protect-and-defer acts on the coordinator's pool, so it
-# should fire; but the LATENCY CONSEQUENCES of its deferrals are measured against an engine that is
-# NOT actually short of KV. A positive result says the compound is EXPRESSIBLE, FIRES, and costs
-# what it costs UNDER BELIEVED PRESSURE. It does NOT say the policy helps under real memory
-# pressure.
+# STEP 2b AT 0.25x ON THE c5attr BASE, measured: the mechanism FIRES.
+#   switch ON   183a3ad7928452c9 / 13,287 rows
+#   switch OFF  9a4be873eb3c5fba / 14,218 rows   (the committed base digest)
+#   264 protect-and-defer decisions, 162 state and 102 request
+#   CHARACTERISTIC DECISIONS: 10 state defers + 9 chunks + 20 request defers = 39, plus 33 protects
+#   harm is a real distribution: n 128, median 0.9996, p75 2.357, max 5.996, 77 distinct, none zero,
+#     73 over the 0.65824 bar
+#   34 request bar-crossings are UNEXPRESSIBLE and counted, not dropped: a recall query is ONE
+#     PROMPT, so there is nothing to send less of
+#   traced decision, hand-checkable: robo005 at t = 443.3 s, u = 6,400, free KV 3,988,
+#     0.0001535807289 x 6400 = 0.982917 s of added first-token delay, harm 0.999680 against a bar
+#     of 0.658240, deferral 1.038573 s
 #
-# A REGISTRATION GAP WAS FOUND AND FIXED BEFORE POSTING: arms_v6cf was NOT registered in arms.py,
-# and run_live2_real.py imports only `arms` and `hybrid`, so all 11 cf-pd arms were invisible in the
-# harness's own process and EVERY CELL WOULD HAVE DIED AT LAUNCH. Two additive lines fixed it; 11
-# arms now resolve at plain import. The name proof is the only reason this was caught before four
-# live cells failed at start.
+# AT 1x THE SWITCH MOVES ZERO DECISIONS ON THIS BASE, measured tonight: ON is byte-identical to OFF
+# and to the committed base. That is an ABSENT LINK (Rule 2 unexercised), NOT a negative, and it is
+# why the tag carries _kv0.25 and must not be dropped.
 #
-# PROOFS: off-switch identity PASS (covex-v6-cf-pd-c5attr-off = 9a4be873eb3c5fba / 14,218, the
-# committed base). Name proof PASS through run_live2_real.py itself, negative control still raises.
+# THE MATCHED-MEMORY CONTROL IS IN THIS LIST, at the H100's insistence and it was right: comparing
+# a _kv0.25 treatment against 1x comparators would CONFOUND the mechanism with the pool size, since
+# the logical pool alone changes placement and enforcement decisions. The attributable comparison is
+# the -off arm at the SAME memory, which is the Step 4 negative control in live form.
+#
+# AND A DEGENERACY THAT MATTERS FOR READING IT: in a DRY cell the -off arm at 0.25x gives EXACTLY
+# its 1x digest, because the dry harness's gpu_kv_fraction comes from a live server and is 0.0, and
+# only this compound's own `_pd_free_kv` reads the pool (pd_kv_bound_by_belief 264 of 264). So the
+# DRY control is degenerate and proves nothing about pool effects; LIVE it is not, because
+# --gpu-kv-tokens 15736 is enforced and the engine reports gpu_cache_usage_perc. Dry evidence
+# cannot substitute for the live control.
+#
+# THE CAVEAT THAT BOUNDS EVERY NUMBER FROM THESE CELLS: _kv0.25 changes the HARNESS'S LOGICAL POOL
+# ONLY, the coordinator's belief plus enforcement at --gpu-kv-tokens 15736. THE ENGINE'S REAL vLLM
+# ALLOCATION IS PINNED AND UNCHANGED. So the compound will fire, but the LATENCY CONSEQUENCES of its
+# deferrals are measured against an engine that is NOT actually short of KV. A positive result says
+# the compound is EXPRESSIBLE, FIRES, and costs what it costs UNDER BELIEVED PRESSURE. It does NOT
+# say the policy helps under real memory pressure.
+#
+# OTHER PROOFS: off-switch identity PASS. Name proof PASS through run_live2_real.py itself with a
+# negative control, covering the -off name used below. A REGISTRATION GAP was found and fixed before
+# any posting: arms_v6cf was not in arms.py, so all 11 cf-pd arms were invisible to the harness and
+# every cell would have died at launch.
 #
 # PRE-REGISTERED, IN THIS ORDER:
-#   1. THE PORT RULE FIRST: count the characteristic decisions live, request deferrals plus chunks.
-#      ZERO IS AN ABSENT LINK and is reported as such, NEVER as a negative about the policy.
-#   2. The three D179 checks by the committed pre-registered scorer, against base
-#      hybrid-F-lhreq-noc3 and against covex-v6-state-uo-c5attr, unchanged and not re-tuned.
+#   1. PORT RULE FIRST: count the characteristic decisions live. ZERO IS AN ABSENT LINK, reported as
+#      such and NEVER as a negative about the policy.
+#   2. The three D179 checks by the committed scorer, against the -off arm AT THE SAME MEMORY as the
+#      attributable control, and against base and c5attr at 1x only as context, labelled as
+#      confounded with pool size.
 #   3. The compound targets the late alert frames behind recall prefills, so the signal is alert
-#      attainment at least the c5attr base's with robot and assistance not surrendered.
-#   4. HARM BOUND: ROBOT LATE AT MOST 10 PER SEED, because deferring a rebuild can push the
-#      deferred work past its own deadline.
-#   FAILURE CONDITION: if the characteristic decisions are zero, or the three checks do not move
-#   against the c5attr base, the mechanism is reported as NOT HELPING rather than kept for being
+#      attainment at least the matched control's, with robot and assistance not surrendered.
+#   4. HARM BOUND: ROBOT LATE AT MOST 10 PER SEED, because deferring a rebuild can push the deferred
+#      work past its own deadline.
+#   FAILURE CONDITION: if the characteristic decisions are zero, or the checks do not move against
+#   the MATCHED control, the mechanism is reported as NOT HELPING rather than kept for being
 #   harmless.
+#
+# w_source for every bar here is the CONSTANT 1.0: covex-v6-fair's deficit weight is NOT wired into
+# this compound, so rung 4 on a rung-3 base is a separate question and is not what these cells test.
 covex-v6-cf-pd-c5attr 16 4 _kv0.25_L3_epg_rq30
+covex-v6-cf-pd-c5attr-off 16 4 _kv0.25_L3_epg_rq30
 covex-v6-cf-pd-c5attr 16 5 _kv0.25_L3_epg_rq30
+covex-v6-cf-pd-c5attr-off 16 5 _kv0.25_L3_epg_rq30
 covex-v6-cf-pd-c5attr 16 6 _kv0.25_L3_epg_rq30
 covex-v6-cf-pd-c5attr 16 7 _kv0.25_L3_epg_rq30

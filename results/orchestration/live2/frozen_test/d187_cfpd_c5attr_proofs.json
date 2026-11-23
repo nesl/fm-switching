@@ -65,6 +65,73 @@
   "model": null,
   "device": "flash_cpu",
   "n": 16,
-  "timestamp": "2026-11-22T22:34:47.050743"
- }
+  "timestamp": "2026-11-22T22:42:02.706493"
+ },
+ "MY_CITATION_ERROR_CORRECTED": "The first version of this file and of the posted cell list cited 1,478 differing decisions, 17 request deferrals, 2 chunks and 19 protects as evidence that protect-and-defer fires at 0.25x ON THE c5attr BASE. THOSE NUMBERS ARE FROM THE SHARES BASE: in cf_pd_proofs.json they sit under AT_0p25x_MEMORY ... per_base.covex-v6-cf-pd-SHARES, and for the c5attr arm the only Step 2b there is AT_1x_MEMORY with 0 differing and absent_link true. So I asserted firing on a base where nothing had shown it firing. Caught by the H100, which is the SECOND time tonight it caught this exact substitution: it refused the rung-3 list hours earlier because that list cited a shares-base 3,902 for the c5attr base, and I wrote this header after criticising that. The numbers below are measured ON THE c5attr BASE.",
+ "STEP_2b_AT_0p25x_ON_THE_c5attr_BASE": {
+  "verdict": "PASS, the mechanism FIRES on this base",
+  "on": {
+   "arm": "covex-v6-cf-pd-c5attr",
+   "digest": "183a3ad7928452c9",
+   "rows": 13287,
+   "kv_scale": 0.25,
+   "gpu_kv_tokens": 15736
+  },
+  "off": {
+   "arm": "covex-v6-cf-pd-c5attr-off",
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "kv_scale": 0.25,
+   "gpu_kv_tokens": 15736
+  },
+  "rows_fewer_with_the_switch_on": 931,
+  "characteristic_decisions": {
+   "state_defers": 10,
+   "state_chunks": 9,
+   "request_defers": 20,
+   "total_defers_and_chunks": 39,
+   "protects": 33,
+   "pd_decisions": 264,
+   "pd_decisions_state": 162,
+   "pd_decisions_request": 102
+  },
+  "harm_distribution": {
+   "n": 128,
+   "min": 0.000246,
+   "p25": 0.000493,
+   "median": 0.999649,
+   "p75": 2.357182,
+   "p90": 4.934724,
+   "max": 5.99596,
+   "n_distinct": 77,
+   "n_zero": 0,
+   "bar_at_w1": 0.65824,
+   "n_over_bar": 73,
+   "note": "not constant, never zero, and not always over the bar"
+  },
+  "gate_mix": {
+   "no_active_alert_episode": 67,
+   "rebuild_fits_without_evicting": 69,
+   "harm_does_not_exceed_the_bar": 55,
+   "defer_to_latest_safe_start": 30,
+   "must_start_now_so_send_less": 9,
+   "request_crossed_bar_but_UNEXPRESSIBLE": 34,
+   "unexpressible_note": "a recall query is ONE PROMPT, so there is nothing to send less of; the registered candidate that would apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is NOT part of this compound and is not built. Counted, not dropped."
+  },
+  "traced_decision_robo005": {
+   "t_s": 443.3,
+   "u_rebuild": 6400,
+   "free_kv_tokens": 3988.0,
+   "harm": 0.99968,
+   "bar": 0.65824,
+   "crosses": true,
+   "deferral_s": 1.038573,
+   "kappa": 1.5775406165458339,
+   "kappa_calibrated": true,
+   "harm_row": "opp0004421 dash000 p_on_time 0.999680 -> 0.000000",
+   "note": "hand-checkable: 0.0001535807289 x 6400 = 0.982917 s of added first-token delay"
+  },
+  "w_source": "constant 1.0. covex-v6-fair's deficit weight is NOT wired into this compound, so every bar here is 1.0 x MARGIN_CF. Rung 4 on a rung-3 base is a separate question."
+ },
+ "A_DEGENERACY_IN_THE_DRY_CONTROL_THAT_DOES_NOT_HOLD_LIVE": "The OFF arm at 0.25x gives 9a4be873eb3c5fba / 14,218, which is EXACTLY its 1x digest. So in a DRY cell the pool size is invisible to every arm that does not itself read it: the dry harness's gpu_kv_fraction comes from a live server and is identically 0.0, and only this compound's own `_pd_free_kv` consults the pool through the residency belief (pd_kv_bound_by_belief 264 of 264). THE DRY MATCHED-MEMORY CONTROL IS THEREFORE DEGENERATE and proves nothing about pool effects. LIVE IT IS NOT DEGENERATE, because --gpu-kv-tokens 15736 is enforced and the engine reports gpu_cache_usage_perc, which is exactly why the H100's demand for a LIVE matched-memory control is right and why dry evidence cannot substitute for it."
 }
