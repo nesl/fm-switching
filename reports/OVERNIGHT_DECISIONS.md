@@ -319,3 +319,62 @@ next session rung 3 cannot be tested there. It can. The docstring needs correcti
 edit it: I am a one-turn watchdog-resumed session, and editing a live-path file without being able
 to follow through on a byte-identity proof is the wrong trade even for a comment. Recorded here so
 the correction is not lost.
+
+---
+
+## 2026-11-23 05:15Z D188 (2) PREPARED AND NOT USED, and it OVERTURNS an earlier measurement: the id(obs) cache DOES change rung-2 decisions
+
+Prepared per D188 (2) behind `live2_qcache_key_fix`, an arm-scoped INSTANCE switch defaulting FALSE
+whose truthy CLASS form raises. NOT enabled on any registered arm, no live cell run, no cell list
+created. Proofs in `results/orchestration/live2/frozen_test/d188_qcache_key_fix_proofs.json`.
+
+OFF-PATH IDENTITY: 14 of 14 arms byte-identical, each audited against a value committed BEFORE the
+change, with `covex-v6-state-uo` 9a4be873eb3c5fba / 14,218 as the positive control on the instrument
+itself. Step 4 control: `covex-v6-base` with the switch ON is identical to its OFF digest, as an arm
+that never enters V6StateArm must be.
+
+THE RESULT THAT MATTERS, AND IT CONTRADICTS WHAT WAS RECORDED EARLIER TONIGHT. With the switch ON,
+17 of 20 rung-2 cells are byte-identical, and THREE DIFFER: `covex-v6-state-shares`, `-r1` and `-r2`
+AT SEED 6. The whole difference is one extra HOLD_BACK (`state_chosen_HOLD_BACK` 4 to 5), which
+removes one MATERIALIZE ask and one `release_piece` row: 35 rows setwise, 696 positionally because
+the tail shifts by one. First difference at t = 1133.3 s. `harm_warm_nonzero` moves in EVERY one of
+the 20 cells (deltas -38 to +11), so the mechanism is live everywhere and crosses a decision margin
+in three.
+
+WHY THE EARLIER ZERO WAS WRONG, and the reason generalises. `d179_recall_skip_diagnosis.json`
+reported ZERO differing rows on all 12 rung-2 cells. That measurement applied the candidate fix
+through a WRAPPER installed on both sides, AND THE WRAPPER ALLOCATES, so it perturbed the very
+address reuse under test. A WRAPPED MEASUREMENT UNDERSTATES THIS DEFECT. The new measurement
+switches the committed expression in place and its OFF side reproduces the committed digest, so it
+does not have that problem. The lesson beyond this defect: an instrument that allocates cannot
+measure an allocation-dependent bug.
+
+THE CROSS-ARM RECONCILIATION IS NOT CONFIRMED AND IS NOT SUFFICIENT. The claim was that the damage
+is to cross-arm byte-identity proofs rather than to an arm's own decisions. Tested on the pair with
+exactly that shape, `covex-v6-state-shares-off` against `covex-v6-state-uo`: byte-identical at all
+four seeds with the switch both OFF and ON, so that pair is UNEXERCISED and distinguishes nothing.
+And the claim is false as stated anyway, because an arm's own decisions DO move at seed 6.
+
+REGISTER, and it is the part that decides tomorrow's work: a DRY replay measures DRY allocation
+patterns. The stale-hit count is itself not reproducible across runs (275 against 279 on the same
+cell under two wrapper configurations), and only 5 to 9 of about 280 stale hits landed on a NON-EMPTY
+cache, which is the only kind that can change a harm sum. That tail is small enough that a different
+allocator trace could put it anywhere. THE LIVE EFFECT CANNOT BE BOUNDED FROM DRY REPLAYS and the
+dry number must not stand in for it.
+
+WHAT TOMORROW MUST RERUN, on the outcome that actually occurred: the final rung-2 arm AND ITS
+COMPARATORS together, with the switch ON, at every seed that will be read. It is NOT safe to reuse a
+committed comparator cell: `covex-v6-state-uo` shows zero dry change at all four seeds, but that is
+a dry result on a mechanism whose live reach is unbounded, and it is the arm that supplies check 2's
+bar. The rerun set is the final shares label, `covex-v6-state-shares` and `-r1` as the
+before-conditions, and `covex-v6-state-uo` plus `hybrid-F-lhreq-noc3` as comparators.
+
+WHY TONIGHT'S COMPARISONS STILL STAND, which is what the user's ruling anticipated: all rung-2 arms
+carry the defect EQUALLY tonight, so shares against r1 against r2 is internally consistent, and the
+seed-6 difference is between switch states rather than between arms. The verdict for tonight is not
+invalidated; the FINAL numbers should be produced with the switch ON.
+
+AN ENVIRONMENT GOTCHA FOUND IN PASSING, recorded because it cost real work and fails silently:
+`conda run` DOES NOT FORWARD STDIN, so `conda run -n fmtk python - <<'EOF'` runs nothing and EXITS 0.
+Four patch scripts silently no-opped and a sweep ran on unpatched code before it was noticed. Pass a
+file to `conda run` instead. Same family as the existing note about `&` in a conda run command.
