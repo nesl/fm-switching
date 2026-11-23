@@ -21,6 +21,7 @@ This is the decomposition EXPERIMENTS.md (StudyEDGE-DL-LOAD) calls for when it s
 | arm | seed | in [2.5,3.0) | total | (a) re-cut (dev / cloud) | (b) arm |
 |---|---|---|---|---|---|
 | llf | 4 | 0 | -4 | 0 (0 / 0) | -4 |
+| mooncake | 4 | 0 | 1 | 0 (0 / 0) | 1 |
 
 Device WARM latencies are about 0.25 to 0.31 s on the cells seen so far, far below 2.5 s, so no device answer falls in [2.5, 3.0) and the device re-cut is zero: the whole CBD change is the arm's different decisions under the tighter deadline, which is the point of running the 2.5 s cells rather than re-scoring the 3 s grid.
 
@@ -30,7 +31,7 @@ Device WARM latencies are about 0.25 to 0.31 s on the cells seen so far, far bel
 
 ## Provenance
 
-- runs dir last commit: d5fd703c
+- runs dir last commit: 755bf882
 - WARM table last commit: 00a223d1
 - inputs: each cell's cell.json (robot_rows, robot_headline), outcomes.jsonl.gz and request.jsonl.gz; delivery rule experiments/orchestration/live2/d179_rung2_verdict.py
 - build is byte-deterministic given the inputs; the git commit of this file is the build time of record.
