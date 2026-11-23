@@ -1,0 +1,96 @@
+{
+ "step7a_robot_reproduction": {
+  "rule": "my robot correct-by-deadline equals the committed cell.json headline exactly",
+  "cells": [
+   {
+    "arm": "base",
+    "seed": 4,
+    "committed": 0.469697,
+    "my_fraction": 0.469697,
+    "exact": true
+   },
+   {
+    "arm": "base",
+    "seed": 5,
+    "committed": 0.338583,
+    "my_fraction": 0.338583,
+    "exact": true
+   },
+   {
+    "arm": "state-uo",
+    "seed": 4,
+    "committed": 0.613636,
+    "my_fraction": 0.613636,
+    "exact": true
+   },
+   {
+    "arm": "state-uo",
+    "seed": 5,
+    "committed": 0.425197,
+    "my_fraction": 0.425197,
+    "exact": true
+   },
+   {
+    "arm": "fair-c5attr",
+    "seed": 4,
+    "committed": 0.628788,
+    "my_fraction": 0.628788,
+    "exact": true
+   },
+   {
+    "arm": "fair-c5attr",
+    "seed": 5,
+    "committed": 0.425197,
+    "my_fraction": 0.425197,
+    "exact": true
+   }
+  ],
+  "all_exact": true
+ },
+ "step7b_device_only_detection_vs_shep": {
+  "my_device_only": [
+   {
+    "seed": 4,
+    "n_crash": 86,
+    "n_detected": 21,
+    "detection_rate": 0.2441860465116279,
+    "median_lead_s": 3.3,
+    "false_alarm_rate": 0.25878594249201275
+   },
+   {
+    "seed": 5,
+    "n_crash": 95,
+    "n_detected": 25,
+    "detection_rate": 0.2631578947368421,
+    "median_lead_s": 2.133,
+    "false_alarm_rate": 0.2681744749596123
+   },
+   {
+    "seed": 6,
+    "n_crash": 86,
+    "n_detected": 23,
+    "detection_rate": 0.26744186046511625,
+    "median_lead_s": 2.818,
+    "false_alarm_rate": 0.2523961661341853
+   },
+   {
+    "seed": 7,
+    "n_crash": 94,
+    "n_detected": 26,
+    "detection_rate": 0.2765957446808511,
+    "median_lead_s": 2.8,
+    "false_alarm_rate": 0.24193548387096775
+   }
+  ],
+  "shep_EP_G_far10_device_4BI": {
+   "threshold": -2.5788895709823816,
+   "detected": 39,
+   "mean_lead_4BI": 1.9018461538461535
+  },
+  "consistency_note": "same operating threshold (reused exactly) and same order of magnitude for detection and lead. My device-only detection rate is lower than a naive 39/N read of StudySH-EP because the units differ: StudySH-EP EP-G episodes are event-anchored 21-frame windows ending at the event (every frame is pre-event), while the D192 episodes are the workload's (play_id, pos//21) 21-frame blocks, which are not anchored on the event, so a crash near an episode boundary has fewer pre-event instants in which to cross. This is a reported, explained difference, not a threshold or scorer mismatch."
+ },
+ "step7c_ss2_aggregate": {
+  "realworldqa": "device 0.654902 and cloud 0.712418 reproduce the committed compare file exactly",
+  "refspatial": "device and cloud reproduce to within half a question (binary cut 0.5 vs the compare file's fractional point-accuracy mean)"
+ }
+}
