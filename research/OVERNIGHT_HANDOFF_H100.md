@@ -100,3 +100,19 @@ For a new file `runs/<LIST>` on origin:
   release_infeasible per type vs s4 2,685 / 70 / 12, recall predicted-vs-engine uncached ratio, W overrun without
   recall, the three checks (pre-registered pass: recall infeasible <= 13 and robot on time toward 118 at s4;
   assistance must not move).
+- 18:35 (interactive session) PERMISSION TEST of a non-interactive `claude -p` run from the repo directory under the
+  existing settings: `tmux ls` DENIED, `ps -o ...` DENIED, `git -C ... status` DENIED, writing or appending a file in
+  runs/ DENIED; plain `grep` OK. So a watchdog-resumed Claude session CANNOT gate lists, commit or check the driver;
+  it can only read. (flash's resumed A6000 session reported the same at 02:33Z.) The earlier 18:12 test only tried
+  `date`, which passed and was not representative. Not worked around: it is a permissions decision for the user. What
+  still runs unattended is the bash cron watchdog: driver restart, stale STOP, orphaned-server cleanup. A newly posted
+  list will NOT be gated overnight if the interactive session dies.
+- 18:35 CAVEAT ON EVERY r1 RESULT (raised by flash, verified by the operator from the code): the D187 (1) pricing fix
+  subtracts `max(built_tokens, last_telemetry_cached_tokens)` whenever that is non-zero, including when residency
+  readiness is COLD. `last_telemetry_cached_tokens` is written only when a request completes (engine_actions.py:358)
+  and nothing resets it on eviction, so on an evicted session it can be stale, overstating the prefix and
+  UNDERSTATING the request size: the unsafe direction (admits work that may not fit). flash's measure of the
+  COLD-guarded form: it fixes 56 of the 57 mispriced skips at s4 against 57, so the defect is expected to be small
+  (readiness was GPU-WARM at 69 of 70 s4 skips). Signature to look for: recall LATENESS rather than skips. If r1's
+  recall skips fall as pre-registered but robot on time does not rise to match, suspect this before concluding
+  anything about the policy. Not changed mid-grid.
