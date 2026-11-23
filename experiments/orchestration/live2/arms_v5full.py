@@ -124,6 +124,10 @@ class V5FullArm:
                                       clock=CI.DecisionClock())
             if self._cf_budget_ms is not None:
                 kw["budget_ms"] = float(self._cf_budget_ms)
+            import cf_objective as _CO
+            # D206 item 1a: declared, not defaulted. This family has no deficit feed at all.
+            kw.setdefault("counters", _CO.NoPlannerDeficitFeed(
+                rung=getattr(self, "name", "v5-full")))
             self._cf = CP.Counterfactual(**kw)
         return self._cf
 

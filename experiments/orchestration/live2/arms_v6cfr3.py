@@ -317,6 +317,41 @@ class _Rung4Mixin:
                 self.stats["rd_defer_latest_start_infeasible"] += 1
         return act
 
+    def _cf_engine(self) -> Any:
+        """RUNG 4'S STATE PLANNER READS THE LIVE DEFICIT FEED (D206 item 1b).
+
+        The base builds the engine with `cf_objective.NoPlannerDeficitFeed`, which is the correct
+        DECLARATION for rungs 2 and 3 and is wrong for rung 4: spec v6 section 7 deficit-weights
+        the counterfactual's state decisions, and D185 (4) says rung 4 uses the same per-device
+        w_d in harm and in `w_d * MARGIN_CF`. The source is swapped HERE, in rung 4's own module,
+        the only place that knows both that the feed exists and that this rung may read it.
+
+        THE SWAP IS READ BACK AND ASSERTED, so a construction that silently kept the constant
+        RAISES instead of producing a plausible null, which is the shape of the defect this rung
+        is being repaired for.
+        """
+        cf = super()._cf_engine()                                       # type: ignore[misc]
+        if not getattr(cf, "_rung4_planner_wired", False):
+            src = PlannerDeficitWeights(self)
+            cf.counters = src
+            cf._rung4_planner_wired = True
+            self._planner_w_source = src
+            if getattr(cf.counters, "IS_DECLARED_CONSTANT", True):
+                raise WeightWiringError(
+                    "the rung-4 planner weight source did not take: the engine still holds %r, a "
+                    "declared constant, so plan_state would price every device at 1.0"
+                    % (type(cf.counters).__name__,))
+            if cf.counters._arm._feed is not self._feed:                # pragma: no cover
+                raise WeightWiringError(
+                    "the rung-4 planner source is not reading THE SAME feed object as the two "
+                    "legs, so the limb and the legs could disagree (D206 item 1b)")
+        return cf
+
+    def planner_weight_report(self) -> Dict[str, Any]:
+        """The planner limb's own source, so a cell can show it is live and not constant."""
+        src = getattr(self, "_planner_w_source", None)
+        return src.as_dict() if src is not None else {"source": None, "wired": False}
+
     def rd_report(self) -> Dict[str, Any]:
         """The question-deferral leg's own distributions, so the bar is checkable as a spread."""
         n = sorted(float(x) for x in self.rd_nets)
@@ -366,6 +401,7 @@ class _Rung4Mixin:
                             "no division by the number served (D191 item 1)"),
                      added_here="the two legs' w_d wiring and the question-deferral decision",
                      w_source=getattr(self, "_pd_w_source", None),
+                     planner_limb_w_source=self.planner_weight_report(),
                      w_wired_proof=getattr(self, "W_WIRED_PROOF", None),
                      bar_reading=getattr(self, "_pd_bar_reading", None),
                      bar_at_w1=PD.MARGIN_CF_ON_TIME,
@@ -374,6 +410,97 @@ class _Rung4Mixin:
                      gain=getattr(self, "_feed_gain", None),
                      gain_declared=GAIND.GAIN))
         return d
+
+
+class DeficitSourceNeverFed(RuntimeError):
+    """A weight source that is SUPPOSED to be fed received nothing for a whole run (D206 item 3)."""
+
+
+class PlannerDeficitWeights:
+    """THE SAME per-device `w_d` the two legs read, adapted to the v5 planner's interface.
+
+    D206 item 1b, and the point is ONE SOURCE AND NOT TWO. The two counterfactual legs already read
+    `self._feed.weight_device` through `_weight_of` below; this hands the STATE PLANNER the same
+    object, so the limb and the legs cannot disagree about a device's weight at a given instant.
+    They are equal BY CONSTRUCTION rather than by agreement, and a proof that compares them is an
+    IDENTITY and must say so: n reads of one object, maximum absolute difference exactly 0.
+
+    THE DEVICE RESOLVER IS THE ARM'S OWN, `_fairfeed_resolve_device`, which is what rung 3's
+    ordering consumer uses, so the planner weight and the ordering weight cannot disagree about
+    WHICH DEVICE a decision is about either. An id that does not resolve takes the floor and is
+    COUNTED, because the device set is the roster's and an unresolved id means the resolver failed.
+
+    FAIL-LOUD, AND DELIBERATELY NOT PER READ. D206 item 3 says a source supposed to be fed must
+    raise rather than return a neutral value. The condition that let the original defect live is
+    "never fed across a whole run", NOT "holds no data at this instant": at the first decision the
+    feed legitimately has no observations, which is why `W_WIRED_PROOF` records that 1.0 at
+    construction is correct and not a failure. So the raises are at CONSTRUCTION when the feed
+    object is absent, and at REPORT TIME when reads happened and the feed received zero
+    observations all run. A per-read raise would fire on decision one of a correct run.
+    """
+
+    IS_DECLARED_CONSTANT = False
+
+    def __init__(self, arm: Any) -> None:
+        if getattr(arm, "_feed", None) is None:
+            raise WeightWiringError(
+                "PlannerDeficitWeights was built with no live feed on the arm; _fairfeed_init has "
+                "not run, so the rung-4 planner limb would have silently priced every device at "
+                "1.0 (D206 item 1b)")
+        self._arm = arm
+        self.reads = 0
+        self.unresolved = 0
+        self.reads_above_floor = 0
+
+    def _resolve(self, device_id: Any) -> Optional[str]:
+        return self._arm._fairfeed_resolve_device(device_id, None)
+
+    def weight(self, device_id: Any) -> float:
+        self.reads += 1
+        did = self._resolve(device_id)
+        if did is None:
+            self.unresolved += 1
+            self._arm.stats["planner_w_device_unresolved"] += 1
+            return 1.0
+        w = float(self._arm._feed.weight_device(did))
+        if not (w == w) or w < 1.0:
+            # the D178 (2) floor RESTATED AT THE POINT OF USE: the bar is w_R * MARGIN_CF and a
+            # weight under 1 would lower it below the committed margin by another route.
+            self._arm.stats["planner_w_below_floor_clamped"] += 1
+            return 1.0
+        if w > 1.0:
+            self.reads_above_floor += 1
+        return w
+
+    def shortfall(self, device_id: Any) -> float:
+        did = self._resolve(device_id)
+        return 0.0 if did is None else float(self._arm._feed.shortfall_device(did))
+
+    def starving(self, device_id: Any, threshold: float = 0.10) -> bool:
+        return self.shortfall(device_id) >= float(threshold)
+
+    def _n_observations(self) -> int:
+        f = self._arm._feed
+        return int(getattr(f, "n_offers", 0)) + int(getattr(f, "n_completions", 0))
+
+    def as_dict(self) -> Dict[str, Any]:
+        n_obs = self._n_observations()
+        if self.reads and n_obs == 0:
+            raise DeficitSourceNeverFed(
+                "the rung-4 planner deficit source was READ %d times and the feed received ZERO "
+                "observations for the whole run, so every weight it returned was the floor. That "
+                "is the condition that let the D200 (1) defect survive, and D206 item 3 requires "
+                "it to raise rather than report a neutral default." % (self.reads,))
+        return {"source": ("live2/deficit_feed.DeficitFeed.weight_device, THE SAME FEED OBJECT "
+                           "the two counterfactual legs read (D206 item 1b)"),
+                "is_declared_constant": False,
+                "gain": float(getattr(self._arm, "_feed_gain", float("nan"))),
+                "reads": self.reads, "unresolved": self.unresolved,
+                "reads_above_the_w1_floor": self.reads_above_floor,
+                "feed_observations": n_obs,
+                "identity_note": ("the legs and this limb read ONE object, so an equality proof "
+                                  "between them is an IDENTITY with maximum absolute difference "
+                                  "exactly 0, not a measurement of agreement")}
 
 
 def _weight_of(arm: Any, device_id: str) -> float:

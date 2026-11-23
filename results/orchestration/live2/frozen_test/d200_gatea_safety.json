@@ -37,7 +37,17 @@
   "q90_equals_max": true,
   "verdict": "IDENTITY: q90 of 5 points by nearest rank IS the maximum, so overrun = (max - q90) * predicted is identically 0 and the committed would-have-missed 0 of 6 could not have been anything else"
  },
- "gate_a_would_have_missed": {
+ "THE_GATE": {
+  "_status": "D206: THE GATE. Exposure and overrun magnitude, both measurements.",
+  "safety_factor_q90": 1.863404,
+  "exposure_fraction_of_sent_recall_requests_over_the_safety_factor": 0.099352,
+  "exposure_n_over_n": "46 of 463",
+  "overrun_magnitude_worst_as_a_multiple_of_predicted_service": 1.503537,
+  "quantile_is_non_degenerate": true,
+  "n_rows_strictly_above_the_factor": 46,
+  "_how_to_read": "a deferral placed at the latest safe start carries about the exposure probability of overrunning, and the overrun costs (ratio - safety_factor) x predicted service seconds; both are measured on real sent requests, which the retired count was not"
+ },
+ "gate_a_would_have_missed_RETIRED": {
   "at_median_ratio": {
    "bias": 1.314313,
    "n_deferrals": 1,
@@ -84,6 +94,7 @@
    ]
   }
  },
+ "_why_the_count_is_retired": "D206, on this script's own reasoning: overrun = (b - SAFETY_FACTOR) * service has the sign of (b - SAFETY_FACTOR) alone, so the count is 0 or N and never in between. The old 0 of 6 was an identity because q90 equalled max; N of N at the max bias is an identity of the opposite sign. Replacing the input made the QUANTILE real and did not make the COUNT informative. The column is kept and labelled so a reader can see why it was retired, not merely that it went.",
  "gate_a_count_is_structurally_0_or_N": {
   "why": "overrun = (b - SAFETY_FACTOR) * predicted_total_service_s with a positive service, so the sign is the sign of (b - SAFETY_FACTOR) and is the same for every deferral. The count is 0 below the factor, 0 AT the factor and N above it, for any N.",
   "consequence": "the old 0 of 6 was an identity because q90 EQUALLED max; the new N of N at the max bias is an identity of the opposite sign. Replacing the input makes the QUANTILE real and does NOT make the COUNT informative. Read `exposure_measured_on_sent_requests` instead.",

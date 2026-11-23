@@ -201,8 +201,14 @@ class V6StateArm:
         if self._cf is None:
             import cf_instrument as CI
             import cf_planner as CP
+            import cf_objective as _CO
+            # D206 item 1a: the weight source is DECLARED at the construction site, never
+            # defaulted. Rung 4 does not come through here: `arms_v6cfr3` overrides `_cf_engine`
+            # and injects the live feed, so this line is the rung-2 and rung-3 declaration only.
             kw: Dict[str, Any] = dict(dry=self.dry, dry_margin=self.dry_margin,
-                                      clock=CI.DecisionClock())
+                                      clock=CI.DecisionClock(),
+                                      counters=_CO.NoPlannerDeficitFeed(
+                                          rung=getattr(self, "name", "covex-v6-state")))
             if self._cf_budget_ms is not None:
                 kw["budget_ms"] = float(self._cf_budget_ms)
             self._cf = CP.Counterfactual(**kw)

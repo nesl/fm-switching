@@ -127,10 +127,17 @@ class V6FairArm(VS.V6StateArm):
         elif cloud and dev:
             self.stats["deficit_feed_carried_by_both"] += 1
         kind = {"monitor": "dashcam"}.get(str(rec.get("kind")), "robot")
-        try:
-            self._cf_engine().counters.observe(str(did), on_time=on_time, kind=kind)
-        except Exception:                                                      # noqa: BLE001
-            self.stats["deficit_feed_observe_failed"] += 1
+        # D206 item 1a: THIS FEED NO LONGER REACHES THE STATE PLANNER, and the move is
+        # DECISION-IDENTICAL BY MEASUREMENT rather than by argument. On a dry seed-4 cell this hook
+        # fed `cf_objective.DeficitCounters` 11,751 times and every one of the 16 devices still
+        # ended at weight exactly 1.0, because `on_time` above is OR-COMBINED over cloud and device
+        # and the device always answers inside these deadlines, so the 0.90 target is met by
+        # construction and the shortfall is structurally 0. `live2/deficit_feed.py` predicted
+        # exactly that, and this family is the PRE-D177 rung 3 that D178 and D185 replaced. The
+        # observation is COUNTED BY TYPE AND NOT APPLIED, rather than sent to a superseded counter
+        # or swallowed by an `except` that would have logged 11,751 silent failures.
+        self.stats["deficit_feed_counted_not_applied"] += 1
+        self.stats["deficit_feed_counted_not_applied_" + kind] += 1
 
     def decide(self, obs: Observation) -> Action:
         act = VS.V6StateArm.decide(self, obs)
@@ -148,7 +155,15 @@ class V6FairArm(VS.V6StateArm):
             # multiplying everything by one
             try:
                 c = self._cf_engine().counters
-                ws = [c.weight(d) for d in c.devices]
+                # D206: the planner's source is the DECLARED CONSTANT 1 for this family, so the
+                # reported maximum is 1.0 BY DECLARATION and is labelled, not presented as a
+                # measured weight that happens to be 1.
+                if getattr(c, "IS_DECLARED_CONSTANT", False):
+                    self.stats["deficit_weight_max_milli"] = 1000
+                    self.stats["deficit_weight_is_declared_constant"] = 1
+                    ws = []
+                else:
+                    ws = [c.weight(d) for d in c.devices]
                 if ws:
                     self.stats["deficit_weight_max_milli"] = max(
                         int(self.stats.get("deficit_weight_max_milli", 0)),

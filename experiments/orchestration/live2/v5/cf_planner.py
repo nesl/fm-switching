@@ -107,6 +107,10 @@ MARGIN_UNITS = "expected on-time cloud answers; MARGIN_CF / A_D2_DEV = 0.65824 (
 HARM_REPLACEMENT_SEMANTICS = True
 
 
+class WeightSourceUndeclared(RuntimeError):
+    """A Counterfactual was built without declaring where its deficit weight comes from (D206)."""
+
+
 def effective_margin(margin_value: float, weight: float) -> float:
     """The bar a deviation must clear: `w_d * MARGIN_CF` (D171 (1)), or the bare margin if the
     switch is off. One function, so the three decision kinds cannot drift apart."""
@@ -354,7 +358,7 @@ class Counterfactual:
 
     def __init__(self, *, model: Optional[Dict[str, Any]] = None,
                  residuals: Optional[Dict[str, Any]] = None,
-                 counters: Optional[CO.DeficitCounters] = None,
+                 counters: Any = None,
                  accuracy_table: Optional[Dict[str, Any]] = None,
                  safety: Optional[float] = None,
                  clock: Optional[DecisionClock] = None,
@@ -362,7 +366,19 @@ class Counterfactual:
                  dry: bool = False, dry_margin: Optional[float] = None) -> None:
         self.model = model if model is not None else CC.load_gate_model()
         self.residuals = residuals if residuals is not None else CC.load_residuals()
-        self.counters = counters if counters is not None else CO.DeficitCounters()
+        # D206: NO NEUTRAL DEFAULT. A default here is exactly how the defect D200 (1) names
+        # survived: `DeficitCounters()` with no feeder returns 1.0 for every device, which is a
+        # believable number, so no consistency check could see it while the docstring kept
+        # claiming a link to the live feed that no rung provided. Every caller now DECLARES its
+        # source, and a caller that declares none RAISES rather than being handed a quiet 1.
+        if counters is None:
+            raise WeightSourceUndeclared(
+                "cf_planner.Counterfactual was constructed with no declared deficit weight "
+                "source. D206 removed the default. Pass cf_objective.NoPlannerDeficitFeed(rung=) "
+                "if this rung's deficit feed genuinely does not reach the state planner (rungs 2 "
+                "and 3), or arms_v6cfr3.PlannerDeficitWeights(arm) if it does (rung 4). "
+                "cf_objective.DeficitCounters is SUPERSEDED and has no live path.")
+        self.counters = counters
         if accuracy_table is None:
             sys.path.append(str(HERE))
             import value_readers as VR                                         # noqa: PLC0415

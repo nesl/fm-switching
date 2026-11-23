@@ -12,6 +12,14 @@ The committed input had n = 5, so k = 5 = n and the q90 IS the maximum: `b - SAF
 identically 0 and `would_miss` is identically False, for every candidate and every arm. That is why
 the input is replaced here and the threshold is not.
 
+THE COUNT IS RETIRED (D206, user ruling, on this script's own reasoning). `overrun =
+(b - SAFETY_FACTOR) * service` has the sign of `(b - SAFETY_FACTOR)` alone, because the service is
+positive, so the would-have-missed COUNT can only be 0 or N and carries nothing about any
+individual deferral. It was 0 of 6 because the old q90 EQUALLED the max, and it is N of N at any
+bias strictly above the factor. THE GATE QUANTITIES ARE NOW THE EXPOSURE AND THE OVERRUN
+MAGNITUDE. The count is KEPT as a column explicitly labelled an identity, so a reader can see WHY
+it was retired rather than only that it went.
+
 NOTHING IS REIMPLEMENTED. The rows come from the committed `cost_model_gate_d162.features`, the
 zone from the committed `cost_model_gate_d162.classify`, the first-token coefficients from the
 committed `cost_model_gate_d162.json`, and the quantile from the committed
@@ -176,6 +184,20 @@ def main() -> int:
            "verdict": ("IDENTITY: q90 of 5 points by nearest rank IS the maximum, so "
                        "overrun = (max - q90) * predicted is identically 0 and the committed "
                        "would-have-missed 0 of 6 could not have been anything else")}
+    gate = {"_status": "D206: THE GATE. Exposure and overrun magnitude, both measurements.",
+            "safety_factor_q90": sf,
+            "exposure_fraction_of_sent_recall_requests_over_the_safety_factor":
+                exposure["fraction_above_the_safety_factor"],
+            "exposure_n_over_n": "%d of %d" % (exposure["n_above_the_safety_factor"],
+                                               exposure["n_sent_requests"]),
+            "overrun_magnitude_worst_as_a_multiple_of_predicted_service":
+                exposure["worst_overrun_multiple_of_predicted_service"],
+            "quantile_is_non_degenerate": dist["q90_is_strictly_below_max"],
+            "n_rows_strictly_above_the_factor": dist["n_strictly_above_q90"],
+            "_how_to_read": ("a deferral placed at the latest safe start carries about the "
+                             "exposure probability of overrunning, and the overrun costs "
+                             "(ratio - safety_factor) x predicted service seconds; both are "
+                             "measured on real sent requests, which the retired count was not")}
     res = {
         "_what": ("the rung-4 safety factor and the D196 (1) Gate A would-have-missed count, "
                   "re-derived from the PER-REQUEST observed-over-predicted first-token ratio of "
@@ -187,7 +209,15 @@ def main() -> int:
         "new_input": dist,
         "new_safety_factor_q90": sf,
         "old_input_for_comparison": old,
-        "gate_a_would_have_missed": cols,
+        "THE_GATE": gate,
+        "gate_a_would_have_missed_RETIRED": cols,
+        "_why_the_count_is_retired": (
+            "D206, on this script's own reasoning: overrun = (b - SAFETY_FACTOR) * service has the "
+            "sign of (b - SAFETY_FACTOR) alone, so the count is 0 or N and never in between. The "
+            "old 0 of 6 was an identity because q90 equalled max; N of N at the max bias is an "
+            "identity of the opposite sign. Replacing the input made the QUANTILE real and did "
+            "not make the COUNT informative. The column is kept and labelled so a reader can see "
+            "why it was retired, not merely that it went."),
         "gate_a_count_is_structurally_0_or_N": {
             "why": ("overrun = (b - SAFETY_FACTOR) * predicted_total_service_s with a positive "
                     "service, so the sign is the sign of (b - SAFETY_FACTOR) and is the same for "

@@ -16,11 +16,18 @@ and for one robot question with a cloud option `o`:
     harm        = sum over other devices j of  w_j * ( P_j(before this option) - P_j(after) )
     objective   = V_i(o) - harm
 
-    w_d         = 1 + 2.0 * shortfall_d / target_d, floored at 1 (D185), supplied by the live
-                  deficit feed (`live2/deficit_feed.py`, `deficit_gain_d178.GAIN = 2.0`) at the
-                  rungs that feed it; `DeficitCounters` below is the v5 fallback and keeps its
-                  own declared form, `1 + DEFICIT_GAIN * shortfall`, which is 1.0 for every
-                  device whose counter is never fed
+    w_d         ONE DEFICIT SOURCE, DECLARED AT EVERY CONSTRUCTION SITE (D206, which
+                  supersedes D203's "DeficitCounters deleted"). This module supplies NO DEFAULT,
+                  because a neutral default is how the defect D200 (1) names survived from
+                  2026-11-20 to 2026-11-23. The two live sources are
+                  `NoPlannerDeficitFeed` (rungs 2 and 3, the declared constant 1) and
+                  `live2/deficit_feed.DeficitFeed.weight_device` adapted at
+                  `arms_v6cfr3.PlannerDeficitWeights` (rung 4), so rung 4's planner limb and its
+                  two counterfactual legs read THE SAME FEED OBJECT and cannot drift apart.
+                  `DeficitCounters` below is SUPERSEDED and has NO LIVE PATH; it is kept so the
+                  four committed proof scripts and the 30-check committed test suite that name it
+                  keep working, and `tests/test_d206_no_live_deficitcounters.py` is what keeps
+                  "no live path" true AS THE TREE CHANGES rather than resting on one reading
     margin      = w_d * MARGIN_CF with MARGIN_CF = 0.65824 ON-TIME ANSWERS (D177 (3),
                   `attainment_margin`, read through `cf_planner._margin`)
 
@@ -246,8 +253,85 @@ class DeviceDeficit:
         return max(t - self.rate, 0.0)
 
 
+class NoPlannerDeficitFeed:
+    """THE EXPLICIT CONSTANT WEIGHT 1 for a rung whose deficit feed does not reach this planner.
+
+    D206 item 1a. This is NOT a fallback and NOT an unfed counter: it is a DECLARATION, and the
+    difference is the whole point. An unfed counter that happens to return 1.0 and a constant 1.0
+    that is declared are decision-identical and are not equally honest, because only the second
+    tells a reader that no deficit reaches this limb, and only the second cannot later be mistaken
+    for a live weight that is merely quiet.
+
+    WHY THE RUNGS THAT USE IT ARE ENTITLED TO IT, in their own words rather than by omission:
+
+        rung 2   has no deficits by design. The deficit mechanism enters the ladder at rung 3.
+        rung 3   HAS a live per-device deficit feed, and D185 (3) gives it exactly two consumers,
+                 the ORDERING hook (`hybrid/hybrid_arm.py:399, 483, 486`) and the FLEXIBLE SPLIT
+                 (`share_admission.py:162-168`). NEITHER IS THIS PLANNER. Rung 3's weight is
+                 therefore correctly absent here, and that is a scope fact, not a gap.
+
+    MEASURED CONSEQUENCE OF THAT SCOPE FACT, so nobody reads this constant as harmless: if rung 3's
+    planner limb DID read its feed, 687 of 60,473 rung-3 state decisions would choose a different
+    candidate on the dry seed-4 cell (63,242 weight reads, 0 unresolved, 53,597 above the w = 1
+    floor). OBSERVED by decision-log diff in
+    `results/orchestration/live2/frozen_test/d200_r3_planner_weight_probe.json`. The user has ruled
+    that the change is APPLIED AT THE FINAL LADDER RERUN (D190 (6)) and NOT NOW, so this constant
+    is correct for rung 3 TODAY and is scheduled to stop being correct.
+
+    IT DOES NOT RAISE, deliberately, and this is the one place D206 (3)'s fail-loud does not apply:
+    a source that is SUPPOSED to be fed and is not must raise, and this source is declared never to
+    be fed. The fail-loud lives on `arms_v6cfr3.PlannerDeficitWeights`, the source that IS fed.
+    """
+
+    IS_DECLARED_CONSTANT = True
+    WEIGHT = 1.0
+    DECLARATION = ("no deficit feed in the state planner at this rung (D206 item 1a); rung 2 has "
+                   "no deficits by design and rung 3's D185 (3) consumers are the ordering hook "
+                   "and the flexible split, neither of which is this planner")
+
+    def __init__(self, rung: str = "unspecified", why: str = "") -> None:
+        self.rung = str(rung)
+        self.why = str(why) or self.DECLARATION
+        self.reads = 0
+
+    def weight(self, device_id: str) -> float:
+        self.reads += 1
+        return self.WEIGHT
+
+    def shortfall(self, device_id: str) -> float:
+        return 0.0
+
+    def starving(self, device_id: str, threshold: float = 0.10) -> bool:
+        return False
+
+    def as_dict(self) -> Dict[str, Any]:
+        return {"source": "NoPlannerDeficitFeed (D206 item 1a)",
+                "is_declared_constant": True, "weight": self.WEIGHT,
+                "rung": self.rung, "declaration": self.why, "reads": self.reads,
+                "supersedes": ("the unfed cf_objective.DeficitCounters default removed from "
+                               "cf_planner.Counterfactual by D206"),
+                "equivalence": ("bit-identical to what the unfed DeficitCounters returned at all "
+                                "five read sites: the weight reads in plan_request, plan_state "
+                                "and plan_sync, the counters= argument of harm_to_others, and the "
+                                "counters= argument of harm_warm_from_queue_delay")}
+
+
 class DeficitCounters:
-    """Per-device deficit counters, updated from the REALISED on-time outcome of each opportunity.
+    """SUPERSEDED (D200, D206): COMMITTED PROOFS AND TESTS ONLY. NO LIVE PATH.
+
+    DO NOT CONSTRUCT THIS FROM AN ARM. `w = 1 + DEFICIT_GAIN * shortfall` with `DEFICIT_GAIN = 1.0`
+    and `ON_TIME_TARGET` 0.90 for every type with no per-episode reset is the PRE-D178 form: the
+    targets are stale by D178 (1) and the gain is stale by D185 (2).
+
+    MEASURED, so that "no live path" is not merely asserted: the one arm family that ever fed this
+    object, `arms_v6fair` (registered at `arms.py:725`, hook at `arms_v6fair.py:131`), fed it
+    11,751 times on a dry seed-4 cell and EVERY ONE of its 16 devices still ended at weight exactly
+    1.0, because that family's numerator is OR-combined over cloud and device and the device always
+    answers inside these deadlines, so the target is met by construction and the shortfall is
+    structurally 0. So moving it to the declared constant is DECISION-IDENTICAL, measured rather
+    than assumed, which is why D206's byte-identity requirement can be met at all.
+
+    Per-device deficit counters, updated from the REALISED on-time outcome of each opportunity.
 
     On-time is the only thing observable online without ground truth (`arms_policy.py:276` says
     the same of the v1 counters, and it is the one thing about them v5 keeps). Correctness is not

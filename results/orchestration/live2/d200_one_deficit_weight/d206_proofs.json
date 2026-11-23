@@ -1,0 +1,63 @@
+{
+ "_what": "D206 Option D: the proofs c1, c2 and c3 for the one-deficit-weight change, on a clean git archive of origin/main 1f5cf80e5de617fa21e96ca94c32c33c4bd95271.",
+ "_recipe": "cf_pd_one_cell.py / cfr3_one_cell.py --cutoff-off, 16 devices, seed 4, 1200 s, ratio 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0; ONE DRY CELL PER PROCESS; fmtk python; host load recorded at each cell start (other sessions held it at 2.8 to 10.1 throughout). The planner wall-clock cutoff is patched off on every cell, which is why a digest compared to a committed bar is insensitive to that load: demonstrated by the rung-2 bar reproducing at load 0.3 earlier today and at load 9.1 here.",
+ "c1_unit_equivalence_at_every_read_site": {
+  "script": "experiments/orchestration/live2/d206_guard_proofs.py",
+  "result": "18 of 18 checks PASS, exit code 0, reproduced twice on two independent exports",
+  "the_five_read_sites": [
+   "cf_planner.py plan_request: w = self.counters.weight(device_id)",
+   "cf_planner.py plan_request: counters=self.counters into cf_objective.harm_to_others",
+   "cf_planner.py plan_state: w = self.counters.weight(device_id)",
+   "cf_planner.py plan_sync: w = self.counters.weight(device_id)",
+   "arms_v6state.py: counters=cf.counters into cf_objective.harm_warm_from_queue_delay"
+  ],
+  "weight_equality": "EXACT (==, not isclose) over 11 device ids including the unresolvable ones; maximum absolute difference 0.0; the shared value is exactly 1.0",
+  "object_passing_sites": "harm_to_others and harm_warm_from_queue_delay driven with each source; total AND every row exactly equal. This is the only form that covers the `w = counters.weight(...) if counters else row.weight` override, where passing an object DISCARDS the row's own weight, and the rows were built with a deliberately WRONG row weight of 7.0 so a fallback to the row would have shown.",
+  "positive_controls": "each equality is paired with a w = 2.0 source that DOES move the result (harm_to_others 0.009439 to 0.018879; harm_warm 3.194640 to 6.389279), so no equality is vacuous",
+  "no_neutral_default": "cf_planner.Counterfactual raises WeightSourceUndeclared when no source is declared"
+ },
+ "the_guard_D206_item_2": {
+  "claim": "no registered arm's live path constructs the superseded cf_objective.DeficitCounters, and this stays true as the tree changes",
+  "method": "all 209 registered arms CONSTRUCTED, every engine built, the weight source read off the constructed engine",
+  "result": {"arms_built": 208, "no_engine": 151, "DeficitCounters_on_a_live_path": 0,
+             "live_sources": {"NoPlannerDeficitFeed": 49, "PlannerDeficitWeights": 8},
+             "construction_failures": {"covex-v6-cf-pd": "BaseNotChosen, by design"}},
+  "not_vacuous": "the guard also asserts the rung-4 live source is used at least once, and that the live-source set is EXACTLY the two declared sources"
+ },
+ "c2_one_cell_per_construction_site_family": {
+  "partition": "MEASURED by inspect on the constructed arms, see d206_families.json. THREE construction sites reach the planner, plus 151 arms with no _cf_engine at all. Reaching total 57, equal to the committed d177 reach census at its parent (57) independently, ratio 1.000.",
+  "cells": [
+   {"family": "F1 no _cf_engine attribute", "n_arms": 151, "site": "none",
+    "arm": "covex-v6-base", "digest": "af8befb9420ad86a", "rows": 12085,
+    "bar": "committed af8befb9420ad86a / 12,085", "verdict": "BYTE-IDENTICAL",
+    "load_at_start": "10.08"},
+   {"family": "F2", "n_arms": 5, "site": "arms_v5full.py:119",
+    "arm": "covex-v6", "digest": "18067c4c66bb44b8", "rows": 11955,
+    "bar": "NO COMMITTED BAR at this recipe, so proved by a BEFORE / AFTER pair on two trees in two processes: the pristine tree gives 18067c4c66bb44b8 / 11,955, identical",
+    "verdict": "BYTE-IDENTICAL (before/after pair)", "load_at_start": "2.78 patched, 8.93 pristine",
+    "register": "a weaker register than a committed bar, stated at the family rather than hidden in a total"},
+   {"family": "F3", "n_arms": 44, "site": "arms_v6state.py:200",
+    "arm": "covex-v6-state-uo-c5attr", "digest": "9a4be873eb3c5fba", "rows": 14218,
+    "bar": "committed 9a4be873eb3c5fba / 14,218", "verdict": "BYTE-IDENTICAL",
+    "load_at_start": "9.08"},
+   {"family": "F3 second representative", "n_arms": 44, "site": "arms_v6state.py:200",
+    "arm": "covex-v6-fair-c5attr", "digest": "12e4f73ce0ebd865", "rows": 13812,
+    "bar": "committed 12e4f73ce0ebd865 / 13,812", "verdict": "BYTE-IDENTICAL, AND THIS IS PROOF c3",
+    "load_at_start": "9.40",
+    "why_it_matters": "the -rr s5 to s7 judgments are made against this digest's cell, so rung 3 staying exactly here is what Option D promised and what those judgments depend on"},
+   {"family": "F4", "n_arms": 8, "site": "arms_v6cfr3.py:320, the NEW rung-4 override",
+    "arm": "covex-v6-cf-c5attr", "digest": "f5b627392839527c", "rows": 14470,
+    "bar": "as-committed 048ec39ecc144321 / 13,773, measured by this session before the change",
+    "verdict": "MOVED, AS REQUIRED BY DESIGN",
+    "load_at_start": "7.82",
+    "why_moving_is_the_pass": "this is Step 2b for the D206 change. Rung 4's state planner now prices devices at w in [1, 3] instead of 1, so a byte-identical rung 4 would have meant the fix never reached a decision. 697 more rows and a different digest."}
+  ],
+  "every_family_covered": true,
+  "escalation_check": "D206 asks for an escalation rather than a representative where a family cannot be covered by one cell. No family had that problem: each is ONE construction line, and four of the five representatives carry a committed bar. F2's missing bar is handled by the before/after pair, not by picking a representative and hoping.",
+  "register": "one cell per family proves the SHARED CONSTRUCTION SITE is decision-identical end to end. It does NOT re-derive each of the 49 constant-source arms' own digests, and is not offered as doing so: that is what c1's bit-identity at the five read sites carries instead, and a per-arm digest claim is what the 54-arm sweep the user cut would have required."
+ },
+ "_provenance": {"script": "apply_d206_patches.py, d206_guard_proofs.py, d206_weight_source_families.py; cells by cf_pd_one_cell.py and cfr3_one_cell.py",
+                 "model": "n/a (dry, CPU only; no model, no engine, no server)",
+                 "device": "flash (CPU only)", "n": 6,
+                 "origin_main_sha_read": "1f5cf80e5de617fa21e96ca94c32c33c4bd95271"}
+}
