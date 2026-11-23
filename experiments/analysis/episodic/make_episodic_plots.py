@@ -68,7 +68,8 @@ def plot_a(means):
     ax.set_xticks(list(x))
     ax.set_xticklabels(arms, rotation=55, ha="right", fontsize=7.2)
     ax.set_ylabel("correct-in-time fraction (mean over seeds 4 to 7)")
-    ax.set_title("D192 (a)  Per-type correct-in-time, arms ordered by the unified pooled fraction")
+    ax.set_title("D192 (a)  Per-type correct-in-time, arms ordered by the unified pooled fraction\n"
+                 "(dashcam on episode-level FAR-10 thresholds)")
     ax.grid(True, axis="y", alpha=0.25)
     ax.legend(loc="lower right", fontsize=8.5, ncol=2)
     for sp in ("top", "right"):
@@ -97,7 +98,8 @@ def plot_b(means):
                     color=OK["black"])
     ax.set_xlabel("dashcam cloud GPU seconds per episode")
     ax.set_ylabel("dashcam detection rate (crash episodes detected before event)")
-    ax.set_title("D192 (b)  Dashcam detection rate vs GPU seconds per episode (one marker per arm)")
+    ax.set_title("D192 (b)  Dashcam detection rate vs GPU seconds per episode (one marker per arm)\n"
+                 "(episode-level FAR-10 thresholds)")
     ax.grid(True, alpha=0.25)
     for sp in ("top", "right"):
         ax.spines[sp].set_visible(False)
@@ -124,8 +126,9 @@ def validation():
             k, n, frac = E.robot_correct_in_time(cell)
             robot.append({"arm": disp, "seed": seed, "committed": committed,
                           "my_fraction": frac, "exact": committed == frac})
-    # Step 7b: device-only detection vs StudySH-EP EP-G device
-    thr = DC.thresholds()
+    # Step 7b: device-only detection vs StudySH-EP EP-G device (episode-level thresholds)
+    thr = DC.thresholds_episode()
+    thr_i = DC.thresholds()
     labels = DC.nexar_labels()
     dev = []
     for seed in E.SEEDS:
@@ -137,6 +140,12 @@ def validation():
     shep = json.load(open(os.path.join(E.REPO,
                      "results/dashcam/study_sh_ep/sh_ep_results.json")))["h2_earliness"]["EP-G|far10"]
     out = {
+        "episode_level_thresholds_PRIMARY": {
+            "device": thr["per_tier"]["device"], "cloud": thr["per_tier"]["cloud"],
+            "_rule": ("at most 10 percent of no-crash DEV EP-G episodes cross when the tier alone "
+                      "serves every instant; DEV fold only, never EVAL"),
+        },
+        "instant_level_thresholds_BESIDE": {"device": thr_i["device"], "cloud": thr_i["cloud"]},
         "step7a_robot_reproduction": {
             "rule": "my robot correct-by-deadline equals the committed cell.json headline exactly",
             "cells": robot,

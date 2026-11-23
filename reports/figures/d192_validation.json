@@ -1,4 +1,25 @@
 {
+ "episode_level_thresholds_PRIMARY": {
+  "device": {
+   "theta": -0.20141326215572522,
+   "n_neg_dev_episodes": 45,
+   "k_allowed": 5,
+   "achieved_dev_episode_far": 0.1111111111111111,
+   "n_pos_dev_episodes": 45
+  },
+  "cloud": {
+   "theta": -2.9298319411413662,
+   "n_neg_dev_episodes": 45,
+   "k_allowed": 5,
+   "achieved_dev_episode_far": 0.1111111111111111,
+   "n_pos_dev_episodes": 45
+  },
+  "_rule": "at most 10 percent of no-crash DEV EP-G episodes cross when the tier alone serves every instant; DEV fold only, never EVAL"
+ },
+ "instant_level_thresholds_BESIDE": {
+  "device": -2.5788895709823816,
+  "cloud": -6.876020753063131
+ },
  "step7a_robot_reproduction": {
   "rule": "my robot correct-by-deadline equals the committed cell.json headline exactly",
   "cells": [
@@ -51,35 +72,35 @@
   "my_device_only": [
    {
     "seed": 4,
-    "n_crash": 86,
-    "n_detected": 21,
-    "detection_rate": 0.2441860465116279,
-    "median_lead_s": 3.3,
-    "false_alarm_rate": 0.25878594249201275
+    "n_crash": 172,
+    "n_detected": 13,
+    "detection_rate": 0.0755813953488372,
+    "median_lead_s": 2.833,
+    "false_alarm_rate": 0.05555555555555555
    },
    {
     "seed": 5,
-    "n_crash": 95,
-    "n_detected": 25,
-    "detection_rate": 0.2631578947368421,
-    "median_lead_s": 2.133,
-    "false_alarm_rate": 0.2681744749596123
+    "n_crash": 192,
+    "n_detected": 17,
+    "detection_rate": 0.08854166666666667,
+    "median_lead_s": 3.418,
+    "false_alarm_rate": 0.07471264367816093
    },
    {
     "seed": 6,
-    "n_crash": 86,
-    "n_detected": 23,
-    "detection_rate": 0.26744186046511625,
-    "median_lead_s": 2.818,
-    "false_alarm_rate": 0.2523961661341853
+    "n_crash": 173,
+    "n_detected": 16,
+    "detection_rate": 0.09248554913294797,
+    "median_lead_s": 5.7,
+    "false_alarm_rate": 0.07050092764378478
    },
    {
     "seed": 7,
-    "n_crash": 94,
-    "n_detected": 26,
-    "detection_rate": 0.2765957446808511,
-    "median_lead_s": 2.8,
-    "false_alarm_rate": 0.24193548387096775
+    "n_crash": 187,
+    "n_detected": 14,
+    "detection_rate": 0.0748663101604278,
+    "median_lead_s": 1.924,
+    "false_alarm_rate": 0.06261859582542695
    }
   ],
   "shep_EP_G_far10_device_4BI": {

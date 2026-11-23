@@ -50,11 +50,63 @@ ALERT_DEADLINE_S = 1.0
 
 
 def thresholds(condition="EP-G", far="far10"):
+    """INSTANT-level FAR-10 thresholds, committed by StudySH-EP on DEV (kept beside, labelled)."""
     d = json.load(open(os.path.join(E.REPO, SH_EP)))
     blk = d["h2_earliness"][f"{condition}|{far}"]["models"]
-    return {"device": blk["4BI"]["threshold"], "cloud": blk["32BI"]["threshold"],
+    return {"level": "instant", "device": blk["4BI"]["threshold"],
+            "cloud": blk["32BI"]["threshold"],
             "achieved_far": {"device": blk["4BI"]["achieved_far"],
                              "cloud": blk["32BI"]["achieved_far"]}}
+
+
+# StudySH-EP DEV EP-G per-instant scores for both tiers (committed). side = DEV / EVAL fold.
+DEV_4BI = "results/dashcam/study_sh_ep/sh_ep_requests_4BI_shep1.jsonl"
+DEV_32BI = "results/dashcam/study_sh_ep/h100/sh_ep_requests_32BI_shep2-EP-G.jsonl.gz"
+_EP_THR = {}
+
+
+def _load_dev_episodes(path):
+    """DEV EP-G episodes (one per clip) -> {clip: {label, max_score}} over negatives/positives."""
+    opener = gzip.open if path.endswith(".gz") else open
+    by_clip = {}
+    with opener(os.path.join(E.REPO, path), "rt") as fh:
+        for l in fh:
+            if '"EP-G"' not in l or '"DEV"' not in l:
+                continue
+            r = json.loads(l)
+            if r.get("condition") != "EP-G" or r.get("side") != "DEV" or r.get("score") is None:
+                continue
+            c = r["file_name"]
+            d = by_clip.setdefault(c, {"label": r.get("label"), "max": float(r["score"])})
+            d["max"] = max(d["max"], float(r["score"]))
+    return by_clip
+
+
+def thresholds_episode(far=0.10):
+    """EPISODE-level thresholds: on StudySH-EP DEV EP-G episodes (never EVAL), the smallest tier
+    threshold such that at most 10 percent of NO-CRASH DEV episodes (negative clips; no pre-event
+    instant) have ANY instant crossing when that tier alone serves every instant. An episode crosses
+    when its maximum instant score is at or above the threshold.
+    """
+    if _EP_THR:
+        return _EP_THR
+    import math
+    out = {"level": "episode", "far_target": far, "fold": "StudySH-EP DEV (EP-G), never EVAL",
+           "per_tier": {}}
+    for tier, path in (("device", DEV_4BI), ("cloud", DEV_32BI)):
+        dev = _load_dev_episodes(path)
+        neg = sorted((v["max"] for v in dev.values() if v["label"] == "negative"), reverse=True)
+        n = len(neg)
+        k = math.ceil(far * n)
+        theta = neg[k - 1] if 0 < k <= n else (neg[-1] if neg else 0.0)
+        achieved = sum(1 for m in neg if m >= theta - 1e-12) / n if n else None
+        out[tier] = theta
+        out["per_tier"][tier] = {"theta": theta, "n_neg_dev_episodes": n, "k_allowed": k,
+                                 "achieved_dev_episode_far": achieved,
+                                 "n_pos_dev_episodes": sum(1 for v in dev.values()
+                                                           if v["label"] == "positive")}
+    _EP_THR.update(out)
+    return _EP_THR
 
 
 def nexar_labels():
@@ -144,6 +196,10 @@ def score_cell(path, seed, thr, labels, device_only=False):
     req_after = 0
     gpu_after_by = {"crash": 0.0, "nocrash": 0.0}
     req_after_by = {"crash": 0, "nocrash": 0}
+    gpu_after_cat = {"true_detection": 0.0, "false_alarm": 0.0,
+                     "crash_crossing_not_before_event": 0.0}
+    req_after_cat = {"true_detection": 0, "false_alarm": 0,
+                     "crash_crossing_not_before_event": 0}
     missing_cost = 0
 
     for eid, rows in eps.items():
@@ -153,8 +209,12 @@ def score_cell(path, seed, thr, labels, device_only=False):
         ref = meta.get("ref")
         is_pos = (meta.get("label") == "positive")
         pts = [float(r["clip_pts"]) for r in rows]
-        is_crash = bool(is_pos and ref is not None and pts[0] - 1e-9 <= ref <= pts[-1] + 1e-9
-                        and pts[0] < ref)
+        # D192 refinement: a CRASH episode CONTAINS a pre-event instant (positive clip, an instant
+        # strictly before the event); every other episode is NO-CRASH (negative clips and the
+        # post-event segments of positive clips). This matches the no-crash definition used to
+        # calibrate the episode-level DEV thresholds.
+        has_pre = bool(is_pos and ref is not None and any(p < ref for p in pts))
+        is_crash = has_pre
         if is_pos and not is_crash:
             pos_nonevent += 1
 
@@ -173,17 +233,25 @@ def score_cell(path, seed, thr, labels, device_only=False):
                 alert_pts = float(r["clip_pts"])
                 break
 
+        detected = bool(is_crash and alert_idx is not None and alert_pts < ref)
         if is_crash:
             n_crash += 1
-            if alert_idx is not None and alert_pts < ref:
+            if detected:
                 det += 1
                 leads.append(ref - alert_pts)
+                category = "true_detection"
+            elif alert_idx is not None:
+                category = "crash_crossing_not_before_event"
+            else:
+                category = "crash_miss"
         else:
             n_nocrash += 1
             if alert_idx is None:
                 nocrash_correct += 1
+                category = "nocrash_clean"
             else:
                 false_alarm += 1
+                category = "false_alarm"
 
         # Step 2: cost of cloud work in this episode, and the part AFTER the first crossing
         for i, r in enumerate(rows):
@@ -203,6 +271,9 @@ def score_cell(path, seed, thr, labels, device_only=False):
                 key = "crash" if is_crash else "nocrash"
                 gpu_after_by[key] += g
                 req_after_by[key] += 1
+                if category in gpu_after_cat:
+                    gpu_after_cat[category] += g
+                    req_after_cat[category] += 1
 
     n_eps = n_crash + n_nocrash
     return {
@@ -227,18 +298,27 @@ def score_cell(path, seed, thr, labels, device_only=False):
         "step2_gpu_after_nocrash": round(gpu_after_by["nocrash"], 4),
         "step2_requests_after_crash": req_after_by["crash"],
         "step2_requests_after_nocrash": req_after_by["nocrash"],
+        "step2_gpu_after_true_detection": round(gpu_after_cat["true_detection"], 4),
+        "step2_gpu_after_false_alarm": round(gpu_after_cat["false_alarm"], 4),
+        "step2_gpu_after_crash_crossing_not_before_event":
+            round(gpu_after_cat["crash_crossing_not_before_event"], 4),
+        "step2_requests_after_true_detection": req_after_cat["true_detection"],
+        "step2_requests_after_false_alarm": req_after_cat["false_alarm"],
+        "threshold_level": thr.get("level", "unknown"),
         "missing_cost_instants": missing_cost,
     }
 
 
 if __name__ == "__main__":
-    thr = thresholds()
     labels = nexar_labels()
-    print("thresholds:", thr)
-    # smoke test on base seed 4
+    thr_e = thresholds_episode()
+    thr_i = thresholds()
+    print("episode-level thresholds:", json.dumps(thr_e["per_tier"], indent=1))
+    print("instant-level thresholds:", {"device": thr_i["device"], "cloud": thr_i["cloud"]})
     p, rr = E.cell_dir("hybrid-F-lhreq-noc3", 4)
-    r = score_cell(p, 4, thr, labels)
-    print("base s4:", json.dumps({k: r[k] for k in
-          ("n_crash", "n_nocrash", "positive_clip_nonevent_episodes_as_nocrash",
-           "detection_rate", "false_alarm_rate", "fraction_episodes_correct",
-           "median_lead_s", "gpu_s_per_episode", "step2_gpu_fraction_after_crossing")}, indent=1))
+    for lab, thr in (("EPISODE-level", thr_e), ("instant-level", thr_i)):
+        r = score_cell(p, 4, thr, labels)
+        print(f"\nbase s4 ({lab}):", json.dumps({k: r[k] for k in
+              ("n_crash", "n_nocrash", "detection_rate", "false_alarm_rate",
+               "fraction_episodes_correct", "median_lead_s",
+               "step2_gpu_after_true_detection", "step2_gpu_after_false_alarm")}, indent=1))
