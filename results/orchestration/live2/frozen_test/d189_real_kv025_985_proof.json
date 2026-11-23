@@ -1,0 +1,175 @@
+{
+ "_what": "D189 real-engine 0.25x: the 984 -> 985 correction after a hardware start failure, with the reserved-block relation DERIVED FROM MEASURED 1x NUMBERS and the default path proved unchanged. No server is started: the allowlist and pool expectation are pure logic over extra_flags, and the H100 owns the GPU.",
+ "the_failure": {
+  "cell": "llf s4 _kv0.25 (real engine, override 984)",
+  "vllm_error": "ValueError: To serve at least one request with the model's max seq len (15744), 3.84 GiB KV cache is needed, which is larger than the available KV cache memory (3.84 GiB)",
+  "vllm_log_line": "Overriding num_gpu_blocks=3935 with num_gpu_blocks_override=984",
+  "driver_behaviour": "v30's infrastructure guard stopped the driver cleanly: no skip, no orphan, no cell.json written, about 90 s idle GPU. Nothing is recorded as run.",
+  "whose_arithmetic": "the 984 originated in the H100's derivation and my launcher allowlisted it without catching the reserved block, so neither side caught it"
+ },
+ "the_derivation_MEASURED_not_assumed": {
+  "observed_1x_allocated_blocks": 3935,
+  "observed_1x_reported_tokens": 62944,
+  "block_size": 16,
+  "check": "(3935 - 1) * 16 = 62944",
+  "equals_reported": true,
+  "conclusion": "ONE BLOCK IS RESERVED, so usable = (override - 1) * 16",
+  "register": "the 1x figures are OBSERVED from the H100's server log; the 0.25x consequence is DERIVED from them by exact arithmetic, not measured on hardware, because a dry engine start cannot show it and the GPU is in use. The first real 0.25x cell must confirm 'KV POOL ... engine 15744' before the other eleven run."
+ },
+ "options": {
+  "984": {
+   "usable_tokens": 15728,
+   "max_model_len_fits": false
+  },
+  "985": {
+   "usable_tokens": 15744,
+   "max_model_len_fits": true
+  },
+  "986": {
+   "usable_tokens": 15760,
+   "max_model_len_fits": true
+  }
+ },
+ "why_985_and_not_986": "985 gives usable 15,744, EXACTLY EQUAL to max_model_len. The engine's test is strict ('is larger than'), so equal passes, and 985 is the only value honouring the user's 15,744 ruling without loosening it. 986 (15,760, one block of headroom) is pre-derived as the fallback if 985 also fails, and is deliberately NOT allowlisted: an allowlist that already accepts the next guess stops being a check.",
+ "why_not_984_with_max_model_len_15728": "it would start, but it moves the CONTEXT LIMIT away from the user's 15,744 ruling, which is a methodological change rather than a launcher fix",
+ "default_path_cases": [
+  {
+   "extra_flags": [],
+   "allowed_before": false,
+   "allowed_now": false,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true
+  },
+  {
+   "extra_flags": [
+    "--long-prefill-token-threshold",
+    "1024"
+   ],
+   "allowed_before": true,
+   "allowed_now": true,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true
+  },
+  {
+   "extra_flags": [
+    "--long-prefill-token-threshold",
+    "2048"
+   ],
+   "allowed_before": true,
+   "allowed_now": true,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true
+  },
+  {
+   "extra_flags": [
+    "--num-gpu-blocks-override",
+    "984",
+    "--max-model-len",
+    "15744"
+   ],
+   "allowed_before": true,
+   "allowed_now": false,
+   "pool_expected_before": 15744,
+   "pool_expected_now": 62944,
+   "behaviour_identical": false
+  },
+  {
+   "extra_flags": [
+    "--num-gpu-blocks-override",
+    "985",
+    "--max-model-len",
+    "15744"
+   ],
+   "allowed_before": false,
+   "allowed_now": true,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 15744,
+   "behaviour_identical": false
+  },
+  {
+   "extra_flags": [
+    "--num-gpu-blocks-override",
+    "985"
+   ],
+   "allowed_before": false,
+   "allowed_now": false,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true
+  },
+  {
+   "extra_flags": [
+    "--max-model-len",
+    "15744"
+   ],
+   "allowed_before": false,
+   "allowed_now": false,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true
+  },
+  {
+   "extra_flags": [
+    "--gpu-memory-utilization",
+    "0.5"
+   ],
+   "allowed_before": false,
+   "allowed_now": false,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true
+  },
+  {
+   "extra_flags": [
+    "--max-model-len",
+    "15744",
+    "--num-gpu-blocks-override",
+    "985"
+   ],
+   "allowed_before": false,
+   "allowed_now": false,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true
+  },
+  {
+   "extra_flags": [
+    "--num-gpu-blocks-override",
+    "986",
+    "--max-model-len",
+    "15744"
+   ],
+   "allowed_before": false,
+   "allowed_now": false,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true
+  }
+ ],
+ "n_cases": 10,
+ "n_behaviour_changed": 2,
+ "changed_cases": [
+  [
+   "--num-gpu-blocks-override",
+   "984",
+   "--max-model-len",
+   "15744"
+  ],
+  [
+   "--num-gpu-blocks-override",
+   "985",
+   "--max-model-len",
+   "15744"
+  ]
+ ],
+ "verdict": "PASS: behaviour changes for EXACTLY the two entries that must change, the old 984 entry (now refused) and the new 985 entry (now accepted), and for nothing else. The no-flags default, both committed long-prefill entries, each half of the entry alone, an unlisted flag, the same two flags TRANSPOSED, and the 986 fallback all behave identically before and after; the transposed and 986 cases still STOP, which is correct.",
+ "_provenance": {
+  "git_commit": "679e7749a206be478b7ea1c3641e0740246d8f7a",
+  "script": "proof.py, pure logic, no server",
+  "device": "cpu",
+  "n": 10
+ }
+}

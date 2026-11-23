@@ -1,4 +1,46 @@
 #
+# REPOSTED 2026-11-23: 984 -> 985, AFTER A HARDWARE START FAILURE ON THE FIRST REAL 0.25x CELL.
+# The 12 arm-seed lines are unchanged; only the block override moves.
+#
+# WHAT HAPPENED. llf s4 _kv0.25 FAILED AT SERVER START and v30's infrastructure guard stopped the
+# driver cleanly: no skip, no orphan, no cell.json, about 90 s of idle GPU. vLLM said: "To serve at
+# least one request with the model's max seq len (15744), 3.84 GiB KV cache is needed, which is
+# larger than the available KV cache memory". Its log also showed "Overriding num_gpu_blocks=3935
+# with num_gpu_blocks_override=984".
+#
+# THE CAUSE, AND THE RELATION IS MEASURED RATHER THAN ASSUMED. vLLM RESERVES ONE BLOCK. At 1x it
+# allocates 3,935 blocks and reports a 62,944-token pool, and (3935 - 1) x 16 = 62,944 EXACTLY, so
+# usable = (override - 1) x 16. With 984 the usable pool was 983 x 16 = 15,728, BELOW the 15,744
+# max_model_len, so the engine refused to start. 985 gives 984 x 16 = 15,744.
+#
+# NEITHER SIDE CAUGHT IT. The 984 came from the H100's derivation and my launcher allowlisted it
+# without accounting for the reserved block. Recorded because the allowlist is meant to be the
+# check, and here it passed a value that could not start.
+#
+# 15,744 IS EXACTLY EQUAL TO max_model_len, WHICH IS A KNIFE EDGE AND IS DELIBERATE. The engine's
+# test is STRICT ("is larger than"), so equal passes, and 985 is the only value that honours the
+# user's 15,744 ruling without loosening it. IF 985 ALSO FAILS AT START, the next value is 986
+# (15,760, one block of headroom); it is pre-derived in d189_real_kv025_985_proof.json so the
+# diagnosis need not be repeated, and it is deliberately NOT allowlisted, because an allowlist that
+# already accepts the next guess stops being a check.
+#
+# THE ALTERNATIVE WAS DECLINED, not overlooked: 984 with --max-model-len 15728 would start, but it
+# moves the CONTEXT LIMIT away from the user's 15,744 ruling, which is a methodological change and
+# not a launcher fix. That needs the user, not me.
+#
+# FLAG ORDER IS STILL LOAD-BEARING: the allowlist is an exact list match, proved over 10 flag lists,
+# and the same two flags TRANSPOSED still STOP.
+#
+# CONFIRM ON THE FIRST CELL, before the other eleven run: the KV POOL line must read engine 15744 /
+# logical 15736, and the ENGINE FLAG LIVE line must show the flags in the server argv. The 1x figures
+# are OBSERVED; the 0.25x consequence is DERIVED from them by exact arithmetic and is NOT yet
+# measured on hardware.
+#
+# Everything else from the previous posting stands unchanged, including the runnability probe, the
+# four-arm logical-condition null that does NOT carry over to the real engine, and the engine-refusal
+# counts (llf 20 / 2, covex-v6-rules 55 / 37, no other arm of the six).
+#
+#
 # REPOSTED 2026-11-23 AS THE REAL-ENGINE 0.25x CONDITION. The 12 arm-seed lines are UNCHANGED; every
 # line now carries `--num-gpu-blocks-override 984 --max-model-len 15744` in fields 5+, which driver v30
 # passes to the server.
@@ -214,15 +256,15 @@
 # lh_req, single-shot set ss2, dashcam_format EP-G, robot upload PER-FRAME, robot_reask_mean_s 30.0
 # (rq30), deadlines dashcam 1.0 s / robot 3.0 s (_L3) / single-shot 2.0 s. Tag _kv0.25_L3_epg_rq30.
 #
-llf 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
-mooncake 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
-simplestream 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
-eco-llm 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
-covex-v6-base 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
-covex-v6-rules 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
-llf 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
-mooncake 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
-simplestream 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
-eco-llm 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
-covex-v6-base 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
-covex-v6-rules 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
+llf 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+mooncake 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+simplestream 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+eco-llm 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+covex-v6-base 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+covex-v6-rules 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+llf 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+mooncake 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+simplestream 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+eco-llm 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+covex-v6-base 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+covex-v6-rules 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744

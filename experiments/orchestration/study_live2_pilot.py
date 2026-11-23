@@ -109,7 +109,26 @@ def start_server(host_gib, scheduling_policy=None, extra_flags=None):
     # `hybrid_arm.CONTEXT_LIMIT_TOKENS = 32768` is deliberately LEFT ALONE: it is a module constant
     # every arm reads, changing it would alter the frozen base for all of them, and the refusal
     # path already produces the right score. The refusals must be REPORTED SEPARATELY per cell.
-    _REAL_KV025 = ["--num-gpu-blocks-override", "984", "--max-model-len", "15744"]
+    # CORRECTED 2026-11-23 AFTER A HARDWARE START FAILURE: 984 -> 985. vLLM RESERVES ONE
+    # BLOCK. The relation is MEASURED, not assumed: at 1x vLLM logs "num_gpu_blocks=3935" and
+    # reports a 62,944-token pool, and (3935 - 1) * 16 = 62,944 exactly, so usable =
+    # (override - 1) * 16. With 984 the usable pool was 983 * 16 = 15,728, BELOW the 15,744
+    # max_model_len, and vLLM refused to start: "To serve at least one request with the model's
+    # max seq len (15744), 3.84 GiB KV cache is needed, which is larger than the available KV
+    # cache memory". The H100's infrastructure guard stopped the driver cleanly: no skip, no
+    # orphan, no cell.json, about 90 s of idle GPU.
+    #
+    # 985 GIVES 984 * 16 = 15,744 USABLE, EXACTLY EQUAL to max_model_len. That is a knife edge and
+    # it is deliberate: the engine's test is STRICT ("is larger than"), so equal passes, and 985
+    # is the only value that honours the user's 15,744 ruling without loosening it. IF 985 ALSO
+    # FAILS AT START, the next value is 986 (985 * 16 = 15,760, one block of headroom); it is
+    # pre-derived here so the diagnosis does not have to be repeated, and it is NOT allowlisted,
+    # because an allowlist that already accepts the next guess stops being a check.
+    #
+    # THE ALTERNATIVE WAS DECLINED: 984 with --max-model-len 15728 would start, but it moves the
+    # CONTEXT LIMIT away from the user's 15,744 ruling, which is a methodological change and not
+    # a launcher fix.
+    _REAL_KV025 = ["--num-gpu-blocks-override", "985", "--max-model-len", "15744"]
     if extra_flags:
         if list(extra_flags) not in (["--long-prefill-token-threshold", "1024"],
                                      ["--long-prefill-token-threshold", "2048"],
