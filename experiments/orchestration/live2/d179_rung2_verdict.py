@@ -40,7 +40,7 @@ holds no trace tree and so cannot call `score.load`:
 
 THE TRANSCRIPTION IS PROVED, NOT ASSERTED. The positive control re-derives
 `robot_pool_on_time`, `ss_pool_on_time` and the dashcam on-time sum from `outcomes.jsonl.gz` plus
-`request.jsonl.gz` and requires EXACT equality with the cell's own committed `score.sweep[0]`
+`request.jsonl.gz` and requires EXACT equality with the cell's own committed `score.score.sweep[0]`
 block. On the eight committed comparator cells it reproduces all 24 counts exactly. If it does
 not reproduce them, THIS SCRIPT IS BROKEN AND THE CELL IS NOT, and the run stops rather than
 reporting a comparison.
@@ -99,7 +99,7 @@ CHECK 2, "robot on-time gain over base retained".
     gain      = rung2_on_time_fraction - base_on_time_fraction
     retained  = (shares_on_time_fraction - base_on_time_fraction) / gain
 
-  DENOMINATOR = the cell's own robot pool, `sweep[0].robot_pool_n`, which is every `robo00x`
+  DENOMINATOR = the cell's own robot pool, `score.score.sweep[0].robot_pool_n`, which is every `robo00x`
   opportunity in the cell. It is NOT the feasible subset and NOT a distinct-question count; a
   D159 (C) re-ask is its own opportunity with its own 3.0 s deadline and counts again. The pool
   size is trace-determined, so it must be EQUAL across the three arms at a given seed; on the
@@ -131,7 +131,7 @@ CHECK 3, "assistance within 2 s".
   per-device minimum, because a pooled 0.93 can sit on top of a device at 0.80.
 
   OFFERED, NOT DELIVERED. The denominator is the count of assistance OPPORTUNITIES in the cell
-  (`sweep[0].ss_pool_n`), which is the offered count: 357 on seed 4 against the 1,429 that
+  (`score.score.sweep[0].ss_pool_n`), which is the offered count: 357 on seed 4 against the 1,429 that
   `d181_share_floors.json` records over the four base cells. A denominator of completions would
   read 100 percent for a device whose questions are all being declined, which is the exact case
   these checks exist to catch, and a share-admission arm is the arm most able to produce it.
@@ -210,6 +210,25 @@ ALERT_INSTANTS_PER_EPISODE = 19
 EPG_CAP_FRAMES = 21
 EPG_T_LOCAL_ORIGIN_S = 3.0
 EPG_T_LOCAL_STEP_S = 0.5
+
+SWEEP_REQUIRED_KEYS = ("robot_pool_n", "robot_pool_on_time", "robot_pool_fraction",
+                       "ss_pool_n", "ss_pool_on_time", "ss_pool_fraction", "ss_per_device",
+                       "dashcam_per_device", "dashcam_all_meet")
+
+ROBOT_ACCURACY_REGISTER = (
+    "robot_headline.correct_answers_delivered_by_deadline is an ACCURACY, not an on-time rate: "
+    "its own `metric` field says correct_answers_delivered_by_deadline, and its definition is the "
+    "cloud's answer when delivered within the deadline, ELSE THE DEVICE'S if the device's also "
+    "arrived in time, else a miss. It is NOT the quantity check 2 names, for two separate "
+    "reasons, and substituting it changes the check twice over. First, an on-time wrong answer "
+    "scores zero and a correct late answer scores zero, so it is not a deadline-attainment rate. "
+    "Second, it ADMITS THE DEVICE SIDE, which D177 and D179 (6) exclude: the currency is on-time "
+    "CLOUD answers only and device_on_time is reported beside, never added. The device floor is "
+    "0.371212 on all three arms at seed 4, identical, and the measured consequence is large: on "
+    "seed 4 the on-time retention is (0.454545 - 0.265152) / (0.893939 - 0.265152) = 0.3012 while "
+    "the by_deadline retention is (0.545455 - 0.469697) / (0.613636 - 0.469697) = 0.5267, because "
+    "the accuracy reading compresses the numerator by 2.5x and the denominator by 4.4x. The two "
+    "are reported side by side and the ON-TIME one is the check.")
 
 RETAIN_BAR = 0.90
 ASSIST_BAR = 0.90
@@ -585,9 +604,44 @@ def read_cell(run_dir: str) -> Dict[str, Any]:
     # mirrored nor an unmirrored cell reads as having no share mechanism at all.
     arm_stats = dict(coord.get("counts") or {})
     arm_stats.update(dict(coord.get("arm_stats") or {}))
-    score =((cell.get("score") or {}).get("score") or {})
+    # THE PATH IS cell.json -> score -> score -> sweep[0]. It is GUARDED rather than trusted,
+    # because reading it one level short returns {} and every pool count then reads None, which is
+    # indistinguishable from "the base cells carry no on-time counts". That mis-read happened once
+    # and concluded the comparator had no counts: a missing field wearing the look of an absent
+    # measurement, which is the wrong conclusion in the wrong direction. So the keys the block MUST
+    # carry are named and their absence is a loud flag, never a None.
+    score = ((cell.get("score") or {}).get("score") or {})
     sweep = (score.get("sweep") or [{}])[0]
+    missing = [k for k in SWEEP_REQUIRED_KEYS if k not in sweep]
+    rh = score.get("robot_headline") or {}
     committed = {
+        "_path": "cell.json -> score -> score -> sweep[0]",
+        "_required_keys_missing_FLAG": missing,
+        "_path_resolved": bool(sweep) and not missing,
+        "_keys_that_do_not_exist": {
+            "dashcam_verdict": ("NOT a key of this block. The verdict key is dashcam_all_meet; "
+                                "asking for dashcam_verdict reads None, which is a missing field "
+                                "wearing the look of a failed check"),
+        },
+        "dashcam_all_meet": sweep.get("dashcam_all_meet"),
+        "dashcam_eligible": sweep.get("dashcam_eligible"),
+        "dashcam_excluded": sweep.get("dashcam_excluded"),
+        "robot_pool_meets": sweep.get("robot_pool_meets"),
+        "robot_pool_eligible": sweep.get("robot_pool_eligible"),
+        "robot_per_device": sweep.get("robot_per_device"),
+        "robot_worst_device": sweep.get("robot_worst_device"),
+        "ss_classified_by": sweep.get("ss_classified_by"),
+        "capacity_met": sweep.get("capacity_met"),
+        "L_dash": sweep.get("L_dash"), "p_dash": sweep.get("p_dash"),
+        "L_rob": sweep.get("L_rob"), "p_rob": sweep.get("p_rob"),
+        "robot_by_deadline_ACCURACY_BESIDE": {
+            "metric": rh.get("metric"),
+            "value": rh.get("correct_answers_delivered_by_deadline"),
+            "n": rh.get("n_by_deadline"),
+            "device_only_robot_accuracy_FLOOR": ((score.get("device_only") or {})
+                                                 .get("robot_accuracy")),
+            "_register": ROBOT_ACCURACY_REGISTER,
+        },
         "robot_pool_n": sweep.get("robot_pool_n"),
         "robot_pool_on_time": sweep.get("robot_pool_on_time"),
         "robot_pool_fraction": sweep.get("robot_pool_fraction"),
@@ -673,6 +727,30 @@ def positive_control(cells: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
         "verdict": "PASS" if rows and all(r["pass"] for r in rows) else "FAIL",
         "_if_it_fails": ("THIS SCORER IS BROKEN AND THE CELL IS NOT. Report the scorer failure, "
                          "not the comparison."),
+    }
+
+
+def _by_deadline_beside(base, rung2, shares) -> Dict[str, Any]:
+    """The accuracy reading of check 2, computed so nobody has to reach for it, labelled so nobody
+    can mistake it for the check. See ROBOT_ACCURACY_REGISTER for why it is a different quantity.
+    """
+    v = {k: c["committed_score_block"]["robot_by_deadline_ACCURACY_BESIDE"]["value"]
+         for k, c in (("base", base), ("rung2_committed", rung2), ("shares", shares))}
+    g = (round(v["rung2_committed"] - v["base"], 6)
+         if None not in (v["rung2_committed"], v["base"]) else None)
+    d = (round(v["shares"] - v["base"], 6) if None not in (v["shares"], v["base"]) else None)
+    return {
+        "_register": ROBOT_ACCURACY_REGISTER,
+        "values": v,
+        "device_only_accuracy_FLOOR": {
+            k: c["committed_score_block"]["robot_by_deadline_ACCURACY_BESIDE"]
+            ["device_only_robot_accuracy_FLOOR"]
+            for k, c in (("base", base), ("rung2_committed", rung2), ("shares", shares))},
+        "gain": g,
+        "delta": d,
+        "retained_fraction_ON_AN_ACCURACY": (round(d / g, 6) if (g and d is not None
+                                                                 and abs(g) >= GAIN_EPS) else None),
+        "IS_NOT_THE_PRE_REGISTERED_CHECK": True,
     }
 
 
@@ -766,6 +844,7 @@ def verdict_for_seed(seed: int, base: Optional[Dict[str, Any]],
             "rule": "shares on-time fraction must not fall more than 0.01 below the base's",
             "pass": fallback},
         "basis_used": basis,
+        "by_deadline_ACCURACY_BESIDE_NOT_THE_CHECK": _by_deadline_beside(base, rung2, shares),
         "pass": bool(c2_pass and same_pool),
         "_no_seed_dropped": ("a seed whose denominator is near zero or negative is reported with "
                              "its gain_class and scored on the absolute fallback, never dropped "
@@ -1070,6 +1149,7 @@ DEFINITIONS = {
             "no_seed_dropped": "every seed is reported with its gain_class, never dropped",
         },
         "committed_gains": "base-to-rung2 gain is +0.629 / +0.693 / +0.545 / +0.610 on seeds 4 to 7",
+        "NOT_by_deadline": ROBOT_ACCURACY_REGISTER,
     },
     "assistance_within_2s": {
         "deadline_s": 2.0,

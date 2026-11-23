@@ -263,6 +263,44 @@ This is why a parse check on one real cell is worth its minute. The fault produc
 zero where a reader expects a number, and no effect at all on the three pre-registered checks: it
 would have shown up as three empty hold distributions in a report whose verdict section was full.
 
+### 5c. Two corrections raised by the coordinator, both checked against my own derivation
+
+**The field path.** The sweep block is at `cell.json -> score -> score -> sweep[0]`. This scorer
+already read that path, and all 48 positive-control counts came from it. Reading it one level short
+returns `{}`, every pool count then reads `None`, and that is indistinguishable from "the base
+cells carry no on-time counts": a missing field wearing the look of an absent measurement, which is
+the wrong conclusion in the wrong direction. The path is now **guarded** rather than trusted: nine
+keys are declared required and their absence is a loud flag, not a `None`. It resolves on all eight
+comparator cells. Recorded with it: `dashcam_verdict` is **not** a key of that block; the verdict
+key is `dashcam_all_meet`, and asking for `dashcam_verdict` reads `None`, which is a missing field
+wearing the look of a failed check.
+
+**The base comparator name.** `hybrid-F-lhreq-noc3_n16_s{4,5,6,7}_1200s_h27_3t_L3_epg_rq30`, which
+is what this scorer uses. The `_L3_epg` cells without `rq30` at seeds 4 and 5 are a different
+workload with no re-asks and a robot pool of 20 to 25 instead of 105 to 132; they are not used here.
+
+**Independent agreement on every comparator figure.** Re-derived from the raw logs, not copied:
+base robot 35/132, 27/127, 41/121, 19/105 and SS 337/357, 343/356, 349/357, 354/359 on seeds 4 to 7;
+`covex-v6-state-uo` seed 4 robot 118/132 and dashcam pooled 0.1878; shares seed 4 robot 60/132,
+SS 344/357, dashcam pooled 0.7443, `dashcam_all_meet` true. No disagreement anywhere.
+
+**One disagreement, and it is a register error, not an arithmetic one.** The `by_deadline` figures
+(base 0.4697, rung 2 0.6136, shares 0.5455) are **not** robot on-time. They are
+`robot_headline.correct_answers_delivered_by_deadline`, whose own `metric` field says so: an
+ACCURACY over the same 132 questions. Substituting it for the check changes the check twice over.
+
+1. It is not a deadline-attainment rate at all: an on-time wrong answer scores zero and a correct
+   late answer scores zero.
+2. It **admits the device side**, which D177 and D179 (6) exclude. The currency is on-time CLOUD
+   answers only and `device_on_time` is reported beside, never added. The device floor is 0.371212
+   on all three arms at seed 4, identical.
+
+The measured consequence is large and runs in the flattering direction: the accuracy reading
+compresses the numerator by 2.5x and the denominator by 4.4x, so retention reads 0.53 where the
+on-time quantity reads 0.30. **Check 2 is specified on robot ON-TIME**, so 0.3012 is the number
+scored at seed 4, and the accuracy reading is carried in the output under
+`by_deadline_ACCURACY_BESIDE_NOT_THE_CHECK`. Both are reported; only one is the check.
+
 ---
 
 ## 6. What the scorer outputs per seed

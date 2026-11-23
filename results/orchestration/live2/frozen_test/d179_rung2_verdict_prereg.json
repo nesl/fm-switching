@@ -237,7 +237,8 @@
     "absolute_fallback": "shares on-time fraction must not fall more than 0.01 below the base's",
     "no_seed_dropped": "every seed is reported with its gain_class, never dropped"
    },
-   "committed_gains": "base-to-rung2 gain is +0.629 / +0.693 / +0.545 / +0.610 on seeds 4 to 7"
+   "committed_gains": "base-to-rung2 gain is +0.629 / +0.693 / +0.545 / +0.610 on seeds 4 to 7",
+   "NOT_by_deadline": "robot_headline.correct_answers_delivered_by_deadline is an ACCURACY, not an on-time rate: its own `metric` field says correct_answers_delivered_by_deadline, and its definition is the cloud's answer when delivered within the deadline, ELSE THE DEVICE'S if the device's also arrived in time, else a miss. It is NOT the quantity check 2 names, for two separate reasons, and substituting it changes the check twice over. First, an on-time wrong answer scores zero and a correct late answer scores zero, so it is not a deadline-attainment rate. Second, it ADMITS THE DEVICE SIDE, which D177 and D179 (6) exclude: the currency is on-time CLOUD answers only and device_on_time is reported beside, never added. The device floor is 0.371212 on all three arms at seed 4, identical, and the measured consequence is large: on seed 4 the on-time retention is (0.454545 - 0.265152) / (0.893939 - 0.265152) = 0.3012 while the by_deadline retention is (0.545455 - 0.469697) / (0.613636 - 0.469697) = 0.5267, because the accuracy reading compresses the numerator by 2.5x and the denominator by 4.4x. The two are reported side by side and the ON-TIME one is the check."
   },
   "assistance_within_2s": {
    "deadline_s": 2.0,
@@ -981,5 +982,68 @@
   "all_48_pinned_blobs_unchanged_at_the_registering_commit": true,
   "verified_how": "git rev-parse <registering commit>:<cell>/<file> for all 48 pinned files, each equal to the blob sha recorded under pinned_comparators",
   "consequence": "none for the comparison: the comparator CONTENT is the same object under both commits. The commit label under `pinned_at_origin_main_commit` is the earlier of the two and is kept as recorded rather than rewritten"
+ },
+ "field_path_guard": {
+  "_why": "reading the sweep block one level short returns {} and every pool count then reads None, which is indistinguishable from 'the base cells carry no on-time counts'. That mis-read happened once in this study and concluded the comparator had no counts: a missing field wearing the look of an absent measurement, which is the wrong conclusion in the wrong direction",
+  "path": "cell.json -> score -> score -> sweep[0]",
+  "required_keys": [
+   "robot_pool_n",
+   "robot_pool_on_time",
+   "robot_pool_fraction",
+   "ss_pool_n",
+   "ss_pool_on_time",
+   "ss_pool_fraction",
+   "ss_per_device",
+   "dashcam_per_device",
+   "dashcam_all_meet"
+  ],
+  "absence_is_a_loud_flag_not_a_None": true,
+  "keys_that_do_not_exist": {
+   "dashcam_verdict": "NOT a key of this block. The verdict key is dashcam_all_meet; asking for dashcam_verdict reads None, which is a missing field wearing the look of a failed check"
+  },
+  "resolved_on_all_8_comparator_cells": true,
+  "committed_dashcam_all_meet": {
+   "base": {
+    "4": true,
+    "5": true,
+    "6": true,
+    "7": true
+   },
+   "rung2_committed": {
+    "4": false,
+    "5": false,
+    "6": true,
+    "7": false
+   }
+  }
+ },
+ "robot_on_time_is_not_robot_accuracy": {
+  "_register": "robot_headline.correct_answers_delivered_by_deadline is an ACCURACY, not an on-time rate: its own `metric` field says correct_answers_delivered_by_deadline, and its definition is the cloud's answer when delivered within the deadline, ELSE THE DEVICE'S if the device's also arrived in time, else a miss. It is NOT the quantity check 2 names, for two separate reasons, and substituting it changes the check twice over. First, an on-time wrong answer scores zero and a correct late answer scores zero, so it is not a deadline-attainment rate. Second, it ADMITS THE DEVICE SIDE, which D177 and D179 (6) exclude: the currency is on-time CLOUD answers only and device_on_time is reported beside, never added. The device floor is 0.371212 on all three arms at seed 4, identical, and the measured consequence is large: on seed 4 the on-time retention is (0.454545 - 0.265152) / (0.893939 - 0.265152) = 0.3012 while the by_deadline retention is (0.545455 - 0.469697) / (0.613636 - 0.469697) = 0.5267, because the accuracy reading compresses the numerator by 2.5x and the denominator by 4.4x. The two are reported side by side and the ON-TIME one is the check.",
+  "measured_on_shares_seed_4": {
+   "on_time_THE_CHECK": {
+    "base": 0.265152,
+    "rung2_committed": 0.893939,
+    "shares": 0.454545,
+    "counts": {
+     "base": "35/132",
+     "rung2_committed": "118/132",
+     "shares": "60/132"
+    },
+    "gain": 0.628787,
+    "delta": 0.189393,
+    "retained": 0.301204,
+    "pass_against_0p90": false
+   },
+   "by_deadline_ACCURACY_BESIDE": {
+    "base": 0.469697,
+    "rung2_committed": 0.613636,
+    "shares": 0.545455,
+    "gain": 0.143939,
+    "delta": 0.075758,
+    "retained_ON_AN_ACCURACY": 0.52632,
+    "device_only_accuracy_floor_all_three_arms": 0.371212
+   },
+   "why_they_differ": "the accuracy reading compresses the numerator by 2.5x and the denominator by 4.4x, so the ratio reads 0.53 against the on-time 0.30. The check is specified on ON-TIME and that is the number scored; the accuracy is carried beside it under a name that says it is not the check"
+  }
  }
 }
