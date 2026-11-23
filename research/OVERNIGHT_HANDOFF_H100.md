@@ -82,7 +82,9 @@ For a new file `runs/<LIST>` on origin:
   action taken (everything up). Correct.
 - Non-interactive claude under the existing settings can run Bash (tested from a scratch directory, so the test does
   not become the conversation `claude -c` resumes).
-- Not exercised live: the orphan kill (needs a real orphan) and the actual restart (needs the driver gone).
+- 18:26, after the handover cleared STOP: DRY with the driver, chain and claude checks pointed at absent names: would run `tmux new-session -d -s frozengrid 'bash experiments/orchestration/study_frozen_grid_driver_v28.sh'` and the claude resume. Correct.
+- Handover v27 to v28 done 18:25:52; first half-memory cell covex-v6-base s4 `_kv0.5` started 18:25:55 with `--gpu-kv-tokens 31472` verified in the live harness argv.
+- Not exercised live: the orphan kill (needs a real orphan) and a real restart (needs the driver gone).
 
 ## Incidents and INVALID cells (append below, newest last)
 
