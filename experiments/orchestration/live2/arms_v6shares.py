@@ -137,6 +137,13 @@ V6SHARES_ARMS = {
     # covex-v6-state-shares in any ARM-side respect, the comparison it exists to support is void.
     SHARES_ARM_NAME + "-r1": lambda **kw: V6StateSharesArm(
         name=SHARES_ARM_NAME + "-r1", **kw),
+    # D187 r2: the QUEUE-REGISTER label. Arm-side identical to -r1 and to the base arm; what
+    # differs is again the COORDINATOR, which now feeds the release re-check the W quantity the
+    # D162 model was actually fitted on (submit to FIRST TOKEN) instead of _uncached_in_flight
+    # (submit to COMPLETION, which includes decode). The r1 cells stay valid as the
+    # before-condition for this change, exactly as the shares cells did for r1.
+    SHARES_ARM_NAME + "-r2": lambda **kw: V6StateSharesArm(
+        name=SHARES_ARM_NAME + "-r2", **kw),
 }
 
 

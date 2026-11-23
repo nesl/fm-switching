@@ -934,7 +934,14 @@ class Live2Coordinator:
         # for an instant the device did not already answer locally).
         if self._release_recheck:
             _rr = RR.decide(qtype="alert", uncached=_uncached,
-                            queued_uncached_ahead=self._uncached_in_flight,
+                            # D187 r2: W, NOT _uncached_in_flight. The D162 fit builds its queue regressor over the
+                            # interval t_submit to t_submit + first_token_s (cost_model_gate_d162.py:97, summing
+                            # intervals OPEN AT THE START INSTANT), which is submit-to-FIRST-TOKEN work.
+                            # _uncached_in_flight drains at COMPLETION and so includes decode, overstating the
+                            # fitted regressor and overestimating the predicted first token, which refuses work
+                            # that would have fitted. 25 of the 34 residual recall skips at seed 4 were
+                            # queue-refused with a u that already fits the slack.
+                            queued_uncached_ahead=self._w.total(),
                             remaining_s=o.deadline_abs() - t)
             if not _rr["feasible"]:
                 RR.note_infeasible(self.counts, "alert")
@@ -1276,7 +1283,14 @@ class Live2Coordinator:
                 self.counts[RR.COUNTER_UNCLASSIFIED] += 1
             else:
                 _rr = RR.decide(qtype=_qt, uncached=_uncached,
-                                queued_uncached_ahead=self._uncached_in_flight,
+                                # D187 r2: W, NOT _uncached_in_flight. The D162 fit builds its queue regressor over the
+                                # interval t_submit to t_submit + first_token_s (cost_model_gate_d162.py:97, summing
+                                # intervals OPEN AT THE START INSTANT), which is submit-to-FIRST-TOKEN work.
+                                # _uncached_in_flight drains at COMPLETION and so includes decode, overstating the
+                                # fitted regressor and overestimating the predicted first token, which refuses work
+                                # that would have fitted. 25 of the 34 residual recall skips at seed 4 were
+                                # queue-refused with a u that already fits the slack.
+                                queued_uncached_ahead=self._w.total(),
                                 remaining_s=o.deadline_abs() - t)
                 if not _rr["feasible"]:
                     RR.note_infeasible(self.counts, _qt)
@@ -1396,11 +1410,15 @@ class Live2Coordinator:
         # Tracked HERE, at the single point where a request id exists for every kind, rather than
         # at the four release sites, so the id W is keyed on is exactly the id the drain pops.
         # Keying on anything else is how an in-flight total drifts, which the note above records.
-        if self._share_admission:
-            _wq = SA.type_of_device(device_id)
-            if _wq is not None:
-                self._w.on_submit(rid, _wq, int(self._uncached_last_charged),
-                                  background=SA.is_background(kind))
+        # D187 r2: tracked UNCONDITIONALLY, no longer gated on share admission. The release
+        # re-check now reads W as its queue input, and an arm with the re-check but WITHOUT share
+        # admission would otherwise see W as 0, which UNDERSTATES the queue and is the UNSAFE
+        # direction: it would admit work that cannot make its deadline. Tracking is cheap and W is
+        # read only where needed, so arms with both switches off compute it and never consult it.
+        _wq = SA.type_of_device(device_id)
+        if _wq is not None:
+            self._w.on_submit(rid, _wq, int(self._uncached_last_charged),
+                              background=SA.is_background(kind))
         # ---- END D179 (1) to (3) block --------------------------------------------------------
         d = self.st.devices[device_id]
         # THE TRUE SUBMISSION STAMP (StudyLIVE2-harness addendum (a), from flash's branch). A
@@ -1780,8 +1798,7 @@ class Live2Coordinator:
             # good, which reads as "the floors are too tight" rather than as a bug. This also
             # catches a live request that settled without ever yielding a content token: an error,
             # a refusal, a timeout. Idempotent with the drain above.
-            if self._share_admission:
-                self._w.on_settled_without_first_token(str(sub.request_id))
+            self._w.on_settled_without_first_token(str(sub.request_id))
             # ---- END D179 (1) block -----------------------------------------------------------
             self._settle(sub, first_s, done_s, path, t, ct, self._score_of(sub, r),
                          http_status=r.get("http_status"))
@@ -1946,10 +1963,9 @@ class Live2Coordinator:
         # The LIVE drain, and the one D179 (1) specifies. Idempotent, so the settle drain below
         # cannot double-subtract. Fires only when a real backend exists, which is why the settle
         # drain is not optional: in a DRY cell this hook is never called at all.
-        if self._share_admission:
-            _rid = r.get("request_id") or getattr(r.get("sub"), "request_id", None)
-            if _rid:
-                self._w.on_first_token(str(_rid))
+        _rid = r.get("request_id") or getattr(r.get("sub"), "request_id", None)
+        if _rid:
+            self._w.on_first_token(str(_rid))
         # ---- END D179 (1) block ---------------------------------------------------------------
         sub = r.get("sub")
         if sub is None or sub.kind in ("piece", "whole") or not sub.opportunity_id:

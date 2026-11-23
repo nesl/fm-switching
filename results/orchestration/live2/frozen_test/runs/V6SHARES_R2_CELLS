@@ -1,0 +1,53 @@
+# D187 r2 QUEUE-REGISTER FIX. One cell per line: "arm n seed tag". Lines starting # are NOT run.
+#
+# RUN AFTER r1 s7 COMPLETES, so the r1 grid stays complete and comparable. Posted by the main flash
+# session under D187 overnight autonomy. Pre-registration: reports/prereg_queue_register_r2.md,
+# committed at 3ed47764 BEFORE this list.
+#
+# THE ARM IS A LABEL. covex-v6-state-shares-r2 is proved arm-side IDENTICAL to -r1; only the
+# coordinator differs. The four r1 cells stay VALID as this change's before-condition.
+#
+# THE MECHANISM, from the FIT'S OWN CODE rather than from a judgement. The release re-check
+# predicts a first token with the committed D162 model, and was fed
+# queued_uncached_ahead=self._uncached_in_flight. That counter DRAINS AT COMPLETION
+# (coordinator.py settle path), so a request stays counted through its whole decode. But
+# cost_model_gate_d162.py:97 builds the fitted regressor over the interval t_submit to
+# t_submit + first_token_s, summing intervals OPEN AT THE START INSTANT. That is submit-to-FIRST-
+# TOKEN work, which is the D179 W quantity the coordinator already tracks. The model was therefore
+# being fed a LARGER quantity than the one it was fitted on, which OVERESTIMATES the predicted
+# first token and REFUSES WORK THAT WOULD HAVE FITTED.
+#
+# WHY IT IS THE BINDING CONSTRAINT: of the 34 residual recall skips at r1 seed 4, only NINE were
+# refused by the size term; TWENTY-FIVE were refused by the QUEUE term with a u that already fits
+# the slack (seed 5: 7 size, 5 queue). Three prefix fixes were disqualified on measurement first.
+#
+# W IS NOW TRACKED UNCONDITIONALLY, because an arm with the re-check but WITHOUT share admission
+# would otherwise read W as 0, understating the queue, which is the unsafe direction.
+#
+# PRE-REGISTERED PASS CHECK, with its failure condition and a HARM BOUND:
+#   seeds 4 and 6 are the targets: release_infeasible_recall falls from 34 and 21;
+#     robot_pool_on_time rises from 95 (toward 118) and 92 (toward 107);
+#     check 2 retention rises from 0.7229 and 0.77 toward the 0.90 bar
+#   SEED 5 IS A CONTROL, NOT A TARGET: it already passes at 0.9773 and must NOT regress below 0.90
+#   HARM BOUND: ROBOT LATE MUST NOT EXCEED 10 AT ANY SEED (r1 had 2, 1, 5). A smaller queue input
+#     admits MORE, so if the model is optimistic the skips convert to LATE answers rather than
+#     on-time ones. A skip and a late answer score identically, but a late answer ALSO consumed
+#     engine time another request could have used, so that trade is not an improvement and will
+#     not be reported as one.
+#   FAILURE CONDITION: if the queue-refused skips do not fall, the mechanism is WRONG and is
+#     reported as wrong. The fix is not kept for being harmless.
+#   ABSENT-LINK CHECK: the alert path uses the same corrected quantity, so release_infeasible_alert
+#     should also fall. If NOTHING falls anywhere, the change reached no decision.
+#
+# PROOFS DONE, each audited against a value committed BEFORE the change: covex-v6-base
+# af8befb9420ad86a / 12,085 and covex-v6-state-uo 9a4be873eb3c5fba / 14,218, both byte-identical.
+# uo is the decisive one: it is check 2's comparator, and making W tracking unconditional touches
+# every arm, so an unchanged uo is what lets r2 be compared against the committed rung 2 at all.
+#
+# THE DRY TRAP, stated so the prescreen is not over-read: on a dry cell on_first NEVER FIRES (no
+# backend), so W drains only at settle and the two quantities nearly coincide. The dry proofs show
+# this change HARMLESS and show almost NOTHING about its size. The firing proof is these cells.
+covex-v6-state-shares-r2 16 4 _L3_epg_rq30
+covex-v6-state-shares-r2 16 5 _L3_epg_rq30
+covex-v6-state-shares-r2 16 6 _L3_epg_rq30
+covex-v6-state-shares-r2 16 7 _L3_epg_rq30
