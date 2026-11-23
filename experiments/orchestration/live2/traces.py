@@ -136,11 +136,42 @@ def upload_s(nbytes: int, uplink_mbps: float = UPLINK_MBPS, rtt_ms: float = RTT_
     return nbytes * 8.0 / (uplink_mbps * 1e6) + rtt_ms / 2000.0
 
 
+_FIXTURE_POOL: Optional[List[float]] = None
+
+
+def _fixture_score(key: str) -> float:
+    """A committed StudyORIN1 score, picked by a hash of the INVENTED instant id. D205 (3).
+
+    The number is real and the pairing is not, which is exactly what makes it a fixture. It is
+    deterministic in the instant id, so a synthetic trace stays reproducible, and it is drawn from
+    the committed dense set rather than invented so the VALUES have the right register and sign
+    (log P(Yes), so strictly negative) and an arm cannot be handed the maximum of the range by
+    accident, which is the defect D201 found.
+    """
+    global _FIXTURE_POOL
+    if _FIXTURE_POOL is None:
+        import data_sources as DS                                      # noqa: PLC0415
+        _FIXTURE_POOL = sorted({round(float(v["score"]), 6)
+                                for v in DS.orin_dense_scores().values()})
+        if not _FIXTURE_POOL:
+            raise RuntimeError("the committed StudyORIN1 dense set is empty; no fixture score")
+    return _FIXTURE_POOL[hashlib_int(key) % len(_FIXTURE_POOL)]
+
+
 def synthetic(*, n_dashcam: int = 2, n_robot: int = 2, duration_s: float = 60.0,
               seed: int = 1, upload_mode: str = "A", frames_dir: Optional[Path] = None,
               questions_per_session: int = 3, session_s: float = 430.0,
-              frame_bytes: int = int(E10A_NEXAR_Q90_MEDIAN_B)) -> Dict[str, Any]:
-    """A SYNTHETIC trace. Labelled as such everywhere it is used."""
+              frame_bytes: int = int(E10A_NEXAR_Q90_MEDIAN_B),
+              device_score_fixture: bool = False,
+              is_measurement: bool = False) -> Dict[str, Any]:
+    """A SYNTHETIC trace. Labelled as such everywhere it is used.
+
+    `device_score_fixture` attaches a committed score to each invented instant, for TESTS
+    ONLY and behind `allow_fixture_device_scores` (D205 (3)). Default off, so every existing
+    caller is unchanged and still gets `device_score=None`.
+    """
+    if device_score_fixture:
+        allow_fixture_device_scores(is_measurement, "traces.synthetic")
     rng = random.Random(seed)
     ev: List[Dict[str, Any]] = []
     frames_by_instant: Dict[str, str] = {}
@@ -179,17 +210,22 @@ def synthetic(*, n_dashcam: int = 2, n_robot: int = 2, duration_s: float = 60.0,
             # arm None for the whole device channel, and inar-vl and hybrid-llm RAISE. A
             # synthetic cell therefore cannot be used to run either published method, which is
             # the correct outcome and not a limitation to work around.
+            #
+            # D205 (3): a TEST may ask for fixture scores instead, behind the guard above. The
+            # value is a real committed score paired with an unreal instant, which is a fixture
+            # and is labelled one in the returned dict.
+            _ds = _fixture_score(opp) if device_score_fixture else None
             if upload_mode == "B":
                 ev.append(SC.make("monitor_offer", device_id=did, opportunity_id=opp,
                                   instant_id=iid, t_capture=round(t, 4),
                                   deadline_s=DASHCAM_L_S, frame_bytes=frame_bytes,
-                                  device_score=None))
+                                  device_score=_ds))
             else:
                 ev.append(SC.make("monitor_frame", device_id=did, opportunity_id=opp,
                                   instant_id=iid, t_capture=round(t, 4),
                                   t_arrive=round(t + upload_s(frame_bytes), 4),
                                   deadline_s=DASHCAM_L_S, frame_ref=ref,
-                                  frame_bytes=frame_bytes, device_score=None))
+                                  frame_bytes=frame_bytes, device_score=_ds))
             k += 1
             t = round(start + k * NEXAR_INSTANT_CADENCE_S, 4)
 
@@ -235,6 +271,7 @@ def synthetic(*, n_dashcam: int = 2, n_robot: int = 2, duration_s: float = 60.0,
 
     ev.sort(key=lambda e: (_sched(e), e["kind"]))
     return dict(label="SYNTHETIC", events=ev, ratio=ratio_label(n_dashcam, n_robot),
+                device_score_fixture=bool(device_score_fixture),
                 fairness_digest=fairness_digest(ev, upload_mode),
                 live1_trace_digest=live1_trace_digest(ev), seed=seed,
                 frames_by_instant=frames_by_instant,
@@ -243,7 +280,11 @@ def synthetic(*, n_dashcam: int = 2, n_robot: int = 2, duration_s: float = 60.0,
                 frame_files=len(written), constants=_SOURCES,
                 note=("SYNTHETIC TEST FIXTURE. The frame files are PLACEHOLDER BYTES, not "
                       "JPEGs, and no clip, session or question in this trace is real. Nothing "
-                      "produced from it is a measurement."))
+                      "produced from it is a measurement."
+                      + (" The DEVICE SCORES are FIXTURES too: committed StudyORIN1 values "
+                         "paired with invented instants (D205 (3))."
+                         if device_score_fixture else
+                         " It carries NO device score, so every arm that reads one raises.")))
 
 
 def hashlib_int(s: str) -> int:
@@ -305,6 +346,33 @@ def write(trace: Dict[str, Any], path: Any) -> Path:
                 note=trace.get("note"))
     SC.write_jsonl(p, [head] + trace["events"])
     return p
+
+
+class FixtureScoresRefused(RuntimeError):
+    """A measured run asked for FIXTURE device scores. D205 (3)."""
+
+
+def allow_fixture_device_scores(is_measurement: bool, where: str = "this run") -> None:
+    """The D205 (3) guard. Fixture device scores are a TEST FIXTURE and nothing else.
+
+    A SYNTHETIC trace's instants are invented, so no committed StudyORIN1 row belongs to any of
+    them and any score attached to one is a FIXTURE: a real number paired with an unreal instant.
+    That is fine for a legality or a determinism test, which assert the shape of what an arm emits,
+    and it is not fine for anything that produces a number.
+
+    So the guard is the ONE place the distinction is enforced, and it RAISES rather than degrading:
+    a measured run that asks for fixture scores stops. The failure this protects against is the
+    one D201 found, where a value that was never a score reached seven arms' decisions and was
+    read as the maximum of log P(Yes); a fixture quietly surviving into a measured cell would be
+    the same failure with a better-looking number.
+    """
+    if is_measurement:
+        raise FixtureScoresRefused(
+            "%s declares is_measurement=True and asked for FIXTURE device scores. A SYNTHETIC "
+            "trace's instants are invented, so a score attached to one is a fixture and may not "
+            "reach a measured cell (D205 (3)). Use a REAL trace slice from a development seed "
+            "(never 1 to 3, never HOLDOUT), whose instants carry their own committed StudyORIN1 "
+            "score." % where)
 
 
 def require_fake_server(trace: Dict[str, Any], server_kind: str) -> None:

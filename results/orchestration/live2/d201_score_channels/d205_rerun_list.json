@@ -1,0 +1,272 @@
+{
+ "label": "D205 step 2e: the rerun list for the three fixed arms, at EVERY condition they were committed in, enumerated FROM the committed cells. For the H100, TO RUN AFTER THE POLICY CELLS. A POSTED LIST, not a result: nothing here has been rerun.",
+ "sha": "8986f5931f6578727ae6495973c9f49683becfa3",
+ "is_measurement": false,
+ "arms": [
+  "inar-vl",
+  "hybrid-llm",
+  "confidence-cascade"
+ ],
+ "arm_name_strings": "--arm inar-vl / --arm hybrid-llm / --arm confidence-cascade. `published:...` is a REPORT LABEL only, emitted at policy/audit/leaderboard.py:134; the runner takes the bare name.",
+ "SEEDS_ARE_A_NEW_SEED_SET_NOT_A_REPRODUCTION": {
+  "statement": "seeds 5, 6 and 7 were NEVER RUN for inar-vl or hybrid-llm anywhere: every live2 cell of theirs is at seed 4 or seed 0. So 'seeds 4 to 7' adds three seeds that have no committed counterpart, and only the seed-4 column is a comparison against a superseded number. The other three are new evidence and must be reported as such, not as a reproduction.",
+  "confidence-cascade": "different: it IS in the frozen grid at seeds 4 to 7 (baseline_matrix_table.json seeds_present [4,5,6,7]), so all four of its seeds do have a superseded counterpart.",
+  "seeds_1_to_3": "RESERVED FOR ROUND 1 (policy/audit/_harness.py:23-25). Not used.",
+  "holdout": "none for any of the three. The only HOLDOUT in baseline_matrix_table.json is held_out.arms = covex-v6-state-shares and covex-v6-fair-shares."
+ },
+ "READ_THIS_BEFORE_SCHEDULING_ANY_OF_IT": {
+  "stop_condition": "two of the three arms did not move. inar-vl's escalation rate is 1.0 before and 1.0 after; hybrid-llm's is 0.0 before and 0.0 after. See d205_escalation_rate.json.",
+  "consequence_for_this_list": "confidence-cascade's cells are worth rerunning now: it moved 0.9165 to 0.284, so a rerun measures a different policy than the superseded cells did. inar-vl's and hybrid-llm's cells are listed for completeness and SHOULD NOT BE SCHEDULED YET: at a single operating point each arm is pinned at an extreme, so a rerun would spend H100 time reproducing always-cloud and device-only under two other names. What those two need first is a knob ruling (inar-vl's quality_floor and gain_per_second; hybrid-llm's routing threshold, which its card says is swept), not a cell.",
+  "priority": "AFTER the policy cells either way, per D205 step 4: this work must not delay the rung-3 and rung-4 build or the H100."
+ },
+ "A_LIVE_vllm_32BI": {
+  "knobs_as_recorded": "ratio 50:50, upload_mode A, memory_setting tight, gpu_kv_tokens 62944, host_tier_gib 27.0, host_tier_tokens 110630, decision_period_s 0.1, targets dashcam L=1.0 p=0.25 per_device and robot L=5.0 p=0.9 pooled, vLLM 32BI with --enable-prefix-caching and --kv-offloading-backend native --kv-offloading-size 27, calibration live2_calibration_dense_jpeg.json sha 52f25b40 FINAL. PREFIX CACHING WAS ON in every committed cell and the rerun must state the same.",
+  "cells": [
+   {
+    "id": "L1",
+    "arm": "hybrid-llm",
+    "n": 8,
+    "run_s": 120.0,
+    "committed_seed": 0,
+    "committed_dir": "results/orchestration/live2/pilot/runs5/hybrid-llm_n8_s0_600s_h27_validity120/",
+    "rerun_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "schedule": "HOLD pending the knob ruling"
+   },
+   {
+    "id": "L2",
+    "arm": "hybrid-llm",
+    "n": 8,
+    "run_s": 600.0,
+    "committed_seed": 0,
+    "committed_dir": "results/orchestration/live2/pilot/runs5/hybrid-llm_n8_s0_600s_h27/",
+    "committed_head": "263b091",
+    "rerun_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "schedule": "HOLD pending the knob ruling"
+   },
+   {
+    "id": "L3",
+    "arm": "hybrid-llm",
+    "n": 10,
+    "run_s": 600.0,
+    "committed_seed": 0,
+    "committed_dir": "results/orchestration/live2/pilot/runs5/hybrid-llm_n10_s0_600s_h27/",
+    "committed_head": "263b091",
+    "rerun_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "schedule": "HOLD pending the knob ruling"
+   },
+   {
+    "id": "L4",
+    "arm": "hybrid-llm",
+    "n": 14,
+    "run_s": 600.0,
+    "committed_seed": 0,
+    "committed_dir": "results/orchestration/live2/pilot/runs5/hybrid-llm_n14_s0_600s_h27/",
+    "committed_head": "227a30a",
+    "rerun_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "flag": "this cell ran on a HEAD including the placement commit e924005 while L2 and L3 did not, so the committed ladder already straddles a change",
+    "schedule": "HOLD pending the knob ruling"
+   }
+  ],
+  "note": "inar-vl and confidence-cascade have NO live cell. hybrid-llm at 12 devices is owed and was never run: the pilot5 driver's placement pause did not pause and silently skipped it. That is a gap, not a committed cell."
+ },
+ "B_DRY_live2": {
+  "cells": [
+   {
+    "id": "D1",
+    "arms": [
+     "inar-vl",
+     "hybrid-llm",
+     "confidence-cascade"
+    ],
+    "n": 8,
+    "run_s": 600.0,
+    "knobs": "ratio 50:50, mode A, dry, GPU_KV 62944, HOST_GIB 27.0, cost_model pol4, h_s 0.5, mu_mode ewma",
+    "committed_file": "results/orchestration/live2/covex_harden/leaderboard_published_s4.json",
+    "committed_seed": 4,
+    "rerun_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "schedule": "confidence-cascade now; the other two HOLD"
+   },
+   {
+    "id": "D2",
+    "arms": [
+     "inar-vl",
+     "hybrid-llm",
+     "confidence-cascade"
+    ],
+    "n": 16,
+    "run_s": 600.0,
+    "knobs": "as D1",
+    "committed_file": "same",
+    "committed_seed": 4,
+    "rerun_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "schedule": "confidence-cascade now; the other two HOLD"
+   },
+   {
+    "id": "D3",
+    "arms": [
+     "inar-vl",
+     "hybrid-llm",
+     "confidence-cascade"
+    ],
+    "n": 8,
+    "run_s": 300.0,
+    "knobs": "ratio 50:50, mode A, dry, 20 arms including llf",
+    "committed_file": "results/orchestration/live2/baselines_published/arm_independence.json",
+    "committed_seed": 4,
+    "rerun_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "note": "is_measurement=true, and it holds the action-sequence digests behind the D130 collapse claim, so it must be recomputed whatever is decided about the other two",
+    "schedule": "now, for all three"
+   },
+   {
+    "id": "D4",
+    "arms": [
+     "inar-vl",
+     "hybrid-llm",
+     "confidence-cascade"
+    ],
+    "n": 16,
+    "run_s": 1200.0,
+    "knobs": "ratio 40:40:20, dry, lh_req, ss2",
+    "committed_files": [
+     "results/orchestration/live2/frozen_test/baseline_prescreen.json",
+     "results/orchestration/live2/racefix/proof1_byte_identity.json",
+     "results/orchestration/live2/v5/patch1_byte_identity_proof.json"
+    ],
+    "committed_seed": 4,
+    "rerun_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "note": "this is the cell the step 2d decision diff was run on, so seed 4 is already in hand",
+    "schedule": "done at seed 4 by the diff; seeds 5 to 7 with the rest"
+   },
+   {
+    "id": "D5",
+    "arms": [
+     "inar-vl"
+    ],
+    "n": 16,
+    "run_s": 1200.0,
+    "knobs": "as D4",
+    "committed_file": "results/orchestration/live2/frozen_test/baseline_prescreen_seed0_exclusions.json",
+    "committed_seed": 0,
+    "rerun_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "schedule": "HOLD"
+   },
+   {
+    "id": "D6",
+    "arms": [
+     "confidence-cascade"
+    ],
+    "n": 16,
+    "run_s": 1200.0,
+    "knobs": "the frozen grid",
+    "committed_file": "results/orchestration/live2/frozen_test/baseline_matrix_table.json",
+    "committed_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "rerun_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "note": "confidence-cascade is in scored_arms, so this is the one arm of the three whose every seed has a superseded counterpart and whose rerun is a true reproduction",
+    "schedule": "now"
+   },
+   {
+    "id": "D7",
+    "arms": [
+     "confidence-cascade"
+    ],
+    "n": 16,
+    "run_s": 1200.0,
+    "knobs": "the frozen headline, measured-warm device latency",
+    "committed_files": [
+     "results/orchestration/live2/frozen_test/frozen_headline_n16_4seed_d155_measured_warm.json",
+     "results/orchestration/live2/frozen_test/frozen_headline_n16_s4_d155_L3_measured_warm.json"
+    ],
+    "committed_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "rerun_seeds": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "schedule": "now"
+   }
+  ],
+  "derived_recompute_not_rerun": [
+   {
+    "file": "results/orchestration/live2/covex_harden/robot_denominators.json",
+    "why": "a post-processor over D1 and D2"
+   },
+   {
+    "file": "results/orchestration/live2/frozen_test/baseline_matrix_table.json",
+    "why": "its SWEEP_ARMS header records the 2026-11-20 ruling that inar-vl is identical to always-cloud-fcfs so only always-cloud runs. THAT RULING RESTS ON THE DEFECT and must be revisited against the step 2d diff before the sweep list is reused."
+   }
+  ]
+ },
+ "C_NOT_to_be_rerun": {
+  "the_offline_simulator_and_the_StudyB_smoke": "sim/run.py:237-240 and smoke/replay.py:76-85 both feed the real measured scores, so those cells were never defective. Rerunning them would spend time to reproduce themselves.",
+  "live1_stub": "declared not a measurement in its own file"
+ },
+ "_provenance": {
+  "git_commit": "8986f5931f6578727ae6495973c9f49683becfa3",
+  "script": "none: enumerated from the committed artefacts",
+  "model": "none",
+  "device": "cpu",
+  "n": 11,
+  "timestamp": "2026-11-23T14:16:39.449079"
+ }
+}

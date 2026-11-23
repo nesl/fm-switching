@@ -22,7 +22,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 LIVE2 = HERE.parent
 ROOT = LIVE2.parents[2]
-for _p in (str(LIVE2), str(ROOT / "experiments/orchestration/live"),
+for _p in (str(HERE), str(LIVE2), str(LIVE2 / "fleet"),
+           str(ROOT / "experiments/orchestration/live"),
            str(ROOT / "experiments/orchestration/baselines"),
            str(ROOT / "experiments/lib")):
     if _p not in sys.path:
@@ -34,6 +35,7 @@ import calib as CALIB                                                 # noqa: E4
 import cstate as CS                                                   # noqa: E402
 import schema as SC                                                   # noqa: E402
 import traces as T                                                    # noqa: E402
+import _realslice as RS                                               # noqa: E402
 from coordinator import Live2Coordinator, Logs                        # noqa: E402
 from interface import Action, Observation, Policy, RecallAction        # noqa: E402
 
@@ -43,9 +45,26 @@ HOST_TOK = 48_000
 WINDOW = 60.0
 
 
-def _trace(seed=1, mode="A", nd=2, nr=2, duration=WINDOW, frames=None):
+def _trace(seed=4, mode="A", nd=2, nr=2, duration=WINDOW, frames=None):
+    """The SYNTHETIC fixture trace, WITH FIXTURE DEVICE SCORES (D205 (3)).
+
+    The default seed was 1, which is RESERVED FOR ROUND 1; it is a development seed now. The
+    fixture scores are what let a test run an arm that reads a device score at all, and they are
+    allowed here and nowhere else: `traces.allow_fixture_device_scores` raises for any caller that
+    declares `is_measurement`, which `test_the_fixture_score_guard_refuses_a_measured_run` proves.
+    """
     return T.synthetic(n_dashcam=nd, n_robot=nr, duration_s=duration, seed=seed,
-                       upload_mode=mode, frames_dir=frames)
+                       upload_mode=mode, frames_dir=frames,
+                       device_score_fixture=True, is_measurement=False)
+
+
+def _real(seed=0, mode="A", nd=4, duration=300.0):
+    """A REAL trace slice from a development seed, with the committed per-instant device scores.
+
+    D205 (3): the ALL-ARM legality and fairness tests run on this, not on a synthetic trace, so
+    that the arms which read a device score are asserted against instants that are real.
+    """
+    return RS.real_slice(seed=seed, n_devices=nd, duration_s=duration, upload_mode=mode)
 
 
 def _arm(name):
@@ -134,12 +153,20 @@ class TestA_SchemaAndLegality(unittest.TestCase):
             self.assertEqual(back.live1_trace_digest, "l" * 32)
 
     def test_every_arm_emits_only_legal_actions(self):
-        tr = _trace()
+        # D205 (3): a REAL trace slice from a development seed. Every monitor instant carries its
+        # committed StudyORIN1 device score, so the arms that read one are exercised here rather
+        # than raising on a synthetic trace that has no score to give them.
+        tr = _real()
         with tempfile.TemporaryDirectory() as d:
             for name in A.ARM_NAMES:
                 if not _live_runnable(name):
                     continue
-                a, co, res = _run(name, tr, Path(d) / name)
+                # D205 (3): the WINDOW must cover the slice, or the coordinator stops
+                # before the slice's recall questions arrive and `device-only`, which
+                # never offloads a monitor instant, decides nothing at all. A slice that
+                # cannot exercise an arm is not a cell that arm passed.
+                a, co, res = _run(name, tr, Path(d) / name,
+                                     window=tr["duration_s"])
                 self.assertEqual(res["n_errors"], 0, name)
                 self.assertGreater(res["n_decisions"] + res["n_requests"], 0, name)
 
@@ -194,19 +221,72 @@ class TestB_Fairness(unittest.TestCase):
         self.assertEqual(T.fairness_digest(pull, "B"), FT.fairness_digest(precs, "B"))
 
     def test_identical_opportunity_stream_digest(self):
-        """The per-arm check on the stream the coordinator actually built."""
-        tr = _trace()
+        """The per-arm check on the stream the coordinator actually built.
+
+        D205 (3): on the REAL slice, for the same reason as the legality test.
+        """
+        tr = _real()
         seen = set()
         with tempfile.TemporaryDirectory() as d:
             for name in A.ARM_NAMES:
                 if not _live_runnable(name):
                     continue
-                _a, co, _res = _run(name, tr, Path(d) / name)
+                # D205 (3): the WINDOW must cover the slice, or the coordinator stops
+                # before the slice's recall questions arrive and `device-only`, which
+                # never offloads a monitor instant, decides nothing at all. A slice that
+                # cannot exercise an arm is not a cell that arm passed.
+                _a, co, _res = _run(name, tr, Path(d) / name,
+                                     window=tr["duration_s"])
                 seen.add(_opp_digest(co))
         self.assertEqual(len(seen), 1, f"arms saw different opportunity streams: {seen}")
 
     def test_digest_changes_with_the_stream(self):
-        self.assertNotEqual(_trace(seed=1)["fairness_digest"], _trace(seed=2)["fairness_digest"])
+        # seeds 4 and 5, not 1 and 2: 1 to 3 are reserved for round 1 (D205 (3)). What this
+        # asserts is unchanged, that the digest is a function of the stream.
+        self.assertNotEqual(_trace(seed=4)["fairness_digest"], _trace(seed=5)["fairness_digest"])
+
+    def test_the_real_slice_carries_a_committed_score_on_every_instant(self):
+        """D205 (3): the slice's own precondition, asserted rather than assumed."""
+        tr = _real()
+        mon = [e for e in tr["events"] if e["kind"] in ("monitor_frame", "monitor_offer")]
+        self.assertGreater(len(mon), 0)
+        self.assertEqual(tr["n_monitor_instants"], len(mon))
+        # a slice that cannot exercise an arm is not a cell that arm passed: `device-only` never
+        # offloads a monitor instant, so without recall questions it decides nothing at all
+        self.assertGreaterEqual(tr["n_recall_questions"], 2, "the slice cannot exercise every arm")
+        for e in mon:
+            self.assertIsNotNone(e["device_score"], e["opportunity_id"])
+            self.assertLess(float(e["device_score"]), 0.0,
+                            "log P(Yes) is strictly negative; 0.0 is the maximum of the range "
+                            "and is the value this whole change exists to remove")
+        for bad in (1, 2, 3):
+            with self.assertRaises(ValueError):
+                RS.real_slice(seed=bad)
+
+    def test_the_fixture_score_guard_refuses_a_measured_run(self):
+        """D205 (3): PROVE THE GUARD RAISES.
+
+        Fixture scores are a real committed value paired with an invented instant. They are fine
+        for a legality test and must never reach a cell, so the guard raises on `is_measurement`.
+        """
+        with self.assertRaises(T.FixtureScoresRefused):
+            T.synthetic(n_dashcam=1, n_robot=0, duration_s=5.0, seed=4,
+                        device_score_fixture=True, is_measurement=True)
+        with self.assertRaises(T.FixtureScoresRefused):
+            T.allow_fixture_device_scores(True, "a measured cell")
+        T.allow_fixture_device_scores(False, "a test")
+        ok = T.synthetic(n_dashcam=1, n_robot=0, duration_s=5.0, seed=4,
+                         device_score_fixture=True, is_measurement=False)
+        self.assertTrue(ok["device_score_fixture"])
+        mon = [e for e in ok["events"] if e["kind"] == "monitor_frame"]
+        self.assertGreater(len(mon), 0)
+        for e in mon:
+            self.assertIsNotNone(e["device_score"])
+            self.assertLess(float(e["device_score"]), 0.0)
+        plain = T.synthetic(n_dashcam=1, n_robot=0, duration_s=5.0, seed=4)
+        self.assertFalse(plain["device_score_fixture"])
+        self.assertTrue(all(e["device_score"] is None for e in plain["events"]
+                            if e["kind"] == "monitor_frame"))
 
 
 class _FutureReader(Policy):
