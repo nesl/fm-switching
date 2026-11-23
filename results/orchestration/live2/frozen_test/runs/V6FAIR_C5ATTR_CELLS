@@ -34,3 +34,24 @@ covex-v6-fair-c5attr 16 4 _L3_epg_rq30
 covex-v6-fair-c5attr-gain0 16 4 _L3_epg_rq30
 covex-v6-fair-c5attr 16 5 _L3_epg_rq30
 covex-v6-fair-c5attr-gain0 16 5 _L3_epg_rq30
+#
+# APPENDED 2026-11-23 by the main flash session, on the user's instruction, SAME CODE as the lines
+# above so this needs only a re-gate and no new proof: the gain-0 negative control at s6 and s7.
+#
+# WHY, and it corrects a call I made earlier tonight. When the H100 asked whether to add these, I
+# declined on GPU economy, arguing that covex-v6-fair-c5attr-OFF is proved byte-identical to the
+# committed covex-v6-state-uo-c5attr base, so a difference at s6 or s7 against that base is already
+# attributable to the feed. That is true but it is the WEAKER comparison. The gain-0 arm is the
+# stronger control because it leaves BOTH consumers live and instrumented and removes only the
+# quantity under test, so a difference cannot be the arm wrapper, the registration, or any other
+# plumbing. The D185 attribution at s6 and s7 currently rests on the weaker one, and the user has
+# ruled that the stronger control is worth the GPU.
+#
+# WHAT IT WILL SETTLE. Scored by the committed pre-registered scorer, rung 3 passes check 2 at all
+# four seeds (retention 1.061 / 0.989 / 1.063 / 1.016) and check 3 at all four, but FAILS check 1 at
+# s4, s6 and s7 (deltas against base -0.0013, -0.0299, -0.0788). At s4 and s5 the gain contrast
+# shows the ordering feed roughly DOUBLING pooled dashcam on-time against its own control (0.507
+# against 0.213, and 0.492 against 0.246). These two cells extend that contrast to the two seeds
+# where check 1 fails by more than noise, which is exactly where the attribution matters most.
+covex-v6-fair-c5attr-gain0 16 6 _L3_epg_rq30
+covex-v6-fair-c5attr-gain0 16 7 _L3_epg_rq30
