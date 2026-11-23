@@ -27,7 +27,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "experiments/analysis/episodic"))
+sys.path.insert(0, str(ROOT / "experiments/orchestration/live2"))
 import episodic_lib as E  # noqa: E402  robot, SS, cell_dir, read_jsonl
+import d179_rung2_verdict as V  # noqa: E402  per-episode on-time attainment (D179 (6) definition)
 
 SUPERSEDED = json.load(open(ROOT / "results/orchestration/live2/d201_score_channels/"
                             "d201_superseded_cells.json"))["the_seven_readers"].keys()
@@ -71,6 +73,28 @@ def robot_d176(cell, path, std_correct, std_n):
     over_rows = [r for r in rr if r.get("opportunity_id") in over]
     over_correct = sum(1 for r in over_rows if r.get("standing_correct_by_deadline"))
     return std_correct - over_correct, std_n - len(over_rows)
+
+
+def dash_attainment(path):
+    """Dashcam SERVICE metric, scored by d179_rung2_verdict.py's definition (D179 (6), check 1):
+    per-episode on-time CLOUD alert attainment. For each alert episode (key (play_id, round((t_local
+    - 3.0)/0.5)//21)) count the on-time cloud alert instants under the committed delivery rule
+    (_within at L=1.0 s, with the D144/D146 passes; device_on_time never added) over the flat D178
+    denominator of 19 (positions 2 to 20 of 21); return the MEAN per-episode attainment and the
+    fraction of episodes at or above the 0.25 target. Separate from the D192 thresholded correctness.
+    This calls d179's own functions so the number is scored by that definition, not a copy of it."""
+    outs = V._read_jsonl(os.path.join(path, "outcomes.jsonl"))
+    reqs = V._read_jsonl(os.path.join(path, "request.jsonl")) \
+        or V._read_jsonl(os.path.join(path, "requests.jsonl"))
+    if not outs:
+        return None, None
+    delivered = V._committed_delivery(outs, reqs)
+    mons = [o for o in delivered.values() if V._type_of(o.get("device_id")) == "alert"]
+    if not mons:
+        return None, None
+    blk = V._alert_episode_block(mons, lambda o: V._within(o, V.DEADLINE_S["alert"]))
+    pe = blk["per_episode_PRIMARY"]
+    return pe["mean_attainment"], pe["fraction_of_episodes_at_or_above_target"]
 
 
 def collect_units(arm_raw, seed, device_only=False):
@@ -156,6 +180,7 @@ def per_cell(arm_raw, seed):
     rk, rn, racc = E.robot_correct_in_time(cell)
     dk, dn = robot_d176(cell, path, rk, rn)
     sk, sn, sacc, _, _ = E.ss_correct_in_time(path)
+    attain, frac025 = dash_attainment(path)
     # robot device-only floor / robot on time / single-shot within 2 s / dashcam attainment
     return {
         "cell": os.path.basename(path), "used_rerun": used_rerun,
@@ -165,6 +190,7 @@ def per_cell(arm_raw, seed):
         "robot_on_time_frac": sweep.get("robot_pool_fraction"),
         "ss_correct": sk, "ss_n": sn, "ss_acc": sacc,
         "ss_within_2s_frac": sweep.get("ss_pool_fraction"),
+        "dash_ontime_attain": attain, "dash_frac_ep_ge_025": frac025,
         "pooled_correct": (rk + sk if rk is not None and sk is not None else None),
         "pooled_n": (rn + sn if rn is not None and sn is not None else None),
     }
@@ -210,6 +236,10 @@ def main():
                      "robot_correct": rk, "robot_n": n, "robot_acc": acc,
                      "robot_d176_correct": rk, "robot_d176_n": n, "robot_d176_acc": acc,
                      "ss_correct": sk, "ss_n": sn, "ss_acc": (sk / sn if sn else None),
+                     # device-only delivers no on-time CLOUD alerts, so its cloud service attainment
+                     # is 0 by definition (the device alert stream is the mAP's device floor, not an
+                     # on-time cloud fraction).
+                     "dash_ontime_attain": 0.0, "dash_frac_ep_ge_025": 0.0,
                      "pooled_correct": (rk + sk if rk is not None else None),
                      "pooled_n": (n + sn if n is not None else None)})
 
@@ -221,7 +251,8 @@ def main():
     # four-seed means + csv
     COLS = ["arm", "seed", "cell", "used_rerun", "robot_correct", "robot_n", "robot_acc",
             "robot_d176_correct", "robot_d176_n", "robot_d176_acc", "robot_on_time_frac",
-            "ss_correct", "ss_n", "ss_acc", "ss_within_2s_frac", "pooled_correct", "pooled_n"]
+            "ss_correct", "ss_n", "ss_acc", "ss_within_2s_frac",
+            "dash_ontime_attain", "dash_frac_ep_ge_025", "pooled_correct", "pooled_n"]
     FIGDIR.mkdir(parents=True, exist_ok=True)
     with open(FIGDIR / "table1.csv", "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=COLS)
@@ -233,7 +264,7 @@ def main():
     agg = defaultdict(lambda: defaultdict(list))
     for r in rows:
         for c in ("robot_acc", "robot_d176_acc", "robot_on_time_frac", "ss_acc",
-                  "ss_within_2s_frac"):
+                  "ss_within_2s_frac", "dash_ontime_attain", "dash_frac_ep_ge_025"):
             if r.get(c) is not None:
                 agg[r["arm"]][c].append(r[c])
         if r.get("pooled_correct") is not None and r.get("pooled_n"):
@@ -248,7 +279,8 @@ def main():
            "dsmap": git_sha("experiments/analysis/early1/dsmap.py"),
            "dashcam_episodic": git_sha("experiments/analysis/episodic/dashcam_episodic.py")}
     means = {a: {c: mean(a, c) for c in ("robot_acc", "robot_d176_acc", "robot_on_time_frac",
-                                         "ss_acc", "ss_within_2s_frac", "pooled_frac")}
+                                         "ss_acc", "ss_within_2s_frac", "pooled_frac",
+                                         "dash_ontime_attain", "dash_frac_ep_ge_025")}
              for a in agg}
     for a in means:
         means[a]["dashcam_delivered_mAP_EVAL"] = delivered.get(a)
@@ -333,11 +365,11 @@ def write_md(means, sha, dropped, dash):
     A("Columns: robot correct-by-deadline (correct by 3 s, cloud if on time else device); robot D176 "
       "(same, excluding the over-32k context-refusal recalls); single-shot correct by 2 s (StudySS2); "
       "pooled correct-in-time over robot and single-shot units; dashcam delivered-stream Nexar "
-      "challenge mAP (D199, on-time cloud only, EVAL); and the on-time service columns. The dashcam "
-      "D192 per-episode attainment is beside the mAP and is NOT part of the claim.")
+      "challenge mAP (D199, on-time cloud only, EVAL); the on-time service columns; and the dashcam "
+      "per-episode on-time attainment SERVICE columns.")
     A("")
-    A("| arm | robot | robot D176 | single-shot | pooled | dashcam mAP (EVAL) | robot on-time | SS within 2s | dash attain (D192) |")
-    A("|---|---|---|---|---|---|---|---|---|")
+    A("| arm | robot | robot D176 | single-shot | pooled | dashcam mAP (EVAL) | robot on-time | SS within 2s | dash per-episode on-time attainment | dash episodes >= 0.25 |")
+    A("|---|---|---|---|---|---|---|---|---|---|")
     order = sorted(means, key=lambda a: -(means[a]["pooled_frac"] or 0))
     for a in order:
         m = means[a]
@@ -346,12 +378,19 @@ def write_md(means, sha, dropped, dash):
         A(f"| {a} | {f(m['robot_acc'])} | {f(m['robot_d176_acc'])} | {f(m['ss_acc'])} | "
           f"{f(m['pooled_frac'])} | {f(m.get('dashcam_delivered_mAP_EVAL'))} | "
           f"{f(m['robot_on_time_frac'])} | {f(m['ss_within_2s_frac'])} | "
-          f"{f(m.get('dashcam_episode_attain_D192'))} |")
+          f"{f(m.get('dash_ontime_attain'))} | {f(m.get('dash_frac_ep_ge_025'))} |")
     A("")
     A("Dashcam is a ranking metric (challenge mAP) with no per-unit correctness, so it is not pooled "
-      "into the unit count; the pooled column is robot and single-shot units only. The D192 column is "
-      "the thresholded per-episode attainment, kept beside the mAP and labelled not part of the "
-      "claim (D199).")
+      "into the unit count; the pooled column is robot and single-shot units only.")
+    A("")
+    A("**Dashcam per-episode on-time attainment** is the dashcam SERVICE metric, scored by "
+      "d179_rung2_verdict.py's definition (D179 (6) check 1): for each alert episode, the count of "
+      "on-time CLOUD alert instants (committed delivery rule, L = 1.0 s, D144/D146 passes; device "
+      "on-time is never added) over the flat D178 denominator of 19 (positions 2 to 20 of the "
+      "21-frame episode), meaned over episodes; the next column is the fraction of episodes at or "
+      "above the 0.25 target (D178 (1), the scorer's p_dash). This is SEPARATE from the D192 "
+      "thresholded episode correctness. Device-only has no on-time cloud alerts, so its attainment "
+      "is 0 by definition.")
     A("")
     A("## Paired question-clustered CIs (correct-in-time diff, 2000 reps, seed 0)")
     A("")
