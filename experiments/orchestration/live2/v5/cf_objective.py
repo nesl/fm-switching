@@ -293,6 +293,241 @@ def p_device_on_time(deadline_s: float, wait_s: Optional[float] = None, *,
 
 
 # ---------------------------------------------------------------------------
+# D191 (1): THE COMPARISON, RULED BY THE USER. ONE comparison decides, and both of its sides are
+# COUNTS of expected on-time cloud answers, each device weighted by its own per-device deficit
+# weight (D185: w_d = 1 + 2.0 * shortfall_d / target_d):
+#
+#     deviate if and only if   (weighted gain - weighted harm)  >  w_d * MARGIN_CF
+#     MARGIN_CF = 0.6582 ON-TIME ANSWERS                        (D177 (3), `attainment_margin`)
+#
+# THERE IS NO DIVISION BY THE NUMBER SERVED, and that is the part a reader has to get right,
+# because the draft of `attainment_delta` divided by it. THE TARGET NORMALISATION ALREADY LIVES
+# INSIDE w_d (`shortfall_d / target_d`, D185, D178 (2)), so dividing the gain by the window as
+# well normalises TWICE. What that does is not conservatism: a per-decision attainment RATE moves
+# by about 1 / served, roughly 8e-4 on a 1,200-instant window, against a bar of 0.65824 - three
+# orders of magnitude down - so the left-hand side can never reach the bar and the gate NEVER
+# OPENS. A gate that never opens is CLAUDE.md Rule 2's `unscorable`, it produces a believable
+# null rather than a crash, and no byte-identity digest can see it. The division is therefore
+# GONE from this function rather than guarded.
+#
+# THE exact-primary / margin-primary QUESTION IS SETTLED AND DISSOLVED by the same ruling, and
+# the concern that raised it is recorded here as RESOLVED rather than deleted. The draft carried
+# `LEX_READING_DEFAULT` with two readings and a comment that they "behave oppositely": under a
+# margin on the PRIMARY key, per-decision attainment deltas would sit far below MARGIN_CF and the
+# primary key would be INERT, which is the opposite of lexicographic. That concern was right
+# about the arithmetic and wrong about the premise. D191 (1) rules that ONE comparison decides,
+# and that any secondary key breaks EXACT ties only. A tie-break that fires only on exact
+# equality cannot be widened by a margin, so there is no second reading to choose and NO SWITCH
+# IS OFFERED: `LEX_READINGS` and `LEX_READING_DEFAULT` are deliberately absent, because a switch
+# for a settled question is how a superseded reading comes back.
+#
+# ---------------------------------------------------------------------------
+# THE CURRENCY FLIP IS NOT IN THIS COMMIT, AND THAT IS A MEASUREMENT AND NOT AN OMISSION.
+#
+# D177 (1) also replaces the CURRENCY of `option_value` and `device_only_value`: w * P(on time)
+# instead of expected correctness. That edit is NOT here, because converting this module alone
+# makes the arithmetic INCONSISTENT at its only live consumer, and the numbers are these:
+#
+#   `cf_planner.plan_state` scores every candidate as
+#        w * p_question * acc * (p_warm - p_cold)  -  harm
+#   with `acc = table["cloud_D2"] = 0.250` computed INLINE (cf_planner.py, plan_state's `gain`),
+#   not through `option_value`. So converting `option_value` converts the HARM and leaves that
+#   GAIN in correctness units, and the subtraction mixes two currencies - the exact error D177
+#   exists to prevent.
+#
+#   MEASURED, with one displaced on-time answer at w = 1, through the two live callers:
+#     arms_v6state._harm_warm (acc_cloud 0.25, acc_device 0.071429)   0.178571 -> 1.000000, 5.6x
+#     cf_protect_defer.harm_on_time (acc_cloud 1.0, acc_device 0.0)   1.000000 -> 1.000000, 1.0x
+#   RUNG 4 DOES NOT NEED THE FLAG: it already gets on-time units from its OWN arguments, which is
+#   what `cf_protect_defer` says it does and is now checked rather than believed. Rung 2 and
+#   rung 3 do need it, and they are the ones whose gain is unconverted. `plan_state`'s HOLD_BACK
+#   candidate is valued at `harm_warm` ITSELF, so it would inflate by that same 5.6x against an
+#   unchanged gain.
+#
+# So the flip is owed, and it is owed TOGETHER WITH plan_state's gain and the removal of the
+# value reader's accuracy factor (D177 (2)), in one commit, on a base another session owns. What
+# is landed here is the part that is provably DECISION-NEUTRAL: four functions that nothing in
+# the decision path called before, and one committed constant. `option_value` and
+# `device_only_value` are untouched below, so no arm's arithmetic moves.
+LEX_READING = ("settled by user ruling D191 (1): ONE comparison decides, in counts of on-time "
+               "cloud answers; a secondary key breaks EXACT ties only")
+LEX_READING_SUPERSEDED_CONCERN = (
+    "the draft offered 'exact-primary' against 'margin-primary' and warned they behave "
+    "oppositely, because a margin on a window-NORMALISED primary key would leave it inert. "
+    "RESOLVED, not deleted: D191 (1) removes the window normalisation from the comparison (it "
+    "lives inside w_d) and confines the secondary key to exact ties, so neither reading survives "
+    "as a choice")
+CURRENCY_FLIP_STATUS = (
+    "NOT IN THIS COMMIT. D177 (1)'s conversion of option_value and device_only_value is owed "
+    "together with cf_planner.plan_state's inline gain (which carries acc = 0.250) and the "
+    "removal of the value reader (D177 (2)); converting this module alone would make plan_state "
+    "subtract on-time-unit harm from correctness-unit gain and would inflate harm_warm and "
+    "HOLD_BACK by 5.6x against an unchanged gain. Measured, not assumed; see the note above.")
+
+# THE a_D2_DEV FACTOR, NOT RETYPED FROM A COMMENT. It is a committed constant whose authoritative
+# declaration is `v5/margin_cf_d169.py:22`, the script that COMPUTED MARGIN_CF: its line 92 is
+# `error = A_D2_DEV * abs(p_hat - 1[on time])` and its line 117 sets
+# `margin_cf = error_p90_overall`. So the committed 0.16456 is a_D2_DEV times a p90 of
+# |P_hat - outcome|, and dividing it by a_D2_DEV returns that p90, which is a PROBABILITY and so
+# is already in on-time units. That is the whole of D177 (3)'s arithmetic and it introduces no
+# number (D154 (2)). It is not imported, because importing `margin_cf_d169` would pull
+# `cost_model_gate_d162` and `trace` into every process that imports this module; instead
+# `a_d2_dev_declarations()` PARSES every declaration of the name in the tree, so "one constant"
+# stays checkable the way `cf_margin.margin_cf_declarations` makes MARGIN_CF checkable.
+A_D2_DEV = 0.250
+A_D2_DEV_SOURCE = ("v5/margin_cf_d169.py:22 (the script that computed MARGIN_CF; its line 92 is "
+                   "`error = A_D2_DEV * abs(p_hat - on_time)` and its line 117 sets "
+                   "`margin_cf = error_p90_overall`), restated in v5/cf_margin.py:62 and "
+                   "declared identically in v5/cf_ontime_frozen.py and v5/cf_ontime_d162.py")
+
+
+def a_d2_dev_declarations() -> Dict[str, Any]:
+    """Every declaration of the name `A_D2_DEV` in the tree, PARSED, and whether they agree.
+
+    The point is not style. Two modules holding the same literal is how "one constant" stops
+    being true without anyone editing either number (the one-price-source ruling of 2026-11-21,
+    which this file already applies to QUEUE_TOKEN_S). A regex would also report the comment and
+    docstring mentions above as declarations, so this walks the AST.
+    """
+    import ast
+    import subprocess
+    found: Dict[str, Any] = {}
+    how = "git grep"
+    try:
+        files = subprocess.run(["git", "grep", "-l", "A_D2_DEV", "--", "*.py"],
+                               cwd=str(REPO), capture_output=True, text=True,
+                               check=False).stdout.split()
+    except Exception:                                                          # noqa: BLE001
+        files = []
+    if not files:
+        # A `git archive` checkout has no .git, so git grep returns NOTHING and this audit would
+        # report "0 declarations, they agree" - a vacuous pass, and exactly the shape CLAUDE.md
+        # calls an impossible success. The clean-checkout proofs run on such a tree, so the
+        # fallback walk is the path that actually gets exercised there.
+        how = "filesystem walk (no git index; results/ and figures/ hold no policy and are skipped)"
+        for sub in ("experiments", "simulator", "plots"):
+            d = REPO / sub
+            if not d.is_dir():
+                continue
+            for q in d.rglob("*.py"):
+                try:
+                    if "A_D2_DEV" in q.read_text():
+                        files.append(str(q.relative_to(REPO)))
+                except Exception:                                              # noqa: BLE001
+                    continue
+    for rel in files:
+        p = REPO / rel
+        try:
+            tree = ast.parse(p.read_text())
+        except Exception:                                                      # noqa: BLE001
+            continue
+        for node in ast.walk(tree):
+            tgts = []
+            if isinstance(node, ast.Assign):
+                tgts = list(node.targets)
+            elif isinstance(node, ast.AnnAssign):
+                tgts = [node.target]
+            for t in tgts:
+                if isinstance(t, ast.Name) and t.id == "A_D2_DEV":
+                    try:
+                        found[rel] = float(ast.literal_eval(node.value))
+                    except Exception:                                          # noqa: BLE001
+                        found[rel] = None
+    vals = sorted({v for v in found.values() if v is not None})
+    return {"declarations": found, "n": len(found), "distinct_values": vals,
+            "agree": len(vals) == 1, "found_how": how, "this_module": A_D2_DEV,
+            "source": A_D2_DEV_SOURCE,
+            "note": ("`agree` requires EXACTLY ONE distinct value, not at most one: zero "
+                     "declarations found means the audit did not run, and reporting that as "
+                     "agreement is an impossible success")}
+
+
+def attainment_margin(margin_cf: float) -> float:
+    """MARGIN_CF (D169 step 3, correctness units) expressed in D177's ON-TIME units.
+
+    0.16456 / 0.250 = 0.65824, which D177 (3) states as 0.6582 and D178 (5) uses as the bar:
+    "MARGIN_CF 0.6582 scaled by the deficit weight of the device the decision is about".
+
+    THE ONE THING A CALLER MUST GET RIGHT IS WHAT IT IS COMPARED AGAINST. The number returned is
+    a COUNT of on-time cloud answers (0.65824 of one answer), because that is what dividing out
+    a_D2_DEV leaves: a p90 of |P_hat - 1[on time]|, which is a probability, and a probability of
+    one answer is a count of answers. It is therefore commensurable with, and only with,
+    quantities summed as `w * p` over requests, which is what D171 (1)'s
+    `(value_cf - value_base) > w_d x MARGIN_CF` compares and what `harm_warm_from_queue_delay`
+    returns WHEN ITS CALLER PASSES `acc_cloud=1.0, acc_device=0.0` - which is what
+    `cf_protect_defer.harm_on_time` does, and is how rung 4 obtains these units today.
+
+    IT IS NOT COMMENSURABLE WITH A RATE. Any quantity divided by a per-device window count (a
+    target-attainment RATE, D165 (A)'s window-normalised primary key) is smaller than this by
+    about the size of that window, so comparing one against this margin gives a test that never
+    passes. That is not a conservative bar, it is an absent mechanism (CLAUDE.md Rule 2,
+    `unscorable`), and no committed ruling supplies a margin in rate units. If a rate-unit
+    comparison is ever wanted, the margin for it has to be measured, not divided out of this one.
+
+    IT IS ALSO NOT COMMENSURABLE WITH `cf_planner.plan_state`'s GAIN, which carries the 0.250
+    factor inline. See CURRENCY_FLIP_STATUS: that is why the currency flip is not in this commit.
+    """
+    return float(margin_cf) / A_D2_DEV
+
+
+def served_in_window(counters: Any, device_id: str) -> int:
+    """How many opportunities of this device the counters have seen: the window DENOMINATOR.
+
+    WHAT THIS IS FOR, AND WHAT IT IS NOT FOR, because the difference is D191 (1). D122 (B) asks
+    that a device's progress be read against "that device's target window so a sparse-task device
+    (about 4 questions per run) is not outweighed by a dense one (about 1,200 instants)", and
+    this returns that window. It belongs to the SHORTFALL inside the deficit weight
+    (`shortfall_d / target_d`, D185), which is where D191 (1) puts the target normalisation. IT
+    IS NOT A DIVISOR ON THE GATE: dividing the gain or the harm by it would normalise twice and
+    make the comparison unscorable, which is the point of the D191 (1) note above.
+
+    A device with nothing served yet counts as 1 rather than 0. That is the correct limit and not
+    a guard against a division: until something is served, the device's measured attainment is
+    entirely decided by the next answer.
+
+    REGISTER, marked at the point of use (CLAUDE.md): this is an ACCESSOR over the committed
+    counters and, with the division removed, NOTHING IN THE DECISION PATH READS IT. Its readers
+    are this module's tests and the reporting path. It is landed because D122 (B)'s window is
+    wanted beside every weighted number, and it is named here as having no production read so
+    that no one later mistakes it for a live mechanism (the `desired_tier` failure).
+    """
+    d = getattr(counters, "devices", {}).get(device_id) if counters is not None else None
+    return max(int(getattr(d, "served", 0) or 0), 1)
+
+
+def attainment_delta(weight: float, p_on_time_cf: float, p_on_time_base: float) -> float:
+    """The DEVIATION's left-hand side, one device's share of it: `w * (p_cf - p_base)`.
+
+    A COUNT of expected on-time cloud answers, weighted by that device's deficit weight, and
+    commensurable with `attainment_margin` and with a harm built as `w * (p_before - p_after)`
+    (D191 (1), D177 (1), D178 (5), D171 (1)).
+
+    NO `served` ARGUMENT, by ruling and not by oversight. The draft divided by the number served,
+    which made this a RATE three orders of magnitude below the margin; the D191 (1) note above
+    has the arithmetic and the consequence. The target normalisation is inside `weight`.
+    """
+    return float(weight) * (float(p_on_time_cf) - float(p_on_time_base))
+
+
+def lex_better(cand: Tuple[float, float], incumbent: Tuple[float, float]) -> bool:
+    """Is `cand` better than `incumbent`? Each is (on-time count, expected correctness).
+
+    ONE comparison decides (D191 (1)): the on-time count. The second element breaks EXACT ties
+    only, which is why it is compared after an exact `==` and why NO MARGIN AND NO READING SWITCH
+    is accepted here. See `LEX_READING` and `LEX_READING_SUPERSEDED_CONCERN`.
+
+    Correctness is still the OUTCOME measured offline (D177 (1)); it appears here only as a
+    deterministic tie-break, so a run cannot depend on dictionary order when two candidates are
+    worth exactly the same number of on-time answers.
+    """
+    a_c, v_c = cand
+    a_i, v_i = incumbent
+    if float(a_c) != float(a_i):
+        return float(a_c) > float(a_i)
+    return float(v_c) > float(v_i)
+
+
+# ---------------------------------------------------------------------------
 # Option values
 
 

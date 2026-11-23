@@ -1,0 +1,1538 @@
+{
+ "_what": "D191 (1): the four D165 (A) functions and the committed A_D2_DEV constant landed in v5/cf_objective.py, proved on a CLEAN CHECKOUT of origin/main plus the candidate change. The D177 (1) CURRENCY FLIP IS DELIBERATELY NOT IN THIS CHANGE and the measured reason is in _why_the_currency_flip_is_deferred.",
+ "_the_defect_this_closes": {
+  "claim": "origin's own committed rung-4 mechanism proof CANNOT RUN on origin, because it imports a name that is in no commit",
+  "file_and_line": "experiments/orchestration/live2/cf_pd_tests.py:83-84",
+  "the_line": "abs(PD.MARGIN_CF_ON_TIME - float(CM.MARGIN_CF) / CO.A_D2_DEV) < 1e-15",
+  "on_the_pristine_tree": "AttributeError: module 'cf_objective' has no attribute 'A_D2_DEV'; cf_pd_tests.py exits 1 having produced no checks",
+  "with_this_change": "36 checks, 36 passed, 0 FAILED",
+  "also": "cf_protect_defer reaches the same two names and survives on the pristine tree only through a hasattr fallback added from the other side; with this change it takes the canonical path and the bar is 0.65824 either way, which is measured on both trees",
+  "a_stale_committed_artefact_found_on_the_way": "results/orchestration/live2/frozen_test/cf_pd_mechanism_tests.json does NOT match what origin's own code now produces: of 255 leaves, 3 differ, ALL STRINGS, zero numeric and zero boolean. Two are the reworded MARGIN_CF_ON_TIME_SOURCE (the value 0.65824000000000005 is identical on both sides) and one is a field that did not exist when the JSON was written. NOT regenerated here, because that file is another session's output and the numbers are unchanged; recorded so the next reader does not spend the hour again."
+ },
+ "_units_resolution": {
+  "ruling": "RULED BY THE USER, D191 (1). Not derived here and not chosen here.",
+  "statement": "gain and harm are BOTH counts of expected on-time cloud answers, each device weighted by its own w_d (D185: w_d = 1 + 2.0 * shortfall_d / target_d); deviate iff (weighted gain - weighted harm) > w_d * MARGIN_CF with MARGIN_CF = 0.6582 on-time answers; THERE IS NO DIVISION BY THE NUMBER SERVED, because the target normalisation already lives inside w_d",
+  "committed_arithmetic_that_agrees": {
+   "v5/cf_margin.py:67": "MARGIN_CF = 0.16456, set once at 2cb2d5c1 under D169 step 3",
+   "v5/margin_cf_d169.py:22": "A_D2_DEV = 0.250",
+   "v5/margin_cf_d169.py:92": "error = A_D2_DEV * abs(p_hat - 1[on time])",
+   "v5/margin_cf_d169.py:117": "margin_cf = error_p90_overall",
+   "conclusion": "the committed 0.16456 is 0.250 times a p90 of |P_hat - outcome|, so dividing by 0.250 returns that p90 = 0.65824, a PROBABILITY and therefore a COUNT of on-time answers. D177 (3)'s 0.6582 and the committed 0.16456 are THE SAME NUMBER in different units and do not conflict: ratio 1.000",
+   "attainment_margin_value": 0.65824
+  },
+  "what_changed_in_attainment_delta": "THE DIVISION BY `served` WAS REMOVED AND THE PARAMETER DELETED, so the twice-normalised rate is unconstructible rather than merely discouraged. The draft returned `w * (p_cf - p_base) / served`, a RATE of order 1/served (about 8e-4 on a 1,200-instant window) against a bar of 0.65824 - three orders of magnitude down - so the gate could never open. That is CLAUDE.md Rule 2's `unscorable`, and NO byte-identity digest can see it; the unit tests are the only check that can, and they pin it from both sides.",
+  "lexicographic_reading": "SETTLED AND DISSOLVED by D191 (1): ONE comparison decides and a secondary key breaks EXACT ties only, so a margin on the primary key cannot make it inert and there is no reading to choose. NO SWITCH WAS INTRODUCED: LEX_READINGS and LEX_READING_DEFAULT are absent by design and the unit tests assert their absence. The draft's concern is recorded as RESOLVED in cf_objective.LEX_READING_SUPERSEDED_CONCERN rather than silently deleted."
+ },
+ "_why_the_currency_flip_is_deferred": {
+  "_what": "the PREDICTED magnitude of the conversion, worked out from committed numbers BEFORE the digests were read, so a move or a null is read against a prediction and not explained after",
+  "accuracy_table": {
+   "source": "results/orchestration/live2/lh_req/lh_req_quality.json via value_readers.load_dev_table()",
+   "cloud_D2": 0.25,
+   "device": 0.071429,
+   "n": 28,
+   "caveat": "the device entry is 4B x RECENT (D87) standing in for device-on-D2"
+  },
+  "pre_D177_valuation_factor_on_a_difference": {
+   "formula": "acc_cloud - acc_device * p_device_on_time, with p_device_on_time = 1.0 because every measured Orin device answer is inside its own deadline",
+   "value": 0.17857099999999998
+  },
+  "the_constant_the_margin_is_divided_by": {
+   "A_D2_DEV": 0.25,
+   "source": "v5/margin_cf_d169.py:22, the script that computed MARGIN_CF"
+  },
+  "THE_DISCREPANCY_AND_WHY_IT_MATTERS": "D177 (3) calls 0.250 'the constant that scaled BOTH gain and margin', and that is exact only where the valuation carries NO device fallback (acc_device = 0, the pre-D171 (2) term). With D171 (2)'s replacement semantics live the factor is 0.25 - 0.071429 = 0.178571, not 0.250. So the conversion divides the valuation by 0.178571 while dividing the margin by 0.250, and the harm-to-bar ratio therefore moves by 0.250 / 0.178571 = 1.4000. The conversion is NOT exactly decision-neutral, by this factor, wherever a comparison is against the margin and the device fallback was priced. THIS IS A PREDICTION, recorded before the digests were read: if a counterfactual-bearing arm's digest moves, 1.4000 is the expected cause and not a bug; if none moves, the margin was not the binding comparison on a dry cell, which is what the cf_protect_defer docstring and D174 part B3 already say about dry cells and price.",
+  "harm_to_bar_ratio_multiplier": 1.4000033600080641,
+  "which_arms_could_move_and_by_what_path": {
+   "covex-v6-state-uo, covex-v6-state-noprice": "arms_v6state.py:336 calls harm_warm_from_queue_delay with acc_cloud = table['cloud_D2'] and acc_device = table['device'], both CONSTANT across rows, so for this caller the old factor comes cleanly out of the sum and the conversion is a pure rescale of harm_warm by 1 / 0.178571. Whether that crosses a threshold inside plan_state is the measured question.",
+   "v5-full": "the only caller of plan_request, which reads option_value and device_only_value directly; NOT in the 17-arm set and not registered as a rung-4 arm on origin",
+   "plan_sync": "has no caller anywhere in the tree",
+   "the_other_15_arms": "do not import cf_objective at all, so for them a byte-identity PASS is TRUE AND GUARANTEED by the code, not a measurement of the conversion - the register this result must be read in",
+   "scorer/score.py::device_only_value": "a DIFFERENT function that happens to share the name; it is the offline scorer's and is untouched"
+  },
+  "the_largest_single_semantic_change": "device_only_value goes from w * p_dev * acc_device (w * 1.0 * 0.071429) to EXACTLY 0.0, so in plan_request the DEVICE_ANSWERS candidate stops competing on value. That is D177 (1)'s intent - the device answer is the incumbent, not a candidate - and it is the change most likely to move a decision. It reaches only v5-full on origin, because plan_request has no other caller.",
+  "which_arms_can_reach_cf_objective_AT_ALL": {
+   "_measured": "every one of the 17 arms was constructed and checked for the counterfactual engine attribute `_cf_engine`; see reach check in the session log",
+   "can_reach": [
+    "covex-v6-state-uo",
+    "covex-v6-state-noprice"
+   ],
+   "cannot_reach": 15,
+   "REGISTER_THIS_FIXES": "a byte-identity PASS on the other 15 arms is TRUE AND GUARANTEED BY THE CODE, not a measurement of the conversion: those arms never call cf_objective. The informative content of proof 2 is TWO arms, and they are also the two the driver runs a third time for self-reproduction under load. Reporting '17 of 17 identical' as if 17 arms had tested the conversion would be a number in the wrong register."
+  },
+  "magnitude_on_a_dry_cell_from_COMMITTED_counters": {
+   "source": "results/orchestration/live2/frozen_test/d188_qcache_key_fix_proofs.json, proof_b_rung2_dry_decision_deltas[0].arm_stats_off, a committed DRY rung-2 cell",
+   "harm_warm_priced": 2297,
+   "harm_warm_nonzero": 1596,
+   "harm_warm_milli_sum": 178,
+   "harm_warm_max_milli": 178,
+   "what_that_means": "the mechanism IS exercised - priced 2,297 times and non-zero 1,596 times on a dry cell, so this is NOT the `unexercised` case in the reachability sense. But the SUM of the rounded milli values equals the MAX, 178, so 1,595 of the 1,596 non-zero harms rounded to 0 milli: they are below 5e-4. One outlier is 0.178, which is one displaced answer times the pre-D177 factor 0.178571 almost exactly.",
+   "therefore_the_prediction": "under D177 those 1,595 tiny harms are multiplied by 1/0.178571 = 5.6 and are STILL about 1e-3 or less, against a bar of 0.65824; the single outlier goes 0.178 -> 1.000. So the 1.4000 relative shift has essentially nothing to cross on a dry cell and the digests are EXPECTED TO BE IDENTICAL. If they are, the correct classification is UNEXERCISED IN MAGNITUDE - the quantity is alive, non-zero and varies, and it is simply far from the threshold on this workload - and NOT 'the conversion is decision-neutral'. The cf_protect_defer docstring and D174 part B3 say the same thing in the same words: a dry cell does not exercise price."
+  }
+ },
+ "_clean_checkout": {
+  "base_sha": "d7c09a130207a692b5e5a9f314711498bebf1796",
+  "how": "git archive of the base sha extracted to a scratch tree; NOT the shared worktree /tmp/claude-1001/mapwt, which holds other sessions' uncommitted code and is how origin was broken before",
+  "the_two_trees_differ_by_exactly_these_files": [
+   "experiments/orchestration/live2/tests/test_cf_objective_d191.py",
+   "experiments/orchestration/live2/v5/cf_objective.py"
+  ],
+  "file_sha256_in_the_proof_tree": {
+   "experiments/orchestration/live2/v5/cf_objective.py": "9cba6d0d0e354fffbdc26874094f07aa81c9c55e44ba81b7e09fc0491ae84deb",
+   "experiments/orchestration/live2/tests/test_cf_objective_d191.py": "65208450cfed1de803a7944f2bd3ef1cadabb640862a1692c2e8bf4abfc2c226"
+  },
+  "option_value_and_device_only_value_are_byte_identical_to_origin": true,
+  "the_change_to_cf_objective_is_a_PURE_ADDITION": {
+   "lines_added": 236,
+   "lines_removed_or_modified": 0,
+   "checked_how": "diff -u against the pristine tree has no `-` line other than the header",
+   "why_this_is_the_strongest_form_of_the_claim": "no EXISTING line of the module changed, so no existing code path can behave differently. The only ways the new code can be reached are the names it adds, and in the whole tree exactly two places read them: cf_protect_defer's hasattr branch, which yields the same 0.65824 either way (measured on both trees), and cf_pd_tests.py:83, which previously raised AttributeError. The byte-identity digests below are therefore a CONFIRMATION of something the diff already establishes, which is the register to read them in."
+  },
+  "why_that_matters": "those two functions are the ONLY paths from this module into any arm's arithmetic, so leaving them untouched is what makes the byte-identity result below guaranteed by the code rather than hoped for"
+ },
+ "proof_1_unit_tests": {
+  "where": "experiments/orchestration/live2/tests/test_cf_objective_d191.py",
+  "why_there": "beside the repo's other live2 unit tests (tests/test_deficit_feed.py, tests/test_release_recheck.py); a plain script because pytest is not in fmtk",
+  "summary": [
+   "30 checks, 30 PASS, 0 FAIL"
+  ],
+  "the_two_constructed_cases_the_user_named": {
+   "computed_exactly_as_cf_protect_defer_does": "acc_cloud=1.0, acc_device=0.0",
+   "no_displacement": {
+    "harm": 0.0,
+    "asserted": "== 0.0, exact, not a tolerance"
+   },
+   "one_displaced_on_time_answer": {
+    "w_d": 2.75,
+    "harm": 2.75,
+    "asserted": "== w_d, exact, not a tolerance",
+    "wrong_readings_pinned_as_what_it_must_NOT_be": {
+     "accuracy_weighted": 0.49107024999999993,
+     "window_normalised_over_1200": 0.0022916666666666667
+    }
+   }
+  },
+  "full_output": [
+   "PASS NO DISPLACEMENT -> harm is EXACTLY 0.0 and no row is emitted (asserted with ==, not a tolerance: the units are COUNTS, so the case is an exact equality) | total=0.0 rows=0",
+   "PASS and the delay was still CHARGED and is reported, so a zero harm is not a silent refusal to price | dt=0.153581 s",
+   "PASS ONE DISPLACED ON-TIME ANSWER -> harm is EXACTLY w_d, a COUNT of answers (==) | total=2.75 want 2.75",
+   "PASS and it is NOT either wrong reading: not accuracy-weighted, not window-normalised | accuracy-weighted would be 0.491070, window-normalised 0.002292",
+   "PASS the delay is the IMPORTED queued-ahead price times the tokens, not a local literal | live2/d162_price.py::PER_QUEUE_S (cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47))",
+   "PASS a delay beyond the D160 (2) healthy bound is CAPPED and the cap is COUNTED, not silent",
+   "PASS the SAME displacement under rung 2/3's accuracy arguments is 0.178571 * w_d, the CORRECTNESS currency: the units come from the CALL, so one module serves both | on-time 2.750000 vs correctness 0.491070, ratio 5.6000",
+   "PASS and that ratio is 5.6, which is WHY the global flip is deferred: plan_state's gain carries the 0.250 factor and would not move with it | 5.6000",
+   "PASS the committed option_value is UNTOUCHED by this commit: under acc 1.0 / 0.0 it already returns w * p, which is the on-time form",
+   "PASS attainment_margin(MARGIN_CF) = 0.16456 / 0.250 = 0.65824, D177 (3)'s 0.6582 | 0.65824000000000005",
+   "PASS MARGIN_CF itself is UNCHANGED by this work: 0.16456, set once at 2cb2d5c1 (D154 (2))",
+   "PASS A_D2_DEV is 0.250, EVERY declaration in the tree is parsed and they agree - and the audit is NOT vacuous: at least two declarations were found | n=4 via filesystem walk (no git index; results/ and figures/ hold no policy and are skipped): ['experiments/orchestration/live2/v5/cf_objective.py', 'experiments/orchestration/live2/v5/cf_ontime_d162.py', 'experiments/orchestration/live2/v5/cf_ontime_frozen.py', 'experiments/orchestration/live2/v5/margin_cf_d169.py']",
+   "PASS zero declarations would NOT be reported as agreement (an impossible success)",
+   "PASS the margin's source names margin_cf_d169, the script that COMPUTED MARGIN_CF",
+   "PASS ONE displaced answer at w = 1 CLEARS the w = 1 bar, so the gate CAN open | 1.00000 > 0.65824",
+   "PASS a THOUSANDTH of an answer does NOT clear it, so the bar is a bar and not a rubber stamp",
+   "PASS the bar is NOT in rate units: one instant of a 1,200-instant window moves an attainment RATE by 1/1200, which is 1.27e-3 of this bar - three orders down, so a rate-unit comparison could never fire | ratio=0.00127 (1/1200 = 0.000833 vs bar 0.65824)",
+   "PASS attainment_delta takes NO `served` argument, so the twice-normalised rate is UNCONSTRUCTIBLE rather than merely discouraged | (weight: 'float', p_on_time_cf: 'float', p_on_time_base: 'float') -> 'float'",
+   "PASS attainment_delta is w * (p_cf - p_base), a COUNT, and EQUALS the difference of two option_values taken in on-time units: one currency, not two | 1.1000000000000001",
+   "PASS attainment_delta is EXACTLY the harm arithmetic with the sign reversed, so gain and harm are the same currency by construction and not by agreement | delta=-2.750000 harm=2.750000",
+   "PASS the twice-normalised form would NOT clear the bar even for a whole answer, which is the inert gate D191 (1) removed",
+   "PASS served_in_window returns the window denominator and FLOORS AT 1, the correct limit for a device with nothing served yet",
+   "PASS served_in_window's docstring MARKS ITS REGISTER: no production read, D122 (B)'s window for reporting, and explicitly NOT a divisor on the gate",
+   "PASS lex_better decides on the ON-TIME COUNT alone when the counts differ",
+   "PASS the secondary key breaks EXACT ties ONLY, and a tie is not 'better than' itself",
+   "PASS a count difference BELOW the margin still decides this ordering: the margin gates the DEVIATION, not the comparison (D191 (1): one comparison decides)",
+   "PASS NO reading switch is offered for a settled question, and the superseded concern is RECORDED AS RESOLVED rather than deleted (D191 (1))",
+   "PASS lex_better accepts NO margin argument, so margin-primary is unconstructible | (cand: 'Tuple[float, float]', incumbent: 'Tuple[float, float]') -> 'bool'",
+   "PASS CONTROL: with the bar at 0 the deviation always clears; with the bar at infinity it never does; so the bar is what decides and is not decorative | one answer = 1.00000, bar(0) = 0.00000, bar(inf) = inf",
+   "PASS CONTROL: attainment_margin is LINEAR in MARGIN_CF, so a bar quoted in correctness units cannot accidentally reproduce the on-time one unless a_D2_DEV is 1",
+   "",
+   "30 checks, 30 PASS, 0 FAIL",
+   ""
+  ]
+ },
+ "proof_2_every_existing_arm_byte_identical": {
+  "_claim": "every registered arm the D179 (6a) gate is stated over decides identically before and after, with the counterfactual switch OFF",
+  "recipe": "sha256(json.dumps(rows_without_arm_version, sort_keys=True, separators=(',',':'), default=float))[:16]; ONE DRY CELL PER PROCESS",
+  "driver": "experiments/orchestration/live2/d179_offswitch_digest_proofs.py, the COMMITTED driver, reused unchanged with --jobs 3",
+  "n_arms": 17,
+  "n_identical": 17,
+  "n_reproducing_their_committed_bar": 17,
+  "arms_missing_their_committed_bar": [],
+  "n_of_these_arms_that_can_reach_cf_objective_AT_ALL": 2,
+  "REGISTER": "this measures a REGRESSION question and not the conversion. Of the arms in this set, only 2 can reach cf_objective at all, and `option_value` and `device_only_value` are byte-identical to origin in this change, so identity here is TRUE AND GUARANTEED BY THE CODE. Reporting it as '17 arms tested the units ruling' would be a number in the wrong register. What the digests rule out is that landing these functions disturbed anything; what tests the units is proof 1.",
+  "whole_registry_context": {
+   "n_registered_arms_at_this_tip": 206,
+   "n_that_can_reach_cf_objective": 54,
+   "they_are_measured_here": false,
+   "why_not_needed": "the 54 counterfactual-bearing arms all reach this module through `option_value` / `device_only_value` / `harm_*`, and all four are byte-identical to origin in this change. They WILL need measuring when the currency flip lands, which is one reason it is deferred.",
+   "can_reach_list": [
+    "covex-v6",
+    "covex-v6-cf-c5attr",
+    "covex-v6-cf-c5attr-gain0",
+    "covex-v6-cf-c5attr-harm0",
+    "covex-v6-cf-c5attr-margin-huge",
+    "covex-v6-cf-c5attr-off",
+    "covex-v6-cf-c5attr-pdonly",
+    "covex-v6-cf-c5attr-rqonly",
+    "covex-v6-cf-c5attr-w1",
+    "covex-v6-cf-pd-c5attr",
+    "covex-v6-cf-pd-c5attr-barmaxharmed",
+    "covex-v6-cf-pd-c5attr-bigmargin",
+    "covex-v6-cf-pd-c5attr-harmzero",
+    "covex-v6-cf-pd-c5attr-off",
+    "covex-v6-cf-pd-shares",
+    "covex-v6-cf-pd-shares-barmaxharmed",
+    "covex-v6-cf-pd-shares-bigmargin",
+    "covex-v6-cf-pd-shares-harmzero",
+    "covex-v6-cf-pd-shares-off",
+    "covex-v6-fair",
+    "covex-v6-fair-c5attr",
+    "covex-v6-fair-c5attr-gain0",
+    "covex-v6-fair-c5attr-off",
+    "covex-v6-fair-c5attr-orderonly",
+    "covex-v6-fair-c5attr-splitonly",
+    "covex-v6-fair-nofeed",
+    "covex-v6-fair-nolimit",
+    "covex-v6-fair-novalue",
+    "covex-v6-fair-off",
+    "covex-v6-fair-shares",
+    "covex-v6-fair-shares-gain0",
+    "covex-v6-fair-shares-off",
+    "covex-v6-fair-shares-orderonly",
+    "covex-v6-fair-shares-splitonly",
+    "covex-v6-state",
+    "covex-v6-state-d162",
+    "covex-v6-state-nobelief",
+    "covex-v6-state-noprice",
+    "covex-v6-state-noretain",
+    "covex-v6-state-notouch",
+    "covex-v6-state-off",
+    "covex-v6-state-shares",
+    "covex-v6-state-shares-noadmit",
+    "covex-v6-state-shares-norecheck",
+    "covex-v6-state-shares-off",
+    "covex-v6-state-shares-r1",
+    "covex-v6-state-shares-r2",
+    "covex-v6-state-uo",
+    "covex-v6-state-uo-c5attr",
+    "covex-v6-state-wo",
+    "v5-full",
+    "v5-full-noguarddefer",
+    "v5-full-nohealthy",
+    "v5-full-off"
+   ]
+  },
+  "cell_and_protocol": {
+   "cell": {
+    "n": 16,
+    "run_s": 1200.0,
+    "seed": 4,
+    "ratio": "40:40:20",
+    "robot_question_set": "lh_req",
+    "ss_question_set": "ss2",
+    "dashcam_format": "epg",
+    "robot_upload": "per-frame",
+    "robot_reask_mean_s": 30.0
+   },
+   "protocol": {
+    "one_dry_cell_per_process": true,
+    "cf_instrument_over_budget_patched_off": true,
+    "concurrency": 3,
+    "sequential": false,
+    "cores": 24,
+    "loadavg_driver_start": [
+     4.14,
+     2.69,
+     1.22
+    ],
+    "loadavg_driver_end": [
+     3.15,
+     3.81,
+     3.94
+    ],
+    "wall_s": 3265.2,
+    "cpu_user_s_by_arm": [
+     [
+      "covex-v6-base",
+      266.33,
+      267.64
+     ],
+     [
+      "covex-v6-rules",
+      255.57,
+      223.74
+     ],
+     [
+      "covex-v6-state-uo",
+      295.72,
+      297.42
+     ],
+     [
+      "v5-rules-2",
+      264.58,
+      251.56
+     ],
+     [
+      "hybrid-F-lhreq-noc3",
+      282.43,
+      261.5
+     ],
+     [
+      "b7-edf-feasibility",
+      273.31,
+      257.66
+     ],
+     [
+      "always-cloud-fcfs",
+      263.28,
+      281.65
+     ],
+     [
+      "edf",
+      252.91,
+      238.83
+     ],
+     [
+      "llf",
+      273.5,
+      262.72
+     ],
+     [
+      "mooncake",
+      246.37,
+      273.76
+     ],
+     [
+      "attentionstore-prefetch",
+      293.78,
+      283.99
+     ],
+     [
+      "simplestream",
+      263.65,
+      251.45
+     ],
+     [
+      "querystream-proactive",
+      265.13,
+      264.48
+     ],
+     [
+      "warm-all-lru",
+      298.49,
+      298.48
+     ],
+     [
+      "confidence-cascade",
+      262.22,
+      263.68
+     ],
+     [
+      "eco-llm",
+      257.59,
+      259.63
+     ],
+     [
+      "covex-v6-state-noprice",
+      280.47,
+      272.99
+     ]
+    ]
+   },
+   "registry": {
+    "n_at_import": 187,
+    "n_after_register": 187,
+    "added_by_register": [],
+    "n_arms_tested": 17,
+    "arms_not_constructed": []
+   }
+  },
+  "arms": [
+   {
+    "arm": "covex-v6-base",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "af8befb9420ad86a",
+     "rows": 12085
+    },
+    "after_candidate": {
+     "digest": "af8befb9420ad86a",
+     "rows": 12085
+    },
+    "committed_bar": {
+     "digest": "af8befb9420ad86a",
+     "rows": 12085
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.14,
+      2.69,
+      1.22
+     ],
+     "loadavg_end": [
+      4.23,
+      3.7,
+      2.03
+     ],
+     "cpu_user_s": 266.33,
+     "cpu_sys_s": 0.76,
+     "wall_s": 266.7,
+     "pid": 1695
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.14,
+      2.69,
+      1.22
+     ],
+     "loadavg_end": [
+      4.21,
+      3.71,
+      2.04
+     ],
+     "cpu_user_s": 267.64,
+     "cpu_sys_s": 0.7,
+     "wall_s": 267.98,
+     "pid": 1697
+    }
+   },
+   {
+    "arm": "covex-v6-rules",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "18067c4c66bb44b8",
+     "rows": 11955
+    },
+    "after_candidate": {
+     "digest": "18067c4c66bb44b8",
+     "rows": 11955
+    },
+    "committed_bar": {
+     "digest": "18067c4c66bb44b8",
+     "rows": 11955
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.14,
+      2.69,
+      1.22
+     ],
+     "loadavg_end": [
+      4.27,
+      3.69,
+      2.01
+     ],
+     "cpu_user_s": 255.57,
+     "cpu_sys_s": 0.96,
+     "wall_s": 256.03,
+     "pid": 1696
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.27,
+      3.69,
+      2.01
+     ],
+     "loadavg_end": [
+      4.77,
+      4.08,
+      2.53
+     ],
+     "cpu_user_s": 223.74,
+     "cpu_sys_s": 1.44,
+     "wall_s": 223.81,
+     "pid": 3501
+    }
+   },
+   {
+    "arm": "covex-v6-state-uo",
+    "can_reach_cf_objective": true,
+    "before_pristine": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218
+    },
+    "after_candidate": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218
+    },
+    "committed_bar": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218,
+     "state_decisions": 60934,
+     "error": null
+    },
+    "after_self_reproduces_under_load": true,
+    "before_host": {
+     "loadavg_start": [
+      4.23,
+      3.7,
+      2.03
+     ],
+     "loadavg_end": [
+      4.86,
+      4.32,
+      2.75
+     ],
+     "cpu_user_s": 295.72,
+     "cpu_sys_s": 1.8,
+     "wall_s": 296.12,
+     "pid": 3649
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.21,
+      3.71,
+      2.04
+     ],
+     "loadavg_end": [
+      4.86,
+      4.32,
+      2.75
+     ],
+     "cpu_user_s": 297.42,
+     "cpu_sys_s": 1.71,
+     "wall_s": 297.71,
+     "pid": 3685
+    }
+   },
+   {
+    "arm": "v5-rules-2",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "18067c4c66bb44b8",
+     "rows": 11955
+    },
+    "after_candidate": {
+     "digest": "18067c4c66bb44b8",
+     "rows": 11955
+    },
+    "committed_bar": {
+     "digest": "18067c4c66bb44b8",
+     "rows": 11955
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.77,
+      4.08,
+      2.53
+     ],
+     "loadavg_end": [
+      4.58,
+      4.46,
+      3.1
+     ],
+     "cpu_user_s": 264.58,
+     "cpu_sys_s": 1.48,
+     "wall_s": 264.7,
+     "pid": 12995
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.86,
+      4.32,
+      2.75
+     ],
+     "loadavg_end": [
+      4.25,
+      4.38,
+      3.17
+     ],
+     "cpu_user_s": 251.56,
+     "cpu_sys_s": 1.55,
+     "wall_s": 251.66,
+     "pid": 30759
+    }
+   },
+   {
+    "arm": "hybrid-F-lhreq-noc3",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "af8befb9420ad86a",
+     "rows": 12085
+    },
+    "after_candidate": {
+     "digest": "af8befb9420ad86a",
+     "rows": 12085
+    },
+    "committed_bar": {
+     "digest": "af8befb9420ad86a",
+     "rows": 12085
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.86,
+      4.32,
+      2.75
+     ],
+     "loadavg_end": [
+      4.26,
+      4.37,
+      3.21
+     ],
+     "cpu_user_s": 282.43,
+     "cpu_sys_s": 1.5,
+     "wall_s": 282.54,
+     "pid": 30793
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.58,
+      4.46,
+      3.1
+     ],
+     "loadavg_end": [
+      4.11,
+      4.26,
+      3.36
+     ],
+     "cpu_user_s": 261.5,
+     "cpu_sys_s": 1.54,
+     "wall_s": 261.58,
+     "pid": 32133
+    }
+   },
+   {
+    "arm": "b7-edf-feasibility",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "b9aadd1c3a2b26d5",
+     "rows": 12265
+    },
+    "after_candidate": {
+     "digest": "b9aadd1c3a2b26d5",
+     "rows": 12265
+    },
+    "committed_bar": {
+     "digest": "b9aadd1c3a2b26d5",
+     "rows": 12265
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.25,
+      4.38,
+      3.17
+     ],
+     "loadavg_end": [
+      4.21,
+      4.27,
+      3.45
+     ],
+     "cpu_user_s": 273.31,
+     "cpu_sys_s": 1.46,
+     "wall_s": 273.36,
+     "pid": 32542
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.26,
+      4.37,
+      3.21
+     ],
+     "loadavg_end": [
+      4.24,
+      4.27,
+      3.46
+     ],
+     "cpu_user_s": 257.66,
+     "cpu_sys_s": 1.6,
+     "wall_s": 257.79,
+     "pid": 32765
+    }
+   },
+   {
+    "arm": "always-cloud-fcfs",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "c7f86bb7755828de",
+     "rows": 12253
+    },
+    "after_candidate": {
+     "digest": "c7f86bb7755828de",
+     "rows": 12253
+    },
+    "committed_bar": {
+     "digest": "c7f86bb7755828de",
+     "rows": 12253
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.11,
+      4.26,
+      3.36
+     ],
+     "loadavg_end": [
+      4.14,
+      4.2,
+      3.58
+     ],
+     "cpu_user_s": 263.28,
+     "cpu_sys_s": 1.57,
+     "wall_s": 263.49,
+     "pid": 33704
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.21,
+      4.27,
+      3.45
+     ],
+     "loadavg_end": [
+      4.13,
+      4.17,
+      3.63
+     ],
+     "cpu_user_s": 281.65,
+     "cpu_sys_s": 1.45,
+     "wall_s": 281.74,
+     "pid": 34142
+    }
+   },
+   {
+    "arm": "edf",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "9db366ac8f684d45",
+     "rows": 16327
+    },
+    "after_candidate": {
+     "digest": "9db366ac8f684d45",
+     "rows": 16327
+    },
+    "committed_bar": {
+     "digest": "9db366ac8f684d45",
+     "rows": 16327
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.24,
+      4.27,
+      3.46
+     ],
+     "loadavg_end": [
+      4.06,
+      4.16,
+      3.62
+     ],
+     "cpu_user_s": 252.91,
+     "cpu_sys_s": 1.55,
+     "wall_s": 252.96,
+     "pid": 34276
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.14,
+      4.2,
+      3.58
+     ],
+     "loadavg_end": [
+      4.18,
+      4.15,
+      3.71
+     ],
+     "cpu_user_s": 238.83,
+     "cpu_sys_s": 1.58,
+     "wall_s": 238.94,
+     "pid": 35088
+    }
+   },
+   {
+    "arm": "llf",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "961be8fe4942d86b",
+     "rows": 14075
+    },
+    "after_candidate": {
+     "digest": "961be8fe4942d86b",
+     "rows": 14075
+    },
+    "committed_bar": {
+     "digest": "961be8fe4942d86b",
+     "rows": 14075
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.06,
+      4.16,
+      3.62
+     ],
+     "loadavg_end": [
+      4.12,
+      4.15,
+      3.77
+     ],
+     "cpu_user_s": 273.5,
+     "cpu_sys_s": 1.53,
+     "wall_s": 273.6,
+     "pid": 35572
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.13,
+      4.17,
+      3.63
+     ],
+     "loadavg_end": [
+      4.12,
+      4.15,
+      3.77
+     ],
+     "cpu_user_s": 262.72,
+     "cpu_sys_s": 1.58,
+     "wall_s": 262.93,
+     "pid": 35653
+    }
+   },
+   {
+    "arm": "mooncake",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "7544b3aa16433c70",
+     "rows": 12742
+    },
+    "after_candidate": {
+     "digest": "7544b3aa16433c70",
+     "rows": 12742
+    },
+    "committed_bar": {
+     "digest": "7544b3aa16433c70",
+     "rows": 12742
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.18,
+      4.15,
+      3.71
+     ],
+     "loadavg_end": [
+      4.17,
+      4.14,
+      3.82
+     ],
+     "cpu_user_s": 246.37,
+     "cpu_sys_s": 1.55,
+     "wall_s": 246.47,
+     "pid": 36368
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.12,
+      4.15,
+      3.77
+     ],
+     "loadavg_end": [
+      4.11,
+      4.12,
+      3.87
+     ],
+     "cpu_user_s": 273.76,
+     "cpu_sys_s": 1.53,
+     "wall_s": 273.85,
+     "pid": 37149
+    }
+   },
+   {
+    "arm": "attentionstore-prefetch",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "b563cf7612fd1e02",
+     "rows": 46931
+    },
+    "after_candidate": {
+     "digest": "b563cf7612fd1e02",
+     "rows": 46931
+    },
+    "committed_bar": {
+     "digest": "b563cf7612fd1e02",
+     "rows": 46931
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.12,
+      4.15,
+      3.77
+     ],
+     "loadavg_end": [
+      4.08,
+      4.11,
+      3.87
+     ],
+     "cpu_user_s": 293.78,
+     "cpu_sys_s": 1.74,
+     "wall_s": 294.09,
+     "pid": 37173
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.17,
+      4.14,
+      3.82
+     ],
+     "loadavg_end": [
+      4.04,
+      4.1,
+      3.9
+     ],
+     "cpu_user_s": 283.99,
+     "cpu_sys_s": 1.72,
+     "wall_s": 284.3,
+     "pid": 37386
+    }
+   },
+   {
+    "arm": "simplestream",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "870a3c3586d1b537",
+     "rows": 12253
+    },
+    "after_candidate": {
+     "digest": "870a3c3586d1b537",
+     "rows": 12253
+    },
+    "committed_bar": {
+     "digest": "870a3c3586d1b537",
+     "rows": 12253
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.11,
+      4.12,
+      3.87
+     ],
+     "loadavg_end": [
+      4.23,
+      4.13,
+      3.94
+     ],
+     "cpu_user_s": 263.65,
+     "cpu_sys_s": 1.5,
+     "wall_s": 263.66,
+     "pid": 37783
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.08,
+      4.11,
+      3.87
+     ],
+     "loadavg_end": [
+      4.34,
+      4.16,
+      3.95
+     ],
+     "cpu_user_s": 251.45,
+     "cpu_sys_s": 1.5,
+     "wall_s": 251.49,
+     "pid": 37837
+    }
+   },
+   {
+    "arm": "querystream-proactive",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "a0b9e14e513c621c",
+     "rows": 12646
+    },
+    "after_candidate": {
+     "digest": "a0b9e14e513c621c",
+     "rows": 12646
+    },
+    "committed_bar": {
+     "digest": "a0b9e14e513c621c",
+     "rows": 12646
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.04,
+      4.1,
+      3.9
+     ],
+     "loadavg_end": [
+      4.13,
+      4.14,
+      3.98
+     ],
+     "cpu_user_s": 265.13,
+     "cpu_sys_s": 1.48,
+     "wall_s": 265.2,
+     "pid": 38053
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.23,
+      4.13,
+      3.94
+     ],
+     "loadavg_end": [
+      4.1,
+      4.13,
+      4.0
+     ],
+     "cpu_user_s": 264.48,
+     "cpu_sys_s": 1.53,
+     "wall_s": 264.6,
+     "pid": 38297
+    }
+   },
+   {
+    "arm": "warm-all-lru",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "751381e72502fffe",
+     "rows": 17205
+    },
+    "after_candidate": {
+     "digest": "751381e72502fffe",
+     "rows": 17205
+    },
+    "committed_bar": {
+     "digest": "751381e72502fffe",
+     "rows": 17205
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.34,
+      4.16,
+      3.95
+     ],
+     "loadavg_end": [
+      4.05,
+      4.11,
+      4.0
+     ],
+     "cpu_user_s": 298.49,
+     "cpu_sys_s": 1.61,
+     "wall_s": 298.71,
+     "pid": 38337
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.13,
+      4.14,
+      3.98
+     ],
+     "loadavg_end": [
+      4.15,
+      4.11,
+      4.01
+     ],
+     "cpu_user_s": 298.48,
+     "cpu_sys_s": 1.59,
+     "wall_s": 298.63,
+     "pid": 38570
+    }
+   },
+   {
+    "arm": "confidence-cascade",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "b9290071679f1baa",
+     "rows": 12253
+    },
+    "after_candidate": {
+     "digest": "b9290071679f1baa",
+     "rows": 12253
+    },
+    "committed_bar": {
+     "digest": "b9290071679f1baa",
+     "rows": 12253
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.1,
+      4.13,
+      4.0
+     ],
+     "loadavg_end": [
+      4.07,
+      4.09,
+      4.01
+     ],
+     "cpu_user_s": 262.22,
+     "cpu_sys_s": 1.57,
+     "wall_s": 262.38,
+     "pid": 38933
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.05,
+      4.11,
+      4.0
+     ],
+     "loadavg_end": [
+      4.16,
+      4.11,
+      4.01
+     ],
+     "cpu_user_s": 263.68,
+     "cpu_sys_s": 1.52,
+     "wall_s": 263.88,
+     "pid": 39022
+    }
+   },
+   {
+    "arm": "eco-llm",
+    "can_reach_cf_objective": false,
+    "before_pristine": {
+     "digest": "f32fa95c6953c64e",
+     "rows": 12253
+    },
+    "after_candidate": {
+     "digest": "f32fa95c6953c64e",
+     "rows": 12253
+    },
+    "committed_bar": {
+     "digest": "f32fa95c6953c64e",
+     "rows": 12253
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": null,
+    "after_self_reproduces_under_load": null,
+    "before_host": {
+     "loadavg_start": [
+      4.15,
+      4.11,
+      4.01
+     ],
+     "loadavg_end": [
+      4.08,
+      4.08,
+      4.01
+     ],
+     "cpu_user_s": 257.59,
+     "cpu_sys_s": 1.53,
+     "wall_s": 257.75,
+     "pid": 39591
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.07,
+      4.09,
+      4.01
+     ],
+     "loadavg_end": [
+      4.15,
+      4.11,
+      4.02
+     ],
+     "cpu_user_s": 259.63,
+     "cpu_sys_s": 1.51,
+     "wall_s": 259.75,
+     "pid": 40138
+    }
+   },
+   {
+    "arm": "covex-v6-state-noprice",
+    "can_reach_cf_objective": true,
+    "before_pristine": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218
+    },
+    "after_candidate": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218
+    },
+    "committed_bar": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218
+    },
+    "identical_before_vs_after": true,
+    "reproduces_committed_bar": true,
+    "register": "committed bar MET",
+    "after_repeat": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218,
+     "state_decisions": 60934,
+     "error": null
+    },
+    "after_self_reproduces_under_load": true,
+    "before_host": {
+     "loadavg_start": [
+      4.16,
+      4.11,
+      4.01
+     ],
+     "loadavg_end": [
+      4.24,
+      4.14,
+      4.03
+     ],
+     "cpu_user_s": 280.47,
+     "cpu_sys_s": 1.58,
+     "wall_s": 280.63,
+     "pid": 40236
+    },
+    "after_host": {
+     "loadavg_start": [
+      4.08,
+      4.08,
+      4.01
+     ],
+     "loadavg_end": [
+      4.26,
+      4.16,
+      4.05
+     ],
+     "cpu_user_s": 272.99,
+     "cpu_sys_s": 1.69,
+     "wall_s": 273.26,
+     "pid": 40454
+    }
+   }
+  ],
+  "WHAT_WAS_ACTUALLY_RUN_AND_AT_WHICH_SHA": {
+   "trees": "git archive of c9fc3eacfa065e7828c2824f3c9418ded2f3a452 (pristine) against the same sha plus a candidate change, both cut before origin moved again",
+   "the_candidate_measured_was_the_SUPERSET_not_this_commit": "the digests were produced against a candidate that ALSO carried the D177 (1) currency flip (ON_TIME_UNITS plus the converted option_value and device_only_value). THIS COMMIT IS A STRICT SUBSET of that candidate: a pure addition with option_value and device_only_value byte-identical to origin. So the identity measured here holds a fortiori for what is committed - a change that alters strictly less cannot move a digest that the larger change left untouched. Stated rather than presented as a run of this commit, because a proof attributed to the wrong artefact is the register error CLAUDE.md asks to be marked at the point of use.",
+   "and_it_is_the_more_informative_direction": "the superset's identity is the stronger measurement: even WITH the currency flip, all 17 arms including both counterfactual-bearing ones decided identically on a dry cell. That matches the prediction recorded BEFORE the digests were read (see _why_the_currency_flip_is_deferred): the committed dry-cell counters show 1,595 of 1,596 non-zero harm_warm values below 5e-4, so a 5.6x rescale has nothing to cross. The classification is therefore UNEXERCISED IN MAGNITUDE on a dry cell, NOT 'the flip is decision-neutral'. A live cell prices differently and is where the flip must be measured.",
+   "why_this_commit_was_not_re-run": "origin moved three times during the task (4330ddd -> c9fc3ea -> 8b32cca -> dbd727f3 -> c9b5629a). cf_objective.py is BYTE-IDENTICAL across all of them, which is checked and recorded, so the anchors and the subset argument hold; re-running 36 dry cells per origin move would never terminate. The files that DID change between the proof sha and the commit parent are arms.py and cf_protect_defer.py, and the import proofs WERE re-run at the later tip against both of them."
+  },
+  "headline": "17 of 17 arms byte-identical before and after; 17 of 17 reproduce their COMMITTED digest; 14 distinct digests over 17 arms with row counts 11,955 to 46,931, so the hash discriminates; both planner-bearing arms reproduce themselves in a THIRD cell under the same parallel load. Concurrency 3 on 24 cores, loadavg 4.14 to 3.15, wall 3,265 s."
+ },
+ "proof_3_import_on_a_clean_checkout": {
+  "_claim": "the committed cf_pd_tests.py and cf_protect_defer reach cf_objective.A_D2_DEV and cf_objective.attainment_margin; with this change both resolve canonically on a tree holding only committed code plus the change",
+  "WHAT_CHANGED_UNDER_THIS_PROOF": "when this task was briefed, cf_protect_defer.py:150 called attainment_margin UNCONDITIONALLY and registering arms_v6cf killed every arm at cell start. Between the brief and this run ANOTHER SESSION repaired it from the other side - the call is behind hasattr with a fallback, and the rung-4 registration has been RESTORED - so the import is no longer broken and THIS PROOF IS NO LONGER ABOUT UNBREAKING IT. The premise the task was given is void and the remaining defect is the narrower one in _the_defect_this_closes. Reported rather than quietly re-scoped.",
+  "after_candidate_tree": {
+   "_what": "PROOF 3, at the CURRENT tip. argv: <tree> <out>",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/candB_8ab3f7e8",
+   "has_dot_git": false,
+   "python": "3.10.19",
+   "import cf_objective": {
+    "ok": true,
+    "value": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/candB_8ab3f7e8/experiments/orchestration/live2/v5/cf_objective.py"
+   },
+   "the four D165 (A) / D191 (1) functions are present": {
+    "ok": true,
+    "value": [
+     "attainment_delta",
+     "attainment_margin",
+     "lex_better",
+     "served_in_window"
+    ]
+   },
+   "ON_TIME_UNITS is deliberately NOT in this commit (CURRENCY_FLIP_STATUS says why)": {
+    "ok": true,
+    "value": {
+     "ON_TIME_UNITS present": false,
+     "CURRENCY_FLIP_STATUS": "NOT IN THIS COMMIT. D177 (1)'s conversion of option_value and device_only_value is owed together with cf_planner.plan_st"
+    }
+   },
+   "import cf_protect_defer": {
+    "ok": true,
+    "value": "cf-protect-defer-1.0"
+   },
+   "MARGIN_CF_ON_TIME is 0.65824 and the module's own assert passed": {
+    "ok": true,
+    "value": 0.65824
+   },
+   "WHICH PATH produced the bar (the thing this change actually moves)": {
+    "ok": true,
+    "value": "cf_objective.attainment_margin (the canonical function)"
+   },
+   "import arms (the harness's own entry point) and count the registry": {
+    "ok": true,
+    "value": 206
+   },
+   "rung 4 IS registered on this tip - track B restored it, NOT this change": {
+    "ok": true,
+    "value": [
+     "covex-v6-cf-c5attr",
+     "covex-v6-cf-c5attr-gain0",
+     "covex-v6-cf-c5attr-harm0",
+     "covex-v6-cf-c5attr-margin-huge",
+     "covex-v6-cf-c5attr-off",
+     "covex-v6-cf-c5attr-pdonly"
+    ]
+   },
+   "EVERY registered arm constructs, with designed refusals counted separately": {
+    "ok": true,
+    "value": {
+     "n_arms": 206,
+     "n_designed_refusals": 1,
+     "designed_refusals": [
+      "covex-v6-cf-pd"
+     ],
+     "n_unexpected_failures": 0,
+     "unexpected_failures": [],
+     "note": "BaseNotChosen is track B's DELIBERATE refusal for a rung-4 name whose rung-2 base is still a contingency (addendum 9 item A); it is a designed refusal and not a break, and it is counted separately so it cannot be used to hide a real one"
+    }
+   },
+   "cf_pd_tests.py, the committed 36-check rung-4 mechanism proof, PASSES": {
+    "ok": true,
+    "value": {
+     "returncode": 0,
+     "summary": [
+      "36 checks, 36 passed, 0 FAILED"
+     ],
+     "n_fail_lines": 0,
+     "stderr_tail": ""
+    }
+   },
+   "tests/test_cf_objective_d191.py, 39 checks, PASSES": {
+    "ok": true,
+    "value": {
+     "returncode": 0,
+     "summary": [
+      "30 checks, 30 PASS, 0 FAIL"
+     ],
+     "n_fail_lines": 0,
+     "stderr_tail": ""
+    }
+   },
+   "_verdict": "PASS"
+  },
+  "before_pristine_tree": {
+   "_what": "PROOF 3, at the CURRENT tip. argv: <tree> <out>",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/base2_8ab3f7e8",
+   "has_dot_git": false,
+   "python": "3.10.19",
+   "import cf_objective": {
+    "ok": true,
+    "value": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/base2_8ab3f7e8/experiments/orchestration/live2/v5/cf_objective.py"
+   },
+   "the four D165 (A) / D191 (1) functions are present": {
+    "ok": true,
+    "value": []
+   },
+   "ON_TIME_UNITS is present and True": {
+    "ok": true,
+    "value": "ABSENT"
+   },
+   "import cf_protect_defer": {
+    "ok": true,
+    "value": "cf-protect-defer-1.0"
+   },
+   "MARGIN_CF_ON_TIME is 0.65824 and the module's own assert passed": {
+    "ok": true,
+    "value": 0.65824
+   },
+   "WHICH PATH produced the bar (the thing this change actually moves)": {
+    "ok": true,
+    "value": "FALLBACK cf_margin.MARGIN_CF / cf_ontime_frozen.A_D2_DEV, because cf_objective.attainment_margin is not in this tree yet: same arithmetic, same two committed constants, no new number."
+   },
+   "import arms (the harness's own entry point) and count the registry": {
+    "ok": true,
+    "value": 206
+   },
+   "rung 4 IS registered on this tip - track B restored it, NOT this change": {
+    "ok": true,
+    "value": [
+     "covex-v6-cf-c5attr",
+     "covex-v6-cf-c5attr-gain0",
+     "covex-v6-cf-c5attr-harm0",
+     "covex-v6-cf-c5attr-margin-huge",
+     "covex-v6-cf-c5attr-off",
+     "covex-v6-cf-c5attr-pdonly"
+    ]
+   },
+   "EVERY registered arm constructs, with designed refusals counted separately": {
+    "ok": true,
+    "value": {
+     "n_arms": 206,
+     "n_designed_refusals": 1,
+     "designed_refusals": [
+      "covex-v6-cf-pd"
+     ],
+     "n_unexpected_failures": 0,
+     "unexpected_failures": [],
+     "note": "BaseNotChosen is track B's DELIBERATE refusal for a rung-4 name whose rung-2 base is still a contingency (addendum 9 item A); it is a designed refusal and not a break, and it is counted separately so it cannot be used to hide a real one"
+    }
+   },
+   "cf_pd_tests.py, the committed 36-check rung-4 mechanism proof, PASSES": {
+    "ok": false,
+    "error": "AssertionError: cf_pd_tests.py exited 1: {'returncode': 1, 'summary': [], 'n_fail_lines': 0, 'stderr_tail': 'agya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/base2_8ab3f7e8/experiments/orchestration/live2/cf_pd_tests.py\", line 83, in t_margin\\n    abs(PD.MARGIN_CF_ON_TIME - float(CM.MARGIN_CF) / CO.A_D2_DEV) < 1e-15,\\nAttributeError: module \\'cf_objective\\' has no attribute \\'A_D2_DEV\\'\\n'}",
+    "traceback": "ut[name] = {\"ok\": True, \"value\": fn()}\n  File \"/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/import_proof2_8ab3f7e8.py\", line 85, in <lambda>\n    lambda: run(LIVE2 / \"cf_pd_tests.py\", \"cf_pd_tests.py\"))\n  File \"/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/import_proof2_8ab3f7e8.py\", line 82, in run\n    raise AssertionError(\"%s exited %d: %s\" % (label, r.returncode, res))\nAssertionError: cf_pd_tests.py exited 1: {'returncode': 1, 'summary': [], 'n_fail_lines': 0, 'stderr_tail': 'agya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/base2_8ab3f7e8/experiments/orchestration/live2/cf_pd_tests.py\", line 83, in t_margin\\n    abs(PD.MARGIN_CF_ON_TIME - float(CM.MARGIN_CF) / CO.A_D2_DEV) < 1e-15,\\nAttributeError: module \\'cf_objective\\' has no attribute \\'A_D2_DEV\\'\\n'}\n"
+   },
+   "tests/test_cf_objective_d177.py, 39 checks, PASSES": {
+    "ok": false,
+    "error": "AssertionError: test_cf_objective_d177.py exited 2: {'returncode': 2, 'summary': [], 'n_fail_lines': 0, 'stderr_tail': \"/home/pragya/miniconda3/envs/fmtk/bin/python: can't open file '/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/base2_8ab3f7e8/experiments/orchestration/live2/tests/test_cf_objective_d177.py': [Errno 2] No such file or directory\\n\"}",
+    "traceback": "\"ok\": True, \"value\": fn()}\n  File \"/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/import_proof2_8ab3f7e8.py\", line 87, in <lambda>\n    lambda: run(LIVE2 / \"tests/test_cf_objective_d177.py\", \"test_cf_objective_d177.py\"))\n  File \"/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/import_proof2_8ab3f7e8.py\", line 82, in run\n    raise AssertionError(\"%s exited %d: %s\" % (label, r.returncode, res))\nAssertionError: test_cf_objective_d177.py exited 2: {'returncode': 2, 'summary': [], 'n_fail_lines': 0, 'stderr_tail': \"/home/pragya/miniconda3/envs/fmtk/bin/python: can't open file '/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/base2_8ab3f7e8/experiments/orchestration/live2/tests/test_cf_objective_d177.py': [Errno 2] No such file or directory\\n\"}\n"
+   },
+   "_verdict": "FAIL (2 steps)"
+  },
+  "the_control_is_audited_too": "the same script on the pristine tree FAILS on exactly the two steps it should and no others: cf_pd_tests.py exits 1 with the AttributeError, and this change's own test file does not exist there. Every other step PASSES on both trees, including the bar's value, which is how the result is shown to be narrow rather than sweeping."
+ },
+ "proof_4_positive_control": {
+  "_claim": "a known-good committed arm must reproduce its committed digest on the clean tree; if it does not, the INSTRUMENT is broken and not the arm",
+  "bar_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json, the `after` column, same cell and same recipe, committed at d7c09a13",
+  "n_met": 17,
+  "n_missed": 0,
+  "missed": [],
+  "second_positive_control": "the digest DISCRIMINATES arms rather than collapsing: 14 distinct digests over 17 arms",
+  "third_positive_control": "the committed 36-check cf_pd_tests.py passes on the candidate tree and its output JSON matches the committed one on all 255 leaves except 3 strings, with zero numeric and zero boolean differences, and the 3 are attributable to another session's rewording rather than to this change",
+  "negative_control_on_the_mechanism_landed": "CLAUDE.md Step 4. The mechanism this change adds is THE BAR, so the control drives the bar to 0 and to infinity: one displaced answer clears a bar of 0 and does NOT clear a bar of infinity, so the bar is what decides. A control that flipped nothing would mean the bar was decorative. Documented cell: the constructed unit cases, w_d = 2.75."
+ },
+ "_mechanism_verification": {
+  "step_0_what_would_invalidate_this_run": [
+   "ORIGIN MOVED THREE TIMES DURING THE TASK (4330ddd -> c9fc3ea -> 8b32cca -> the base sha here). Resolved to ONE literal sha per attempt and the same sha used for the archive, the INDEX.md rebuild and the commit parent, because a push between two separate reads takes the tree from the old ref and the parent from the new and silently reverts what landed between.",
+   "THE PREMISE OF THE TASK WAS VOIDED MID-TASK by another session's fix; found by re-fetching before committing rather than after. See WHAT_CHANGED_UNDER_THIS_PROOF.",
+   "THE TREE CHANGED UNDER AN IN-FLIGHT RUN: a first digest run was launched and then a long line was fixed in the same tree. The run was KILLED and relaunched against a frozen tree rather than reasoned about, because a digest straddling two versions of the file under test is a digest of neither.",
+   "A BROKEN PROOF WRAPPER: the first import-proof wrapper reported PASS on a non-zero return code, so cf_pd_tests.py failing was recorded inside a PASS. Fixed before anything was recorded and both sides rerun. An impossible success is as diagnostic as an impossible failure (CLAUDE.md check 7).",
+   "A VACUOUS CONSTANT AUDIT: a_d2_dev_declarations used `git grep`, which returns NOTHING on a `git archive` tree - the very tree these proofs run on - and `agree` was `len(vals) <= 1`, so zero declarations read as agreement. Now a filesystem fallback walks the tree, `agree` requires EXACTLY ONE distinct value, and the test asserts n >= 2.",
+   "HOST LOAD: concurrency 3 on a 24-core box, the planner wall-clock cutoff patched off on BOTH sides of every comparison, per-cell loadavg and CPU seconds recorded with every digest."
+  ],
+  "step_1_causal_chain": "If MARGIN_CF was measured as a_D2_DEV times a p90 probability error (margin_cf_d169.py:92), then dividing it by a_D2_DEV yields the same bar in on-time-answer units (D177 (3)); a harm built as sum_j w_j (p_before - p_after) is in those same units (D178 (5)); so cf_protect_defer.bar can compare that harm against w_R * 0.65824 (D171 (1), D191 (1)), which is the comparison rung 4 exists to make. Every link is in the committed design log, and this change supplies the one function the chain was missing.",
+  "step_2_each_link_has_a_READ": {
+   "A_D2_DEV -> the committed rung-4 proof": "cf_pd_tests.py:83-84, which cannot run without it",
+   "attainment_margin -> the bar": "cf_protect_defer.py:166-169 at MODULE level, then bar()",
+   "the bar -> a deferral decision": "cf_protect_defer.bar(), compared against harm_on_time",
+   "harm_on_time -> on-time units": "cf_protect_defer.py:374 passes acc_cloud=1.0, acc_device=0.0, under which the committed option_value is w * p; MEASURED in proof 1, not inferred",
+   "served_in_window": "ABSENT from the decision path - NO production read. Landed for D122 (B)'s reporting window and NAMED as such in its docstring and here, because a write-only field nobody wrote down is how desired_tier happened. It implements no causal link and nothing here claims it does.",
+   "attainment_delta / lex_better": "no production read YET; they are the arithmetic the rung-4 comparison will call, landed with the margin they must be commensurable with, and exercised by the tests."
+  },
+  "step_2b_the_switch_reaches_a_decision": "The switch this change moves is WHICH PATH computes the bar, and the diff is measured on both trees: MARGIN_CF_ON_TIME_PATH reads 'FALLBACK cf_margin.MARGIN_CF / cf_ontime_frozen.A_D2_DEV' on the pristine tree and 'cf_objective.attainment_margin (the canonical function)' on the candidate tree, while MARGIN_CF_ON_TIME is 0.65824 on both. That is the intended shape: the path moves, the number does not. The decision-level diff is proof 2, and it is EMPTY BY CONSTRUCTION because the valuation is untouched.",
+  "step_3_traced_unit": "one harm row, by hand: w_j = 2.75, p_before = 1.0, p_after = 0.0, so the row is 2.75 * (1.0 - 0.0) = 2.75 on-time answers; the bar at w_R = 1 is 0.16456 / 0.250 = 0.65824; 2.75 > 0.65824, so a deferral fires. The same displacement under rung 2/3's accuracy arguments is 0.491070, which is the SAME event priced in the other currency and is why the flip is deferred. Both printed by the unit tests.",
+  "step_4_negative_control": "the bar driven to 0 and to infinity flips the comparison both ways, so the bar is what decides. For the DEFERRED flip, the control is the 5.6x measurement above, which is why it is deferred rather than landed and controlled later.",
+  "step_5_alternative_explanation": "proof 3's PASS could be produced by (a) A_D2_DEV and attainment_margin now existing [the claimed mechanism], or (b) something else in the tree having changed. (b) is excluded by construction: the two trees differ by exactly two files whose sha256 are recorded, and the control fails on exactly the two steps that depend on the new names. Proof 2's identity could be produced by (a) the change genuinely disturbing nothing, or (b) the digest being insensitive. (b) is excluded by the distinct-digest count and by the committed bars being met. What proof 2 CANNOT distinguish is whether the conversion would move decisions, because the conversion is not in this change; that is stated rather than implied."
+ },
+ "_results_consistency_check": {
+  "1_cross_check_against_committed": [
+   {
+    "quantity": "MARGIN_CF",
+    "this_run": 0.16456,
+    "prior": 0.16456,
+    "source": "v5/cf_margin.py:67 (2cb2d5c1, D169 step 3)",
+    "ratio": 1.0,
+    "agree": true
+   },
+   {
+    "quantity": "MARGIN_CF in on-time units",
+    "this_run": 0.65824,
+    "prior": 0.65824,
+    "source": "cf_pd_proofs.json and cf_pd_mechanism_tests.json, both committed",
+    "ratio": 1.0,
+    "agree": true
+   },
+   {
+    "quantity": "A_D2_DEV",
+    "this_run": 0.25,
+    "prior": 0.25,
+    "source": "v5/margin_cf_d169.py:22, and 3 more declarations all equal",
+    "ratio": 1.0,
+    "agree": true
+   },
+   {
+    "quantity": "QUEUE_TOKEN_S",
+    "this_run": "imported from d162_price.PER_QUEUE_S",
+    "prior": "same import, unchanged",
+    "source": "live2/d162_price.py",
+    "ratio": 1.0,
+    "agree": true
+   },
+   {
+    "quantity": "cf_pd_tests.py checks",
+    "this_run": "36 of 36 pass",
+    "prior": "36 of 36 (committed JSON)",
+    "source": "cf_pd_mechanism_tests.json",
+    "ratio": 1.0,
+    "agree": true
+   },
+   {
+    "quantity": "per-arm dry decision digests",
+    "this_run": "see proof 2",
+    "prior": "d179_offswitch_digest_proofs.json at the base sha",
+    "source": "committed",
+    "ratio": "exact string equality",
+    "agree": 17
+   }
+  ],
+  "2_physical_plausibility": "NO latency, throughput or size is measured. The only seconds-valued quantity is the queued-ahead delay, the COMMITTED d162_price coefficient times a driven token count, capped at the D160 (2) healthy bound with the cap counted. Nothing here is a rate, so nothing is compared against a cost curve.",
+  "3_distribution_sanity": "digests are expected CONSTANT across the two sides - that is the claim - so the guard against a degenerate hash is that they DISCRIMINATE arms; see second_positive_control for the distinct count and the row-count spread. The unit-test values are constructed and exact by design, which is why both wrong readings are pinned beside each one rather than left as an absence.",
+  "4_definition_audit": {
+   "MARGIN_CF": "0.16456, a_D2_DEV times the p90 of |P_hat - 1[on time]| over the D169 population; UNCHANGED, same definition as every prior committed use",
+   "MARGIN_CF on-time": "0.65824, that same p90 undivided; the units D177 (3) and D178 (5) use",
+   "harm": "sum over OTHER devices of w_j * (p_before - p_after), a COUNT of expected on-time cloud answers, obtained on the call by acc_cloud=1.0 and acc_device=0.0. The SAME function under rung 2/3's accuracy arguments returns the CORRECTNESS currency, and the two are 5.6x apart; one name, two units, selected by the caller - recorded here because that is exactly the kind of thing check 4 exists to catch",
+   "a dry cell": "test_hybrid.dry at 16 devices, seed 4, 1,200 s, posted knobs; identical to the committed d179 cell, same driver",
+   "the digest": "sha256 of the decision rows with arm_version removed, first 16 hex; the established recipe, unchanged"
+  },
+  "5_claim_linkage": "bears on policy_spec_v6.md:261, which records the rung-4 harm side as NOT converted and says no rung-4 result may be read until it is. This change does NOT close that row: it lands the four functions and the constant, and the conversion itself is deferred with its reason measured. It bears on no CLAIMS.md claim about the SYSTEM, because it measures no system behaviour: it is a units and plumbing result, and whether harm ever crosses the bar in a live regime is untouched and named as untouched.",
+  "6_proxy_validity": "no proxy is used. DEVICE_WAIT_FALLBACK_S = 0.567, the one superseded proxy in this file, is not read by anything this change touches.",
+  "7_validate_the_control": "the control side of proof 2 is a PRISTINE tree audited against its OWN committed digests, which is proof 4, not merely against the treatment. The control side of proof 3 is audited too and FAILS on exactly two steps, which is the required outcome: a before condition that imported cleanly would mean the proof tested nothing. Both an impossible failure and an impossible success were looked for, and the impossible-success wrapper bug and the vacuous constant audit were both found that way (step 0)."
+ },
+ "_provenance": {
+  "git_commit": "d7c09a130207a692b5e5a9f314711498bebf1796",
+  "script": "tests/test_cf_objective_d191.py + d179_offswitch_digest_proofs.py",
+  "model": "n/a (policy arithmetic and dry cells; no model, no engine)",
+  "timestamp": "2026-11-23T10:19:51.772093",
+  "device": "flash (CPU only)",
+  "n": 17,
+  "seed": 4,
+  "git_commit_note": "THE COMMIT THE PROOFS RAN ON, in the only register available inside the commit that carries the change: the proof tree was a `git archive` of d7c09a130207a692b5e5a9f314711498bebf1796 plus the two files this commit adds, and `_clean_checkout.file_sha256_in_the_proof_tree` lets a reader confirm that the bytes proved are the bytes committed. The commit's own sha cannot appear in a file the commit contains."
+ }
+}
