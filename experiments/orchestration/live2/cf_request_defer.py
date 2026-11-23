@@ -61,6 +61,37 @@ defer_s`; the opportunity is WITHHELD until then and then OFFERED AGAIN, so it i
 against the state that actually obtains. That re-offer IS the re-plan, and it is why this module
 never stores a plan: there is nothing to invalidate.
 
+THE RESIDENCY INPUT THE PREDICTION CONSUMES, STATED BECAUSE IT HAS JUST BEEN MEASURED TO MATTER.
+The latest safe start is `deadline - kappa * predicted service`, so what feeds "predicted service"
+decides whether a deferral is safe or is a self-inflicted loss. This module's caller predicts from
+`u_request`, which is `readiness_tokens - built_tokens_by_session[session]`: a RESIDENT-TOKEN
+COUNT, not a tier label. Every harm row does the same. That is deliberate and it is the input
+D190 (5) track C found the hybrid gate does NOT use:
+
+  * `hybrid_arm.py:401`, branching at `:421-426`, prices on the three-label
+    `residency_readiness()` from `cstate.py:138`, so GPU-WARM at 44 percent resident and GPU-WARM
+    at 28 percent resident price IDENTICALLY. On one partially-resident history that label
+    collapse made the estimator predict 0.6506 s against an OBSERVED 5.3166 s - 8.17x optimistic -
+    because the label said GPU-WARM while 71.3 percent of a 20,356-token prompt was uncached.
+  * The quantity that fixes it already exists and does not reach that gate
+    (`hybrid_arm.py:526-534`, `_unbuilt_rebuild_s`, feeding only the C2 risk flag at `:404-409`).
+    That is a read-that-never-reaches-a-decision, CLAUDE.md Step 2's concern.
+
+So this module does not inherit the label collapse: at 71.3 percent uncached it would predict on
+about 14,500 uncached tokens, not on a label. WHAT IT DOES INHERIT, and no safety factor is
+invented to cover it: `built_tokens_by_session` is the COORDINATOR'S BELIEF, not engine telemetry
+(D44, D47 - residency cannot be commanded), so an overstated belief understates `u` and the latest
+safe start is computed too late by exactly that much. And on the five recall questions actually
+SENT in the committed rung-3 cells, D162 UNDER-PREDICTS first token by 1.39x to 1.87x. The
+committed kappa is 1.5775, so it COVERS 1.39x AND DOES NOT COVER 1.87x.
+
+THE CONSEQUENCE IS REPORTED, NOT ENGINEERED AWAY. "Any recall made late by a deferral" is
+therefore expected to be non-zero rather than a formality, and it is the column D191 says may not
+be omitted. MARGIN_CF is not widened, kappa is not replaced and no factor is fitted to the cells
+being diagnosed: D191 item 2 says the safety factor comes from COMMITTED FIT DATA, and a parameter
+derived from a cell under diagnosis would be tuning. Every decision records `residency_input` so a
+reader can see which input priced it without taking this paragraph's word for it.
+
 WHAT THIS MODULE DOES NOT DECIDE. Whether the saving is ever large enough to clear the bar in a
 live regime, and whether a deferred recall then misses its own deadline. Both are measured, the
 second as `recall_made_late_by_a_deferral`, which is the column D191 says may not be omitted.
@@ -115,6 +146,28 @@ def arm_enables(arm: Any) -> bool:
 MIN_DEFERRAL_S = PD.DECISION_PERIOD_S
 
 ACTIONS = ("BASE", "DEFER_TO_LATEST_SAFE_START")
+
+# ON EVERY DECISION, so the exposure is in the data and not only in the docstring above.
+RESIDENCY_INPUT = {
+    "kind": "RESIDENT_TOKEN_COUNT",
+    "quantity": "u_request = readiness_tokens - built_tokens_by_session[session]",
+    "is_a_tier_label": False,
+    "why_it_matters": ("D190 (5) track C: the hybrid gate prices on the three-label "
+                       "residency_readiness(), so GPU-WARM at 44 percent resident and at 28 "
+                       "percent resident price identically; on one history that collapse was "
+                       "8.17x optimistic (0.6506 s predicted, 5.3166 s observed)"),
+    "exposure_this_module_does_inherit": (
+        "built_tokens_by_session is the coordinator's BELIEF, not engine telemetry (D44, D47), so "
+        "an overstated belief understates u and puts the latest safe start too late by that much"),
+    "measured_predictor_bias": ("D162 under-predicts first token by 1.39x to 1.87x on the five "
+                                "recall questions SENT in the committed rung-3 cells "
+                                "(d190_recall_lag_diagnosis.json)"),
+    "kappa_coverage": ("kappa = %.6f covers 1.39x and DOES NOT cover 1.87x. Not widened: D191 "
+                       "item 2 fixes the safety factor to committed FIT data, and a factor fitted "
+                       "to the cells under diagnosis would be tuning. The consequence is reported "
+                       "as 'any recall made late by a deferral' and is expected to be non-zero."
+                       % PD.KAPPA),
+}
 
 GATES = (
     "no_uncached_prefill",            # u <= 0: nothing to queue ahead of anything
@@ -250,6 +303,7 @@ def decide(*, decider_device_id: str, now_s: float,
     out["crosses_bar"] = bool(net > float(b["bar"]))
     out["units"] = ("counts of expected on-time cloud answers, per-device w_d weighted; "
                     "MARGIN_CF = %.5f on-time answers (D191 item 1)" % PD.MARGIN_CF_ON_TIME)
+    out["residency_input"] = RESIDENCY_INPUT
     if not out["crosses_bar"]:
         out["gate"] = "saving_does_not_exceed_margin"
         return out
