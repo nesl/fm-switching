@@ -105,6 +105,7 @@ sys.path.insert(0, str(HERE / "v5"))
 import cf_cost as CC                                                           # noqa: E402
 import cf_margin as CM                                                         # noqa: E402
 import cf_objective as CO                                                      # noqa: E402
+import cf_ontime_frozen as OTF                                                # noqa: E402
 
 PD_VERSION = "cf-protect-defer-1.0"
 
@@ -147,12 +148,38 @@ def arm_enables(arm: Any) -> bool:
 # ---------------------------------------------------------------------------
 # THE BAR. Derived from two committed constants by a committed function; never retyped.
 
-MARGIN_CF_ON_TIME: float = CO.attainment_margin(float(CM.MARGIN_CF))
+# IMPORT-TIME DEPENDENCY, AND WHY IT IS NOW RESOLVED AND NOT ASSUMED. This line read
+# `CO.attainment_margin(...)` unconditionally. `cf_objective.attainment_margin` and
+# `cf_objective.A_D2_DEV` are being landed by ANOTHER SESSION and exist in no commit yet, so on a
+# clean checkout this module raised `AttributeError` AT IMPORT. That is not a local inconvenience:
+# `arms_v6cf` imports this module, `arms.py` imports `arms_v6cf` and `run_live2_real.py` imports
+# `arms`, so one missing attribute made EVERY ARM IN THE HARNESS unresolvable. It happened
+# (2026-11-22 22:46): five gated rung-3 cells died at launch and the driver had to be stopped.
+#
+# THE FALLBACK IS NOT A SECOND DEFINITION OF THE NUMBER. `attainment_margin(m)` is `m / A_D2_DEV`,
+# and both inputs are already committed constants with single owners: `cf_margin.MARGIN_CF`
+# (0.16456, declared there and nowhere else in `cf_*`) and `A_D2_DEV = 0.250`, declared in
+# `v5/cf_ontime_frozen.py` and `v5/cf_ontime_d162.py`. The fallback READS those two; it retypes
+# neither, and it records WHICH path produced the number. When the canonical function lands it is
+# PREFERRED, so one definition is in force at a time and the register travels in the data.
+_MARGIN_PATH: str
+if hasattr(CO, "attainment_margin"):
+    MARGIN_CF_ON_TIME: float = float(CO.attainment_margin(float(CM.MARGIN_CF)))
+    _A_D2_DEV = float(getattr(CO, "A_D2_DEV", OTF.A_D2_DEV))
+    _MARGIN_PATH = "cf_objective.attainment_margin (the canonical function)"
+else:
+    _A_D2_DEV = float(OTF.A_D2_DEV)
+    MARGIN_CF_ON_TIME = float(CM.MARGIN_CF) / _A_D2_DEV
+    _MARGIN_PATH = ("FALLBACK cf_margin.MARGIN_CF / cf_ontime_frozen.A_D2_DEV, because "
+                    "cf_objective.attainment_margin is not in this tree yet: same arithmetic, "
+                    "same two committed constants, no new number.")
 MARGIN_CF_ON_TIME_SOURCE = (
-    "cf_objective.attainment_margin(cf_margin.MARGIN_CF) = %.5f / %.3f = %.17g; D177 (3) states "
-    "it as 0.6582 in on-time units" % (float(CM.MARGIN_CF), CO.A_D2_DEV, MARGIN_CF_ON_TIME))
+    "MARGIN_CF / A_D2_DEV = %.5f / %.3f = %.17g; D177 (3) states it as 0.6582 in on-time units. "
+    "Path: %s" % (float(CM.MARGIN_CF), _A_D2_DEV, MARGIN_CF_ON_TIME, _MARGIN_PATH))
+MARGIN_CF_ON_TIME_PATH = _MARGIN_PATH
 assert round(MARGIN_CF_ON_TIME, 4) == 0.6582, (
-    "the derived on-time margin %r does not round to D177 (3)'s 0.6582" % (MARGIN_CF_ON_TIME,))
+    "the derived on-time margin %r does not round to D177 (3)'s 0.6582 (path: %s)"
+    % (MARGIN_CF_ON_TIME, _MARGIN_PATH))
 
 WEIGHT_ON_BAR_READINGS: Tuple[str, ...] = ("decider", "max_harmed")
 WEIGHT_ON_BAR_DEFAULT = "decider"
@@ -371,7 +398,25 @@ def harm_on_time(u_rebuild: int, others: Sequence[Dict[str, Any]], *,
             "n_others_moved": int(wh.n_affected),
             "harm_by_type": {k: float(v) for k, v in sorted(by_type.items())},
             "rows": [dict(r) for r in wh.rows],
-            "on_time_units": bool(CO.ON_TIME_UNITS)}
+            # REPORTING ONLY, and `getattr` for the same reason the bar above is resolved:
+            # `cf_objective.ON_TIME_UNITS` is the D177 flag another session is landing and it is
+            # in no commit, so reading it as an attribute raised AttributeError here AT RUN TIME,
+            # on the first decision that reached the harm - not at import, which is why the
+            # import fix alone did not surface it.
+            #
+            # THE ARITHMETIC IS NOT AFFECTED EITHER WAY, and that is checked rather than hoped.
+            # The call above passes `acc_cloud=1.0, acc_device=0.0`, so the committed
+            # `option_value` evaluates to `w * (p * 1.0 + (1 - p) * p_dev * 0.0)` = `w * p`, which
+            # is exactly what D177's `ON_TIME_UNITS` branch returns. The two forms coincide ON
+            # THIS CALL by construction, which is what this module's own docstring means by
+            # keeping the accuracy arguments in the signature. So the flag's absence changes a
+            # reported field and nothing that decides.
+            "on_time_units": bool(getattr(CO, "ON_TIME_UNITS", True)),
+            "on_time_units_source": (
+                "cf_objective.ON_TIME_UNITS" if hasattr(CO, "ON_TIME_UNITS") else
+                "the flag is not in this tree; on-time units are obtained on this call by "
+                "acc_cloud=1.0 and acc_device=0.0, under which the committed option_value is "
+                "w * p, identical to the D177 branch")}
 
 
 # ---------------------------------------------------------------------------

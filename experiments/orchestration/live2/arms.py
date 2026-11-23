@@ -762,8 +762,36 @@ ARMS.update(V6FAIRFEED_ARMS)
 # cf_protect_defer no longer depends on it at import time. Rung 4's cell list is un-gated and
 # unaffected by this revert.
 #
-# from arms_v6cf import V6CF_ARMS
-# ARMS.update(V6CF_ARMS)
+# RESTORED 2026-11-23 (D190 / D191) ON THE CONDITION THE REVERT ITSELF NAMED: "or when
+# cf_protect_defer no longer depends on it at import time". It no longer does. Two import-time
+# reads of `cf_objective` attributes that exist in no commit were resolved against their own
+# committed sources, and both are reporting-or-derivation only, with the arithmetic shown to be
+# unchanged at the point of use:
+#
+#   cf_protect_defer.py  MARGIN_CF_ON_TIME   prefers `CO.attainment_margin` and otherwise reads
+#                                            `cf_margin.MARGIN_CF / cf_ontime_frozen.A_D2_DEV`,
+#                                            the same two committed constants the function
+#                                            divides. 0.65824 either way, asserted.
+#   cf_protect_defer.py  on_time_units       a REPORTED FIELD. The harm call passes
+#                                            acc_cloud=1.0, acc_device=0.0, under which the
+#                                            committed `option_value` is `w * p`, which is
+#                                            exactly D177's branch. Nothing that decides moves.
+#
+# So this is NOT the rejected move of pushing the half-finished D177 edit to unblock a GPU: that
+# edit is still another session's and is still not here. The CONDITION was met instead, which is
+# what the revert asked for. PROVED BEFORE RESTORING, on a clean `git archive` checkout with no
+# local edits: `import arms` succeeds and every arm resolves. The proof is
+# `d190_rung4_r3_proofs.json`, item "import_on_a_clean_checkout".
+from arms_v6cf import V6CF_ARMS                                         # noqa: E402
+ARMS.update(V6CF_ARMS)
+# D190 (3) / D191 item 2 RUNG 4 ON THE RUNG-3 BASE: the ladder is CUMULATIVE, so rung 4 is rung 3
+# plus the counterfactual compounds, not rung 2 plus them. `arms_v6cf` above builds them over a
+# RUNG-2 base and its own proofs record that the deficit weight is the constant 1.0 there; this
+# family wires the live weight and adds the question-deferral decision. Registered HERE for the
+# reason every v6 family above is: `run_live2_real.py` imports `arms` and `hybrid` and nothing
+# else, so a name registered only in its own module does not exist in the harness's process.
+from arms_v6cfr3 import V6CFR3_ARMS                                     # noqa: E402
+ARMS.update(V6CFR3_ARMS)
 
 
 def _register_v6_aliases() -> None:
