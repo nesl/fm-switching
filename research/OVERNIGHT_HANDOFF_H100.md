@@ -133,3 +133,4 @@ For a new file `runs/<LIST>` on origin:
   hybrid-F-lhreq-noc3 rq30 (robot on time s4 35 / s5 27 / s6 41 / s7 19) and uo (118 / 115 / 107 / 83);
   release_infeasible vs shares s4 2,685 / 70 / 12; pre-registered pass at s4: recall infeasible <= 13, robot on time
   toward 118, assistance unchanged; lateness signature if skips fall without on-time rising.
+- 19:08 USER RULING: the resumed session launches with --permission-mode auto (the interactive session's mode). Tested from the repo directory: tmux ls, ps, git status, file write and append all OK. So a resumed H100 session CAN gate lists, commit and check the driver; do so under the same rules as above.

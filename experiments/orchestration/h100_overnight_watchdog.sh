@@ -11,7 +11,8 @@
 #      deadlocks it. An orphan seen on two consecutive passes is stopped with SIGINT, then SIGKILL after 30 s.
 #      A process on GPU 2 that is not ours is NEVER touched; it is logged.
 #   3. Claude: if no claude process of this user exists and none was launched in the last 20 min, resume this
-#      conversation non-interactively in tmux "claudeh100" with the existing permission settings (no permission flags).
+#      conversation non-interactively in tmux "claudeh100" with --permission-mode auto, the mode the interactive
+#      session runs in (user ruling ~19:00, after the test showed the default mode refuses tmux, ps, git and writes).
 #      It runs from /home/pragya/Desktop because that is the project directory of the conversation being continued.
 cd /home/pragya/Desktop/fm-switching || exit 1
 export PATH=/home/pragya/.local/bin:/usr/local/bin:/usr/bin:/bin
@@ -72,6 +73,6 @@ if pgrep -u pragya -x $CPROC >/dev/null || tmux has-session -t $CSESS 2>/dev/nul
 elif [ -f $ST/claude_launched ] && [ $(( $(date +%s) - $(stat -c %Y $ST/claude_launched) )) -lt 600 ]; then
   w "claude: absent, last launch under 10 min ago, waiting"
 else
-  act "tmux new-session -d -s claudeh100 \"cd /home/pragya/Desktop && claude -c -p 'Read fm-switching/research/OVERNIGHT_HANDOFF_H100.md (and fm-switching/research/OVERNIGHT_HANDOFF.md for flash state) and continue the H100 queue under D187' >> $ST/claude_resume.log 2>&1\""
+  act "tmux new-session -d -s claudeh100 \"cd /home/pragya/Desktop && claude -c --permission-mode auto -p 'Read fm-switching/research/OVERNIGHT_HANDOFF_H100.md (and fm-switching/research/OVERNIGHT_HANDOFF.md for flash state) and continue the H100 queue under D187' >> $ST/claude_resume.log 2>&1\""
   [ "$DRY" = 1 ] || touch $ST/claude_launched
 fi
