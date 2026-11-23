@@ -1,0 +1,49 @@
+# D187 RUNG 4: protect-and-defer, on the c5attr rung-2 base. One cell per line: "arm n seed tag".
+# Lines starting # are NOT run.
+#
+# RUN AFTER RUNG 3, AHEAD OF THE REMAINING _kv0.5 CELLS. Posted by the main flash session under
+# D187 overnight autonomy. Proofs: results/orchestration/live2/frozen_test/d187_cfpd_c5attr_proofs.json
+#
+# THE TAG CARRIES _kv0.25 DELIBERATELY AND MUST NOT BE DROPPED. At DEFAULT (1x) memory this
+# mechanism moves ZERO decisions: measured tonight on this very base, covex-v6-cf-pd-c5attr with
+# the switch ON gives 9a4be873eb3c5fba / 14,218, IDENTICAL to the switch-off arm and to the
+# committed covex-v6-state-uo-c5attr base. cf_pd_proofs.json already declared that an ABSENT LINK
+# (Rule 2 unexercised), and tonight's run reproduces it independently. SO A 1x CELL IS A
+# GUARANTEED NULL and would spend four live cells rediscovering a documented absent link.
+# It fires at 0.25x, the spec section 10 REGISTERED sweep: 1,478 differing decisions, 17 request
+# deferrals, 2 chunks, 19 protects, with both Step 4 controls collapsing exactly to the OFF digest.
+#
+# THE CAVEAT THAT BOUNDS EVERY NUMBER FROM THESE CELLS, and it must travel with them exactly as the
+# driver requires for _kv0.5: _kv0.25 changes the HARNESS'S LOGICAL POOL ONLY, the coordinator's
+# belief plus enforcement at --gpu-kv-tokens 15736, with --kv-capacity-enforced. THE ENGINE'S REAL
+# vLLM ALLOCATION IS PINNED AND UNCHANGED. Protect-and-defer acts on the coordinator's pool, so it
+# should fire; but the LATENCY CONSEQUENCES of its deferrals are measured against an engine that is
+# NOT actually short of KV. A positive result says the compound is EXPRESSIBLE, FIRES, and costs
+# what it costs UNDER BELIEVED PRESSURE. It does NOT say the policy helps under real memory
+# pressure.
+#
+# A REGISTRATION GAP WAS FOUND AND FIXED BEFORE POSTING: arms_v6cf was NOT registered in arms.py,
+# and run_live2_real.py imports only `arms` and `hybrid`, so all 11 cf-pd arms were invisible in the
+# harness's own process and EVERY CELL WOULD HAVE DIED AT LAUNCH. Two additive lines fixed it; 11
+# arms now resolve at plain import. The name proof is the only reason this was caught before four
+# live cells failed at start.
+#
+# PROOFS: off-switch identity PASS (covex-v6-cf-pd-c5attr-off = 9a4be873eb3c5fba / 14,218, the
+# committed base). Name proof PASS through run_live2_real.py itself, negative control still raises.
+#
+# PRE-REGISTERED, IN THIS ORDER:
+#   1. THE PORT RULE FIRST: count the characteristic decisions live, request deferrals plus chunks.
+#      ZERO IS AN ABSENT LINK and is reported as such, NEVER as a negative about the policy.
+#   2. The three D179 checks by the committed pre-registered scorer, against base
+#      hybrid-F-lhreq-noc3 and against covex-v6-state-uo-c5attr, unchanged and not re-tuned.
+#   3. The compound targets the late alert frames behind recall prefills, so the signal is alert
+#      attainment at least the c5attr base's with robot and assistance not surrendered.
+#   4. HARM BOUND: ROBOT LATE AT MOST 10 PER SEED, because deferring a rebuild can push the
+#      deferred work past its own deadline.
+#   FAILURE CONDITION: if the characteristic decisions are zero, or the three checks do not move
+#   against the c5attr base, the mechanism is reported as NOT HELPING rather than kept for being
+#   harmless.
+covex-v6-cf-pd-c5attr 16 4 _kv0.25_L3_epg_rq30
+covex-v6-cf-pd-c5attr 16 5 _kv0.25_L3_epg_rq30
+covex-v6-cf-pd-c5attr 16 6 _kv0.25_L3_epg_rq30
+covex-v6-cf-pd-c5attr 16 7 _kv0.25_L3_epg_rq30

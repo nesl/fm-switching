@@ -1,0 +1,70 @@
+{
+ "_what": "Proofs for rung 4 (protect-and-defer) on the c5attr rung-2 base, and the pre-registration for V6CFPD_CELLS. Committed BEFORE the cell list, with digests as a file rather than in prose, which is what the H100 has had to ask for twice.",
+ "digest_recipe": "sha256(json.dumps(rows_without_arm_version, sort_keys=True, separators=(',',':'), default=float))[:16]",
+ "cell": "dry, seed 4, 16 devices, 1200 s, posted knobs, one cell per process, DEFAULT memory",
+ "A_REGISTRATION_GAP_THAT_WOULD_HAVE_KILLED_EVERY_CELL": {
+  "found": "arms_v6cf was NOT registered in arms.py. run_live2_real.py imports only `arms` and `hybrid`, so all 11 cf-pd arms were invisible in the harness's own process and every cell would have DIED AT LAUNCH.",
+  "fixed": "two additive lines in arms.py beside every other v6 family",
+  "verified": "11 cf-pd arms now resolve at PLAIN import; 198 arms total",
+  "why_it_matters": "the name proof is the only reason this was found before four live cells failed at start. A factory or module-level registration is not the same thing as resolving in the harness."
+ },
+ "off_switch_identity": {
+  "verdict": "PASS",
+  "cells": [
+   {
+    "arm": "covex-v6-cf-pd-c5attr-off",
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "equals": "the committed covex-v6-state-uo-c5attr base, 9a4be873eb3c5fba / 14218"
+   }
+  ]
+ },
+ "THE_1x_ABSENT_LINK_CONFIRMED_INDEPENDENTLY": {
+  "measured_tonight": {
+   "arm": "covex-v6-cf-pd-c5attr",
+   "switch": "ON",
+   "memory": "DEFAULT (1x)",
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "identical_to_off_and_to_base": true
+  },
+  "meaning": "at FULL POOL the switch moves ZERO decisions on this base, reproducing what cf_pd_proofs.json already declared as an ABSENT LINK (Rule 2 unexercised) rather than as a negative. A rung-4 cell list at 1x would therefore be a GUARANTEED NULL: four live cells spent to rediscover a documented absent link. That is why these cells carry _kv0.25 IN THE TAG, so the memory setting cannot be lost from the cell name.",
+  "where_it_does_fire": "0.25x memory, the spec section 10 REGISTERED sweep: 1,478 differing decisions, 17 request deferrals, 2 chunks, 19 protects, per cf_pd_proofs.json. Both Step 4 controls there collapse exactly to the OFF digest."
+ },
+ "name_proof": {
+  "_what": "covex-v6-cf-pd-c5attr resolves through run_live2_real.py itself, with a negative control",
+  "probes": {
+   "covex-v6-cf-pd-c5attr": {
+    "arm": "covex-v6-cf-pd-c5attr",
+    "rc": 0,
+    "unknown_arm": false,
+    "tail": "}"
+   },
+   "covex-v6-cf-pd-c5attr-not-an-arm": {
+    "arm": "covex-v6-cf-pd-c5attr-not-an-arm",
+    "rc": 1,
+    "unknown_arm": true,
+    "tail": "KeyError: \"unknown arm 'covex-v6-cf-pd-c5attr-not-an-arm'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstore-prefetch-noyield', 'attentionstore-prefetch-off', '"
+   }
+  },
+  "verdict": "PASS",
+  "_note": "through run_live2_real.py itself, with a negative control"
+ },
+ "THE_CAVEAT_THAT_BOUNDS_WHAT_THIS_CAN_CLAIM": "_kv0.25 changes the HARNESS'S LOGICAL POOL only: the coordinator's belief plus enforcement at --gpu-kv-tokens 15736 (study_frozen_grid_driver_v28.sh:85), with --kv-capacity-enforced. THE ENGINE'S REAL vLLM ALLOCATION IS PINNED AND UNCHANGED. Protect-and-defer acts on the coordinator's pool, so it should fire live as it does dry; but the LATENCY CONSEQUENCES of its deferrals are measured against an engine that is NOT actually short of KV. So a positive result says the compound is expressible, fires, and costs what it costs UNDER BELIEVED PRESSURE. It does NOT say the policy helps under real memory pressure. This caveat travels with every rung-4 number, exactly as the driver's own comment requires for the _kv0.5 sweep.",
+ "PRE_REGISTERED_PASS_AND_FAILURE": {
+  "port_rule_FIRST": "count the characteristic decisions live: request deferrals plus chunks. ZERO is an ABSENT LINK and is reported as such, NEVER as a negative about the policy. This is checked before any score is read.",
+  "the_three_D179_checks": "scored by the committed pre-registered scorer against base hybrid-F-lhreq-noc3 and against covex-v6-state-uo-c5attr as the rung-2 comparator, unchanged and not re-tuned for this rung",
+  "what_the_compound_targets": "the late alert frames behind recall prefills, so the signal to look for is alert attainment at least the c5attr base's with robot and assistance not surrendered",
+  "harm_bound": "ROBOT LATE AT MOST 10 PER SEED, the same bound used all night, because deferring a rebuild can push the deferred work past its own deadline",
+  "failure_condition": "if the characteristic decisions are zero, or the three checks do not move relative to the c5attr base, the mechanism is reported as not helping rather than kept for being harmless"
+ },
+ "_provenance": {
+  "git_commit": "the commit carrying this file",
+  "_note": "stamped to the commit the measurement ran on, not origin/main at writing time",
+  "script": "dumpcf.py and a harness name probe, one dry cell per process",
+  "model": null,
+  "device": "flash_cpu",
+  "n": 16,
+  "timestamp": "2026-11-22T22:34:47.050743"
+ }
+}

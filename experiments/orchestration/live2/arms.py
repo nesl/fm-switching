@@ -749,6 +749,12 @@ ARMS.update(V6SHARES_ARMS)
 from arms_v6fairfeed import V6FAIRFEED_ARMS                             # noqa: E402
 ARMS.update(V6FAIRFEED_ARMS)
 
+# D187 rung 4: protect-and-defer. Registered HERE because `run_live2_real.py` imports only `arms`
+# and `hybrid`, so an arm that is only in its own module resolves in a friendly process and then
+# DIES AT CELL START. Without these two lines every covex-v6-cf-pd cell would fail on launch.
+from arms_v6cf import V6CF_ARMS                                          # noqa: E402
+ARMS.update(V6CF_ARMS)
+
 
 def _register_v6_aliases() -> None:
     """Rungs 0, 1 and 4, which alias committed arms. Deferred into a function because the rung-0
