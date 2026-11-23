@@ -1,0 +1,447 @@
+{
+ "_what": "D187 Task 2: has anything on the LIVE PATH of `streamscout` or `lmcache` changed since their s4/s5 cells were produced? Asked because s6/s7 cells are wanted and would be compared against those s4/s5 cells.",
+ "_register": "Two registers, kept apart. (1) A STATIC CLOSURE DIFF over the module-level import closure, which is a CONSTRUCTED BOUND: it reports every file that changed, including files these arms never execute. (2) An EMPIRICAL DRY DIGEST, which is an OBSERVED comparison: the same arm, same workload, same seed, run on a clean checkout of the cell's own revision and of origin/main. The digest is the one that answers 'could a decision move'; the closure diff alone cannot, because arms_published.py imports every baseline adapter at module level, so an unrelated arm's change lands in the closure of both arms.",
+ "_tree": "every cell ran on a CLEAN checkout containing ONLY committed code, built with `git archive`, NOT in the shared worktree, which carries other sessions' uncommitted edits.",
+ "_instrument_unchanged": "hybrid/test_hybrid.py (the dry harness) and fleet/trace.py (the workload generator) are BYTE-IDENTICAL between both compared revisions and origin/main, so a digest difference would be the live path and not the instrument.",
+ "step1_revision_of_each_cell": {
+  "_how": "read from each cell's OWN run_meta.json and header.json (they agree)",
+  "cells": {
+   "streamscout_s4": {
+    "rev": "ef4a963a38c9e457dbb4e4d6fdfdd3d8fb36a42d",
+    "reachable": true,
+    "header_git_working_tree_dirty": false
+   },
+   "streamscout_s5": {
+    "rev": "50777f0d8f206e0f13c1cfe34f801e5a0385b496",
+    "reachable": false,
+    "bound": "1f557752",
+    "header_git_working_tree_dirty": false
+   },
+   "lmcache_s4": {
+    "rev": "4af40941608e089917bd02662a89e972825a91dd",
+    "reachable": false,
+    "bound": "181c9d10",
+    "header_git_working_tree_dirty": false
+   },
+   "lmcache_s5": {
+    "rev": "469929a1f79675c62cad9b1a8f0f270d713762e2",
+    "reachable": true,
+    "header_git_working_tree_dirty": false
+   }
+  },
+  "FINDING_TWO_REVISIONS_ARE_UNREACHABLE": "`50777f0d` (streamscout s5) and `4af40941` (lmcache s4) exist NEITHER locally NOR on origin: `git fetch origin <sha>` returns `upload-pack: not our ref` for both. They were never pushed, or were pushed on a history since rewritten. Each cell's header records a CLEAN tree at that sha, so the code state was a real committed state -- it is simply not recoverable. THEREFORE those two cells' own revisions CANNOT be diffed, and what is reported for them is a BOUND from the commit that ADDED the cell to git, not the cell's revision. This is a register distinction, not a technicality: the s4/s5 pair is half unverifiable."
+ },
+ "step2_static_closure_diff": {
+  "_register": "CONSTRUCTED BOUND, not a census of what these arms execute",
+  "closure_roots": [
+   "live2/coordinator.py",
+   "live2/arms.py",
+   "live2/hybrid/hybrid_arm.py",
+   "live2/arms_published.py",
+   "baselines/<arm>_adapted.py"
+  ],
+  "closure_size": 85,
+  "note": "the two arms' closures are IDENTICAL (85 files), because arms_published.py imports every baseline adapter at module level.",
+  "streamscout_s4_own_rev": {
+   "ref": "ef4a963a38c9e457dbb4e4d6fdfdd3d8fb36a42d",
+   "closure_files": 85,
+   "changed": 13,
+   "could_move_a_decision": 13,
+   "docstring_only": 0,
+   "verdict": "LIVE PATH CHANGED EXECUTABLY in 13 file(s): ['cascade_adapted.py', 'arms.py', 'arms_v6c5.py', 'arms_v6fairfeed.py', 'arms_v6shares.py', 'arms_v6state.py', 'coordinator.py', 'deficit_feed.py', 'deficit_gain_d178.py', 'hybrid_arm.py', 'release_recheck.py', 'share_admission.py', 'share_capacity.py']",
+   "rows": [
+    {
+     "file": "experiments/orchestration/baselines/cascade_adapted.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "50",
+     "deleted": "2"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "40",
+     "deleted": "0"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6c5.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6fairfeed.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6shares.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6state.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "62",
+     "deleted": "2"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "532",
+     "deleted": "7"
+    },
+    {
+     "file": "experiments/orchestration/live2/deficit_feed.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/deficit_gain_d178.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/hybrid/hybrid_arm.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "96",
+     "deleted": "3"
+    },
+    {
+     "file": "experiments/orchestration/live2/release_recheck.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/share_admission.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/share_capacity.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    }
+   ]
+  },
+  "lmcache_s5_own_rev": {
+   "ref": "469929a1f79675c62cad9b1a8f0f270d713762e2",
+   "closure_files": 85,
+   "changed": 12,
+   "could_move_a_decision": 12,
+   "docstring_only": 0,
+   "verdict": "LIVE PATH CHANGED EXECUTABLY in 12 file(s): ['arms.py', 'arms_v6c5.py', 'arms_v6fairfeed.py', 'arms_v6shares.py', 'arms_v6state.py', 'coordinator.py', 'deficit_feed.py', 'deficit_gain_d178.py', 'hybrid_arm.py', 'release_recheck.py', 'share_admission.py', 'share_capacity.py']",
+   "rows": [
+    {
+     "file": "experiments/orchestration/live2/arms.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "40",
+     "deleted": "0"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6c5.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6fairfeed.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6shares.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6state.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "62",
+     "deleted": "2"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "532",
+     "deleted": "7"
+    },
+    {
+     "file": "experiments/orchestration/live2/deficit_feed.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/deficit_gain_d178.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/hybrid/hybrid_arm.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "96",
+     "deleted": "3"
+    },
+    {
+     "file": "experiments/orchestration/live2/release_recheck.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/share_admission.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/share_capacity.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    }
+   ]
+  },
+  "streamscout_s5_BOUND": {
+   "ref": "1f557752",
+   "closure_files": 85,
+   "changed": 12,
+   "could_move_a_decision": 12,
+   "docstring_only": 0,
+   "verdict": "LIVE PATH CHANGED EXECUTABLY in 12 file(s): ['arms.py', 'arms_v6c5.py', 'arms_v6fairfeed.py', 'arms_v6shares.py', 'arms_v6state.py', 'coordinator.py', 'deficit_feed.py', 'deficit_gain_d178.py', 'hybrid_arm.py', 'release_recheck.py', 'share_admission.py', 'share_capacity.py']",
+   "rows": [
+    {
+     "file": "experiments/orchestration/live2/arms.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "40",
+     "deleted": "0"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6c5.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6fairfeed.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6shares.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6state.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "62",
+     "deleted": "2"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "532",
+     "deleted": "7"
+    },
+    {
+     "file": "experiments/orchestration/live2/deficit_feed.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/deficit_gain_d178.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/hybrid/hybrid_arm.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "96",
+     "deleted": "3"
+    },
+    {
+     "file": "experiments/orchestration/live2/release_recheck.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/share_admission.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/share_capacity.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    }
+   ]
+  },
+  "lmcache_s4_BOUND_via_s5_commit": {
+   "ref": "181c9d10",
+   "closure_files": 85,
+   "changed": 12,
+   "could_move_a_decision": 12,
+   "docstring_only": 0,
+   "verdict": "LIVE PATH CHANGED EXECUTABLY in 12 file(s): ['arms.py', 'arms_v6c5.py', 'arms_v6fairfeed.py', 'arms_v6shares.py', 'arms_v6state.py', 'coordinator.py', 'deficit_feed.py', 'deficit_gain_d178.py', 'hybrid_arm.py', 'release_recheck.py', 'share_admission.py', 'share_capacity.py']",
+   "rows": [
+    {
+     "file": "experiments/orchestration/live2/arms.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "40",
+     "deleted": "0"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6c5.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6fairfeed.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6shares.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/arms_v6state.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "62",
+     "deleted": "2"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "532",
+     "deleted": "7"
+    },
+    {
+     "file": "experiments/orchestration/live2/deficit_feed.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/deficit_gain_d178.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/hybrid/hybrid_arm.py",
+     "status": "CHANGED",
+     "verdict": "COULD-MOVE-A-DECISION",
+     "added": "96",
+     "deleted": "3"
+    },
+    {
+     "file": "experiments/orchestration/live2/release_recheck.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/share_admission.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    },
+    {
+     "file": "experiments/orchestration/live2/share_capacity.py",
+     "status": "ADDED-SINCE",
+     "verdict": "COULD-MOVE-A-DECISION (new module on the live path)"
+    }
+   ]
+  },
+  "files_that_changed_executably": [
+   "live2/arms.py",
+   "live2/coordinator.py",
+   "live2/hybrid/hybrid_arm.py",
+   "live2/arms_v6c5.py",
+   "live2/arms_v6fairfeed.py",
+   "live2/arms_v6shares.py",
+   "live2/arms_v6state.py",
+   "live2/deficit_feed.py (ADDED)",
+   "live2/deficit_gain_d178.py (ADDED)",
+   "live2/release_recheck.py (ADDED)",
+   "live2/share_admission.py (ADDED)",
+   "live2/share_capacity.py (ADDED)",
+   "baselines/cascade_adapted.py (streamscout_s4 only)"
+  ],
+  "NOT_changed": "baselines/streamscout_adapted.py, baselines/lmcache_adapted.py, live2/arms_published.py, live2/cstate.py, baselines/interface.py, baselines/costs.py, live2/scores.py are ALL IDENTICAL since both reachable revisions. Neither arm's OWN module changed.",
+  "why_the_changed_files_are_gated": "the coordinator additions (+532/-7 since ef4a963a) are the D178/D179 share-admission and release-recheck work. Both are gated on INSTANCE attributes that default False (`share_admission.arm_enables` / `release_recheck.arm_enables`, which RAISE on a truthy class attribute), and `coordinator._share_ok` returns True unchanged when the switch is off. A repo-wide grep shows `live2_share_admission` and `live2_release_recheck` are set ONLY in d179_release_recheck_proofs.py and d179_share_tests.py -- never in arms_published.py, never for these two arms. The one ungated addition in `_expire` is a MEASUREMENT MIRROR whose decision-bearing half sits under `if self._share_admission`. streamscout_adapted.py does not import cascade_adapted, so that change cannot reach it. hybrid/hybrid_arm.py is executed only by hybrid-* arms. THIS IS A READING OF THE CODE AND IS WEAKER THAN A MEASUREMENT, which is why step 3 exists."
+ },
+ "step3_empirical_dry_digest": {
+  "_register": "OBSERVED. One dry cell per process, posted knobs, seed 4, 16 devices, 1200 s.",
+  "_claim": "if nothing on the arm's live path moved a decision, the same arm on the same workload must give the SAME digest on the cell's revision and on origin/main.",
+  "streamscout": {
+   "revision_compared": "ef4a963a (streamscout s4's OWN revision)",
+   "on_cell_revision": {
+    "digest": "30b2806a117c9c57",
+    "rows": 12249,
+    "kinds": {
+     "release_monitor": 11760,
+     "release_recall": 132,
+     "decline": 357
+    }
+   },
+   "on_origin_main": {
+    "digest": "30b2806a117c9c57",
+    "rows": 12249,
+    "kinds": {
+     "release_monitor": 11760,
+     "release_recall": 132,
+     "decline": 357
+    }
+   },
+   "identical": true
+  },
+  "lmcache": {
+   "revision_compared": "469929a1 (lmcache s5's OWN revision)",
+   "on_cell_revision": {
+    "digest": "2b789696e98821c4",
+    "rows": 37080,
+    "kinds": {
+     "release_monitor": 11764,
+     "release_whole": 454,
+     "release_recall": 434,
+     "state_action": 24428
+    }
+   },
+   "on_origin_main": {
+    "digest": "2b789696e98821c4",
+    "rows": 37080,
+    "kinds": {
+     "release_monitor": 11764,
+     "release_whole": 454,
+     "release_recall": 434,
+     "state_action": 24428
+    }
+   },
+   "identical": true
+  }
+ },
+ "_provenance": {
+  "git_commit": "d0675b6338a10ef4cc91c90cb9993c92eecc8a15",
+  "_git_commit_register": "THE COMMIT THE MEASUREMENT RAN ON, not origin/main at writing time",
+  "script": "scratchpad drycell.py / closure.py / diffclose.py over committed code",
+  "model": "none-dry",
+  "device": "nvidia_rtx_a6000",
+  "n": 16,
+  "timestamp": "2026-11-23T07:40:49-08:00"
+ },
+ "VERDICT_ON_COMPARABILITY": {
+  "streamscout": "COMPARABLE on the measured half: s4's own revision ef4a963a and origin/main give a BYTE-IDENTICAL dry decision log for this arm on the posted workload, so no live-path change moved a decision for it. s5's revision 50777f0d is UNREACHABLE and was NOT measured.",
+  "lmcache": "COMPARABLE on the measured half: s5's own revision 469929a1 and origin/main give a BYTE-IDENTICAL dry decision log for this arm on the posted workload. s4's revision 4af40941 is UNREACHABLE and was NOT measured.",
+  "THE_RESIDUAL_AND_IT_IS_NOT_MINE_TO_RULE": "For each arm, ONE of the two existing cells ran on a revision that no longer exists (streamscout s5 = 50777f0d, lmcache s4 = 4af40941). Those two cells cannot be shown comparable by diff or by measurement, only bounded by the commit that added them. So: the live path is PROVED quiet for each arm across its one reachable revision, and UNVERIFIABLE across the other. I do NOT claim the full s4/s5 pair remains comparable with new s6/s7 cells. Reported for the main session to rule.",
+  "mechanisms_confirmed_off": "neither arm sets live2_share_admission or live2_release_recheck, so the D178/D179 additions are inert for them; D188's frozen floors and W_max are untouched and live2_qcache_key_fix is not enabled."
+ }
+}

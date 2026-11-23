@@ -1,0 +1,269 @@
+{
+ "_what": "D187: kvflow-prefetch on the D164 FINAL workload (tag _L3_epg_rq30, posted knobs). Three proofs gating the KVFLOW_CELLS list: the PORT RULE on this workload, off-switch identity, and a name proof through run_live2_real.py itself.",
+ "_register": "DRY decision-path cells, stub bridge, no engine, no server. Every number here is a COUNT OF DECISIONS or a digest, never seconds; nothing here is a measured latency, quality or capacity result. `prefills_issued` is an OBSERVED COUNT of release_piece/release_whole rows in the coordinator's own decision log (arms_kvprefetch.py:603). The `prefetch_*` figures are the arm's ASKS, one per promoted session per epoch, most of which no-op; they are NOT a decision count and must not be reported as one.",
+ "_tree": "every cell ran on a CLEAN checkout containing ONLY what is committed at d0675b6338a10ef4cc91c90cb9993c92eecc8a15, built with `git archive`, NOT in the shared worktree, which carries other sessions' uncommitted edits.",
+ "_concurrency": {
+  "positive_control": 1,
+  "port_rule_cell": 1,
+  "offswitch_cells": 2,
+  "note": "stated because host load is a parameter of this dry harness (d184_r3_wallclock_probe.json). The positive control was run ALONE and reproduces its committed digest exactly, which is the one direction a dirty or perturbed tree cannot fake."
+ },
+ "cell": {
+  "seed": 4,
+  "n": 16,
+  "run_s": 1200.0,
+  "ratio": "40:40:20",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0
+ },
+ "_standing_caveats_on_every_dry_row": [
+  "NO MEMORY LIMIT IS ENFORCED in a dry cell (the standing caveat recorded in research/STATUS.md on every dry row). These cells run at FULL (1x) memory by the harness's default pool, and nothing here measures behaviour under KV pressure.",
+  "DRY means the stub bridge and NO engine and NO server, so no cache of any kind is consulted and there is no warm/cold distinction to state: no latency is measured at all.",
+  "Host load is a parameter of this dry harness (d184_r3_wallclock_probe.json). Concurrency is recorded per proof and the headline cell was re-run in a separate process."
+ ],
+ "proofA_PORT_RULE_on_this_workload": {
+  "_claim": "CLAUDE.md port rule: the characteristic decision this arm exists to make occurs at least once ON THIS WORKLOAD. Required because the committed proof (kvflow_prefetch_proofs.json, at 55ec283) found it UNEXPRESSIBLE and therefore ZERO on the committed harness of the day.",
+  "decision_kind_counted": "prefetch_ahead: a MATERIALIZE for a session the cloud holds frames for and that has NO pending question, observed as release_whole / release_piece rows in the coordinator's decision log",
+  "prefills_issued_treatment": 108,
+  "prefills_issued_control_off": 9,
+  "prefills_issued_base_kvflow": 9,
+  "attributable_to_prefetch_ahead": 99,
+  "arm_asks": {
+   "prefetch_wanted": 19209,
+   "prefetch_ahead_emitted": 99,
+   "prefetch_ahead_unexpressible": 19107,
+   "node_set_widened_by": 2289063,
+   "steps_finite": 109923,
+   "prefetch_yielded_epochs": 2
+  },
+  "why_nonzero_now": "PATCH 1 of reports/study_engine_actions.md section 3.1 HAS LANDED since the committed proof was written: interface.py:165 declares Observation.live_sessions, interface.py:282 unions it into validate_action's known_sessions, and cstate.py:637 emits it. The committed proof's Step 0 finding ('warming ahead is still NOT expressible at origin/main') is pinned to 55ec283 and is now STALE. The arm was never changed; the channel it acts through was opened.",
+  "cross_run_reproduction_control": {
+   "_why": "host load is a parameter of this dry harness (d184_r3_wallclock_probe.json), so the headline cell was run twice in separate processes and the second run is reported beside the first rather than replacing it.",
+   "run1_concurrency_1_alone": {
+    "digest": "0e3ba03d2e7ff3b3",
+    "rows": 32316,
+    "prefills_issued": 108,
+    "prefetch_ahead_emitted": 99
+   },
+   "run2": {
+    "digest": "0e3ba03d2e7ff3b3",
+    "rows": 32316,
+    "prefills_issued": 108,
+    "prefetch_ahead_emitted": 99
+   },
+   "reproduced": true
+  },
+  "verdict": "PASS: 108 prefetch-ahead prefills on this workload against the base's 9, so the characteristic decision occurs. NOT a relabelled zero.",
+  "residual_limit_declared": "prefetch_ahead_unexpressible is 19107 against 99 emitted, so MOST asks are still refused by validate_action (the session is neither warm, nor pending, nor live at that epoch). The mechanism is live and reaches a decision; it is not fully expressed. This is declared on every row of this arm."
+ },
+ "proofB_offswitch_identity": {
+  "_claim": "kvflow-prefetch-off must collapse to the committed base kvflow, and the treatment must differ from both. A treatment digest equal to the base's would be an ABSENT LINK.",
+  "_digest_recipe": "sha256(json.dumps(rows_without_arm_version, sort_keys=True, separators=(',',':'), default=float))[:16]",
+  "table": [
+   {
+    "arm": "kvflow (base)",
+    "knobs": "posted",
+    "digest": "5f1e4f703d316740",
+    "rows": 17322,
+    "prefills_issued": 9,
+    "committed_value": null,
+    "label": "FIRST RUN on this workload: no committed value exists for this cell"
+   },
+   {
+    "arm": "kvflow-prefetch-off",
+    "knobs": "posted",
+    "digest": "5f1e4f703d316740",
+    "rows": 17322,
+    "prefills_issued": 9,
+    "committed_value": null,
+    "label": "FIRST RUN on this workload"
+   },
+   {
+    "arm": "kvflow-prefetch",
+    "knobs": "posted",
+    "digest": "0e3ba03d2e7ff3b3",
+    "rows": 32316,
+    "prefills_issued": 108,
+    "committed_value": null,
+    "label": "FIRST RUN on this workload"
+   }
+  ],
+  "off_identical_to_base": true,
+  "treatment_differs_from_base": true,
+  "committed_values_for_this_cell": "NONE. The committed kvflow_prefetch_proofs.json ran the same seed/n/run_s/ratio/question-sets but on the DEFAULT dashcam_format=oneframe, robot_upload=batch-30s, robot_reask_mean_s=0.0 -- NOT the posted _L3_epg_rq30 workload. So these three posted-workload rows are FIRST RUNS, labelled as such, and are NOT an audit of a committed value.",
+  "verdict": "PASS: off is byte-identical to the base (5f1e4f703d316740) and the treatment differs (0e3ba03d2e7ff3b3), so the arm adds nothing outside its one channel and that channel reaches a decision."
+ },
+ "proofB2_positive_control_against_a_committed_value": {
+  "_claim": "CLAUDE.md check 7: validate the CONTROL, not only the result. A known-good committed arm must reproduce its committed numbers on this tree and recipe; if it fails, the check is broken, not the arm.",
+  "cell": {
+   "seed": 4,
+   "n": 16,
+   "run_s": 1200.0,
+   "ratio": "40:40:20",
+   "robot_question_set": "lh_req",
+   "ss_question_set": "ss2",
+   "dashcam_format": "oneframe",
+   "robot_upload": "batch-30s",
+   "robot_reask_mean_s": 0.0
+  },
+  "concurrency": "1 (run ALONE)",
+  "quantity": [
+   {
+    "quantity": "kvflow base digest",
+    "this_run": "7fa6b4aa9a9dd9c6",
+    "committed": "7fa6b4aa9a9dd9c6",
+    "source": "results/orchestration/live2/kv_prefetch/kvflow_prefetch_proofs.json proof2_fairness_digest.base_digest"
+   },
+   {
+    "quantity": "kvflow base decision rows",
+    "this_run": 13947,
+    "committed": 13947,
+    "source": "same file, proof1_well_formedness.decisions_base"
+   },
+   {
+    "quantity": "kvflow base prefills_issued",
+    "this_run": 0,
+    "committed": 0,
+    "source": "same file, proof3.prefills_issued_base"
+   },
+   {
+    "quantity": "kvflow base kind census",
+    "this_run": {
+     "release_monitor": 13193,
+     "state_action": 377,
+     "release_recall": 377
+    },
+    "committed": {
+     "release_monitor": 13193,
+     "state_action": 377,
+     "release_recall": 377
+    },
+    "source": "same file, check7_positive_control.base_census.kinds"
+   }
+  ],
+  "verdict": "PASS: every committed quantity reproduced EXACTLY on this clean tree and this digest recipe, so the instrument is sound and the comparisons above are readable."
+ },
+ "proofC_name_proof_through_the_harness": {
+  "_what": "kvflow-prefetch names resolve through run_live2_real.py itself, posted knobs",
+  "_register": "the harness's OWN entry point as a subprocess with the real command line, NOT a bare make_arm in a friendly process",
+  "entry_point": "experiments/orchestration/live2/run_live2_real.py",
+  "clean_tree": "committed-only checkout of origin/main (no working-tree edits)",
+  "posted_knobs": [
+   "--ratio",
+   "40:40:20",
+   "--robot-question-set",
+   "lh_req",
+   "--ss-question-set",
+   "ss2",
+   "--dashcam-format",
+   "epg",
+   "--robot-upload",
+   "per-frame",
+   "--robot-reask-mean-s",
+   "30.0",
+   "--seed",
+   "4"
+  ],
+  "registered_in": "experiments/orchestration/live2/arms.py:678 (from arms_kvprefetch import KVPREFETCH_ARMS)",
+  "P0_negative_control": {
+   "_claim": "a name that is NOT registered still raises through this same path",
+   "probe": {
+    "arm": "kvflow-prefetch-not-an-arm",
+    "returncode": 1,
+    "raised_unknown_arm": true,
+    "cmd": "run_live2_real.py --arm kvflow-prefetch-not-an-arm + posted knobs",
+    "tail": "KeyError: \"unknown arm 'kvflow-prefetch-not-an-arm'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstore-prefetch-noyield', 'attentionstore-prefetch-off', 'b10-blocking-aware', 'b7-edf-feasibility', 'b9', 'builder-acfcfs', 'builder-default', 'builder-s1-fairshar"
+   },
+   "verdict": "PASS: the check can see an unresolved name"
+  },
+  "names": [
+   {
+    "arm": "kvflow-prefetch",
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "cmd": "run_live2_real.py --arm kvflow-prefetch + posted knobs",
+    "tail": "}"
+   },
+   {
+    "arm": "kvflow-prefetch-off",
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "cmd": "run_live2_real.py --arm kvflow-prefetch-off + posted knobs",
+    "tail": "}"
+   }
+  ],
+  "all_resolve": true,
+  "verdict": "PASS: both names resolve through the harness's own entry point with the posted knobs"
+ },
+ "consistency_check": {
+  "1_cross_check_against_committed": {
+   "table": [
+    {
+     "quantity": "kvflow base digest, committed-proof cell",
+     "this_run": "(see positive control)",
+     "prior": "7fa6b4aa9a9dd9c6",
+     "source": "kvflow_prefetch_proofs.json",
+     "ratio": 1.0,
+     "agree": "AGREE, exactly"
+    },
+    {
+     "quantity": "kvflow base decision rows, same cell",
+     "this_run": 13947,
+     "prior": 13947,
+     "source": "same",
+     "ratio": 1.0,
+     "agree": "AGREE, exactly"
+    },
+    {
+     "quantity": "kvflow base prefills_issued, same cell",
+     "this_run": 0,
+     "prior": 0,
+     "source": "same",
+     "ratio": 1.0,
+     "agree": "AGREE"
+    },
+    {
+     "quantity": "kvflow-prefetch prefills on the POSTED workload",
+     "this_run": 108,
+     "prior": "0 committed / 87 shimmed",
+     "source": "same, proof3",
+     "ratio": "not comparable",
+     "agree": "NOT A DISAGREEMENT: different workload AND different harness. The prior ran oneframe/batch-30s/no-re-asks, and ran BEFORE PATCH 1 landed. Explained, not reconciled away."
+    }
+   ],
+   "verdict": "PASS: every quantity with a prior on the SAME cell agrees exactly."
+  },
+  "2_physical_plausibility": "NOT APPLICABLE AND SAID SO RATHER THAN SKIPPED: every number in this file is a COUNT OF DECISIONS or a digest. No latency, throughput or size is measured or reported, so there is no implied rate to compare against the committed cost curves.",
+  "3_distribution_sanity": "The port rule is a COUNT ON ONE CELL, which is the register the task asks for, so no median over items is reported and none should be read in. The count is NOT a suspicious constant: it is corroborated by a second, independent route (the arm's own prefetch_ahead_emitted = 99 equals the observed 108 minus the base's 9), and the cell was re-run in a separate process as a cross-run reproduction control. The per-seed spread across seeds 4 to 7 is NOT claimed here and will come from the live cells.",
+  "4_definition_audit": {
+   "prefills_issued": "count of release_piece / release_whole rows in the coordinator decision log. IDENTICAL to the committed definition at arms_kvprefetch.py:603, read from that line rather than re-chosen.",
+   "prefetch_ahead": "a MATERIALIZE for a session the cloud holds frames for and that has NO pending question. Verbatim the committed proof3 `characteristic` string.",
+   "digest": "sha256 over decision rows with `arm_version` removed, the established recipe. Validated by reproducing a committed digest exactly.",
+   "posted knobs / _L3_epg_rq30": "16 devices, FULL 1x memory, 1200 s, 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0 -- the same definition BASELINE_MATRIX's header gives.",
+   "verdict": "PASS: no name is used here with a definition other than its committed one. The ONE definitional difference is flagged rather than absorbed: the committed proof's cell is NOT the posted workload."
+  },
+  "5_claim_linkage": "Bears on the spec v6 section 10 baseline comparison: whether kvflow-prefetch is a fair representative of its published system on the final workload. It SUPPORTS running it, and it WEAKENS any reading of the arm as fully expressed, because 19,107 of 19,209 asks are still refused. Nothing here measures KV transfer between heterogeneous tiers, which FORMULATION.md Scoping puts out of scope.",
+  "6_proxy_validity": "NO PROXY IS USED for the port-rule count: it is an OBSERVED count of rows in the coordinator's own decision log, not a stand-in. The arm's `prefetch_*` counters WOULD be a proxy for the decision count and are deliberately NOT used as one; they are reported separately and labelled ASKS.",
+  "7_validate_the_control": "DONE, and it is the reason the positive control exists in this file: the committed `kvflow` base was audited against its own committed numbers BEFORE the off-switch comparison was read, and reproduced all four of them exactly. A broken control passes every check applied to the treatment."
+ },
+ "_provenance": {
+  "git_commit": "d0675b6338a10ef4cc91c90cb9993c92eecc8a15",
+  "_git_commit_register": "THE COMMIT THE MEASUREMENT RAN ON, not origin/main at writing time. Verified separately that NO file in the live-path import closure differs between this commit and origin/main at writing time, so these numbers still hold at the tip.",
+  "script": "scratchpad drycell.py / nameproof.py over committed origin/main code",
+  "model": "none-dry",
+  "device": "nvidia_rtx_a6000",
+  "n": 16,
+  "timestamp": "2026-11-23T07:43:43-08:00"
+ },
+ "summary": {
+  "port_rule": "PASS",
+  "offswitch": "PASS",
+  "positive_control": "PASS",
+  "name_proof": "PASS",
+  "cross_run_reproduced": true,
+  "all_pass": true
+ }
+}

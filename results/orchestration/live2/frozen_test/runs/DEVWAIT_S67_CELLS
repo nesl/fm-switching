@@ -1,0 +1,75 @@
+# D187 DEVWAIT_S67_CELLS. One cell per line: "arm n seed tag". Lines starting # are NOT run.
+#
+# The s6/s7 half of the two arms BASELINE_MATRIX lists only at seeds 4 and 5: `streamscout`
+# (released in runs/DEVWAIT_READY) and `lmcache` (port proof passed 2026-11-21).
+#
+# WORKLOAD, identical to BASELINE_MATRIX's: 16 devices, FULL (1x) memory, 1200 s, ratio 40:40:20,
+# robot question set lh_req, single-shot set ss2, dashcam_format epg, robot_upload per-frame,
+# robot_reask_mean_s 30.0. That is the tag _L3_epg_rq30. Seeds 6 and 7 only.
+#
+# D188 HOLDS: the floors and W_max are FROZEN and `live2_qcache_key_fix` is NOT enabled. Checked,
+# not assumed: neither arm sets `live2_share_admission` or `live2_release_recheck`.
+#
+# ---- WHY THIS IS A SEPARATE LIST AND NOT LINES APPENDED TO BASELINE_MATRIX
+# Because it carries a caveat BASELINE_MATRIX does not, and because a separate list can be
+# re-gated or withdrawn without editing a file the H100 is consuming mid-sweep.
+#
+# ---- THE PORT RULE IS NOT RE-PROVED HERE, AND NOT CLAIMED HERE
+# streamscout's stands in runs/DEVWAIT_READY and baseline_matrix_table.py (132 of 132 escalations
+# at seed 4). lmcache's stands in results/orchestration/live2/offload_verify/lmcache_port.json
+# (2026-11-21: 63,747 state_action LRU tier assignments and 26 release_whole prefills in a dry
+# 16-device seed-4 cell). Neither is restated as mine.
+#
+# ---- WHAT WAS ACTUALLY CHECKED: HAS THE LIVE PATH MOVED SINCE s4/s5?
+# Check committed as a FILE, with its own measured numbers and its `_provenance.git_commit` set to
+# the commit the MEASUREMENT ran on:
+#   results/orchestration/live2/frozen_test/d187_streamscout_lmcache_livepath_check.json
+#
+# Each cell's code revision was read from its OWN run_meta.json and header.json, which agree and
+# all record a CLEAN working tree:
+#   streamscout s4  ef4a963a   REACHABLE
+#   streamscout s5  50777f0d   UNREACHABLE
+#   lmcache     s4  4af40941   UNREACHABLE
+#   lmcache     s5  469929a1   REACHABLE
+#
+# TWO OF THE FOUR REVISIONS NO LONGER EXIST. `50777f0d` and `4af40941` are absent locally and
+# `git fetch origin <sha>` returns `upload-pack: not our ref` for both: never pushed, or pushed on
+# a history since rewritten. Those two cells' revisions therefore CANNOT be diffed or re-run, and
+# are only BOUNDED by the commit that added them to git. That is a register distinction, not a
+# technicality: the existing s4/s5 pair is HALF UNVERIFIABLE.
+#
+# FOR THE TWO REACHABLE REVISIONS THE ANSWER IS A MEASUREMENT, NOT A READING OF THE DIFF. The same
+# arm, same posted workload, same seed 4, one dry cell per process, run on a clean committed-only
+# checkout of the cell's own revision AND of origin/main:
+#   streamscout   ef4a963a  30b2806a117c9c57 / 12,249      origin/main  30b2806a117c9c57 / 12,249
+#   lmcache       469929a1  2b789696e98821c4 / 37,080      origin/main  2b789696e98821c4 / 37,080
+# The dry harness (hybrid/test_hybrid.py) and the workload generator (fleet/trace.py) are
+# BYTE-IDENTICAL across all three revisions, so a digest difference would be the live path and not
+# the instrument.
+#
+# THE STATIC CLOSURE DIFF IS REPORTED AS A CONSTRUCTED BOUND, NOT A CENSUS. Over the 85-file
+# module-level import closure of (coordinator.py, arms.py, hybrid/hybrid_arm.py, arms_published.py,
+# the arm's own adapter), 12 to 13 files changed executably, including coordinator.py (+532/-7) and
+# hybrid/hybrid_arm.py (+96/-3). But NEITHER ARM'S OWN MODULE CHANGED, and arms_published.py,
+# cstate.py, interface.py, costs.py and scores.py are all identical. The closure is large and
+# identical for both arms only because arms_published.py imports every baseline adapter at module
+# level, so an unrelated arm's change lands in both closures. The coordinator additions are the
+# D178/D179 share-admission and release-recheck work, gated on INSTANCE attributes that default
+# False (arm_enables RAISES on a truthy class attribute), with `_share_ok` returning True unchanged
+# when the switch is off; a repo-wide grep finds those attributes set ONLY in d179_* proof scripts.
+# streamscout_adapted.py does not import cascade_adapted, so that file's change cannot reach it.
+# hybrid/hybrid_arm.py is executed only by hybrid-* arms.
+#
+# ---- VERDICT, AND THE PART THAT IS NOT MINE TO RULE
+# The live path is PROVED QUIET BY MEASUREMENT for each arm across its ONE REACHABLE revision, and
+# is UNVERIFIABLE across the other. SO: THESE s6/s7 CELLS ARE NOT CERTIFIED HERE AS PAIRABLE WITH
+# THE EXISTING s4/s5 CELLS. The s4 side of lmcache and the s5 side of streamscout rest on revisions
+# that cannot be recovered. Reported for the main session to rule; if it rules the pair unusable,
+# the remedy is to rerun s4/s5 on origin/main, and these two lines per arm are still the s6/s7 half
+# of that set either way.
+#
+# ---------------------------------------------------------------- RUN NOW
+streamscout 16 6 _L3_epg_rq30
+streamscout 16 7 _L3_epg_rq30
+lmcache 16 6 _L3_epg_rq30
+lmcache 16 7 _L3_epg_rq30

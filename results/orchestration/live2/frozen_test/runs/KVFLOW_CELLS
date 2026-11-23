@@ -1,0 +1,88 @@
+# D187 KVFLOW_CELLS. One cell per line: "arm n seed tag". Lines starting # are NOT run.
+#
+# kvflow-prefetch, seeds 4 to 7, on the D164 FINAL workload. A spec v6 section 10 baseline that
+# has NEVER been run on this workload.
+#
+# WORKLOAD, identical to BASELINE_MATRIX's and to every proof below: 16 devices, FULL (1x) memory,
+# 1200 s, ratio 40:40:20, robot question set lh_req, single-shot set ss2, dashcam_format epg,
+# robot_upload per-frame, robot_reask_mean_s 30.0, deadlines dashcam 1.0 s / robot 3.0 s /
+# single-shot 2.0 s. That is the tag _L3_epg_rq30. Seeds 4 to 7 only; never 1 to 3, never HOLDOUT.
+#
+# D188 HOLDS on every cell here: the floors and W_max are FROZEN and `live2_qcache_key_fix` is NOT
+# enabled. These arms set neither `live2_share_admission` nor `live2_release_recheck`.
+#
+# ---------------------------------------------------------------- THE PROOFS THIS LIST IS GATED ON
+# All three are COMMITTED AS A FILE, not asserted here:
+#   results/orchestration/live2/kv_prefetch/d187_kvflow_prefetch_posted_proofs.json
+# whose `_provenance.git_commit` is THE COMMIT THE MEASUREMENT RAN ON (d0675b63), not origin/main
+# at writing time. No file in the live-path import closure differs between d0675b63 and the
+# origin/main this list is committed on, so the numbers hold at the tip.
+#
+# (a) THE PORT RULE ON THIS WORKLOAD: PASS.
+#     Decision kind counted: `prefetch_ahead` -- a MATERIALIZE for a session the cloud holds
+#     frames for and that has NO pending question, observed as release_whole rows in the
+#     coordinator's own decision log (the committed definition, arms_kvprefetch.py:603).
+#     COUNT: 108 release_whole on a dry seed-4 cell with the posted knobs, against the committed
+#     base `kvflow`'s 9 on the SAME cell, so 99 are attributable to prefetch-ahead. That 99 equals
+#     the arm's own `prefetch_ahead_emitted` of 99 EXACTLY, which is the internal agreement the
+#     count needs: an observed log count and the arm's own emitted counter arrived at the same
+#     number by different routes.
+#     REGISTER, kept at the point of use: 108 and 9 are OBSERVED COUNTS of decision rows. The
+#     `prefetch_*` figures are the arm's ASKS, one per promoted session per epoch, most of which
+#     no-op; they are NOT a decision count.
+#
+#     WHY THIS IS NON-ZERO NOW, AND WHY THE COMMITTED PROOF SAYS ZERO. The committed
+#     kvflow_prefetch_proofs.json (at 55ec283) found the mechanism UNEXPRESSIBLE and the count 0,
+#     and arms_kvprefetch.py's own module docstring still says warming ahead is not expressible at
+#     origin/main. THAT FINDING IS STALE AND PINNED TO 55ec283. PATCH 1 of
+#     reports/study_engine_actions.md section 3.1 HAS SINCE LANDED: interface.py:165 declares
+#     `Observation.live_sessions`, interface.py:282 unions it into validate_action's
+#     `known_sessions`, and cstate.py:637 emits it. The arm was never changed; the channel it acts
+#     through was opened. A reader meeting that docstring should not conclude these cells are a
+#     relabelled zero.
+#
+#     DECLARED LIMIT ON EVERY ROW OF THIS ARM: `prefetch_ahead_unexpressible` is 19,107 against
+#     99 emitted, so MOST asks are still refused by validate_action because the session is neither
+#     warm, nor pending, nor live at that epoch. The mechanism is live and reaches a decision; it
+#     is NOT fully expressed. Do not read these cells as the published system at full strength.
+#
+# (b) OFF-SWITCH IDENTITY: PASS, and it is a FIRST RUN, not an audit.
+#     On the posted workload at seed 4, dry:
+#       kvflow            (base)       5f1e4f703d316740   17,322 rows   9 release_whole
+#       kvflow-prefetch-off            5f1e4f703d316740   17,322 rows   9 release_whole
+#       kvflow-prefetch   (treatment)  0e3ba03d2e7ff3b3   32,316 rows   108 release_whole
+#     The control is BYTE-IDENTICAL to the base, so the arm adds nothing outside its one channel,
+#     and the treatment differs, so that channel reaches a decision. A treatment digest equal to
+#     the base's would have been an ABSENT LINK.
+#     NO COMMITTED VALUE EXISTS FOR THIS CELL. The committed kvflow_prefetch_proofs.json ran the
+#     same seed/n/run_s/ratio/question-sets but on the DEFAULT oneframe / batch-30s / no-re-asks
+#     workload, NOT this one. These three rows are therefore FIRST RUNS, labelled as such.
+#
+#     POSITIVE CONTROL AGAINST A COMMITTED VALUE, run ALONE at concurrency 1, because a side of the
+#     comparison that is never audited is the blindness this check exists for: `kvflow` on the
+#     COMMITTED proof's own cell reproduces 7fa6b4aa9a9dd9c6 / 13,947 rows / 0 prefills and the
+#     kind census 13,193 + 377 + 377 EXACTLY. Matching a committed digest is the one direction a
+#     dirty or perturbed tree cannot fake.
+#
+# (c) NAME PROOF THROUGH run_live2_real.py ITSELF: PASS, with its negative control.
+#     Both names were resolved by spawning the harness's OWN entry point as a subprocess with the
+#     posted knobs on the real command line, not by a bare make_arm in a friendly process: the
+#     harness imports only `arms` and `hybrid`, so a module registration is not the same thing.
+#     `kvflow-prefetch` and `kvflow-prefetch-off` both exit 0 on a 2-device 5 s cell.
+#     NEGATIVE CONTROL: `kvflow-prefetch-not-an-arm` still raises
+#     `KeyError: unknown arm 'kvflow-prefetch-not-an-arm'` and exits 1, so the check can see an
+#     unresolved name and "no KeyError appeared" is not passing trivially.
+#     Registered at arms.py:678 (`from arms_kvprefetch import KVPREFETCH_ARMS`). arms.py was NOT
+#     edited by this work, so no new module-level import was added to it.
+#
+# EVERY PROOF RAN ON A CLEAN CHECKOUT CONTAINING ONLY WHAT IS COMMITTED at d0675b63, built with
+# `git archive`, NOT in the shared worktree, which carries other sessions' uncommitted edits.
+# One dry cell per process. Concurrency stated per proof in the JSON (1 for the positive control
+# and the port-rule cell, 2 for the off-switch pair); host load is a parameter of this dry harness
+# per d184_r3_wallclock_probe.json, so it is recorded rather than assumed.
+#
+# ---------------------------------------------------------------- RUN NOW
+kvflow-prefetch 16 4 _L3_epg_rq30
+kvflow-prefetch 16 5 _L3_epg_rq30
+kvflow-prefetch 16 6 _L3_epg_rq30
+kvflow-prefetch 16 7 _L3_epg_rq30
