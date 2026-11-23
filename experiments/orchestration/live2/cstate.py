@@ -78,7 +78,21 @@ class DeviceRec:
     cadence_s: float = 0.5
     frame_count: int = 1
     on_cloud: bool = True
+    # `delivered` is the APPLICATION-VISIBLE stream: the device's own answer at the capture
+    # instant, with a cloud answer appended on top of it when one arrives. `delivered_device`
+    # is the DEVICE'S OWN stream and nothing else, with the EPISODE KEY beside each score.
+    #
+    # D201: THE TWO ARE KEPT APART BECAUSE TWO PUBLISHED METHODS NEED THE DEVICE ONE.
+    # `inarvl_adapted` reads the trajectory as its image-signal substitute (card A1) and
+    # `hybrid_llm_adapted` reads it as the router features x (card A4); both are statistics of
+    # q(S), the SMALL model. Hybrid LLM's router emits p_w(x) ~ Pr[q(S) >= q(L)] and routes
+    # BEFORE either model answers, so it may not see q(L) - the same reading that made
+    # StudyB-baselines amendment 2 item 3b take `device_answer_confidence` away from its recall
+    # path. Feeding either arm the application-visible stream would hand it the CLOUD's score
+    # for every instant the cloud answered in time, which is q(L).
     delivered: deque = field(default_factory=lambda: deque(maxlen=40))
+    delivered_device: deque = field(default_factory=lambda: deque(maxlen=40))
+    device_score_unknown: int = 0
     sessions: List[str] = field(default_factory=list)
     frame_bytes: int = 0
 
@@ -223,6 +237,10 @@ class Opportunity:
     question_id: Optional[str] = None
     pulled_at: Optional[float] = None
     served_at: Optional[float] = None
+    # D201: the DEVICE's own committed score for this instant, copied off the wire event
+    # unchanged. The coordinator derives nothing: `fleet/emulator` reads it from the trace's
+    # answer table and `traces.pull_responder` forwards it when it rebuilds the event.
+    device_score: Optional[float] = None
     cache_path: Optional[str] = None
 
     # D133 Part A second field. `RecallAction.representation` is written by arms and read nowhere,
@@ -336,7 +354,8 @@ class CoordState:
         o = Opportunity(opp_id=ev["opportunity_id"], device_id=ev["device_id"], kind="monitor",
                         t_event=float(ev["t_capture"]), deadline_s=float(ev["deadline_s"]),
                         frame_bytes=int(ev["frame_bytes"]), state="offered",
-                        instant_id=ev["instant_id"])
+                        instant_id=ev["instant_id"],
+                        device_score=ev.get("device_score"))
         self.devices[o.device_id].frame_bytes = o.frame_bytes
         self._add(o)
         return o
@@ -347,9 +366,12 @@ class CoordState:
             o = Opportunity(opp_id=ev["opportunity_id"], device_id=ev["device_id"],
                             kind="monitor", t_event=float(ev["t_capture"]),
                             deadline_s=float(ev["deadline_s"]),
-                            instant_id=ev["instant_id"])
+                            instant_id=ev["instant_id"],
+                            device_score=ev.get("device_score"))
             self._add(o)
         o.t_arrive = float(ev["t_arrive"])
+        if ev.get("device_score") is not None:
+            o.device_score = float(ev["device_score"])
         o.frame_ref = ev["frame_ref"]
         o.frame_bytes = int(ev["frame_bytes"])
         self.devices[o.device_id].frame_bytes = o.frame_bytes
@@ -591,6 +613,17 @@ class CoordState:
                 stream_id=d.device_id,
                 delivered_scores=tuple(v for _t, v in d.delivered),
                 delivered_times_s=tuple(round(t, 3) for t, _v in d.delivered),
+                # D201: None, not a short tuple, once ANY instant on this device arrived
+                # with no committed device score. A shortened tuple would read as "this
+                # stream has had fewer instants", which is the shape that let a constant
+                # pass for a trajectory in the first place; None makes the two arms that
+                # read q(S) raise instead of deciding on a partial history.
+                device_scores=(None if d.device_score_unknown else
+                               tuple(v for _t, v, _e in d.delivered_device)),
+                device_times_s=(None if d.device_score_unknown else
+                                tuple(round(t, 3) for t, _v, _e in d.delivered_device)),
+                device_episode_ids=(None if d.device_score_unknown else
+                                    tuple(e for _t, _v, e in d.delivered_device)),
                 cadence_s=d.cadence_s, frame_count=d.frame_count, on_cloud=d.on_cloud,
                 network=NetworkState(connected=True, uplink_bps=d.uplink_mbps * 1e6 / 8.0,
                                      rtt_s=d.rtt_ms / 1000.0)))

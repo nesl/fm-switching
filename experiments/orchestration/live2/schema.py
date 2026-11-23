@@ -91,10 +91,10 @@ FIELDS: Dict[str, tuple] = {
     "session_start": ("device_id", "session_id", "t"),
     "session_end": ("device_id", "session_id", "t"),
     "monitor_offer": ("device_id", "opportunity_id", "instant_id", "t_capture", "deadline_s",
-                      "frame_bytes"),
+                      "frame_bytes", "device_score"),
     "monitor_frame": ("device_id", "opportunity_id", "instant_id", "t_capture", "t_arrive",
                       "deadline_s", "frame_ref", "frame_bytes", "episode_id", "episode_index",
-                      "frame_refs", "episode_frames"),
+                      "frame_refs", "episode_frames", "device_score"),
     "history_preload": ("device_id", "session_id", "frame_refs", "est_tokens", "t"),
     "history_append": ("device_id", "session_id", "batch_id", "t_arrive", "frame_refs",
                        "est_tokens"),
@@ -143,6 +143,7 @@ class MonitorOffer:
     t_capture: float
     deadline_s: float
     frame_bytes: int
+    device_score: Optional[float] = None
 
 
 @dataclass
@@ -163,6 +164,7 @@ class MonitorFrame:
     episode_index: Optional[int] = None
     frame_refs: Optional[List[str]] = None
     episode_frames: Optional[int] = None
+    device_score: Optional[float] = None
 
 
 @dataclass
@@ -246,9 +248,18 @@ del _k, _c, _want
 # They are present only when the trace was generated with the EP-G dashcam format; a one-frame
 # trace carries none of them and the coordinator then builds the committed StudyD3 body, which
 # is what every caller before D153 did.
+# D201: `device_score` is the DEVICE's own committed per-instant dashcam score for this
+# instant, carried from the trace's answer table (`device_answers.jsonl`, written by
+# `fleet/trace.py` out of StudyORIN1's dense per-instant set). It is OPTIONAL ON THE WIRE
+# only so that a synthetic event builder with no committed score can still construct an
+# event; it is NOT optional at the point of use. `coordinator._device_answer` RAISES when
+# the field is absent or None, because the defect this field fixes survived for as long as
+# it did precisely by substituting a neutral 0.0 for a score that was never fed.
 OPTIONAL_FIELDS: Dict[str, tuple] = {
     "recall_question": ("category",),
-    "monitor_frame": ("episode_id", "episode_index", "frame_refs", "episode_frames"),
+    "monitor_frame": ("episode_id", "episode_index", "frame_refs", "episode_frames",
+                      "device_score"),
+    "monitor_offer": ("device_score",),
 }
 
 

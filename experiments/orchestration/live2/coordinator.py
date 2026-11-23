@@ -603,12 +603,12 @@ class Live2Coordinator:
             return None
         if k == "monitor_offer":
             o = self.st.monitor_offer(ev)
-            self._device_answer(o)
+            self._device_answer(o, ev)
             return "stream_arrival"
         if k == "monitor_frame":
             o = self.st.monitor_frame(ev)
             self._take_episode(o, ev)
-            self._device_answer(o)
+            self._device_answer(o, ev)
             return "stream_arrival"
         if k == "recall_question":
             self.st.recall_question(ev)
@@ -649,18 +649,52 @@ class Live2Coordinator:
                 f"producer that rebuilds the event (mode B `traces.pull_responder`) has to "
                 f"forward the four episode fields; it is not optional once the trace has them")
 
-    def _device_answer(self, o) -> None:
+    def _device_answer(self, o, ev: Optional[Dict[str, Any]] = None) -> None:
         """The device answers every opportunity locally and immediately (spec v4 section 1.2),
         so the application-visible stream carries the device's own answer from the capture
         instant; a cloud answer that arrives in time is appended on top of it and upgrades it.
-        The SCORES here are placeholders: task value is scored offline from the recordings
-        (D85, D87), never in this process."""
+
+        D201: THE SCORE IS NO LONGER A PLACEHOLDER. It was `0.0`, stated deliberately here on the
+        ground that task value is scored offline from the recordings (D85, D87). That is true of
+        TASK VALUE and it is not true of the DECISION INPUT: `baselines/inarvl_adapted.py` and
+        `baselines/hybrid_llm_adapted.py` read these VALUES at decision time, so on one dry s4
+        cell 2,821,940 score values were handed to an arm and all of them were the same number.
+        Both arms were therefore not the published methods. The value here is now the DEVICE's own
+        committed per-instant score, carried off the wire (`fleet/emulator.device_score_of`, out
+        of the trace's `device_answers.jsonl`, out of StudyORIN1's dense per-instant set).
+
+        It RAISES when the score is not there. A monitor instant with no device score is a
+        plumbing fault, not a data gap: the trace generator refuses to emit an instant the
+        committed set does not cover. A neutral default here is exactly how the defect survived.
+        """
         d = self.st.devices.get(o.device_id)
         if d is None or o.kind != "monitor":
             return
         if any(abs(t - o.t_event) < 1e-9 for t, _v in d.delivered):
             return
-        d.delivered.append((o.t_event, 0.0))
+        sc = o.device_score if o.device_score is not None else (ev or {}).get("device_score")
+        if sc is None:
+            # UNKNOWN, AND KEPT UNKNOWN. A SYNTHETIC trace (`traces.py`) carries placeholder
+            # instants and holds no committed device score, so there is nothing to record. None
+            # preserves the length of the application-visible stream, which arms read (e.g.
+            # `thinking_qwenvl_adapted.py` and `constructed.py` read `len(delivered_scores)`),
+            # while being unmistakably not a number.
+            #
+            # WHERE THE RAISE LIVES. Not here. On the real path `fleet/emulator.device_score_of`
+            # already raises when the trace's answer table does not cover an instant, so an
+            # absence that matters is caught at the producer. What must never happen is a SCORE
+            # READER deciding on a stand-in, so the DEVICE CHANNEL IS MARKED UNUSABLE for this
+            # device and `cstate.observation` then hands the arm None, on which both
+            # score-reading arms raise (D200 (3), D201).
+            d.device_score_unknown += 1
+            self.counts["device_score_unknown"] += 1
+            d.delivered.append((o.t_event, None))
+            return
+        sc = float(sc)
+        o.device_score = sc
+        d.delivered.append((o.t_event, sc))
+        # The DEVICE channel, with the episode key beside the score. The cloud never writes here.
+        d.delivered_device.append((o.t_event, sc, getattr(o, "episode_id", None)))
 
     def _roster(self, now: Optional[float] = None) -> None:
         """The arm-side hook (D100): CAUSAL FACTS KNOWN AT ARRIVAL, never the future, and never
@@ -1914,7 +1948,19 @@ class Live2Coordinator:
         ev = self._cloud_answer(sub, o, delivered, path, scored)
         o.state = "answered" if ontime else "late"
         if o.kind == "monitor":
-            self.st.devices[o.device_id].delivered.append((delivered, 0.0))
+            # D201: the APPLICATION-VISIBLE stream is upgraded by the cloud answer, so what is
+            # appended is the CLOUD's score, which `_score_of` has already extracted for this
+            # answer (`scores.sh_score`, log p_yes) and which this method already records on the
+            # completion record below. It was a literal 0.0.
+            #
+            # IT CAN BE None, AND None IS KEPT. A dry cell sends no HTTP and so carries no
+            # logprobs, and a live first token whose top-20 holds neither Yes nor No has no
+            # p_yes either; `scores.py` records that as UNKNOWN on purpose. None is therefore the
+            # honest value and is NOT raised on, unlike the device side, where an absent score
+            # is a plumbing fault. The DEVICE channel is untouched here: no arm whose published
+            # method reads q(S) may be handed q(L) through it.
+            self.st.devices[o.device_id].delivered.append(
+                (delivered, (scored or {}).get("cloud_score")))
         self.answers.append(dict(opportunity_id=o.opp_id, kind=o.kind, device_id=o.device_id,
                                  decision="CLOUD", delivered_s=delivered,
                                  deadline_s=o.deadline_abs(),

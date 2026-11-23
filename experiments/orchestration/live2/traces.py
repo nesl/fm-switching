@@ -172,16 +172,24 @@ def synthetic(*, n_dashcam: int = 2, n_robot: int = 2, duration_s: float = 60.0,
             opp = f"{did}|i{k:05d}"
             ref = frame_file(f"{did}_i{k:05d}.bin", frame_bytes // 200)
             frames_by_instant[opp] = ref
+            # D201: a SYNTHETIC trace holds NO committed device score. These instants are
+            # invented (see SyntheticTraceRefused above), so there is no StudyORIN1 row to put
+            # on the wire and none is fabricated. `device_score=None` says so explicitly rather
+            # than by omission: the coordinator counts it, `cstate.observation` then hands the
+            # arm None for the whole device channel, and inar-vl and hybrid-llm RAISE. A
+            # synthetic cell therefore cannot be used to run either published method, which is
+            # the correct outcome and not a limitation to work around.
             if upload_mode == "B":
                 ev.append(SC.make("monitor_offer", device_id=did, opportunity_id=opp,
                                   instant_id=iid, t_capture=round(t, 4),
-                                  deadline_s=DASHCAM_L_S, frame_bytes=frame_bytes))
+                                  deadline_s=DASHCAM_L_S, frame_bytes=frame_bytes,
+                                  device_score=None))
             else:
                 ev.append(SC.make("monitor_frame", device_id=did, opportunity_id=opp,
                                   instant_id=iid, t_capture=round(t, 4),
                                   t_arrive=round(t + upload_s(frame_bytes), 4),
                                   deadline_s=DASHCAM_L_S, frame_ref=ref,
-                                  frame_bytes=frame_bytes))
+                                  frame_bytes=frame_bytes, device_score=None))
             k += 1
             t = round(start + k * NEXAR_INSTANT_CADENCE_S, 4)
 
@@ -316,8 +324,12 @@ def pull_responder(trace_frames: Dict[str, Any], frame_bytes_default: int = 60_0
     def respond(o, t: float) -> Dict[str, Any]:
         nb = int(o.frame_bytes or frame_bytes_default)
         ref = trace_frames.get(o.opp_id) or o.opp_id
+        # D201: the DEVICE's score came in on the OFFER and is forwarded unchanged. Mode B
+        # rebuilds the monitor_frame here, so an omission would reach `_device_answer` with no
+        # score and raise - which is the intended behaviour, not something to paper over.
         return SC.make("monitor_frame", device_id=o.device_id, opportunity_id=o.opp_id,
                        instant_id=o.instant_id or o.opp_id, t_capture=o.t_event,
                        t_arrive=round(t + RTT_MS / 2000.0 + upload_s(nb), 4),
-                       deadline_s=o.deadline_s, frame_ref=ref, frame_bytes=nb)
+                       deadline_s=o.deadline_s, frame_ref=ref, frame_bytes=nb,
+                       device_score=o.device_score)
     return respond

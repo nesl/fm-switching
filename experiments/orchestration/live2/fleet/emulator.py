@@ -248,6 +248,38 @@ class FleetEmulator:
         self.dir = Path(trace_dir)
         self.records = [json.loads(l) for l in open(self.dir / "trace.jsonl")]
         self.meta = json.loads((self.dir / "trace_meta.json").read_text())
+        # D201: THE DEVICE'S OWN PER-INSTANT DASHCAM SCORE, ON THE WIRE.
+        #
+        # `fleet/trace.py` already writes one row per monitor instant into
+        # `device_answers.jsonl`, carrying `device_score` straight out of StudyORIN1's dense
+        # per-instant set (`data_sources.orin_dense_scores`), and the generator RAISES if the
+        # committed set does not cover an instant. That table was never read at run time, so the
+        # coordinator filled the application-visible stream with a literal 0.0 and the two arms
+        # whose published method reads the device's score trajectory decided on a constant.
+        # The table is loaded here, once, and the score travels on the monitor event.
+        #
+        # IT IS CAUSAL. The row is keyed on the opportunity, i.e. on ONE capture instant, and it
+        # is attached to that instant's own event. No row for a later instant is ever read.
+        #
+        # A MISSING TABLE RAISES, and does not degrade to None. A device score that is absent is
+        # exactly the failure this fixes, and a neutral value here would hide it again.
+        ap = self.dir / "device_answers.jsonl"
+        if not ap.exists():
+            raise FileNotFoundError(
+                "%s holds no device_answers.jsonl; the DEVICE's own per-instant dashcam score "
+                "cannot be put on the wire, and an arm whose published method reads it would "
+                "decide on nothing (D201)" % self.dir)
+        self._device_score: Dict[str, float] = {}
+        for _ln in open(ap):
+            _a = json.loads(_ln)
+            if _a.get("kind") != "monitor":
+                continue
+            _v = _a.get("device_score")
+            if _v is None:
+                raise ValueError(
+                    "device_answers.jsonl row for %r carries no device_score (D201)"
+                    % _a.get("opportunity_id"))
+            self._device_score[str(_a["opportunity_id"])] = float(_v)
         if mode not in TR.MODES:
             raise ValueError(f"mode {mode!r} not in {TR.MODES}")
         self.mode = mode
@@ -326,6 +358,20 @@ class FleetEmulator:
                 t_offer: float) -> LK.UplinkTransfer:
         return self.queue(r["device_id"]).send(kind, ref, nbytes, t_offer)
 
+    def device_score_of(self, opportunity_id: str) -> float:
+        """The DEVICE's committed score for this instant (D201). RAISES if it is not there.
+
+        There is no fallback on purpose. Every monitor opportunity in a generated trace has a
+        row, because `fleet/trace.py` refuses to emit an instant the committed StudyORIN1 set
+        does not cover, so an absence here is a plumbing fault and not a data gap.
+        """
+        v = self._device_score.get(str(opportunity_id))
+        if v is None:
+            raise KeyError(
+                "no committed DEVICE score for monitor opportunity %r; the trace's answer "
+                "table does not cover it (D201)" % opportunity_id)
+        return float(v)
+
     # -- handlers ---------------------------------------------------------
     def _on_monitor_opportunity(self, r: Dict[str, Any], t: float) -> None:
         opp = r["opportunity_id"]
@@ -343,7 +389,8 @@ class FleetEmulator:
         else:
             ev = EV.make("monitor_offer", device_id=r["device_id"], opportunity_id=opp,
                          instant_id=opp, t_capture=r["t"], deadline_s=r["deadline_s"],
-                         frame_bytes=int(r["frame_bytes"]))
+                         frame_bytes=int(r["frame_bytes"]),
+                         device_score=self.device_score_of(opp))
             self.outcomes[opp].pulled = False
             self._push(t + LK.pull_s(self.link(r["device_id"]).rtt_ms), "offer_arrived",
                        dict(rec=r, ev=ev))
@@ -497,7 +544,9 @@ class FleetEmulator:
                                        instant_id=r["opportunity_id"], t_capture=r["t"],
                                        t_arrive=payload["t_arrive"],
                                        deadline_s=r["deadline_s"], frame_ref=r["frame_ref"],
-                                       frame_bytes=int(r["frame_bytes"]), **ep), t)
+                                       frame_bytes=int(r["frame_bytes"]),
+                                       device_score=self.device_score_of(
+                                           r["opportunity_id"]), **ep), t)
             elif what == "recall_question":
                 self._on_recall_question(payload, t)
             elif what == "question_arrived":

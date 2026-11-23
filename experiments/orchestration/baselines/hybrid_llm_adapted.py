@@ -9,7 +9,8 @@ cards/hybrid_llm.md.
   quality q(.)    <- the continuous Nexar score log P(Yes) at the same moment, so the quality gap
                      H(x) = q(S(x)) - q(L(x)) is computed from committed traces, not from a
                      BART score
-  features x      <- StudyD3 DEVELOPMENT-split device-score trajectory features (`devsplit`)
+  features x      <- StudyD3 DEVELOPMENT-split device-score trajectory features (`devsplit`),
+                     read live off `EpisodicStream.device_scores` (D201)
   router          <- the paper's rdet / rprob / rtrans, trained on the development split only
   routing rule    <- send to the SMALL model (keep local) when p_w(x) >= threshold; the threshold
                      is the paper's cost knob
@@ -33,8 +34,31 @@ from interface import (Action, DEFAULTS, Observation, Policy, RecallAction,
 
 
 def _features(stream) -> List[float]:
-    """The same six features `devsplit.FEATURES` defines, from the stream's DELIVERED history."""
-    h = [v for v in stream.delivered_scores if v is not None]
+    """The same six features `devsplit.FEATURES` defines, from the DEVICE's own score history.
+
+    D201: this read was `stream.delivered_scores`, and `live2/coordinator.py` filled that with a
+    literal 0.0 at both of its writers, so the router's features x were a constant on every
+    decision of every live2 cell and p_w(x) could not move. Two things are wrong with that
+    channel for THIS arm, and only one of them is the constant:
+
+      * the values were not real, which is the defect; and
+      * the application-visible stream carries the CLOUD's score for every instant the cloud
+        answered in time, i.e. q(L). The paper's router emits p_w(x) ~ Pr[q(S) >= q(L)] from the
+        query's features and routes BEFORE either model answers (Section 3), so it may not see
+        q(L) - exactly the reading under which amendment 2 item 3b took
+        `device_answer_confidence` off this arm's recall path. Card A4 says the features are the
+        DEVICE-score trajectory, and the router was fitted on StudyD3 device scores.
+
+    So the channel is `stream.device_scores`. The six statistics are unchanged.
+    """
+    if stream.device_scores is None:
+        raise RuntimeError(
+            "hybrid-llm was asked to route stream %r with NO device score channel. Card A4 makes "
+            "the DEVICE's score trajectory this router's features x, and the router was fitted on "
+            "StudyD3 device scores, so a neutral feature vector may not be substituted "
+            "(D201 (3) FAIL LOUD). The harness must supply EpisodicStream.device_scores."
+            % getattr(stream, "stream_id", None))
+    h = [v for v in stream.device_scores if v is not None]
     if not h:
         return [0.0] * len(DS.FEATURES)
     prev = np.asarray(h[:-1] if len(h) > 1 else h, dtype=float)

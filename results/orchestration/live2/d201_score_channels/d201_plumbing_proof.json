@@ -1,0 +1,158 @@
+{
+ "label": "D201 item (b): the score plumbing and its FAIL-LOUD proof. CPU only, DRY cells only. NOTHING HERE IS A LATENCY, QUALITY OR CAPACITY RESULT. Both sides are the same sha and differ only in the nine files of this change.",
+ "sha": "de23b3544c5f64cd129b5779febd6644cb3c938e",
+ "is_measurement": false,
+ "what_changed": {
+  "device_score_on_the_wire": [
+   "live2/schema.py and live2/fleet/events.py: `device_score` added to monitor_offer and monitor_frame",
+   "live2/fleet/emulator.py: loads the trace's own device_answers.jsonl in __init__ and raises if it is absent or a row carries no device_score; `device_score_of` raises for an instant the table does not cover; the score goes out on both monitor events",
+   "live2/traces.py: mode B's pull_responder forwards it when it rebuilds the frame; the SYNTHETIC builder passes device_score=None explicitly, because a synthetic trace holds no committed score"
+  ],
+  "the_device_channel": [
+   "live2/cstate.py: DeviceRec.delivered_device, a second deque holding (t, device score, episode id), plus device_score_unknown",
+   "live2/cstate.py: observation() exposes device_scores, device_times_s and device_episode_ids, and hands None (not a short tuple) once any instant on that device arrived with no committed score",
+   "baselines/interface.py: the three fields on EpisodicStream, with the two channels documented apart"
+  ],
+  "the_two_arms": [
+   "baselines/inarvl_adapted.py:65 reads device_scores instead of delivered_scores; the statistics are unchanged",
+   "baselines/hybrid_llm_adapted.py:37 the same; the six devsplit features are unchanged"
+  ],
+  "the_cloud_score": [
+   "live2/coordinator.py:1917 appends the REAL cloud score from _score_of instead of a literal 0.0; None is kept as None, because a dry cell has no logprobs and a live first token whose top-20 holds neither Yes nor No has no p_yes",
+   "the cloud score was ALREADY on the completion record at coordinator.py:1950 and needed no change"
+  ],
+  "where_the_raise_lives": "at the producer (fleet/emulator.device_score_of) and at the reader (both arms), not in coordinator._device_answer, which records what arrived and counts an unknown. A synthetic cell therefore cannot run either published method, which is the correct outcome."
+ },
+ "P1_the_device_channel_is_live_and_varies": {
+  "cell": "seed 4, 4 devices, 300 s, 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0, DRY",
+  "probe": "every call to INARVLAdapted._image_signals on one dry cell, censused by wrapping it; the wrapper changes no decision",
+  "image_signal_calls": 6000,
+  "pristine": {
+   "EpisodicStream_has_device_scores": false,
+   "device_channel": {
+    "values": 0,
+    "distinct": 0,
+    "min": null,
+    "max": null
+   },
+   "application_channel": {
+    "values": 215996,
+    "distinct": 1,
+    "none_count": 0,
+    "most_common": [
+     [
+      0.0,
+      215996
+     ]
+    ]
+   }
+  },
+  "patched": {
+   "EpisodicStream_has_device_scores": true,
+   "device_channel": {
+    "values": 211737,
+    "distinct": 921,
+    "min": -20.6513,
+    "max": -0.0231
+   },
+   "application_channel": {
+    "values": 215996,
+    "distinct": 922,
+    "none_count": 107955,
+    "most_common": [
+     [
+      "None",
+      107955
+     ],
+     [
+      -13.6343,
+      246
+     ],
+     [
+      -10.7658,
+      150
+     ]
+    ]
+   }
+  },
+  "reading": "PRISTINE: 215,996 values reached the arm and ONE distinct value, 0.0. PATCHED: 211,737 values on the device channel with 921 distinct values spanning -20.6513 to -0.0231, which is log P(Yes) and therefore the right register and the right sign. The application channel now carries 107,955 None, which is every cloud upgrade in a cell that has no cloud score: that is why the two arms were moved OFF that channel rather than left on it with real values, since inar-vl does not filter None and would have produced nan.",
+  "episode_key": {
+   "calls_with_a_key": 5499,
+   "windows_spanning_more_than_one_episode": 5289
+  },
+  "episode_key_reading": "the key is now available to the arm. 5,289 of 5,499 windows that carry one span MORE THAN ONE EP-G episode, so whether the window should be sliced to the current episode is a live question; it is NOT decided here, because both cards specify a within-clip trajectory and changing the window changes both arms' decisions."
+ },
+ "P2_an_arm_with_no_device_channel_raises": {
+  "pristine": {
+   "inar-vl": {
+    "raised": false,
+    "note": "DID NOT RAISE: this is the defect, not the fix"
+   },
+   "hybrid-llm": {
+    "raised": false,
+    "note": "DID NOT RAISE: this is the defect, not the fix"
+   }
+  },
+  "patched": {
+   "inar-vl": {
+    "raised": true,
+    "type": "RuntimeError",
+    "message": "inar-vl was asked to decide on stream 'dash000' with NO device score channel. Card A1 makes the DEVICE's own score trajectory this arm's image-signal substitute, so there is nothing to compute here and a neutral value may not be invented (D201 (3) FAIL LOUD). The harness must supply EpisodicStream.d"
+   },
+   "hybrid-llm": {
+    "raised": true,
+    "type": "RuntimeError",
+    "message": "hybrid-llm was asked to route stream 'dash000' with NO device score channel. Card A4 makes the DEVICE's score trajectory this router's features x, and the router was fitted on StudyD3 device scores, so a neutral feature vector may not be substituted (D201 (3) FAIL LOUD). The harness must supply Epis"
+   }
+  },
+  "reading": "pristine: neither arm raises, which is the defect. patched: both raise with a RuntimeError naming the card clause and D201 (3)."
+ },
+ "P3_the_producer_raises_for_an_uncovered_instant": {
+  "pristine": {
+   "producer_has_device_score_of": false
+  },
+  "patched": {
+   "producer_has_device_score_of": true,
+   "known_instant": -3.5,
+   "unknown_instant_raised": true,
+   "unknown_instant_type": "KeyError",
+   "unknown_instant_message": "\"no committed DEVICE score for monitor opportunity 'opp_not_in_the_answer_table'; the trace's answer table does not cover it (D201)\""
+  }
+ },
+ "P4_the_trace_does_not_move": {
+  "cell": "seed 4, 16 devices, 1200 s, 40:40:20, mode A, lh_req, ss2, epg, per-frame, reask 30.0",
+  "pristine": {
+   "trace_sha256": "24455ad2ab8c3621c8c33ab7fc77f90f3d6f0c0c05b6701d445433c61e25ce6e",
+   "device_answers_sha256": "d833467857b5766e4400143ff2aef1dc952d7b56606caafd641c70a12c265bef",
+   "fairness_digest_A": "96c1a0b486381709e2fc63e9b0f33f9e1ba1d887d6cedf21d89d407621177849",
+   "fairness_digest_B": "a7e6fe0e273b5e7f63d7fd4eb011bdb05a706696c2b86cb731b3498eed0535cd",
+   "n_device_answers": 12253
+  },
+  "patched": {
+   "trace_sha256": "24455ad2ab8c3621c8c33ab7fc77f90f3d6f0c0c05b6701d445433c61e25ce6e",
+   "device_answers_sha256": "d833467857b5766e4400143ff2aef1dc952d7b56606caafd641c70a12c265bef",
+   "fairness_digest_A": "96c1a0b486381709e2fc63e9b0f33f9e1ba1d887d6cedf21d89d407621177849",
+   "fairness_digest_B": "a7e6fe0e273b5e7f63d7fd4eb011bdb05a706696c2b86cb731b3498eed0535cd",
+   "n_device_answers": 12253
+  },
+  "identical": true,
+  "reading": "D201 anticipated a trace-format change and accepted it. NONE WAS NEEDED. fleet/trace.py:536-555 has written `device_score` into device_answers.jsonl all along; this change reads that column at run time. fleet/trace.py is untouched, so trace_sha256, device_answers_sha256 and both fairness digests are byte-identical and every committed trace-hash check still passes."
+ },
+ "known_consequence_that_needs_a_ruling": {
+  "what": "tests/test_live2_coord.py runs EVERY registered arm on a SYNTHETIC trace (test_every_arm_emits_only_legal_actions, test_identical_opportunity_stream_digest). A synthetic trace holds no committed device score, so after this change inar-vl and hybrid-llm raise there, by design. Measured: 10 errors of 26 tests in tests/test_live2_coord.py and 3 of 22 in tests/test_live2_fix2.py.",
+  "why_it_is_not_worked_around": "the alternatives are to fabricate a score for an invented instant, or to give the arms a fallback, and a fallback is the neutral default D200 (3) forbids. The honest fix is in the TEST's arm list, which this session does not own.",
+  "tests_that_pass_unchanged": [
+   "tests/test_live2_d114.py",
+   "tests/test_live2_d118.py"
+  ]
+ },
+ "_provenance": {
+  "git_commit": "de23b3544c5f64cd129b5779febd6644cb3c938e",
+  "script": "d201_priv/work/faillaud.py and p4.py (session scratch)",
+  "model": "none",
+  "device": "cpu",
+  "n": 4,
+  "timestamp": "2026-11-23T13:47:51.183211",
+  "note": "the two probe scripts are session scratch, not committed experiment scripts; the proofs they produce are recorded here in full so they can be re-derived from the patch alone"
+ }
+}

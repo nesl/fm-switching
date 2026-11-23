@@ -6,7 +6,8 @@ Mapping and adaptations in cards/inarvl.md.
 
 The paper's signals are computed from the (image, question) pair. We do not re-read pixels (that
 would be new measurement), so:
-  image branch (blur, exposure, artifact, detail)  <- the DEVICE's own delivered score trajectory
+  image branch (blur, exposure, artifact, detail)  <- the DEVICE's own per-instant score trajectory
+      (`EpisodicStream.device_scores`; D201, previously the application-visible stream)
       statistics, normalised to [0, 1]: a weak, flat, noisy trajectory plays the role of a
       degraded image, which is what the paper's signals are FOR (deciding when the edge model is
       out of its depth). Recorded as adaptation A1, and it is the largest departure in this card.
@@ -62,7 +63,23 @@ class INARVLAdapted(Policy):
         self._by_name = {r["name"]: r for r in rows}
 
     def _image_signals(self, s) -> dict:
-        h = np.asarray([v for v in s.delivered_scores], dtype=float)
+        """Card A1's substitute signals, from the DEVICE's own score trajectory.
+
+        D201: this read was `s.delivered_scores`, the APPLICATION-VISIBLE stream, which
+        `live2/coordinator.py` filled with a literal 0.0 at both of its writers. On one dry s4
+        cell that handed this method 2,821,940 values with ONE distinct value, so every signal
+        below was a constant and the router's input never moved. The channel is now
+        `s.device_scores`: StudyORIN1's committed per-instant score for the instants this device
+        has captured, which is what card A1 says this arm reads. The statistics are unchanged.
+        """
+        if s.device_scores is None:
+            raise RuntimeError(
+                "inar-vl was asked to decide on stream %r with NO device score channel. Card A1 "
+                "makes the DEVICE's own score trajectory this arm's image-signal substitute, so "
+                "there is nothing to compute here and a neutral value may not be invented "
+                "(D201 (3) FAIL LOUD). The harness must supply EpisodicStream.device_scores."
+                % getattr(s, "stream_id", None))
+        h = np.asarray([v for v in s.device_scores], dtype=float)
         if len(h) == 0:
             return dict(blur=1.0, exposure=0.5, artifact=0.5, detail=0.0)
         # A weak / flat / noisy device trajectory is the analogue of a degraded image.

@@ -94,15 +94,41 @@ class NetworkState:
 
 @dataclass(frozen=True)
 class EpisodicStream:
-    """One standing video query. `delivered_scores` is what the APPLICATION has seen, i.e. the
-    device's sample-and-held score stream of StudyE9b, never the compute-time stream."""
+    """One standing video query, with TWO score channels that must not be confused.
+
+    `delivered_scores` is what the APPLICATION has seen: the device's own answer at the capture
+    instant, with the CLOUD's answer appended on top of it whenever one arrived in time. It can
+    therefore carry q(L), and it can carry None, because a cloud answer whose first token holds
+    neither Yes nor No has no p_yes and `live2/scores.py` records that as UNKNOWN.
+
+    `device_scores` is the DEVICE's own stream and nothing else: StudyORIN1's committed
+    per-instant score at each capture instant, oldest first, with `device_episode_ids` giving the
+    EP-G episode each one belongs to. It is never None once it has been supplied, and the
+    coordinator raises rather than inventing one.
+
+    D201: WHY BOTH EXIST. Two published methods read a score trajectory and both read q(S), the
+    SMALL model: INAR-VL substitutes it for the paper's image signals (card inarvl.md A1) and
+    Hybrid LLM uses it as the router features x (card hybrid_llm.md A4). Hybrid LLM's router emits
+    p_w(x) ~ Pr[q(S) >= q(L)] and routes BEFORE either model answers, so it may not see q(L); this
+    is the same reading under which StudyB-baselines amendment 2 item 3b took
+    `device_answer_confidence` off its recall path. Both arms read `device_scores`.
+
+    `device_scores` is None, not empty, when no producer supplied it. An arm that needs it RAISES
+    on None. An empty tuple would be indistinguishable from "the stream has had no instants yet",
+    which is how the defect this channel fixes survived: `delivered_scores` was filled with a
+    literal 0.0 by `live2/coordinator.py`, so 2,821,940 values on one dry cell were one number and
+    both arms decided on a constant.
+    """
     stream_id: str
-    delivered_scores: Tuple[float, ...]      # oldest -> newest, application-visible only
+    delivered_scores: Tuple[Optional[float], ...]   # oldest -> newest, application-visible
     delivered_times_s: Tuple[float, ...]     # grid times of those scores
     cadence_s: float
     frame_count: int
     on_cloud: bool
     network: NetworkState
+    device_scores: Optional[Tuple[float, ...]] = None
+    device_times_s: Optional[Tuple[float, ...]] = None
+    device_episode_ids: Optional[Tuple[Optional[str], ...]] = None
 
     def latest_score(self) -> Optional[float]:
         return self.delivered_scores[-1] if self.delivered_scores else None
