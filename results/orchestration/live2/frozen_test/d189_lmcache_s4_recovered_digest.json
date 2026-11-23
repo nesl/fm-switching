@@ -1,0 +1,41 @@
+{
+ "_what": "D189 / DEVWAIT_S67: closes the lmcache s4 comparability question BY MEASUREMENT. lmcache s4's cell revision 4af40941 was unrecoverable from origin ('upload-pack: not our ref') because it is a PRE-REBASE ORIGINAL whose rebased copy reached origin. The H100 held the object in its local store and pushed it to refs/h100/recover-4af4094 so it could be measured.",
+ "provenance_of_the_compared_revision": "4af40941608e089917bd02662a89e972825a91dd reached this box as a RECOVERED PRE-REBASE OBJECT from the H100's local store via refs/h100/recover-4af4094, NOT from origin. A reader checking that sha against origin will not find it and should not have to guess why. The H100 checked the objects it added before pushing: run outputs and logs only, nothing over 5 MB, no secrets and no frames.",
+ "why_a_digest_and_not_a_static_read": "The static diff 4af4094 against lmcache s5's revision 469929a touches only cascade-arm code that lmcache does not execute. That is not sufficient, because arms_published.py imports EVERY baseline adapter AT MODULE LEVEL, so a module-level side effect reaches lmcache regardless of what it executes, and baselines/device_confidence.py is NEW. A new module pulled in at import time can register an arm, mutate a shared dict, seed an RNG or install a default. A static reading cannot distinguish 'imported and inert' from 'imported and mutating'; a dry digest can.",
+ "method": "one dry cell per process on CLEAN committed-only checkouts (git archive), posted knobs (16 devices, seed 4, 1200 s, ratio 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0), digest = sha256 over decision rows with arm_version removed, the established recipe",
+ "concurrency": 2,
+ "concurrency_note": "both trees ran simultaneously. For a MATCH this is safe: a host-load artefact would have to be symmetric across two different trees to fake equality. A DIFFERENCE would have been re-run alone before being believed.",
+ "old_tree_4af40941": {
+  "root": "old",
+  "arm": "lmcache",
+  "seed": 4,
+  "digest": "2b789696e98821c4",
+  "rows": 37080
+ },
+ "new_tree_origin_main": {
+  "root": "new",
+  "arm": "lmcache",
+  "seed": 4,
+  "digest": "2b789696e98821c4",
+  "rows": 37080
+ },
+ "match": true,
+ "cross_check_against_prior": {
+  "quantity": "lmcache dry digest, posted cell, seed 4",
+  "this_run": "2b789696e98821c4",
+  "prior_run": "2b789696e98821c4",
+  "source_of_prior": "d187_streamscout_lmcache_livepath_check.json, measured at 469929a (lmcache s5's revision) and at origin/main",
+  "ratio": 1.0,
+  "agree": true,
+  "note": "so all THREE revisions, 4af4094 / 469929a / origin/main, give the same digest and row count"
+ },
+ "verdict": "MATCH: 2b789696e98821c4 / 37,080 rows on both 4af40941 and origin/main. lmcache's live path is QUIET across its s4 cell revision and the tip, BY MEASUREMENT and not by static reasoning. Combined with streamscout (git diff 50777f0d ef4a963a over live2/ and baselines/ returns ZERO differing files, so s5 ran the same live path as s4, whose digest is byte-identical to origin/main), ALL FOUR of the existing streamscout / lmcache s4 and s5 cells are now established comparable with new s6 / s7 cells by measurement. The caveat in DEVWAIT_S67_CELLS can be narrowed accordingly; it was correct when written, because two of the four revisions were then unreachable.",
+ "_provenance": {
+  "git_commit": "e1e64fc6e8c2ae6ac41583a21205dfce146a18b6",
+  "recovered_revision_measured": "4af40941608e089917bd02662a89e972825a91dd",
+  "script": "drycell.py",
+  "device": "cpu_dry",
+  "n": 12,
+  "timestamp": "2026-11-23T07:56:51.763069"
+ }
+}

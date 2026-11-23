@@ -1,3 +1,47 @@
+#
+# REPOSTED 2026-11-23 AS THE REAL-ENGINE 0.25x CONDITION. The 12 arm-seed lines are UNCHANGED; every
+# line now carries `--num-gpu-blocks-override 984 --max-model-len 15744` in fields 5+, which driver v30
+# passes to the server.
+#
+# WHY THE REPOST. The first posting of this list was the LOGICAL-ONLY tag condition, and that was the
+# wrong condition. The user ruled at 07:35 to 07:40 that 0.25x means a REAL ENGINE 0.25x, recorded at
+# `research/OVERNIGHT_HANDOFF_H100.md` line 168: `--num-gpu-blocks-override 984` (984 x 16 = 15,744
+# tokens) plus `--max-model-len 15744`, because vLLM 0.31 refuses to start when the KV cache cannot
+# hold one max_model_len request, with the logical pool kept at `--gpu-kv-tokens 15736` via the
+# _kv0.25 tag so the coordinator's belief matches the engine. I posted the tag condition before that
+# ruling reached me and the H100 correctly declined to gate it. VERIFIED against the committed record
+# rather than taken from the relay.
+#
+# FLAG ORDER IS LOAD-BEARING. `study_live2_pilot.py`'s allowlist is an EXACT LIST MATCH, proved over 9
+# flag lists in `d189_real_kv025_launcher_proof.json` at 72e2d718: the same two flags IN THE OTHER
+# ORDER still STOP. Write them exactly as above. A transposed line halts the driver rather than
+# running silently wrong, which is the behaviour I chose over a permissive match.
+#
+# WHAT CARRIES OVER AND WHAT DOES NOT, and this is the correction that matters most. The runnability
+# probe in `kv025_runnability_probe.json` and its per-arm table carry over UNCHANGED as the
+# LOGICAL-side evidence: no arm is unable to run, the pool is 15,736 logical, eviction
+# (`cstate.py:498-517`) handles a history larger than the pool, and nothing raises or spins.
+#
+# BUT THE FOUR-ARM PRE-REGISTERED NULL DOES NOT CARRY OVER. Under the LOGICAL condition the pool
+# cannot bind mooncake, simplestream, eco-llm or covex-v6-base: they never build a prefix
+# (`cstate.py:448` considers only sessions with built_tokens > 0), their largest prompt is below the
+# pool, and three of them reach the pool only through `arms.py:82 self._caps`, which has exactly one
+# occurrence in the repo and it is a WRITE. That made a null from those four Rule 2 UNEXERCISED.
+# UNDER THE REAL ENGINE THAT REASONING NO LONGER APPLIES: fewer vLLM blocks means more engine
+# preemption and less concurrency for EVERY arm, so the pool binds all six AT THE ENGINE regardless
+# of whether an arm can observe it. The H100 caught this and it is right. So the real condition is
+# informative for all six arms, while the logical one would have been informative for two.
+#
+# ENGINE REFUSALS, the separate channel, hit only two arms. By the committed per-arm counts, prompts
+# over 15,744 occur for llf (20 at s4, 2 at s5) and covex-v6-rules (55 and 37) AND NO OTHER ARM OF
+# THE SIX. `hybrid_arm.CONTEXT_LIMIT_TOKENS` stays 32,768 deliberately, so 15.7k to 32k prompts are
+# SENT and refused by the engine; `scorer/score.py:refused_request_ids` already scores a refusal
+# correctly by leaving the device answer standing, and its own motivating example is a 38,821-token
+# prefill. REPORT THE REFUSAL COUNT PER CELL, per the user's ruling.
+#
+# SERVER START AT 0.25x IS STILL UNVERIFIED ON HARDWARE. Confirm the first cell's KV POOL line reads
+# engine 15744 / logical 15736, and the ENGINE FLAG LIVE line, before letting the other eleven run.
+#
 # D189 item 1: THE 0.25x GPU KV MEMORY CONDITION, six edge-condition arms at SEEDS 4 AND 5 ONLY.
 # One cell per line: "arm n seed tag". Lines starting # are NOT run. 12 lines, none omitted.
 #
@@ -170,15 +214,15 @@
 # lh_req, single-shot set ss2, dashcam_format EP-G, robot upload PER-FRAME, robot_reask_mean_s 30.0
 # (rq30), deadlines dashcam 1.0 s / robot 3.0 s (_L3) / single-shot 2.0 s. Tag _kv0.25_L3_epg_rq30.
 #
-llf 16 4 _kv0.25_L3_epg_rq30
-mooncake 16 4 _kv0.25_L3_epg_rq30
-simplestream 16 4 _kv0.25_L3_epg_rq30
-eco-llm 16 4 _kv0.25_L3_epg_rq30
-covex-v6-base 16 4 _kv0.25_L3_epg_rq30
-covex-v6-rules 16 4 _kv0.25_L3_epg_rq30
-llf 16 5 _kv0.25_L3_epg_rq30
-mooncake 16 5 _kv0.25_L3_epg_rq30
-simplestream 16 5 _kv0.25_L3_epg_rq30
-eco-llm 16 5 _kv0.25_L3_epg_rq30
-covex-v6-base 16 5 _kv0.25_L3_epg_rq30
-covex-v6-rules 16 5 _kv0.25_L3_epg_rq30
+llf 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
+mooncake 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
+simplestream 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
+eco-llm 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
+covex-v6-base 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
+covex-v6-rules 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
+llf 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
+mooncake 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
+simplestream 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
+eco-llm 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
+covex-v6-base 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
+covex-v6-rules 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 984 --max-model-len 15744
