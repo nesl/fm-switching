@@ -1,15 +1,27 @@
 {
   "present": {
-    "mm_cache_queries": false,
-    "mm_cache_hits": false
+    "mm_cache_queries": true,
+    "mm_cache_hits": true
   },
-  "first_snapshot": {},
-  "last_snapshot": {},
+  "first_snapshot": {
+    "request_success": 0,
+    "mm_cache_queries": 0,
+    "mm_cache_hits": 0,
+    "prefix_cache_hits": 0,
+    "prefix_cache_queries": 0
+  },
+  "last_snapshot": {
+    "request_success": 11518,
+    "mm_cache_queries": 368597,
+    "mm_cache_hits": 352829,
+    "prefix_cache_hits": 51385712,
+    "prefix_cache_queries": 58220252
+  },
   "delta": {
-    "mm_cache_queries": null,
-    "mm_cache_hits": null,
-    "prefix_cache_hits": null
+    "mm_cache_queries": 368597,
+    "mm_cache_hits": 352829,
+    "prefix_cache_hits": 51385712
   },
-  "gate": "INSTRUMENT NOT REPORTING",
+  "gate": "FAIL: multimodal hits in a run whose payloads should all be unique (SS timing column not usable)",
   "note": "server-wide counters from 10-s snapshots, first to last (the window can omit the first and last ~10 s); dashcam and robot frames carry per-(device, frame) UUIDs (D84), so total hits bound single-shot hits"
 }
