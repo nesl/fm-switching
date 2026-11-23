@@ -1,0 +1,12 @@
+# D212 FILLER QUEUE (H100). Policy lists (FINAL_LADDER_CELLS and after) are gated ABOVE every filler list and always run first.
+# order | entry | status
+a | confidence-cascade 1x s4-s7 (_rerun) + hybrid-llm 1x s4-s7 | READY, gated as FILLER_A_CELLS (hybrid-llm did not move in the D205 diff: flagged)
+b | routellm 1x s4-s7 | WAITING on its per-card check (moved via hybrid-llm _features)
+c | cascade-routing 1x s4-s7 | READY, gated as FILLER_C_CELLS (device-only floor by construction)
+d1 | simplestream reruns | WAITING on hits 14, 7 (mine)
+d2 | llf, mooncake, eco-llm reruns | WAITING on hit 14 (eco-llm also 16) (mine)
+d3 | inar-vl rerun | WAITING on hits 16, 17 (mine)
+d4 | kvflow, lmcache, pensieve, rh8, attentionstore | WAITING on hits 9, 8 (mine)
+e | covex-v6-base / covex-v6-rules safe subset | READY, gated as D209SAFE_CELLS (running)
+HELD | 0.25x policy cells, ablations (D210), 0.25x baselines affected by hit 14 | HELD
+WAITING ON HIT 6 | preble, uniscale, b9, covex-v6-cf-* | flash's fix
