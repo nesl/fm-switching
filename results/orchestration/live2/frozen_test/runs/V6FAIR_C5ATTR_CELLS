@@ -1,0 +1,36 @@
+# RUNG 3 ON THE c5attr BASE (D184 applies: shares failed its pre-registered checks).
+# One cell per line: "arm n seed tag". Lines starting # are NOT run.
+#
+# Posted by a watchdog-resumed session under D187 autonomy, after the r2 verdict.
+#
+# WHY THIS BASE: D184 with D187 (2) makes shares rung 2 ONLY IF it meets all three D179 checks at
+# all four seeds. It does not. Scored with the committed pre-registered scorer, positive control
+# PASS 6 of 6 cells exact, check 2 retention against a 0.90 bar:
+#     r1   0.7229 / 0.9773 / 0.7727 / 0.8906   passes at s5 only
+#     r2   0.5301 / 0.9773 / 0.7727 / pending  passes at s5 only, and is WORSE than r1 at s4
+# So r1 is the best shares version and it still fails. c5attr is rung 2 and rungs 3 and 4 build on
+# it; r1 is reported as the trade-off ablation.
+#
+# THE ORDERING CONSUMER IS LIVE ON THIS BASE, verified by construction rather than assumed:
+# covex-v6-fair-c5attr has the chain V6FairFeed -> V5Rules2Arm -> HybridArm with
+# _deficit_order_key overridden ON THE HybridArm, exactly as on the shares base. NOTE that the
+# docstring at arms_v6fairfeed.py:26-34 says the opposite, that the feed is an absent link on
+# c5attr; that text PREDATES the D182 ordering consumer and is stale. See
+# reports/OVERNIGHT_DECISIONS.md.
+#
+# THE FLEXIBLE-SPLIT CONSUMER IS GENUINELY ABSENT ON THIS BASE, and that is not a problem: c5attr
+# carries no share admission, so weights_by_type has no reader there. The dry attribution already
+# measured the split's contribution at EXACTLY 0 differing decisions against 3,902 for ordering,
+# so nothing testable is lost. Report it as absent rather than as zero.
+#
+# PRE-REGISTERED PASS CONDITION (user addendum 12 item 5, committed at cd2048df BEFORE any
+# rung-3 cell): gain 2.0 against gain 0 MUST show differing decisions, reported per consumer. If
+# none differ, rung 3 is reported as a NON-CONTRIBUTION and is NEVER TUNED. The -gain0 arm is the
+# control and is a CELL, not a code edit.
+#
+# Weights are per device, normalised, w_d = 1 + 2.0 x (shortfall_d / target_d), floored at 1,
+# range [1, 3]. The raw unnormalised form is NOT RUN (D182).
+covex-v6-fair-c5attr 16 4 _L3_epg_rq30
+covex-v6-fair-c5attr-gain0 16 4 _L3_epg_rq30
+covex-v6-fair-c5attr 16 5 _L3_epg_rq30
+covex-v6-fair-c5attr-gain0 16 5 _L3_epg_rq30

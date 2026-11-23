@@ -13,7 +13,13 @@ REPO=/home/pragya/Desktop/FM-switching
 SESSION=fmsw-overnight
 LOG=$REPO/ops/watchdog.log
 STATE=$REPO/ops/watchdog.state
-MAX_RESTARTS=6
+# Raised from 6 to 12 at 05:40Z. The restarts are no longer a crash loop, they are a POLL: a
+# `claude -p` session exits when its prompt completes, so the heartbeat goes stale 600 s later and
+# the next cron tick starts a fresh one-turn worker. That cadence is exactly 6 per hour, which was
+# the old budget, so the loop would have exhausted its own ceiling and stopped overnight while the
+# work was still progressing. 12 leaves headroom for jitter while still stopping a genuine crash
+# loop, which would restart every 2 minutes and reach 30 per hour.
+MAX_RESTARTS=12
 WINDOW_S=3600
 CLAUDE=/home/pragya/.local/bin/claude
 # --permission-mode auto, on the user's explicit ruling ("Resume session with auto mode"), which

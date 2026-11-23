@@ -267,3 +267,55 @@ RECORDED FOR TOMORROW: if the scorer is ever rerun by someone assembling a runs 
 they must decompress that file first, or the diagnostics silently empty. Worth a one-line guard in
 the scorer that FAILS LOUDLY when `coordinator_result.json.gz` exists and `coordinator_result.json`
 does not, rather than a fallback that quietly succeeds.
+
+---
+
+## 2026-11-23 05:40Z DETERMINATION: r1 DOMINATES r2, both fail the rule, so D184 applies
+
+Scored with the committed pre-registered scorer, gz decompressed, positive control PASS 6 of 6
+cells exact. Check 2 retention, bar 0.90:
+
+  seed      r1        r2        r2 better?
+  s4      0.7229    0.5301     NO, worse by 0.193
+  s5      0.9773    0.9773     equal
+  s6      0.7727    0.7727     equal
+  s7      0.8906    pending    cannot change the dominance below
+
+r1 IS THE BEST SHARES VERSION, unambiguously: greater than or equal to r2 at every scored seed and
+strictly better at s4. That resolves the "which version is best" question an earlier handoff
+deferred, and it does so WITHOUT needing s7, because r2 would have to beat r1 at s4 to change the
+ordering and s4 is already measured.
+
+BOTH VERSIONS FAIL THE RULE: each passes all three checks at s5 only, against a rule of all three
+at all four seeds. So the D184 trigger is satisfied. c5attr is rung 2, rungs 3 and 4 build on it,
+and r1 is reported as the TRADE-OFF ABLATION.
+
+THE r2 RESULT IS "FIRED AND DID NOT HELP", the one Rule 2 category that is evidence about the
+policy rather than about plumbing. The queue-register fix was RIGHT ABOUT THE REGISTER: the D162
+regressor is built over submit-to-first-token intervals and the re-check had been fed a
+submit-to-completion counter, and the corrected input did reach the decision, with the median
+queued-ahead at the skips falling from 1,496 to 1,101. It still made s4 worse. The likely system
+explanation, measured but not isolated, is that a more permissive re-check admits more work, which
+raises W, which makes share admission deny more (share_deny_recall 467 to 643), settling the arm at
+a worse equilibrium. BEING RIGHT ABOUT A QUANTITY IS NOT THE SAME AS BEING RIGHT ABOUT THE OUTCOME,
+and that is the lesson worth keeping from r2.
+
+## 2026-11-23 05:40Z FINDING: a docstring in arms_v6fairfeed.py is now STALE and would mislead the next reader
+
+That file's header (around lines 26 to 34) states that the deficit feed's weights are consumed by
+D179 share admission AND BY NOTHING ELSE, and concludes that on the c5attr base the weights have no
+reader at all and the feed is an ABSENT LINK BY CONSTRUCTION. That was true when written and is now
+FALSE: the D182 ordering consumer added a SECOND reader, the _deficit_order_key hook in
+hybrid_arm.py, which has nothing to do with share admission.
+
+VERIFIED EMPIRICALLY RATHER THAN BY READING. Constructing covex-v6-fair-c5attr gives the chain
+V6FairFeed -> V5Rules2Arm -> HybridArm with the ordering override installed ON THE HybridArm,
+exactly as for covex-v6-fair-shares. So the feed CAN steer on the c5attr base, through the ordering
+consumer, which is the only consumer that ever did anything: the dry attribution measured ordering
+at 3,902 differing decisions and the flexible split at exactly 0.
+
+WHY IT MATTERS RIGHT NOW: D184 puts rung 3 on the c5attr base, and that docstring would tell the
+next session rung 3 cannot be tested there. It can. The docstring needs correcting and I did NOT
+edit it: I am a one-turn watchdog-resumed session, and editing a live-path file without being able
+to follow through on a byte-identity proof is the wrong trade even for a comment. Recorded here so
+the correction is not lost.
