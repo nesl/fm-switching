@@ -58,15 +58,19 @@ def over32k_oids(path):
     return oids
 
 
-def robot_d176(cell, path):
-    """robot correct-by-deadline excluding the over-32k (http-400) recalls, from robot_rows."""
-    rr = (((cell.get("score") or {}).get("score") or {}).get("robot_rows")) or []
-    if not rr:
+def robot_d176(cell, path, std_correct, std_n):
+    """D176: the committed robot correct-by-deadline with the over-32k (http-400 context-refusal)
+    recalls removed from BOTH numerator and denominator. Defined relative to the committed standard
+    counts, so it equals the standard exactly when a cell has no over-32k refusal."""
+    if std_correct is None or std_n is None:
         return None, None
     over = over32k_oids(path)
-    rows = [r for r in rr if r.get("opportunity_id") not in over]
-    k = sum(1 for r in rows if r.get("standing_correct_by_deadline"))
-    return k, len(rows)
+    if not over:
+        return std_correct, std_n
+    rr = (((cell.get("score") or {}).get("score") or {}).get("robot_rows")) or []
+    over_rows = [r for r in rr if r.get("opportunity_id") in over]
+    over_correct = sum(1 for r in over_rows if r.get("standing_correct_by_deadline"))
+    return std_correct - over_correct, std_n - len(over_rows)
 
 
 def per_cell(arm_raw, seed):
@@ -77,7 +81,7 @@ def per_cell(arm_raw, seed):
     score = (cell.get("score") or {}).get("score") or {}
     sweep = (score.get("sweep") or [{}])[0]
     rk, rn, racc = E.robot_correct_in_time(cell)
-    dk, dn = robot_d176(cell, path)
+    dk, dn = robot_d176(cell, path, rk, rn)
     sk, sn, sacc, _, _ = E.ss_correct_in_time(path)
     # robot device-only floor / robot on time / single-shot within 2 s / dashcam attainment
     return {
