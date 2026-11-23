@@ -1,0 +1,346 @@
+{
+ "label": "D201 part 1: the per-baseline method statement from each card (item a) and the tree audit for other consumers of placeholder, stub or unfed values (item d). STATIC READ of committed code at one sha. Nothing here is a measurement except the single field marked `measured_on_one_dry_cell`.",
+ "read_at_sha": "56398c852a4bf998eab4a273b8b34d840d310720",
+ "is_measurement": false,
+ "the_defect": {
+  "field": "baselines/interface.py:100 EpisodicStream.delivered_scores",
+  "writers_of_literal_0.0": [
+   "live2/coordinator.py:663 (_device_answer)",
+   "live2/coordinator.py:1917 (cloud settle)",
+   "live/adapter.py:419 (v1 adapter, device branch)",
+   "live/adapter.py:450 (v1 adapter, cloud branch)"
+  ],
+  "placeholder_stated_at": "live2/coordinator.py:655-657",
+  "score_definition": "log P(Yes)",
+  "score_definition_sources": [
+   "baselines/devsplit.py:34-35",
+   "live2/scores.py:9-12",
+   "experiments/dashcam/d3_infer_vllm.py:96-102",
+   "experiments/dashcam/ctrl1c_calibrate.py:276-277,298"
+  ],
+  "why_0.0_is_not_neutral": "the range of log P(Yes) is (-inf, 0], so 0.0 is the MAXIMUM of the range: P(Yes)=1.0, maximally alarming. Every threshold v >= tau with tau a quantile of observed negatives is satisfied unconditionally, so the affected arms escalate on every instant rather than failing silent.",
+  "corroboration_in_a_committed_artefact": {
+   "file": "results/orchestration/live2/frozen_test/baseline_prescreen.json",
+   "cell": "seed 4, 16 devices, 1200 s, 40:40:20, lh_req, ss2, dry",
+   "inar-vl": {
+    "decisions": 13570,
+    "digest": "d2f69d4eb94625b4"
+   },
+   "routellm": {
+    "decisions": 13570,
+    "digest": "d2f69d4eb94625b4"
+   },
+   "always-cloud-fcfs": {
+    "decisions": 13570,
+    "digest": "d2f69d4eb94625b4"
+   },
+   "reading": "two score-reading arms are byte-identical to always-cloud because, fed the maximum of the range, they always escalate"
+  }
+ },
+ "method_statements": {
+  "inar-vl": {
+   "module": "baselines/inarvl_adapted.py",
+   "card": "baselines/cards/inarvl.md",
+   "which_score": "the DEVICE's own score only; never the cloud's",
+   "card_basis": "mapping table: 'image signals | the DEVICE's own delivered score-trajectory statistics | ADAPTATION A1 - the largest departure'; A1: the paper's signals exist to decide when the edge model is out of its depth",
+   "when": "every decision period, per stream, on the whole visible trajectory, before any cloud answer exists for the instant being decided",
+   "read_sites": [
+    "baselines/inarvl_adapted.py:65 (_image_signals)",
+    "baselines/inarvl_adapted.py:69-72 (last value, std twice, max)"
+   ],
+   "recall_branch_reads_a_score": false,
+   "recall_branch_note": "inarvl_adapted.py:97 passes four hard-coded image signals",
+   "depends_on_the_cloud_score": false,
+   "dry_cell_is_a_valid_proof": true,
+   "expressible_live": true,
+   "expressible_live_because": "fleet/data_sources.orin_dense_scores():752 is StudyORIN1's dense per-instant (file_name, t) -> score, 42,014 rows on the 0.25 s grid, and fleet/trace.py:536-555 already writes device_score into device_answers.jsonl for every monitor instant, raising at :538-541 if the committed set does not cover one"
+  },
+  "hybrid-llm": {
+   "module": "baselines/hybrid_llm_adapted.py",
+   "card": "baselines/cards/hybrid_llm.md",
+   "which_score": "the DEVICE's own score only; the cloud's is FORBIDDEN, because the router emits p_w(x) ~ Pr[q(S) >= q(L)] and routes BEFORE either model answers",
+   "card_basis": "mapping table: 'features x | StudyD3 development-split device-trajectory features | ADAPTATION A4'; A4: trajectory statistics over the offsets <= the decision moment, strictly causal, development split only; amendment 2 item 3b already took device_answer_confidence off the recall path on the same ground",
+   "when": "every decision period, per stream, before either model answers",
+   "read_sites": [
+    "baselines/hybrid_llm_adapted.py:37 (_features)",
+    "baselines/hybrid_llm_adapted.py:40-46 (last, mean, max, slope, std, len)"
+   ],
+   "recall_branch_reads_a_score": false,
+   "recall_branch_note": "hybrid_llm_adapted.py:86 takes DEFAULTS['recall_decision']",
+   "depends_on_the_cloud_score": false,
+   "dry_cell_is_a_valid_proof": true,
+   "expressible_live": true,
+   "second_fault_beyond_the_constant": "delivered_scores is the APPLICATION-VISIBLE stream and coordinator.py:1917 appends the CLOUD's answer on top of the device's, so real values in that channel would hand this arm q(L), which its published method forbids. The constant hid this because both writers wrote the same number."
+  },
+  "thinking-qwenvl-atdm": {
+   "module": "baselines/thinking_qwenvl_adapted.py",
+   "named_by": "the D200 session, not by the original D201 brief",
+   "read_sites": [
+    "baselines/thinking_qwenvl_adapted.py:84 (v = s.latest_score())",
+    "baselines/thinking_qwenvl_adapted.py:87 (conf = (v + 12.0) / 12.0, clamped)",
+    "baselines/thinking_qwenvl_adapted.py:88 (len(s.delivered_scores))"
+   ],
+   "same_defect": true,
+   "same_defect_because": "with v = 0.0, conf = 1.0 exactly: a constant AND the maximum of the range, handed to atdm() as the device's confidence",
+   "depends_on_an_answer": true,
+   "dry_cell_is_a_valid_proof": false,
+   "dry_cell_note": "this arm declares reads_device_answer (fleet/data_sources.py:245-247), so its published mechanism waits for an answer and only a LIVE cell can prove it"
+  }
+ },
+ "all_value_readers_of_delivered_scores": {
+  "count": 7,
+  "named_in_D201": 2,
+  "sites": {
+   "baselines/inarvl_adapted.py:65": "direct",
+   "baselines/hybrid_llm_adapted.py:37": "direct",
+   "baselines/constructed.py:110": "via interface.py:107-108 latest_score(); THIS IS B4, OUR OWN ARM",
+   "baselines/cascade_adapted.py:130": "via latest_score()",
+   "baselines/thinking_qwenvl_adapted.py:84": "via latest_score()",
+   "baselines/uniscale_adapted.py:59": "via latest_score()",
+   "baselines/r3streaming_adapted.py:103": "via latest_score()"
+  },
+  "what_the_constant_makes_each_compute": {
+   "baselines/cascade_adapted.py:136": "escalate = v >= tau_trigger with tau_trigger the 0.80 quantile of negative log P(Yes) (:74-77), strictly < 0, so every stream escalates on every epoch",
+   "baselines/constructed.py:111-112": "the same arithmetic, tau built identically at :91",
+   "baselines/thinking_qwenvl_adapted.py:87": "conf = 1.0, constant",
+   "baselines/uniscale_adapted.py:61-63": "context vector [1.0, 0.0, 0.0, gpu_kv_fraction]",
+   "baselines/r3streaming_adapted.py:103": "abs(v or -12.0)**-1 if v else 0.0; 0.0 is falsy, so every difficulty is 0.0",
+   "baselines/hybrid_llm_adapted.py:37-45": "five of six router features collapse; only len(h) varies",
+   "baselines/routellm_adapted.py:94": "imports the same _features (:32), so the same collapse",
+   "baselines/inarvl_adapted.py:69-72": "(blur, exposure, artifact, detail) = (0.0, 0.0, 0.0, 1.0)"
+  },
+  "positive_control_on_this_audit": "sim/run.py:237-240 feeds the REAL measured scores from dev_wall (:160-173, :419), so the offline simulator does NOT have this defect and no score-reading arm's sim cell is comparable with its live2 cell"
+ },
+ "audit_hits": [
+  {
+   "n": 1,
+   "what": "delivered_scores: 7 value readers, 4 writers of 0.0",
+   "tier": 1,
+   "see": "all_value_readers_of_delivered_scores above",
+   "documented": "partly (coordinator.py:655-657 only); live/adapter.py:15 documents the opposite of the truth"
+  },
+  {
+   "n": 2,
+   "what": "NetworkState.connected hard-coded True, read as a gate at ~20 sites",
+   "tier": 1,
+   "writes": [
+    "live2/cstate.py:595",
+    "live/adapter.py:224"
+   ],
+   "reads": [
+    "baselines/uniscale_adapted.py:84",
+    "baselines/ekya_adapted.py:135",
+    "baselines/inarvl_adapted.py:83",
+    "baselines/routellm_adapted.py:95",
+    "baselines/hybrid_llm_adapted.py:74",
+    "baselines/thinking_qwenvl_adapted.py:90",
+    "baselines/querystream_adapted.py:110",
+    "baselines/perllm_adapted.py:82",
+    "baselines/videostorm_adapted.py:109",
+    "baselines/ecollm_adapted.py:125",
+    "baselines/cascade_adapted.py:136",
+    "baselines/cascade_routing_adapted.py:125",
+    "baselines/r3streaming_adapted.py:107",
+    "baselines/constructed.py:59,111,142,221,341,454,560,567",
+    "live2/arms_policy.py:633,634,817",
+    "live2/arms_published.py:156"
+   ],
+   "composite": "live2/arms_policy.py:634-635 is the ONLY production caller of policy/coordinator.py:791 on_outage and sits behind this dead gate, so policy/state.py:26 Link.p_reachable_within_hs is 1.0 everywhere and the spec 7.5 reachability discount read at policy/rollout.py:690, :756 and policy/closed_form.py:202 is a dead constant in every harness; policy/coordinator.py:802 on_reconnect has no production caller at all",
+   "documented": "the root constant at fleet/links.py:9-11; NOT at any read site; live/adapter.py:13-24 omits streams[].network from its 'WHAT IS LIVE' table"
+  },
+  {
+   "n": 3,
+   "what": "ekya_adapted.py:89 'return s + 0.0 * self._recall_gain(obs, bg)' zeroes the term the comment at :86-87 says is added",
+   "tier": 1,
+   "consequence": "score() becomes monotone in stream share, so in the thief loop :94-130 any step into bg is reverted and any step out is kept; the characteristic joint partition is one-directional",
+   "documented": "NO, and the adjacent comment asserts the opposite"
+  },
+  {
+   "n": 4,
+   "what": "live2/hybrid/value_reader.py:115 returns send=False for every input, which also defeats its own declared Step-4 control",
+   "tier": 1,
+   "documented": "no"
+  },
+  {
+   "n": 5,
+   "what": "live2/cstate.py:260 CoordState.metrics: one guarded write, two decision-path reads",
+   "tier": 1,
+   "documented": "no"
+  },
+  {
+   "n": 6,
+   "what": "live/adapter.py:233 with :140-144: 'except Exception: return {}' substitutes 'KV cache empty' on any fetch failure",
+   "tier": 1,
+   "documented": "no"
+  },
+  {
+   "n": 7,
+   "what": "baselines/simplestream_adapted.py:47 self.window_steps is WRITE-ONLY, and the arm's live2 registration cites it as the reason it ports",
+   "tier": 1,
+   "shape": "the desired_tier shape",
+   "documented": "no"
+  },
+  {
+   "n": 8,
+   "what": "baselines/attentionstore_adapted.py:46,:48 Session(sid, 0, HBM, last_access_s=0.0): literal 0 tokens and literal 0.0 access time feed the two mechanisms the arm exists for",
+   "tier": 1,
+   "documented": "no"
+  },
+  {
+   "n": 9,
+   "what": "baselines/pensieve_adapted.py:47 tokens.setdefault(sid, 11000): a magic stand-in for missing measured history size, on a charged path, 4 instances",
+   "tier": 1,
+   "documented": "no"
+  },
+  {
+   "n": 10,
+   "what": "live2/arms_policy.py:792 every device's recall demand is one frozen DEV prior; the EWMA that would update it has no caller",
+   "tier": 1,
+   "documented": "no"
+  },
+  {
+   "n": 11,
+   "what": "live2/v5/cf_objective.py:280 DeficitCounters.weight() returns exactly 1.0 for every device in every arm but one",
+   "tier": 1,
+   "same_as": "D200 (1), found independently here"
+  },
+  {
+   "n": 12,
+   "what": "policy/state.py:153 z_of() -> self.z.get(task, 0.0); Device.z (:145) is never written on any production path",
+   "tier": 1,
+   "documented": "no"
+  },
+  {
+   "n": 13,
+   "what": "policy/state.py:41 HistoryBelief.staleness_s = 0.0, read on the decision path, written nowhere by default",
+   "tier": 1,
+   "documented": "no"
+  },
+  {
+   "n": 14,
+   "what": "live2/arms.py:82 self._caps is WRITE-ONLY (one code occurrence in the tree)",
+   "tier": 1,
+   "documented": "no"
+  },
+  {
+   "n": 15,
+   "what": "baselines/smoke/replay.py:102 device_answer_confidence=None, ignoring reads_device_answer; the 2026-11-20 ruling was applied to live2 (cstate.py:516) only",
+   "tier": 1,
+   "documented": "no"
+  },
+  {
+   "n": 16,
+   "what": "baselines/thinking_qwenvl_adapted.py:73 rho is a constant in all three harnesses by two independent routes",
+   "tier": 1,
+   "documented": "no"
+  },
+  {
+   "n": 17,
+   "what": "baselines/inarvl_adapted.py:78-80,94,97: 7 of 10 fuse inputs are literal constants; all six text signals are hard zeros on the episodic path and all four image signals hard-coded on the recall path; energy_j=0.0 at :61 makes the paper's energy axis inert",
+   "tier": 1,
+   "documented": "energy only, card A5"
+  },
+  {
+   "n": 18,
+   "what": "baselines/constructed.py:96-103 B4's query-type routing takes the same branch on every query because '\"D2\" in have' is always true; the DEVICE and single-shot branches at :101-108 are unreachable, and LONG/SHORT at :84-85 contain no real trace category",
+   "tier": 1,
+   "documented": "partly, live2/cstate.py:419-427"
+  },
+  {
+   "n": 19,
+   "what": "e36e_fleet.py:853 the CLAUDE.md Step-4 negative control is defined and never called, gating an 8,064-condition sweep at :909-913; :862-870 prints 'Negative control PASS' with no computation",
+   "tier": 2,
+   "documented": "the code documents its own evasion at :856-861"
+  },
+  {
+   "n": 20,
+   "what": "e36b_fleet.py:180-188 and e36c_fleet.py:164-167 refresh_ms() returns 0.0 for every reachable argument pair",
+   "tier": 2,
+   "documented": "in a sibling file, e36d_fleet.py:5"
+  },
+  {
+   "n": 21,
+   "what": "policy/coordinator.py:704 competing_s=0.0 makes PRIORITY unreachable on the restore path even with realistic_competing on; its guard test policy/tests/test_v11_fixes.py:338-355 scans only three functions and not this one",
+   "tier": 2,
+   "documented": "no"
+  },
+  {
+   "n": 22,
+   "what": "live2/touch_policy.py:108 TOUCH_PRICE_MODE is never assigned, so touch_price_gpu_s_d162 (:111) is unreachable and the touch charge stays the whole-prefix price the module's own measurement (:77-106) calls 3.6x to 9.8x too high",
+   "tier": 2,
+   "documented": "the sharp note is in a third file, arms_v6state.py:171-174"
+  },
+  {
+   "n": 23,
+   "what": "live2/arms_policy.py:790 an 8x unit error: cstate.py:595 builds uplink_bps already in BYTES/s and :790 divides by 8 again (212,500 B/s against 1,700,000), so every predicted upload time is 8x too long; :639 also hard-codes the link constants for a device first seen on a recall query",
+   "tier": 2,
+   "documented": "no"
+  },
+  {
+   "n": 24,
+   "what": "sim/run.py:253-255 latency_estimate_s is two constants, one a literal 0.0 that clockwork_adapted.py:58 reads as its queue estimate",
+   "tier": 2,
+   "documented": "no"
+  },
+  {
+   "n": 25,
+   "what": "sim/run.py:250 recall work in flight is counted as episodic while recall carries a literal 0",
+   "tier": 2,
+   "documented": "no"
+  },
+  {
+   "n": 26,
+   "what": "live2/engine_actions.py:399-401 EXTERNAL_HIT_KEYS are CONSTRUCTED key names, so the host belief is unreachable and the RELOAD lever has no trigger state",
+   "tier": 2,
+   "documented": "yes, :396-398"
+  },
+  {
+   "n": 27,
+   "what": "live2/coordinator.py:1653-1654 the dry service time is one constant for every episodic request (literal frame_count=1, load_pct=25) and a literal COLD for every recall request, so warm-versus-cold is absent from every dry cell's timing; it then becomes lat['episodic'], which cstate.py:19 advertises as an EWMA of MEASURED TTFTs",
+   "tier": 2,
+   "documented": "partly, :1647-1651"
+  },
+  {
+   "n": 28,
+   "what": "baselines/profiles.py:94 C.__dict__.get('_CAD', (0.25, 0.5, 1.0)): _CAD is defined nowhere, so the default is the only value ever used",
+   "tier": 2,
+   "documented": "no"
+  }
+ ],
+ "measured_on_one_dry_cell": {
+  "what": "the episode-boundary question behind open ruling 2: how often the 40-entry stream window spans more than one EP-G episode, with the device score channel live",
+  "cell": "seed 4, 4 devices, 300 s, 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0, dry",
+  "calls_carrying_an_episode_key": 5499,
+  "calls_whose_window_spans_more_than_one_episode": 5289,
+  "fraction": 0.962,
+  "why_it_matters": "both cards specify a WITHIN-CLIP trajectory (inarvl A1 substitutes for ONE image; hybrid_llm A4 is offsets of ONE clip), and the harness window does not respect clip or episode boundaries"
+ },
+ "before_side_of_the_decision_diff_cannot_be_the_committed_prescreen": {
+  "file": "results/orchestration/live2/frozen_test/baseline_prescreen.json",
+  "its_provenance_git_commit": "62edb7fd82a5678c41d3a2296d2cb10c9e3539e0",
+  "commits_between_that_and_this_sha": 875,
+  "of_those_touching_the_decision_path": 59,
+  "paths_counted": [
+   "experiments/orchestration/live2/coordinator.py",
+   "experiments/orchestration/live2/cstate.py",
+   "experiments/orchestration/live2/arms.py",
+   "experiments/orchestration/live2/arms_published.py",
+   "experiments/orchestration/baselines/"
+  ],
+  "consequence": "both sides of the item (c) diff must be run at ONE sha, from two trees differing only in the D201 patch. This is CLAUDE.md consistency check 7: a side of the comparison that is never audited."
+ },
+ "open_rulings": [
+  "D201 names two arms; seven read the values, and baselines/constructed.py:110 (B4) is ours, not a published baseline. Whether the other five arms' committed cells are superseded, and whether B4's are, is a user decision.",
+  "Both cards specify a within-clip trajectory and the harness window crosses episode boundaries in 96.2 per cent of calls (see measured_on_one_dry_cell). Whether to slice the two arms' feature window to the current episode changes both arms' decisions and is not decided here.",
+  "A synthetic trace holds no committed device score, so once scores are real no arm whose published method reads one can run on a synthetic cell; tests/test_live2_coord.py's all-arm legality and fairness tests run every registered arm on exactly such a trace."
+ ],
+ "_provenance": {
+  "git_commit": "56398c852a4bf998eab4a273b8b34d840d310720",
+  "script": "none: static read of committed code, recorded by hand",
+  "model": "none",
+  "device": "cpu",
+  "n": 28,
+  "timestamp": "2026-11-23T13:44:30.443837",
+  "note": "written without _provenance.stamp because no experiment script produced it; the fields are the convention's own and git_commit is the sha every line number was read at"
+ }
+}
