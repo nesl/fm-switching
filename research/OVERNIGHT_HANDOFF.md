@@ -1,5 +1,28 @@
 # OVERNIGHT HANDOFF (D187). READ THIS FIRST.
 
+## THE FALLBACK TRIGGER. READ THIS BEFORE SCORING ANYTHING.
+
+USER CORRECTION 2026-11-23: an earlier version of this file said D184 applies "if check 2 still
+fails at 3 or more seeds". THAT WAS WRONG AND IS WITHDRAWN. Do not use a count of failing seeds as
+the trigger.
+
+THE RULE (D184 with D187 (2)): SHARES IS RUNG 2 ONLY IF IT MEETS ALL THREE D179 CHECKS AT ALL FOUR
+SEEDS, 4, 5, 6 AND 7. There is no partial credit, no majority, and no pooling: the scorer's own rule
+is that the verdict is per seed because a pooled figure can hide a per-seed failure.
+
+SO: IF, BY ABOUT 05:00, THE BEST SHARES VERSION STILL FAILS ANY CHECK AT ANY SEED, APPLY D184.
+  c5attr becomes rung 2.
+  Rungs 3 and 4 build on c5attr.
+  Shares, in its BEST version, is reported as the TRADE-OFF ABLATION, not as a failure: it restores
+  alert attainment above base at every seed while giving back robot on-time, and that is the result.
+
+WHERE THINGS STAND AGAINST THAT RULE, so nobody has to infer it: r1 passes all three checks at s5
+ONLY (check 2 at 0.7229 / 0.9773 / 0.77 / pending for s4 / s5 / s6 / s7). ONE SEED PASSING IS NOT
+THE TARGET. r2 therefore has to pass all three checks at ALL FOUR seeds to displace the fallback,
+and r2's own pre-registration (3ed47764) treats s4 and s6 as targets with s5 as a control that must
+not regress. If r2 lifts s4 and s6 but drops s5 below 0.90, THAT IS STILL A FAILURE OF THE RULE.
+
+
 ## 03:45Z UPDATE, written by a WATCHDOG-RESUMED session
 
 THE RESUME WORKED. The interactive session died (the user warned SSH might crash); the heartbeat
@@ -70,7 +93,7 @@ budget to spend.
        --pins results/orchestration/live2/frozen_test/d179_rung2_verdict_prereg.json
    Base cells are hybrid-F-lhreq-noc3_n16_s{4,5,6,7}_1200s_h27_3t_L3_epg_rq30 (D172 names).
    READ THE `positive control: PASS (8/8 cells exact)` LINE FIRST.
-2. If check 2 still fails at 3 or more seeds, D184 applies by about 05:00: c5attr becomes rung 2,
+2. Apply the fallback trigger exactly as stated in THE FALLBACK TRIGGER section at the top of this file. The earlier wording here, "if check 2 still fails at 3 or more seeds", was WRONG and is withdrawn by user correction: the trigger is ANY check failing at ANY seed,
    shares is reported as a trade-off ablation, and rungs 3 and 4 build on c5attr.
 
 ---
