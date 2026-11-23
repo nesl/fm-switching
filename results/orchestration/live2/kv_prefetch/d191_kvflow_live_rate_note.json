@@ -1,0 +1,50 @@
+{
+ "_what": "D191 register note on kvflow-prefetch: the DRY port-rule count must not be cited as the arm's LIVE prefetch rate. Raised by the H100 from the first live cell and recorded here rather than by editing either the gated cell list or the dry proof, so each number keeps its own register and provenance.",
+ "why_this_note_exists": "The gated KVFLOW_CELLS header and d187_kvflow_prefetch_posted_proofs.json both report a DRY measurement: 108 prefetch_ahead decisions against the base kvflow's 9, so 99 attributable, matching the arm's own prefetch_ahead_emitted of 99. That is a correct PORT-RULE proof, which asks only whether the characteristic decision occurs at least once. It is NOT a rate, and the header's unexpressible figure (19,107 against 99 emitted, 0.5 percent expressed) is a DRY figure that a reader could easily carry into a sentence about the live system.",
+ "dry_OBSERVED_on_a_dry_cell": {
+  "prefetch_ahead_decisions": 108,
+  "base_kvflow_decisions": 9,
+  "attributable": 99,
+  "arm_counter_prefetch_ahead_emitted": 99,
+  "prefetch_ahead_unexpressible": 19107,
+  "asks": 19209,
+  "expressed_share": 0.0052,
+  "source": "d187_kvflow_prefetch_posted_proofs.json, dry seed-4 cell, posted knobs",
+  "register": "OBSERVED count of decision rows on a DRY cell; a port-rule existence proof"
+ },
+ "live_OBSERVED_on_the_s4_cell": {
+  "prefetch_wanted": 19582,
+  "prefetch_ahead_emitted": 1628,
+  "prefetch_ahead_unexpressible": 17954,
+  "expressed_share": 0.0831,
+  "ratio_live_emitted_to_dry_attributable": 16.4,
+  "source": "H100, coordinator_result arm_stats, kvflow-prefetch_n16_s4 (_L3_epg_rq30)",
+  "register": "OBSERVED counters from a LIVE cell; this is the rate, the dry figure is not"
+ },
+ "the_correction": "The live mechanism is about 16x more active than the dry proof suggested: 8.3 percent of asks expressed live against 0.5 percent dry. The likely reason, offered as the H100's reading and not as a measured cause, is that live sessions and real engine telemetry put more sessions in the expressible state than a dry cell does. SO: cite 1,628 and 8.3 percent for the live arm, and 99 only as the port-rule existence proof.",
+ "the_caveat_that_still_stands": "92 percent of asks remain UNEXPRESSIBLE live (17,954 of 19,582), so kvflow-prefetch is still NOT the published system at full strength and must not be reported as such. The direction of the correction matters: it makes the arm look MORE active, so it weakens any claim that the port passed on a technicality, and it does not weaken the not-at-full-strength caveat at all.",
+ "also_recorded_about_this_cell": {
+  "verdict": "VALID but SATURATED",
+  "by_deadline": 0.371,
+  "note_on_by_deadline": "equal to the cell's own floor",
+  "robot_on_time": "6 of 132",
+  "ss_on_time": "30 of 357",
+  "dashcam": "FAIL 0.069",
+  "load_tok_s": 5890,
+  "requests": 9358,
+  "errors": 23,
+  "null_status_requests": 23,
+  "engine_kv_pool_tokens": 62944,
+  "D144_2_check": "23 errors of 9,358 requests is 0.25 percent, well under D144 (2)'s 5 percent saturation-labelling threshold, so the run is NOT labelled saturated by the ERROR rule. It is saturated on LOAD and on sitting at its own floor, which is a different and weaker statement and should be written as such.",
+  "floor_caveat": "an arm AT its floor orders against other arms uninformatively, the same caveat already attached to lmcache s6 at 0.083 against a 0.058 floor",
+  "OPEN_and_asked_of_the_H100": "the 23 null-status requests are the D175 refusal signature. Confirm they appear in scorer/score.py:refused_request_ids and that none replaced a device answer, as was done for lmcache s6's two. The error direction FLATTERS the arm, and 23 is an order of magnitude more than the two that case tested, so it is worth checking rather than assuming the earlier confirmation generalises."
+ },
+ "_provenance": {
+  "git_commit": "c21278c854de3850620b09a143736efd14f27f37",
+  "script": "none, a record of two measurements",
+  "device": "live cell measured on the H100; dry proof measured on flash",
+  "n": 2,
+  "timestamp": "2026-11-23T10:06:13.163784",
+  "register_of_this_file": "the dry figures are re-read from the committed proof; the live figures are relayed by the H100 from its cell and are NOT independently verified on this box"
+ }
+}
