@@ -1,0 +1,1193 @@
+{
+ "_what": "D179 (6): the three pre-registered rung-2 checks, scored PER SEED, with the positive control, the pinned comparators and the definitions that were chosen before any shares cell existed",
+ "_prereg": "results/orchestration/live2/frozen_test/runs/V6SHARES_CELLS (its header)",
+ "arms": {
+  "base": "hybrid-F-lhreq-noc3",
+  "rung2_committed": "covex-v6-fair-c5attr",
+  "shares": "covex-v6-fair-c5attr-rr"
+ },
+ "seeds": [
+  7
+ ],
+ "tag": "_L3_epg_rq30",
+ "runs_dir": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessA_rr7/runs",
+ "cells_absent": [],
+ "definitions": {
+  "on_time_PRIMARY": {
+   "rule": "t_delivered - t_opportunity <= deadline_s + 1e-9, score._within",
+   "t_delivered_passes_applied": [
+    "D144 (2) / D175 (1): a refused request's delivery is nulled (non-200 http_status, or no status with neither prompt_tokens nor output_tokens)",
+    "D146 DELIVERY=completion: for kind == recall only, t_delivered is re-based onto the request's t_done plus the same per-row forward delay; a monitor stays at first token plus the forward hop"
+   ],
+   "source": "experiments/orchestration/live2/scorer/score.py:484-579, 687-689",
+   "why_transcribed": "score.load needs the trace tree, which this box does not hold; the positive control proves the transcription against the cells' own committed score blocks"
+  },
+  "on_time_SECONDARY_beside": {
+   "rule": "cloud_payload.on_time, the coordinator's own online flag",
+   "register": "FIRST-TOKEN reading, not the committed completion-delivery reading",
+   "why_kept": "the D178 deficit feed reads exactly this field, so the online mechanism's view and the offline score's view are both on the page; on covex-v6-state-uo seed 4 they differ by 140 monitor instants, which is dashcam_ontime_reconcile.json's late_at_forward_only bucket exactly"
+  },
+  "currency": "on-time CLOUD answers only (D177). device_on_time is never added to any numerator here",
+  "query_type": {
+   "rule": "device-id prefix: dash -> alert, robo -> recall, asst -> assistance",
+   "source": "share_admission.type_of_device",
+   "why_not_kind": "arms_v6fair.py:129 merges assistance into recall by kind, and every asst00x completion arrives as kind recall with deadline_s 2.0, so a kind-based split double-counts recall",
+   "guard": "the (prefix, kind, deadline_s) cross-tab must be exactly {(dash, monitor, 1.0), (robo, recall, 3.0), (asst, recall, 2.0)}"
+  },
+  "alert_per_episode_attainment": {
+   "episode_key": "(play_id, int(round((t_local - 3.0) / 0.5)) // 21)",
+   "episode_key_source": "d178_deficit_feed_proofs.json f_replay_committed_live_cell independent._how; chosen over the EP-G prompt-token law because it is readable from the outcome row alone and therefore sees episodes the policy never served",
+   "epg_cap_frames": 21,
+   "epg_min_frames": 3,
+   "denominator_PRIMARY": 19,
+   "denominator_source": "D178 (1) declared constant: positions 2 to 20 inclusive of the 21-frame episode, verified on a committed cell at 714 episodes, instants per episode min 2 / median 19 / max 19",
+   "denominator_bias_measured": "flat 19 gives 0.1467 against the true per-episode 0.1427 on covex-v6-state seed 5, so the constant costs +0.0040; both are reported",
+   "target": 0.25,
+   "target_source": "D178 (1), spec v6 sections 2 and 8; also the committed scorer's p_dash",
+   "both_reported": "MEAN PER-EPISODE and POOLED, and only the per-episode one answers check 1; on covex-v6-state seed 5 the per-episode shortfall is 0.1427 and the pooled shortfall is 0.0411, a factor of 3.5",
+   "attainment_vs_shortfall": "attainment_e = on_time_e / 19, shortfall_e = max(0, 0.25 - attainment_e); the mean clipped shortfall is NOT 0.25 minus the mean attainment and the two are reported separately",
+   "check_1_quantity": "the MEAN PER-EPISODE ATTAINMENT, compared against the base's. The fraction of episodes at or above 0.25 is reported beside it because that is the other reading of 'target attainment' and the two can disagree"
+  },
+  "robot_retention": {
+   "gain": "rung2 on-time fraction minus base on-time fraction",
+   "retained": "(shares minus base) / gain",
+   "denominator": "sweep[0].robot_pool_n, every robo00x opportunity in the cell; not the feasible subset and not a distinct-question count, because a D159 (C) re-ask is its own opportunity with its own 3.0 s deadline",
+   "pool_equality_guard": "the pool is trace-determined and must be EQUAL across arms at a seed; on the committed comparators it is 132 / 127 / 121 / 105 for both arms, and an inequality is a STOP, not a rescaling",
+   "near_zero_or_negative_denominator": {
+    "NORMAL": "gain >= +0.01: retained is the ratio, bar 0.90",
+    "NO_GAIN_TO_RETAIN": "|gain| < 0.01: the ratio is null and the check is VACUOUS for that seed and said to be; the absolute fallback applies",
+    "NEGATIVE_GAIN": "gain <= -0.01: the ratio is reported but marked UNINTERPRETABLE because its sign inverts; the absolute fallback applies",
+    "absolute_fallback": "shares on-time fraction must not fall more than 0.01 below the base's",
+    "no_seed_dropped": "every seed is reported with its gain_class, never dropped"
+   },
+   "committed_gains": "base-to-rung2 gain is +0.629 / +0.693 / +0.545 / +0.610 on seeds 4 to 7",
+   "NOT_by_deadline": "robot_headline.correct_answers_delivered_by_deadline is an ACCURACY, not an on-time rate: its own `metric` field says correct_answers_delivered_by_deadline, and its definition is the cloud's answer when delivered within the deadline, ELSE THE DEVICE'S if the device's also arrived in time, else a miss. It is NOT the quantity check 2 names, for two separate reasons, and substituting it changes the check twice over. First, an on-time wrong answer scores zero and a correct late answer scores zero, so it is not a deadline-attainment rate. Second, it ADMITS THE DEVICE SIDE, which D177 and D179 (6) exclude: the currency is on-time CLOUD answers only and device_on_time is reported beside, never added. The device floor is 0.371212 on all three arms at seed 4, identical, and the measured consequence is large: on seed 4 the on-time retention is (0.454545 - 0.265152) / (0.893939 - 0.265152) = 0.3012 while the by_deadline retention is (0.545455 - 0.469697) / (0.613636 - 0.469697) = 0.5267, because the accuracy reading compresses the numerator by 2.5x and the denominator by 4.4x. The two are reported side by side and the ON-TIME one is the check."
+  },
+  "assistance_within_2s": {
+   "deadline_s": 2.0,
+   "unit_PRIMARY": "the DEVICE (D178 (1)): every asst00x device at or above 0.90. The pooled fraction and the per-device minimum are reported beside",
+   "denominator": "OFFERED assistance opportunities (sweep[0].ss_pool_n = 357 on seed 4 against d181_share_floors.json's 1,429 over the four base cells), not completions: a completions denominator reads 100 percent for a device whose questions are all being declined, the exact case these checks exist to catch",
+   "same_test": "for assistance 'within 2 s' and 'on time' are the same test"
+  },
+  "W_register": "live W is submit to FIRST TOKEN, dry W is submit to SETTLE (on_first is wired only when a real backend exists, procsplit.py:430-433); the dry report's 13.43 percent of virtual time above W_max and its 3.56x high water are SETTLE-basis and size nothing, so a live cell's W is never compared to them",
+  "overrun_signature_check": "in the dry cell recall was present in ALL 18,476 overruns with no exception, so an overrun with no recall in it is NEW and is flagged loudly",
+  "seeds_permitted": "0, 4, 5, 6, 7 only; never 1 to 3 and never HOLDOUT"
+ },
+ "positive_control": {
+  "_what": "the scorer re-derives six committed counts per cell from outcomes.jsonl.gz plus request.jsonl.gz and must match the cell's own score.sweep[0] block EXACTLY",
+  "tolerance": "EXACT, 0 counts",
+  "cells": [
+   {
+    "cell": "covex-v6-fair-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "arm": "covex-v6-fair-c5attr",
+    "seed": 7,
+    "checks": [
+     {
+      "quantity": "robot_pool_on_time",
+      "committed": 84,
+      "recomputed": 84,
+      "agree": true
+     },
+     {
+      "quantity": "robot_pool_n",
+      "committed": 105,
+      "recomputed": 105,
+      "agree": true
+     },
+     {
+      "quantity": "ss_pool_on_time",
+      "committed": 354,
+      "recomputed": 354,
+      "agree": true
+     },
+     {
+      "quantity": "ss_pool_n",
+      "committed": 359,
+      "recomputed": 359,
+      "agree": true
+     },
+     {
+      "quantity": "dashcam_on_time",
+      "committed": 6444,
+      "recomputed": 6444,
+      "agree": true
+     },
+     {
+      "quantity": "dashcam_n_instants",
+      "committed": 11779,
+      "recomputed": 11779,
+      "agree": true
+     }
+    ],
+    "pass": true,
+    "crosstab_matches_expected": true
+   },
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "arm": "hybrid-F-lhreq-noc3",
+    "seed": 7,
+    "checks": [
+     {
+      "quantity": "robot_pool_on_time",
+      "committed": 19,
+      "recomputed": 19,
+      "agree": true
+     },
+     {
+      "quantity": "robot_pool_n",
+      "committed": 105,
+      "recomputed": 105,
+      "agree": true
+     },
+     {
+      "quantity": "ss_pool_on_time",
+      "committed": 354,
+      "recomputed": 354,
+      "agree": true
+     },
+     {
+      "quantity": "ss_pool_n",
+      "committed": 359,
+      "recomputed": 359,
+      "agree": true
+     },
+     {
+      "quantity": "dashcam_on_time",
+      "committed": 7513,
+      "recomputed": 7513,
+      "agree": true
+     },
+     {
+      "quantity": "dashcam_n_instants",
+      "committed": 11779,
+      "recomputed": 11779,
+      "agree": true
+     }
+    ],
+    "pass": true,
+    "crosstab_matches_expected": true
+   }
+  ],
+  "n_cells": 2,
+  "n_pass": 2,
+  "verdict": "PASS",
+  "_if_it_fails": "THIS SCORER IS BROKEN AND THE CELL IS NOT. Report the scorer failure, not the comparison."
+ },
+ "comparator_cells": {
+  "base": {
+   "7": {
+    "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "arm": "hybrid-F-lhreq-noc3",
+    "arm_version": "live2-arm-1.0",
+    "run_valid": true,
+    "digests_equal": true,
+    "committed_score_block": {
+     "_path": "cell.json -> score -> score -> sweep[0]",
+     "_required_keys_missing_FLAG": [],
+     "_path_resolved": true,
+     "_keys_that_do_not_exist": {
+      "dashcam_verdict": "NOT a key of this block. The verdict key is dashcam_all_meet; asking for dashcam_verdict reads None, which is a missing field wearing the look of a failed check"
+     },
+     "dashcam_all_meet": true,
+     "dashcam_eligible": [
+      "dash000",
+      "dash001",
+      "dash002",
+      "dash003",
+      "dash004",
+      "dash005"
+     ],
+     "dashcam_excluded": [],
+     "robot_pool_meets": false,
+     "robot_pool_eligible": true,
+     "robot_per_device": {
+      "robo000": {
+       "n_questions": 8,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo001": {
+       "n_questions": 3,
+       "on_time": 1,
+       "fraction": 0.333333
+      },
+      "robo002": {
+       "n_questions": 32,
+       "on_time": 5,
+       "fraction": 0.15625
+      },
+      "robo003": {
+       "n_questions": 16,
+       "on_time": 5,
+       "fraction": 0.3125
+      },
+      "robo004": {
+       "n_questions": 21,
+       "on_time": 3,
+       "fraction": 0.142857
+      },
+      "robo005": {
+       "n_questions": 10,
+       "on_time": 2,
+       "fraction": 0.2
+      },
+      "robo006": {
+       "n_questions": 15,
+       "on_time": 3,
+       "fraction": 0.2
+      }
+     },
+     "robot_worst_device": "robo000",
+     "ss_classified_by": "device answer kind",
+     "capacity_met": false,
+     "L_dash": 1.0,
+     "p_dash": 0.25,
+     "L_rob": 3.0,
+     "p_rob": 0.9,
+     "robot_by_deadline_ACCURACY_BESIDE": {
+      "metric": "correct_answers_delivered_by_deadline",
+      "value": 0.380952,
+      "n": 105,
+      "device_only_robot_accuracy_FLOOR": 0.295238,
+      "_register": "robot_headline.correct_answers_delivered_by_deadline is an ACCURACY, not an on-time rate: its own `metric` field says correct_answers_delivered_by_deadline, and its definition is the cloud's answer when delivered within the deadline, ELSE THE DEVICE'S if the device's also arrived in time, else a miss. It is NOT the quantity check 2 names, for two separate reasons, and substituting it changes the check twice over. First, an on-time wrong answer scores zero and a correct late answer scores zero, so it is not a deadline-attainment rate. Second, it ADMITS THE DEVICE SIDE, which D177 and D179 (6) exclude: the currency is on-time CLOUD answers only and device_on_time is reported beside, never added. The device floor is 0.371212 on all three arms at seed 4, identical, and the measured consequence is large: on seed 4 the on-time retention is (0.454545 - 0.265152) / (0.893939 - 0.265152) = 0.3012 while the by_deadline retention is (0.545455 - 0.469697) / (0.613636 - 0.469697) = 0.5267, because the accuracy reading compresses the numerator by 2.5x and the denominator by 4.4x. The two are reported side by side and the ON-TIME one is the check."
+     },
+     "robot_pool_n": 105,
+     "robot_pool_on_time": 19,
+     "robot_pool_fraction": 0.180952,
+     "ss_pool_n": 359,
+     "ss_pool_on_time": 354,
+     "ss_pool_fraction": 0.986072,
+     "ss_per_device": {
+      "asst000": {
+       "n_questions": 119,
+       "on_time": 118,
+       "fraction": 0.991597
+      },
+      "asst001": {
+       "n_questions": 120,
+       "on_time": 119,
+       "fraction": 0.991667
+      },
+      "asst002": {
+       "n_questions": 120,
+       "on_time": 117,
+       "fraction": 0.975
+      }
+     },
+     "dashcam_n_instants": 11779,
+     "dashcam_on_time": 7513,
+     "delivery_rule": "completion",
+     "on_time_rule": "an answer is delivered at COMPLETION, prefill plus decode (D146, the default from 2026-11-20); a dashcam Yes/No stays at first token",
+     "target_defaults": {
+      "L_dash": 1.0,
+      "p_dash": 0.25,
+      "min_dash_instants": 200,
+      "L_rob": 3.0,
+      "p_rob": 0.9,
+      "min_rob_questions_pooled": 20,
+      "source": "D71 as amended by D82"
+     }
+    },
+    "recomputed": {
+     "alert": {
+      "deadline_s": 1.0,
+      "n_opportunities_OFFERED": 11779,
+      "on_time_COMMITTED_RULE": 7513,
+      "fraction_COMMITTED_RULE": 0.63783,
+      "on_time_CLOUD_FLAG_FIRST_TOKEN": 7689,
+      "fraction_CLOUD_FLAG_FIRST_TOKEN": 0.652772,
+      "per_device": {
+       "dash000": {
+        "n": 1958,
+        "on_time": 1256,
+        "fraction": 0.641471
+       },
+       "dash001": {
+        "n": 1984,
+        "on_time": 1261,
+        "fraction": 0.635585
+       },
+       "dash002": {
+        "n": 1959,
+        "on_time": 1214,
+        "fraction": 0.619704
+       },
+       "dash003": {
+        "n": 1975,
+        "on_time": 1268,
+        "fraction": 0.642025
+       },
+       "dash004": {
+        "n": 1934,
+        "on_time": 1255,
+        "fraction": 0.648914
+       },
+       "dash005": {
+        "n": 1969,
+        "on_time": 1259,
+        "fraction": 0.639411
+       }
+      },
+      "per_device_min_fraction": 0.619704,
+      "per_device_all_at_or_above_0p90": false
+     },
+     "recall": {
+      "deadline_s": 3.0,
+      "n_opportunities_OFFERED": 105,
+      "on_time_COMMITTED_RULE": 19,
+      "fraction_COMMITTED_RULE": 0.180952,
+      "on_time_CLOUD_FLAG_FIRST_TOKEN": 22,
+      "fraction_CLOUD_FLAG_FIRST_TOKEN": 0.209524,
+      "per_device": {
+       "robo000": {
+        "n": 8,
+        "on_time": 0,
+        "fraction": 0.0
+       },
+       "robo001": {
+        "n": 3,
+        "on_time": 1,
+        "fraction": 0.333333
+       },
+       "robo002": {
+        "n": 32,
+        "on_time": 5,
+        "fraction": 0.15625
+       },
+       "robo003": {
+        "n": 16,
+        "on_time": 5,
+        "fraction": 0.3125
+       },
+       "robo004": {
+        "n": 21,
+        "on_time": 3,
+        "fraction": 0.142857
+       },
+       "robo005": {
+        "n": 10,
+        "on_time": 2,
+        "fraction": 0.2
+       },
+       "robo006": {
+        "n": 15,
+        "on_time": 3,
+        "fraction": 0.2
+       }
+      },
+      "per_device_min_fraction": 0.0,
+      "per_device_all_at_or_above_0p90": false
+     },
+     "assistance": {
+      "deadline_s": 2.0,
+      "n_opportunities_OFFERED": 359,
+      "on_time_COMMITTED_RULE": 354,
+      "fraction_COMMITTED_RULE": 0.986072,
+      "on_time_CLOUD_FLAG_FIRST_TOKEN": 356,
+      "fraction_CLOUD_FLAG_FIRST_TOKEN": 0.991643,
+      "per_device": {
+       "asst000": {
+        "n": 119,
+        "on_time": 118,
+        "fraction": 0.991597
+       },
+       "asst001": {
+        "n": 120,
+        "on_time": 119,
+        "fraction": 0.991667
+       },
+       "asst002": {
+        "n": 120,
+        "on_time": 117,
+        "fraction": 0.975
+       }
+      },
+      "per_device_min_fraction": 0.975,
+      "per_device_all_at_or_above_0p90": true
+     }
+    },
+    "alert_episodes": {
+     "numerator_COMMITTED_RULE_PRIMARY": {
+      "n_episodes": 714,
+      "n_instants": 11779,
+      "instants_per_episode": {
+       "min": 2,
+       "median": 19.0,
+       "max": 19
+      },
+      "episode_positions_seen": {
+       "min": 2,
+       "max": 20
+      },
+      "per_episode_PRIMARY": {
+       "denominator": 19,
+       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "mean_attainment": 0.553811,
+       "mean_shortfall_clipped": 0.053387,
+       "episodes_at_or_above_target": 515,
+       "fraction_of_episodes_at_or_above_target": 0.721289
+      },
+      "per_episode_true_denominator_BESIDE": {
+       "mean_attainment": 0.627063,
+       "mean_shortfall_clipped": 0.050171
+      },
+      "pooled_BESIDE": {
+       "on_time": 7513,
+       "n_instants": 11779,
+       "attainment": 0.63783,
+       "shortfall_clipped": 0.0,
+       "_why_beside": "pooling understates the alert deficit by about 3.5x on the committed cell (0.0411 against 0.1427); only the per-episode figure answers check 1"
+      }
+     },
+     "numerator_CLOUD_FLAG_FIRST_TOKEN_BESIDE": {
+      "n_episodes": 714,
+      "n_instants": 11779,
+      "instants_per_episode": {
+       "min": 2,
+       "median": 19.0,
+       "max": 19
+      },
+      "episode_positions_seen": {
+       "min": 2,
+       "max": 20
+      },
+      "per_episode_PRIMARY": {
+       "denominator": 19,
+       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "mean_attainment": 0.566785,
+       "mean_shortfall_clipped": 0.050144,
+       "episodes_at_or_above_target": 523,
+       "fraction_of_episodes_at_or_above_target": 0.732493
+      },
+      "per_episode_true_denominator_BESIDE": {
+       "mean_attainment": 0.642184,
+       "mean_shortfall_clipped": 0.047438
+      },
+      "pooled_BESIDE": {
+       "on_time": 7689,
+       "n_instants": 11779,
+       "attainment": 0.652772,
+       "shortfall_clipped": 0.0,
+       "_why_beside": "pooling understates the alert deficit by about 3.5x on the committed cell (0.0411 against 0.1427); only the per-episode figure answers check 1"
+      }
+     }
+    },
+    "planner_time_limit": {
+     "budget_ms": null,
+     "decisions": null,
+     "abandoned_to_base": null,
+     "fraction_recomputed": null,
+     "fraction_as_recorded": null,
+     "by_kind": {},
+     "over_1_percent": [],
+     "flag_recomputed": false,
+     "flag_as_recorded": null,
+     "_register": "cf_instrument.over_budget is a WALL-CLOCK limit, so this rate is a property of the host CPU as well as of the policy; a flash rate is a LOWER BOUND for an H100 cell (D115 (1), about 2.2x) and must not be quoted for one"
+    }
+   }
+  },
+  "rung2_committed": {
+   "7": {
+    "cell": "covex-v6-fair-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "arm": "covex-v6-fair-c5attr",
+    "arm_version": "covex-v6-fair-feed-1.0",
+    "run_valid": true,
+    "digests_equal": true,
+    "committed_score_block": {
+     "_path": "cell.json -> score -> score -> sweep[0]",
+     "_required_keys_missing_FLAG": [],
+     "_path_resolved": true,
+     "_keys_that_do_not_exist": {
+      "dashcam_verdict": "NOT a key of this block. The verdict key is dashcam_all_meet; asking for dashcam_verdict reads None, which is a missing field wearing the look of a failed check"
+     },
+     "dashcam_all_meet": true,
+     "dashcam_eligible": [
+      "dash000",
+      "dash001",
+      "dash002",
+      "dash003",
+      "dash004",
+      "dash005"
+     ],
+     "dashcam_excluded": [],
+     "robot_pool_meets": false,
+     "robot_pool_eligible": true,
+     "robot_per_device": {
+      "robo000": {
+       "n_questions": 8,
+       "on_time": 6,
+       "fraction": 0.75
+      },
+      "robo001": {
+       "n_questions": 3,
+       "on_time": 2,
+       "fraction": 0.666667
+      },
+      "robo002": {
+       "n_questions": 32,
+       "on_time": 32,
+       "fraction": 1.0
+      },
+      "robo003": {
+       "n_questions": 16,
+       "on_time": 16,
+       "fraction": 1.0
+      },
+      "robo004": {
+       "n_questions": 21,
+       "on_time": 3,
+       "fraction": 0.142857
+      },
+      "robo005": {
+       "n_questions": 10,
+       "on_time": 10,
+       "fraction": 1.0
+      },
+      "robo006": {
+       "n_questions": 15,
+       "on_time": 15,
+       "fraction": 1.0
+      }
+     },
+     "robot_worst_device": "robo004",
+     "ss_classified_by": "device answer kind",
+     "capacity_met": false,
+     "L_dash": 1.0,
+     "p_dash": 0.25,
+     "L_rob": 3.0,
+     "p_rob": 0.9,
+     "robot_by_deadline_ACCURACY_BESIDE": {
+      "metric": "correct_answers_delivered_by_deadline",
+      "value": 0.47619,
+      "n": 105,
+      "device_only_robot_accuracy_FLOOR": 0.295238,
+      "_register": "robot_headline.correct_answers_delivered_by_deadline is an ACCURACY, not an on-time rate: its own `metric` field says correct_answers_delivered_by_deadline, and its definition is the cloud's answer when delivered within the deadline, ELSE THE DEVICE'S if the device's also arrived in time, else a miss. It is NOT the quantity check 2 names, for two separate reasons, and substituting it changes the check twice over. First, an on-time wrong answer scores zero and a correct late answer scores zero, so it is not a deadline-attainment rate. Second, it ADMITS THE DEVICE SIDE, which D177 and D179 (6) exclude: the currency is on-time CLOUD answers only and device_on_time is reported beside, never added. The device floor is 0.371212 on all three arms at seed 4, identical, and the measured consequence is large: on seed 4 the on-time retention is (0.454545 - 0.265152) / (0.893939 - 0.265152) = 0.3012 while the by_deadline retention is (0.545455 - 0.469697) / (0.613636 - 0.469697) = 0.5267, because the accuracy reading compresses the numerator by 2.5x and the denominator by 4.4x. The two are reported side by side and the ON-TIME one is the check."
+     },
+     "robot_pool_n": 105,
+     "robot_pool_on_time": 84,
+     "robot_pool_fraction": 0.8,
+     "ss_pool_n": 359,
+     "ss_pool_on_time": 354,
+     "ss_pool_fraction": 0.986072,
+     "ss_per_device": {
+      "asst000": {
+       "n_questions": 119,
+       "on_time": 118,
+       "fraction": 0.991597
+      },
+      "asst001": {
+       "n_questions": 120,
+       "on_time": 119,
+       "fraction": 0.991667
+      },
+      "asst002": {
+       "n_questions": 120,
+       "on_time": 117,
+       "fraction": 0.975
+      }
+     },
+     "dashcam_n_instants": 11779,
+     "dashcam_on_time": 6444,
+     "delivery_rule": "completion",
+     "on_time_rule": "an answer is delivered at COMPLETION, prefill plus decode (D146, the default from 2026-11-20); a dashcam Yes/No stays at first token",
+     "target_defaults": {
+      "L_dash": 1.0,
+      "p_dash": 0.25,
+      "min_dash_instants": 200,
+      "L_rob": 3.0,
+      "p_rob": 0.9,
+      "min_rob_questions_pooled": 20,
+      "source": "D71 as amended by D82"
+     }
+    },
+    "recomputed": {
+     "alert": {
+      "deadline_s": 1.0,
+      "n_opportunities_OFFERED": 11779,
+      "on_time_COMMITTED_RULE": 6444,
+      "fraction_COMMITTED_RULE": 0.547075,
+      "on_time_CLOUD_FLAG_FIRST_TOKEN": 6546,
+      "fraction_CLOUD_FLAG_FIRST_TOKEN": 0.555735,
+      "per_device": {
+       "dash000": {
+        "n": 1958,
+        "on_time": 1067,
+        "fraction": 0.544944
+       },
+       "dash001": {
+        "n": 1984,
+        "on_time": 1062,
+        "fraction": 0.535282
+       },
+       "dash002": {
+        "n": 1959,
+        "on_time": 1052,
+        "fraction": 0.537009
+       },
+       "dash003": {
+        "n": 1975,
+        "on_time": 980,
+        "fraction": 0.496203
+       },
+       "dash004": {
+        "n": 1934,
+        "on_time": 1056,
+        "fraction": 0.546019
+       },
+       "dash005": {
+        "n": 1969,
+        "on_time": 1227,
+        "fraction": 0.623159
+       }
+      },
+      "per_device_min_fraction": 0.496203,
+      "per_device_all_at_or_above_0p90": false
+     },
+     "recall": {
+      "deadline_s": 3.0,
+      "n_opportunities_OFFERED": 105,
+      "on_time_COMMITTED_RULE": 84,
+      "fraction_COMMITTED_RULE": 0.8,
+      "on_time_CLOUD_FLAG_FIRST_TOKEN": 84,
+      "fraction_CLOUD_FLAG_FIRST_TOKEN": 0.8,
+      "per_device": {
+       "robo000": {
+        "n": 8,
+        "on_time": 6,
+        "fraction": 0.75
+       },
+       "robo001": {
+        "n": 3,
+        "on_time": 2,
+        "fraction": 0.666667
+       },
+       "robo002": {
+        "n": 32,
+        "on_time": 32,
+        "fraction": 1.0
+       },
+       "robo003": {
+        "n": 16,
+        "on_time": 16,
+        "fraction": 1.0
+       },
+       "robo004": {
+        "n": 21,
+        "on_time": 3,
+        "fraction": 0.142857
+       },
+       "robo005": {
+        "n": 10,
+        "on_time": 10,
+        "fraction": 1.0
+       },
+       "robo006": {
+        "n": 15,
+        "on_time": 15,
+        "fraction": 1.0
+       }
+      },
+      "per_device_min_fraction": 0.142857,
+      "per_device_all_at_or_above_0p90": false
+     },
+     "assistance": {
+      "deadline_s": 2.0,
+      "n_opportunities_OFFERED": 359,
+      "on_time_COMMITTED_RULE": 354,
+      "fraction_COMMITTED_RULE": 0.986072,
+      "on_time_CLOUD_FLAG_FIRST_TOKEN": 354,
+      "fraction_CLOUD_FLAG_FIRST_TOKEN": 0.986072,
+      "per_device": {
+       "asst000": {
+        "n": 119,
+        "on_time": 118,
+        "fraction": 0.991597
+       },
+       "asst001": {
+        "n": 120,
+        "on_time": 119,
+        "fraction": 0.991667
+       },
+       "asst002": {
+        "n": 120,
+        "on_time": 117,
+        "fraction": 0.975
+       }
+      },
+      "per_device_min_fraction": 0.975,
+      "per_device_all_at_or_above_0p90": true
+     }
+    },
+    "alert_episodes": {
+     "numerator_COMMITTED_RULE_PRIMARY": {
+      "n_episodes": 714,
+      "n_instants": 11779,
+      "instants_per_episode": {
+       "min": 2,
+       "median": 19.0,
+       "max": 19
+      },
+      "episode_positions_seen": {
+       "min": 2,
+       "max": 20
+      },
+      "per_episode_PRIMARY": {
+       "denominator": 19,
+       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "mean_attainment": 0.475011,
+       "mean_shortfall_clipped": 0.06074,
+       "episodes_at_or_above_target": 474,
+       "fraction_of_episodes_at_or_above_target": 0.663866
+      },
+      "per_episode_true_denominator_BESIDE": {
+       "mean_attainment": 0.536456,
+       "mean_shortfall_clipped": 0.055999
+      },
+      "pooled_BESIDE": {
+       "on_time": 6444,
+       "n_instants": 11779,
+       "attainment": 0.547075,
+       "shortfall_clipped": 0.0,
+       "_why_beside": "pooling understates the alert deficit by about 3.5x on the committed cell (0.0411 against 0.1427); only the per-episode figure answers check 1"
+      }
+     },
+     "numerator_CLOUD_FLAG_FIRST_TOKEN_BESIDE": {
+      "n_episodes": 714,
+      "n_instants": 11779,
+      "instants_per_episode": {
+       "min": 2,
+       "median": 19.0,
+       "max": 19
+      },
+      "episode_positions_seen": {
+       "min": 2,
+       "max": 20
+      },
+      "per_episode_PRIMARY": {
+       "denominator": 19,
+       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "mean_attainment": 0.48253,
+       "mean_shortfall_clipped": 0.059358,
+       "episodes_at_or_above_target": 475,
+       "fraction_of_episodes_at_or_above_target": 0.665266
+      },
+      "per_episode_true_denominator_BESIDE": {
+       "mean_attainment": 0.544642,
+       "mean_shortfall_clipped": 0.054569
+      },
+      "pooled_BESIDE": {
+       "on_time": 6546,
+       "n_instants": 11779,
+       "attainment": 0.555735,
+       "shortfall_clipped": 0.0,
+       "_why_beside": "pooling understates the alert deficit by about 3.5x on the committed cell (0.0411 against 0.1427); only the per-episode figure answers check 1"
+      }
+     }
+    },
+    "planner_time_limit": {
+     "budget_ms": 20.0,
+     "decisions": 57975,
+     "abandoned_to_base": 0,
+     "fraction_recomputed": 0.0,
+     "fraction_as_recorded": 0.0,
+     "by_kind": {
+      "state": {
+       "decisions": 57975,
+       "abandoned_to_base": 0,
+       "fraction": 0.0
+      }
+     },
+     "over_1_percent": [],
+     "flag_recomputed": false,
+     "flag_as_recorded": false,
+     "_register": "cf_instrument.over_budget is a WALL-CLOCK limit, so this rate is a property of the host CPU as well as of the policy; a flash rate is a LOWER BOUND for an H100 cell (D115 (1), about 2.2x) and must not be quoted for one"
+    }
+   }
+  }
+ },
+ "per_seed": [
+  {
+   "seed": 7,
+   "cells": {
+    "base": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "rung2_committed": "covex-v6-fair-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "shares": "covex-v6-fair-c5attr-rr_n16_s7_1200s_h27_3t_L3_epg_rq30"
+   },
+   "check_1_alert": {
+    "COMMITTED_RULE_PRIMARY": {
+     "mean_per_episode_attainment": {
+      "base": 0.553811,
+      "rung2_committed": 0.475011,
+      "shares": 0.652735
+     },
+     "delta_shares_minus_base": 0.098924,
+     "pass": true,
+     "fraction_of_episodes_at_or_above_0p25": {
+      "base": 0.721289,
+      "rung2_committed": 0.663866,
+      "shares": 0.852941
+     },
+     "pooled_attainment_BESIDE": {
+      "base": 0.63783,
+      "rung2_committed": 0.547075,
+      "shares": 0.751762
+     }
+    },
+    "CLOUD_FLAG_FIRST_TOKEN_BESIDE": {
+     "mean_per_episode_attainment": {
+      "base": 0.566785,
+      "rung2_committed": 0.48253,
+      "shares": 0.658779
+     },
+     "delta_shares_minus_base": 0.091994,
+     "pass": true,
+     "fraction_of_episodes_at_or_above_0p25": {
+      "base": 0.732493,
+      "rung2_committed": 0.665266,
+      "shares": 0.858543
+     },
+     "pooled_attainment_BESIDE": {
+      "base": 0.652772,
+      "rung2_committed": 0.555735,
+      "shares": 0.758723
+     }
+    },
+    "verdicts_agree_across_rules": true,
+    "_check": "1. alert per-episode target attainment AT LEAST THE BASE'S"
+   },
+   "check_2_robot_retention": {
+    "_check": "2. at least 90 percent of the committed rung-2 robot on-time GAIN OVER BASE retained",
+    "robot_pool_n": {
+     "base": 105,
+     "rung2_committed": 105,
+     "shares": 105
+    },
+    "robot_pool_n_equal_across_arms": true,
+    "STOP_unequal_pool": false,
+    "on_time_counts": {
+     "base": 19,
+     "rung2_committed": 84,
+     "shares": 84
+    },
+    "on_time_fractions": {
+     "base": 0.180952,
+     "rung2_committed": 0.8,
+     "shares": 0.8
+    },
+    "gain_rung2_minus_base": 0.619048,
+    "delta_shares_minus_base": 0.619048,
+    "gain_class": "NORMAL",
+    "retained_fraction": 1.0,
+    "retained_bar": 0.9,
+    "absolute_fallback_bound": {
+     "rule": "shares on-time fraction must not fall more than 0.01 below the base's",
+     "pass": true
+    },
+    "basis_used": "ratio",
+    "by_deadline_ACCURACY_BESIDE_NOT_THE_CHECK": {
+     "_register": "robot_headline.correct_answers_delivered_by_deadline is an ACCURACY, not an on-time rate: its own `metric` field says correct_answers_delivered_by_deadline, and its definition is the cloud's answer when delivered within the deadline, ELSE THE DEVICE'S if the device's also arrived in time, else a miss. It is NOT the quantity check 2 names, for two separate reasons, and substituting it changes the check twice over. First, an on-time wrong answer scores zero and a correct late answer scores zero, so it is not a deadline-attainment rate. Second, it ADMITS THE DEVICE SIDE, which D177 and D179 (6) exclude: the currency is on-time CLOUD answers only and device_on_time is reported beside, never added. The device floor is 0.371212 on all three arms at seed 4, identical, and the measured consequence is large: on seed 4 the on-time retention is (0.454545 - 0.265152) / (0.893939 - 0.265152) = 0.3012 while the by_deadline retention is (0.545455 - 0.469697) / (0.613636 - 0.469697) = 0.5267, because the accuracy reading compresses the numerator by 2.5x and the denominator by 4.4x. The two are reported side by side and the ON-TIME one is the check.",
+     "values": {
+      "base": 0.380952,
+      "rung2_committed": 0.47619,
+      "shares": 0.47619
+     },
+     "device_only_accuracy_FLOOR": {
+      "base": 0.295238,
+      "rung2_committed": 0.295238,
+      "shares": 0.295238
+     },
+     "gain": 0.095238,
+     "delta": 0.095238,
+     "retained_fraction_ON_AN_ACCURACY": 1.0,
+     "IS_NOT_THE_PRE_REGISTERED_CHECK": true
+    },
+    "pass": true,
+    "_no_seed_dropped": "a seed whose denominator is near zero or negative is reported with its gain_class and scored on the absolute fallback, never dropped and never silently given a ratio"
+   },
+   "check_3_assistance": {
+    "_check": "3. assistance within 2 s AT LEAST 90 percent",
+    "deadline_s": 2.0,
+    "denominator": "the device's OFFERED assistance opportunities (D178 (1) unit = DEVICE)",
+    "per_device_PRIMARY": {
+     "base": {
+      "asst000": {
+       "n": 119,
+       "on_time": 118,
+       "fraction": 0.991597
+      },
+      "asst001": {
+       "n": 120,
+       "on_time": 119,
+       "fraction": 0.991667
+      },
+      "asst002": {
+       "n": 120,
+       "on_time": 117,
+       "fraction": 0.975
+      }
+     },
+     "rung2_committed": {
+      "asst000": {
+       "n": 119,
+       "on_time": 118,
+       "fraction": 0.991597
+      },
+      "asst001": {
+       "n": 120,
+       "on_time": 119,
+       "fraction": 0.991667
+      },
+      "asst002": {
+       "n": 120,
+       "on_time": 117,
+       "fraction": 0.975
+      }
+     },
+     "shares": {
+      "asst000": {
+       "n": 119,
+       "on_time": 119,
+       "fraction": 1.0
+      },
+      "asst001": {
+       "n": 120,
+       "on_time": 119,
+       "fraction": 0.991667
+      },
+      "asst002": {
+       "n": 120,
+       "on_time": 119,
+       "fraction": 0.991667
+      }
+     }
+    },
+    "per_device_min_fraction": {
+     "base": 0.975,
+     "rung2_committed": 0.975,
+     "shares": 0.991667
+    },
+    "all_devices_at_or_above_0p90": {
+     "base": true,
+     "rung2_committed": true,
+     "shares": true
+    },
+    "pooled_BESIDE": {
+     "base": {
+      "on_time": 354,
+      "n": 359,
+      "fraction": 0.986072
+     },
+     "rung2_committed": {
+      "on_time": 354,
+      "n": 359,
+      "fraction": 0.986072
+     },
+     "shares": {
+      "on_time": 357,
+      "n": 359,
+      "fraction": 0.994429
+     }
+    },
+    "pass": true,
+    "pass_on_pooled_BESIDE": true
+   },
+   "all_three_pass": true,
+   "diagnostics_shares": {
+    "share_admission": {
+     "share_counters_present": false,
+     "admits": {
+      "alert": null,
+      "recall": null,
+      "assistance": null
+     },
+     "denies": {
+      "alert": null,
+      "recall": null,
+      "assistance": null
+     },
+     "hold_instants": {
+      "alert": null,
+      "recall": null,
+      "assistance": null
+     },
+     "hold_periods": {
+      "alert": null,
+      "recall": null,
+      "assistance": null
+     },
+     "reasons": {},
+     "port_rule": {
+      "_claim": "an arm must make its characteristic decision at least once; a shares arm whose gate never denies has made no share decision, whatever its proofs say",
+      "any_deny": false,
+      "pass": false
+     },
+     "w": {
+      "high_water_tokens": null,
+      "zero_returns": null,
+      "tracked_at_end": null,
+      "over_wmax_periods_TIME": null,
+      "samples_TIME": null,
+      "over_wmax_per_gate_call": null,
+      "samples_per_gate_call": null,
+      "composition_TIME": {},
+      "composition_per_gate_call": {},
+      "_register": "LIVE W is submit to FIRST TOKEN; the dry report's W is submit to SETTLE and is the larger of the two. These numbers must not be compared against the dry cell's 13.43 percent or its 3.56x"
+     },
+     "SIGNATURE_CHECK_overrun_without_recall": {
+      "_claim": "in the dry cell recall was present in ALL 18,476 overruns with no exception, because only the oversize exemption can push W past W_max; an overrun with no recall in it is NEW and no existing proof covers it",
+      "time_basis_buckets_without_recall": {},
+      "time_basis_count_without_recall": 0,
+      "gate_call_basis_buckets_without_recall": {},
+      "gate_call_basis_count_without_recall": 0,
+      "FLAG": false
+     }
+    },
+    "release_recheck": {
+     "alert": {
+      "release_infeasible": 1803
+     },
+     "recall": {
+      "release_infeasible": null
+     },
+     "assistance": {
+      "release_infeasible": null
+     },
+     "submitted_denominators_in_cell": {
+      "submitted_monitor": 9252,
+      "submitted_piece": 153,
+      "submitted_recall": 446,
+      "submitted_touch": 2212
+     },
+     "_denominator_note": "the submitted_* counters are mirrored into arm_stats so a skip COUNT has an IN-CELL denominator; forming the rate from another arm's denominator is a cross-arm substitution dressed as a rate"
+    },
+    "planner_time_limit": {
+     "budget_ms": 20.0,
+     "decisions": 58769,
+     "abandoned_to_base": 0,
+     "fraction_recomputed": 0.0,
+     "fraction_as_recorded": 0.0,
+     "by_kind": {
+      "state": {
+       "decisions": 58769,
+       "abandoned_to_base": 0,
+       "fraction": 0.0
+      }
+     },
+     "over_1_percent": [],
+     "flag_recomputed": false,
+     "flag_as_recorded": false,
+     "_register": "cf_instrument.over_budget is a WALL-CLOCK limit, so this rate is a property of the host CPU as well as of the policy; a flash rate is a LOWER BOUND for an H100 cell (D115 (1), about 2.2x) and must not be quoted for one"
+    },
+    "hold_times": {
+     "n_share_hold_rows": 0,
+     "background_holds_no_request_join": 0,
+     "rows_whose_type_could_not_be_resolved": 0,
+     "per_type": {
+      "alert": {
+       "n_held_instants_with_a_submit": 0,
+       "never_submitted_RIGHT_CENSORED": 0,
+       "hold_s_p50": null,
+       "hold_s_p90": null,
+       "hold_s_min": null,
+       "hold_s_max": null,
+       "negative_holds_FLAG": 0
+      },
+      "recall": {
+       "n_held_instants_with_a_submit": 0,
+       "never_submitted_RIGHT_CENSORED": 0,
+       "hold_s_p50": null,
+       "hold_s_p90": null,
+       "hold_s_min": null,
+       "hold_s_max": null,
+       "negative_holds_FLAG": 0
+      },
+      "assistance": {
+       "n_held_instants_with_a_submit": 0,
+       "never_submitted_RIGHT_CENSORED": 0,
+       "hold_s_p50": null,
+       "hold_s_p90": null,
+       "hold_s_min": null,
+       "hold_s_max": null,
+       "negative_holds_FLAG": 0
+      }
+     },
+     "_censoring": "a held instant with no request row was never submitted, so its hold is right-censored at the end of the run; it is counted, never dropped and never scored as a zero-length hold"
+    },
+    "budget": {
+     "budget_gpu_s": 1200.0,
+     "budget_spent_gpu_s": 948.75,
+     "budget_refusal": null
+    },
+    "run_valid": true,
+    "digests_equal": true,
+    "n_errors": 0
+   }
+  }
+ ],
+ "per_seed_summary": {
+  "n_seeds_scored": 1,
+  "n_seeds_unscored": 0,
+  "check_1_pass_seeds": [
+   7
+  ],
+  "check_2_pass_seeds": [
+   7
+  ],
+  "check_3_pass_seeds": [
+   7
+  ],
+  "all_three_pass_seeds": [
+   7
+  ],
+  "_rule": "the verdict is PER SEED. A seed that fails a check fails it; there is no pooled rescue, because a pooled figure can hide a per-seed failure"
+ },
+ "pooled_BESIDE_not_the_verdict": {
+  "_warning": "reported BESIDE the per-seed table and never as the verdict; a pooled figure can hide a per-seed failure (consistency check 3)",
+  "by_role": {
+   "base": {
+    "robot_on_time": 19,
+    "robot_n": 105,
+    "robot_fraction": 0.180952,
+    "assistance_on_time": 354,
+    "assistance_n": 359,
+    "assistance_fraction": 0.986072,
+    "n_cells": 1
+   },
+   "rung2_committed": {
+    "robot_on_time": 84,
+    "robot_n": 105,
+    "robot_fraction": 0.8,
+    "assistance_on_time": 354,
+    "assistance_n": 359,
+    "assistance_fraction": 0.986072,
+    "n_cells": 1
+   },
+   "shares": {
+    "robot_on_time": 84,
+    "robot_n": 105,
+    "robot_fraction": 0.8,
+    "assistance_on_time": 357,
+    "assistance_n": 359,
+    "assistance_fraction": 0.994429,
+    "n_cells": 1
+   }
+  }
+ },
+ "_provenance": {
+  "git_commit": "unset",
+  "script": "d179_rung2_verdict.py",
+  "model": "n/a (read-only scorer over committed run logs)",
+  "device": "n/a (CPU)",
+  "n": 1,
+  "timestamp": "2026-11-23T22:29:31.932458+00:00"
+ },
+ "_what_this_run_is": "s7 scoring of covex-v6-fair-c5attr-rr against rung 3 and base under D196 (2), committed d179_rung2_verdict.py unchanged, positive control PASS 2 of 2 cells exact. ALL THREE D179 CHECKS PASS. Alert mean per-episode 0.6527 against rung 3's 0.4750, +0.1777. Robot on time 84 of 105, EQUAL to rung 3's 84, so RETENTION IS EXACTLY 1.0: this is the ONLY seed where rr TIES rung 3 on robot rather than exceeding it, and it is also the seed with the WEAKEST BAR (77.5, because rung 3 itself is weakest here at 84 against base 19). So s7 is the weakest of the four passes and should be read that way rather than as a fourth equal pass.",
+ "_D176_REGISTER_NOTE": {
+  "what": "the s7 robot pool of 105 INCLUDES the 18 over-32k questions that D176 rules should be EXCLUDED from headline robot results for every arm identically and reported separately. The coordinator register confirms the arithmetic: on time 84, late 3, unsent 18, summing to 105.",
+  "as_counted_here": "84 of 105 = 0.8000",
+  "a_D176_compliant_headline_would_be": "84 of 87 = 0.9655",
+  "does_it_affect_the_comparison": "NO. The pool is EQUAL ACROSS ARMS (105 for base, rung 3 and rr) and both rung 3 and rr are at 84, so the retention of 1.0 and the check-2 verdict are unaffected. What it affects is the ABSOLUTE figure, and by a large margin: 0.80 against 0.9655.",
+  "why_recorded": "so nobody quotes 84 of 105 as the s7 robot headline without knowing it carries D176's 18 as misses. Flagged for a user ruling rather than adjusted here, because changing the denominator is a methodological change and the scorer is the committed one.",
+  "register": "OBSERVED from the scorer's pool_n and the H100's coordinator split; the arithmetic is exact"
+ }
+}
