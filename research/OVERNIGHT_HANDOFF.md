@@ -1,5 +1,56 @@
 # OVERNIGHT HANDOFF (D187). READ THIS FIRST.
 
+## STATE AT 05:25Z (21:25 local), written by a SECOND watchdog-resumed session
+
+The previous worker's heartbeat went stale at 1,109 s and the watchdog restarted me at 05:10:01Z in
+tmux `fmsw-overnight`. I claimed `ops/heartbeat` immediately. Note for whoever follows: `conda` is
+NOT on this session's PATH (login shell is sh); use `/home/pragya/miniconda3/bin/conda run -n fmtk`.
+
+### THE FALLBACK CONDITION IS NOW SATISFIED, measured with the committed scorer
+
+r2 s4 and s5 scored with the committed pre-registered scorer, `--shares-arm
+covex-v6-state-shares-r2`, gz decompressed first, POSITIVE CONTROL PASS 4 of 4 cells exact:
+
+  r2 s4  retention 0.5301  check 2 FAIL   (r1 0.7229)   base 35, uo 118, r2 79
+  r2 s5  retention 0.9773  check 2 PASS   (r1 0.9773)   base 27, uo 115, r2 113
+
+Checks 1 and 3 PASS at both. So r2 FAILS AT s4 and therefore CANNOT meet the rule "all three checks
+at all four seeds", whatever s6 and s7 return. r1 also fails (s4, s6, s7). THE BEST SHARES VERSION
+FAILS AT AT LEAST ONE SEED, which is exactly the D184 trigger.
+
+### WHAT I DID NOT DO, AND WHY
+
+I did NOT declare D184 and post rung-3 cells, for two reasons that a later session should weigh
+rather than inherit:
+
+1. THE DEADLINE IS AMBIGUOUS AND NOBODY RESOLVED IT. The rule says "by about 05:00". Local time is
+   UTC-8, so 05:00 LOCAL is 13:00Z and 05:00Z was 25 minutes ago. The previous session asked the
+   user which was meant and got no answer. Under the LOCAL reading there are still about 7.5 hours,
+   and D187 (2) says to keep iterating. Under the UTC reading the fallback is already due. The
+   CONDITION is met either way; only the timing of the declaration turns on it.
+2. WHICH VERSION IS "BEST" IS NOT YET DETERMINED. r1 is ahead on s4 (0.7229 against 0.5301) and
+   equal on s5. If r2 s6 and s7 come in above r1's 0.7727 and 0.8906, "best version" becomes a
+   judgement rather than a reading, and that judgement belongs in the write-up. r2 s6 and s7 are
+   running on the H100 and cost nothing of ours, so the complete grid is worth having before
+   anything is written up as the ablation.
+
+### THE NEXT STEP
+
+1. When r2 s6 and s7 land, score all four seeds with the committed scorer, gz decompressed, and
+   record the complete r1-against-r2 table.
+2. Then apply D184: c5attr is rung 2; rungs 3 and 4 build on it; the BEST shares version is
+   reported as the TRADE-OFF ABLATION. State which version was chosen as best and on what basis.
+3. Rung 3 is already built base-agnostic and `covex-v6-fair-c5attr` is registered, as is
+   `covex-v6-cf-pd-c5attr` for rung 4, so neither needs new code to run on the c5attr base. Posting
+   those cell lists is the way to keep the H100 fed under D187 (4) once r2's grid is complete.
+
+### WHAT NOTHING TONIGHT HAS CHANGED, and must stay that way
+
+Floors and W_max are frozen per D188 (1). The `id(obs)` cache fix is NOT applied per D188 (2), and
+the agent that was preparing it behind an OFF switch landed NOTHING, so the live path is untouched:
+`live2_qcache_key_fix` appears nowhere. That is the state the ruling requires.
+
+
 ## STATE AT 04:55Z (20:55 local), written by a WATCHDOG-RESUMED session
 
 I am a watchdog-resumed session. The previous interactive session stopped at about 04:38Z; its
