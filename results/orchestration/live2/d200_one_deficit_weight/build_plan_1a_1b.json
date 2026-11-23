@@ -1,0 +1,45 @@
+{
+ "_what": "the applied-ready design for D200 items 1a and 1b, with the blast radius enumerated BEFORE the edit rather than discovered mid-build. Items 1a and 1b are NOT APPLIED in this session: this file is the plan plus the two pre-build measurements that clear it.",
+ "_the_two_pre_build_measurements": {
+  "1_arms_v6fair_feeds_the_counter_and_still_yields_exactly_1": {
+   "why_it_mattered": "D200 1a's justification is 'the two are decision-identical so nothing is superseded'. arms.py:725-726 registers V6FAIR_ARMS and arms_v6fair.py:131 calls self._cf_engine().counters.observe(...), so for covex-v6-fair, -novalue and -nolimit the counter is FED and the premise could have been false.",
+   "measured": "covex-v6-fair, dry s4, n16, 1200 s, committed recipe, cutoff off: n_updates 11751, gain 1.0, 16 devices, EVERY device weight exactly 1.0, n_weight_not_1 = 0, deficit_devices_above_1 = 0, deficit_weight_max_milli = 1000.",
+   "why_it_is_1_everywhere_and_this_is_the_interesting_part": "deficit_feed_on_time is 11751 of 11751, because that family's numerator is OR-COMBINED (deficit_feed_carried_by_both 10745, carried_by_cloud 97, carried_by_device 909). The device always answers inside these deadlines, so an OR target is met BY CONSTRUCTION, so shortfall = max(0.90 - 1.0, 0) = 0 and w = 1 + 1.0 x 0 = 1.0. live2/deficit_feed.py's own docstring PREDICTED exactly this: 'An OR feed cannot see the one deficit this rung exists to act on.'",
+   "verdict": "1a's premise HOLDS, and for a better reason than assumed: the pre-D178 family is decision-identical to a declared constant 1 not because its counter is unfed but because its feed is structurally incapable of producing a shortfall. A DECLARED constant 1 is therefore honest for it too, and D200 (1)'s 'stale targets' are stale AND inert here.",
+   "caveat_register": "OBSERVED on seed 4 at 16 devices, dry. The generalisation to other seeds rests on the device answering inside the deadline, which cf_objective's own measured tables give as 0.2503 to 0.3169 s against 1.0 to 5.0 s deadlines. A cell in which NEITHER the cloud nor the device is on time for some opportunity would produce a non-zero shortfall; there were ZERO such opportunities on this cell."
+  },
+  "2_rung_3_planner_decisions_that_would_change": {
+   "see": "results/orchestration/live2/frozen_test/d200_r3_planner_weight_probe.json",
+   "register": "CONSTRUCTED in the previous report, OBSERVED here by decision-log diff"
+  }
+ },
+ "item_1a_design": {
+  "where": "v5/cf_objective.py",
+  "add": "class NoPlannerDeficitFeed, the DECLARED CONSTANT WEIGHT 1 for a rung whose deficit feed does not reach the state planner. weight() returns 1.0, shortfall() 0.0, starving() False, and as_dict() states in words 'no deficit feed in the state planner at this rung' plus the rung's reason (rung 2 has no deficits by design; rung 3's consumers are D185's ordering and flexible split, not the planner). It carries IS_DECLARED_CONSTANT = True so a reader and a proof can tell a declared constant from a source that should have been fed.",
+  "delete": "class DeficitCounters and the module constants it owned alone (ON_TIME_TARGET, ON_TIME_TARGET_SOURCE, DEFICIT_GAIN), which are the stale 0.90-per-type targets and the gain 1.0 D200 (1) names. No fallback is kept anywhere in the tree.",
+  "where_2": "v5/cf_planner.py",
+  "change": "Counterfactual.__init__ takes an explicit weight source and RAISES if none is given, so every construction DECLARES its source. The neutral default is what let the defect live for three days, so the default is removed rather than replaced.",
+  "where_3": "arms_v6state.py:208 _cf_engine()",
+  "change": "pass CO.NoPlannerDeficitFeed() EXPLICITLY, and at :337 pass the same object into harm_warm_from_queue_delay, so rungs 2 and 3 declare their constant and DO NOT RAISE (D200 1a).",
+  "where_4": "arms_v6fair.py:131",
+  "change": "the completion hook's observe() call goes, and the family declares NoPlannerDeficitFeed with its own recorded reason (the OR-feed measurement above). Decision-identical, measured, so its committed digests stand."
+ },
+ "item_1b_design": {
+  "where": "arms_v6cfr3.py",
+  "add": "class PlannerDeficitWeights, the adapter over the arm's live DeficitFeed, and an override of _cf_engine() that constructs the Counterfactual with it. The adapter resolves a device through the ARM'S OWN _fairfeed_resolve_device and then calls the arm's own _feed.weight_device, so the planner weight and rung 3's ordering weight cannot disagree about which device a decision is about. ONE DEFICIT SOURCE IN THE TREE: the same feed object the two legs already read, so the planner limb and the legs are the same weight BY CONSTRUCTION and not by agreement.",
+  "fail_loud_shape": "the adapter RAISES at construction if _feed is absent (the thing that is supposed to be fed is missing), counts every read, and RAISES at report time if reads occurred while the feed received ZERO observations for the whole run. A per-read raise would be WRONG and is deliberately not used: at the first decision the feed legitimately holds no data, which is why W_WIRED_PROOF records that 1.0 at construction is correct. The condition that let the defect live is 'never fed across a whole run', and that is the condition checked.",
+  "floor": "the 1.0 floor is restated at the point of use, as _weight_of already does, so no path can lower the bar below MARGIN_CF by another route."
+ },
+ "blast_radius_of_deleting_DeficitCounters": {
+  "mine_and_straightforward": ["v5/cf_planner.py:357 type hint", "v5/cf_planner.py:365 default", "v5/cf_objective.py:629 type hint", "v5/cf_objective.py:667 weight override", "v5/cf_objective.py:760 weight override", "arms_v6state.py:337", "arms_v5full.py:156 (a describe STRING only, no behaviour)"],
+  "needs_a_decision_because_the_record_is_committed": ["tests/test_cf_objective_d177.py:143,227,228,255,256 (30 committed unit checks)", "v5/cf_proofs.py:646,741,846", "v5/d171_proofs.py:81", "v5/d177_currency_flip_proofs.py:108,157"],
+  "the_precedent": "CLAUDE.md and the committed d177 row both record that a proof JSON is NOT regenerated under its own label. These four scripts reference a class that will no longer exist, so each needs either a pinned-superseded-reading edit or an explicit ruling that its JSON stands and its script is updated to the new source name."
+ },
+ "proofs_owed_when_1a_and_1b_LAND": [
+  "byte-identity of every registered arm that reaches the counterfactual, on the committed recipe, with the three positive-control digests in the same processes. The reach census is committed: 54 of 206 at the d177 measurement base and 57 of 209 at its parent, so the OBSERVED claim is bounded to those arms and the remaining 151 are CONSTRUCTED by static import closure, in two registers, as the d177 row already does.",
+  "rung 3 must still read 12e4f73ce0ebd865 / 13,812 and rung 2 9a4be873eb3c5fba / 14,218 and base af8befb9420ad86a / 12,085",
+  "rung 4: w_d in the PLANNER limb non-constant AND equal to the legs' w_d for the same device at the same decision time. Note the register: for the two LEGS that equality is an IDENTITY (one feed object read twice, max abs difference 0.0 by construction, n = 22 on the s4 cell); for the PLANNER limb it becomes a real measurement only once 1b is applied, which is the whole point of 1b.",
+  "a negative control: the -w1 and -gain0 arms must collapse, and -off must still be byte-identical to the COMMITTED RUNG-3 arm and not to rung 2"
+ ],
+ "_provenance": {"script": "hand-written plan; the two measurements are d200_gatea_safety.py and d200_r3_planner_weight_probe.py", "device": "flash (CPU only)", "origin_main_sha_read": "d46c73493eb482926402f65fe76d0fba7e7ae9cf"}
+}

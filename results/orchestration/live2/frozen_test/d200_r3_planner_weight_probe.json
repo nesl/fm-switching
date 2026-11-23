@@ -1,0 +1,86 @@
+{
+ "_what": "D200 1c OBSERVED count: rung-3 (covex-v6-fair-c5attr) planner decisions that CHANGE when the planner limb reads the live deficit_feed instead of the unfed counter. Dry s4 cell, committed recipe, cutoff patched off, one cell per process.",
+ "_register_change": "this number was CONSTRUCTED from the code in the previous report (the deciding ratio is w_j / w, inert at w = 1); it is now OBSERVED by a decision-log diff. The register has changed from CONSTRUCTED to OBSERVED.",
+ "n_logged_baseline": 60934,
+ "n_logged_planner_fed": 60920,
+ "n_keys_common": 60473,
+ "n_keys_only_baseline": 461,
+ "n_keys_only_planner_fed": 447,
+ "DECISIONS_WITH_A_DIFFERENT_CHOSEN_CANDIDATE": 687,
+ "decisions_differing_on_any_deciding_field": 50702,
+ "by_kind": {
+  "state": 687
+ },
+ "first_changed_decision": {
+  "key": [
+   "state",
+   "st:robo003|s001|3703477849945137_start_0.0_end_599.96:23452"
+  ],
+  "baseline": {
+   "kind": "state",
+   "decision_id": "st:robo003|s001|3703477849945137_start_0.0_end_599.96:23452",
+   "device_id": "robo003",
+   "chosen": "HOLD_BACK",
+   "base_choice": "KEEP",
+   "cf_choice": "HOLD_BACK",
+   "deviated": true,
+   "value_cf": 0.998289382,
+   "delta": 0.998289382,
+   "margin": 0.65824
+  },
+  "planner_fed": {
+   "kind": "state",
+   "decision_id": "st:robo003|s001|3703477849945137_start_0.0_end_599.96:23452",
+   "device_id": "robo003",
+   "chosen": "KEEP",
+   "base_choice": "KEEP",
+   "cf_choice": "HOLD_BACK",
+   "deviated": false,
+   "value_cf": 0.998289382,
+   "delta": 0.998289382,
+   "margin": 0.65824
+  },
+  "differing_fields": [
+   "chosen",
+   "deviated"
+  ]
+ },
+ "weight_source_baseline": {
+  "source": "committed unfed cf_objective.DeficitCounters",
+  "every_weight": 1.0
+ },
+ "weight_source_planner_fed": {
+  "source": "deficit_feed.DeficitFeed.weight_device via the arm's own resolver",
+  "reads": 63242,
+  "unresolved": 0,
+  "reads_above_the_w1_floor": 53597
+ },
+ "counts_baseline": {
+  "decisions": 60934,
+  "request": 0,
+  "state": 60934,
+  "sync": 0,
+  "rule_based_refused": 0,
+  "deviations": 2272,
+  "timeout_fallback": 0,
+  "recent_suppressed_by_rule": 0,
+  "deferrals_chosen": 0,
+  "warm_unexpressible": 60820,
+  "harm_nonzero": 0,
+  "replans": 0
+ },
+ "counts_planner_fed": {
+  "decisions": 60920,
+  "request": 0,
+  "state": 60920,
+  "sync": 0,
+  "rule_based_refused": 0,
+  "deviations": 2960,
+  "timeout_fallback": 0,
+  "recent_suppressed_by_rule": 0,
+  "deferrals_chosen": 0,
+  "warm_unexpressible": 60806,
+  "harm_nonzero": 0,
+  "replans": 0
+ }
+}

@@ -1,0 +1,63 @@
+{
+  "_what": "PRE-REGISTRATION of the replacement for D196 (1) Gate A, written and COMMITTED BEFORE any quantile of the new input is computed. D200 user ruling item 3: replace the INPUT, not the threshold.",
+  "_why_gate_a_was_replaced": {
+    "the_defect": "The committed Gate A reported would-have-missed 0 of 6 and that zero is an ALGEBRAIC IDENTITY, not a measurement. cf_request_defer.py computes overrun = (b - SAFETY_FACTOR) * predicted_total_service_s and evaluates it at b = SAFETY_FACTOR_INFO['max']. d190_measured_safety.py takes the q90 of its input by _nearest_rank, k = max(1, min(n, ceil(q * n))). The committed input had n = 5, so ceil(0.9 * 5) = 5 = n and the q90 IS the maximum. Hence b - SAFETY_FACTOR is identically 0, overrun is identically 0.0, and would_miss = (0.0 > 0.0) = False for EVERY candidate, at any deferral count, independent of the arm, the seed, the memory setting and the deficit weight.",
+    "why_no_rerun_could_have_found_it": "the deficit weight does not appear in that arithmetic at all, so the D200 fix cannot move it; and a zero that is correctly and consistently zero passes every consistency check. This is CLAUDE.md's named failure mode.",
+    "the_old_input": "the five observed_over_predicted values in d190_recall_lag_diagnosis.json :: devices.*.D162_positive_control_on_sent_rows, which are 2 rows on robo001 at seed 5 and 3 rows on robo004 at seed 7: TWO devices on TWO seeds, min 1.3856, max 1.8721, committed safety_factor 1.8721 = the max.",
+    "what_is_NOT_changed": "neither the quantile (q90) nor the threshold nor MARGIN_CF nor the overrun formula. Only the INPUT DISTRIBUTION is replaced, and the quantile function used is the committed d190_measured_safety._nearest_rank, unmodified."
+  },
+  "_the_new_input": {
+    "population": "the PER-REQUEST predicted-over-actual first-token ratio of every robot (recall) request in the committed healthy-window rows of the rung-3 SENT cells, seeds 4 to 7.",
+    "cells": [
+      "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr_n16_s4_1200s_h27_3t_L3_epg_rq30",
+      "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr_n16_s5_1200s_h27_3t_L3_epg_rq30",
+      "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr_n16_s6_1200s_h27_3t_L3_epg_rq30",
+      "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30"
+    ],
+    "rows_are_SENT_BY_CONSTRUCTION": "request.jsonl holds only requests that reached the engine, so every row in this population is a sent request with its own observed t_first_token. A declined question has no row and cannot enter.",
+    "no_reimplementation": "the rows are built by the COMMITTED cost_model_gate_d162.features(run) and the zone is assigned by the COMMITTED cost_model_gate_d162.classify(rows), both imported and called unchanged. The D162 first-token coefficients are READ from results/orchestration/live2/frozen_test/cost_model_gate_d162.json :: model.first_token and are not retyped, so there is ONE price source.",
+    "healthy_window_definition": "a request inherits the zone of its own 100 s submit window; the window is healthy when its first-token p50 is at or below 2.781 s. WINDOW_S = 100.0 and HEALTHY_MAX_S = 2.781 are pre-registered constants of the committed D162 gate and are not fitted here.",
+    "stratum_declared": "robot (recall) requests only. The -rr work measured that the 42-uncached alert requests are a DIFFERENT STRATUM and that the recall under-prediction factor may not be borrowed across it; rung 4's question deferral defers a recall question, so recall is the stratum its safety factor must come from."
+  },
+  "_n_STATED_BEFORE_THE_QUANTILE_IS_COMPUTED": {
+    "_why_this_block_exists": "the whole defect was that n = 5 makes any q >= 0.8 return the maximum. n is therefore declared here, with the rank the quantile will land on, so a reader can see the quantile is a real quantile this time.",
+    "n_total": 463,
+    "per_seed": {"4": 132, "5": 123, "6": 121, "7": 87},
+    "all_robot_rows_were_in_healthy_windows": "132 of 132, 123 of 123, 121 of 121 and 87 of 87, so the healthy filter removes nothing on these cells and is recorded as NON-BINDING rather than silently applied.",
+    "q90_rank": "_nearest_rank(463, 0.9) gives k = max(1, min(463, ceil(416.7))) = 417, the 417th of 463 sorted values, with 46 rows STRICTLY ABOVE it. At the old n = 5 the same call gave k = 5 of 5, with 0 rows above it.",
+    "n_ratio_against_the_old_input": "463 / 5 = 92.6x"
+  },
+  "_direction_of_the_RATIO_definition_audit": {
+    "the_wording": "the ruling says 'predicted-over-actual'; the committed field name is observed_over_predicted and the committed derived name is D162_worst_underprediction_factor.",
+    "the_direction_used_here": "OBSERVED divided by PREDICTED, which is the committed direction and is the only one that makes the factor conservative: the latest safe start is deadline - SAFETY_FACTOR * predicted, so a factor above 1 must mean the request actually takes LONGER than predicted. The inverse direction would give a factor below 1 and would move the latest safe start LATER, which is the opposite of a safety factor.",
+    "register": "this is a naming difference, not a quantity difference, and it is recorded rather than silently resolved."
+  },
+  "_what_will_be_REPORTED": [
+    "the full ratio distribution: n, min, q10, median, q90 (by the committed _nearest_rank), max, and the count of distinct values, so the input is shown as a spread and not as a single reassuring number",
+    "the new SAFETY_FACTOR = q90 of that distribution",
+    "whether q90 is STRICTLY BELOW max, which is the one check that says the new quantile is not degenerate",
+    "the would-have-missed count among rung 4's s4 question deferrals, evaluated at b = MEDIAN, b = q90 and b = MAX of the SAME distribution, each with its overrun in seconds",
+    "the RATIO of each would-have-missed count to the deferral count",
+    "the old 5-value input reported beside the new one, with both safety factors, so the change of input is visible"
+  ],
+  "_declared_before_computing_how_the_result_will_be_READ": {
+    "if_q90_is_strictly_below_max": "the would-have-missed count at b = max is a MEASUREMENT: a deferral counted as missing does so because some sent recall request in the committed rung-3 cells really did overrun its prediction by that factor, and the count can be non-zero or zero on the data.",
+    "if_q90_EQUALS_max_again": "the quantile is still degenerate and the would-have-missed count at the worst bias is STILL AN IDENTITY. It must then be reported as an identity, exactly as the old gate now is, and NOT as a pass. This branch is written down now so it cannot be reinterpreted afterwards.",
+    "at_b_equals_q90": "overrun = (q90 - SAFETY_FACTOR) * predicted is identically 0 BY CONSTRUCTION, because the safety factor IS the q90. That column is therefore an identity BY DESIGN and is reported as one, not as evidence. It is included only so the reader can see which of the three columns is an identity and which are measurements.",
+    "no_tuning": "the safety factor will not be raised, MARGIN_CF will not be widened and the deferral rule will not be re-thresholded, whatever the count comes out at."
+  },
+  "_step_0_what_would_invalidate_this": [
+    "a cell directory that is not the committed rung-3 cell: checked by reproducing each cell's committed robot-pool counts before any ratio is taken",
+    "reading a quantity that is zero without an engine: the ratio needs observed t_first_token, which only a live cell has, so this is computed on the four committed LIVE cells and never on a dry one",
+    "a second copy of the D162 coefficients drifting from the committed gate: avoided by reading them from the committed JSON",
+    "the rung-3 cells changing under this analysis: they are read-only here and nothing in this work reruns, regates or disturbs them, and the -rr s5 to s7 cells are untouched"
+  ],
+  "_provenance": {
+    "git_commit": "PRE-REGISTRATION, committed before the computation it describes",
+    "script": "d200_gatea_prereg.json (hand-written declaration; the computation is experiments/orchestration/live2/d200_gatea_safety.py, committed separately AFTER this file)",
+    "model": "n/a (read-only analysis of committed live run logs)",
+    "device": "flash (CPU only)",
+    "n": 463,
+    "origin_main_sha_read": "d46c73493eb482926402f65fe76d0fba7e7ae9cf"
+  }
+}
