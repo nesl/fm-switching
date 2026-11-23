@@ -1,0 +1,375 @@
+{
+ "_what": "Proofs for covex-v6-fair-c5attr-rr (rung 3 plus the ALERT release re-check, D179 (4)) BEFORE any cell is posted. Pre-registration: reports/study_alert_release_recheck.md.",
+ "_register": "every cell on a CLEAN `git archive` checkout of the commit in _provenance, NOT the shared worktree, ONE DRY CELL PER PROCESS, CONCURRENCY 1 from this session, fmtk. Load average recorded per cell below.",
+ "cell": "dry, seed 4, 16 devices, 1200 s, posted knobs, planner wall-clock cutoff off",
+ "digest_recipe": "the COMMITTED cf_pd_one_cell.py recipe, called not reimplemented; rr_one_cell.py adds no sha256 and no json.dumps of any row",
+ "host_load_per_cell": [
+  "=== pos_fair  covex-v6-fair-c5attr  11:54:22  load=4.34",
+  "=== rr_off  covex-v6-fair-c5attr-rr-off  11:58:30  load=2.37",
+  "=== rr_on  covex-v6-fair-c5attr-rr  12:01:32  load=1.48",
+  "=== pos_base  covex-v6-base  12:04:30  load=1.15",
+  "=== pos_uo  covex-v6-state-uo-c5attr  12:06:59  load=1.12",
+  "=== rr_alltyp  covex-v6-fair-c5attr-rr-alltypes  12:09:47  load=1.07"
+ ],
+ "positive_controls": {
+  "_claim": "committed arms reproduce their committed digests on this tree WITH this arm registered in the same processes. If a known-good arm fails, the instrument is broken, not the arm.",
+  "cells": [
+   {
+    "arm": "covex-v6-base",
+    "this_run": [
+     "af8befb9420ad86a",
+     12085
+    ],
+    "committed": [
+     "af8befb9420ad86a",
+     12085
+    ],
+    "verdict": "PASS"
+   },
+   {
+    "arm": "covex-v6-state-uo-c5attr",
+    "this_run": [
+     "9a4be873eb3c5fba",
+     14218
+    ],
+    "committed": [
+     "9a4be873eb3c5fba",
+     14218
+    ],
+    "verdict": "PASS"
+   },
+   {
+    "arm": "covex-v6-fair-c5attr",
+    "this_run": [
+     "12e4f73ce0ebd865",
+     13812
+    ],
+    "committed": [
+     "12e4f73ce0ebd865",
+     13812
+    ],
+    "verdict": "PASS"
+   }
+  ]
+ },
+ "off_switch_identity": {
+  "_claim": "the switch off collapses to the COMMITTED RUNG-3 arm byte-identically. The bar is RUNG 3, not rung 2: checking the wrong one would credit this arm with the rung below it.",
+  "off_arm": {
+   "arm": "covex-v6-fair-c5attr-rr-off",
+   "digest": "12e4f73ce0ebd865",
+   "rows": 13812
+  },
+  "committed_rung3": [
+   "12e4f73ce0ebd865",
+   13812
+  ],
+  "equals_committed": true,
+  "diff_against_rung3_this_run": {
+   "A": "rr_off",
+   "B": "pos_fair",
+   "rows_A": 13812,
+   "rows_B": 13812,
+   "differing_setwise": 0,
+   "differing_positional": 0,
+   "identical": true,
+   "first_difference": null
+  },
+  "verdict": "PASS"
+ },
+ "step_2b": {
+  "A": "rr_on",
+  "B": "rr_off",
+  "rows_A": 13841,
+  "rows_B": 13812,
+  "differing_setwise": 15439,
+  "differing_positional": 13344,
+  "identical": false,
+  "first_difference": {
+   "index": 8,
+   "A": {
+    "H": null,
+    "belief": {
+     "cold_tokens_by_session": {},
+     "gpu_tokens_by_session": {},
+     "host_tokens_by_session": {}
+    },
+    "cost_model_id": null,
+    "defer_s": null,
+    "desired_tier": null,
+    "kind": "release_infeasible",
+    "mu": null,
+    "note": null,
+    "opportunity_ids": [
+     "opp0000003"
+    ],
+    "piece_tokens": null,
+    "predicted": {
+     "completion_s": null,
+     "imposed_delay_s_by_request": {},
+     "ttft_s": null
+    },
+    "representation": null,
+    "representation_defaulted": false,
+    "t": 7.1,
+    "traffic_mix": {
+     "monitor": 0,
+     "piece": 0,
+     "recall": 1,
+     "whole": 0
+    }
+   },
+   "B": {
+    "H": null,
+    "belief": {
+     "cold_tokens_by_session": {},
+     "gpu_tokens_by_session": {},
+     "host_tokens_by_session": {}
+    },
+    "cost_model_id": null,
+    "defer_s": null,
+    "desired_tier": null,
+    "kind": "release_monitor",
+    "mu": null,
+    "note": null,
+    "opportunity_ids": [
+     "opp0000003"
+    ],
+    "piece_tokens": null,
+    "predicted": {
+     "completion_s": null,
+     "imposed_delay_s_by_request": {},
+     "ttft_s": null
+    },
+    "representation": null,
+    "representation_defaulted": false,
+    "t": 7.1,
+    "traffic_mix": {
+     "monitor": 0,
+     "piece": 0,
+     "recall": 1,
+     "whole": 0
+    }
+   }
+  },
+  "_claim": "decisions differ against the matched -off arm",
+  "on": {
+   "arm": "covex-v6-fair-c5attr-rr",
+   "digest": "3dd6d89c65050ab4",
+   "rows": 13841
+  },
+  "FIRST_DIFFERENCE_IS_THE_MECHANISMS_OWN_CHANNEL": {
+   "index": 8,
+   "on_kind": "release_infeasible",
+   "off_kind": "release_monitor",
+   "same_opportunity": true,
+   "opportunity": [
+    "opp0000003"
+   ],
+   "verdict": "YES: on the SAME opportunity the on arm emits release_infeasible where the off arm emits release_monitor. That is release_recheck's own logged channel (RR.LOG_KIND), not a side effect.",
+   "corroboration": "opp0000003 is also the FIRST late alert instant in the committed rung-3 s4 attribution (dash004, 1.4286 s wait, dominant-blocked by a recall question of 6,270 uncached tokens), so the first skip is a real late instant."
+  },
+  "release_infeasible_rows_in_the_decision_log": {
+   "on": 1869,
+   "off": 0
+  },
+  "verdict": "PASS"
+ },
+ "port_rule": {
+  "_claim": "the count of the decision kind this arm EXISTS TO MAKE, an ALERT QUESTION SKIPPED BY THE RE-CHECK, confirmed NON-ZERO before any score is read. Zero is an ABSENT LINK.",
+  "release_infeasible_alert": 1869,
+  "release_infeasible_total": 1869,
+  "release_infeasible_recall": null,
+  "release_infeasible_assistance": null,
+  "non_zero": true,
+  "scope_held": "recall and assistance are None, i.e. never incremented, so the alert-only type set held for the whole cell"
+ },
+ "dry_s4_recheck_report": {
+  "evaluations": 10919,
+  "feasible": 9050,
+  "skipped": 1869,
+  "by_type": {
+   "alert": {
+    "evaluated": 10919,
+    "feasible": 9050,
+    "skipped": 1869
+   }
+  },
+  "overrun_ratio_est_over_remaining": {
+   "n": 1869,
+   "min": 1.0072871669174572,
+   "p10": 1.3150447666092118,
+   "median": 2.356511573448007,
+   "p90": 5.40217321152414,
+   "max": 622.0477236669354,
+   "n_distinct": 955
+  },
+  "traced_skip": {
+   "qtype": "alert",
+   "uncached": 42,
+   "queued_uncached_ahead": 7051,
+   "est_first_token_s": 1.1583574232216147,
+   "remaining_s": 0.8999520000001073,
+   "feasible": false
+  },
+  "traced_feasible": {
+   "qtype": "alert",
+   "uncached": 42,
+   "queued_uncached_ahead": 0,
+   "est_first_token_s": 0.0754597035090136,
+   "remaining_s": 0.7999520000000881,
+   "feasible": true
+  },
+  "what_the_traced_pair_shows": "both have uncached = 42. The skip has queued_uncached_ahead = 7,051 and the feasible one 0. So alert questions are skipped because of THE QUEUE AHEAD, not their own size, which is the alert-on-alert congestion the mechanism was built for.",
+  "SELF_INFLICTED_LOSS_GATE": {
+   "_claim": "a skip of an instant that WOULD have made its deadline is a self-inflicted loss. Raw count and ratio reported; MATERIALITY IS NOT DECIDED HERE.",
+   "raw_count": 14,
+   "total_skips": 1869,
+   "ratio": 0.00749063670411985,
+   "factor_used": 1.0260692464358452,
+   "factor_source": "cost_model_gate_d162.json, the committed fit's predicted_p50 0.2519 over actual_p50 0.2455 = 1.026069. The model OVER-predicts by 2.6 percent at the median, and alert requests sit at the LOW-token end of that fit, so this is the relevant direction for them. READ, not chosen.",
+   "n_within_10_percent_of_the_deadline": 54,
+   "n_within_50_percent": 311,
+   "n_over_2x_the_remaining_time": 1290,
+   "NOT_A_TAUTOLOGY_UNLIKE_RUNG_4": "the factor 1.026069 is the committed fit's own p50 and is INDEPENDENT of the skip decision, and the overrun distribution has a real minimum of 1.0073 rather than an identity at the decision threshold. Rung 4's zero came from a safety factor set equal to the measured worst bias, so its overrun was identically zero by construction. These two zeros are not the same kind of number and this one is a measurement.",
+   "A_STRATUM_CAVEAT_I_AM_NOT_LEANING_ON": "the favourable 1.39x to 1.87x UNDER-prediction was measured on multi-thousand-uncached RECALL requests. These alert requests carry uncached of about 42 with large QUEUE terms, which is a DIFFERENT STRATUM, so that tail is not borrowed to argue the skips are safer than they look. The 1.026069 p50 is used instead, and the full ratio distribution is given so the count can be re-read at any factor.",
+   "VERDICT": "REPORTED, NOT RULED. The materiality call is the user's, per the instruction."
+  }
+ },
+ "step_4_negative_control": {
+  "_claim": "the mechanism disabled must collapse to rung 3. The -off arm IS that control and it collapses exactly; there is no separate code path to disable.",
+  "result": {
+   "A": "rr_off",
+   "B": "pos_fair",
+   "rows_A": 13812,
+   "rows_B": 13812,
+   "differing_setwise": 0,
+   "differing_positional": 0,
+   "identical": true,
+   "first_difference": null
+  },
+  "verdict": "PASS"
+ },
+ "scope_ablation": {
+  "_claim": "'alert only' is a measured cell and not a claim. -alltypes is r1's type set on this base and is NOT the headline arm.",
+  "alltypes": {
+   "digest": "6ec243058ee00f60",
+   "rows": 14105,
+   "counters": {
+    "release_infeasible": 1357,
+    "release_infeasible_alert": 1291,
+    "release_infeasible_recall": 30,
+    "release_infeasible_assistance": 36,
+    "release_recheck_unclassified_device": null,
+    "release_recheck_out_of_scope_recall": null,
+    "release_recheck_out_of_scope_assistance": null
+   },
+   "by_type": {
+    "alert": {
+     "evaluated": 10880,
+     "feasible": 9589,
+     "skipped": 1291
+    },
+    "recall": {
+     "evaluated": 103,
+     "feasible": 73,
+     "skipped": 30
+    },
+    "assistance": {
+     "evaluated": 357,
+     "feasible": 321,
+     "skipped": 36
+    }
+   }
+  },
+  "diff_against_alert_only": {
+   "A": "rr_alltyp",
+   "B": "rr_on",
+   "rows_A": 14105,
+   "rows_B": 13841,
+   "differing_setwise": 7946,
+   "differing_positional": 12608,
+   "identical": false,
+   "first_difference": {
+    "index": 977,
+    "A": {
+     "H": null,
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_infeasible",
+     "mu": null,
+     "note": "session=asst001|ss0010",
+     "opportunity_ids": [
+      "opp0000961"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 109.4,
+     "traffic_mix": {
+      "monitor": 0,
+      "piece": 0,
+      "recall": 1,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=asst001|ss0010",
+     "opportunity_ids": [
+      "opp0000961"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 109.4,
+     "traffic_mix": {
+      "monitor": 0,
+      "piece": 0,
+      "recall": 1,
+      "whole": 0
+     }
+    }
+   }
+  },
+  "reading": "with all three types the arm skips 30 recall and 36 assistance questions and its ALERT skips FALL from 1,869 to 1,291, because the recall skips change the queue the alert re-check sees. So the two type sets are not nested in effect and the alert-only restriction is a real design choice, not a subset of the same behaviour."
+ },
+ "the_primary_bar_needs_a_LIVE_cell": "late alert instants and alert attainment are SCORER quantities. A dry cell has no scorer, so the primary pre-registered bar (late alerts FALL against rung 3's 2,290 of 8,356 sent) cannot be read here and is what the s4 cell is for. The 1,869 dry skips are decisions, not scored outcomes, and the two are different registers.",
+ "cells_posted": {
+  "n": 0,
+  "why": "the self-inflicted-loss gate returned 14 of 1,869 and the instruction is to report materiality rather than decide it. Nothing is posted pending that ruling."
+ },
+ "_provenance": {
+  "git_commit": "512a835484a102a728aae8fada91d9d89779d72e",
+  "script": "rr_one_cell.py cells, assembled read-only",
+  "model": null,
+  "device": "flash_cpu",
+  "n": 16,
+  "_note": "the commit the clean checkout was archived from, which is the commit measured"
+ }
+}
