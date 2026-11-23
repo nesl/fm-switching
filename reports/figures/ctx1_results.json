@@ -1,0 +1,141 @@
+{
+ "_what": "StudyCTX1: verify StudyDASH2 Part 6 (D207).",
+ "calibration": {
+  "note": "Platt on SH-EP DEV EP-G only, per tier",
+  "device_4BI": [
+   0.034585975349511,
+   0.28977074973729805
+  ],
+  "cloud_32BI": [
+   0.04504049942859716,
+   0.5807632429263443
+  ]
+ },
+ "workload_clip_counts": {
+  "DEV": 88,
+  "EVAL": 208,
+  "crash_DEV": 43,
+  "crash_EVAL": 103
+ },
+ "device_only": {
+  "DEV_mAP": 0.6512389981568253,
+  "EVAL_mAP": 0.6274270838394719
+ },
+ "check1_conditions": {
+  "C1": {
+   "DEV_mAP": 0.6512389981568253,
+   "DEV_gain_vs_device": 0.0,
+   "EVAL_mAP": 0.6274270838394719,
+   "ALL_mAP_D153": 0.627985192699897,
+   "nondecision_crop_frac_D153": 1.0,
+   "uncached_tok_per_decision_instant": 378.0,
+   "peak_prompt_tokens": 378
+  },
+  "C3": {
+   "DEV_mAP": 0.684983752298726,
+   "DEV_gain_vs_device": 0.0337447541419007,
+   "EVAL_mAP": 0.6817775067978431,
+   "ALL_mAP_D153": 0.6734050556290647,
+   "nondecision_crop_frac_D153": 0.0,
+   "uncached_tok_per_decision_instant": 1056.0,
+   "peak_prompt_tokens": 1056
+  },
+  "C6": {
+   "DEV_mAP": 0.6619036736241752,
+   "DEV_gain_vs_device": 0.010664675467349949,
+   "EVAL_mAP": 0.6937832764659947,
+   "ALL_mAP_D153": 0.6804945454594695,
+   "nondecision_crop_frac_D153": 0.0,
+   "uncached_tok_per_decision_instant": 2070,
+   "peak_prompt_tokens": 2070
+  },
+  "EP-B": {
+   "DEV_mAP": 0.6137429044972049,
+   "DEV_gain_vs_device": -0.037496093659620366,
+   "EVAL_mAP": 0.6647373717960058,
+   "ALL_mAP_D153": 0.6432105331221986,
+   "nondecision_crop_frac_D153": 0.24549549549549549,
+   "uncached_tok_per_decision_instant": 376.0,
+   "peak_prompt_tokens": 3422
+  },
+  "EP-G": {
+   "DEV_mAP": 0.5779482093990319,
+   "DEV_gain_vs_device": -0.07329078875779338,
+   "EVAL_mAP": 0.6631658968105107,
+   "ALL_mAP_D153": 0.6280034876854164,
+   "nondecision_crop_frac_D153": 0.0,
+   "uncached_tok_per_decision_instant": 372,
+   "peak_prompt_tokens": 7140
+  }
+ },
+ "check1_selection": {
+  "dev_ranked": [
+   "C3",
+   "C6",
+   "C1",
+   "EP-B",
+   "EP-G"
+  ],
+  "tied_within_0p02": [
+   "C3"
+  ],
+  "SELECTED": "C3",
+  "selected_EVAL_mAP": 0.6817775067978431,
+  "selected_EVAL_gain_vs_device": {
+   "diff": 0.054350422958371225,
+   "ci": [
+    -0.022099607118878352,
+    0.12309508792614365
+   ]
+  },
+  "selected_EVAL_gain_vs_EP_G": {
+   "diff": 0.018611609987332356,
+   "ci": [
+    -0.04235794732420671,
+    0.07812478929686932
+   ]
+  },
+  "selected_horizon_shift_vs_device": {
+   "0.5": 0.0,
+   "1.0": 1.5,
+   "1.5": 1.5
+  },
+  "selected_EVAL_ap_by_horizon": {
+   "0.5": 0.7429059976168713,
+   "1.0": 0.6381441723278284,
+   "1.5": 0.6642823504488297,
+   "2.0": 0.6716552963718196,
+   "2.5": 0.6373248270265667,
+   "3.0": 0.601908477243893
+  }
+ },
+ "check2_restart": {
+  "n_restart_crops": 43,
+  "cloud_served_fraction": 1.0,
+  "finding": "at restart crops the cloud serves 100 percent of instants (43 of 43), so the StudyDASH2 Part 3-ext 0.170 is NOT a device-fill or which-score-stands artefact; it is a small-sample value (43 positive crops) on genuinely fresh short context, and it does not enter any committed headline (the ceiling, StudyDSMAP and StudyEXIT2 use all crops, not the restart split). No committed headline is affected, so no escalation on Check 2."
+ },
+ "check3_d153": {
+  "part6_applied_d153": false,
+  "finding": "StudyDASH2 Part 6 did NOT apply D153; it scored the cloud at every crop including non-decision instants. Under D153 C1 is 100 percent non-decision (one frame below the three-frame minimum, not deployable), EP-B is 24.5 percent non-decision (device stands on the first two instants of each 5 s block), and C3/C6/EP-G are 0 percent. The condition mAPs here are the D153-correct recomputation.",
+  "nondecision_crop_frac": {
+   "C1": 1.0,
+   "C3": 0.0,
+   "C6": 0.0,
+   "EP-B": 0.24549549549549549,
+   "EP-G": 0.0
+  }
+ },
+ "sanity": {
+  "device_only_from_device_table": 0.6274270838394719,
+  "label_shuffle_selected_EVAL_mAP": 0.46866445090414866,
+  "base_rate_EVAL": 0.4951923076923077
+ },
+ "DECISION": {
+  "BUILD_READY": false,
+  "selected_condition": "C3",
+  "a_eval_gain_vs_device_ci_lb_gt0": false,
+  "b_eval_gain_vs_epg_point_positive": true,
+  "c_survives_checks_2_and_3": true,
+  "reason": "the DEV-selected condition does not meet all three decision conditions under D153"
+ }
+}
