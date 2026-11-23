@@ -1,4 +1,67 @@
-# OVERNIGHT HANDOFF (D187, user decision 2026-11-22 18:10)
+# OVERNIGHT HANDOFF (D187). READ THIS FIRST.
+
+## STATE AT 03:05Z. THE WORK IS NOT BLOCKED ON THIS SESSION.
+
+THE GPU WORK IS AUTONOMOUS AND DOES NOT NEED ME. V6SHARES_R1_CELLS is gated by the H100 at
+79eedc6d and runs covex-v6-state-shares-r1 at seeds 4, 5, 6, 7 after the covex-v6-base s4 _kv0.5
+cell ending about 18:47 local. The H100 reports each seed itself. If this session is gone, THE
+CELLS STILL RUN.
+
+THE NEXT STEP, when the four r1 cells are on origin:
+  1. Assemble a runs dir with base, uo and r1 at seeds 4 to 7. The base is
+     hybrid-F-lhreq-noc3_n16_s{4,5,6,7}_1200s_h27_3t_L3_epg_rq30 (committed cells keep their
+     ORIGINAL names under D172; there is no covex-v6-base cell at these seeds, and the _L3_epg
+     cells WITHOUT rq30 are a different workload).
+  2. Run the COMMITTED PRE-REGISTERED scorer, unchanged:
+       conda run -n fmtk python experiments/orchestration/live2/d179_rung2_verdict.py \
+         --runs <dir> --out results/orchestration/live2/frozen_test/d179_rung2_verdict_r1.json \
+         --report reports/study_d179_rung2_verdict_r1.md \
+         --pins results/orchestration/live2/frozen_test/d179_rung2_verdict_prereg.json
+     READ THE `positive control: PASS (8/8 cells exact)` LINE FIRST. If it is not that, the scorer
+     is broken, not the cells, and the comparison must not be read.
+  3. Score against the pass check pre-registered at c7c60e5b, WITH ITS FAILURE CONDITION:
+     release_infeasible_recall falls from 70 toward at most 13 at s4; robot_pool_on_time rises from
+     60 toward 118; assistance must NOT move (positive control). IF THE FIRST TWO DO NOT MOVE, THE
+     NAMED EXPLANATION IS WRONG and is reported as wrong. The fix is not kept for being harmless.
+  4. Watch the lateness signature the H100 named: skips falling WITHOUT on-time rising to match
+     would mean a stale-prefix residue rather than a fix.
+
+IF SHARES STILL FAILS CHECK 2 AFTER r1, D184 APPLIES: c5attr becomes rung 2, shares is reported as
+a trade-off ablation, and rungs 3 and 4 build on c5attr. Do not iterate further on shares past
+about 05:00.
+
+## WHAT IS FOR THE USER AND MUST NOT BE DONE AUTONOMOUSLY
+
+1. RE-DERIVING THE FLOORS AND W_max. The fix drops the policy's predicted recall u by roughly an
+   order of magnitude, so the recall floor and W_max may now be mis-sized for the regime they
+   govern. Methodological under CLAUDE.md. r1 runs on the EXISTING frozen constants.
+2. THE arms_v6state.py:236 id(obs) CACHE FIX. Decision-neutral on 12 of 12 dry rung-2 cells, but a
+   dry replay cannot bound the LIVE effect.
+3. THE ASSISTANCE IMAGE GRID. Assistance images are sent at native resolution (p50 1,307 image
+   tokens) while alert and recall frames are downsized offline (338 and 90). No D-row authorises
+   the per-type cost. Resizing would make assistance fit inside its share and would very likely
+   help the arm under test, which is exactly why it was NOT done: the image grid is the workload.
+4. THE PERMISSIONS FINDING. Watchdog-restarted sessions are effectively READ-ONLY: refused repo
+   writes and even grep reads under /tmp/claude-1001/ where the workflow lives. The H100
+   reproduced the same on its box. So a faithful restart produces a session that CANNOT continue
+   the work. This limits what D187 (5)'s resilience plan can deliver and was not worked around.
+
+## RESILIENCE AS IT NOW STANDS
+
+ops/watchdog.sh, cron every 10 minutes plus @reboot, gated on ops/heartbeat with a 600 s staleness
+threshold (shortened from 1,800 s at the user's request for a faster restart). Tested both ways:
+fresh heartbeat does not restart, a staled one does. Its original condition was "does the tmux
+session exist", which was wrong in BOTH directions, since the working session is not in tmux and
+each spawned `claude -p` exits when its prompt ends, refilling the condition; it spawned three
+sessions in twenty minutes before the gate.
+
+THIS SESSION IS NOT IN TMUX AND CANNOT MOVE ITSELF THERE. It is attached to the user's client, so
+an SSH loss kills it. That is the gap the watchdog exists for, and item 4 above is why the watchdog
+cannot fully close it.
+
+---
+
+## EARLIER STATE, KEPT FOR CONTEXT
 
 The user is away until morning and has granted autonomy under D187. A resumed session reads THIS
 FILE FIRST, then continues the next step. Updated after every milestone and at least every 2 hours.

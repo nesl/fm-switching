@@ -39,7 +39,7 @@ fi
 # writes and even reads under /tmp), so each restart burned tokens and could not do the work.
 # A live worker touches the heartbeat; if it is fresh, there is nothing to restart.
 HEARTBEAT=$REPO/ops/heartbeat
-STALE_S=1800
+STALE_S=600
 if [ -f "$HEARTBEAT" ]; then
   age=$(( $(date +%s) - $(stat -c %Y "$HEARTBEAT") ))
   if [ "$age" -lt "$STALE_S" ]; then
