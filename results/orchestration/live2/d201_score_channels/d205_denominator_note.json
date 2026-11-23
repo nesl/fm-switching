@@ -1,0 +1,19 @@
+{
+ "label": "D205 step 2d: why the escalation rate is reported over PER-STREAM DECISIONS and not over trace instants.",
+ "is_measurement": false,
+ "the_two_candidate_denominators_at_the_committed_cell": {
+  "cell": "seed 4, 16 devices, 1200 s, 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0",
+  "epg_instants_captured": 13193,
+  "dashcam_decision_instants": 11764,
+  "they_differ_by": "1,429 instants, 12.1 percent",
+  "why_they_differ": "EP-G applies a minimum-frames floor, so an instant can be captured and charged to the uplink without being a decision instant (fleet/trace.py, the epg floor block)"
+ },
+ "the_problem": "inar-vl's committed release_monitor count at this cell is 13,193, which EQUALS epg_instants_captured and EXCEEDS dashcam_decision_instants. So a release_monitor ROW does not stand one-to-one with a decision instant, and dividing a release count by either candidate gives a different answer. Until which object a release row corresponds to is settled, a 'fraction of instants sent' computed at this cell would be a number in the wrong register.",
+ "what_is_reported_instead": "the fraction of the arm's OWN per-stream decisions on which it returned mode cloud, counted by wrapping Policy.decide and reading every StreamAction it emitted. That denominator is unambiguous: it is exactly the set of decisions the arm made, which is what the ruling's question is about.",
+ "cross_check_that_the_two_registers_agree_where_they_can": {
+  "confidence_cascade_per_stream_decisions_4dev_300s": 0.284,
+  "confidence_cascade_release_monitor_over_captured_instants_16dev_1200s": 0.287,
+  "note": "3,790 release_monitor rows of 13,193, from the diff's kinds. The two agree to 0.003 across different cells and different denominators, which is why the per-stream figure is trusted and the conversion is still not posted."
+ },
+ "rule_this_follows": "CLAUDE.md citing-results: mark the register at the point of use. An observed count over the arm's own decisions is not the same object as a fraction of the workload's instants, and the second cannot be derived from the first without settling the release-row correspondence."
+}

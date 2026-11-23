@@ -132,16 +132,38 @@ class HttpBackend:
                 self._stop.wait(interval_s)
         threading.Thread(target=loop, daemon=True).start()
 
+    @property
+    def metrics_failures(self) -> Dict[str, Any]:
+        """How many metrics fetches failed, and the last exception type. Counter only (D205)."""
+        if not hasattr(self, "_metrics_failures"):
+            self._metrics_failures: Dict[str, Any] = {"n": 0, "last": None}
+        return self._metrics_failures
+
     def metrics(self) -> Dict[str, float]:
         if hasattr(self, "_metrics"):
             return self._metrics
         return self._fetch_metrics()
 
     def _fetch_metrics(self) -> Dict[str, float]:
+        """COUNTER ONLY (D205 handoff): the fallback VALUE is unchanged, and so is every decision.
+
+        On a failed fetch this returns {}, and `{}` makes `_observation` read
+        `gpu_kv_fraction=m.get("vllm:gpu_cache_usage_perc", 0.0)` as 0.0, which is the MINIMUM of
+        [0, 1] and therefore the most permissive value an admission gate can be handed. Four
+        baselines read it as a gate. The failure was SILENT, so the blast radius was unknown by
+        construction; this counts it so a later reader can tell "the pool was empty" from "the
+        fetch failed", which is the same confusion as a score that was never fed.
+
+        Deliberately NOT a behaviour change: no raise, no different default. Changing the fallback
+        needs a ruling, and this file's owner was asked for the counter only.
+        """
         try:
             with urllib.request.urlopen(self.base_url + "/metrics", timeout=5) as r:
                 txt = r.read().decode()
-        except Exception:                                             # noqa: BLE001
+        except Exception as e:                                        # noqa: BLE001
+            c = self.metrics_failures
+            c["n"] = int(c.get("n", 0)) + 1
+            c["last"] = type(e).__name__
             return {}
         out = {}
         for line in txt.splitlines():
