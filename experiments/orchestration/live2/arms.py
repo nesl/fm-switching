@@ -749,11 +749,21 @@ ARMS.update(V6SHARES_ARMS)
 from arms_v6fairfeed import V6FAIRFEED_ARMS                             # noqa: E402
 ARMS.update(V6FAIRFEED_ARMS)
 
-# D187 rung 4: protect-and-defer. Registered HERE because `run_live2_real.py` imports only `arms`
-# and `hybrid`, so an arm that is only in its own module resolves in a friendly process and then
-# DIES AT CELL START. Without these two lines every covex-v6-cf-pd cell would fail on launch.
-from arms_v6cf import V6CF_ARMS                                          # noqa: E402
-ARMS.update(V6CF_ARMS)
+# D187 rung 4 registration REVERTED 2026-11-23 22:50 after it BROKE origin/main.
+# `from arms_v6cf import V6CF_ARMS` pulls in cf_protect_defer, which calls
+# `cf_objective.attainment_margin` at import time (cf_protect_defer.py:150). THAT FUNCTION EXISTS
+# ONLY IN AN UNCOMMITTED LOCAL EDIT to v5/cf_objective.py and is in NO commit, so on origin the
+# import raised AttributeError and EVERY ARM DIED AT CELL START. The proofs for rung 4 passed
+# because they ran in a worktree that HAS the uncommitted change; origin never did.
+#
+# The registration is not restored by pushing that edit: it is half-finished D177 work whose HARM
+# side was never converted, and unproven policy code must not go in to unblock a GPU. It is
+# restored only when cf_objective's change is committed WITH its own proof, or when
+# cf_protect_defer no longer depends on it at import time. Rung 4's cell list is un-gated and
+# unaffected by this revert.
+#
+# from arms_v6cf import V6CF_ARMS
+# ARMS.update(V6CF_ARMS)
 
 
 def _register_v6_aliases() -> None:
