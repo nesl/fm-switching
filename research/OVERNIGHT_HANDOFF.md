@@ -65,6 +65,50 @@ IMPORTANT CORRECTION TO EARLIER WORK: the 7,717 median appears in
 built on it is wrong in magnitude: against recall's own share of 1,256.7, a 1,438 median is oversize
 by 14 percent, not by 4.5x.
 
+## 18:45 UPDATE: THE DIAGNOSIS LANDED, THE FIX IS APPLIED, CELLS NOT YET POSTED
+
+(a) MISPRICED SIZE DOMINATES at every seed: 57 of 70, 44 of 48, 41 of 46, 44 of 46. So the
+D187 (1) pre-approved branch applies and the fix is going in WITHOUT waiting for the user.
+
+THE HYPOTHESIS WAS REFUTED AND THE REAL MECHANISM IS ADJACENT. Not a COLD belief: COLD-while-warm
+is 8 of 210 skips, and readiness is GPU-WARM at 69 of 70 at s4, so the warm prefix WAS subtracted.
+THE WRONG QUANTITY WAS. `built_tokens` counts only the coordinator's own 1,024-token build pieces
+while the engine holds the whole history from the EP-G per-frame uploads. Median predicted u at s4
+is 14,712 against the engine's own 1,050 on the SAME opportunity in uo, 15.6x. The size term alone,
+zero queue, exceeded the slack in 29 / 30 / 23 / 32 skips; with the engine's count, 1 / 0 / 1 / 0.
+
+DONE SO FAR:
+- `c7c60e5b` pre-registration, committed BEFORE any cell, with the pass check AND its failure
+  condition (if release_infeasible_recall and robot_pool_on_time do not move, the explanation is
+  wrong and is reported as such rather than the fix being kept for being harmless).
+- The fix is applied at `coordinator.py` (the D187 (1) block), reading
+  `session.last_telemetry_cached_tokens`, which `engine_actions.py:358` already writes and which
+  was read NOWHERE in the pricing path. MAX of it and `built_tokens`, since both are lower bounds.
+- P0 instrumentation: `release_infeasible_events` and `share_events` are now serialised into
+  `coordinator_result.json`, capped at 20,000 with the true total recorded beside them. Without
+  this the r1 cells would be as unreadable as the four that forced the diagnosis to RECONSTRUCT
+  every quantity with a declared proxy.
+- `covex-v6-state-shares-r1` registered as a LABEL, proved arm-side IDENTICAL to
+  `covex-v6-state-shares`, so the only difference is the coordinator's pricing.
+- COMPARABILITY CHECKED, NOT ASSUMED: `budget_refusal` is ABSENT (not merely zero) in all eight
+  committed rung-2 cells, so the mispriced charge never bound and `covex-v6-state-uo` stays a valid
+  comparator for check 2. The dry prescreen on uo tests that directly: uo has no release re-check,
+  so for it `_uncached` reaches only the budget charge, and if the budget never binds its digest
+  must be UNCHANGED.
+
+NEXT STEP, IN ORDER:
+1. Read the two prescreen cells (`covex-v6-base` must stay af8befb9420ad86a / 12,085;
+   `covex-v6-state-uo` must stay 9a4be873eb3c5fba / 14,218). A change in uo would mean the fix is
+   NOT inert there and check 2's comparator would need rerunning before any r1 result is read.
+2. Commit the fix, the P0 serialisation and the r1 label.
+3. Post `runs/V6SHARES_R1_CELLS`: covex-v6-state-shares-r1 16 {4,5,6,7} _L3_epg_rq30, and tell the
+   H100 to run them FIRST.
+4. Score with the committed pre-registered scorer, unchanged.
+
+REMEMBER THE TRAP, stated in the pre-registration: on a DRY cell
+`last_telemetry_cached_tokens` is always None because there is no engine. The dry prescreen proves
+the fix HARMLESS and proves NOTHING about whether it fires. THE FIRING PROOF MUST BE LIVE.
+
 ## IN FLIGHT RIGHT NOW
 
 - Addendum 13 + 14 diagnosis (read-only, one agent, one report): per-skip classification

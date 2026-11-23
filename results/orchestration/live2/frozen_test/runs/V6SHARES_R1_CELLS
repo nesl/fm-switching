@@ -1,0 +1,50 @@
+# D187 (1) COLD-PRICING FIX, r1. One cell per line: "arm n seed tag". Lines starting # are NOT run.
+#
+# RUN THESE FIRST. Posted by the main flash session under D187 overnight autonomy, after the
+# addendum 13 diagnosis showed the shares recall skips are dominated by MISPRICED SIZE.
+#
+# THE ARM IS A LABEL, NOT A VARIANT. covex-v6-state-shares-r1 is proved arm-side IDENTICAL to
+# covex-v6-state-shares; the only difference is the COORDINATOR, which now prices a recall against
+# the prefix the ENGINE reports (session.last_telemetry_cached_tokens, written at
+# engine_actions.py:358 and previously read nowhere in the pricing path) instead of against the
+# coordinator's own build pieces. The four committed covex-v6-state-shares cells were produced by
+# the mispriced code and stay VALID as the before-condition.
+#
+# THE MECHANISM, measured over 210 skips at seeds 4 to 7 (d179_recall_skip_diagnosis.json):
+#   mispriced size dominates at every seed: 57 of 70, 44 of 48, 41 of 46, 44 of 46
+#   median predicted u at s4 was 14,712 against the engine's own 1,050 on the SAME opportunity
+#     in covex-v6-state-uo, a ratio of 15.6x
+#   the size term ALONE, zero queue, exceeded the slack in 29 / 30 / 23 / 32 skips;
+#     with the engine's own count it exceeds it in 1 / 0 / 1 / 0
+#   NOT a COLD belief: readiness is GPU-WARM at 69 of 70 skips at s4, so the warm prefix WAS
+#     subtracted and the WRONG QUANTITY was
+#
+# PRE-REGISTERED PASS CHECK, committed at c7c60e5b BEFORE this list, with its failure condition:
+#   release_infeasible_recall falls from 70 toward at most 13 at s4
+#   robot_pool_on_time rises from 60 toward 118
+#   assistance must NOT move (positive control: no build pieces, no cached prefix, ratio 0.972)
+#   IF 1 AND 2 DO NOT MOVE, the named explanation is WRONG and is reported as such; the fix is not
+#     kept merely for being harmless
+#
+# PROOFS DONE: covex-v6-base af8befb9420ad86a / 12,085 and covex-v6-state-uo 9a4be873eb3c5fba /
+# 14,218, both byte-identical after the fix, each audited against a value committed BEFORE it. uo
+# being unchanged is the one that matters: it has no release re-check, so for it the repriced
+# quantity reaches only the budget charge, and budget_refusal is ABSENT in all eight committed
+# rung-2 cells. So CHECK 2's COMPARATOR SURVIVES THE FIX and no committed cell needs rerunning.
+#
+# THE TRAP, so no one misreads the prescreen: on a DRY cell last_telemetry_cached_tokens is always
+# None because there is no engine. The dry proofs show the fix is HARMLESS. They show NOTHING about
+# whether it fires. THE FIRING PROOF IS THESE LIVE CELLS.
+#
+# NOT CHANGED, and needing the user's ruling: the floors and W_max are NOT re-derived, though the
+# fix drops the policy's predicted recall u by roughly an order of magnitude and may leave the
+# recall floor mis-sized for the regime it governs. That is methodological. The oversize rule is
+# untouched per D186. No target, deadline, metric, workload, seed, baseline, bar or margin moved.
+#
+# NEW IN THESE CELLS: coordinator_result.json now carries release_infeasible_events and
+# share_events (capped at 20,000 with the true totals beside them), so the next diagnosis can READ
+# what this one had to reconstruct.
+covex-v6-state-shares-r1 16 4 _L3_epg_rq30
+covex-v6-state-shares-r1 16 5 _L3_epg_rq30
+covex-v6-state-shares-r1 16 6 _L3_epg_rq30
+covex-v6-state-shares-r1 16 7 _L3_epg_rq30

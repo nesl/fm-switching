@@ -128,6 +128,15 @@ V6SHARES_ARMS = {
         name=SHARES_ARM_NAME + "-noadmit", share_admission=False, **kw),
     SHARES_ARM_NAME + "-norecheck": lambda **kw: V6StateSharesArm(
         name=SHARES_ARM_NAME + "-norecheck", release_recheck=False, **kw),
+    # D187 (1): the r1 LABEL. The arm configuration is IDENTICAL to covex-v6-state-shares in every
+    # respect; what differs is the COORDINATOR, which now prices a recall against the prefix the
+    # engine actually reports instead of against the coordinator's own build pieces
+    # (coordinator.py, the D187 (1) block). The label exists so r1 cells cannot collide with the
+    # four committed covex-v6-state-shares cells, which were produced by the mispriced code and
+    # stay valid as the before-condition. A label, not a variant: if this arm ever differs from
+    # covex-v6-state-shares in any ARM-side respect, the comparison it exists to support is void.
+    SHARES_ARM_NAME + "-r1": lambda **kw: V6StateSharesArm(
+        name=SHARES_ARM_NAME + "-r1", **kw),
 }
 
 

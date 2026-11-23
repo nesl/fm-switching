@@ -1216,8 +1216,27 @@ class Live2Coordinator:
         cost = C.recall_gpu_s(tokens, s.residency_readiness())
         # UNCACHED, not tokens: a warm recall re-presents a prefix the engine already holds, and
         # charging it for the whole history is the same wrong shape the touch charge had.
-        _uncached = (int(tokens) if s.residency_readiness() == "COLD"
-                     else max(int(tokens) - int(getattr(s, "built_tokens", 0) or 0), 0))
+        # D187 (1) COLD-PRICING FIX, pre-registered in reports/prereg_cold_pricing_r1.md before
+        # any r1 cell. The previous line subtracted `built_tokens`, which counts only the
+        # COORDINATOR'S OWN 1,024-token build pieces, while the engine holds the WHOLE history from
+        # the EP-G per-frame uploads. Measured over 210 release-infeasible recall skips at seeds 4
+        # to 7: predicted u had a median of 14,712 at s4 against the engine's own 1,050 on the same
+        # opportunity in covex-v6-state-uo, a ratio of 15.6x, and the size term ALONE exceeded the
+        # slack in 29 of them with zero queue, against 1 using the engine's count. That mispricing
+        # is what refused 57 of 70 recall releases at s4.
+        #
+        # NOT the hypothesis anyone held first: readiness is GPU-WARM at 69 of those 70 skips, so
+        # the warm prefix WAS being subtracted. The wrong quantity was.
+        #
+        # `last_telemetry_cached_tokens` is the engine's OWN report of the prefix it holds
+        # (engine_actions.py:358) and was read NOWHERE in the pricing path: written and never read.
+        # MAX of the two, not replacement: `built_tokens` exists before a session's first request
+        # and the telemetry only after one, and both are LOWER BOUNDS on the true prefix.
+        _prefix = max(int(getattr(s, "built_tokens", 0) or 0),
+                      int(getattr(s, "last_telemetry_cached_tokens", 0) or 0))
+        _uncached = (max(int(tokens) - _prefix, 0) if _prefix
+                     else (int(tokens) if s.residency_readiness() == "COLD"
+                           else max(int(tokens) - int(getattr(s, "built_tokens", 0) or 0), 0)))
         if self._d162_pricing:
             cost = DP.price_gpu_s(_uncached, self._uncached_in_flight, self._charge_mode)
         # ---- D179 (4) RELEASE RE-CHECK, RECALL AND ASSISTANCE PATHS (session B). BEGIN block --
@@ -2038,6 +2057,21 @@ class Live2Coordinator:
             mu_time_average=(self.arm.mu_time_average()
                              if hasattr(self.arm, "mu_time_average") else None),
             arm_stats=_arm_stats(self.arm),
+            # ---- D187 P0: SERIALISE THE TWO D179 EVENT LISTS. BEGIN block ---------------------
+            # Both lists died with the process. That is why the recall-skip diagnosis had to
+            # RECONSTRUCT every quantity the re-check used (predicted uncached, queued ahead,
+            # estimated first token, remaining slack, readiness) from other logs, with a proxy
+            # declared for each, and why `queued_uncached_ahead` could only be BOUNDED rather than
+            # read. Step 3 of CLAUDE.md asks for a traced unit; a quantity that reaches no file
+            # cannot be traced by anyone later. Capped so a long run cannot bloat the result file,
+            # with the cap and the true count both recorded so a truncated list is never mistaken
+            # for a short one.
+            release_infeasible_events=list(self.release_infeasible_events[:20000]),
+            release_infeasible_events_total=len(self.release_infeasible_events),
+            share_events=list(self._share_events[:20000]),
+            share_events_total=len(self._share_events),
+            share_events_cap=20000,
+            # ---- END D187 P0 block ------------------------------------------------------------
             dashcam_format=self.dashcam_format,
             epg=self._epg_summary(),
         )
