@@ -1,84 +1,87 @@
 # PRE-REGISTRATION: the queue-register fix (r2), committed BEFORE its cells
 
-D187 (2) and (3). Written and pushed before any `covex-v6-state-shares-r2` cell exists, so the pass
-check cannot be shaped by the result. Nothing here is edited after a cell runs; a correction is
-appended with its date and reason.
+D187 (2). Written and committed before any `covex-v6-state-shares-r2` cell is posted. Nothing here
+may be edited after a cell runs; a later correction is appended with its date and reason.
 
-## THE QUESTION THE PREVIOUS HANDOFF SAID MUST BE SETTLED FIRST, NOW SETTLED FROM THE FITTING SCRIPT
+## THE MECHANISM, established from the FIT'S OWN CODE, not from a judgement
 
-The release re-check is fed `queued_uncached_ahead=self._uncached_in_flight`
-(`coordinator.py:937` and `:1279`). That counter drains at COMPLETION, so it carries the DECODE
-TAIL of requests whose prefill has already finished. The handoff recorded, correctly, that this
-must NOT be swapped until the D162 fit's own regressor definition was established, because
-swapping lowers the predicted first token and therefore admits more work, which is the direction
-that flatters the arm under test.
+The release re-check predicts a first token with the committed D162 model and compares it against
+the remaining slack. It is fed the queue term as
+`queued_uncached_ahead=self._uncached_in_flight` (`coordinator.py:937` for alerts, `:1279` for
+recall and assistance).
 
-IT IS NOW ESTABLISHED, from the fitting script rather than inferred:
+`_uncached_in_flight` DRAINS AT COMPLETION: its decrement is in the settle path
+(`coordinator.py:1774-1775`), so a request stays counted through its whole decode.
 
-- `experiments/orchestration/live2/cost_model_gate_d162.py:60` `_queue_ahead(items, weight_key)`
-  returns, for each interval, "the summed WEIGHT of intervals open at its start instant".
-- Line 97 builds the first-token regressor from intervals
-  `(r["t_submit"], r["t_submit"] + r["first_token_s"], ...)`.
-- Lines 99 to 100 build a SEPARATE regressor, `queue_decode_ahead`, from
-  `(t_submit + first_token_s, t_submit + first_token_s + decode_s, ...)`.
-- Line 175 fits `first_token_s` on `[1, uncached_tokens, queue_uncached_ahead]`; line 177 fits
-  decode on `[1, queue_decode_ahead]`, a different coefficient.
+THE MODEL'S OWN REGRESSOR IS NOT THAT QUANTITY. `cost_model_gate_d162.py:97-98` builds it as
 
-SO THE FIT'S `queue_uncached_ahead` IS THE SUBMIT-TO-FIRST-TOKEN QUANTITY, and the decode-ahead work
-is a deliberately separate term that the first-token model never sees. Feeding
-`_uncached_in_flight`, which spans submit to COMPLETION, conflates the two regressors the fit went
-to the trouble of separating.
+    qu = _queue_ahead([(r["t_submit"], r["t_submit"] + r["first_token_s"],
+                        uncached_tokens, i) for r in base], "uncached")
 
-THIS IS AN IMPLEMENTATION BUG UNDER D187 (3), not a design change and not a recalibration: the
-model is being fed a quantity it was not fitted on. The coefficient stays exactly as committed.
-`share_admission.py`'s own docstring already said `_uncached_in_flight` is "the right queue input
-for the D174 budget charge and the wrong resource here" and that reasoning was applied to W and
-never to the re-check.
+and `_queue_ahead` (`:60-74`) sums the weight of intervals OPEN AT THE START INSTANT. So the fitted
+`queue_uncached_ahead` is the uncached tokens of requests that are BETWEEN SUBMIT AND FIRST TOKEN
+when this request is submitted. That is the D179 W quantity, which already exists in this
+coordinator as the `WTracker` (submit to first token, drained at `answer_on_first` and at settle).
+
+SO THE RE-CHECK FEEDS THE MODEL A LARGER QUANTITY THAN THE ONE IT WAS FITTED ON, which OVERESTIMATES
+the predicted first token and REFUSES WORK THAT WOULD HAVE FITTED. This is a wrong-register bug of
+exactly the kind this project has hit repeatedly, and the comment in `share_admission.py` already
+states the distinction in the opposite direction: `_uncached_in_flight` is "the right queue input for
+the D174 budget charge and the wrong resource for D179 admission".
+
+## WHY THIS IS THE BINDING CONSTRAINT NOW
+
+In the r1 residual diagnosis (`d187_r1_residual_diagnosis.json`), of the 34 remaining recall skips at
+seed 4 only NINE were refused by the size term; the other TWENTY-FIVE were refused by the QUEUE term
+with a predicted u that already fits the slack (seed 5: 7 size, 5 queue). No prefix fix can reach
+those. Three prefix candidates were disqualified or rejected on measurement, including one I
+proposed, which would have converted a skip into a late answer on the exact row it targeted.
 
 ## THE FIX
 
-Feed the re-check the D179 W tracker's total, which is by construction submitted-and-not-yet-at-
-first-token, the same interval the fit used. W tracking becomes UNCONDITIONAL so the quantity exists
-on any arm carrying the re-check, including the `-noadmit` ablation, where an empty W would read as
-a zero queue and under-predict: the unsafe direction.
+1. Track W unconditionally. `WTracker` updates are currently gated on `self._share_admission`, so an
+   arm with the re-check but no share admission would see W as 0, which UNDERSTATES the queue and is
+   the UNSAFE direction. Tracking is cheap and is read only where needed.
+2. Pass `self._w.total()` as `queued_uncached_ahead` at both re-check call sites. Total, not
+   per-type, because the fit sums over ALL open intervals regardless of type.
 
-## DIRECTION, STATED PLAINLY BECAUSE IT CUTS AGAINST ME
+Nothing else changes: no coefficient, no price, no floor, no W_max, no deadline, no target, no bar,
+no margin, no workload, no seed, no baseline. The D174 budget charge keeps `_uncached_in_flight`,
+which is the quantity it was ruled to use.
 
-W <= `_uncached_in_flight` always, so this LOWERS the predicted first token and admits MORE
-requests. It therefore moves the arm under test toward passing. The justification is NOT that it
-improves the result; it is that the fit's regressor is first-token-based and the code was feeding it
-the wrong interval. If the fitting script had shown a completion-based regressor, the correct action
-would have been to leave the code alone, and that is what the previous session would have done.
+## THE PASS CHECK, pre-registered, with its failure condition
 
-UNDERSTATING THE QUEUE IS THE UNSAFE DIRECTION: it admits work that cannot fit, which surfaces as
-LATENESS, not as skips. r1 s4 has only 2 late robot requests and s5 has 1, so there is no lateness
-budget. The pass check below therefore treats lateness as a FAILURE condition, not as a cost.
+PRIMARY, at seeds 4 and 6, the two that fail under r1:
+1. `release_infeasible_recall` falls from 34 (s4) and 21 (s6).
+2. `robot_pool_on_time` rises from 95 (s4, toward 118) and 92 (s6, toward 107).
+3. Check 2 retention rises from 0.7229 (s4) and 0.77 (s6) toward the 0.90 bar.
 
-## THE PASS CHECK, pre-registered with its failure conditions
+SEED 5 IS A CONTROL, NOT A TARGET: it already passes at 0.9773 and must NOT REGRESS below 0.90.
 
-PRIMARY, at seeds 4 to 7, against the committed r1 cells:
-1. `release_infeasible_recall` falls further at s4, from 34 toward at most 13 (the pre-registered
-   r1 bar, unchanged).
-2. `robot_pool_on_time` rises further at s4, from 95 toward 118.
-3. Check 2 retention reaches 0.90 at s4. s5 already passes at 0.9773 and MUST NOT REGRESS.
+THE FAILURE CONDITION: if the queue-refused skips do not fall, the named mechanism is wrong and is
+reported as wrong. The fix is not kept for being harmless.
 
-FAILURE CONDITIONS, any of which means the fix is reported as not working rather than kept:
-- LATENESS RISES MATERIALLY. Late robot requests above 5 at any seed (r1 has 2 and 1) means the
-  queue is now understated and the fix is harmful, whatever it does to the skip count.
-- s5 or any passing seed REGRESSES below its bar.
-- The skip count falls WITHOUT on-time rising to match, which is the same lateness signature by
-  another route.
-- Alert attainment or assistance falls below its own bar (checks 1 and 3 pass at both r1 seeds).
+THE UNSAFE DIRECTION, and the specific thing to watch: a SMALLER queue input means a SMALLER
+predicted first token, so the re-check will admit MORE. If the model is right, those admissions
+arrive on time. If it is optimistic, they arrive LATE. r1 has almost no lateness to spend: robot
+late is 2 at s4, 1 at s5, 5 at s6. So the pre-registered harm bound is: ROBOT LATE MUST NOT EXCEED
+10 AT ANY SEED. If it does, the fix is trading skips for misses and must be reported as such rather
+than as an improvement, since a skip and a late answer score identically (both miss the deadline)
+but a late answer also consumed engine time that another request could have used.
 
-POSITIVE CONTROL: on an arm with NO release re-check, the queue input is read by nothing, so
-`covex-v6-base` and `covex-v6-state-uo` must be byte-identical, audited against values committed
-BEFORE this change.
+POSITIVE CONTROL ON THE CHECK ITSELF: the alert path uses the same corrected quantity, so
+`release_infeasible_alert` should also fall. If NOTHING falls anywhere, the change did not reach a
+decision and the result is an ABSENT LINK, not a negative.
 
-NEGATIVE CONTROL: the `-noadmit` ablation, which carries the re-check without share admission, must
-now receive a NON-ZERO W. If it reads zero, W tracking did not become unconditional and the fix
-would be silently under-predicting on that arm.
+A CONTROL STATED ON A QUANTITY THE MECHANISM OWNS, learning from the r1 control that was
+unfalsifiable because it rested on a shared counter: the predicted first token for a given
+(uncached, queue) pair is unchanged, since no coefficient moves. Only the QUEUE INPUT changes.
 
-## WHAT IS NOT CHANGED
+## PROOFS BEFORE ANY CELL
 
-No coefficient, intercept, floor, W_max, target, deadline, metric, workload, seed, baseline, bar or
-margin. The oversize rule is untouched per D186. The cold-pricing fix of 79eedc6d stays as it is.
+- Byte-identity on `covex-v6-base` and `covex-v6-state-uo`, each audited against a value committed
+  BEFORE the change. `covex-v6-state-uo` matters most: it is check 2's comparator and has no
+  re-check, so making W tracking unconditional must not move it.
+- THE DRY TRAP, again: on a dry cell `on_first` never fires (no backend), so W drains only at settle
+  and the two quantities nearly coincide. A dry cell therefore proves this change HARMLESS and
+  proves almost NOTHING about its size. The firing proof is live.
