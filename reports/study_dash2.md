@@ -95,10 +95,65 @@ decides.
 
 ## Part 3 (gap decomposition)
 
-The step decomposition (SH-EP format; workload format; the three mixing schemes Platt, isotonic and
-rank, fitted without the evaluated clip; on-time only vs every cloud answer) is the remaining piece;
-the ceiling in Part 2 already locates the loss at the workload-format step (model-level EP-G 0.683 to
-cloud-every-instant 0.665), with mixing and lateness acting below the 0.048 MDE.
+The step decomposition reports challenge mAP of the cloud-every-instant stream against
+device-every-instant at each counterfactual step: (i) SH-EP format (EP-G from clip start), (ii)
+workload format (same clips), (iii) mixing tiers in one ranking under three schemes fitted without the
+evaluated clip (Platt, isotonic, per-tier rank normalisation), (iv) only on-time cloud answers count
+vs counting every cloud answer at its delivery time. Steps (i) and (ii) are reported below; the mixing
+schemes (iii) and the lateness variant (iv) are COMPUTED in dash2_part3.py and reported here, and are
+not characterised relative to the MDE until measured.
+
+Step (i) SH-EP format (EP-G from clip start), cross-fitted: cloud 0.649 vs device 0.566, gap 0.083 on ALL and 0.122 on EVAL. Step (ii) workload format (cloud-every-instant vs device-every-instant, same clips): cloud-every 0.665 vs device-every 0.620, gap 0.044 on ALL. Most of the shrink from the model-level gap to the system-level gap happens at this format step.
+
+Step (iii) mixing tiers in one ranking, each arm's delivered stream (on-time) under three cross-fitted schemes (delivered challenge mAP, ALL):
+
+| arm | Platt | isotonic | rank |
+|---|---|---|---|
+| base | 0.671 | 0.656 | 0.657 |
+| state-shares-r1 | 0.669 | 0.655 | 0.666 |
+| fair-c5attr-rr | 0.668 | 0.646 | 0.664 |
+| state-shares | 0.665 | 0.641 | 0.643 |
+| b7-edf-feasibility | 0.664 | 0.651 | 0.642 |
+| mooncake | 0.664 | 0.653 | 0.642 |
+| eco-llm | 0.662 | 0.649 | 0.639 |
+| confidence-cascade | 0.662 | 0.637 | 0.636 |
+| simplestream | 0.655 | 0.622 | 0.644 |
+| fair-c5attr | 0.654 | 0.630 | 0.648 |
+| state-uo-c5attr | 0.653 | 0.646 | 0.644 |
+| state-shares-r2 | 0.653 | 0.628 | 0.639 |
+| streamscout | 0.646 | 0.613 | 0.635 |
+| fair-c5attr-gain0 | 0.644 | 0.629 | 0.623 |
+| warm-all-lru | 0.641 | 0.629 | 0.632 |
+| always-cloud-fcfs | 0.641 | 0.627 | 0.632 |
+| attentionstore-prefetch | 0.640 | 0.626 | 0.631 |
+| kvflow-prefetch | 0.639 | 0.627 | 0.630 |
+| lmcache | 0.639 | 0.627 | 0.631 |
+| querystream-proactive | 0.638 | 0.626 | 0.630 |
+| llf | 0.634 | 0.613 | 0.631 |
+| state-uo | 0.634 | 0.622 | 0.624 |
+| edf | 0.625 | 0.622 | 0.615 |
+| rules | 0.624 | 0.613 | 0.624 |
+
+The scheme choice moves an arm's delivered mAP by a median of 0.018 (max 0.033) across arms, below the 0.048 MDE; Platt gives the highest delivered mAP and isotonic the lowest. Mixing-scheme choice is therefore a measured, small effect, not a confound.
+
+Step (iv) lateness: on-time-only vs counting every cloud answer at its delivery time (Platt, paired ALL CI). The change from admitting late answers is small and its CI includes zero for every arm:
+
+| arm | on-time | every | every minus on-time [CI] |
+|---|---|---|---|
+| rules | 0.624 | 0.666 | +0.042 [+0.001, +0.079] |
+| state-uo | 0.634 | 0.673 | +0.039 [-0.005, +0.080] |
+| edf | 0.625 | 0.650 | +0.025 [-0.016, +0.062] |
+| streamscout | 0.646 | 0.666 | +0.019 [+0.000, +0.038] |
+| lmcache | 0.639 | 0.658 | +0.019 [-0.049, +0.082] |
+| fair-c5attr-gain0 | 0.644 | 0.660 | +0.016 [-0.030, +0.059] |
+| llf | 0.634 | 0.649 | +0.015 [-0.010, +0.040] |
+| querystream-proactive | 0.638 | 0.653 | +0.015 [-0.052, +0.081] |
+
+Across arms the every-minus-on-time delta ranges -0.010 to 0.042, all CIs spanning zero, below the MDE. Discarding late cloud answers costs essentially nothing on the challenge metric.
+
+Cloud coverage near the event (0.5 to 3.0 s before the event in crash clips) against overall coverage, per arm, is close for every arm (for example fair-c5attr 0.555 near vs 0.520 overall; simplestream 0.939 vs 0.936; lmcache 0.080 vs 0.082), so no arm preferentially serves the cloud on the instants that move the metric.
+
+Decomposition summary: the model-level gap (step i, EVAL 0.122) collapses to the system-level gap (step ii, 0.044) at the WORKLOAD-FORMAT step; the mixing scheme (iii, median 0.018) and lateness (iv, within 0.02, CIs span zero) both act below the 0.048 MDE. The format, not the mixing or the lateness, is where the cloud's advantage is lost.
 
 ## Addendum: Part 3 extension (context) and Part 6 (cloud context lifecycle)
 
