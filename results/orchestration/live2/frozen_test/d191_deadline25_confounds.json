@@ -1,0 +1,65 @@
+{
+ "_what": "TWO CONFOUNDS IN THE D191 (3) RECALL-DEADLINE-2.5 s CONDITION, found while the cells were still running and recorded before any of them is written up. Both change what a 2.5 s against 3 s comparison means.",
+ "CONFOUND_1_SATURATION_CROSSING": {
+  "severity": "the larger of the two, and it can flip arm ordering",
+  "finding": "the 2.5 s condition can turn a SATURATED baseline into an UNSATURATED one, so arm ordering at 2.5 s against 3 s may flip FOR REASONS UNRELATED TO DEADLINE-HANDLING SKILL",
+  "measured_on": "mooncake s4, H100 measurement",
+  "evidence": {
+   "requests_sent_3s": {
+    "robot": 46,
+    "dashcam": 8253,
+    "assistance": 250,
+    "load_tok_s": 5663
+   },
+   "requests_sent_2p5s": {
+    "robot": 30,
+    "dashcam": 11743,
+    "assistance": 356,
+    "load_tok_s": 4513
+   },
+   "robot_requests_dropped": 16,
+   "note": "at 2.5 s mooncake sends 16 FEWER robot requests, which are the long-history prefills, so the load falls about 20 percent and crosses BELOW the saturation cliff",
+   "outcome_3s": {
+    "by_deadline": 0.371,
+    "robot_on_time": 5,
+    "ss": 32,
+    "dashcam": 0.069,
+    "label": "SATURATED"
+   },
+   "outcome_2p5s": {
+    "by_deadline": 0.379,
+    "robot_on_time": 7,
+    "ss": 304,
+    "dashcam": 0.772
+   }
+  },
+  "mechanism_UNVERIFIED": "the tighter robot deadline makes some robot requests fail the arm's own feasibility or deadline check so they are never sent, and on this workload a handful of robot prefills is what holds a baseline over the cliff. WHICH CHECK drops the 16 has NOT been traced; this is the H100's reading and is labelled unverified.",
+  "why_it_is_a_policy_response_not_a_scoring_artefact": "different requests are SENT, measured in the request mix, so the dashcam and SS change is the arm behaving differently rather than the same outcomes being re-scored"
+ },
+ "CONFOUND_2_DEVICE_LATENCY_RECUT": {
+  "severity": "smaller, and confined to the robot headline",
+  "finding": "part of the by_deadline change is the DEVICE LATENCY DISTRIBUTION being re-cut by the threshold, with no policy response at all: a device answer arriving in [2.5, 3.0) counted at 3 s and does not at 2.5 s",
+  "evidence_llf_s4": {
+   "robot_cloud_on_time": "UNCHANGED at 7 across both deadlines",
+   "by_deadline_3s": 0.394,
+   "by_deadline_2p5s": 0.364,
+   "reading": "the policy served the same robot questions, so what changed is WHICH ANSWERS STAND"
+  },
+  "separable_without_a_rerun": "the Orin WARM table gives per-question device latency, so the count of device answers falling in [2.5, 3.0) is computable per cell; subtracting it isolates whatever the arm did differently"
+ },
+ "THE_LAXITY_READING_IS_FALSIFIED": {
+  "hypothesis": "llf's laxity ordering reacts to tighter robot slack in a way that frees capacity for monitors and single-shot",
+  "test_designed_before_the_data": "only llf orders by laxity; mooncake, simplestream and eco-llm have no laxity term, so if the dashcam rise appears there too the laxity reading is not the explanation",
+  "result": "FALSIFIED. mooncake has NO laxity term and shows a FAR LARGER dashcam rise than llf, 0.069 to 0.772 against llf's 0.568 to 0.689. The simpler saturation-crossing story fits both.",
+  "register": "a falsified mechanism hypothesis, tested on a pre-declared discriminating case"
+ },
+ "WHAT_THIS_MEANS_FOR_THE_WRITE_UP": "A 2.5 s against 3 s comparison is NOT a clean test of which arm handles tighter deadlines better. For any arm whose 3 s cell was saturated, the 2.5 s cell may be measuring an unsaturated regime instead, and the two are not comparable on skill. Report each arm's saturation state at BOTH deadlines beside the comparison, and do not rank arms across the two conditions without it.",
+ "_provenance": {
+  "git_commit": "37f9d95d2afb239c30af15dbd0559dfc966feec3",
+  "script": "none, a record of the H100's measurements",
+  "device": "H100 live cells",
+  "n": 2,
+  "register": "the request-mix and outcome figures are OBSERVED by the H100 on its cells and are RELAYED here, not independently verified on flash; the mechanism for the 16 dropped robot requests is UNVERIFIED by either session",
+  "timestamp": "2026-11-23T11:59:33.966357"
+ }
+}
