@@ -39,5 +39,5 @@ base and rules each cover two raw arm names at different memory: base = hybrid-F
 - runs dir last commit: aaa55838
 - scorer score.py last commit: 9803dca0
 - d179_rung2_verdict.py last commit: 302ac817
-- built (UTC): 2026-11-23T17:33:13.287583+00:00
+- built (UTC): 2026-11-23T17:38:01.671300+00:00
 - source data: results/orchestration/live2/frozen_test/runs/<cell>/cell.json and outcomes.jsonl.gz; scorers experiments/orchestration/live2/scorer/score.py and experiments/orchestration/live2/d179_rung2_verdict.py

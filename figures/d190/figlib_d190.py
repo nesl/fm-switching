@@ -11,6 +11,11 @@ from __future__ import annotations
 import csv
 import os
 
+# Deterministic output: fix the PDF CreationDate (matplotlib reads SOURCE_DATE_EPOCH) so a
+# regenerate with unchanged data produces byte-identical files and the D190 poll does not create
+# no-op commits. The value is an arbitrary fixed epoch, not a real build time.
+os.environ.setdefault("SOURCE_DATE_EPOCH", "1700000000")
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -52,10 +57,15 @@ C5_FAMILY = {"state-uo-c5attr", "fair-c5attr", "fair-c5attr-gain0"}
 
 
 def style(fam, i_baseline=0):
+    """Stable style per family. Baselines get a marker and order fixed by their position in the
+    BASELINES list, so the result does not depend on plotting order or on hash randomisation.
+    The i_baseline argument is kept for call-site compatibility and ignored.
+    """
     if fam in ARMS:
         return dict(ARMS[fam])
-    mk = BASELINE_MARKERS[i_baseline % len(BASELINE_MARKERS)]
-    return dict(color=C["grey"], marker=mk, ls=":", label=fam, cls="baseline", order=100 + i_baseline)
+    idx = BASELINES.index(fam) if fam in BASELINES else len(BASELINES)
+    mk = BASELINE_MARKERS[idx % len(BASELINE_MARKERS)]
+    return dict(color=C["grey"], marker=mk, ls=":", label=fam, cls="baseline", order=100 + idx)
 
 
 def rcparams():
@@ -114,7 +124,7 @@ def save(fig, figid):
     rcparams  # noqa  (ensure referenced)
     png = os.path.join(FIGDIR, figid + ".png")
     pdf = os.path.join(FIGDIR, figid + ".pdf")
-    fig.savefig(png)
-    fig.savefig(pdf)
+    fig.savefig(png, metadata={"Software": None})
+    fig.savefig(pdf, metadata={"Creator": None, "Producer": None})
     plt.close(fig)
     return png, pdf
