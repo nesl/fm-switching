@@ -20,7 +20,8 @@ Identity proof: `experiments/orchestration/live2/v6_alias_proof.py` ->
 | 0 | `covex-v6-base` | the `hybrid-F-lhreq-noc3` rules | `hybrid-F-lhreq-noc3` | **6** | READY |
 | 1 | `covex-v6-rules` | chunked just-in-time warming + saturation guard | `v5-rules-2` | **4** | READY |
 | 2 | `covex-v6-state` | per-type host retention (`max_offload_tokens = 0` for alert and single-shot), TOUCH chosen by `plan_state`, residency belief corrected from engine telemetry including host hits, state-based pricing | none yet | 0 | **NOT BUILT** |
-| 3 | `covex-v6-fair` | deficit feed (`observe()` called by the coordinator) + value reader on | none yet | 0 | **NOT BUILT** |
+| 3 | `covex-v6-fair` | deficit feed + value reader on | none yet | 0 | **SUPERSEDED NAME, DO NOT USE FOR NEW CELLS.** Its description is stale on two counts: D177 (2) REMOVED the value reader, and `arms_v6fair.py:129` classifies by request KIND, which merges ASSISTANCE INTO RECALL (`asst00x` completions arrive as kind `recall` with deadline 2.0). The file is left untouched so the old name keeps its old meaning for provenance |
+| 3 | `covex-v6-fair-shares`, `covex-v6-fair-c5attr` (each with `-off` and `-gain0`) | PER-DEVICE deficit feed only; no value reader (D177 (2)); classification by DEVICE PREFIX; cloud on-time answers only; `w_d = 1 + 2.0 x (shortfall_d / target_d)` floored at 1, range [1, 3] (D182, user addendum 12 item 2; the raw unnormalised form is NOT RUN) | none yet | 0 | **BUILT, DEFAULT OFF, NOT YET EVIDENCE.** The base is a parameter, so the same arm runs on either rung-2 outcome; the choice is made by picking the NAME when a cell is posted, with no code edit after the D184 verdict. Consumers: ORDERING by `w_d` descending then deadline (primary), and the flexible-pool split. A rung-3 cell may not be read as evidence about the weighting until the addendum 12 item 5 pass condition is met |
 | 4 | `covex-v6` | the counterfactual: request, state and sync decisions, compound candidates, the episode-rule switch | `v5-full` | **0** | runnable, no cells |
 
 ---
@@ -76,7 +77,7 @@ skips the item.
 | rung | missing |
 |---|---|
 | `covex-v6-state` | `plan_state` has no caller outside the proofs; residency belief is not corrected from telemetry (`telemetry_cached_tokens` NULL); no arm class exists |
-| `covex-v6-fair` | `DeficitCounters.observe()` has no caller, so every weight is 1.0; the value reader is off; the D165 lexicographic objective is not built; no arm class exists |
+| `covex-v6-fair` | `DeficitCounters.observe()` has no caller, so every weight is 1.0; the value reader is off; the D165 lexicographic objective is not built; no arm class exists. The rung-3 work now lives under `covex-v6-fair-shares` / `-c5attr`; `cf_objective.DeficitCounters` still carries one 0.90 target per kind with no per-episode reset and `DEFICIT_GAIN = 1.0`, and is NOT the D178 feed |
 
 ---
 
