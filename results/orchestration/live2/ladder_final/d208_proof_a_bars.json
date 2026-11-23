@@ -81,5 +81,16 @@
    "digest": "9a4be873eb3c5fba",
    "rows": 14218
   }
+ },
+ "_CORRECTION_2026_11_23_the_field_above_IS_WRONG_and_is_kept_beside_this_note_rather_than_deleted": {
+  "what_it_claimed": "that the committed d179 run which produced these bars itself recorded loadavg_end up to about 20, offered as evidence that today's load of about 19.9 is within precedent.",
+  "why_it_is_wrong": "the committed record does not contain it. frozen_test/d179_offswitch_digest_proofs.json carries only a BOOLEAN with no magnitude (arms[2] and arms[16] after_self_reproduces_under_load = True); d179_rung2_verdict.json has no load field at all; the documented load range for these proofs is in d184_r3_c5attr_proofs.json and tops out at 9.00; and the string 20.13 appears nowhere under results/orchestration/. It was relayed without verification and a peer's challenge caught it.",
+  "which_way_the_correction_runs": "AGAINST the original argument, which is why it is recorded rather than quietly dropped: the highest load any committed artefact records is 9.00, so today's about 19.9 is roughly TWICE it and there is NO precedent covering today's regime.",
+  "what_still_supports_the_comparison": [
+   "THE MECHANISM, which does not weaken at higher load: the planner wall-clock cutoff is patched off on these cells (--cutoff-off), so the time-dependent quantity load could perturb is not in play.",
+   "TODAY'S OWN EVIDENCE, now the only empirical support and better than a precedent because it is from the regime actually in use: covex-v6-base af8befb9420ad86a / 12,085 and covex-v6-rules 18067c4c66bb44b8 / 11,955 matched their independently committed bars BIT-EXACTLY at loadavg about 19.9."
+  ],
+  "the_boundary_as_it_should_be_stated": "for --cutoff-off DIGEST cells load is not a comparability threat; for anything TIMING-dependent it is. Carried by the mechanism plus today's bit-exact matches, NOT by precedent.",
+  "procedural_lesson": "the existing record is a FLAG WITH NO NUMBER, which is exactly why the claim could not be checked. Record loadavg per cell as a MAGNITUDE from here on; it costs nothing and one grep would have caught this."
  }
 }
