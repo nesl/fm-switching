@@ -1,3 +1,44 @@
+## 2026-11-22 (main flash session): shares seed 4 scored, check 2 fails, and three of my own readings corrected
+
+**Last updated: 2026-11-22.** StudyD179-SHARES seed 4, under D179 to D182 and the user addenda 1
+to 12. NOT A VERDICT: seeds 5, 6 and 7 are still running and the verdict is the user's.
+
+**SEED 4, on the pre-registered scorer** (written and pushed before any shares cell existed,
+positive control exact on 48 of 48 counts, and shown to discriminate at both degenerate endpoints):
+check 1 PASSES, alert attainment 0.6473 against base 0.4425; check 3 PASSES at 0.9492 per-device
+min; CHECK 2 FAILS at 0.3012 against a 0.90 bar.
+
+**What the result actually says.** The committed rung 2 bought its robot gain by making alerts far
+worse than base: `dashcam_all_meet` is true for base at every seed and false for rung 2 at every
+seed. Shares restores alerts to better than base and hands back most of the robot gain. So D179
+fixed what it was built to fix, at a price the pre-registered bar rejects. A shares-against-rung-2
+comparison alone over-credits the mechanism, which is why the base figure sits beside it everywhere.
+
+**The check-2 failure is a property of the design, not a bug.** Two of the three types are
+routinely OVERSIZE against their own share (assistance 1,372 against 843.7; recall 7,717 against
+1,256.7; only alert fits, 374 against 2,223), and D179 (3) admits an oversize request only when
+nothing else of its type is in flight. So recall and assistance are SERIALISED, one at a time:
+`oversize_wait_for_own_type` fired 430 times, on top of 70 release re-check declines against a
+132-question pool. W_max therefore does not bind those two types at all and the floors genuinely
+constrain only alert.
+
+**Three readings of mine were wrong and are corrected in place rather than quietly dropped.** The
+pre-registered W-overrun signature FIRED: `alert+assistance` reached 1,174 time samples with no
+recall present, because my dry claim that only recall is oversize was an artefact of smaller dry
+assistance bodies. "Alerts are never denied" was a dry reading; live they are denied 17.4 percent
+of gate calls. And I quoted `by_deadline` retention of 52 percent as a second reading of check 2,
+when `by_deadline` is an ACCURACY that falls back to the device answer and so re-admits the side
+D177 excludes; the two readings differ 0.3012 against 0.5267 and the wrong one flatters.
+
+**A field read and never written, in my own instrumentation.** `_log_decision` accepts `key` and
+never puts it in the `DecisionRecord`, so the hold rows resolved 0 of 1,266 in the scorer while
+every other number looked right. The instant travels in `opportunity_ids`.
+
+**Next.** Seeds 5 to 7, then the scorer over all four and the D184 verdict. Two items are for the
+user and not for a mid-grid fix: `pending_by_type` is declared in `allowed()` and never read, so
+D179 (3)'s "the flexible pool goes to types WITH PENDING WORK" is unimplemented and every share is
+tighter than specified; and the oversize serialisation above is the lever that would change check 2.
+
 ## 2026-11-22 (main flash session): rung 2 shares cells gated and running; rung 3's deficit feed found absent twice over
 
 **Last updated: 2026-11-22.** StudyD179-SHARES, StudyFAIR-FEED and StudyPORT-EXCL, under D179 to

@@ -1,0 +1,78 @@
+{
+ "_what": "Why W exceeded W_max with NO RECALL present in the live covex-v6-state-shares s4 cell, which the dry proof said could not happen. The signature check that caught it was pre-registered in the cell-list header and in d179_dry_s4_report.json, and it fired on the first live cell.",
+ "THE_DRY_CLAIM_THAT_WAS_WRONG": {
+  "claimed": "recall is present in ALL 18,476 dry overruns with no exception, on the stated grounds that only the oversize exemption can push W past W_max and only recall is oversize",
+  "live_result": {
+   "recall_alone": 6323,
+   "alert+recall": 3351,
+   "alert+assistance+recall": 1139,
+   "assistance+recall": 982,
+   "alert+assistance_NO_RECALL": 1174
+  },
+  "verdict": "the HALF about the oversize exemption is correct; the half about ONLY RECALL being oversize is WRONG, and it was an artefact of the dry harness's smaller assistance bodies"
+ },
+ "THE_ARITHMETIC_FROM_THE_FROZEN_CONSTANTS": {
+  "note": "own_share is floor plus an equal cut of the flexible pool, 1,802.6 / 3 = 600.9 at covex-v6-state. Medians are share_capacity.FACTORS, measured on the committed base cells, not assumed.",
+  "per_type": [
+   {
+    "type": "alert",
+    "median_uncached": 374.0,
+    "floor": 1622.1,
+    "own_share": 2223.0,
+    "oversize": false,
+    "reaches_W_max_without_headroom": "via the FLOOR guarantee only"
+   },
+   {
+    "type": "assistance",
+    "median_uncached": 1372.0,
+    "floor": 242.8,
+    "own_share": 843.7,
+    "oversize": true,
+    "reaches_W_max_without_headroom": "YES, every typical request takes oversize_alone"
+   },
+   {
+    "type": "recall",
+    "median_uncached": 7717.0,
+    "floor": 655.8,
+    "own_share": 1256.7,
+    "oversize": true,
+    "reaches_W_max_without_headroom": "YES"
+   }
+  ],
+  "conclusion": "TWO of the three types are routinely OVERSIZE, not one. Both the floor path and the oversize path skip the headroom test by design (floors are admission guarantees, D179 (3)'s oversize rule is an explicit exemption), so an oversize ASSISTANCE request plus alerts inside their floor can exceed W_max with no recall anywhere. That is exactly the 1,174 samples."
+ },
+ "THE_LARGER_CONSEQUENCE_FOR_READING_ANY_SHARES_RESULT": "The oversize exemption is the NORMAL path for recall and assistance, not an exception, so W_max does not bind those two types at all and the floors genuinely constrain only ALERT. It also means recall and assistance are SERIALISED per type, because an oversize request is admitted only when nothing else of its type is in flight: oversize_wait_for_own_type fired 430 times in this cell. That serialisation, together with the 70 release re-check declines, is the mechanism behind check 2's failure, and it is a property of the DESIGN rather than a bug in the implementation.",
+ "A_SECOND_DRY_TO_LIVE_GENERALISATION_THAT_WAS_WRONG": {
+  "claimed_from_dry": "alerts are NEVER denied, 0 of 10,064",
+  "live": {
+   "share_deny_alert": 1907,
+   "of_gate_calls": 10959,
+   "fraction": 0.174,
+   "reasons": {
+    "floor_denied": 1504,
+    "w_max": 262,
+    "floor_denied_background": 3
+   }
+  },
+  "reconciliation": "denial reasons 1504 + 430 + 262 + 3 = 2199 = per-type denies 1907 + 278 + 14, so the accounting is exact; what was wrong was generalising a dry cell's concurrency to live"
+ },
+ "REGISTER_CORRECTION_ON_MY_OWN_READING": {
+  "what_I_quoted": "'on by_deadline retention is 52 percent', offered as a second reading of pre-registered check 2",
+  "why_it_is_the_wrong_quantity": "`by_deadline` is robot_headline.correct_answers_delivered_by_deadline, an ACCURACY: an on-time WRONG answer scores zero and a correct LATE answer scores zero, so it is not a deadline-attainment rate. Its committed definition also falls back to the DEVICE's answer when the device also arrived in time, which re-admits exactly the device side D177 excludes. Check 2 is specified on robot ON-TIME.",
+  "size_of_the_difference": {
+   "on_time_the_check": 0.3012,
+   "accuracy_beside": 0.5267,
+   "why_it_matters": "the accuracy reading compresses the numerator 2.5x and the denominator 4.4x and runs in the FLATTERING direction; both fail the 0.90 bar so the s4 verdict is unchanged, but a seed straddling the bar would read differently and the two must never be quoted interchangeably"
+  },
+  "found_by": "the pre-registered scorer, checking my reading rather than reconciling to it"
+ },
+ "_provenance": {
+  "git_commit": "the code under test is 19d8b416 onward; this artefact is analysis of a committed cell and runs no code of its own",
+  "cell": "covex-v6-state-shares_n16_s4_1200s_h27_3t_L3_epg_rq30",
+  "script": "analysis of committed counters plus share_capacity.FACTORS",
+  "model": null,
+  "device": "flash_cpu",
+  "n": 16,
+  "timestamp": "2026-11-22T16:48:52.325288"
+ }
+}
