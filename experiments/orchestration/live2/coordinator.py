@@ -1472,8 +1472,22 @@ class Live2Coordinator:
         """
         if not self._share_admission or qtype is None:
             return True
+        # D182/addendum 12 item 3(b): the FLEXIBLE SPLIT consumer. This argument was the absent
+        # link: share_admission.py:162-168 has always READ weights_by_type, and this call site did
+        # not PASS it, so the deficit feed was computed, exposed and never consumed. A quantity
+        # written and never read is Step 2's stopping condition, and I had told the session
+        # building the feed that the consumer was already wired. It was not.
+        #
+        # Additive by construction: the accessor returns None when the arm has no deficit feed or
+        # its switch is off, and SA.allowed treats a falsy value as the equal split, so every
+        # other arm's decisions are unchanged. Proved on a digest, not asserted.
+        _wbt = None
+        _wfn = getattr(self.arm, "live2_share_weights", None)
+        if callable(_wfn):
+            _wbt = _wfn()
         ok, why = SA.allowed(qtype=qtype, uncached=int(uncached), kind=str(kind),
-                             tracker=self._w, feasible=feasible, enabled=True)
+                             tracker=self._w, feasible=feasible, enabled=True,
+                             weights_by_type=_wbt)
         self.counts["share_" + ("admit" if ok else "deny") + "_" + qtype] += 1
         self.counts["share_reason_" + why] += 1
         if not ok:
@@ -1707,7 +1721,18 @@ class Live2Coordinator:
                                     else bool(_t_opp + _devw <= _dl + 1e-9)),
                     # C5 attribution support, monitors only; False and 0 on every other kind
                     self_released_prefill_overlap=bool(_ovl),
-                    self_released_prefill_uncached=int(_ovl_unc)))
+                    self_released_prefill_uncached=int(_ovl_unc),
+                    # D182/addendum 12 item 1 and 3: the PER-DEVICE alert deficit is per EPISODE,
+                    # and the arm cannot key an episode without being told which one. Both fields
+                    # already exist on the opportunity and are already written to the request log;
+                    # they were simply never passed to the arm, which forced a derivation from the
+                    # EP-G token law. That derivation is exact on committed data but blind to an
+                    # episode with no served instant (4 of 714), and it understates the alert
+                    # deficit, which is the wrong direction for the type the rung exists to help.
+                    # Additive: every committed arm reads named keys and none reads these.
+                    episode_id=getattr(_o, "episode_id", None) if _o is not None else None,
+                    episode_index=(getattr(_o, "episode_index", None)
+                                   if _o is not None else None)))
             # D179: UNCONDITIONAL, paired with the write above, so the field means the same thing
             # on every arm. See the note at the write site.
             _u = self._uncached_pending.pop(sub.request_id, 0)

@@ -337,6 +337,21 @@ class HybridArm:
         return d
 
     # ---- the decision ------------------------------------------------------------------------------------
+
+    # ---- D182 / addendum 12 item 3(a): the DEFICIT ORDERING hook. BEGIN contiguous block -------
+    # This file is the FROZEN base shared by every arm, including every baseline, so the ordering
+    # consumer is added as a HOOK WITH A NEUTRAL DEFAULT rather than as a new sort term. The
+    # default returns 0.0 for every item, and prepending a CONSTANT to a sort key cannot change
+    # the order of anything, so every existing arm's ordering is unchanged by construction and
+    # provable on a digest. Only the rung-3 arm overrides it.
+    #
+    # The warning at the top of this file applies directly: do not put a made-up number into the
+    # ordering index of a frozen policy. That is why this is a separate leading key rather than a
+    # factor folded into `idx`, which would have changed the frozen C1 index itself.
+    def _deficit_order_key(self, device_id, kind):
+        """Negative per-device deficit weight, so a LARGER w_d sorts FIRST. 0.0 when inactive."""
+        return 0.0
+    # ---- END D182 block ------------------------------------------------------------------------
     def decide(self, obs: Observation) -> Action:
         if not any(self.sw.values()):
             return self._b7.decide(obs)                        # THE BASE: b7 exactly
@@ -352,7 +367,11 @@ class HybridArm:
             recent = [t for t in s.delivered_times_s if t > now - 60.0]
             frac = len(recent) / max(60.0 / max(s.cadence_s, 1e-3), 1.0)
             risk = self.sw["c2"] and (frac < 0.25 + self.m_d)
+            # D182: `device_id` carried so the ordering hook can key PER DEVICE. Without it the
+            # hook receives None for every dashcam item and a per-device weight collapses to one
+            # value, which would have looked like an ordering that fired and did nothing.
             items.append(dict(kind="dash", id=s.stream_id, dl=dl, slack=slack, work=epi_s, risk=risk,
+                              device_id=getattr(s, "device_id", None),
                               value=(self.values or {}).get("dashcam", 0.09)))
         rec_dec: Dict[str, RecallAction] = {}
         pending_risk: List[Any] = []
@@ -360,7 +379,8 @@ class HybridArm:
         if c6_recall and self.c6_robot_only and not self.c6_mirror_all_periods:
             c6_recall = any(getattr(q, "category", None) not in self._ss_types for q in obs.recall)
         c6_live = self.sw["c6"] and self._scorer is not None and c6_recall and self._c6_prepare(obs)
-        for q in sorted(obs.recall, key=lambda x: x.deadline_s):
+        for q in sorted(obs.recall, key=lambda x: (
+                self._deficit_order_key(getattr(x, "device_id", None), "recall"), x.deadline_s)):
             est = float(C.recall_ttft_s(max(q.readiness_tokens, 1), q.readiness))
             qs = q.slack_s(now)
             slack = qs - est
@@ -435,6 +455,7 @@ class HybridArm:
                 pending_risk.append((q.query_id, float(q.deadline_s), d.decision == "CLOUD"))
             if d.decision == "CLOUD":
                 items.append(dict(kind="recall", id=q.query_id, dl=q.deadline_s, slack=slack, risk=risk,
+                                  device_id=getattr(q, "device_id", None),
                                   work=float(C.recall_gpu_s(max(q.readiness_tokens, 1), q.readiness)),
                                   value=(self._ss_values.get(q.category, 1e-3) if is_ss
                                          else (self.values or {}).get("recall", 0.1))))
@@ -442,9 +463,11 @@ class HybridArm:
         def idx(it):
             return it["value"] * (1.0 / max(it["slack"], 0.1)) / max(it["work"], 1e-3)
         if self.sw["c1"]:
-            items.sort(key=lambda it: (not it["risk"], -idx(it), it["dl"], it["id"]))
+            items.sort(key=lambda it: (self._deficit_order_key(it.get("device_id"), it["kind"]),
+                                       not it["risk"], -idx(it), it["dl"], it["id"]))
         else:
-            items.sort(key=lambda it: (not it["risk"], it["dl"], it["id"]))
+            items.sort(key=lambda it: (self._deficit_order_key(it.get("device_id"), it["kind"]),
+                                       not it["risk"], it["dl"], it["id"]))
         # cap (C5); without C5 the base has none, as b7
         if self.sw["c5"]:
             self._aimd(obs)

@@ -1,3 +1,44 @@
+## 2026-11-22 (main flash session): rung 2 shares cells gated and running; rung 3's deficit feed found absent twice over
+
+**Last updated: 2026-11-22.** StudyD179-SHARES, StudyFAIR-FEED and StudyPORT-EXCL, under D179 to
+D182 and the user addenda 1 to 12.
+
+**RUNG 2.** V6SHARES_CELLS is posted at `19d8b416` (sha256 `75909a17cdb886ea`) and gated
+independently by the H100: covex-v6-state-shares at 16 devices, seeds 4 to 7, running from about
+16:16. The gate passed on the release re-check's alert skip rate of 0.1781 against a 0.50 bar, down
+from 0.999836 before the `414d332a` register fix, on off-switch byte identity against pre-change
+committed values, on an ATTRIBUTABLE Step 2b, on the port rule (87 denials over 30 distinct
+instants, alerts never denied), and on W not leaking. The three pre-registered D179 (6) checks are
+in the cell-list header and will be reported per seed whatever the outcome. If any fails, rung 2
+adopts c5attr as a logged override of the D181 rule (addendum 9 item A) and no further C5 variants
+are built.
+
+**RUNG 3 IS NOT YET EVIDENCE, and the reason is worth reading before any fair cell is believed.**
+The deficit feed was built correct, non-constant and with a live read, and it moved ZERO decisions
+in both of two conditions. That is an absent link twice over: the coordinator never PASSED the
+weights to the allocator that has always read them (a write-only field, and the main session had
+told the building session the consumer was wired when it was not), and with the channel restored by
+a shim the weights STILL could not matter, because they scale only the flexible pool and no type's
+typical request falls in the band where that pool decides. 98.3 percent of share decisions took
+weight-blind branches. The user's remedy adds ORDERING as the primary consumer, with floors, W_max
+and the oversize rule untouched.
+
+**A PRE-REGISTRATION WAS CORRECTED BEFORE ANY CELL RAN, AND THE ERROR WAS THE MAIN SESSION'S.**
+Gain 2.0 was declared with the justification "a type at half its target counts double, range 1 to
+3". The raw form `w = 1 + gain x shortfall` does not do that: a shortfall cannot exceed its own
+target, so the range is 1 to 1 + gain x target, which is [1.0, 1.5] for alert and [1.0, 2.8] for
+recall and assistance. The error ran against the type with the largest deficit. The normalised form
+now stands, is what the justification always described, and the raw form is not run.
+
+**EXCLUSIONS.** cascade-routing and r3-streaming are out of the scored baselines under D130 for
+failing the port rule by construction, with their cells kept for provenance and the paper listing
+both with the reason. The anomaly that led there was a misread of the arm-independent device-only
+floor, caught by consistency check 7.
+
+**Next.** Rung 2's verdict at about 17:50 from the pre-registered scorer, which is being built
+BEFORE the cells land so the computation cannot be shaped by the result; rung 3's two consumers and
+its pre-registered pass condition; rung 4's protect-and-defer.
+
 ## 2026-11-22 (main flash session): D179 share-based admission under construction, and a register fault that fired a STOP
 
 **Last updated: 2026-11-22.** StudyD179-SHARES and the StudyC5-ATTR outcome, under D179 to D181
