@@ -109,3 +109,76 @@ telemetry fix, so an r1-against-shares comparison would have carried two changes
 The H100 caught it and also noted that my four test cases did not cover COLD with `built_tokens` > 0
 - the single case that distinguishes the two forms. The final form leaves COLD exactly as it was and
 changes only the warm branch, verified case by case.
+
+---
+
+## 2026-11-23 03:40Z FINDING, NO FURTHER CODE CHANGE: the residual r1 skips are mostly NOT a pricing problem, and the 6.4x was largely a measurement artefact
+
+r1 s5 PASSES ALL THREE D179 CHECKS (retention 0.9773 against a 0.90 bar, skips 48 to 12 against a
+bar of 13). r1 s4 does not (0.7229, skips 70 to 34). THE FIX IS SEED-DEPENDENT, NOT UNIFORMLY
+SHORT, which was invisible from s4 alone.
+
+BOTH HYPOTHESES WERE REFUTED BY MEASUREMENT, mine and the user's.
+- "telemetry never written": 0 of 34 at s4 and 0 of 12 at s5. The field was set at EVERY skip.
+- "belief COLD while the engine was warm": 0 of 34 and 0 of 12. Readiness is GPU-WARM at every one.
+- Warms and touches DO write the field (touch 5,668, build piece 234, recall 73 on the skipped
+  sessions), and the belief-apply-off restore at coordinator.py:1708 restores only `belief` and
+  `last_touch_s`, so it is never clobbered.
+
+THE REAL DEFECT IS CENSORING, NOT STALENESS. `cached_tokens` is min(resident prefix, that request's
+own prompt). A touch sends only the confirmed frames (coordinator.py:1118-1127) and a build piece
+sends the built prefix plus one slice (1197-1204), so NEITHER CAN EVER REPORT A PREFIX LARGER THAN
+THE BUILT ONE. Only a recall presents the whole history. The last write before a skip was a build
+piece at 24 of 34. So the field is not lagging behind reality; it is structurally incapable of
+reporting it.
+
+TWO FINDINGS THAT REFRAME THE PROBLEM, and both reduce the value of any further pricing work.
+
+(1) ONLY 9 OF THE 34 SKIPS AT s4 WERE REFUSED BY THE SIZE TERM AT ALL. The other 25 were refused by
+the QUEUE term with a predicted u that already fits the slack (s5: 7 size, 5 queue). So pricing is a
+MINORITY of the residual and a perfect prefix fix cannot reach the bar.
+
+(2) THE 6.4x RESIDUAL MISPRICING IS LARGELY A FEEDBACK ARTEFACT, measured by stratification rather
+than argued. Because only a recall plants the whole history, uo's engine prefix on these sessions
+was planted by UO'S OWN EARLIER RECALLS, which are exactly the ones r1 skipped. Predicted-over-
+engine ratio by number of prior uo recalls on that session: 0 prior gives 1.04 to 1.13; 1 gives
+1.11; 2 gives 14.87; 3 or more gives 10.73. Fifteen of the 34 skips sit on sessions r1 had never
+released a recall on. THE CROSS-ARM ENGINE PROXY IS CONTAMINATED BY THE VERY DIFFERENCE BEING
+MEASURED, and any future "predicted against engine" ratio quoted across arms must be stratified this
+way or it is not evidence.
+
+THREE CANDIDATE FIXES, ALL DISQUALIFIED OR REJECTED ON MEASUREMENT, INCLUDING MINE:
+- "add tokens uploaded since last completion" (my suggestion): DISQUALIFIED by direction. It asserts
+  every uploaded token is resident. On robo001|s000 it would subtract 25,501 where uo's own first
+  recall at that instant reports the engine holding 6,928, giving a measured first token of 4.413 s
+  against 2.953 s of slack. It converts a skip into a LATE ANSWER on exactly the row it targets.
+- "coordinator's own sent-bytes record": DISQUALIFIED, same direction and worse; the pool turns over
+  about 89 times in 1,200 s and re-sent bytes double-count.
+- "running max of telemetry": REJECTED on a measured gain of 0 of 34, because max(built, telemetry)
+  already dominates every earlier value.
+
+A FOURTH CANDIDATE I FOUND AND AM NOT ACTING ON, for the user to rule on. The release re-check is
+fed `queued_uncached_ahead=self._uncached_in_flight` (coordinator.py:937 and 1279), and that counter
+DRAINS AT COMPLETION, so it includes decode time and overstates the work ahead of a request's FIRST
+TOKEN. The D179 W tracker is the first-token-drained quantity and already exists. Since 25 of the 34
+residual skips are queue-refused, this could matter more than any prefix fix. I DID NOT CHANGE IT:
+the D162 gate artefact does not record which counter its queue regressor was fitted against, and
+feeding the model a different quantity from the one it was fitted on could bias predictions LOW,
+which is the unsafe direction. Establishing the fit's definition, or ruling without it, is the
+user's call, not an overnight implementation fix.
+
+THE ASSISTANCE CONTROL: ITS INTENT HOLDS, ITS LETTER DOES NOT, AND THE CONTROL WAS BADLY WRITTEN.
+Assistance moved (skips 12 to 0 at s4, 12 to 3 at s5), so as literally pre-registered the control
+failed. But assistance's OWN predicted u is identical under the pre-fix and post-fix formulas on
+371 of 371 gate events at s4 and 382 of 382 at s5, tested WITHIN the r1 cell so no cross-cell proxy
+is needed: those sessions carry no build pieces and no whole-history request, so the prefix
+subtracted is 0 either way and the max() the fix added has nothing to choose between. The benign
+"w_max headroom freed" explanation that I offered is RULED OUT by measurement: share_deny_assistance
+went 14 to 15 at s4 and 18 to 31 at s5, so the gate got TIGHTER, not looser. The real coupling is
+indirect, through the shared `_uncached_in_flight` counter that recall releases feed.
+
+THE LESSON, which outlives this fix: A CONTROL THAT IS PERMITTED TO MOVE THROUGH A SHARED COUNTER IS
+NOT A CONTROL. "Assistance must not move" was unfalsifiable in the presence of a shared queue. It
+should have been written as "assistance's OWN PREDICTED u must not move", which is checkable and
+passes 371 of 371 and 382 of 382. Future pre-registrations should state controls on quantities the
+mechanism owns, not on outcomes it shares.
