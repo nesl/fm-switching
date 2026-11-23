@@ -793,6 +793,14 @@ ARMS.update(V6CF_ARMS)
 from arms_v6cfr3 import V6CFR3_ARMS                                     # noqa: E402
 ARMS.update(V6CFR3_ARMS)
 
+# D190 (5): rung 3 plus the ALERT release re-check (D179 (4)), one switch, no share admission and
+# no floors. It acts on the 84.1 percent of late alert instants that are dominant-blocked by OTHER
+# ALERT FRAMES, which rung 4's question-deferral leg does not reach. Registered HERE for the reason
+# every v6 family above is: `run_live2_real.py` imports `arms` and `hybrid` and nothing else, so a
+# name registered only in its own module does not exist in the harness's process.
+from arms_v6rr import V6RR_ARMS                                         # noqa: E402
+ARMS.update(V6RR_ARMS)
+
 
 def _register_v6_aliases() -> None:
     """Rungs 0, 1 and 4, which alias committed arms. Deferred into a function because the rung-0

@@ -152,6 +152,53 @@ def arm_enables(arm: Any) -> bool:
     return bool(own[SWITCH_ATTR])
 
 
+# ---------------------------------------------------------------------------
+# WHICH DEADLINE TYPES THIS ARM RE-CHECKS. D190 (5) addition, ADDITIVE AND DEFAULTING TO ALL THREE.
+#
+# WHY IT EXISTS. The re-check is one switch over three types, and the three types are not alike.
+# Measured on the committed rung-3 s4 cell (d190_rung4_margin_diagnosis.json): of 2,290 sent-and-late
+# alert instants, OTHER ALERT FRAMES are the dominant blocker for 84.1 percent and recall questions
+# for 6.9 percent. So the alert path is where the loss is. The recall path is the one that COST: the
+# r1 cells, which ran the re-check on all three types over the shares base, skipped 34 recall
+# questions at s4 and took robot on time to 95 against rung 3's 122. Running both paths at once
+# would change two things in one arm and the alert contribution could not be read out of the result.
+#
+# THE DEFAULT IS ALL THREE TYPES, so no arm that does not declare this attribute can move. That is
+# what makes this additive rather than a change to a committed component: `covex-v6-state-shares-r1`
+# and every other arm that enables the re-check keeps exactly the behaviour it was measured with,
+# and the proof of that is the off-switch and positive-control digests, not this comment.
+TYPES_ATTR = "live2_release_recheck_types"
+
+
+def types_for(arm: Any) -> Tuple[str, ...]:
+    """The deadline types this ARM INSTANCE re-checks. Default: all three.
+
+    Read from the instance only, like the switch itself and for the same reason. An unknown type
+    name RAISES rather than being ignored: a typo that silently re-checked nothing would read as
+    "the mechanism did not fire", which is the failure shape this project keeps paying for.
+    """
+    try:
+        own = vars(arm)
+    except TypeError:                                                       # pragma: no cover
+        own = {}
+    v = own.get(TYPES_ATTR)
+    if v is None:
+        return TYPES
+    got = tuple(str(x) for x in v)
+    bad = [x for x in got if x not in TYPES]
+    if bad:
+        raise ReleaseRecheckSwitchError(
+            "%s names %r, which is not one of the deadline types %r"
+            % (TYPES_ATTR, bad, list(TYPES)))
+    if not got:
+        raise ReleaseRecheckSwitchError(
+            "%s is empty on %r. An arm that re-checks nothing must leave the SWITCH off, so that "
+            "the off-switch identity proof is what demonstrates it, rather than an enabled "
+            "mechanism with no types that looks live and does nothing."
+            % (TYPES_ATTR, getattr(arm, "name", arm)))
+    return got
+
+
 def is_background(kind: str) -> bool:
     return str(kind) in BACKGROUND_KINDS
 

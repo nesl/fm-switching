@@ -318,6 +318,11 @@ class Live2Coordinator:
                     "`_uncached_in_flight` is decremented only under D162 pricing "
                     "(coordinator.py:1508), so on %r it is a cumulative run total and not the "
                     "queue ahead of this request" % (getattr(arm, "name", arm),))
+        # D190 (5): WHICH of the three deadline types this arm re-checks. Default all three, so no
+        # arm that does not declare the attribute can move; `covex-v6-fair-c5attr-rr` declares
+        # ("alert",) because the measured loss is alert-on-alert (84.1 percent of late alerts) and
+        # because the recall path is what took r1's robot on time from 122 to 95.
+        self._release_recheck_types = (RR.types_for(arm) if self._release_recheck else ())
         # one row per skipped request, for the report's traced unit; the COUNTERS are the frozen
         # names in `self.counts` and these rows never substitute for them.
         self.release_infeasible_events: List[Dict[str, Any]] = []
@@ -964,7 +969,7 @@ class Live2Coordinator:
         # behaves, and the outcome row below says `served_by="device"` with the device's own
         # delivery time, which `_device_answer` appended at ingest (this method is never reached
         # for an instant the device did not already answer locally).
-        if self._release_recheck:
+        if self._release_recheck and "alert" in self._release_recheck_types:
             _rr = RR.decide(qtype="alert", uncached=_uncached,
                             # D187 r2: W, NOT _uncached_in_flight. The D162 fit builds its queue regressor over the
                             # interval t_submit to t_submit + first_token_s (cost_model_gate_d162.py:97, summing
@@ -1313,6 +1318,11 @@ class Live2Coordinator:
             _qt = RR.type_of_request("recall", o.device_id)
             if _qt is None:
                 self.counts[RR.COUNTER_UNCLASSIFIED] += 1
+            elif _qt not in self._release_recheck_types:
+                # OUT OF THIS ARM'S SCOPE, counted so a reader can tell "not re-checked" from
+                # "re-checked and feasible". Those are different facts and only the counter
+                # separates them.
+                self.counts["release_recheck_out_of_scope_" + str(_qt)] += 1
             else:
                 _rr = RR.decide(qtype=_qt, uncached=_uncached,
                                 # D187 r2: W, NOT _uncached_in_flight. The D162 fit builds its queue regressor over the
