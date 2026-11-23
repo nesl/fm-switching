@@ -202,7 +202,18 @@ def p1_weighted_margin(res) -> Dict[str, Any]:
 
 def p2_harm_replacement(res) -> Dict[str, Any]:
     """D171 (2). How many dry-run decisions change when the harm term stops charging a displaced
-    request its FULL cloud accuracy, and in which direction."""
+    request its FULL cloud accuracy, and in which direction.
+
+    SUPERSEDED IN SUBSTANCE BY THE D177 (1) CURRENCY FLIP, and this proof now says so instead of
+    reporting a pass it cannot earn. In a currency of on-time CLOUD answers the harm row is
+    `w_o * (p_before - p_after)` and carries no accuracy factor at all, so the switch this proof
+    toggles selects between two arguments that no value reads and EVERY harm term is identical on
+    both sides. That is the ruled consequence (`cf_objective.harm_to_others` states it at the
+    point of use) and not a regression, but the OLD GATE HERE WAS `smaller >= larger`, which is
+    TRUE AT 0 AND 0: it printed "the term is live, every harm magnitude shrank" against a build
+    where nothing shrank. A gate that cannot fail on an inert mechanism is CLAUDE.md's impossible
+    success, so `inert` is now detected and reported as its own verdict.
+    """
     old = _run(res, weighted=True, replacement=False)
     new = _run(res, weighted=True, replacement=True)
     changed = [(a, b) for a, b in zip(old, new) if a["chosen"] != b["chosen"]
@@ -221,10 +232,16 @@ def p2_harm_replacement(res) -> Dict[str, Any]:
     larger = sum(1 for o, n in zip(harm_rows_old, harm_rows_new) if abs(n) > abs(o))
     dev_old = sum(1 for r in old if r["deviated"])
     dev_new = sum(1 for r in new if r["deviated"])
+    # 0 and 0 is the case the old gate could not see: no term shrank AND no term grew, because the
+    # factor the switch acts through is gone from the valuation (D177 (1)).
+    inert = (smaller == 0 and larger == 0 and len(nz_new) > 0)
     return {
         "_claim": ("harm_to_others prices each displaced device's own answer as its fallback "
-                   "(D165 (B) replacement semantics), instead of acc_dev = 0.0"),
-        "formula": "w_o * (p_before - p_after) * (acc_cloud_o - acc_dev_o * p_dev_on_time_o)",
+                   "(D165 (B) replacement semantics), instead of acc_dev = 0.0. SUPERSEDED IN "
+                   "SUBSTANCE by D177 (1): see `switch_is_inert` and the docstring"),
+        "formula": ("w_o * (p_before - p_after) under D177 (1); the accuracy factor "
+                    "`(acc_cloud_o - acc_dev_o * p_dev_on_time_o)` this switch acted through is "
+                    "no longer in any value"),
         "n_decisions": len(new),
         "n_candidate_harm_terms": len(harm_rows_new),
         "n_harm_terms_nonzero_before": len(nz_old),
@@ -242,19 +259,35 @@ def p2_harm_replacement(res) -> Dict[str, Any]:
                           "deviated_before": changed[0][0]["deviated"],
                           "deviated_after": changed[0][1]["deviated"]} if changed else None),
         "deviations_before": dev_old, "deviations_after": dev_new,
-        "direction": ("harm SHRINKS, so the counterfactual is LESS conservative than it was: the "
+        "switch_is_inert": bool(inert),
+        "direction": ("INERT: every harm term is identical on both sides of the switch, because "
+                      "under D177 (1) the harm is w_o * (p_before - p_after) and reads no "
+                      "accuracy at all, so the argument this switch selects does not enter a "
+                      "value. The D171 (2) ruling survives as the reason the harm is a "
+                      "probability difference; the arithmetic it added is subsumed"
+                      if inert else
+                      "harm SHRINKS, so the counterfactual is LESS conservative than it was: the "
                       "old term overstated the loss by ignoring the displaced device's own answer"
-                      if smaller >= larger else
+                      if smaller > larger else
                       "UNEXPECTED: harm grew; the device accuracy must exceed the cloud's"),
-        "rule2_class": (None if changed else
+        "rule2_class": ("UNEXPRESSIBLE under D177 (1): the switch fires and the currency discards "
+                        "the channel it acted through, so this comparison can no longer test the "
+                        "D171 (2) ruling at all. It is not a negative about that ruling"
+                        if inert else None if changed else
                         "UNEXERCISED: every harm term shrank but none shrank past a margin, so no "
                         "decision on this grid changes. The term is live and this grid does not "
                         "reach a case where it decides"),
-        "verdict": ("PASS: the term is live, every harm magnitude shrank, and the direction is "
-                    "the one replacement semantics predicts"
-                    if smaller >= larger and len(nz_new) > 0 else
-                    "FAIL: no harm term is non-zero, so the switch reaches no decision"
+        "verdict": ("FAIL: no harm term is non-zero, so the switch reaches no decision"
                     if not nz_new else
+                    "INERT (not a pass and not a failure of the ruling): the D177 (1) currency "
+                    "removed the accuracy factor this switch acts through, so both sides are "
+                    "byte-identical by construction. The old gate `smaller >= larger` would have "
+                    "called this a PASS at 0 and 0 and said every harm shrank; it is reported as "
+                    "inert instead"
+                    if inert else
+                    "PASS: the term is live, every harm magnitude shrank, and the direction is "
+                    "the one replacement semantics predicts"
+                    if smaller > larger else
                     "FAIL: harm grew in magnitude, which replacement semantics forbids"),
     }
 
@@ -481,6 +514,21 @@ def main() -> int:
     out["P5_delta_distribution"] = p5_delta_distribution(res)
     out["ALL_PASS"] = all(v["verdict"].startswith("PASS") for k, v in out.items()
                           if isinstance(v, dict) and "verdict" in v)
+    # ALL_PASS IS A CONJUNCTION OVER VERDICTS AND ONE OF THEM CAN NO LONGER BE "PASS". Since the
+    # D177 (1) currency flip, P2's switch acts through an accuracy factor that no value reads, so
+    # its verdict is INERT: the comparison cannot test the D171 (2) ruling any more. A False here
+    # is therefore a statement about what this proof can still measure and NOT a regression, and
+    # the per-proof verdicts rather than this flag are the result. The alternative - widening the
+    # conjunction to accept "INERT" - would hide exactly the thing a reader needs to see.
+    out["_all_pass_register"] = (
+        "P2's verdict is INERT under D177 (1) (the harm carries no accuracy factor, so both sides "
+        "of its switch are byte-identical by construction), which makes ALL_PASS False by RULING "
+        "and not by regression. Every other proof here passes. The committed "
+        "results/orchestration/live2/v5/d171_proofs.json is D171's own record under its own "
+        "label and is NOT regenerated: its P2 harm magnitudes are the pre-flip ones and are "
+        "superseded, which the D177 proof JSON states with both sets of numbers."
+        if not out.get("P2_harm_replacement", {}).get("verdict", "").startswith("PASS")
+        else "every proof passed")
     dest = REPO / "results/orchestration/live2/v5/d171_proofs.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(out, indent=1) + "\n")

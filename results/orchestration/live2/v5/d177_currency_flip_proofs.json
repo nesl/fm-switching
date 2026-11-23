@@ -1,0 +1,2313 @@
+{
+ "_what": "D177 (1) THE CURRENCY FLIP: every value the v5 counterfactual compares is a count of expected ON-TIME CLOUD ANSWERS. v5/cf_objective.py (option_value, device_only_value) and v5/cf_planner.py (plan_state's inline acc = 0.250, and the margin read through attainment_margin) converted in ONE commit, because a half-converted comparison subtracts on-time-unit harm from correctness-unit gain, which is the error D177 exists to prevent.",
+ "_rulings": {
+  "D177 (1)": "the policy's currency is ON-TIME CLOUD ANSWERS, with priority to devices behind their targets; correctness is the OUTCOME, measured offline",
+  "D177 (2)": "the value reader is removed and the quality table becomes REPORTING ONLY",
+  "D177 (3)": "MARGIN_CF restated in on-time units: 0.6582 = 0.16456 / 0.250",
+  "D185": "w_d = 1 + 2.0 * shortfall_d / target_d, floored at 1, PER DEVICE",
+  "D191 (1)": "ONE comparison decides, in counts of on-time cloud answers; deviate iff (weighted gain - weighted harm) > w_d * MARGIN_CF; no division by the number served",
+  "D171 (1)": "the margin is weighted by the deficit weight of the device the decision is about"
+ },
+ "_clean_checkout": {
+  "base_sha": "da4427de81ea7f30dd9fb7370ac2c32c04e2acf3",
+  "how": "git archive of the base sha extracted to a scratch tree; NOT the shared worktree /tmp/claude-1001/mapwt, which holds other sessions' uncommitted code including a SUPERSEDED draft of v5/cf_objective.py. The before side is that archive untouched and the after side is that archive plus this change, so nothing uncommitted is in either.",
+  "interpreter": "conda run -n fmtk python for every run without exception (user ruling): the env every committed digest in this project was measured under. The repo's .venv (python 3.10.19, no vllm) was NOT used for any cell, digest or proof.",
+  "commit_parent_sha": "bb3a65f1d4167d7aca30a4477f3dd39b1f7d331a",
+  "paths_that_moved_between_the_measurement_base_and_the_parent": {
+   "none_of_them_is_a_file_this_commit_stages": true,
+   "live2_and_INDEX_paths_that_moved": [
+    "experiments/orchestration/live2/arms.py",
+    "experiments/orchestration/live2/arms_v6rr.py",
+    "experiments/orchestration/live2/coordinator.py",
+    "experiments/orchestration/live2/d190_rung4_r3_proofs.py",
+    "experiments/orchestration/live2/release_recheck.py",
+    "experiments/orchestration/live2/rr_one_cell.py",
+    "results/INDEX.md"
+   ],
+   "why_the_A_B_CONCLUSION_IS_UNAFFECTED": "every digest here is a BEFORE against an AFTER on ONE tree, so both sides carry the same coordinator.py, the same arms.py and the same release_recheck.py. What those pushes can change is the ABSOLUTE digest of an arm at the new tip, which is the other session's pre-registered business and not a claim this commit makes. What they cannot change is the difference this commit measures. The files this commit STAGES are byte-identical between the two shas, which the build script verifies and refuses without.",
+   "results_INDEX_md": "rebuilt from the PARENT's version, not the base's, so nothing another session appended in between is reverted"
+  },
+  "sha256_of_the_two_policy_files_as_committed": {
+   "v5/cf_objective.py": "04fa49e3a6289c0bc2ede52822068913da295d2a1d2e16f6a49f940235e081d8",
+   "v5/cf_planner.py": "a53200dfe08c5e13c40b59f03c29bc7b1f1e2f30d0a44a0225778146598663bd"
+  },
+  "digests_ran_against_a_FROZEN_COPY": {
+   "why": "the after tree was copied to `afterfreeze` and the digest driver was pointed at the copy BEFORE any further editing, so no file could change while a digest was in flight against it; the two copies are byte-compared below",
+   "frozen_copy_matches_the_committed_files": {
+    "v5/cf_objective.py": true,
+    "v5/cf_planner.py": true
+   }
+  }
+ },
+ "_the_arithmetic": {
+  "option_value": "w * p_cloud_on_time (was w * (p * acc_cloud + (1 - p) * p_dev * acc_dev))",
+  "device_only_value": "0.0 (was w * p_dev * acc_dev = w * 1.0 * 0.071429)",
+  "plan_state_gain": "w * p_question * (p_warm - p_cold) - harm (was the same with an inline acc = table['cloud_D2'] = 0.250)",
+  "margin": "cf_planner._margin returns cf_objective.attainment_margin(cf_margin.MARGIN_CF) = 0.16456 / 0.250 = 0.65824; MARGIN_CF itself is UNCHANGED and cf_margin.resolve_margin is still its only read, so no second literal is declared",
+  "scale_factors": {
+   "gain_and_margin": 4.0,
+   "harm_priced_with_the_device_fallback": 5.6,
+   "harm_to_bar_ratio": 1.4000033600080641,
+   "rung_4_harm_acc_1_0": 1.0
+  },
+  "the_band_that_moves": "HOLD_BACK is valued at the harm itself, so its bar moves from harm_old > 0.16456 to harm_old > 0.11754: the band is 0.11754 to 0.16456 in old units at w = 1. With harm = 0 the comparison is EXACTLY scale invariant and no decision can move."
+ },
+ "_w_d_HAS_TWO_DEFINITIONS_IN_THE_TREE_AND_THAT_IS_REPORTED": {
+  "live_feed": "live2/deficit_feed.py and live2/deficit_gain_d178.py: w_d = 1 + GAIN * (shortfall_d / target_d), floored at 1, GAIN = 2.0, range 1 to 3. This is D185's form and it is what the rungs that feed a weight use.",
+  "v5_fallback": "v5/cf_objective.DeficitCounters.weight: w = 1 + DEFICIT_GAIN * shortfall with DEFICIT_GAIN = 1.0 and NO division by the target. Not D185's form.",
+  "why_it_does_not_change_a_number_in_this_commit": "every cell measured here runs with an unfed DeficitCounters, so shortfall = 0 and w = 1 exactly under both forms; the grid runs at w = 1 too. The flip neither creates nor closes this difference.",
+  "register": "CLAUDE.md consistency check 4: one name, two definitions, reported rather than reconciled by this commit, because changing DEFICIT_GAIN would reprice every committed covex-v6 cell and is a methodological change, not an implementation fix. It is owed a ruling."
+ },
+ "proof_1_unit_tests": {
+  "new": {
+   "where": "experiments/orchestration/live2/tests/test_cf_objective_d177.py",
+   "summary": "30 checks, 30 PASS, 0 FAIL",
+   "exit_code": 0,
+   "what_is_asserted_with_==": [
+    "option_value is w * p exactly, and 48 combinations of the three accuracy/device arguments give ONE value",
+    "device_only_value is 0.0 exactly over 18 combinations",
+    "one displaced answer is exactly w_d under rung 2's AND rung 4's accuracy arguments",
+    "a partial displacement is exactly w_d * p_before - w_d * p_after, in the module's own order of operations",
+    "plan_state's WARM gain is exactly w * p_question * (p_warm - p_cold)",
+    "the bar is exactly MARGIN_CF / A_D2_DEV (a division by a power of two)",
+    "with harm = 0 the gain-to-bar ratio is EXACTLY the pre-flip ratio (4.0 is exact in binary), so no decision can move"
+   ],
+   "pinned_as_what_it_must_NOT_produce": [
+    "p * 0.25 + (1 - p) * p_dev * 0.071429 (option_value's superseded value)",
+    "w * p_dev * 0.071429 (device_only_value's superseded value)",
+    "w * p_question * 0.250 * (p_warm - p_cold) (plan_state's superseded gain)"
+   ],
+   "controls": [
+    "NEGATIVE (Step 4): the bar at infinity gives KEEP on the same inputs, the bar at zero deviates on a tiny gain, so the bar is what decides",
+    "POSITIVE (check 7): two plan_state calls either side of the bar give different chosen candidates, so the instrument can see a move"
+   ]
+  },
+  "committed_tests_updated_because_the_flip_makes_their_CLAIMS_false": {
+   "tests/test_cf_objective_d191.py": {
+    "before_this_commit": "30 checks, 28 PASS, 2 FAIL on the flipped code",
+    "after": "30 checks, 30 PASS, 0 FAIL",
+    "what_changed": "three claims, two of which FAILED: the same displacement under rung 2's accuracy arguments is now exactly w_d too (it was 0.491070), the 5.6x is now recorded as what the flip multiplied rung 2's harm BY, and the text 'the committed option_value is UNTOUCHED by this commit' is replaced. The superseded readings are kept in the text, not deleted."
+   },
+   "v5/d171_proofs.py": {
+    "the_defect": "its P2 gate is `smaller >= larger`, TRUE AT 0 AND 0. On the flipped code no harm term shrinks and none grows, and the unfixed script still printed 'PASS: the term is live, every harm magnitude shrank'. That is CLAUDE.md's impossible success and it would have been committed as a pass.",
+    "the_fix": "`inert` is detected (smaller == 0 and larger == 0 with non-zero harms) and reported as its own verdict, with rule2_class UNEXPRESSIBLE: the switch fires and the currency discards the channel it acted through. ALL_PASS is therefore False BY RULING, and `_all_pass_register` says so in the output.",
+    "measured": {
+     "P2_before_flip": {
+      "harm_terms_smaller_in_magnitude": 118,
+      "harm_terms_larger_in_magnitude": 0,
+      "mean_abs_harm_before": 0.00939499408035716,
+      "mean_abs_harm_after": 0.006710694142857134,
+      "decisions_changed": 0
+     },
+     "P2_after_flip": {
+      "harm_terms_smaller_in_magnitude": 0,
+      "harm_terms_larger_in_magnitude": 0,
+      "mean_abs_harm_before": 0.037579976794642804,
+      "mean_abs_harm_after": 0.037579976794642804,
+      "decisions_changed": 0
+     },
+     "other_proofs": {
+      "P0_positive_control": "PASS",
+      "P1_weighted_margin": "PASS",
+      "P2_harm_replacement": "INERT (not a pass and not a failure of the ruling)",
+      "P3_device_model": "PASS",
+      "P4_baselines_unchanged": "PASS",
+      "P5_delta_distribution": "PASS"
+     }
+    },
+    "the_committed_JSON_is_NOT_regenerated": "results/orchestration/live2/v5/d171_proofs.json is D171's own record under its own label. Its P2 harm magnitudes are the pre-flip ones and are SUPERSEDED by this commit; both sets of numbers are above so the next reader does not have to rerun it to find out."
+   }
+  },
+  "committed_proofs_that_still_pass_UNCHANGED": {
+   "cf_pd_tests.py (rung 4's mechanism proof)": "36 checks, 36 passed, 0 FAILED on BOTH trees",
+   "v5/cf_proofs.py": "identical output on both trees apart from decision-latency timings; its own step2b reports the switch reaching 37 of 56 decisions",
+   "cf_pd_mechanism_tests.json": {
+    "base_regen_vs_after_regen": {
+     "leaves": [
+      255,
+      255
+     ],
+     "n_differing": 0,
+     "n_numeric_or_bool_differing": 0,
+     "keys": []
+    },
+    "committed_vs_base_regen": {
+     "leaves": [
+      254,
+      255
+     ],
+     "n_differing": 3,
+     "n_numeric_or_bool_differing": 0,
+     "keys": [
+      "/checks/12/detail/on_time_units_source",
+      "/mechanism/margin/source",
+      "/traced_decision/16"
+     ]
+    },
+    "committed_vs_after_regen": {
+     "leaves": [
+      254,
+      255
+     ],
+     "n_differing": 3,
+     "n_numeric_or_bool_differing": 0,
+     "keys": [
+      "/checks/12/detail/on_time_units_source",
+      "/mechanism/margin/source",
+      "/traced_decision/16"
+     ]
+    }
+   },
+   "a_reporting_misalignment_this_commit_does_NOT_fix_and_names_instead": "arms_v6state.py:453 buckets each state decision's delta at FIXED literals (0.0, 0.01, ... 0.16456, 0.18, 0.20, 0.25) and v6state_proofs.py:115 reads `state_delta_gt_0p16456` as 'over the margin'. Those literals are PRE-FLIP units: the delta is now 4.0x and the bar is 0.65824, so that bucket no longer names the bar. The arm's OTHER counter, `state_delta_over_margin`, is computed against `d.margin_effective` and therefore moves with the flip and stays correct. arms_v6state.py is the rung-2/3/4 arm module and renaming a stats key would change what committed proofs read, so this is REPORTED rather than edited, and the remedy is to express the buckets against margin_effective.",
+   "register": "the committed cf_pd_mechanism_tests.json is STALE in 3 of 255 leaves, ALL STRINGS and zero numeric, against BOTH trees equally (base_regen vs after_regen: 0 differing of 255). THIS CHANGE DOES NOT TOUCH IT, so it is NOT regenerated; the staleness pre-exists the flip and is recorded here, as the D191 proof recorded it, so nobody spends the hour again."
+  }
+ },
+ "proof_2_step_2b_the_switch_REACHES_A_DECISION": {
+  "_why_this_and_not_a_digest": "CLAUDE.md Step 2b requires both conditions run on one cell and the decision logs diffed. A DRY FLEET CELL CANNOT SHOW THIS FLIP: the committed dry counters put 1,595 of 1,596 non-zero harm_warm values below 5e-4 against a bar of 0.65824, so the band is four orders of magnitude away and the digests are identical. The diff is therefore run on a DECLARED GRID, which is where the band is reachable.",
+  "driver": "experiments/orchestration/live2/v5/d177_currency_flip_proofs.py",
+  "state_decisions": {
+   "n": 288,
+   "n_deciding_differ": 21,
+   "n_any_field_differ": 288,
+   "margin_before": 0.16456,
+   "margin_after": 0.65824,
+   "deciding_fields_compared": [
+    "chosen",
+    "base_choice",
+    "cf_choice",
+    "deviated"
+   ],
+   "deciding_differ_indices": [
+    13,
+    31,
+    49,
+    67,
+    85,
+    103,
+    121,
+    139,
+    157,
+    171,
+    175,
+    177,
+    189,
+    193,
+    195,
+    211,
+    229,
+    247,
+    265,
+    266,
+    283
+   ],
+   "note": "n_deciding_differ is the Step 2b number. n_any_field_differ counts the REPORTED values too, which are in new units and must move: if it were 0 the two logs would have come from one tree and nothing was compared."
+  },
+  "state_breakdown": {
+   "rows_differing_on_at_least_one_deciding_field": 21,
+   "per_field": {
+    "chosen": 16,
+    "base_choice": 0,
+    "cf_choice": 5,
+    "deviated": 16
+   },
+   "chosen_candidate_census": {
+    "before": {
+     "KEEP": 288
+    },
+    "after": {
+     "KEEP": 272,
+     "HOLD_BACK": 16
+    }
+   },
+   "harm_pairs_old_to_new_on_the_grid": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     3.57e-05,
+     0.0002
+    ],
+    [
+     0.01097,
+     0.0614323
+    ],
+    [
+     0.0178571,
+     0.1
+    ],
+    [
+     0.042857,
+     0.24
+    ],
+    [
+     0.0548501,
+     0.3071615
+    ],
+    [
+     0.0714284,
+     0.4
+    ],
+    [
+     0.1249997,
+     0.7
+    ]
+   ],
+   "harm_pairs_where_the_CHOSEN_candidate_MOVED": [
+    [
+     0.1249997,
+     0.7
+    ]
+   ],
+   "what_that_shows": "16 rows change the CHOSEN candidate and EVERY ONE of them sits at the single harm pair 0.1249997 old / 0.700 new, which is the band predicted from the committed constants BEFORE the grid was run (0.11754 to 0.16456 in old units). The 5 further rows change only `cf_choice`, the counterfactual's preferred candidate, without clearing the bar. Rows at harm 0.0 do not move, which is the scale invariance asserted with == in the unit tests and is what distinguishes the claimed mechanism from 'the margin alone moved 4x'."
+  },
+  "state_first_difference": {
+   "index": 13,
+   "grid": {
+    "p_question": 0.02,
+    "p_warm": 0.9,
+    "p_cold": 0.85,
+    "uncached_tokens": 4000,
+    "slack_s": 0.35
+   },
+   "harm_warm_before": 0.12499969999999998,
+   "harm_warm_after": 0.7,
+   "fields": [
+    "chosen",
+    "deviated"
+   ],
+   "before": {
+    "chosen": "KEEP",
+    "base_choice": "KEEP",
+    "cf_choice": "HOLD_BACK",
+    "deviated": false,
+    "margin": 0.16456,
+    "margin_effective": 0.16456,
+    "margin_source": "cf_margin.MARGIN_CF",
+    "value_base": 0.0,
+    "value_cf": 0.1249997,
+    "delta": 0.1249997,
+    "elapsed_ms": 0.01085
+   },
+   "after": {
+    "chosen": "HOLD_BACK",
+    "base_choice": "KEEP",
+    "cf_choice": "HOLD_BACK",
+    "deviated": true,
+    "margin": 0.65824,
+    "margin_effective": 0.65824,
+    "margin_source": "cf_margin.MARGIN_CF / cf_objective.A_D2_DEV (D177 (3): on-time units)",
+    "value_base": 0.0,
+    "value_cf": 0.7,
+    "delta": 0.7,
+    "elapsed_ms": 0.009877
+   }
+  },
+  "request_decisions": {
+   "n": 56,
+   "n_deciding_differ": 0,
+   "n_any_field_differ": 56,
+   "margin_before": 0.16456,
+   "margin_after": 0.65824
+  },
+  "request_candidate_census": {
+   "base": {
+    "chosen": {
+     "ADMIT_NOW_D2": 48,
+     "DEVICE_ANSWERS": 8
+    },
+    "cf_choice": {
+     "ADMIT_NOW_D2": 18,
+     "DEFER_TO_LATEST_SAFE_START": 36,
+     "DEVICE_ANSWERS": 2
+    },
+    "device_value_distinct": [
+     0.071429
+    ],
+    "n_device_is_best": 2,
+    "best_value_min": 0.071429,
+    "best_value_max": 0.25,
+    "n": 56
+   },
+   "after": {
+    "chosen": {
+     "ADMIT_NOW_D2": 48,
+     "DEVICE_ANSWERS": 8
+    },
+    "cf_choice": {
+     "ADMIT_NOW_D2": 18,
+     "DEFER_TO_LATEST_SAFE_START": 36,
+     "DEVICE_ANSWERS": 2
+    },
+    "device_value_distinct": [
+     0.0
+    ],
+    "n_device_is_best": 2,
+    "best_value_min": 0.0,
+    "best_value_max": 1.0,
+    "n": 56
+   }
+  },
+  "request_register": "0 of 56 request decisions move and that is NOT a null about the change: device_only_value DID move, from 0.071429 to exactly 0.0 (the census shows the distinct candidate values on each side), and the device candidate still wins the same 2 cells because every cloud option it beats is worth <= 0 on both sides. UNEXERCISED IN DECISION on this grid. plan_request is reached only by the v5-full family (arms_v5full.py:219), which no committed rung uses."
+ },
+ "proof_3_byte_identity_and_the_committed_bars": {
+  "_claim": "every arm that does NOT reach the converted functions decides identically, and the BEFORE side of each comparison reproduces its own committed digest",
+  "recipe": "sha256(json.dumps(rows_without_arm_version, sort_keys=True, separators=(',',':'), default=float))[:16]; ONE DRY CELL PER PROCESS",
+  "driver": "experiments/orchestration/live2/d179_offswitch_digest_proofs.py (committed)",
+  "cell": {
+   "n": 16,
+   "run_s": 1200.0,
+   "seed": 4,
+   "ratio": "40:40:20",
+   "robot_question_set": "lh_req",
+   "ss_question_set": "ss2",
+   "dashcam_format": "epg",
+   "robot_upload": "per-frame",
+   "robot_reask_mean_s": 30.0
+  },
+  "protocol": {
+   "one_dry_cell_per_process": true,
+   "cf_instrument_over_budget_patched_off": true,
+   "concurrency": 3,
+   "sequential": false,
+   "cores": 24,
+   "loadavg_driver_start": [
+    1.13,
+    1.42,
+    1.75
+   ],
+   "loadavg_driver_end": [
+    4.53,
+    4.15,
+    3.79
+   ],
+   "wall_s": 3680.47,
+   "cpu_user_s_by_arm": [
+    [
+     "covex-v6-base",
+     256.18,
+     260.11
+    ],
+    [
+     "covex-v6-rules",
+     245.07,
+     247.11
+    ],
+    [
+     "covex-v6-state-uo",
+     302.8,
+     322.45
+    ],
+    [
+     "v5-rules-2",
+     244.47,
+     246.51
+    ],
+    [
+     "hybrid-F-lhreq-noc3",
+     244.68,
+     257.05
+    ],
+    [
+     "b7-edf-feasibility",
+     277.9,
+     271.23
+    ],
+    [
+     "always-cloud-fcfs",
+     260.14,
+     278.05
+    ],
+    [
+     "edf",
+     249.37,
+     237.97
+    ],
+    [
+     "llf",
+     250.78,
+     238.73
+    ],
+    [
+     "mooncake",
+     240.96,
+     246.51
+    ],
+    [
+     "attentionstore-prefetch",
+     277.52,
+     268.96
+    ],
+    [
+     "simplestream",
+     236.64,
+     238.54
+    ],
+    [
+     "querystream-proactive",
+     244.58,
+     247.15
+    ],
+    [
+     "warm-all-lru",
+     267.14,
+     272.62
+    ],
+    [
+     "confidence-cascade",
+     245.0,
+     232.17
+    ],
+    [
+     "eco-llm",
+     243.49,
+     234.28
+    ],
+    [
+     "covex-v6-state-noprice",
+     273.23,
+     286.58
+    ],
+    [
+     "covex-v6-state",
+     265.55,
+     246.07
+    ],
+    [
+     "covex-v6-cf-c5attr",
+     293.25,
+     297.76
+    ],
+    [
+     "covex-v6-fair-c5attr",
+     265.35,
+     311.38
+    ]
+   ]
+  },
+  "registry": {
+   "n_at_import": 206,
+   "n_after_register": 206,
+   "added_by_register": [],
+   "n_arms_tested": 20,
+   "arms_not_constructed": []
+  },
+  "bar_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json at da4427de81ea7f30dd9fb7370ac2c32c04e2acf3, the `after` column",
+  "RECIPE_COMPARABILITY_BOTH_SIDES": {
+   "_why_this_block_exists": "a digest is comparable only WITHIN one recipe, and mixing two has bitten this project twice in one day: a `test_hybrid.dry` run with the planner wall-clock cutoff LIVE was compared against a bar measured with it PATCHED OFF and read as a moved digest. So both sides' recipes are stated here, field by field, rather than asserted to be the same.",
+   "driver": {
+    "mine": "experiments/orchestration/live2/d179_offswitch_digest_proofs.py",
+    "committed_bar": "d179_offswitch_digest_proofs.py",
+    "same": true
+   },
+   "hash_recipe": "sha256(json.dumps(rows_without_arm_version, sort_keys=True, separators=(',',':'), default=float))[:16] on both sides, computed by the same function in the same file",
+   "cell": {
+    "mine": {
+     "n": 16,
+     "run_s": 1200.0,
+     "seed": 4,
+     "ratio": "40:40:20",
+     "robot_question_set": "lh_req",
+     "ss_question_set": "ss2",
+     "dashcam_format": "epg",
+     "robot_upload": "per-frame",
+     "robot_reask_mean_s": 30.0
+    },
+    "committed_bar": {
+     "n": 16,
+     "run_s": 1200.0,
+     "seed": 4,
+     "ratio": "40:40:20",
+     "robot_question_set": "lh_req",
+     "ss_question_set": "ss2",
+     "dashcam_format": "epg",
+     "robot_upload": "per-frame",
+     "robot_reask_mean_s": 30.0
+    },
+    "same": true
+   },
+   "one_dry_cell_per_process": {
+    "mine": true,
+    "committed_bar": true
+   },
+   "planner_wall_clock_cutoff_patched_off": {
+    "mine": true,
+    "committed_bar": true,
+    "why_it_matters": "with the cutoff LIVE the planner abandons to base under load and the decision log becomes a property of the host rather than of the arm, so a digest measured with it live is NOT comparable to one measured with it off. It is off on both sides here, which is also what makes the concurrency difference below harmless"
+   },
+   "concurrency": {
+    "mine": 3,
+    "committed_bar": 18,
+    "differs_and_why_that_is_safe": "18 for the bar against 3 here. This is the one recipe field that differs, and it cannot move a digest while the wall-clock cutoff is patched off on both sides, which is exactly what the bar check below tests rather than assumes"
+   },
+   "registry_size": {
+    "mine": 206,
+    "committed_bar": 171,
+    "note": "171 then, 206 now: arms were REGISTERED in between, which changes the size of a dict and no decision. The bar check is what makes that checkable"
+   },
+   "code_drift_between_the_bar_and_this_run": {
+    "bar_measured_at": "f3482026d285784bbc8cb03ca9dfd7dfb122f5b3",
+    "this_run_measured_at": "da4427de81ea7f30dd9fb7370ac2c32c04e2acf3",
+    "live2_files_changed_in_between": "50, including coordinator.py and arms_v6state.py",
+    "why_a_MET_bar_is_still_informative": "the D191 session re-measured the same 17 arms at d7c09a13, after that drift, and all 17 met the bar; so a MISS here would be this change or this host, not the drift. A miss is re-run ALONE before it is read."
+   }
+  },
+  "arms": [
+   {
+    "arm": "covex-v6-base",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "af8befb9420ad86a",
+    "after_digest": "af8befb9420ad86a",
+    "rows_before": 12085,
+    "rows_after": 12085,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "af8befb9420ad86a",
+    "committed_bar_rows": 12085,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "covex-v6-rules",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "18067c4c66bb44b8",
+    "after_digest": "18067c4c66bb44b8",
+    "rows_before": 11955,
+    "rows_after": 11955,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "18067c4c66bb44b8",
+    "committed_bar_rows": 11955,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "covex-v6-state-uo",
+    "reaches_the_converted_functions": true,
+    "path": "state_priced",
+    "before_digest": "9a4be873eb3c5fba",
+    "after_digest": "9a4be873eb3c5fba",
+    "rows_before": 14218,
+    "rows_after": 14218,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "9a4be873eb3c5fba",
+    "committed_bar_rows": 14218,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": true,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "v5-rules-2",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "18067c4c66bb44b8",
+    "after_digest": "18067c4c66bb44b8",
+    "rows_before": 11955,
+    "rows_after": 11955,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "18067c4c66bb44b8",
+    "committed_bar_rows": 11955,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "hybrid-F-lhreq-noc3",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "af8befb9420ad86a",
+    "after_digest": "af8befb9420ad86a",
+    "rows_before": 12085,
+    "rows_after": 12085,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "af8befb9420ad86a",
+    "committed_bar_rows": 12085,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "b7-edf-feasibility",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "b9aadd1c3a2b26d5",
+    "after_digest": "b9aadd1c3a2b26d5",
+    "rows_before": 12265,
+    "rows_after": 12265,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "b9aadd1c3a2b26d5",
+    "committed_bar_rows": 12265,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "always-cloud-fcfs",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "c7f86bb7755828de",
+    "after_digest": "c7f86bb7755828de",
+    "rows_before": 12253,
+    "rows_after": 12253,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "c7f86bb7755828de",
+    "committed_bar_rows": 12253,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "edf",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "9db366ac8f684d45",
+    "after_digest": "9db366ac8f684d45",
+    "rows_before": 16327,
+    "rows_after": 16327,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "9db366ac8f684d45",
+    "committed_bar_rows": 16327,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "llf",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "961be8fe4942d86b",
+    "after_digest": "961be8fe4942d86b",
+    "rows_before": 14075,
+    "rows_after": 14075,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "961be8fe4942d86b",
+    "committed_bar_rows": 14075,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "mooncake",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "7544b3aa16433c70",
+    "after_digest": "7544b3aa16433c70",
+    "rows_before": 12742,
+    "rows_after": 12742,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "7544b3aa16433c70",
+    "committed_bar_rows": 12742,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "attentionstore-prefetch",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "b563cf7612fd1e02",
+    "after_digest": "b563cf7612fd1e02",
+    "rows_before": 46931,
+    "rows_after": 46931,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "b563cf7612fd1e02",
+    "committed_bar_rows": 46931,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "simplestream",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "870a3c3586d1b537",
+    "after_digest": "870a3c3586d1b537",
+    "rows_before": 12253,
+    "rows_after": 12253,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "870a3c3586d1b537",
+    "committed_bar_rows": 12253,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "querystream-proactive",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "a0b9e14e513c621c",
+    "after_digest": "a0b9e14e513c621c",
+    "rows_before": 12646,
+    "rows_after": 12646,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "a0b9e14e513c621c",
+    "committed_bar_rows": 12646,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "warm-all-lru",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "751381e72502fffe",
+    "after_digest": "751381e72502fffe",
+    "rows_before": 17205,
+    "rows_after": 17205,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "751381e72502fffe",
+    "committed_bar_rows": 17205,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "confidence-cascade",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "b9290071679f1baa",
+    "after_digest": "b9290071679f1baa",
+    "rows_before": 12253,
+    "rows_after": 12253,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "b9290071679f1baa",
+    "committed_bar_rows": 12253,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "eco-llm",
+    "reaches_the_converted_functions": false,
+    "path": "does not import cf_objective",
+    "before_digest": "f32fa95c6953c64e",
+    "after_digest": "f32fa95c6953c64e",
+    "rows_before": 12253,
+    "rows_after": 12253,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "f32fa95c6953c64e",
+    "committed_bar_rows": 12253,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "covex-v6-state-noprice",
+    "reaches_the_converted_functions": true,
+    "path": "state_priced",
+    "before_digest": "9a4be873eb3c5fba",
+    "after_digest": "9a4be873eb3c5fba",
+    "rows_before": 14218,
+    "rows_after": 14218,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": "9a4be873eb3c5fba",
+    "committed_bar_rows": 14218,
+    "before_meets_committed_bar": true,
+    "bar_available": true,
+    "self_reproduces_under_load": true,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "covex-v6-state",
+    "reaches_the_converted_functions": true,
+    "path": "state_priced",
+    "before_digest": "9a4be873eb3c5fba",
+    "after_digest": "9a4be873eb3c5fba",
+    "rows_before": 14218,
+    "rows_after": 14218,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": null,
+    "committed_bar_rows": null,
+    "before_meets_committed_bar": false,
+    "bar_available": false,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "covex-v6-cf-c5attr",
+    "reaches_the_converted_functions": true,
+    "path": "state_priced",
+    "before_digest": "048ec39ecc144321",
+    "after_digest": "048ec39ecc144321",
+    "rows_before": 13773,
+    "rows_after": 13773,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": null,
+    "committed_bar_rows": null,
+    "before_meets_committed_bar": false,
+    "bar_available": false,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   },
+   {
+    "arm": "covex-v6-fair-c5attr",
+    "reaches_the_converted_functions": true,
+    "path": "state_priced",
+    "before_digest": "12e4f73ce0ebd865",
+    "after_digest": "12e4f73ce0ebd865",
+    "rows_before": 13812,
+    "rows_after": 13812,
+    "byte_identical_before_vs_after": true,
+    "committed_bar_digest": null,
+    "committed_bar_rows": null,
+    "before_meets_committed_bar": false,
+    "bar_available": false,
+    "self_reproduces_under_load": null,
+    "error_before": null,
+    "error_after": null
+   }
+  ],
+  "summary": {
+   "n_arms": 20,
+   "n_byte_identical_before_vs_after": 20,
+   "n_before_meets_committed_bar": 17,
+   "n_bars_available": 17,
+   "arms_that_missed_their_bar": [],
+   "reaching_arms_in_this_set": [
+    "covex-v6-state-uo",
+    "covex-v6-state-noprice",
+    "covex-v6-state",
+    "covex-v6-cf-c5attr",
+    "covex-v6-fair-c5attr"
+   ],
+   "n_distinct_after_digests": 16,
+   "row_count_range": [
+    11955,
+    46931
+   ]
+  },
+  "THE_REGISTER_THIS_RESULT_MUST_BE_READ_IN": "A byte-identity PASS on an arm that never imports cf_objective is TRUE AND GUARANTEED BY THE CODE, not a measurement of the conversion. For the arms that DO reach it, the identity is UNEXERCISED IN MAGNITUDE ON A DRY CELL (CLAUDE.md Rule 2) and is NOT evidence that the flip is decision-neutral: the harm the flip rescales is below 5e-4 on 1,595 of 1,596 non-zero dry values, against a bar of 0.65824, so a dry cell cannot reach the band. A LIVE CELL PRICES DIFFERENTLY (D174 part B3, and cf_protect_defer's docstring says the same). The decision change is demonstrated on the grid in proof 2, where 21 of 288 state decisions move.",
+  "a_SECOND_INDEPENDENT_RECIPE_CONFIRMATION_found_on_the_way": "covex-v6-fair-c5attr (rung 3) comes back 12e4f73ce0ebd865 / 13,812 rows on BOTH sides here. That is exactly the value the committed cutoff-OFF recipe gives for rung 3, independently re-derived in another session today after a cutoff-LIVE run had produced a different digest (dc686e63f9a313ec) and been misread as a moved digest. So this run's recipe is the committed one, confirmed against a number this session did not choose, which is a stronger check than any field-by-field comparison of protocol metadata.",
+  "positive_control": "the digest DISCRIMINATES arms, so an identity is not an artefact of a degenerate hash, and the BEFORE side is checked against committed values rather than only against the after side: a broken control passes every check applied to the treatment (CLAUDE.md check 7)."
+ },
+ "proof_4_reach_census": {
+  "_claim": "which of the registered arms can reach the converted functions, by construction",
+  "method": "every registered arm CONSTRUCTED and inspected for a counterfactual engine and for the rung-4 protect/request-defer objects; the two arm-side entry points into the planner are arms_v6state.py:430 (plan_state) and arms_v5full.py:219 (plan_request) and they are the only two in the tree",
+  "n_registered": 206,
+  "n_can_reach": 54,
+  "n_cannot_reach": 151,
+  "refused_to_construct": [
+   {
+    "arm": "covex-v6-cf-pd",
+    "error": "BaseNotChosen"
+   }
+  ],
+  "counts_by_path": {
+   "off": 1,
+   "request": 5,
+   "state_priced": 48
+  },
+  "identical_on_both_trees": true,
+  "cross_check": "the previous session measured 54 of 206 reaching at a different base sha (reach2 in the D191 session log); this run re-measures 54 of 206 at da4427de81ea7f30dd9fb7370ac2c32c04e2acf3, ratio 1.000",
+  "per_arm_reach_and_change": [
+   {
+    "arm": "covex-v6",
+    "path": "request",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v5full",
+    "capability_attrs": {
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE: device_only_value goes to 0.0, so the DEVICE candidate stops competing on value. On the 56-cell D171 request grid NO decision moved (the device candidate still wins the same 2 cells, because every cloud option it beats is worth <= 0 on both sides), so on that grid the change is UNEXERCISED IN DECISION. plan_request is reached by this family only and by no committed rung. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-c5attr",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cfr3",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true,
+     "live2_cf_protect_defer": true,
+     "live2_cf_request_defer": true
+    },
+    "measured_on_a_dry_cell": true,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. DRY CELL: digest 048ec39ecc144321 before, 048ec39ecc144321 after, identical=True - UNEXERCISED IN MAGNITUDE on this cell, not decision-neutral."
+   },
+   {
+    "arm": "covex-v6-cf-c5attr-gain0",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cfr3",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true,
+     "live2_cf_protect_defer": true,
+     "live2_cf_request_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-c5attr-harm0",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cfr3",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true,
+     "live2_cf_protect_defer": true,
+     "live2_cf_request_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-c5attr-margin-huge",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cfr3",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true,
+     "live2_cf_protect_defer": true,
+     "live2_cf_request_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-c5attr-off",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cfr3",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true,
+     "live2_cf_protect_defer": false,
+     "live2_cf_request_defer": false
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-c5attr-pdonly",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cfr3",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true,
+     "live2_cf_protect_defer": true,
+     "live2_cf_request_defer": false
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-c5attr-rqonly",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cfr3",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true,
+     "live2_cf_protect_defer": false,
+     "live2_cf_request_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-c5attr-w1",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cfr3",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true,
+     "live2_cf_protect_defer": true,
+     "live2_cf_request_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-pd-c5attr",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cf",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_cf_protect_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-pd-c5attr-barmaxharmed",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cf",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_cf_protect_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-pd-c5attr-bigmargin",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cf",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_cf_protect_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-pd-c5attr-harmzero",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cf",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_cf_protect_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-pd-c5attr-off",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cf",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_cf_protect_defer": false
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-pd-shares",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cf",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_cf_protect_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-pd-shares-barmaxharmed",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cf",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_cf_protect_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-pd-shares-bigmargin",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cf",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_cf_protect_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-pd-shares-harmzero",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cf",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_cf_protect_defer": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-cf-pd-shares-off",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6cf",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_cf_protect_defer": false
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fair",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": false,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-c5attr",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fairfeed",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true
+    },
+    "measured_on_a_dry_cell": true,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. DRY CELL: digest 12e4f73ce0ebd865 before, 12e4f73ce0ebd865 after, identical=True - UNEXERCISED IN MAGNITUDE on this cell, not decision-neutral."
+   },
+   {
+    "arm": "covex-v6-fair-c5attr-gain0",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fairfeed",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-c5attr-off",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fairfeed",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": false
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-c5attr-orderonly",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fairfeed",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-c5attr-splitonly",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fairfeed",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-nofeed",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fair",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": false,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-nolimit",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fair",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": false,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-novalue",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fair",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": false,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-off",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fair",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": false,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-shares",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fairfeed",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-shares-gain0",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fairfeed",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-shares-off",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fairfeed",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": false
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-shares-orderonly",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fairfeed",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-fair-shares-splitonly",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6fairfeed",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only",
+     "live2_deficit_feed": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6state",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": false,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": true,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. DRY CELL: digest 9a4be873eb3c5fba before, 9a4be873eb3c5fba after, identical=True - UNEXERCISED IN MAGNITUDE on this cell, not decision-neutral."
+   },
+   {
+    "arm": "covex-v6-state-d162",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6state",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state-nobelief",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6state",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": false,
+     "live2_d162_pricing": false,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state-noprice",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6state",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": false,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": false,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": true,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. DRY CELL: digest 9a4be873eb3c5fba before, 9a4be873eb3c5fba after, identical=True - UNEXERCISED IN MAGNITUDE on this cell, not decision-neutral."
+   },
+   {
+    "arm": "covex-v6-state-noretain",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6state",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": false,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": false,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state-notouch",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6state",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": false,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": false,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state-off",
+    "path": "off",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6state",
+    "capability_attrs": {
+     "plan_state": false,
+     "live2_state_priced_costs": false,
+     "live2_touch_requests": false,
+     "live2_offload_controls": false,
+     "live2_belief_apply": false,
+     "live2_d162_pricing": false,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CANNOT CHANGE: plan_state capability is OFF, so this arm makes no counterfactual decision at all. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state-shares",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6shares",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state-shares-noadmit",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6shares",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state-shares-norecheck",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6shares",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state-shares-off",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6shares",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state-shares-r1",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6shares",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state-shares-r2",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6shares",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state-uo",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6state",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": true,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. DRY CELL: digest 9a4be873eb3c5fba before, 9a4be873eb3c5fba after, identical=True - UNEXERCISED IN MAGNITUDE on this cell, not decision-neutral."
+   },
+   {
+    "arm": "covex-v6-state-uo-c5attr",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6c5",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "uncached-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "covex-v6-state-wo",
+    "path": "state_priced",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v6state",
+    "capability_attrs": {
+     "plan_state": true,
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true,
+     "live2_belief_apply": true,
+     "live2_d162_pricing": true,
+     "live2_charge_mode": "work-only"
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE INSIDE THE BAND: plan_state's gain and bar are 4.0x, the harm it is passed (arms_v6state._harm_warm, committed table) is 5.6x, so a decision moves where the harm is within 1.4x of its side of the bar (HOLD_BACK band 0.11754 to 0.16456 old units at w = 1). MEASURED on the declared grid: 21 of 288 state decisions move. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "v5-full",
+    "path": "request",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v5full",
+    "capability_attrs": {
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE: device_only_value goes to 0.0, so the DEVICE candidate stops competing on value. On the 56-cell D171 request grid NO decision moved (the device candidate still wins the same 2 cells, because every cloud option it beats is worth <= 0 on both sides), so on that grid the change is UNEXERCISED IN DECISION. plan_request is reached by this family only and by no committed rung. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "v5-full-noguarddefer",
+    "path": "request",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v5full",
+    "capability_attrs": {
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE: device_only_value goes to 0.0, so the DEVICE candidate stops competing on value. On the 56-cell D171 request grid NO decision moved (the device candidate still wins the same 2 cells, because every cloud option it beats is worth <= 0 on both sides), so on that grid the change is UNEXERCISED IN DECISION. plan_request is reached by this family only and by no committed rung. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "v5-full-nohealthy",
+    "path": "request",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v5full",
+    "capability_attrs": {
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE: device_only_value goes to 0.0, so the DEVICE candidate stops competing on value. On the 56-cell D171 request grid NO decision moved (the device candidate still wins the same 2 cells, because every cloud option it beats is worth <= 0 on both sides), so on that grid the change is UNEXERCISED IN DECISION. plan_request is reached by this family only and by no committed rung. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   },
+   {
+    "arm": "v5-full-off",
+    "path": "request",
+    "marks": [
+     "_cf",
+     "_cf_engine"
+    ],
+    "module": "arms_v5full",
+    "capability_attrs": {
+     "live2_state_priced_costs": true,
+     "live2_touch_requests": true,
+     "live2_offload_controls": true
+    },
+    "measured_on_a_dry_cell": false,
+    "decisions_change": "CAN CHANGE: device_only_value goes to 0.0, so the DEVICE candidate stops competing on value. On the 56-cell D171 request grid NO decision moved (the device candidate still wins the same 2 cells, because every cloud option it beats is worth <= 0 on both sides), so on that grid the change is UNEXERCISED IN DECISION. plan_request is reached by this family only and by no committed rung. NOT MEASURED ON A CELL in this commit (construction fact only)."
+   }
+  ],
+  "entry_points": [
+   "arms_v6state.py:430 -> cf_planner.plan_state",
+   "arms_v5full.py:219 -> cf_planner.plan_request"
+  ],
+  "note": "plan_sync has NO caller anywhere in the tree; `cf_protect_defer` and `cf_request_defer` call cf_objective.harm_warm_from_queue_delay directly with acc_cloud=1.0 and acc_device=0.0, which the flip leaves unchanged",
+  "RE_MEASURED_AT_THE_COMMIT_PARENT_TOO_because_the_registry_grew": {
+   "_why": "the census above is at the MEASUREMENT BASE, the tree the digests and the grid ran on. origin moved while this work ran and the parent this commit is on registers MORE arms, so the count is re-measured there rather than left to age: a reach list that is one push out of date is the kind of number that gets quoted later.",
+   "measurement_base": {
+    "sha": "da4427de81ea7f30dd9fb7370ac2c32c04e2acf3",
+    "n_registered": 206,
+    "n_can_reach": 54,
+    "counts_by_path": {
+     "off": 1,
+     "request": 5,
+     "state_priced": 48
+    }
+   },
+   "commit_parent": {
+    "sha": "bb3a65f1d4167d7aca30a4477f3dd39b1f7d331a",
+    "n_registered": 209,
+    "n_can_reach": 57,
+    "counts_by_path": {
+     "off": 1,
+     "request": 5,
+     "state_priced": 51
+    }
+   },
+   "arms_that_reach_at_the_parent_and_did_not_exist_at_the_base": [
+    "covex-v6-fair-c5attr-rr",
+    "covex-v6-fair-c5attr-rr-alltypes",
+    "covex-v6-fair-c5attr-rr-off"
+   ],
+   "classification_of_those": "all three are the covex-v6-fair-c5attr-rr family (D190 (5)'s ALERT release re-check on the rung-3 base), built on the same V6StateArm, so they are `state_priced`: they can change a decision inside the band and NONE of them is measured on a cell by this commit. They are another session's build and their own pre-registration governs them.",
+   "how": "`git archive <parent> experiments` into a scratch tree with this base's results/ and data/ symlinked in, because arm CONSTRUCTION reads committed result JSONs (baselines/profiles.py) and those are data, not policy. Reach is decided by constructed attributes, which that supplies."
+  },
+  "the_151_NON_REACHING_ARMS_two_registers": {
+   "_what": "deliverable 1 asks for byte identity for EVERY arm that does not reach the counterfactual. 151 arms do not, and 42 dry cells is what one evening of this machine buys at 270 CPU-seconds a cell, so the claim is made in TWO registers and neither is dressed as the other",
+   "OBSERVED": "15 non-reaching arms measured on a dry cell before and after, byte-identical, with 15 of them checked against their own committed d179 bar",
+   "CONSTRUCTED": "81 of the 151 non-reaching arms are proved unable to reach the changed functions by a STATIC IMPORT CLOSURE over their own class modules: cf_objective and cf_planner are not in it, so the arm cannot call a function this commit changed. For the other 70 the closure is UNINFORMATIVE and is not counted as a proof: their class module is a hub (`arms`, `arms_published`, `arms_builder`, `arms_kvprefetch`) that imports the whole registry, so cf_objective appears in the closure of every arm defined there regardless of what that arm does. For those the evidence is the construction fact that they hold no counterfactual engine, plus the measured digests.",
+   "closure_check": {
+    "n_non_engine_arms": 151,
+    "n_whose_closure_EXCLUDES_both": 81,
+    "n_whose_closure_includes_one": 70,
+    "register": "a closure that EXCLUDES cf_objective makes a byte-identity pass for that arm true and GUARANTEED BY THE CODE: the arm cannot call a function this commit changed. A closure that includes it is NOT evidence of a decision path, only that some module it imports imports it; those arms are named rather than counted away."
+   },
+   "arms_whose_closure_is_uninformative": [
+    "always-cloud-fcfs",
+    "attentionstore",
+    "attentionstore-prefetch",
+    "attentionstore-prefetch-noyield",
+    "attentionstore-prefetch-off",
+    "b10-blocking-aware",
+    "b7-edf-feasibility",
+    "b9",
+    "builder-acfcfs",
+    "builder-default",
+    "builder-s1-fairshare",
+    "builder-s1-feasible",
+    "builder-s1-lateness",
+    "builder-s2-all",
+    "builder-s2-value",
+    "builder-s3-whatif",
+    "builder-s4-adaptive",
+    "builder-s4-llf",
+    "builder-s4-reserve",
+    "builder-s6-decline",
+    "builder-s7-always-recent",
+    "builder-s7-degrade",
+    "cascade-routing",
+    "clockwork",
+    "confidence-cascade",
+    "covex-v6-rules",
+    "covex-v6-rules-uo",
+    "covex-v6-rules-wo",
+    "covstream",
+    "device-only",
+    "eco-llm",
+    "edf",
+    "edf-piece1024",
+    "edf-piece2048",
+    "ekya",
+    "hybrid-llm",
+    "inar-vl",
+    "kvflow",
+    "kvflow-prefetch",
+    "kvflow-prefetch-noyield",
+    "kvflow-prefetch-off",
+    "llf",
+    "lmcache",
+    "mooncake",
+    "pensieve",
+    "perllm",
+    "preble",
+    "querystream-proactive",
+    "r3-streaming",
+    "rh8-demand-aware-causal",
+    "rh8-demand-aware-oracle",
+    "routellm",
+    "simplestream",
+    "streamscout",
+    "thinking-qwenvl-atdm",
+    "uniscale",
+    "utility-per-cost",
+    "v5-rules",
+    "v5-rules-2",
+    "v5-rules-2-noguard",
+    "v5-rules-2-nojit",
+    "v5-rules-2-off",
+    "v5-rules-noyield",
+    "v5-rules-off",
+    "videostorm",
+    "vllm-priority",
+    "warm-all-lru",
+    "warm-all-lru-noyield",
+    "warm-all-lru-off",
+    "warm-all-lru-reactive"
+   ]
+  }
+ },
+ "_superseded_arms_are_NOT_rerun": "SUPERSEDED ARMS KEEP THEIR COMMITTED RESULTS UNDER THEIR OLD LABELS AND ARE NOT RERUN by this commit, and nobody should 'refresh' them later. The rungs committed before the flip were decided under the correctness-unit comparison; their cells are the record of what those arms did, and re-running them under the new currency would produce DIFFERENT arms wearing the same names. ONLY covex-v6-cf-c5attr (rung 4) IS JUDGED ON THE NEW CODE. Rung 4's own harm is unchanged by the flip (acc_cloud 1.0, acc_device 0.0: the 1.0x row above), so its committed proofs stand; its plan_state component is repriced like every other state-path arm.",
+ "_mechanism_verification": {
+  "step_0_what_would_invalidate_this_run": [
+   "ORIGIN MOVING between the archive and the commit: resolved to ONE literal sha (da4427de81ea7f30dd9fb7370ac2c32c04e2acf3) and used for the archive, the INDEX.md rebuild and the commit parent, because a push landing between two resolutions takes the tree from the old ref and the parent from the new.",
+   "THE SHARED WORKTREE: /tmp/claude-1001/mapwt holds other sessions' uncommitted edits and a SUPERSEDED draft of v5/cf_objective.py. No proof here ran in it and nothing was read from it as code.",
+   "HOST LOAD: concurrent cells have perturbed a digest against its committed value before, so the digest concurrency is recorded and the before side is checked against committed bars.",
+   "THE WRONG INTERPRETER: a digest measured under the repo .venv would not be comparable to a committed bar measured under fmtk, and a mismatch would be uninterpretable. conda run -n fmtk, every run.",
+   "EDITING A TREE WITH A DIGEST IN FLIGHT: the digest ran against a frozen copy."
+  ],
+  "step_1_causal_chain": "D177 (1) rules that the policy's currency is on-time cloud answers. If option_value and device_only_value are converted (cf_objective) while plan_state keeps an inline acc = 0.250 (cf_planner), then every state comparison subtracts an on-time-unit harm from a correctness-unit gain, and the subtraction is meaningless: the harm is inflated 5.6x against a gain that did not move, and HOLD_BACK, whose value IS the harm, inflates with it. Converting both in one commit makes gain, harm and bar one currency, so the comparison D191 (1) states - (weighted gain - weighted harm) > w_d * MARGIN_CF - is dimensionally consistent, and the decisions that change are exactly those where the harm's 5.6x and the gain's 4.0x disagree, a band of width 1.4.",
+  "step_2_instantiation": [
+   {
+    "link": "the currency of a cloud option",
+    "quantity": "cf_objective.option_value",
+    "value": "w * p; 48 accuracy/device combinations give one value",
+    "varies": "yes, with p and w",
+    "evidence": "tests/test_cf_objective_d177.py checks 1 to 5"
+   },
+   {
+    "link": "the currency of the device option",
+    "quantity": "cf_objective.device_only_value",
+    "value": "exactly 0.0 (was 0.071429 at w = 1)",
+    "varies": "no, by ruling: it is the zero",
+    "evidence": "18 combinations asserted 0.0; the request census shows the candidate value moving 0.071429 -> 0.0 on all 56 grid cells"
+   },
+   {
+    "link": "the gain of a state decision",
+    "quantity": "cf_planner.plan_state's gain closure",
+    "value": "w * p_question * (p_warm - p_cold); 0.25 at the test's inputs, was 0.0625",
+    "varies": "yes, 4.0x its superseded value, and identical when a different accuracy is passed",
+    "evidence": "test_cf_objective_d177.py plan_state checks; READ at cf_planner.py's `gain`, which every state candidate's value goes through"
+   },
+   {
+    "link": "the bar",
+    "quantity": "cf_planner._margin -> cf_objective.attainment_margin",
+    "value": "0.65824 (was 0.16456)",
+    "varies": "with w_d through effective_margin",
+    "evidence": "asserted exactly; the margin_source string in every decision names the conversion; READ at the `delta > m_eff` comparison in all three plan_* methods"
+   },
+   {
+    "link": "the harm of a background warm",
+    "quantity": "harm_warm_from_queue_delay",
+    "value": "1.0 per displaced answer at w = 1 (was 0.178571): 5.6x",
+    "varies": "yes, with the displaced probability and w",
+    "evidence": "asserted exactly under rung 2's and rung 4's accuracy arguments; READ by arms_v6state._harm_warm -> plan_state's harm_warm and harm_touch"
+   },
+   {
+    "link": "a decision changing",
+    "quantity": "the chosen candidate of plan_state",
+    "value": "21 of 288 grid decisions move; first at harm 0.125 old / 0.700 new",
+    "varies": "yes",
+    "evidence": "proof 2's decision-log diff across two trees"
+   }
+  ],
+  "step_2b_the_switch_reaches_a_decision": "RUN AND REPORTED: 21 of 288 state decisions differ, with the first one in full, and 0 of 56 request decisions with the candidate census that shows why. Both logs come from two separate processes reading two separate trees.",
+  "step_3_traced_unit": "proof 2's first_deciding_difference is one traced state decision with every input, both harms, both bars, both values and both outcomes, checkable by hand: harm 0.1249997 vs bar 0.16456 gives KEEP; harm 0.7 vs bar 0.65824 gives HOLD_BACK.",
+  "step_4_negative_control": "in the unit tests, on the band case: the bar at infinity gives KEEP and the bar at zero deviates, so the bar is what decides. On the digest side the control is the BEFORE tree, whose 15 non-reaching arms reproduce their committed bars.",
+  "step_5_alternative_explanation": "The 21 moved grid decisions could be produced by (a) the currency flip repricing the harm against the bar [the claimed mechanism], or (b) the margin alone moving 4x, which would move decisions whatever the gain did. What distinguishes them: under (b) the moves would be one-directional and would appear with harm = 0 too, and they do not - with harm = 0 the comparison is EXACTLY scale invariant and the unit test asserts the ratio is unchanged with `==`. Every moved decision has a non-zero harm inside the 1.4x band, which only (a) predicts. A third candidate, (c) the device_only_value zero, cannot explain a STATE decision: plan_state has no device candidate."
+ },
+ "_results_consistency_check": {
+  "1_cross_check_against_committed": [
+   {
+    "quantity": "MARGIN_CF",
+    "this_run": 0.16456,
+    "prior": 0.16456,
+    "source": "v5/cf_margin.py (2cb2d5c1, D169 step 3)",
+    "ratio": 1.0,
+    "agree": true
+   },
+   {
+    "quantity": "MARGIN_CF in on-time units",
+    "this_run": 0.65824,
+    "prior": 0.65824,
+    "source": "cf_pd_proofs / D177 (3)'s 0.6582",
+    "ratio": 1.0,
+    "agree": true
+   },
+   {
+    "quantity": "A_D2_DEV",
+    "this_run": 0.25,
+    "prior": 0.25,
+    "source": "v5/margin_cf_d169.py:22",
+    "ratio": 1.0,
+    "agree": true
+   },
+   {
+    "quantity": "accuracy table cloud_D2 / device",
+    "this_run": "0.25 / 0.071429",
+    "prior": "0.25 / 0.071429",
+    "source": "lh_req_quality.json via value_readers.load_dev_table",
+    "ratio": 1.0,
+    "agree": true
+   },
+   {
+    "quantity": "harm multiplier for rung 2 (5.6x)",
+    "this_run": 5.6,
+    "prior": 5.6,
+    "source": "d191_cf_objective_units_proofs.json's PREDICTION, recorded before any digest was read",
+    "ratio": 1.0,
+    "agree": true
+   },
+   {
+    "quantity": "harm-to-bar shift (1.4x)",
+    "this_run": 1.4000033600080641,
+    "prior": 1.4000033600080641,
+    "source": "same prediction",
+    "ratio": 1.0,
+    "agree": true
+   },
+   {
+    "quantity": "arms reaching cf_objective",
+    "this_run": "54 of 206",
+    "prior": "54 of 206",
+    "source": "the D191 session's reach2 census at an earlier sha",
+    "ratio": 1.0,
+    "agree": true
+   },
+   {
+    "quantity": "dry harm_warm distribution",
+    "this_run": "not remeasured",
+    "prior": "priced 2,297, non-zero 1,596, milli_sum == max == 178",
+    "source": "d188_qcache_key_fix_proofs.json proof_b arm_stats_off",
+    "ratio": 1.0,
+    "agree": true
+   }
+  ],
+  "2_physical_plausibility": "no latency, throughput or size is MEASURED here: every number is a count of expected answers or a decision. The one rate that enters is the queued-ahead price, IMPORTED from live2/d162_price.py (PER_QUEUE_S) and not retyped, giving dt = 0.1536 s for 1,000 uncached tokens, which is the committed per_queue_token. Decision latency p50 0.125 ms at n = 16 is inside the committed budget and unchanged from the base tree.",
+  "3_distribution_sanity": "the grid reports the whole decision log, not a median: 21 of 288 state decisions move and all 21 indices are listed; 288 of 288 move on the REPORTED values, which must move and whose constancy would have meant the two logs came from one tree. The digests are 17+ distinct values over the arm set with row counts spanning more than a factor of three, so no constant appears where a distribution is expected.",
+  "4_definition_audit": {
+   "on-time cloud answer": "P(the cloud's answer arrives by this request's deadline), weighted by w_d; a probability, so a count of answers",
+   "MARGIN_CF": "0.16456 as MEASURED (correctness units, D169 step 3); 0.65824 as USED (on-time units, D177 (3)). ONE declaration, one conversion function, both named at the point of use",
+   "w_d": "TWO DEFINITIONS IN THE TREE, reported above under _w_d_HAS_TWO_DEFINITIONS",
+   "harm_warm": "expected on-time cloud answers lost by requests queued behind a warm; 5.6x its pre-flip value at the committed table",
+   "a state decision": "one plan_state call: WARM / TOUCH / KEEP / RELOAD / HOLD_BACK / SLICE"
+  },
+  "5_claim_linkage": "C5 (joint representation x placement x timing beats decomposed policies under a quality SLO) is the claim the counterfactual exists to test. This commit NEITHER SUPPORTS NOR WEAKENS C5: it makes the objective's units consistent so that a later cell can bear on it at all. Nothing here is a result about a policy, and D177 (1) moves quality from the objective to the OUTCOME, which is where C5's quality SLO is scored offline.",
+  "6_proxy_validity": "the declared LINEAR delivery curve in the state grid is an INSTRUMENT, not a proxy for a workload: it exists so partial displacements can be constructed, because the fitted curve on a dry cell produces harms four orders of magnitude below the band and a step curve produces only whole answers, which clear the bar on both sides. No number from the grid is a result about the policy. The quality table is now a REPORTED field and is no longer a proxy for anything in a decision.",
+  "7_validate_the_control": "the BEFORE side of every digest is checked against its own committed bar, not only against the after side, and the reach census is run on both trees and compared. The unit tests carry both a negative and a positive control. The d171 P2 fix is the control lesson applied: a gate that could not fail was reporting a pass on a mechanism that had become inert."
+ },
+ "_rule_2_classification": "The dry-cell byte identity is INCONCLUSIVE / UNEXERCISED IN MAGNITUDE, not a real negative: the quantity is alive, non-zero and varying, and the workload does not reach the band. The grid comparison is the one that FIRED: 21 of 288 state decisions move, so the mechanism reaches a decision and Step 2b is satisfied. The request-side change is UNEXERCISED IN DECISION on the D171 grid and reaches no committed rung.",
+ "_provenance": {
+  "git_commit": "da4427de81ea7f30dd9fb7370ac2c32c04e2acf3 (base; this file lands in the child commit)",
+  "script": "v5/d177_currency_flip_proofs.py + tests/test_cf_objective_d177.py + d179_offswitch_digest_proofs.py",
+  "model": "n/a (policy arithmetic and dry cells; no model, no engine)",
+  "timestamp": "2026-11-23T11:59:24.045914",
+  "device": "flash (CPU only)",
+  "n": 20,
+  "seed": 4
+ }
+}

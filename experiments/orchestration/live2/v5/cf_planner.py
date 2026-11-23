@@ -85,6 +85,21 @@ import cf_margin as CM                                                         #
 # DEMONSTRATED by running both, not asserted from the algebra.
 MARGIN_WEIGHTED_BY_DEFICIT = True
 
+# D177 (1), THE CURRENCY. Every value this planner compares is a count of expected ON-TIME CLOUD
+# ANSWERS: `cf_objective.option_value` is `w * p`, `device_only_value` is 0.0, `plan_state`'s gain
+# carries NO accuracy factor, and the margin is read through `cf_objective.attainment_margin`. The
+# conversion landed in ONE commit with `cf_objective` because a half-converted planner would
+# subtract on-time-unit harm from correctness-unit gain, which is the error D177 exists to
+# prevent; `cf_objective.CURRENCY_FLIP_STATUS` holds the measured magnitudes.
+#
+# WHAT STILL READS THE QUALITY TABLE, so that nobody looks for a removal that is not here. The
+# table is loaded and REPORTED (D177 (2) makes it reporting only): `self.table` fills the
+# `accuracy_table` trace field and each candidate's `accuracy` detail, and the accuracy arguments
+# are still passed to `cf_objective`, which no longer reads them. No value in this module
+# multiplies by an accuracy.
+VALUE_UNITS = "expected on-time cloud answers (D177 (1))"
+MARGIN_UNITS = "expected on-time cloud answers; MARGIN_CF / A_D2_DEV = 0.65824 (D177 (3))"
+
 # D171 (2): the harm term prices each displaced request's OWN device answer as its fallback, the
 # same replacement semantics D165 (B) gives the gain side. OFF reproduces the pre-D171 term, which
 # passed `acc_dev = 0.0` and so charged a displaced request its FULL cloud accuracy. The switch is
@@ -371,7 +386,27 @@ class Counterfactual:
     # ---- the margin, read exactly once per decision
 
     def _margin(self) -> CM.Margin:
-        return CM.resolve_margin(dry=self.dry, dry_value=self.dry_margin)
+        """The deviation bar, IN ON-TIME UNITS (D177 (3)), read exactly once per decision.
+
+        `cf_margin.MARGIN_CF` stays the one declared constant and stays in the units it was
+        MEASURED in (0.16456, correctness; `cf_margin.resolve_margin` is still its only read).
+        D177 (3) restates it as 0.65824 on-time answers, which is that constant divided by the
+        committed `A_D2_DEV = 0.250` that used to scale both gain and margin, and
+        `cf_objective.attainment_margin` is the one function that does that division. So no second
+        literal is declared anywhere and the conversion cannot drift from `cf_protect_defer`'s,
+        which calls the same function.
+
+        THE DRY PATH IS CONVERTED TOO, deliberately. A dry margin is the caller's explicit bar and
+        a dry proof is a proof about the code, never a result about the policy, but a dry bar that
+        skipped the conversion would sit at a quarter of the scorable one and a dry proof would
+        then test a comparison no cell can make. Every dry caller in the tree passes either the
+        committed MARGIN_CF (`v5/d171_proofs.py`) or an extreme (1e9, 0.0), and both read the same
+        before and after the conversion.
+        """
+        m = CM.resolve_margin(dry=self.dry, dry_value=self.dry_margin)
+        return CM.Margin(CO.attainment_margin(m.value),
+                         m.source + " / cf_objective.A_D2_DEV (D177 (3): on-time units)",
+                         m.scorable)
 
     # ---- dispatch
 
@@ -439,6 +474,14 @@ class Counterfactual:
                        accuracy: float) -> Candidate:
                 after = _queue(start_s, tokens, cached)
                 mine = after.by_id()[decision_id]
+                # REGISTER, AT THE POINT OF USE (D177 (1)): `accuracy`, `p_dev` and `acc["DEVICE"]`
+                # are still passed and are REPORTING ONLY; `option_value` is `w * p` and the harm
+                # rows are `w * (p_before - p_after)`, both counts of on-time cloud answers. The
+                # `HARM_REPLACEMENT_SEMANTICS` branch therefore selects between two arguments that
+                # no value reads: the switch is INERT under this currency, by the arithmetic in
+                # `cf_objective.harm_to_others`, and it is left standing rather than removed
+                # because the ruling it implements (D171 (2)) is still the reason the harm is a
+                # probability difference. A reader must not take its presence for a live lever.
                 harm = CO.harm_to_others(before, after, candidate_req_id=decision_id,
                                          counters=self.counters,
                                          acc_device=(acc["DEVICE"]
@@ -481,7 +524,12 @@ class Counterfactual:
             elif not timed_out:
                 timed_out = True
 
-            # 4. the device answers (D152 (2): "reject" means the device answers)
+            # 4. the device answers (D152 (2): "reject" means the device answers). WORTH EXACTLY
+            # ZERO under D177 (1) and that is the flip's largest semantic change: the device
+            # answer is the INCUMBENT, not a candidate competing on value, so this candidate wins
+            # only when every cloud option is worth a negative number (harm over gain). Before the
+            # flip it was `w * p_dev * 0.071429` and could outscore a low-probability cloud
+            # option. `p_device_on_time` is still computed and still reported here.
             cands.append(Candidate("DEVICE_ANSWERS",
                                    value=CO.device_only_value(w, p_dev, acc["DEVICE"]),
                                    gain=CO.device_only_value(w, p_dev, acc["DEVICE"]),
@@ -560,10 +608,22 @@ class Counterfactual:
                    tokens_to_build: int = 0) -> Decision:
         """Warm, touch, keep, reload, hold back or slice (D150's four levers plus keep and reload).
 
-        Scored by reader 2's gain, `w * p_question * accuracy * (p_warm - p_cold) - harm`, which is
-        `v5/value_readers.py::warm_keep_reader`'s arithmetic and is reproduced here over the
-        candidate set rather than re-derived: the counterfactual and the readers maximise the SAME
-        objective (spec v5 section 7.1, session A's requirement 5).
+        Scored by `w * p_question * (p_warm - p_cold) - harm`, a count of expected ON-TIME CLOUD
+        ANSWERS (D177 (1)).
+
+        THE INLINE `acc` FACTOR IS GONE, and it is the whole reason this file and `cf_objective`
+        are one commit. This gain used to be `w * p_question * accuracy * (p_warm - p_cold)`, with
+        `accuracy = table["cloud_D2"] = 0.250` multiplied in HERE and not through
+        `cf_objective.option_value`; converting the harm alone would have left this gain in
+        correctness units. The gain and the margin are both 4.0x larger than before (the factor
+        0.250 removed from one, divided out of the other), a device-fallback-priced harm is 5.6x
+        larger, and `cf_objective.CURRENCY_FLIP_STATUS` records the band of decisions that moves.
+
+        `accuracy` is still accepted and still REPORTED on every candidate, because D177 (2) makes
+        the quality table reporting only rather than absent, and the readers' arithmetic it used to
+        reproduce (`v5/value_readers.py::warm_keep_reader`) is the value READER D177 (2) removes:
+        that module and the arms that select a reader are not this commit's, so the difference is
+        reported here and not edited there.
         """
         m = self._margin()
         acc = float(self.table["cloud_D2"]) if accuracy is None else float(accuracy)
@@ -578,7 +638,8 @@ class Counterfactual:
         with self.clock.time_decision("state", decision_id=decision_id, device_id=device_id,
                                       n_candidates=len(STATE_CANDIDATES)) as t:
             def gain(p_warm: float, p_cold: float, harm: float) -> float:
-                return (w * float(p_question) * acc * (float(p_warm) - float(p_cold))) - float(harm)
+                # NO ACCURACY FACTOR (D177 (1)): on-time cloud answers on both sides of the minus.
+                return (w * float(p_question) * (float(p_warm) - float(p_cold))) - float(harm)
 
             g_warm = gain(p_on_time_warm, p_on_time_cold, harm_warm)
             cands.append(Candidate("WARM", value=(g_warm if warm_expressible else None),
@@ -588,6 +649,8 @@ class Counterfactual:
                                    detail={"horizon_s": round(horizon_s, 6),
                                            "p_question": float(p_question),
                                            "accuracy": acc,
+                                           "accuracy_enters_value": False,
+                                           "value_units": VALUE_UNITS,
                                            "unexpressible_note": (
                                                None if warm_expressible else
                                                "warm-ahead is not expressible in the committed "
@@ -769,6 +832,8 @@ class Counterfactual:
                                            "ordering": "oldest-first within a device: append-only "
                                                        "KV cannot prefill a later frame first "
                                                        "(D148, D152 (3))"}))
+            # LEAVE_TO_DEVICE is worth EXACTLY ZERO under D177 (1), as DEVICE_ANSWERS is in
+            # `plan_request`; `device_only_value` says why at its definition.
             cands.append(Candidate("LEAVE_TO_DEVICE",
                                    value=CO.device_only_value(w, p_dev, acc["DEVICE"]),
                                    gain=CO.device_only_value(w, p_dev, acc["DEVICE"]), harm=0.0,
@@ -831,7 +896,10 @@ class Counterfactual:
                                    "coarse_level": "offered-load forecast (Little's law)"},
             "margin": {"declared_in": "v5/cf_margin.py::MARGIN_CF",
                        "value": CM.MARGIN_CF, "is_set": CM.MARGIN_CF is not None,
-                       "rule": CM.MARGIN_CF_RULE},
+                       "value_on_time_units": (CO.attainment_margin(float(CM.MARGIN_CF))
+                                               if CM.MARGIN_CF is not None else None),
+                       "units": MARGIN_UNITS, "rule": CM.MARGIN_CF_RULE},
+            "value_units": VALUE_UNITS,
             "safety_factor": self.safety,
             "imposed_rules": {"no_RECENT_for_LH": IMPOSED_NO_RECENT_FOR_LH,
                               "note": IMPOSED_NO_RECENT_NOTE},

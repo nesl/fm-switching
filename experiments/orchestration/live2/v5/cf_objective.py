@@ -1,15 +1,40 @@
 #!/usr/bin/env python3
 """THE OBJECTIVE the v5 counterfactual maximises, with per-device deficit weighting and harm to
-other devices (D151 (4), D149 (1), D152 (1) as amended by D155 (3)). CPU only.
+other devices (D151 (4), D149 (1), D152 (1) as amended by D155 (3), RECAST BY D177 (1)). CPU only.
 
-    V = sum over devices i of  w_i * E[correct answers delivered BY THE DEADLINE]  minus harm
+THE CURRENCY IS EXPECTED ON-TIME CLOUD ANSWERS (D177 (1)), and this module and
+`cf_planner.plan_state` were converted in ONE commit, for the reason recorded under
+`CURRENCY_FLIP_STATUS`: converting either side alone subtracts on-time-unit harm from
+correctness-unit gain.
+
+    V = sum over devices i of  w_i * E[on-time CLOUD answers]  minus harm
 
 and for one robot question with a cloud option `o`:
 
-    V_i(o)      = w_i * [ P(o on time) * acc(o)  +  (1 - P(o on time)) * P(dev on time) * acc(dev) ]
-    V_i(DEVICE) = w_i * P(dev on time) * acc(dev)
-    harm        = sum over other devices j of  w_j * ( V_j(before this option) - V_j(after) )
+    V_i(o)      = w_i * P(o on time)
+    V_i(DEVICE) = 0            (a device answer is not a CLOUD answer; it is the incumbent)
+    harm        = sum over other devices j of  w_j * ( P_j(before this option) - P_j(after) )
     objective   = V_i(o) - harm
+
+    w_d         = 1 + 2.0 * shortfall_d / target_d, floored at 1 (D185), supplied by the live
+                  deficit feed (`live2/deficit_feed.py`, `deficit_gain_d178.GAIN = 2.0`) at the
+                  rungs that feed it; `DeficitCounters` below is the v5 fallback and keeps its
+                  own declared form, `1 + DEFICIT_GAIN * shortfall`, which is 1.0 for every
+                  device whose counter is never fed
+    margin      = w_d * MARGIN_CF with MARGIN_CF = 0.65824 ON-TIME ANSWERS (D177 (3),
+                  `attainment_margin`, read through `cf_planner._margin`)
+
+WHY THERE IS NO ACCURACY FACTOR LEFT IN A VALUE. At runtime there is no ground truth, so no
+decision compares two answers' chances of being correct; the cloud with full evidence is more
+accurate than the device on all three query types (measured), so within a type the accuracy
+difference is a positive constant that never changes a decision. Correctness is the OUTCOME,
+measured OFFLINE (D177 (1)), and the quality table is REPORTING ONLY (D177 (2)). The accuracy
+arguments of `option_value`, `harm_to_others` and `harm_warm_from_queue_delay` are therefore
+still accepted, still reported, and NO LONGER READ BY ANY VALUE. They are kept rather than
+deleted so that no caller's signature changes in the same commit as the currency, and each one
+says so at its own definition. The one case where the cloud was NOT more accurate is the
+recent-frames ban, which stays as an IMPOSED RULE in `cf_planner` (D152 (2), D155 (4)) and not as
+an accuracy number.
 
 THREE THINGS IN THAT FORMULA ARE RULINGS AND NOT ARITHMETIC, so they are named here.
 
@@ -30,12 +55,13 @@ THREE THINGS IN THAT FORMULA ARE RULINGS AND NOT ARITHMETIC, so they are named h
    D155 (1) says are being produced; until they land, every report must say that the "by the
    deadline" amendment is live on the cloud side and inert on the device side.
 
-2. THE DEFICIT WEIGHT STEERS ON ON-TIME WHILE THE OBJECTIVE SCORES CORRECTNESS (spec v5 section
-   7.7, gap G14). D152 (1) keeps the counters on observable on-time because correctness is not
-   observable at run time. This module resolves the mismatch by LOCATING it rather than smoothing
-   it: `w_i` is computed from observed on-time outcomes ONLY, and the quantity it multiplies is
-   expected CORRECTNESS. So the weight says WHOSE answers matter more and the accuracy table says
-   WHICH ANSWER is worth more, and neither is asked to do the other's job.
+2. THE DEFICIT WEIGHT AND THE OBJECTIVE NOW STEER ON THE SAME QUANTITY, which CLOSES gap G14
+   (spec v5 section 7.7). It was open because D152 (1) keeps the counters on observable on-time
+   while the objective scored expected CORRECTNESS, so the weight and the quantity it multiplied
+   were in different currencies and the mismatch was LOCATED rather than smoothed. D177 (1) puts
+   the objective in on-time units too, so `w_i` is computed from observed on-time outcomes and
+   multiplies an expected on-time count. The gap is not closed by a conversion invented here: it
+   is closed by the ruling that the policy's currency is the one thing the counters can observe.
 
    The geometry that follows matters more than the statement, and it is proved in
    `weight_is_within_device_invariant`: `w_i` is a per-device scalar, so inside ONE device's
@@ -192,9 +218,10 @@ ON_TIME_TARGET_SOURCE = "D133 robot headline: p 0.90 within the deadline, applie
 DEFICIT_GAIN = 1.0
 
 OBJECTIVE_STATEMENT = (
-    "deficit-weighted expected CORRECT answers delivered BY THE DEADLINE from either source, "
-    "minus harm to other devices (D151 (4), D152 (1) as amended by D155 (3)); the same objective "
-    "every reader in spec v5 section 7 maximises")
+    "deficit-weighted expected ON-TIME CLOUD ANSWERS, minus the on-time cloud answers other "
+    "devices lose (D177 (1), D191 (1); D151 (4), D152 (1), D155 (3) for the deadline and the "
+    "weighting); correctness is the OUTCOME, measured offline, and the quality table is "
+    "reporting only (D177 (2))")
 
 
 # ---------------------------------------------------------------------------
@@ -260,8 +287,8 @@ class DeficitCounters:
         return {"gain": self.gain, "n_updates": self.n_updates,
                 "target": ON_TIME_TARGET, "target_source": ON_TIME_TARGET_SOURCE,
                 "steers_on": "observable on-time (D152 (1))",
-                "objective_scores": "correct answers delivered by the deadline (D155 (3))",
-                "mismatch": "gap G14, located rather than smoothed; see module docstring",
+                "objective_scores": "on-time cloud answers (D177 (1))",
+                "mismatch": "gap G14 CLOSED by D177 (1): one currency; see module docstring",
                 "devices": {k: {"served": v.served, "on_time": v.on_time,
                                 "rate": round(v.rate, 6),
                                 "shortfall": round(v.shortfall(), 6),
@@ -322,33 +349,43 @@ def p_device_on_time(deadline_s: float, wait_s: Optional[float] = None, *,
 # for a settled question is how a superseded reading comes back.
 #
 # ---------------------------------------------------------------------------
-# THE CURRENCY FLIP IS NOT IN THIS COMMIT, AND THAT IS A MEASUREMENT AND NOT AN OMISSION.
+# THE CURRENCY FLIP IS IN THIS COMMIT, WITH `cf_planner.plan_state`, AND THE PAIRING IS THE POINT.
 #
-# D177 (1) also replaces the CURRENCY of `option_value` and `device_only_value`: w * P(on time)
-# instead of expected correctness. That edit is NOT here, because converting this module alone
-# makes the arithmetic INCONSISTENT at its only live consumer, and the numbers are these:
+# D177 (1) replaces the CURRENCY of `option_value` and `device_only_value`: w * P(on time)
+# instead of expected correctness. Converting THIS MODULE ALONE would make the arithmetic
+# inconsistent at its own live consumer, and the numbers are these:
 #
-#   `cf_planner.plan_state` scores every candidate as
+#   `cf_planner.plan_state` scored every candidate as
 #        w * p_question * acc * (p_warm - p_cold)  -  harm
-#   with `acc = table["cloud_D2"] = 0.250` computed INLINE (cf_planner.py, plan_state's `gain`),
-#   not through `option_value`. So converting `option_value` converts the HARM and leaves that
-#   GAIN in correctness units, and the subtraction mixes two currencies - the exact error D177
-#   exists to prevent.
+#   with `acc = table["cloud_D2"] = 0.250` computed INLINE (plan_state's `gain`), not through
+#   `option_value`. Converting `option_value` converts the HARM and would leave that GAIN in
+#   correctness units, and the subtraction would mix two currencies - the exact error D177 exists
+#   to prevent. THE INLINE FACTOR IS THEREFORE GONE from `plan_state` in the same commit.
 #
 #   MEASURED, with one displaced on-time answer at w = 1, through the two live callers:
 #     arms_v6state._harm_warm (acc_cloud 0.25, acc_device 0.071429)   0.178571 -> 1.000000, 5.6x
 #     cf_protect_defer.harm_on_time (acc_cloud 1.0, acc_device 0.0)   1.000000 -> 1.000000, 1.0x
-#   RUNG 4 DOES NOT NEED THE FLAG: it already gets on-time units from its OWN arguments, which is
-#   what `cf_protect_defer` says it does and is now checked rather than believed. Rung 2 and
-#   rung 3 do need it, and they are the ones whose gain is unconverted. `plan_state`'s HOLD_BACK
-#   candidate is valued at `harm_warm` ITSELF, so it would inflate by that same 5.6x against an
-#   unchanged gain.
+#   RUNG 4 DID NOT NEED THE FLIP to be in on-time units: it already gets them from its OWN
+#   arguments, which is what `cf_protect_defer` says it does and is checked rather than believed.
+#   Rungs 2 and 3 are the ones whose gain was unconverted.
 #
-# So the flip is owed, and it is owed TOGETHER WITH plan_state's gain and the removal of the
-# value reader's accuracy factor (D177 (2)), in one commit, on a base another session owns. What
-# is landed here is the part that is provably DECISION-NEUTRAL: four functions that nothing in
-# the decision path called before, and one committed constant. `option_value` and
-# `device_only_value` are untouched below, so no arm's arithmetic moves.
+# WHAT MOVES, STATED AS ARITHMETIC AND NOT AS A HOPE. In `plan_state` the gain and the margin are
+# both multiplied by 1 / 0.250 = 4.0 (the gain loses `acc = 0.250`; the margin is divided by
+# `A_D2_DEV = 0.250`), while a harm that was priced with the device fallback live is multiplied by
+# 1 / (0.250 - 0.071429) = 5.6. A comparison with harm = 0 is therefore EXACTLY SCALE INVARIANT
+# and cannot move; every decision that can move is one where the harm term is within a factor
+# 5.6 / 4.0 = 1.4 of its side of the bar. For `HOLD_BACK`, whose value IS `harm_warm`, the bar
+# moves from `harm_warm_old > 0.16456` to `harm_warm_old > 0.16456 / 1.4 = 0.11754`, so the band
+# that changes is a harm_warm of 0.11754 to 0.16456 old units at w = 1.
+#
+# ON A DRY CELL THAT BAND IS EMPTY, AND THAT IS NOT "THE FLIP IS DECISION-NEUTRAL". The committed
+# rung-2 dry counters (`d188_qcache_key_fix_proofs.json`, proof_b arm_stats_off) price harm_warm
+# 2,297 times and make it non-zero 1,596 times, with milli_sum == max == 178: 1,595 of the 1,596
+# non-zero values are below 5e-4, four orders of magnitude under the band, and the single outlier
+# 0.178 clears the bar on both sides of the flip. The mechanism is alive, non-zero and varying,
+# and the band is simply far away ON THIS WORKLOAD: CLAUDE.md Rule 2's UNEXERCISED IN MAGNITUDE.
+# A live cell prices differently (D174 part B3), and no byte-identity digest from a dry cell may
+# be read as evidence that the flip does not matter.
 LEX_READING = ("settled by user ruling D191 (1): ONE comparison decides, in counts of on-time "
                "cloud answers; a secondary key breaks EXACT ties only")
 LEX_READING_SUPERSEDED_CONCERN = (
@@ -358,11 +395,15 @@ LEX_READING_SUPERSEDED_CONCERN = (
     "lives inside w_d) and confines the secondary key to exact ties, so neither reading survives "
     "as a choice")
 CURRENCY_FLIP_STATUS = (
-    "NOT IN THIS COMMIT. D177 (1)'s conversion of option_value and device_only_value is owed "
-    "together with cf_planner.plan_state's inline gain (which carries acc = 0.250) and the "
-    "removal of the value reader (D177 (2)); converting this module alone would make plan_state "
-    "subtract on-time-unit harm from correctness-unit gain and would inflate harm_warm and "
-    "HOLD_BACK by 5.6x against an unchanged gain. Measured, not assumed; see the note above.")
+    "CLOSED. D177 (1)'s conversion of option_value and device_only_value is IN, in the same "
+    "commit as cf_planner.plan_state's inline `acc = 0.250` (removed) and cf_planner._margin's "
+    "read of attainment_margin, so no decision subtracts on-time-unit harm from correctness-unit "
+    "gain at any point in the history. The quality table is reporting only (D177 (2)); the value "
+    "READER itself lives in v5/value_readers.py and in the arms that select one, which this "
+    "commit does not touch, and the `covex-v6-fair-novalue` arm is where its removal is scored. "
+    "Measured, not assumed: gain and margin x4.0, a device-fallback-priced harm x5.6, so the "
+    "band that moves is a HOLD_BACK harm_warm of 0.11754 to 0.16456 in old units at w = 1, and "
+    "that band is empty on a dry cell (UNEXERCISED IN MAGNITUDE, not decision-neutral).")
 
 # THE a_D2_DEV FACTOR, NOT RETYPED FROM A COMMENT. It is a committed constant whose authoritative
 # declaration is `v5/margin_cf_d169.py:22`, the script that COMPUTED MARGIN_CF: its line 92 is
@@ -464,8 +505,10 @@ def attainment_margin(margin_cf: float) -> float:
     `unscorable`), and no committed ruling supplies a margin in rate units. If a rate-unit
     comparison is ever wanted, the margin for it has to be measured, not divided out of this one.
 
-    IT IS ALSO NOT COMMENSURABLE WITH `cf_planner.plan_state`'s GAIN, which carries the 0.250
-    factor inline. See CURRENCY_FLIP_STATUS: that is why the currency flip is not in this commit.
+    IT IS NOW COMMENSURABLE WITH `cf_planner.plan_state`'s GAIN, and it was not before this
+    commit: the inline `acc = 0.250` is gone from that gain and `cf_planner._margin` returns the
+    margin through THIS function, so both sides of every state comparison are counts of on-time
+    answers. See CURRENCY_FLIP_STATUS.
     """
     return float(margin_cf) / A_D2_DEV
 
@@ -531,20 +574,40 @@ def lex_better(cand: Tuple[float, float], incumbent: Tuple[float, float]) -> boo
 # Option values
 
 
-def option_value(weight: float, p_cloud_on_time: float, acc_cloud: float,
-                 p_dev_on_time: float, acc_dev: float) -> float:
-    """Expected correct answers delivered by the deadline from EITHER source, weighted.
+def option_value(weight: float, p_cloud_on_time: float, acc_cloud: float = 1.0,
+                 p_dev_on_time: float = 1.0, acc_dev: float = 0.0) -> float:
+    """`w * P(cloud answer on time)`: the expected ON-TIME CLOUD ANSWERS this option delivers.
 
-    The second term is the whole of D155 (3)'s amendment: when the cloud's answer does not arrive,
-    the device's does, and it counts if and only if it is inside the deadline.
+    D177 (1). The clamp on `p` stays, so a prediction outside [0, 1] cannot buy or lose value.
+
+    THE LAST THREE ARGUMENTS ARE REPORTING ONLY AND ARE NOT READ (D177 (2)), and they are kept
+    rather than deleted so that the currency and every caller's signature do not change in one
+    commit. They are not a write-only mechanism masquerading as a live one: nothing anywhere
+    treats this function's accuracy arguments as a decision input any more, the callers that pass
+    them do so to keep reporting the table they came from, and the two unit tests
+    `test_cf_objective_d177.py` assert that varying them cannot move the return value. The
+    superseded reading was D155 (3)'s "correct answers from EITHER source": a value of
+    `p * acc_cloud + (1 - p) * p_dev * acc_dev`, where the second term priced the device's own
+    answer. Under D177 the device answer is the INCUMBENT and not a candidate, so it is worth no
+    CLOUD answers and the term is gone; the device's delivery probability keeps its two live
+    roles, in `p_device_on_time` for the recent-frames rule and in the base policy's feasibility.
     """
     p = max(min(float(p_cloud_on_time), 1.0), 0.0)
-    return float(weight) * (p * float(acc_cloud)
-                            + (1.0 - p) * float(p_dev_on_time) * float(acc_dev))
+    return float(weight) * p
 
 
-def device_only_value(weight: float, p_dev_on_time: float, acc_dev: float) -> float:
-    return float(weight) * float(p_dev_on_time) * float(acc_dev)
+def device_only_value(weight: float, p_dev_on_time: float = 1.0, acc_dev: float = 0.0) -> float:
+    """EXACTLY 0.0: a device answer delivers no on-time CLOUD answers (D177 (1)).
+
+    THE LARGEST SINGLE SEMANTIC CHANGE IN THE FLIP, named where it happens. It was
+    `w * p_dev * acc_dev`, which at the committed table is `w * 1.0 * 0.071429`, so the
+    DEVICE_ANSWERS and LEAVE_TO_DEVICE candidates used to compete on value; now they are the
+    reference option worth zero, which is what "the device always answers" (D19, D152 (2)) means
+    in a currency of cloud answers. The arguments are kept and not read, for the reason given in
+    `option_value`. On origin this reaches `plan_request` and `plan_sync` only, whose sole caller
+    is the `v5-full` family.
+    """
+    return 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -574,17 +637,22 @@ def harm_to_others(before: "CC.QueuePlan", after: "CC.QueuePlan", *, candidate_r
     probability moved, with its own device's weight and its own accuracy, so the harm is in the
     same units as the gain and is never a tuned penalty.
 
-    D171 (2), REPLACEMENT SEMANTICS ON BOTH SIDES OF THE SUBTRACTION. A displaced request does not
-    lose its whole cloud answer: its own DEVICE answers instead, exactly as D165 (B) prices the
-    gain side. Each row is therefore
+    UNDER D177 (1) EACH ROW IS `w_o * (p_before - p_after)`, a count of the on-time CLOUD answers
+    that other device loses, which is the form D191 (1) states. It is computed through
+    `option_value`, so the harm and the gain cannot drift apart.
 
-        w_o * (p_before - p_after) * (acc_cloud_o - acc_dev_o * p_dev_on_time_o)
-
-    which is what `option_value` returns when it is given the real `acc_dev` instead of 0.0, and
-    `acc_dev = 0.0` is what it was given before. The old term valued a displaced request at its
-    FULL cloud accuracy, so it OVERSTATED harm wherever the other device could have answered: the
-    counterfactual was more conservative than the objective says it should be. The device's own
-    delivery probability is the measured one (D171 (3)), keyed on that request's own question.
+    D171 (2)'s REPLACEMENT SEMANTICS IS NOW ARITHMETICALLY INERT HERE, and that is a consequence
+    of the currency and not a reversal of the ruling. Each row used to be
+    `w_o * (p_before - p_after) * (acc_cloud_o - acc_dev_o * p_dev_on_time_o)`, where the
+    `acc_dev_o` term is what D171 (2) added: a displaced request does not lose its whole cloud
+    answer, because its own device answers instead. In a currency of CLOUD answers that
+    subtraction has nothing to price - the displaced device's own answer is not a cloud answer -
+    so the whole accuracy factor is gone and with it the distinction the switch
+    `cf_planner.HARM_REPLACEMENT_SEMANTICS` selects. The ruling survives where it is still
+    expressible: the displaced device's answer standing is why its loss is a probability
+    difference and not a whole answer (D175 (1), D178 (4)). The accuracy arguments and the
+    measured `p_device_on_time` (D171 (3)) are still computed and still REPORTED per row, so a
+    reader can see what was displaced; they no longer enter `value_lost`.
     """
     b = before.by_id()
     a = after.by_id()
@@ -667,9 +735,12 @@ def harm_warm_from_queue_delay(uncached_tokens: int,
     its slack by the same amount.
 
     THE VALUATION IS `option_value`, the same function `harm_to_others` uses, so this term and
-    the request-decision harm are in one currency and D171 (2)'s replacement semantics apply to
-    both: a displaced request falls back to ITS OWN DEVICE and is never charged its full cloud
-    accuracy.
+    the request-decision harm are in one currency: under D177 (1), `w * (p_before - p_after)` on-
+    time cloud answers per displaced request. `acc_cloud` and `acc_device` are still accepted and
+    no longer read (see `option_value`), which is why THIS CALLER'S numbers move the most of
+    anything in the flip: `arms_v6state._harm_warm` passes the committed table (0.250 and
+    0.071429), so each displaced answer was worth 0.178571 and is now worth 1.000000, a factor
+    5.6, while `cf_protect_defer.harm_on_time` passes 1.0 and 0.0 and does not move at all.
 
     THE CAP IS COUNTED. A warm whose added delay would push a request's first token past the
     healthy-regime bound is outside the range the D162 model was fitted on, so the delay is capped
@@ -718,6 +789,10 @@ def weight_is_within_device_invariant(p_values: Sequence[float], accs: Sequence[
     mistake: "the objective is deficit weighted" reads as if the weighting affects every decision,
     and inside one request's candidate set it provably affects none. CLAUDE.md Rule 2 calls this
     shape `cancelled by geometry`, and a mechanism that cancels must be claimed where it does not.
+
+    UNDER D177 (1) the `accs` argument no longer enters the values, so the argmax is over
+    `p_values` alone. The proof is about `w_i` and is unaffected; `accs` is kept so the call sites
+    and the reported rows are unchanged, and the `values` rows show the on-time counts.
     """
     rows = []
     for w in weights:

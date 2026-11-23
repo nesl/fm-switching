@@ -18,13 +18,15 @@ left-hand side three orders of magnitude below the bar. A gate that never opens 
 Rule 2's `unscorable`; it produces a believable null rather than a crash, and NO BYTE-IDENTITY
 DIGEST CAN SEE IT. These tests are the only check that can.
 
-HOW THE ON-TIME UNITS ARE OBTAINED IN THIS COMMIT, which is the thing to get right. D177 (1)'s
-global conversion of `option_value` is NOT in this commit (`cf_objective.CURRENCY_FLIP_STATUS`
-says why, with the measured numbers). The units come from the CALL: `harm_warm_from_queue_delay`
-with `acc_cloud=1.0, acc_device=0.0` evaluates the committed `option_value` to
-`w * (p * 1.0 + (1 - p) * p_dev * 0.0)` = `w * p`, which is exactly the on-time form. That is
-what `cf_protect_defer.harm_on_time` passes, so rung 4's harm is already in the margin's units,
-and these tests prove it rather than assuming it.
+HOW THE ON-TIME UNITS ARE OBTAINED, UPDATED BY THE D177 (1) CURRENCY FLIP. When these tests were
+written the flip was not in any commit and the units came from the CALL:
+`harm_warm_from_queue_delay` with `acc_cloud=1.0, acc_device=0.0` evaluated the then-committed
+`option_value` to `w * (p * 1.0 + (1 - p) * p_dev * 0.0)` = `w * p`, which is the on-time form,
+and that is what `cf_protect_defer.harm_on_time` passes. SINCE THE FLIP the units come from
+`option_value` ITSELF, which is `w * p` for every caller and reads no accuracy at all, so rung 4's
+numbers are unchanged (1.0x) and rungs 2 and 3 moved onto the same currency (5.6x on a harm priced
+with the device fallback). Three checks below were rewritten with the flip and say so where they
+stand; everything else in this file passed before and after it, unchanged.
 
 Because the units are COUNTS, the two cases the user named are exact equalities and are asserted
 with `==` rather than a tolerance:
@@ -113,24 +115,27 @@ check("a delay beyond the D160 (2) healthy bound is CAPPED and the cap is COUNTE
       CO.harm_warm_from_queue_delay(10 ** 9, others(0.0001), p_on_time=p_step, acc_cloud=1.0,
                                     acc_device=0.0).capped is True)
 
-# THE UNIT IS OBTAINED FROM THE CALL, AND THAT IS CHECKED AND NOT BELIEVED. Same two inputs, the
-# accuracy arguments rung 2 and rung 3 pass instead: the result is the SAME displacement priced in
-# the OTHER currency, which is exactly why those rungs cannot be converted without their gain.
+# REWRITTEN BY THE D177 (1) FLIP, and the superseded reading is kept in the text because it is
+# what these three checks asserted before it. The unit used to be obtained FROM THE CALL: the same
+# displacement under rung 2's accuracy arguments returned `w_d * (0.25 - 0.071429) = 0.491070`, the
+# correctness currency, and that 5.6x gap was the measured reason the flip could not land on one
+# side alone. It now returns `w_d` whatever accuracy is passed, which is the flip.
 h1_corr = CO.harm_warm_from_queue_delay(1000, others(0.0001), p_on_time=p_step,
                                         acc_cloud=0.25, acc_device=0.071429)
-check("the SAME displacement under rung 2/3's accuracy arguments is 0.178571 * w_d, the "
-      "CORRECTNESS currency: the units come from the CALL, so one module serves both",
-      close(h1_corr.total, W_D * (0.25 - 0.071429 * 1.0), 1e-9),
-      "on-time %.6f vs correctness %.6f, ratio %.4f"
-      % (h1.total, h1_corr.total, h1.total / h1_corr.total))
-check("and that ratio is 5.6, which is WHY the global flip is deferred: plan_state's gain "
-      "carries the 0.250 factor and would not move with it",
-      close(h1.total / h1_corr.total, 1.0 / (0.25 - 0.071429), 1e-6)
+check("SINCE D177 (1) the SAME displacement under rung 2/3's accuracy arguments is EXACTLY w_d "
+      "too: the currency is the module's, not the caller's (==, the units are counts)",
+      h1_corr.total == W_D and h1_corr.total == h1.total,
+      "rung-2 args %.17g, rung-4 args %.17g, superseded correctness reading %.6f"
+      % (h1_corr.total, h1.total, W_D * (0.25 - 0.071429)))
+check("and the 5.6x that USED to separate them is exactly what the flip multiplied rung 2/3's "
+      "harm by, which CURRENCY_FLIP_STATUS records as CLOSED together with plan_state's gain",
+      close(h1_corr.total / (W_D * (0.25 - 0.071429)), 1.0 / (0.25 - 0.071429), 1e-6)
       and "plan_state" in CO.CURRENCY_FLIP_STATUS
-      and "NOT IN THIS COMMIT" in CO.CURRENCY_FLIP_STATUS,
-      "%.4f" % (h1.total / h1_corr.total))
-check("the committed option_value is UNTOUCHED by this commit: under acc 1.0 / 0.0 it already "
-      "returns w * p, which is the on-time form",
+      and CO.CURRENCY_FLIP_STATUS.startswith("CLOSED"),
+      "%.4f" % (h1_corr.total / (W_D * (0.25 - 0.071429))))
+check("option_value returns w * p, the on-time form, which it did under acc 1.0 / 0.0 before the "
+      "flip and now does for EVERY accuracy argument (asserted exhaustively in "
+      "test_cf_objective_d177.py)",
       close(CO.option_value(W_D, 0.37, 1.0, 1.0, 0.0), W_D * 0.37)
       and close(CO.option_value(1.0, 0.0, 1.0, 1.0, 0.0), 0.0))
 
