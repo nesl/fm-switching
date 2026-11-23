@@ -1,12 +1,14 @@
-# D212 FILLER QUEUE (H100). Policy lists (FINAL_LADDER_CELLS and after) are gated ABOVE every filler list and always run first.
+# D212 FILLER QUEUE (H100), reduced by the user's baseline-set ruling (relayed by flash, 2026-11-23 ~16:00): the committed
+# BASELINE_MATRIX ACTIVE arms plus kvflow-prefetch, cascade-routing and device-only are the paper's baseline set.
+# Policy lists (FINAL_LADDER_CELLS and after) are gated ABOVE every filler list and always run first.
 # order | entry | status
-a | confidence-cascade 1x s4-s7 (_rerun) + hybrid-llm 1x s4-s7 | READY, gated as FILLER_A_CELLS (hybrid-llm did not move in the D205 diff: flagged)
-b | routellm 1x s4-s7 | WAITING on its per-card check (moved via hybrid-llm _features)
-c | cascade-routing 1x s4-s7 | READY, gated as FILLER_C_CELLS (device-only floor by construction)
+a  | confidence-cascade 1x s4-s7 (_rerun) | READY, gated as FILLER_A_CELLS (s4 running from 15:53)
+c  | cascade-routing 1x s4-s7 | READY, gated as FILLER_C_CELLS (device-only floor by construction)
 d1 | simplestream reruns | WAITING on hits 14, 7 (mine)
-d2 | llf, mooncake, eco-llm reruns | WAITING on hit 14 (eco-llm also 16) (mine)
-d3 | inar-vl rerun | WAITING on hits 16, 17 (mine)
-d4 | kvflow, lmcache, pensieve, rh8, attentionstore | WAITING on hits 9, 8 (mine)
-e | covex-v6-base / covex-v6-rules safe subset | READY, gated as D209SAFE_CELLS (running)
-HELD | 0.25x policy cells, ablations (D210), 0.25x baselines affected by hit 14 | HELD
-WAITING ON HIT 6 | preble, uniscale, b9, covex-v6-cf-* | flash's fix
+d2 | llf, mooncake, eco-llm reruns | WAITING on hits 14, 16 (mine)
+d4 | kvflow-prefetch, lmcache (hit 9), attentionstore-prefetch (hit 8) reruns | WAITING (mine)
+e  | covex-v6-base / covex-v6-rules safe subset | READY, gated as D209SAFE_CELLS
+z  | hybrid-llm 1x s4-s7 | OPTIONAL, gated as FILLER_Z_CELLS (last; runs only if otherwise idle)
+CANCELLED (outside the paper's baseline set; defects kept as NOTED GAPS, cells SUPERSEDED AND UNREPORTED; no fix, rerun or score):
+   pensieve, rh8, inar-vl, routellm, preble, b9, uniscale; r3-streaming stays out as superseded
+HELD | 0.25x policy cells, ablations (D210), KV025_RUNGS, 0.25x baselines affected by hit 14 | HELD
