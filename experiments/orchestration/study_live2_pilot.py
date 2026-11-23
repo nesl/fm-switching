@@ -118,6 +118,11 @@ def start_server(host_gib, scheduling_policy=None, extra_flags=None):
     # cache memory". The H100's infrastructure guard stopped the driver cleanly: no skip, no
     # orphan, no cell.json, about 90 s of idle GPU.
     #
+    # SUPERSEDED BY MEASUREMENT 2026-11-23: the text below predicted 984 * 16 = 15,744 usable
+    # from a reserved block. THE ENGINE ACTUALLY REPORTS 15,760 = 985 * 16, so no block is
+    # reserved on the override path and the pool check now expects 15,760. The prediction is left
+    # here, marked, because it is what the 984 failure was diagnosed from and a reader comparing
+    # the two should see both.
     # 985 GIVES 984 * 16 = 15,744 USABLE, EXACTLY EQUAL to max_model_len. That is a knife edge and
     # it is deliberate: the engine's test is STRICT ("is larger than"), so equal passes, and 985
     # is the only value that honours the user's 15,744 ruling without loosening it. IF 985 ALSO
@@ -145,7 +150,21 @@ def start_server(host_gib, scheduling_policy=None, extra_flags=None):
     # real-0.25x entry: with --num-gpu-blocks-override 984 the engine reports 15,744 rather than
     # GPU_KV, so comparing against GPU_KV would STOP every such cell. Any other value still STOPS,
     # and the DEFAULT path is byte-for-byte the previous behaviour.
-    _expect_kv = 15744 if list(extra_flags or []) == _REAL_KV025 else GPU_KV
+    # CORRECTED 2026-11-23, SECOND TIME, AND THIS ONE IS MEASURED. The engine STARTED with
+    # override 985 and reported GPU KV = 15,760 tokens = 985 x 16, so ALL 985 BLOCKS ARE USABLE
+    # on the override path and NO BLOCK IS RESERVED. The reserved-block reading was an INFERENCE
+    # from the 1x relation (profiler 3,935 blocks against a reported 62,944 = 3,934 x 16) and it
+    # does NOT transfer to the override path. 984 failed vLLM's admission check for a different
+    # reason: it needed 3.84 GiB against 3.84 GiB available, an equality that rounding pushed
+    # over, not a missing block.
+    #
+    # So the expectation is 15,760, not 15,744. --max-model-len stays 15,744 and the logical pool
+    # stays 15,736 via the _kv0.25 tag, which leaves the engine holding one block (16 tokens) more
+    # than a single max-length request: real headroom, and still 0.2504 x 62,944.
+    #
+    # THE CELL LINES DO NOT CHANGE, so KV025_CELLS (e6b19712) and KV025_RUNGS_CELLS (52ecf2ae)
+    # keep their hashes and need only a re-gate.
+    _expect_kv = 15760 if list(extra_flags or []) == _REAL_KV025 else GPU_KV
     if info.get("kv_cache_tokens") != _expect_kv:
         srv.stop()
         raise SystemExit(f"GPU pool {info.get('kv_cache_tokens')} != expected {_expect_kv}: STOP")

@@ -165,11 +165,34 @@
    "15744"
   ]
  ],
- "verdict": "PASS: behaviour changes for EXACTLY the two entries that must change, the old 984 entry (now refused) and the new 985 entry (now accepted), and for nothing else. The no-flags default, both committed long-prefill entries, each half of the entry alone, an unlisted flag, the same two flags TRANSPOSED, and the 986 fallback all behave identically before and after; the transposed and 986 cases still STOP, which is correct.",
+ "verdict": "SUPERSEDED IN PART: the default-path proof over 10 flag lists still stands, but the reserved-block derivation is FALSIFIED BY MEASUREMENT and the pool expectation is 15,760. See CORRECTED_BY_MEASUREMENT_2026_11_23.",
  "_provenance": {
   "git_commit": "679e7749a206be478b7ea1c3641e0740246d8f7a",
   "script": "proof.py, pure logic, no server",
   "device": "cpu",
   "n": 10
+ },
+ "CORRECTED_BY_MEASUREMENT_2026_11_23": {
+  "what_was_wrong": "this file's reserved-block derivation. It predicted that usable = (override - 1) x 16, so 985 would give 15,744. THE ENGINE ACTUALLY STARTED AND REPORTED 15,760 = 985 x 16: ALL 985 BLOCKS ARE USABLE and NO BLOCK IS RESERVED on the override path.",
+  "measured": {
+   "engine_reported_gpu_kv_tokens": 15760,
+   "override": 985,
+   "block_size": 16,
+   "check": "985 * 16 = 15760",
+   "startup_s": 78.9,
+   "engine_flag_live": true,
+   "source": "H100, first real 0.25x cell, ENGINE FLAG LIVE pid 1769772"
+  },
+  "why_the_inference_failed": "the 1x relation (profiler 3,935 blocks against a reported 62,944 = 3,934 x 16) is the NO-OVERRIDE path, where vLLM reports one block fewer than the profiler counted. It does NOT transfer to the override path, where the override IS the usable count. The arithmetic was exact and the premise was wrong.",
+  "why_984_actually_failed": "not a missing block: vLLM needed 3.84 GiB against 3.84 GiB available, an EQUALITY that rounding pushed over. So 984 was too tight for a different reason than the one diagnosed, and 985 is correct for a different reason than the one given.",
+  "whose_inference": "the reserved-block reading was the H100's first and I adopted it and wrote it into this file as a derivation. Neither of us measured it before acting on it.",
+  "what_this_file_got_right": "the REGISTER was marked correctly and that is why this is a correction rather than a surprise: the file stated that the 1x figures were OBSERVED while the 0.25x consequence was DERIVED by arithmetic and NOT YET MEASURED ON HARDWARE, and that the first cell had to confirm the engine pool before the other eleven were trusted. The first cell did exactly that and the launcher's own pool check caught the mismatch and stopped the driver: 'GPU pool 15760 != expected 15744: STOP', no skip, no orphan, about 2 min of GPU.",
+  "the_fix": "the launcher's pool expectation for the 985 entry becomes 15,760. --max-model-len stays 15,744 and the logical pool stays 15,736 via _kv0.25, which leaves the engine one block (16 tokens) above a single max-length request: real headroom, and 0.2504 x 62,944. THE CELL LINES DO NOT CHANGE, so KV025_CELLS (e6b19712) and KV025_RUNGS_CELLS (52ecf2ae) keep their hashes.",
+  "the_0_25x_engine_pool_of_record": 15760,
+  "_corrected_provenance": {
+   "git_commit": "f1c081f16e3da0f5c4eff8765d99f1dbb0c72815",
+   "timestamp": "2026-11-23T11:37:01.688249",
+   "register": "15,760 is now OBSERVED from a live engine, not derived"
+  }
  }
 }
