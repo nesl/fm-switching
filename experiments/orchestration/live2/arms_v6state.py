@@ -75,6 +75,52 @@ ROBOT_DEADLINE_S = 3.0          # D147, the committed robot deadline
 # at which a session is treated as warm for pricing. Declared, not swept.
 WARM_BELIEF_MIN = 0.5
 
+# --- D188 (2): the `_queued_behind` cache-key fix, BEHIND AN OFF-BY-DEFAULT ARM-SCOPED SWITCH ---
+#
+# THE DEFECT. `cstate.observation(self, now: float, epoch: str, ...)` (cstate.py:579) always passes
+# a STR epoch, so the `isinstance(obs.epoch, int)` test in `_queued_behind` has never once been
+# true and the cache key has always been `id(obs)`, a MEMORY ADDRESS. CPython reuses addresses, so
+# a fresh Observation allocated where a freed one sat hits the entry written in a PREVIOUS decision
+# period, and `_harm_warm` is then priced against a queue whose `slack_s` was computed from the
+# previous period's `now_s`. The cached value is read into a decision: `_harm_warm` ->
+# `cf_objective.harm_warm_from_queue_delay` -> `hw` / `harm_touch` -> `cf.plan_state`, whose
+# `d.chosen` emits a KEEP_GPU_WARM SessionAction or removes a MATERIALIZE ask.
+#
+# THE FIX keys on the decision period itself, `(epoch, now_s)`, which cannot alias.
+#
+# IT IS OFF BY DEFAULT AND MUST STAY OFF until the final rung-2 arm and its comparators are rerun
+# TOGETHER with it ON (user ruling D188 (2)). With the switch off, `key` is the exact expression
+# this module has always used, so no cell running under today's arms can be affected.
+QCACHE_KEY_FIX_SWITCH = "live2_qcache_key_fix"
+
+
+class QCacheKeyFixSwitchError(RuntimeError):
+    """The switch was declared as a truthy CLASS attribute, which D188 (2) forbids."""
+
+
+def qcache_key_fix_enabled(arm: Any) -> bool:
+    """Is the D188 key fix on for THIS ARM INSTANCE? Default False.
+
+    INSTANCE-DICT LOOKUP ONLY, and a truthy CLASS attribute RAISES: the same shape as
+    `release_recheck.arm_enables` and `share_admission.arm_enables`, and for the same reason. A
+    class attribute would switch the fix on for every arm that inherits from this one in the same
+    run and would make the cells incomparable. A class default of False is harmless and passes.
+    """
+    try:
+        own = vars(arm)
+    except TypeError:                                                          # pragma: no cover
+        own = {}
+    if QCACHE_KEY_FIX_SWITCH not in own:
+        for klass in type(arm).__mro__:
+            if bool(klass.__dict__.get(QCACHE_KEY_FIX_SWITCH, False)):
+                raise QCacheKeyFixSwitchError(
+                    "%s is ON as a CLASS attribute of %s and the instance declares nothing. "
+                    "D188 (2) requires an arm-scoped INSTANCE attribute: a class-level switch "
+                    "turns the fix on for every arm in the run."
+                    % (QCACHE_KEY_FIX_SWITCH, klass.__name__))
+        return False
+    return bool(own[QCACHE_KEY_FIX_SWITCH])
+
 
 class V6StateArm:
     """covex-v6-rules plus per-type state, touch chosen by plan_state, and state pricing."""
@@ -232,8 +278,22 @@ class V6StateArm:
     def _queued_behind(self, obs: Observation, session_id: str) -> List[Dict[str, Any]]:
         """The requests a background warm would sit in front of, with their own predicted service
         time and slack. One `predict` per pending request per epoch, cached, because the harm term
-        is evaluated once per session and the pending set does not change inside an epoch."""
-        key = (int(obs.epoch) if isinstance(obs.epoch, int) else id(obs))
+        is evaluated once per session and the pending set does not change inside an epoch.
+
+        THE KEY IS SWITCHED (D188 (2)). The OFF branch is the expression this method has always
+        used and is the default; see QCACHE_KEY_FIX_SWITCH above for why it is wrong and why it
+        stays the default tonight. The switch is RESOLVED ONCE PER ARM INSTANCE and memoised,
+        because the OFF path runs inside the planner's wall-clock budget and an MRO scan per call
+        would charge the budget for a switch that is off; setting the switch after this method has
+        first run therefore does nothing, and every caller sets it at construction."""
+        fix = self.__dict__.get("_qcache_key_fix_resolved")
+        if fix is None:
+            fix = qcache_key_fix_enabled(self)
+            self.__dict__["_qcache_key_fix_resolved"] = fix
+        if fix:
+            key = (str(getattr(obs, "epoch", "")), float(obs.now_s))
+        else:
+            key = (int(obs.epoch) if isinstance(obs.epoch, int) else id(obs))
         if self._q_cache_key != key:
             self._q_cache_key = key
             self._q_cache = []

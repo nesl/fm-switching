@@ -1,0 +1,3042 @@
+{
+ "_what": "D188 (2): the `_queued_behind` cache-key fix prepared behind an OFF-by-default arm-scoped switch, with (a) its byte-identity proof on the non-rung-2 arms against committed values and (b) a dry measurement of how many rung-2 decisions it changes with the switch ON.",
+ "_ruling": "The fix is NOT applied to any cell tonight. No registered arm declares the switch; the ON cells below construct the arm and set the INSTANCE attribute inside the measuring process only.",
+ "_switch": {
+  "name": "live2_qcache_key_fix",
+  "default": false,
+  "scope": "arm-scoped INSTANCE attribute; a truthy CLASS attribute raises",
+  "pattern_copied_from": [
+   "release_recheck.arm_enables",
+   "share_admission.arm_enables"
+  ]
+ },
+ "_base_sha": "29402ae5ce3a38e27f4ed87f0606a9320116c3f8",
+ "_before_root": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d188/before",
+ "_after_root": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d188/after",
+ "_cell": {
+  "n": 16,
+  "run_s": 1200.0,
+  "ratio": "40:40:20",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0
+ },
+ "_seeds": [
+  4,
+  5,
+  6,
+  7
+ ],
+ "_protocol": {
+  "one_dry_cell_per_process": true,
+  "cf_instrument_over_budget_patched_off": true,
+  "digest_cells_are_unwrapped": true,
+  "counting_wrapper_run_in_its_own_cell": true,
+  "digest_recipe": "sha256(json.dumps(rows_without_arm_version, sort_keys=True, separators=(',',':'), default=float))[:16]",
+  "concurrency": 10,
+  "cores": 24,
+  "loadavg_driver_start": [
+   0.76,
+   6.47,
+   9.83
+  ],
+  "loadavg_driver_end": [
+   7.7,
+   8.74,
+   9.8
+  ],
+  "wall_s": 414.16
+ },
+ "_register": "A DRY REPLAY MEASURES DRY ALLOCATION PATTERNS. The stale-hit counts and the decision deltas below are an INDICATION of live exposure, NOT a measurement of it: a live run has a real backend, I/O threads and a different allocation history, and nothing here bounds that. The counting wrapper itself allocates, so its counts are taken in a separate cell from any digest and perturb the very reuse they count.",
+ "_committed_reference": {
+  "source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+  "sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+  "cell": {
+   "n": 16,
+   "run_s": 1200.0,
+   "seed": 4,
+   "ratio": "40:40:20",
+   "robot_question_set": "lh_req",
+   "ss_question_set": "ss2",
+   "dashcam_format": "epg",
+   "robot_upload": "per-frame",
+   "robot_reask_mean_s": 30.0
+  }
+ },
+ "proof_a_offswitch_byte_identity": [
+  {
+   "arm": "covex-v6-base",
+   "with_switch_off": {
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "af8befb9420ad86a",
+    "rows": 12085
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "v5-rules-2",
+   "with_switch_off": {
+    "digest": "18067c4c66bb44b8",
+    "rows": 11955,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "18067c4c66bb44b8",
+    "rows": 11955
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "b7-edf-feasibility",
+   "with_switch_off": {
+    "digest": "b9aadd1c3a2b26d5",
+    "rows": 12265,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "b9aadd1c3a2b26d5",
+    "rows": 12265
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "always-cloud-fcfs",
+   "with_switch_off": {
+    "digest": "c7f86bb7755828de",
+    "rows": 12253,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "c7f86bb7755828de",
+    "rows": 12253
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "edf",
+   "with_switch_off": {
+    "digest": "9db366ac8f684d45",
+    "rows": 16327,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "9db366ac8f684d45",
+    "rows": 16327
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "llf",
+   "with_switch_off": {
+    "digest": "961be8fe4942d86b",
+    "rows": 14075,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "961be8fe4942d86b",
+    "rows": 14075
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "mooncake",
+   "with_switch_off": {
+    "digest": "7544b3aa16433c70",
+    "rows": 12742,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "7544b3aa16433c70",
+    "rows": 12742
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "attentionstore-prefetch",
+   "with_switch_off": {
+    "digest": "b563cf7612fd1e02",
+    "rows": 46931,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "b563cf7612fd1e02",
+    "rows": 46931
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "simplestream",
+   "with_switch_off": {
+    "digest": "870a3c3586d1b537",
+    "rows": 12253,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "870a3c3586d1b537",
+    "rows": 12253
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "querystream-proactive",
+   "with_switch_off": {
+    "digest": "a0b9e14e513c621c",
+    "rows": 12646,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "a0b9e14e513c621c",
+    "rows": 12646
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "warm-all-lru",
+   "with_switch_off": {
+    "digest": "751381e72502fffe",
+    "rows": 17205,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "751381e72502fffe",
+    "rows": 17205
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "confidence-cascade",
+   "with_switch_off": {
+    "digest": "b9290071679f1baa",
+    "rows": 12253,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "b9290071679f1baa",
+    "rows": 12253
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "eco-llm",
+   "with_switch_off": {
+    "digest": "f32fa95c6953c64e",
+    "rows": 12253,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "f32fa95c6953c64e",
+    "rows": 12253
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  },
+  {
+   "arm": "covex-v6-state-uo",
+   "with_switch_off": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "error": null
+   },
+   "committed_before_the_change": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218
+   },
+   "committed_source": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+   "committed_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+   "identical_to_committed": true
+  }
+ ],
+ "proof_a_moved_arms_attributed": [],
+ "proof_b_rung2_dry_decision_deltas": [
+  {
+   "arm": "covex-v6-state-uo",
+   "seed": 4,
+   "off": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "error": null
+   },
+   "on": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 14218,
+    "rows_on": 14218,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1596,
+   "harm_warm_on": 1607,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 60934,
+    "state_chosen_HOLD_BACK": 1,
+    "state_chosen_TOUCH": 2267,
+    "state_chosen_WARM": 4,
+    "state_chosen_KEEP": 58662,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 2267,
+    "state_hold_back_enacted": 1,
+    "harm_warm_priced": 2297,
+    "harm_warm_nonzero": 1596,
+    "harm_warm_milli_sum": 178,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 1,
+    "harm_warm_no_queue": 58751,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 60934,
+    "state_chosen_HOLD_BACK": 1,
+    "state_chosen_TOUCH": 2267,
+    "state_chosen_WARM": 4,
+    "state_chosen_KEEP": 58662,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 2267,
+    "state_hold_back_enacted": 1,
+    "harm_warm_priced": 2314,
+    "harm_warm_nonzero": 1607,
+    "harm_warm_milli_sum": 178,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 1,
+    "harm_warm_no_queue": 58734,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": {
+    "calls": 61048,
+    "hits": 50722,
+    "misses": 10326,
+    "stale_hits": 282,
+    "fresh_hits": 50440,
+    "distinct_keys": 8968,
+    "periods_seen": 10608,
+    "stale_hits_cache_nonempty": 8,
+    "stale_hits_cache_empty": 274,
+    "stale_hits_returned_nonempty": 8,
+    "stale_hits_recall_set_changed": 23
+   },
+   "stale_hit_traces_from_that_wrapped_cell": [
+    {
+     "arm": "covex-v6-state-uo",
+     "asking_session_id": "robo005|s000|1649035665793396_start_0.0_end_335.392",
+     "period_now_s_reading": 39.5,
+     "period_now_s_that_wrote_the_entry": 39.4,
+     "epoch_reading": "tick",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 128487464408480,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0000235",
+       "session_id": "asst001|ss0003",
+       "engine_s": 0.22158637159992584,
+       "slack_s_from_the_OTHER_period": 1.840999999999998
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-uo",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 363.9,
+     "period_now_s_that_wrote_the_entry": 363.8,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 128487408197472,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0003601",
+       "session_id": "asst000|ss0035",
+       "engine_s": 0.020941804260713986,
+       "slack_s_from_the_OTHER_period": 1.903999999999979
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-uo",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 453.9,
+     "period_now_s_that_wrote_the_entry": 453.8,
+     "epoch_reading": "tick",
+     "epoch_that_wrote": "recall_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 128487383323872,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0004532",
+       "session_id": "asst000|ss0044",
+       "engine_s": 0.02220599145367031,
+       "slack_s_from_the_OTHER_period": 1.903999999999979
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-uo",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 468.5,
+     "period_now_s_that_wrote_the_entry": 468.4,
+     "epoch_reading": "tick",
+     "epoch_that_wrote": "recall_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 128487377713088,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0004680",
+       "session_id": "robo005|s001|791449306887400_start_0.0_end_304.403",
+       "engine_s": 2.277515943687764,
+       "slack_s_from_the_OTHER_period": 2.904000000000036
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-uo",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 509.5,
+     "period_now_s_that_wrote_the_entry": 509.4,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 128487365554384,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0005110",
+       "session_id": "asst001|ss0050",
+       "engine_s": 0.3086346897434903,
+       "slack_s_from_the_OTHER_period": 1.8410000000000477
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    }
+   ],
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": [
+    {
+     "class": "V6StateArm",
+     "arm_name": "covex-v6-state-uo",
+     "in_instance_dict": true,
+     "declared_value": "True",
+     "declared_type": "bool",
+     "resolved_and_read_by_queued_behind": true
+    }
+   ],
+   "stale_hits_from_a_separate_WRAPPED_on_cell": {
+    "calls": 61048,
+    "hits": 0,
+    "misses": 61048,
+    "stale_hits": 0,
+    "fresh_hits": 0,
+    "distinct_keys": 9007,
+    "periods_seen": 10608,
+    "stale_hits_cache_nonempty": 0,
+    "stale_hits_cache_empty": 0,
+    "stale_hits_returned_nonempty": 0,
+    "stale_hits_recall_set_changed": 0
+   }
+  },
+  {
+   "arm": "covex-v6-state-uo-c5attr",
+   "seed": 4,
+   "off": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "error": null
+   },
+   "on": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 14218,
+    "rows_on": 14218,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1600,
+   "harm_warm_on": 1607,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 60934,
+    "state_chosen_HOLD_BACK": 1,
+    "state_chosen_TOUCH": 2267,
+    "state_chosen_WARM": 4,
+    "state_chosen_KEEP": 58662,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 2267,
+    "state_hold_back_enacted": 1,
+    "harm_warm_priced": 2313,
+    "harm_warm_nonzero": 1600,
+    "harm_warm_milli_sum": 178,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 1,
+    "harm_warm_no_queue": 58735,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 60934,
+    "state_chosen_HOLD_BACK": 1,
+    "state_chosen_TOUCH": 2267,
+    "state_chosen_WARM": 4,
+    "state_chosen_KEEP": 58662,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 2267,
+    "state_hold_back_enacted": 1,
+    "harm_warm_priced": 2314,
+    "harm_warm_nonzero": 1607,
+    "harm_warm_milli_sum": 178,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 1,
+    "harm_warm_no_queue": 58734,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": {
+    "calls": 61048,
+    "hits": 50748,
+    "misses": 10300,
+    "stale_hits": 308,
+    "fresh_hits": 50440,
+    "distinct_keys": 9034,
+    "periods_seen": 10608,
+    "stale_hits_cache_nonempty": 11,
+    "stale_hits_cache_empty": 297,
+    "stale_hits_returned_nonempty": 9,
+    "stale_hits_recall_set_changed": 17
+   },
+   "stale_hit_traces_from_that_wrapped_cell": [
+    {
+     "arm": "covex-v6-state-uo-c5attr",
+     "asking_session_id": "robo005|s000|1649035665793396_start_0.0_end_335.392",
+     "period_now_s_reading": 39.5,
+     "period_now_s_that_wrote_the_entry": 39.4,
+     "epoch_reading": "tick",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 128475655443872,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0000235",
+       "session_id": "asst001|ss0003",
+       "engine_s": 0.22158637159992584,
+       "slack_s_from_the_OTHER_period": 1.840999999999998
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-uo-c5attr",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 389.5,
+     "period_now_s_that_wrote_the_entry": 389.4,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 128475591700880,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0003860",
+       "session_id": "asst001|ss0038",
+       "engine_s": 0.2257401295196395,
+       "slack_s_from_the_OTHER_period": 1.8410000000000477
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-uo-c5attr",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 389.6,
+     "period_now_s_that_wrote_the_entry": 389.5,
+     "epoch_reading": "tick",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 128475591700880,
+     "recall_set_changed_between_them": false,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0003860",
+       "session_id": "asst001|ss0038",
+       "engine_s": 0.2257401295196395,
+       "slack_s_from_the_OTHER_period": 1.8410000000000477
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-uo-c5attr",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 389.7,
+     "period_now_s_that_wrote_the_entry": 389.6,
+     "epoch_reading": "tick",
+     "epoch_that_wrote": "tick",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 128475591700880,
+     "recall_set_changed_between_them": false,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0003860",
+       "session_id": "asst001|ss0038",
+       "engine_s": 0.2257401295196395,
+       "slack_s_from_the_OTHER_period": 1.8410000000000477
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-uo-c5attr",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 423.9,
+     "period_now_s_that_wrote_the_entry": 423.8,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "recall_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 128475582339232,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0004219",
+       "session_id": "asst000|ss0041",
+       "engine_s": 0.021483598771980986,
+       "slack_s_from_the_OTHER_period": 1.903999999999979
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    }
+   ],
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": [
+    {
+     "class": "V6StateUoC5AttrArm",
+     "arm_name": "covex-v6-state-uo-c5attr",
+     "in_instance_dict": true,
+     "declared_value": "True",
+     "declared_type": "bool",
+     "resolved_and_read_by_queued_behind": true
+    }
+   ],
+   "stale_hits_from_a_separate_WRAPPED_on_cell": {
+    "calls": 61048,
+    "hits": 0,
+    "misses": 61048,
+    "stale_hits": 0,
+    "fresh_hits": 0,
+    "distinct_keys": 9089,
+    "periods_seen": 10608,
+    "stale_hits_cache_nonempty": 0,
+    "stale_hits_cache_empty": 0,
+    "stale_hits_returned_nonempty": 0,
+    "stale_hits_recall_set_changed": 0
+   }
+  },
+  {
+   "arm": "covex-v6-state-shares",
+   "seed": 4,
+   "off": {
+    "digest": "3a5b40d78b9dcb3b",
+    "rows": 13390,
+    "error": null
+   },
+   "on": {
+    "digest": "3a5b40d78b9dcb3b",
+    "rows": 13390,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 13390,
+    "rows_on": 13390,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1924,
+   "harm_warm_on": 1899,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 63886,
+    "state_chosen_HOLD_BACK": 2,
+    "state_chosen_TOUCH": 1019,
+    "state_chosen_WARM": 2,
+    "state_chosen_KEEP": 62863,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 1019,
+    "state_hold_back_enacted": 2,
+    "harm_warm_priced": 2891,
+    "harm_warm_nonzero": 1924,
+    "harm_warm_milli_sum": 356,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 2,
+    "harm_warm_no_queue": 61094,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 63886,
+    "state_chosen_HOLD_BACK": 2,
+    "state_chosen_TOUCH": 1019,
+    "state_chosen_WARM": 2,
+    "state_chosen_KEEP": 62863,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 1019,
+    "state_hold_back_enacted": 2,
+    "harm_warm_priced": 2890,
+    "harm_warm_nonzero": 1899,
+    "harm_warm_milli_sum": 356,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 2,
+    "harm_warm_no_queue": 61095,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": {
+    "calls": 63985,
+    "hits": 53905,
+    "misses": 10080,
+    "stale_hits": 279,
+    "fresh_hits": 53626,
+    "distinct_keys": 8898,
+    "periods_seen": 10359,
+    "stale_hits_cache_nonempty": 9,
+    "stale_hits_cache_empty": 270,
+    "stale_hits_returned_nonempty": 7,
+    "stale_hits_recall_set_changed": 17
+   },
+   "stale_hit_traces_from_that_wrapped_cell": [
+    {
+     "arm": "covex-v6-state-shares",
+     "asking_session_id": "robo000|s000|1011205677616862_start_0.0_end_314.103",
+     "period_now_s_reading": 239.5,
+     "period_now_s_that_wrote_the_entry": 239.4,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "recall_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 129339538970496,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0002312",
+       "session_id": "asst001|ss0023",
+       "engine_s": 0.06067340175362723,
+       "slack_s_from_the_OTHER_period": 1.8409999999999909
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-shares",
+     "asking_session_id": "robo000|s000|1011205677616862_start_0.0_end_314.103",
+     "period_now_s_reading": 241.4,
+     "period_now_s_that_wrote_the_entry": 241.3,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 129339538705184,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0002327",
+       "session_id": "robo004|s000|1242272464195379_start_0.0_end_599.982",
+       "engine_s": 2.0662160842936346,
+       "slack_s_from_the_OTHER_period": 2.8769999999999922
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-shares",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 351.1,
+     "period_now_s_that_wrote_the_entry": 351.0,
+     "epoch_reading": "tick",
+     "epoch_that_wrote": "recall_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 129339511925600,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0003467",
+       "session_id": "asst002|ss0033",
+       "engine_s": 0.2257401295196395,
+       "slack_s_from_the_OTHER_period": 1.9089999999999745
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-shares",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 509.5,
+     "period_now_s_that_wrote_the_entry": 509.4,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 129339464699520,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0005110",
+       "session_id": "asst001|ss0050",
+       "engine_s": 0.3086346897434903,
+       "slack_s_from_the_OTHER_period": 1.8410000000000477
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-shares",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 684.3,
+     "period_now_s_that_wrote_the_entry": 684.2,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 129339405910272,
+     "recall_set_changed_between_them": false,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0006905",
+       "session_id": "asst000|ss0067",
+       "engine_s": 0.040988201177592935,
+       "slack_s_from_the_OTHER_period": 1.5040000000000018
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    }
+   ],
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": [
+    {
+     "class": "V6StateSharesArm",
+     "arm_name": "covex-v6-state-shares",
+     "in_instance_dict": true,
+     "declared_value": "True",
+     "declared_type": "bool",
+     "resolved_and_read_by_queued_behind": true
+    }
+   ],
+   "stale_hits_from_a_separate_WRAPPED_on_cell": {
+    "calls": 63985,
+    "hits": 0,
+    "misses": 63985,
+    "stale_hits": 0,
+    "fresh_hits": 0,
+    "distinct_keys": 8847,
+    "periods_seen": 10359,
+    "stale_hits_cache_nonempty": 0,
+    "stale_hits_cache_empty": 0,
+    "stale_hits_returned_nonempty": 0,
+    "stale_hits_recall_set_changed": 0
+   }
+  },
+  {
+   "arm": "covex-v6-state-shares-r1",
+   "seed": 4,
+   "off": {
+    "digest": "3a5b40d78b9dcb3b",
+    "rows": 13390,
+    "error": null
+   },
+   "on": {
+    "digest": "3a5b40d78b9dcb3b",
+    "rows": 13390,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 13390,
+    "rows_on": 13390,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1924,
+   "harm_warm_on": 1899,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 63886,
+    "state_chosen_HOLD_BACK": 2,
+    "state_chosen_TOUCH": 1019,
+    "state_chosen_WARM": 2,
+    "state_chosen_KEEP": 62863,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 1019,
+    "state_hold_back_enacted": 2,
+    "harm_warm_priced": 2891,
+    "harm_warm_nonzero": 1924,
+    "harm_warm_milli_sum": 356,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 2,
+    "harm_warm_no_queue": 61094,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 63886,
+    "state_chosen_HOLD_BACK": 2,
+    "state_chosen_TOUCH": 1019,
+    "state_chosen_WARM": 2,
+    "state_chosen_KEEP": 62863,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 1019,
+    "state_hold_back_enacted": 2,
+    "harm_warm_priced": 2890,
+    "harm_warm_nonzero": 1899,
+    "harm_warm_milli_sum": 356,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 2,
+    "harm_warm_no_queue": 61095,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": {
+    "calls": 63985,
+    "hits": 53905,
+    "misses": 10080,
+    "stale_hits": 279,
+    "fresh_hits": 53626,
+    "distinct_keys": 8898,
+    "periods_seen": 10359,
+    "stale_hits_cache_nonempty": 9,
+    "stale_hits_cache_empty": 270,
+    "stale_hits_returned_nonempty": 7,
+    "stale_hits_recall_set_changed": 17
+   },
+   "stale_hit_traces_from_that_wrapped_cell": [
+    {
+     "arm": "covex-v6-state-shares-r1",
+     "asking_session_id": "robo000|s000|1011205677616862_start_0.0_end_314.103",
+     "period_now_s_reading": 239.5,
+     "period_now_s_that_wrote_the_entry": 239.4,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "recall_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 134205160281984,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0002312",
+       "session_id": "asst001|ss0023",
+       "engine_s": 0.06067340175362723,
+       "slack_s_from_the_OTHER_period": 1.8409999999999909
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-shares-r1",
+     "asking_session_id": "robo000|s000|1011205677616862_start_0.0_end_314.103",
+     "period_now_s_reading": 241.4,
+     "period_now_s_that_wrote_the_entry": 241.3,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 134205160016672,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0002327",
+       "session_id": "robo004|s000|1242272464195379_start_0.0_end_599.982",
+       "engine_s": 2.0662160842936346,
+       "slack_s_from_the_OTHER_period": 2.8769999999999922
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-shares-r1",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 351.1,
+     "period_now_s_that_wrote_the_entry": 351.0,
+     "epoch_reading": "tick",
+     "epoch_that_wrote": "recall_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 134205133237088,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0003467",
+       "session_id": "asst002|ss0033",
+       "engine_s": 0.2257401295196395,
+       "slack_s_from_the_OTHER_period": 1.9089999999999745
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-shares-r1",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 509.5,
+     "period_now_s_that_wrote_the_entry": 509.4,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 134205086011008,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0005110",
+       "session_id": "asst001|ss0050",
+       "engine_s": 0.3086346897434903,
+       "slack_s_from_the_OTHER_period": 1.8410000000000477
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-shares-r1",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 684.3,
+     "period_now_s_that_wrote_the_entry": 684.2,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 134205027221760,
+     "recall_set_changed_between_them": false,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0006905",
+       "session_id": "asst000|ss0067",
+       "engine_s": 0.040988201177592935,
+       "slack_s_from_the_OTHER_period": 1.5040000000000018
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    }
+   ],
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": [
+    {
+     "class": "V6StateSharesArm",
+     "arm_name": "covex-v6-state-shares-r1",
+     "in_instance_dict": true,
+     "declared_value": "True",
+     "declared_type": "bool",
+     "resolved_and_read_by_queued_behind": true
+    }
+   ],
+   "stale_hits_from_a_separate_WRAPPED_on_cell": {
+    "calls": 63985,
+    "hits": 0,
+    "misses": 63985,
+    "stale_hits": 0,
+    "fresh_hits": 0,
+    "distinct_keys": 8847,
+    "periods_seen": 10359,
+    "stale_hits_cache_nonempty": 0,
+    "stale_hits_cache_empty": 0,
+    "stale_hits_returned_nonempty": 0,
+    "stale_hits_recall_set_changed": 0
+   }
+  },
+  {
+   "arm": "covex-v6-state-shares-r2",
+   "seed": 4,
+   "off": {
+    "digest": "3a5b40d78b9dcb3b",
+    "rows": 13390,
+    "error": null
+   },
+   "on": {
+    "digest": "3a5b40d78b9dcb3b",
+    "rows": 13390,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 13390,
+    "rows_on": 13390,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1924,
+   "harm_warm_on": 1899,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 63886,
+    "state_chosen_HOLD_BACK": 2,
+    "state_chosen_TOUCH": 1019,
+    "state_chosen_WARM": 2,
+    "state_chosen_KEEP": 62863,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 1019,
+    "state_hold_back_enacted": 2,
+    "harm_warm_priced": 2891,
+    "harm_warm_nonzero": 1924,
+    "harm_warm_milli_sum": 356,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 2,
+    "harm_warm_no_queue": 61094,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 63886,
+    "state_chosen_HOLD_BACK": 2,
+    "state_chosen_TOUCH": 1019,
+    "state_chosen_WARM": 2,
+    "state_chosen_KEEP": 62863,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 1019,
+    "state_hold_back_enacted": 2,
+    "harm_warm_priced": 2890,
+    "harm_warm_nonzero": 1899,
+    "harm_warm_milli_sum": 356,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 2,
+    "harm_warm_no_queue": 61095,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": {
+    "calls": 63985,
+    "hits": 53905,
+    "misses": 10080,
+    "stale_hits": 279,
+    "fresh_hits": 53626,
+    "distinct_keys": 8898,
+    "periods_seen": 10359,
+    "stale_hits_cache_nonempty": 9,
+    "stale_hits_cache_empty": 270,
+    "stale_hits_returned_nonempty": 7,
+    "stale_hits_recall_set_changed": 17
+   },
+   "stale_hit_traces_from_that_wrapped_cell": [
+    {
+     "arm": "covex-v6-state-shares-r2",
+     "asking_session_id": "robo000|s000|1011205677616862_start_0.0_end_314.103",
+     "period_now_s_reading": 239.5,
+     "period_now_s_that_wrote_the_entry": 239.4,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "recall_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 130472808519552,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0002312",
+       "session_id": "asst001|ss0023",
+       "engine_s": 0.06067340175362723,
+       "slack_s_from_the_OTHER_period": 1.8409999999999909
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-shares-r2",
+     "asking_session_id": "robo000|s000|1011205677616862_start_0.0_end_314.103",
+     "period_now_s_reading": 241.4,
+     "period_now_s_that_wrote_the_entry": 241.3,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 130472808254240,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0002327",
+       "session_id": "robo004|s000|1242272464195379_start_0.0_end_599.982",
+       "engine_s": 2.0662160842936346,
+       "slack_s_from_the_OTHER_period": 2.8769999999999922
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-shares-r2",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 351.1,
+     "period_now_s_that_wrote_the_entry": 351.0,
+     "epoch_reading": "tick",
+     "epoch_that_wrote": "recall_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 130472781458272,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0003467",
+       "session_id": "asst002|ss0033",
+       "engine_s": 0.2257401295196395,
+       "slack_s_from_the_OTHER_period": 1.9089999999999745
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-shares-r2",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 509.5,
+     "period_now_s_that_wrote_the_entry": 509.4,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 130472734248576,
+     "recall_set_changed_between_them": true,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0005110",
+       "session_id": "asst001|ss0050",
+       "engine_s": 0.3086346897434903,
+       "slack_s_from_the_OTHER_period": 1.8410000000000477
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    },
+    {
+     "arm": "covex-v6-state-shares-r2",
+     "asking_session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "period_now_s_reading": 684.3,
+     "period_now_s_that_wrote_the_entry": 684.2,
+     "epoch_reading": "stream_arrival",
+     "epoch_that_wrote": "stream_arrival",
+     "seconds_between_the_two_periods": 0.1,
+     "address_used_as_the_key": 130472675459328,
+     "recall_set_changed_between_them": false,
+     "cached_rows": 1,
+     "returned_to_harm_warm": 1,
+     "returned_rows": [
+      {
+       "req_id": "opp0006905",
+       "session_id": "asst000|ss0067",
+       "engine_s": 0.040988201177592935,
+       "slack_s_from_the_OTHER_period": 1.5040000000000018
+      }
+     ],
+     "note": "each slack_s above is deadline_s - now_s with now_s from the period that WROTE the entry, not the period reading it"
+    }
+   ],
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": [
+    {
+     "class": "V6StateSharesArm",
+     "arm_name": "covex-v6-state-shares-r2",
+     "in_instance_dict": true,
+     "declared_value": "True",
+     "declared_type": "bool",
+     "resolved_and_read_by_queued_behind": true
+    }
+   ],
+   "stale_hits_from_a_separate_WRAPPED_on_cell": {
+    "calls": 63985,
+    "hits": 0,
+    "misses": 63985,
+    "stale_hits": 0,
+    "fresh_hits": 0,
+    "distinct_keys": 8847,
+    "periods_seen": 10359,
+    "stale_hits_cache_nonempty": 0,
+    "stale_hits_cache_empty": 0,
+    "stale_hits_returned_nonempty": 0,
+    "stale_hits_recall_set_changed": 0
+   }
+  },
+  {
+   "arm": "covex-v6-state-uo",
+   "seed": 5,
+   "off": {
+    "digest": "0797f70ba66fe54c",
+    "rows": 11931,
+    "error": null
+   },
+   "on": {
+    "digest": "0797f70ba66fe54c",
+    "rows": 11931,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 11931,
+    "rows_on": 11931,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1644,
+   "harm_warm_on": 1651,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 60631,
+    "state_chosen_HOLD_BACK": 2,
+    "state_chosen_TOUCH": null,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 60629,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": null,
+    "state_hold_back_enacted": 2,
+    "harm_warm_priced": 2323,
+    "harm_warm_nonzero": 1644,
+    "harm_warm_milli_sum": 412,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 4,
+    "harm_warm_no_queue": 58412,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 60631,
+    "state_chosen_HOLD_BACK": 2,
+    "state_chosen_TOUCH": null,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 60629,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": null,
+    "state_hold_back_enacted": 2,
+    "harm_warm_priced": 2343,
+    "harm_warm_nonzero": 1651,
+    "harm_warm_milli_sum": 412,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 4,
+    "harm_warm_no_queue": 58392,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-uo-c5attr",
+   "seed": 5,
+   "off": {
+    "digest": "0797f70ba66fe54c",
+    "rows": 11931,
+    "error": null
+   },
+   "on": {
+    "digest": "0797f70ba66fe54c",
+    "rows": 11931,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 11931,
+    "rows_on": 11931,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1644,
+   "harm_warm_on": 1651,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 60631,
+    "state_chosen_HOLD_BACK": 2,
+    "state_chosen_TOUCH": null,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 60629,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": null,
+    "state_hold_back_enacted": 2,
+    "harm_warm_priced": 2323,
+    "harm_warm_nonzero": 1644,
+    "harm_warm_milli_sum": 412,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 4,
+    "harm_warm_no_queue": 58412,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 60631,
+    "state_chosen_HOLD_BACK": 2,
+    "state_chosen_TOUCH": null,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 60629,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": null,
+    "state_hold_back_enacted": 2,
+    "harm_warm_priced": 2343,
+    "harm_warm_nonzero": 1651,
+    "harm_warm_milli_sum": 412,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 4,
+    "harm_warm_no_queue": 58392,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-shares",
+   "seed": 5,
+   "off": {
+    "digest": "6ce90daf1ae14d19",
+    "rows": 12344,
+    "error": null
+   },
+   "on": {
+    "digest": "6ce90daf1ae14d19",
+    "rows": 12344,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 12344,
+    "rows_on": 12344,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1957,
+   "harm_warm_on": 1964,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 65116,
+    "state_chosen_HOLD_BACK": 5,
+    "state_chosen_TOUCH": null,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 65111,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": null,
+    "state_hold_back_enacted": 5,
+    "harm_warm_priced": 2879,
+    "harm_warm_nonzero": 1957,
+    "harm_warm_milli_sum": 890,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 5,
+    "harm_warm_no_queue": 62331,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 65116,
+    "state_chosen_HOLD_BACK": 5,
+    "state_chosen_TOUCH": null,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 65111,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": null,
+    "state_hold_back_enacted": 5,
+    "harm_warm_priced": 2915,
+    "harm_warm_nonzero": 1964,
+    "harm_warm_milli_sum": 890,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 5,
+    "harm_warm_no_queue": 62295,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-shares-r1",
+   "seed": 5,
+   "off": {
+    "digest": "6ce90daf1ae14d19",
+    "rows": 12344,
+    "error": null
+   },
+   "on": {
+    "digest": "6ce90daf1ae14d19",
+    "rows": 12344,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 12344,
+    "rows_on": 12344,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1957,
+   "harm_warm_on": 1964,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 65116,
+    "state_chosen_HOLD_BACK": 5,
+    "state_chosen_TOUCH": null,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 65111,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": null,
+    "state_hold_back_enacted": 5,
+    "harm_warm_priced": 2879,
+    "harm_warm_nonzero": 1957,
+    "harm_warm_milli_sum": 890,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 5,
+    "harm_warm_no_queue": 62331,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 65116,
+    "state_chosen_HOLD_BACK": 5,
+    "state_chosen_TOUCH": null,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 65111,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": null,
+    "state_hold_back_enacted": 5,
+    "harm_warm_priced": 2915,
+    "harm_warm_nonzero": 1964,
+    "harm_warm_milli_sum": 890,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 5,
+    "harm_warm_no_queue": 62295,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-shares-r2",
+   "seed": 5,
+   "off": {
+    "digest": "6ce90daf1ae14d19",
+    "rows": 12344,
+    "error": null
+   },
+   "on": {
+    "digest": "6ce90daf1ae14d19",
+    "rows": 12344,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 12344,
+    "rows_on": 12344,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1957,
+   "harm_warm_on": 1964,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 65116,
+    "state_chosen_HOLD_BACK": 5,
+    "state_chosen_TOUCH": null,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 65111,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": null,
+    "state_hold_back_enacted": 5,
+    "harm_warm_priced": 2879,
+    "harm_warm_nonzero": 1957,
+    "harm_warm_milli_sum": 890,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 5,
+    "harm_warm_no_queue": 62331,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 65116,
+    "state_chosen_HOLD_BACK": 5,
+    "state_chosen_TOUCH": null,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 65111,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": null,
+    "state_hold_back_enacted": 5,
+    "harm_warm_priced": 2915,
+    "harm_warm_nonzero": 1964,
+    "harm_warm_milli_sum": 890,
+    "harm_warm_max_milli": 178,
+    "harm_warm_capped": 5,
+    "harm_warm_no_queue": 62295,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-uo",
+   "seed": 6,
+   "off": {
+    "digest": "19aebc1c702d1f32",
+    "rows": 12385,
+    "error": null
+   },
+   "on": {
+    "digest": "19aebc1c702d1f32",
+    "rows": 12385,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 12385,
+    "rows_on": 12385,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1596,
+   "harm_warm_on": 1590,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 58540,
+    "state_chosen_HOLD_BACK": 4,
+    "state_chosen_TOUCH": 379,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 58157,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 379,
+    "state_hold_back_enacted": 4,
+    "harm_warm_priced": 2290,
+    "harm_warm_nonzero": 1596,
+    "harm_warm_milli_sum": 716,
+    "harm_warm_max_milli": 179,
+    "harm_warm_capped": 4,
+    "harm_warm_no_queue": 56342,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 58540,
+    "state_chosen_HOLD_BACK": 4,
+    "state_chosen_TOUCH": 379,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 58157,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 379,
+    "state_hold_back_enacted": 4,
+    "harm_warm_priced": 2258,
+    "harm_warm_nonzero": 1590,
+    "harm_warm_milli_sum": 716,
+    "harm_warm_max_milli": 179,
+    "harm_warm_capped": 4,
+    "harm_warm_no_queue": 56374,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-uo-c5attr",
+   "seed": 6,
+   "off": {
+    "digest": "19aebc1c702d1f32",
+    "rows": 12385,
+    "error": null
+   },
+   "on": {
+    "digest": "19aebc1c702d1f32",
+    "rows": 12385,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 12385,
+    "rows_on": 12385,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1600,
+   "harm_warm_on": 1590,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 58540,
+    "state_chosen_HOLD_BACK": 4,
+    "state_chosen_TOUCH": 379,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 58157,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 379,
+    "state_hold_back_enacted": 4,
+    "harm_warm_priced": 2289,
+    "harm_warm_nonzero": 1600,
+    "harm_warm_milli_sum": 716,
+    "harm_warm_max_milli": 179,
+    "harm_warm_capped": 4,
+    "harm_warm_no_queue": 56343,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 58540,
+    "state_chosen_HOLD_BACK": 4,
+    "state_chosen_TOUCH": 379,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 58157,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 379,
+    "state_hold_back_enacted": 4,
+    "harm_warm_priced": 2258,
+    "harm_warm_nonzero": 1590,
+    "harm_warm_milli_sum": 716,
+    "harm_warm_max_milli": 179,
+    "harm_warm_capped": 4,
+    "harm_warm_no_queue": 56374,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-shares",
+   "seed": 6,
+   "off": {
+    "digest": "85d33c74078c0e0e",
+    "rows": 12465,
+    "error": null
+   },
+   "on": {
+    "digest": "c05d1eea55344e6f",
+    "rows": 12464,
+    "error": null
+   },
+   "digest_identical": false,
+   "row_diff": {
+    "available": true,
+    "rows_off": 12465,
+    "rows_on": 12464,
+    "setwise_rows_only_off": 18,
+    "setwise_rows_only_on": 17,
+    "setwise_differing_rows": 35,
+    "positional_differing_rows": 696,
+    "identical_setwise": false,
+    "identical_positionally": false,
+    "first_differing_row": {
+     "index": 11769,
+     "off": {
+      "H": null,
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_piece",
+      "mu": null,
+      "note": "session=robo003|s002|1032206425511233_start_0.0_end_600.011",
+      "opportunity_ids": [],
+      "piece_tokens": 1024,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 1133.3,
+      "traffic_mix": {
+       "monitor": 4,
+       "piece": 0,
+       "recall": 0,
+       "whole": 0
+      }
+     },
+     "on": {
+      "H": null,
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_recall",
+      "mu": null,
+      "note": "session=asst000|ss0112",
+      "opportunity_ids": [
+       "opp0011578"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": "D2",
+      "representation_defaulted": true,
+      "t": 1133.3,
+      "traffic_mix": {
+       "monitor": 4,
+       "piece": 0,
+       "recall": 0,
+       "whole": 0
+      }
+     }
+    }
+   },
+   "harm_warm_off": 1882,
+   "harm_warm_on": 1893,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 60291,
+    "state_chosen_HOLD_BACK": 4,
+    "state_chosen_TOUCH": 100,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 60187,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 100,
+    "state_hold_back_enacted": 4,
+    "harm_warm_priced": 2705,
+    "harm_warm_nonzero": 1882,
+    "harm_warm_milli_sum": 814,
+    "harm_warm_max_milli": 179,
+    "harm_warm_capped": 5,
+    "harm_warm_no_queue": 57669,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 60291,
+    "state_chosen_HOLD_BACK": 5,
+    "state_chosen_TOUCH": 100,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 60186,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 100,
+    "state_hold_back_enacted": 5,
+    "harm_warm_priced": 2710,
+    "harm_warm_nonzero": 1893,
+    "harm_warm_milli_sum": 993,
+    "harm_warm_max_milli": 179,
+    "harm_warm_capped": 6,
+    "harm_warm_no_queue": 57664,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-shares-r1",
+   "seed": 6,
+   "off": {
+    "digest": "85d33c74078c0e0e",
+    "rows": 12465,
+    "error": null
+   },
+   "on": {
+    "digest": "c05d1eea55344e6f",
+    "rows": 12464,
+    "error": null
+   },
+   "digest_identical": false,
+   "row_diff": {
+    "available": true,
+    "rows_off": 12465,
+    "rows_on": 12464,
+    "setwise_rows_only_off": 18,
+    "setwise_rows_only_on": 17,
+    "setwise_differing_rows": 35,
+    "positional_differing_rows": 696,
+    "identical_setwise": false,
+    "identical_positionally": false,
+    "first_differing_row": {
+     "index": 11769,
+     "off": {
+      "H": null,
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_piece",
+      "mu": null,
+      "note": "session=robo003|s002|1032206425511233_start_0.0_end_600.011",
+      "opportunity_ids": [],
+      "piece_tokens": 1024,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 1133.3,
+      "traffic_mix": {
+       "monitor": 4,
+       "piece": 0,
+       "recall": 0,
+       "whole": 0
+      }
+     },
+     "on": {
+      "H": null,
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_recall",
+      "mu": null,
+      "note": "session=asst000|ss0112",
+      "opportunity_ids": [
+       "opp0011578"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": "D2",
+      "representation_defaulted": true,
+      "t": 1133.3,
+      "traffic_mix": {
+       "monitor": 4,
+       "piece": 0,
+       "recall": 0,
+       "whole": 0
+      }
+     }
+    }
+   },
+   "harm_warm_off": 1882,
+   "harm_warm_on": 1893,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 60291,
+    "state_chosen_HOLD_BACK": 4,
+    "state_chosen_TOUCH": 100,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 60187,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 100,
+    "state_hold_back_enacted": 4,
+    "harm_warm_priced": 2705,
+    "harm_warm_nonzero": 1882,
+    "harm_warm_milli_sum": 814,
+    "harm_warm_max_milli": 179,
+    "harm_warm_capped": 5,
+    "harm_warm_no_queue": 57669,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 60291,
+    "state_chosen_HOLD_BACK": 5,
+    "state_chosen_TOUCH": 100,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 60186,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 100,
+    "state_hold_back_enacted": 5,
+    "harm_warm_priced": 2710,
+    "harm_warm_nonzero": 1893,
+    "harm_warm_milli_sum": 993,
+    "harm_warm_max_milli": 179,
+    "harm_warm_capped": 6,
+    "harm_warm_no_queue": 57664,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-shares-r2",
+   "seed": 6,
+   "off": {
+    "digest": "85d33c74078c0e0e",
+    "rows": 12465,
+    "error": null
+   },
+   "on": {
+    "digest": "c05d1eea55344e6f",
+    "rows": 12464,
+    "error": null
+   },
+   "digest_identical": false,
+   "row_diff": {
+    "available": true,
+    "rows_off": 12465,
+    "rows_on": 12464,
+    "setwise_rows_only_off": 18,
+    "setwise_rows_only_on": 17,
+    "setwise_differing_rows": 35,
+    "positional_differing_rows": 696,
+    "identical_setwise": false,
+    "identical_positionally": false,
+    "first_differing_row": {
+     "index": 11769,
+     "off": {
+      "H": null,
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_piece",
+      "mu": null,
+      "note": "session=robo003|s002|1032206425511233_start_0.0_end_600.011",
+      "opportunity_ids": [],
+      "piece_tokens": 1024,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 1133.3,
+      "traffic_mix": {
+       "monitor": 4,
+       "piece": 0,
+       "recall": 0,
+       "whole": 0
+      }
+     },
+     "on": {
+      "H": null,
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_recall",
+      "mu": null,
+      "note": "session=asst000|ss0112",
+      "opportunity_ids": [
+       "opp0011578"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": "D2",
+      "representation_defaulted": true,
+      "t": 1133.3,
+      "traffic_mix": {
+       "monitor": 4,
+       "piece": 0,
+       "recall": 0,
+       "whole": 0
+      }
+     }
+    }
+   },
+   "harm_warm_off": 1882,
+   "harm_warm_on": 1893,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 60291,
+    "state_chosen_HOLD_BACK": 4,
+    "state_chosen_TOUCH": 100,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 60187,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 100,
+    "state_hold_back_enacted": 4,
+    "harm_warm_priced": 2705,
+    "harm_warm_nonzero": 1882,
+    "harm_warm_milli_sum": 814,
+    "harm_warm_max_milli": 179,
+    "harm_warm_capped": 5,
+    "harm_warm_no_queue": 57669,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 60291,
+    "state_chosen_HOLD_BACK": 5,
+    "state_chosen_TOUCH": 100,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 60186,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 100,
+    "state_hold_back_enacted": 5,
+    "harm_warm_priced": 2710,
+    "harm_warm_nonzero": 1893,
+    "harm_warm_milli_sum": 993,
+    "harm_warm_max_milli": 179,
+    "harm_warm_capped": 6,
+    "harm_warm_no_queue": 57664,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-uo",
+   "seed": 7,
+   "off": {
+    "digest": "664950ccb241bc87",
+    "rows": 14342,
+    "error": null
+   },
+   "on": {
+    "digest": "664950ccb241bc87",
+    "rows": 14342,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 14342,
+    "rows_on": 14342,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1559,
+   "harm_warm_on": 1521,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 58438,
+    "state_chosen_HOLD_BACK": null,
+    "state_chosen_TOUCH": 2163,
+    "state_chosen_WARM": 3,
+    "state_chosen_KEEP": 56272,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 2163,
+    "state_hold_back_enacted": null,
+    "harm_warm_priced": 2196,
+    "harm_warm_nonzero": 1559,
+    "harm_warm_milli_sum": 0,
+    "harm_warm_max_milli": 0,
+    "harm_warm_capped": null,
+    "harm_warm_no_queue": 56329,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 58438,
+    "state_chosen_HOLD_BACK": null,
+    "state_chosen_TOUCH": 2163,
+    "state_chosen_WARM": 3,
+    "state_chosen_KEEP": 56272,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 2163,
+    "state_hold_back_enacted": null,
+    "harm_warm_priced": 2189,
+    "harm_warm_nonzero": 1521,
+    "harm_warm_milli_sum": 0,
+    "harm_warm_max_milli": 0,
+    "harm_warm_capped": null,
+    "harm_warm_no_queue": 56336,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-uo-c5attr",
+   "seed": 7,
+   "off": {
+    "digest": "664950ccb241bc87",
+    "rows": 14342,
+    "error": null
+   },
+   "on": {
+    "digest": "664950ccb241bc87",
+    "rows": 14342,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 14342,
+    "rows_on": 14342,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1559,
+   "harm_warm_on": 1521,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 58438,
+    "state_chosen_HOLD_BACK": null,
+    "state_chosen_TOUCH": 2163,
+    "state_chosen_WARM": 3,
+    "state_chosen_KEEP": 56272,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 2163,
+    "state_hold_back_enacted": null,
+    "harm_warm_priced": 2196,
+    "harm_warm_nonzero": 1559,
+    "harm_warm_milli_sum": 0,
+    "harm_warm_max_milli": 0,
+    "harm_warm_capped": null,
+    "harm_warm_no_queue": 56329,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 58438,
+    "state_chosen_HOLD_BACK": null,
+    "state_chosen_TOUCH": 2163,
+    "state_chosen_WARM": 3,
+    "state_chosen_KEEP": 56272,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 2163,
+    "state_hold_back_enacted": null,
+    "harm_warm_priced": 2189,
+    "harm_warm_nonzero": 1521,
+    "harm_warm_milli_sum": 0,
+    "harm_warm_max_milli": 0,
+    "harm_warm_capped": null,
+    "harm_warm_no_queue": 56336,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-shares",
+   "seed": 7,
+   "off": {
+    "digest": "2db793d2a3cae03a",
+    "rows": 12564,
+    "error": null
+   },
+   "on": {
+    "digest": "2db793d2a3cae03a",
+    "rows": 12564,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 12564,
+    "rows_on": 12564,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1644,
+   "harm_warm_on": 1638,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 58737,
+    "state_chosen_HOLD_BACK": null,
+    "state_chosen_TOUCH": 199,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 58538,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 199,
+    "state_hold_back_enacted": null,
+    "harm_warm_priced": 2418,
+    "harm_warm_nonzero": 1644,
+    "harm_warm_milli_sum": 0,
+    "harm_warm_max_milli": 0,
+    "harm_warm_capped": null,
+    "harm_warm_no_queue": 56407,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 58737,
+    "state_chosen_HOLD_BACK": null,
+    "state_chosen_TOUCH": 199,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 58538,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 199,
+    "state_hold_back_enacted": null,
+    "harm_warm_priced": 2431,
+    "harm_warm_nonzero": 1638,
+    "harm_warm_milli_sum": 0,
+    "harm_warm_max_milli": 0,
+    "harm_warm_capped": null,
+    "harm_warm_no_queue": 56394,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-shares-r1",
+   "seed": 7,
+   "off": {
+    "digest": "2db793d2a3cae03a",
+    "rows": 12564,
+    "error": null
+   },
+   "on": {
+    "digest": "2db793d2a3cae03a",
+    "rows": 12564,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 12564,
+    "rows_on": 12564,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1644,
+   "harm_warm_on": 1638,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 58737,
+    "state_chosen_HOLD_BACK": null,
+    "state_chosen_TOUCH": 199,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 58538,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 199,
+    "state_hold_back_enacted": null,
+    "harm_warm_priced": 2418,
+    "harm_warm_nonzero": 1644,
+    "harm_warm_milli_sum": 0,
+    "harm_warm_max_milli": 0,
+    "harm_warm_capped": null,
+    "harm_warm_no_queue": 56407,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 58737,
+    "state_chosen_HOLD_BACK": null,
+    "state_chosen_TOUCH": 199,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 58538,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 199,
+    "state_hold_back_enacted": null,
+    "harm_warm_priced": 2431,
+    "harm_warm_nonzero": 1638,
+    "harm_warm_milli_sum": 0,
+    "harm_warm_max_milli": 0,
+    "harm_warm_capped": null,
+    "harm_warm_no_queue": 56394,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  },
+  {
+   "arm": "covex-v6-state-shares-r2",
+   "seed": 7,
+   "off": {
+    "digest": "2db793d2a3cae03a",
+    "rows": 12564,
+    "error": null
+   },
+   "on": {
+    "digest": "2db793d2a3cae03a",
+    "rows": 12564,
+    "error": null
+   },
+   "digest_identical": true,
+   "row_diff": {
+    "available": true,
+    "rows_off": 12564,
+    "rows_on": 12564,
+    "setwise_rows_only_off": 0,
+    "setwise_rows_only_on": 0,
+    "setwise_differing_rows": 0,
+    "positional_differing_rows": 0,
+    "identical_setwise": true,
+    "identical_positionally": true,
+    "first_differing_row": null
+   },
+   "harm_warm_off": 1644,
+   "harm_warm_on": 1638,
+   "arm_stats_off": {
+    "decisions": null,
+    "state_decisions": 58737,
+    "state_chosen_HOLD_BACK": null,
+    "state_chosen_TOUCH": 199,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 58538,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 199,
+    "state_hold_back_enacted": null,
+    "harm_warm_priced": 2418,
+    "harm_warm_nonzero": 1644,
+    "harm_warm_milli_sum": 0,
+    "harm_warm_max_milli": 0,
+    "harm_warm_capped": null,
+    "harm_warm_no_queue": 56407,
+    "harm_warm_unpriced": null
+   },
+   "arm_stats_on": {
+    "decisions": null,
+    "state_decisions": 58737,
+    "state_chosen_HOLD_BACK": null,
+    "state_chosen_TOUCH": 199,
+    "state_chosen_WARM": null,
+    "state_chosen_KEEP": 58538,
+    "state_chosen_SLICE": null,
+    "state_touch_emitted": 199,
+    "state_hold_back_enacted": null,
+    "harm_warm_priced": 2431,
+    "harm_warm_nonzero": 1638,
+    "harm_warm_milli_sum": 0,
+    "harm_warm_max_milli": 0,
+    "harm_warm_capped": null,
+    "harm_warm_no_queue": 56394,
+    "harm_warm_unpriced": null
+   },
+   "stale_hits_from_a_separate_WRAPPED_off_cell": null,
+   "stale_hit_traces_from_that_wrapped_cell": null,
+   "switch_arrival_from_a_separate_WRAPPED_on_cell": null,
+   "stale_hits_from_a_separate_WRAPPED_on_cell": null
+  }
+ ],
+ "proof_c_cross_arm_claim": [
+  {
+   "pair": [
+    "covex-v6-state-shares-off",
+    "covex-v6-state-uo"
+   ],
+   "seed": 4,
+   "off": {
+    "left_digest": "9a4be873eb3c5fba",
+    "left_rows": 14218,
+    "right_digest": "9a4be873eb3c5fba",
+    "right_rows": 14218,
+    "diff": {
+     "available": true,
+     "rows_off": 14218,
+     "rows_on": 14218,
+     "setwise_rows_only_off": 0,
+     "setwise_rows_only_on": 0,
+     "setwise_differing_rows": 0,
+     "positional_differing_rows": 0,
+     "identical_setwise": true,
+     "identical_positionally": true,
+     "first_differing_row": null
+    },
+    "identical": true
+   },
+   "on": {
+    "left_digest": "9a4be873eb3c5fba",
+    "left_rows": 14218,
+    "right_digest": "9a4be873eb3c5fba",
+    "right_rows": 14218,
+    "diff": {
+     "available": true,
+     "rows_off": 14218,
+     "rows_on": 14218,
+     "setwise_rows_only_off": 0,
+     "setwise_rows_only_on": 0,
+     "setwise_differing_rows": 0,
+     "positional_differing_rows": 0,
+     "identical_setwise": true,
+     "identical_positionally": true,
+     "first_differing_row": null
+    },
+    "identical": true
+   },
+   "reconciliation_confirmed": false
+  },
+  {
+   "pair": [
+    "covex-v6-state-shares-off",
+    "covex-v6-state-uo"
+   ],
+   "seed": 5,
+   "off": {
+    "left_digest": "0797f70ba66fe54c",
+    "left_rows": 11931,
+    "right_digest": "0797f70ba66fe54c",
+    "right_rows": 11931,
+    "diff": {
+     "available": true,
+     "rows_off": 11931,
+     "rows_on": 11931,
+     "setwise_rows_only_off": 0,
+     "setwise_rows_only_on": 0,
+     "setwise_differing_rows": 0,
+     "positional_differing_rows": 0,
+     "identical_setwise": true,
+     "identical_positionally": true,
+     "first_differing_row": null
+    },
+    "identical": true
+   },
+   "on": {
+    "left_digest": "0797f70ba66fe54c",
+    "left_rows": 11931,
+    "right_digest": "0797f70ba66fe54c",
+    "right_rows": 11931,
+    "diff": {
+     "available": true,
+     "rows_off": 11931,
+     "rows_on": 11931,
+     "setwise_rows_only_off": 0,
+     "setwise_rows_only_on": 0,
+     "setwise_differing_rows": 0,
+     "positional_differing_rows": 0,
+     "identical_setwise": true,
+     "identical_positionally": true,
+     "first_differing_row": null
+    },
+    "identical": true
+   },
+   "reconciliation_confirmed": false
+  },
+  {
+   "pair": [
+    "covex-v6-state-shares-off",
+    "covex-v6-state-uo"
+   ],
+   "seed": 6,
+   "off": {
+    "left_digest": "19aebc1c702d1f32",
+    "left_rows": 12385,
+    "right_digest": "19aebc1c702d1f32",
+    "right_rows": 12385,
+    "diff": {
+     "available": true,
+     "rows_off": 12385,
+     "rows_on": 12385,
+     "setwise_rows_only_off": 0,
+     "setwise_rows_only_on": 0,
+     "setwise_differing_rows": 0,
+     "positional_differing_rows": 0,
+     "identical_setwise": true,
+     "identical_positionally": true,
+     "first_differing_row": null
+    },
+    "identical": true
+   },
+   "on": {
+    "left_digest": "19aebc1c702d1f32",
+    "left_rows": 12385,
+    "right_digest": "19aebc1c702d1f32",
+    "right_rows": 12385,
+    "diff": {
+     "available": true,
+     "rows_off": 12385,
+     "rows_on": 12385,
+     "setwise_rows_only_off": 0,
+     "setwise_rows_only_on": 0,
+     "setwise_differing_rows": 0,
+     "positional_differing_rows": 0,
+     "identical_setwise": true,
+     "identical_positionally": true,
+     "first_differing_row": null
+    },
+    "identical": true
+   },
+   "reconciliation_confirmed": false
+  },
+  {
+   "pair": [
+    "covex-v6-state-shares-off",
+    "covex-v6-state-uo"
+   ],
+   "seed": 7,
+   "off": {
+    "left_digest": "664950ccb241bc87",
+    "left_rows": 14342,
+    "right_digest": "664950ccb241bc87",
+    "right_rows": 14342,
+    "diff": {
+     "available": true,
+     "rows_off": 14342,
+     "rows_on": 14342,
+     "setwise_rows_only_off": 0,
+     "setwise_rows_only_on": 0,
+     "setwise_differing_rows": 0,
+     "positional_differing_rows": 0,
+     "identical_setwise": true,
+     "identical_positionally": true,
+     "first_differing_row": null
+    },
+    "identical": true
+   },
+   "on": {
+    "left_digest": "664950ccb241bc87",
+    "left_rows": 14342,
+    "right_digest": "664950ccb241bc87",
+    "right_rows": 14342,
+    "diff": {
+     "available": true,
+     "rows_off": 14342,
+     "rows_on": 14342,
+     "setwise_rows_only_off": 0,
+     "setwise_rows_only_on": 0,
+     "setwise_differing_rows": 0,
+     "positional_differing_rows": 0,
+     "identical_setwise": true,
+     "identical_positionally": true,
+     "first_differing_row": null
+    },
+    "identical": true
+   },
+   "reconciliation_confirmed": false
+  }
+ ],
+ "step4_negative_control": {
+  "arm": "covex-v6-base",
+  "why": "this arm never enters V6StateArm, so the key cannot reach a decision in it; with the switch ON it must still give its own OFF digest and its committed value",
+  "switch_on": {
+   "digest": "af8befb9420ad86a",
+   "rows": 12085,
+   "error": null
+  },
+  "switch_off": {
+   "digest": "af8befb9420ad86a",
+   "rows": 12085
+  },
+  "committed": {
+   "digest": "af8befb9420ad86a",
+   "rows": 12085
+  },
+  "collapses": true
+ },
+ "step3_isolated_key_trace": [
+  {
+   "switch": false,
+   "resolved_and_read_by_queued_behind": false,
+   "key_at_now_s_10": "128316754732768",
+   "key_at_now_s_11": "128316754732768",
+   "key_is_a_memory_address": true,
+   "key_changed_between_the_two_periods": false,
+   "address_reuse_reproduced": true,
+   "tries_to_reoccupy_the_address": 1,
+   "the_previous_periods_list_came_back": true
+  },
+  {
+   "switch": true,
+   "resolved_and_read_by_queued_behind": true,
+   "key_at_now_s_10": "('e1', 10.0)",
+   "key_at_now_s_11": "('e1', 11.0)",
+   "key_is_a_memory_address": false,
+   "key_changed_between_the_two_periods": true,
+   "address_reuse_reproduced": true,
+   "tries_to_reoccupy_the_address": 1,
+   "the_previous_periods_list_came_back": false
+  }
+ ],
+ "switch_scope_proof": {
+  "switch_attr": "live2_qcache_key_fix",
+  "checks": [
+   {
+    "check": "switch name",
+    "got": "live2_qcache_key_fix",
+    "want": "live2_qcache_key_fix",
+    "pass": true
+   },
+   {
+    "check": "absent on instance and class -> False",
+    "got": false,
+    "want": false,
+    "pass": true
+   },
+   {
+    "check": "instance True -> True",
+    "got": true,
+    "want": true,
+    "pass": true
+   },
+   {
+    "check": "harmless class default False -> False",
+    "got": false,
+    "want": false,
+    "pass": true
+   },
+   {
+    "check": "instance OFF overrides class ON -> False",
+    "got": false,
+    "want": false,
+    "pass": true
+   },
+   {
+    "check": "truthy CLASS attribute raises",
+    "got": "QCacheKeyFixSwitchError",
+    "want": "QCacheKeyFixSwitchError",
+    "pass": true
+   }
+  ],
+  "raise_message": "live2_qcache_key_fix is ON as a CLASS attribute of ClassOn and the instance declares nothing. D188 (2) requires an arm-scoped INSTANCE attribute: a class-level switch turns the fix on for every arm in the run.",
+  "registered_arms": [
+   {
+    "arm": "covex-v6-state-uo",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "covex-v6-state-uo-c5attr",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "covex-v6-state-shares",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "covex-v6-state-shares-r1",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "covex-v6-state-shares-r2",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "covex-v6-base",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "v5-rules-2",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "b7-edf-feasibility",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "always-cloud-fcfs",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "edf",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "llf",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "mooncake",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "attentionstore-prefetch",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "simplestream",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "querystream-proactive",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "warm-all-lru",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "confidence-cascade",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "eco-llm",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   },
+   {
+    "arm": "covex-v6-state-uo",
+    "constructed": true,
+    "switch_in_instance_dict": false,
+    "classes_declaring_switch": [],
+    "enabled": false
+   }
+  ],
+  "no_registered_arm_enables_the_switch": true,
+  "pass": true
+ },
+ "_mechanism_verification": {
+  "step0_what_would_invalidate_this_run": [
+   "The committed digests this is audited against were produced at sha f3482026 and origin/main has moved since, so a disagreeing digest could be this change OR an intervening commit. Every disagreeing arm is therefore re-run on the UNPATCHED tree to attribute it (proof_a_moved_arms_attributed). None disagreed.",
+   "A dry cell does not reproduce across runs inside one process, and that non-reproduction IS the defect under study, so every cell here is its own process.",
+   "Under concurrency the planner wall-clock cutoff makes a digest a property of the machine load; it is patched off here, as it was in the committed proof being compared against. Live cells keep it ON (D99 (3)).",
+   "The counting wrapper allocates and so perturbs the address reuse it counts; it is never installed in a cell whose digest is compared with anything.",
+   "The OFF path runs inside the planner's wall-clock budget, so an MRO scan per call would charge that budget for a switch that is off; the switch is resolved once per arm instance."
+  ],
+  "step1_causal_chain": "The `_queued_behind` single-slot cache is keyed on id(obs), because `obs.epoch` is a str and the isinstance(int) test never fires (cstate.py:579). CPython reuses addresses, so an Observation allocated where a freed one sat HITS an entry written in a previous decision period. That entry's rows carry a slack_s computed as deadline_s - now_s with the OTHER period's now_s. `_harm_warm` reads the filtered list and prices it through `cf_objective.harm_warm_from_queue_delay`, so the `hw` and `harm_touch` reaching `cf.plan_state` differ from their correct values; plan_state scores HOLD_BACK at harm_warm and SLICE at half of it against WARM, TOUCH and KEEP, so `d.chosen` can change, and a changed choice emits a different KEEP_GPU_WARM SessionAction or removes a MATERIALIZE ask, which is a different decision row. The D162 one-price source is the user ruling of 2026-11-21 that this term and the request-decision harm stay in one currency (D171 (2)).",
+  "step2_instantiation": [
+   {
+    "causal link": "the key is an address, not a decision period",
+    "implementing quantity": "qcache_counts.stale_hits",
+    "where to read it": "proof_b stale_hits_from_a_separate_WRAPPED_off_cell",
+    "varies as expected": "non-zero on the rung-2 arms, and zero on any arm that never enters V6StateArm",
+    "evidence": "the counting wrapper; and the isolated key trace in step3_isolated_key_trace, where the OFF key is an integer address that does not change between two different now_s and the ON key is (epoch, now_s)"
+   },
+   {
+    "causal link": "a stale entry reaches `_harm_warm`",
+    "implementing quantity": "qcache_counts.stale_hits_returned_nonempty",
+    "where to read it": "proof_b; a stale hit returning an EMPTY list cannot change a harm sum and is counted apart",
+    "varies as expected": "must be non-zero for the chain to be live",
+    "evidence": "`_queued_behind` returns the filtered list and `_harm_warm` consumes it"
+   },
+   {
+    "causal link": "the priced harm differs",
+    "implementing quantity": "arm_stats.harm_warm_nonzero / harm_warm_milli_sum",
+    "where to read it": "proof_b, ON against OFF per cell",
+    "varies as expected": "must move between ON and OFF if the stale value is priced",
+    "evidence": "the stats written in `_harm_warm`"
+   },
+   {
+    "causal link": "the choice moves",
+    "implementing quantity": "the decision-row digest and the setwise and positional row diff",
+    "where to read it": "proof_b row_diff",
+    "varies as expected": "THIS IS THE QUESTION THE RUN ASKS. A zero is reported as the unscorable shape of Rule 2 and never as 'the defect is harmless'",
+    "evidence": "`cf.plan_state` -> `d.chosen` -> SessionAction or MATERIALIZE removal"
+   }
+  ],
+  "step2b_switch_reaches_a_decision": "Recorded as switch_arrival in a counted cell, which is excluded from every digest comparison: the class and name of each arm instance built, whether the switch is in its INSTANCE dict, its repr and its type, and the memoised `_qcache_key_fix_resolved`, which is written only by `_queued_behind` and is therefore the READ. An ON cell whose arrival says NOT READ has not run the mechanism and its null would be an ABSENT LINK, not a negative.",
+  "step3_one_unit": "Two readings. step3_isolated_key_trace is the mechanism in isolation, hand-checkable: the same arm asked twice at now_s 10.0 and 11.0, with the key printed each time, and an address-reuse trial in which a freed Observation's address is deliberately reoccupied. stale_hit_traces_from_that_wrapped_cell is the same thing inside a cell: up to five stale hits in full, with the reading period, the period that wrote the entry, the gap between them, and each row returned to `_harm_warm` with the slack_s computed from the other period's now_s.",
+  "step4_negative_control": "step4_negative_control, on covex-v6-base at seed 4; see its `why`.",
+  "step5_alternative_explanations": [
+   "A ZERO decision delta could be produced by (a) the stale value being priced but never crossing a margin in plan_state, or (b) the switch never arriving. (b) is excluded by step2b's switch_arrival; (a) is the remaining explanation and is exactly the UNSCORABLE shape of Rule 2, so a zero is reported as inconclusive-unscorable and not as a real negative.",
+   "A NON-ZERO delta could be produced by (a) the address key aliasing across periods [the claimed mechanism] or (b) some other difference between the two runs. (b) is excluded by construction for the within-arm comparison: the two cells differ in one expression, the OFF branch is byte-identical to the committed code, and the OFF side reproduces the committed digest.",
+   "A NON-ZERO CROSS-ARM delta that collapses under the fix could be produced by (a) the address key aliasing differently under two different allocation histories [the claimed mechanism] or (b) the two arms genuinely differing in policy. (b) is constrained for the pair used here only to the extent that covex-v6-state-shares-off is the DECLARED Step-4 collapse of covex-v6-state-uo; if the pair still differs with the switch ON, (b) is the live explanation and the pair proves nothing about the key."
+  ]
+ },
+ "verdict_proof_a": "PASS: all 14 arms reproduce their committed digest with the switch OFF.",
+ "verdict_proof_b": "the switch ON changes decisions on 3 of 20 rung-2 cells: ['covex-v6-state-shares s6', 'covex-v6-state-shares-r1 s6', 'covex-v6-state-shares-r2 s6']",
+ "verdict_proof_c": "covex-v6-state-shares-off vs covex-v6-state-uo s4: OFF identical, ON identical -> reconciliation NOT confirmed; covex-v6-state-shares-off vs covex-v6-state-uo s5: OFF identical, ON identical -> reconciliation NOT confirmed; covex-v6-state-shares-off vs covex-v6-state-uo s6: OFF identical, ON identical -> reconciliation NOT confirmed; covex-v6-state-shares-off vs covex-v6-state-uo s7: OFF identical, ON identical -> reconciliation NOT confirmed",
+ "_provenance": {
+  "git_commit": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
+  "script": "d188_qcache_key_fix_proofs.py",
+  "model": "n/a (policy proof, dry cells, no server)",
+  "timestamp": "2026-11-22T21:32:36.118635",
+  "device": "flash (CPU)",
+  "n": 73,
+  "tree_exported_from_ref": "29402ae5ce3a38e27f4ed87f0606a9320116c3f8"
+ }
+}
