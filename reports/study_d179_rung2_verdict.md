@@ -244,6 +244,25 @@ The checks discriminate and the two endpoints disagree in both directions, which
 running both. Check 1 failing when shares is the committed rung 2 is not a surprise: it is the
 alert loss shares exists to recover.
 
+### 5b. One plumbing fault, found by the first landed cell before any verdict was read
+
+Seed 4 of the shares arm landed while this was being written and the scorer was run on it once,
+as a parse check and not as a verdict (three of four seeds were still missing). It found a fault
+in this script, which was fixed:
+
+The held instant travels in a decision row's `opportunity_ids`, **not** in a `key` field.
+`_log_decision` takes `key` as a keyword but passes it only to the prediction lookup and never
+into the `DecisionRecord` (`coordinator.py:1970-1991`), so `rec["key"]` does not exist. The
+hold-time block read `key` and resolved **0 of 1,266** hold rows, so every per-type hold
+distribution came out empty while every other number in the output looked right. That is the
+write-only-field shape from the other side: a field that is READ and never written. After the fix,
+1,252 deadline-type holds resolve, 14 background holds are counted separately, 0 rows are
+unresolved, and no hold is negative.
+
+This is why a parse check on one real cell is worth its minute. The fault produced no error, no
+zero where a reader expects a number, and no effect at all on the three pre-registered checks: it
+would have shown up as three empty hold distributions in a report whose verdict section was full.
+
 ---
 
 ## 6. What the scorer outputs per seed

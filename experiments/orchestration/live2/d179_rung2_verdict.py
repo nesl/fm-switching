@@ -367,7 +367,14 @@ def _hold_block(decisions: List[Dict[str, Any]],
     background = 0
     unkeyed = 0
     for d in holds:
-        key = d.get("key")
+        # The held instant travels in `opportunity_ids`, NOT in a `key` field: _log_decision takes
+        # `key` as a keyword but passes it only to the prediction lookup and never into the
+        # DecisionRecord (coordinator.py:1970-1991), so `rec["key"]` does not exist. Reading `key`
+        # resolved 0 of 1,266 hold rows on the first shares cell and the per-type hold
+        # distributions came out empty while every other number looked right, which is the
+        # write-only-field shape from the other side: a field that is READ and never written.
+        ids = d.get("opportunity_ids") or []
+        key = (str(ids[0]) if ids else d.get("key"))
         if key is None:
             unkeyed += 1
             continue
