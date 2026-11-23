@@ -1,4 +1,4 @@
-# StudyRUNG4: the counterfactual rung on the rung-3 base — PRE-REGISTRATION
+# StudyRUNG4: the counterfactual rung on the rung-3 base - PRE-REGISTRATION
 
 D190 (3), D191 items 0 to 2. Written and **committed before any cell of this rung is posted**, which
 is what D190 (3) requires. Every bar below was **supplied by the user** and is recorded verbatim;
@@ -22,10 +22,10 @@ them.
 
 The two decisions, reported separately throughout:
 
-* **protect-and-defer** (`cf_protect_defer`, D165 (D)) — when an alert episode is active and a
+* **protect-and-defer** (`cf_protect_defer`, D165 (D)) - when an alert episode is active and a
   recall **rebuild or warm** is large and not urgent, protect the victim history and defer or chunk
   the rebuild to its latest safe start if its predicted harm exceeds the margin.
-* **question-deferral** (`cf_request_defer`, D151 (3), scoped into rung 4 by **D191 item 2**) —
+* **question-deferral** (`cf_request_defer`, D151 (3), scoped into rung 4 by **D191 item 2**)  - 
   defer a recall **question** to its latest safe start when an alert episode is active and the
   deferral's predicted harm saving exceeds the margin.
 
@@ -40,16 +40,16 @@ protect-and-defer moved **zero** decisions and **not one** of its decisions reac
 computation. The gate mix is the diagnosis: every decision stopped at `no_active_alert_episode` or
 `rebuild_fits_without_evicting`, and `pd_free_kv` was the constant 62,944 over every decision.
 
-Under CLAUDE.md Rule 2 that is **UNEXERCISED** — the mechanism is reachable but no condition in the
-run reaches it — and it is **an absent link, not a negative about the policy**. The user's diagnosis
+Under CLAUDE.md Rule 2 that is **UNEXERCISED** - the mechanism is reachable but no condition in the
+run reaches it - and it is **an absent link, not a negative about the policy**. The user's diagnosis
 is the one the gate mix supports: large non-urgent rebuilds rarely occur while histories stay warm,
 so the remaining loss sits behind recall **question** prefills, which are neither rebuilds nor
 evictions. A 6,000-token recall prompt delays an alert instant's first token through exactly the
 same D162 queued-ahead term whether or not anything is evicted.
 
 So the eviction gate is not a safety check that needs relaxing, it is **the wrong question**.
-Protect-and-defer is therefore **left exactly as it is** — not loosened, not re-thresholded, not
-re-run until it fires — and a second, differently-gated decision is added beside it. This is
+Protect-and-defer is therefore **left exactly as it is** - not loosened, not re-thresholded, not
+re-run until it fires - and a second, differently-gated decision is added beside it. This is
 recorded here so that it cannot later be read as a threshold having been moved after a null.
 
 ## 3. The inequality, in D191 item 1's ruled units
@@ -74,13 +74,68 @@ For the question-deferral the two sides are named and both are inside the inequa
 `w_j`, the harmed device's weight, sits **inside** the saving sum, one weight per row. `w_R`, the
 decider's weight, scales **the bar**. Putting the harmed type's weight on the bar is the sign error
 `cf_protect_defer` documents: harm and bar would scale together, the deciding ratio would not move,
-and the deficit weight would be inert — Rule 2's `cancelled by geometry`.
+and the deficit weight would be inert - Rule 2's `cancelled by geometry`.
 
 `kappa = 1.5775406165458339`, the committed q90 of actual over predicted service, read through
-`cf_margin.safety_factor(cf_cost.load_residuals())` — the same factor `v5/cf_planner.py:357` uses.
+`cf_margin.safety_factor(cf_cost.load_residuals())` - the same factor `v5/cf_planner.py:357` uses.
 **Never chosen, never swept.** Its two committed caveats travel with every latest-start time: its
 split is held-out-BY-ARM, not D125's "FIT/DEV", and the residual summary itself carries
 `gate_status: FAILS`.
+
+### 3a. The two pricing requirements, both binding before Step 2b is trusted
+
+**REQUIREMENT 1, `u` is computed by the D186 / r1 correction and not by `built_tokens` alone.**
+
+    u = tokens                                    if readiness is COLD
+      = max(tokens - max(built, telemetry), 0)     otherwise
+
+`last_telemetry_cached_tokens` is the engine's own report of the prefix it holds, trusted **only**
+while the session is not believed COLD, because it is never reset on eviction (the `e9569009`
+guard); `built_tokens` is the other source, and the **max** of the two is taken because each is a
+lower bound on the true prefix and each exists when the other may not. All three inputs are carried
+to the arm on the roster as `uncached_inputs_by_session` (additive; no committed arm reads it).
+
+Why this is not a nicety: `built_tokens` alone priced recall **15.6x too high** under shares
+(predicted median `u` 14,712 at s4 against the engine's own 1,050 on the same opportunity), which
+refused 57 of 70 recall releases. In **this** module `u` multiplies the queued-ahead price, so 15.6x
+too high **over-prices the harm of sending now and therefore OVER-DEFERS**, and that failure would
+look exactly like the mechanism working: more deferrals, each justified by a harm that was never
+there. The dry report shows `u` under the rule in force **against** `u` under `built_tokens` alone,
+per candidate, so the two are compared and not assumed equal.
+
+**REQUIREMENT 2, the safety factor is the MEASURED D162 under-prediction**, not the committed
+service-residual kappa.
+
+| | value | source |
+|---|---|---|
+| in force on this path | **1.8721** | `d190_recall_lag_diagnosis.json`, `devices.*.D162_positive_control_on_sent_rows[].observed_over_predicted`, **q90 by nearest rank over n = 5** |
+| measured range | 1.3856 to 1.8721 | the five recall questions actually **sent** in the committed `covex-v6-fair-c5attr` cells at seeds 5 and 7 |
+| q90 by linear interpolation, for comparison | 1.74398 | the same five values |
+| the committed kappa this replaces here | 1.5775406165458339 | `cf_margin.safety_factor(cf_cost.load_residuals())`, q90 on a held-out-BY-ARM split |
+
+The committed kappa **covers** the 1.3856 low end and **does not cover** the 1.8721 high end. That
+is the gap the measured factor closes, and it closes it in the only safe direction: a larger factor
+puts the latest safe start **earlier**.
+
+**Why this is not tuning, and it is the provenance of the data that settles it.** The ratios come
+from the committed cells of the **base rung 4 is built on**, not from rung 4's own cells. That is
+the same practice D180 to D182 used to derive the D179 floors from committed `covex-v6-base` cells.
+**n = 5 is stated first, not in a footnote:** at that n the nearest-rank q90 **is** the maximum, and
+five rows is a real limitation on how well the tail is characterised. It is not presented as more
+than it is.
+
+**Scope of the change.** `cf_protect_defer.KAPPA` is left **exactly as committed** at
+1.5775406165458339, because its arms (`covex-v6-cf-pd-*`) have a posted cell list owned by another
+session and changing their safety factor would silently change what those cells measure. The tree
+therefore holds two safety factors on purpose, and each one records which it is. That is a declared
+divergence, not an oversight.
+
+**And the column this buys.** Because the factor is now the measured bias, the self-inflicted-loss
+question becomes arithmetic rather than a guess: a deferral's overrun under a bias `b` is exactly
+`(b - safety_factor) * predicted_service`, so it is at or below zero for every `b` at or below the
+factor. **How many deferred questions would have missed the 3 s deadline under the measured bias** is
+computed on every candidate and reported at the measured worst bias, the measured best bias, and the
+committed kappa this path no longer uses, so the three can be compared rather than argued about.
 
 ## 4. PRE-REGISTERED PASS AND FAILURE, at 1x, seeds 4 to 7
 
@@ -109,11 +164,11 @@ PASS requires **both** conjuncts, per seed:
 
 **Reported beside it, every seat of it, and the third one may not be omitted:**
 
-* **LATE ALERT FRAMES** — alert instants sent and answered after 1 s. The hypothesis is that they
+* **LATE ALERT FRAMES** - alert instants sent and answered after 1 s. The hypothesis is that they
   **fall**.
-* **RECALL DEFERRALS** — count, and slack used (the deferral in seconds, as a distribution and not
+* **RECALL DEFERRALS** - count, and slack used (the deferral in seconds, as a distribution and not
   only a mean).
-* **ANY RECALL MADE LATE BY A DEFERRAL** — D191 names this as the column that can turn a pass into a
+* **ANY RECALL MADE LATE BY A DEFERRAL** - D191 names this as the column that can turn a pass into a
   self-inflicted loss. The live figure is the scorer's. The dry arm also reports its own prediction
   of it (`rd_defer_own_p_after_zero`, `rd_defer_latest_start_infeasible`); the two are reported side
   by side and **neither is substituted for the other**.
@@ -127,9 +182,45 @@ seed**, flagged at once if exceeded, because deferring work can push the deferre
 deadline.
 
 **PORT RULE (CLAUDE.md "Citing results"), checked FIRST and before any score is read.** The count of
-rung 4's characteristic decision — a question deferral, a rebuild deferral or a chunk — must be
+rung 4's characteristic decision - a question deferral, a rebuild deferral or a chunk - must be
 **non-zero**. Zero is an **ABSENT LINK** and is reported as such, never as a negative about the
 policy.
+
+## 4b. PRE-REGISTERED REPORTED SECONDARIES. These are NOT GATES.
+
+Four quantities, declared here **before any of them exists as a number**, to be computed by the
+Orin's **D192 episodic scorer** once it lands, against rung 3 at each seed:
+
+| secondary | unit | expected direction |
+|---|---|---|
+| dashcam **episodes** correct: detections on crash episodes, false alarms on no-crash episodes | per episode | **no worse than rung 3** |
+| robot correct by 3 s | per question | **no worse than rung 3** |
+| single-shot correct within 2 s | per question | **no worse than rung 3** |
+| cost per dashcam episode | GPU-seconds per episode | **no worse than rung 3** |
+
+**They are secondaries and they stay secondaries.** None of them may be promoted to a gate after
+the fact, and none of them may be quietly dropped: the whole point of pre-registering a secondary is
+that its direction was declared before the number existed. Whatever comes out is reported.
+
+**Why they exist, stated plainly because it is a real tension and not a formality.** Rung 4's gate in
+section 4 is specified on **timeliness** quantities: mean per-episode alert attainment, and robot
+on-time retention. D192 (2) makes the project's combined figure a **correctness** unit: correct
+decisions delivered in time, per natural unit. Gating on one quantity while presenting the work by
+another would mean rung 4 was judged by a different measure than it is shown by, and a reader would
+have no way to see the substitution. The resolution is to keep the gate exactly as the user set it
+and to add the D192 quantities as **declared secondaries**, so both appear side by side and neither
+replaces the other.
+
+## 4c. WHERE THE LINE AROUND RUNG 4 IS, NOW THAT IT HAS MOVED ONCE
+
+Rung 4's scope widened once today: **D191 item 2** added the counterfactual request decision
+(question-deferral) to what had been protect-and-defer alone. It does not widen again here.
+
+**The D192 (3) episode early exit is NOT part of `covex-v6-cf-c5attr`.** When it is built it is a
+separate switch or a separate arm on top of rung 4, with its own pre-registration and its own
+verdict. Rung 4's definition and rung 4's verdict are **fixed** as of this file. A reader who met
+the earlier, narrower description of rung 4 needs to be able to see exactly where the boundary now
+sits, which is what this section is for.
 
 ## 5. What is reported separately and must not be folded in
 
@@ -139,8 +230,8 @@ attached. A mechanism that fires only under memory pressure is a **finding**, st
 
 ## 6. The framing this rung has to beat
 
-Every rule-based fix so far — the share floors, r1's release re-check, the C5 attribution rule,
-rung 3's deficit ordering — lands somewhere on **one** alert-versus-recall trade-off curve: alert
+Every rule-based fix so far - the share floors, r1's release re-check, the C5 attribution rule,
+rung 3's deficit ordering - lands somewhere on **one** alert-versus-recall trade-off curve: alert
 attainment bought with recall on-time, or the reverse. Rung 4's claim is that a counterfactual that
 prices the trade explicitly and defers in **time** rather than choosing in **priority** moves **off**
 that curve: both axes at once, because the deferred work is not dropped, it is moved to slack that

@@ -108,11 +108,40 @@ for _p in (str(HERE), str(HERE / "v5"), str(HERE / "fleet"), str(HERE.parent / "
         sys.path.insert(0, _p)
 
 import cf_protect_defer as PD                                                  # noqa: E402
+import d190_measured_safety as MS                                              # noqa: E402
 
 sys.path.insert(0, str(HERE / "v5"))
 import cf_cost as CC                                                           # noqa: E402
 
-RD_VERSION = "cf-request-defer-1.0"
+RD_VERSION = "cf-request-defer-1.1"
+
+# ---------------------------------------------------------------------------
+# THE SAFETY FACTOR, MEASURED AND NOT CHOSEN (D191, revised ruling).
+#
+# `cf_protect_defer.KAPPA` is 1.5775406165458339, the committed q90 of actual over predicted
+# SERVICE on a held-out-by-arm split of cf_service_residuals.json. The user's revised ruling is
+# that the latest safe start on THIS path must instead carry the MEASURED D162 UNDER-PREDICTION,
+# derived from committed RUNG-3 data, with the quantile and source stated. `d190_measured_safety`
+# reads it: q90 by nearest rank over the five recall questions actually SENT in the two committed
+# covex-v6-fair-c5attr cells, which is 1.8721.
+#
+# NOT TUNING, AND THE REASON IS THE PROVENANCE OF THE DATA: those are the cells of the BASE rung 4
+# is built on, not rung 4's own cells, which is the practice D180 to D182 used to derive the D179
+# floors from committed covex-v6-base cells. The committed kappa COVERS the 1.3856 low end of the
+# measured range and DOES NOT COVER the 1.8721 high end; the measured factor closes that gap, and
+# only in the safe direction, because a LARGER factor puts the latest safe start EARLIER.
+#
+# `cf_protect_defer.KAPPA` IS LEFT ALONE. Its arms have a posted cell list owned by another
+# session, so changing their safety factor would change what those cells measure. The tree holds
+# two factors on purpose and each one says which it is.
+SAFETY_FACTOR: float = float(MS.SAFETY_FACTOR)
+SAFETY_FACTOR_INFO = MS.INFO
+
+# The three deadline types' own bounds are the harness's; THE RECALL DEADLINE IS 3.0 s ON THIS
+# WORKLOAD and that is what the self-inflicted-loss column is measured against. It is read from
+# the question's own absolute deadline on every decision, so this constant is used only to LABEL
+# the column and never to decide anything.
+RECALL_DEADLINE_S_LABEL = 3.0
 
 # The one switch, arm-scoped on the INSTANCE, default False, truthy CLASS attribute RAISES. Same
 # pattern and same reason as `cf_protect_defer.SWITCH_ATTR`: a class-level switch turns the rung
@@ -213,8 +242,18 @@ def decide(*, decider_device_id: str, now_s: float,
         out["gate"] = "no_deadline"
         return out
 
-    # ---- the latest safe start, through the committed arithmetic ------------------------------
-    lss = PD.latest_safe_start(float(now_s), float(deadline_abs_s), pred)
+    # ---- the latest safe start, through the COMMITTED ARITHMETIC with the MEASURED factor -----
+    # `cf_cost.latest_safe_start` is the one definition of the quantity in the tree (the same
+    # function v5/cf_planner.py:357 calls); only the FACTOR differs here, and it is the measured
+    # D162 under-prediction rather than the committed service-residual kappa. Both are recorded.
+    _l = CC.latest_safe_start(float(now_s), float(deadline_abs_s), pred, SAFETY_FACTOR)
+    lss = dict(_l.as_dict())
+    lss["safety_factor_source"] = SAFETY_FACTOR_INFO["source"]
+    lss["safety_factor_quantile"] = "%s q%g over n=%d" % (
+        SAFETY_FACTOR_INFO["quantile_method"], SAFETY_FACTOR_INFO["quantile"] * 100,
+        SAFETY_FACTOR_INFO["n"])
+    lss["safety_factor_measured_range"] = [SAFETY_FACTOR_INFO["min"], SAFETY_FACTOR_INFO["max"]]
+    lss["committed_kappa_not_used_here"] = PD.KAPPA
     out["latest_safe_start"] = lss
     # `cf_cost.LatestSafeStart.deferral_s` IS the quantity, already floored at 0 and already
     # `latest_start_s - now`. It is read, not re-derived from the absolute start: deriving it
@@ -304,6 +343,28 @@ def decide(*, decider_device_id: str, now_s: float,
     out["units"] = ("counts of expected on-time cloud answers, per-device w_d weighted; "
                     "MARGIN_CF = %.5f on-time answers (D191 item 1)" % PD.MARGIN_CF_ON_TIME)
     out["residency_input"] = RESIDENCY_INPUT
+    # ---- THE SELF-INFLICTED-LOSS COLUMN, computed on every candidate and not only the ones
+    # that fire, so the exposure of the ones that DID fire can be read against the ones that did
+    # not. "Would this deferred question have missed its own deadline under the MEASURED D162
+    # bias?" The deferral starts at `now + deferral_s`; under a bias b the service actually takes
+    # `b * predicted`, so the finish is `now + deferral_s + b * predicted` and it misses iff that
+    # exceeds the absolute deadline. Since `deferral_s = deadline - now - SAFETY_FACTOR *
+    # predicted`, the overrun is exactly `(b - SAFETY_FACTOR) * predicted`: NEGATIVE for every b
+    # at or below the factor, which is the whole reason the factor is the q90 and not the median.
+    # Reported at the measured WORST bias and at the measured MINIMUM, so the column is a range
+    # and not a single reassuring number.
+    total = float(getattr(pred, "total_s", 0.0) or 0.0)
+    miss: Dict[str, Any] = {"recall_deadline_s_label": RECALL_DEADLINE_S_LABEL,
+                            "predicted_total_service_s": total,
+                            "deferral_s": defer_s,
+                            "safety_factor_used": SAFETY_FACTOR}
+    for tag, b in (("at_measured_worst_bias", float(SAFETY_FACTOR_INFO["max"])),
+                   ("at_measured_best_bias", float(SAFETY_FACTOR_INFO["min"])),
+                   ("at_committed_kappa", float(PD.KAPPA))):
+        overrun = (float(b) - SAFETY_FACTOR) * total
+        miss[tag] = {"bias": float(b), "overrun_s": overrun, "would_miss": bool(overrun > 0.0)}
+    out["would_miss_deadline_under_measured_bias"] = miss
+
     if not out["crosses_bar"]:
         out["gate"] = "saving_does_not_exceed_margin"
         return out

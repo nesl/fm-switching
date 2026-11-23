@@ -134,8 +134,66 @@ class _Rung4Mixin:
     (and leaves it alone, because it is no longer a CLOUD admission).
     """
 
+    def _rd_u(self, session_id: str, tokens: int) -> Dict[str, Any]:
+        """`u`, THE UNCACHED PREFILL, BY THE D186 / r1 CORRECTION AND NOT BY built_tokens ALONE.
+
+            u = tokens                                    if readiness is COLD
+              = max(tokens - max(built, telemetry), 0)     otherwise
+
+        THE SAME THREE LINES THE COORDINATOR'S OWN RECALL RELEASE PATH USES, on the same three
+        inputs, now carried on the roster as `uncached_inputs_by_session`. Why it matters here and
+        not only there: `built_tokens` ALONE priced recall 15.6x TOO HIGH under shares (predicted
+        median u 14,712 at s4 against the engine's own 1,050 on the same opportunity), and 15.6x
+        too high is not a harmless conservatism in THIS module - `u` multiplies the queued-ahead
+        price, so it OVER-PRICES THE HARM OF SENDING NOW and therefore OVER-DEFERS. That failure
+        would look exactly like the mechanism working: more deferrals, each justified by a harm
+        that was never there.
+
+        `last_telemetry_cached_tokens` is the engine's own report and is trusted ONLY while the
+        session is NOT believed COLD, because it is never reset on eviction (the e9569009 guard).
+        MAX of the two, not replacement: both are lower bounds on the true prefix and each exists
+        when the other may not.
+
+        BOTH FORMS ARE RETURNED, so the dry report can show the one in force against the one that
+        was wrong instead of asserting they agree.
+        """
+        roster = getattr(self._rules, "_roster", None) or {}
+        inp = (roster.get("uncached_inputs_by_session") or {}).get(str(session_id))
+        built_map = roster.get("built_tokens_by_session") or {}
+        built_only = max(int(tokens) - int(built_map.get(str(session_id), 0) or 0), 0)
+        if inp is None:
+            # The roster field is absent, so this is an older coordinator. FALL BACK and COUNT it,
+            # rather than silently pricing by the quantity the correction exists to replace.
+            self.stats["rd_u_no_roster_inputs"] += 1
+            return {"u": built_only, "rule": "FALLBACK built_tokens only (roster field absent)",
+                    "u_built_only": built_only, "readiness": None,
+                    "built_tokens": int(built_map.get(str(session_id), 0) or 0),
+                    "telemetry_cached_tokens": None}
+        built = int(inp.get("built_tokens", 0) or 0)
+        tel = int(inp.get("telemetry_cached_tokens", 0) or 0)
+        readiness = str(inp.get("readiness"))
+        if readiness == "COLD":
+            u = int(tokens)
+            rule = "COLD: u = tokens, nothing subtracted (the e9569009 guard)"
+            self.stats["rd_u_cold"] += 1
+        else:
+            u = max(int(tokens) - max(built, tel), 0)
+            rule = "NOT COLD: u = tokens - max(built, telemetry)"
+            self.stats["rd_u_not_cold"] += 1
+            if tel > built:
+                self.stats["rd_u_telemetry_won"] += 1
+            elif built > tel:
+                self.stats["rd_u_built_won"] += 1
+        if u != built_only:
+            self.stats["rd_u_differs_from_built_only"] += 1
+            self.stats["rd_u_built_only_minus_u_sum"] += int(built_only - u)
+        return {"u": int(u), "rule": rule, "u_built_only": built_only,
+                "readiness": readiness, "built_tokens": built,
+                "telemetry_cached_tokens": tel, "prompt_tokens": int(tokens)}
+
     def _rd_one(self, obs: Observation, *, decider_device_id: str, session_id: str,
-                u_request: int, deadline_abs_s: float) -> Dict[str, Any]:
+                u_request: int, deadline_abs_s: float,
+                u_detail: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         cf = self._cf_engine()
         others = self._pd_others(obs, session_id)
         pred = CC.predict(cf.model, int(u_request), 0, 0, 0)
@@ -154,6 +212,7 @@ class _Rung4Mixin:
                       margin_scale=(self.MARGIN_CONTROL_SCALE
                                     if self._pd_control_margin_huge else 1.0))
         d["session_id"] = str(session_id)
+        d["u_detail"] = dict(u_detail or {})
         self._rd_record(d)
         return d
 
@@ -183,7 +242,10 @@ class _Rung4Mixin:
                 "n_rows_saved": d.get("n_rows_saved"),
                 "n_rows_still_harmed": d.get("n_rows_still_harmed"),
                 "own_p_before": d.get("own_p_before"), "own_p_after": d.get("own_p_after"),
-                "n_alert_pending": d.get("n_alert_pending")})
+                "n_alert_pending": d.get("n_alert_pending"),
+                "u_detail": d.get("u_detail"),
+                "would_miss_under_measured_bias":
+                    d.get("would_miss_deadline_under_measured_bias")})
         if self.rd_trace_kept is None and str(d.get("action")) != "BASE":
             self.rd_trace_kept = d
         if self.rd_trace_crossed is None and bool(d.get("crosses_bar")):
@@ -222,9 +284,10 @@ class _Rung4Mixin:
                 # nothing. D175 (1): only a DELIVERED cloud answer replaces the device's.
                 self.stats["rd_skipped_over_limit"] += 1
                 continue
-            u = max(tok - int(built.get(sid, 0) or 0), 0)
+            ud = self._rd_u(sid, tok)
             d = self._rd_one(obs, decider_device_id=str(did), session_id=sid,
-                             u_request=u, deadline_abs_s=float(qy.deadline_s))
+                             u_request=int(ud["u"]), deadline_abs_s=float(qy.deadline_s),
+                             u_detail=ud)
             if d["action"] != "DEFER_TO_LATEST_SAFE_START":
                 continue
             # THE CHANNEL, and it is the one the coordinator reads: `defer_s` at
@@ -241,6 +304,15 @@ class _Rung4Mixin:
             # are reported side by side and never substituted for one another.
             if float(d.get("own_p_after", 1.0)) <= 0.0:
                 self.stats["rd_defer_own_p_after_zero"] += 1
+            # THE COLUMN D191 REQUIRES: how many deferred questions would have missed their own
+            # deadline under the MEASURED D162 bias. Counted at the measured WORST bias, which is
+            # the bias the safety factor is set to, and separately at the committed kappa this
+            # path no longer uses, so the two can be compared rather than argued about.
+            m = d.get("would_miss_deadline_under_measured_bias") or {}
+            if (m.get("at_measured_worst_bias") or {}).get("would_miss"):
+                self.stats["rd_defer_would_miss_at_measured_worst_bias"] += 1
+            if (m.get("at_committed_kappa") or {}).get("would_miss"):
+                self.stats["rd_defer_would_miss_under_committed_kappa"] += 1
             if not bool(d.get("lss_feasible", True)):
                 self.stats["rd_defer_latest_start_infeasible"] += 1
         return act

@@ -717,6 +717,38 @@ class Live2Coordinator:
             # arm reads it.
             belief_by_session={sid: dict(s.belief or {})
                                for sid, s in self.st.sessions.items()},
+            # D190 (3) / D191: THE THREE INPUTS OF THE D186 / r1 UNCACHED CORRECTION, together,
+            # so an arm can price a prefill the way THIS COORDINATOR prices it instead of the way
+            # that was wrong. The correction itself is at the recall release path above:
+            #
+            #   u = tokens                                    if readiness is COLD
+            #     = max(tokens - max(built, telemetry), 0)     otherwise
+            #
+            # and the reason it exists is measured: `built_tokens` ALONE priced recall 15.6x too
+            # high (predicted median u 14,712 at s4 against the engine's own 1,050 on the same
+            # opportunity), which refused 57 of 70 recall releases. `last_telemetry_cached_tokens`
+            # is the engine's OWN report of the prefix it holds (engine_actions.py:358) and was
+            # read NOWHERE in any arm's pricing path: written and never read. MAX of the two, not
+            # replacement, because `built_tokens` exists before a session's first request and the
+            # telemetry only after one, and both are LOWER BOUNDS on the true prefix.
+            #
+            # THE READINESS LABEL IS HERE BECAUSE THE TELEMETRY MUST NOT BE TRUSTED WITHOUT IT.
+            # `last_telemetry_cached_tokens` is never reset on eviction - there is no other write
+            # to it in the tree - so after an eviction it still holds the prefix the engine USED
+            # to have. Subtracting it then UNDERSTATES the work and admits a request that cannot
+            # make its deadline, which is the mirror image of the bug the correction fixes and
+            # would surface as lateness rather than as skips. An arm given the telemetry without
+            # the label cannot avoid that, so it is given both.
+            #
+            # ADDITIVE, exactly like `est_tokens_by_session` and `belief_by_session` above: no
+            # committed arm reads this key, nothing else in the roster changes, and no existing
+            # arm's behaviour can move.
+            uncached_inputs_by_session={
+                sid: dict(built_tokens=int(s.built_tokens),
+                          telemetry_cached_tokens=int(
+                              getattr(s, "last_telemetry_cached_tokens", 0) or 0),
+                          readiness=str(s.residency_readiness()))
+                for sid, s in self.st.sessions.items()},
         ))
 
     # ---------------------------------------------------------------- enactment

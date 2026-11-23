@@ -103,8 +103,8 @@ the **rung-3** base. Reading one as the other is not a naming nicety:
 
 `-pdonly` and `-rqonly` are the one-factor arms addendum 12 item 5 requires: "a combined count that
 cannot be attributed is not a pass". `-pdonly` is also the exact treatment of D191 step (a).
-Protect-and-defer is **UNEXERCISED at 1x** on this base (Rule 2) — every decision stops at
-`no_active_alert_episode` or `rebuild_fits_without_evicting` — which is an absent link and not a
+Protect-and-defer is **UNEXERCISED at 1x** on this base (Rule 2) - every decision stops at
+`no_active_alert_episode` or `rebuild_fits_without_evicting` - which is an absent link and not a
 negative. The question-deferral leg does fire at 1x. Neither module was re-thresholded to make
 either statement true.
 
