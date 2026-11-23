@@ -1,0 +1,82 @@
+{
+ "_what": "The gate the H100 asked for before running V6FAIR_C5ATTR_CELLS, as ONE JSON: Step 2b on the c5attr base with per-consumer attribution, the off-switch identity against the committed base, and the name proof re-run at current code. Its refusal to gate was correct: the cell list said 'verified by construction' while the arm's own docstring says ABSENT LINK on this base, and the 3,902-decision figure came from the SHARES base. Discovering an absent link live would have cost about 88 minutes of H100 time; this costs minutes of flash CPU.",
+ "cell": "seed 4, 16 devices, 1200 s, ratio 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0",
+ "digest_recipe": "sha256(json.dumps(rows_without_arm_version, sort_keys=True, separators=(',',':'), default=float))[:16]",
+ "1_step2b_on_the_c5attr_base": {
+  "control": {
+   "arm": "covex-v6-fair-c5attr-gain0",
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "_why_this_control": "gain 0 leaves BOTH consumers live and fully instrumented and removes only the quantity under test, so a difference cannot be plumbing. It collapses EXACTLY to the c5attr base digest, which is the Step 4 negative control passing."
+  },
+  "both_consumers": {
+   "arm": "covex-v6-fair-c5attr",
+   "digest": "12e4f73ce0ebd865",
+   "rows": 13812,
+   "differing_setwise": 4512,
+   "differing_positional": 12272,
+   "first_difference_index": 1942,
+   "first_difference": "index 1942, t=207.1 s: this arm emits release_monitor for opp0001971 where the control emits release_monitor for opp0001969. An ORDERING SWAP, which is the mechanism's own signature rather than a side effect."
+  },
+  "ordering_consumer_alone": {
+   "arm": "covex-v6-fair-c5attr-orderonly",
+   "digest": "12e4f73ce0ebd865",
+   "rows": 13812,
+   "differing_setwise": 4512,
+   "differing_positional": 12272,
+   "identical_to_both_consumers": true
+  },
+  "split_consumer_alone": {
+   "arm": "covex-v6-fair-c5attr-splitonly",
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "differing_setwise": 0,
+   "identical_to_control": true
+  },
+  "VERDICT": "STEP 2b PASSES ON THE c5attr BASE. The ordering consumer accounts for ALL 4,512 differing decisions and the order-only arm is BYTE-IDENTICAL to the both-consumers arm, which is the strongest attribution available: not a comparison of magnitudes but the same decision log. The split consumer accounts for EXACTLY ZERO, which is what 'absent by construction' predicts on a base with no share admission, since _share_ok returns before SA.allowed. So the docstring's absent-link note applies to the SPLIT consumer only, and that is now MEASURED rather than reasoned."
+ },
+ "2_off_switch_identity": {
+  "arm": "covex-v6-fair-c5attr-off",
+  "digest": "9a4be873eb3c5fba",
+  "rows": 14218,
+  "base_arm": "covex-v6-state-uo-c5attr",
+  "base_digest": "9a4be873eb3c5fba",
+  "base_rows": 14218,
+  "identical": true,
+  "_incidental_worth_knowing": "covex-v6-state-uo-c5attr is DRY-IDENTICAL to covex-v6-state-uo (9a4be873eb3c5fba / 14,218, the committed value). Expected, since C5 attribution only differs when a slow monitor overlaps a self-released prefill, which needs an engine. CONSEQUENCE: no dry cell can distinguish those two arms, so a dry comparison between them would be a null that means nothing."
+ },
+ "3_name_proof_at_current_code": {
+  "_what": "covex-v6-fair-c5attr resolves through run_live2_real.py itself, with a negative control",
+  "probes": {
+   "covex-v6-fair-c5attr": {
+    "arm": "covex-v6-fair-c5attr",
+    "rc": 0,
+    "unknown_arm": false,
+    "tail": "}"
+   },
+   "covex-v6-fair-c5attr-not-an-arm": {
+    "arm": "covex-v6-fair-c5attr-not-an-arm",
+    "rc": 1,
+    "unknown_arm": true,
+    "tail": "KeyError: \"unknown arm 'covex-v6-fair-c5attr-not-an-arm'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstore-prefetch-noyield', 'attentionstore-prefetch-off', 'b"
+   }
+  },
+  "verdict": "PASS",
+  "_why_rerun": "the previous proof was at b17e939, before e38d8fc changed the arm module, so it was stale. Run through run_live2_real.py ITSELF as a subprocess with the posted knobs; the negative control is not optional, because 'no KeyError appeared' passes trivially whenever the subprocess failed for another reason."
+ },
+ "WHAT_THIS_GATE_DOES_NOT_SHOW": "It establishes that the ordering consumer REACHES DECISIONS on this base, and nothing about whether it HELPS. The three D179 checks on live cells decide that. A dry cell cannot establish concurrency or magnitude: twice tonight a dry property failed to transfer live (alerts were never denied dry but are denied about 17 percent of gate calls live, and W overran W_max with no recall present live where recall was present in all 18,476 dry overruns).",
+ "_provenance": {
+  "git_commit": "40992dbee5ebb7f8965b91589943b3ba7700bc99",
+  "_note": "the commit whose live-path blobs the cells ran on, verified by comparing the worktree against origin/main for coordinator.py, hybrid_arm.py and share_admission.py: no difference. Blob ids recorded below so the claim is checkable rather than asserted.",
+  "blobs": {
+   "experiments/orchestration/live2/arms_v6fairfeed.py": "e1e8966b8515",
+   "experiments/orchestration/live2/deficit_feed.py": "77300905c9ac",
+   "experiments/orchestration/live2/hybrid/hybrid_arm.py": "6fee76bef907"
+  },
+  "script": "one dry cell per process; row-level diff on decision logs",
+  "model": null,
+  "device": "flash_cpu",
+  "n": 16,
+  "timestamp": "2026-11-22T22:11:12.994655"
+ }
+}
