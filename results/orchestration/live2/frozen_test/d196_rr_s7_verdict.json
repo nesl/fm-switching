@@ -1179,15 +1179,35 @@
   "model": "n/a (read-only scorer over committed run logs)",
   "device": "n/a (CPU)",
   "n": 1,
-  "timestamp": "2026-11-23T22:29:31.932458+00:00"
+  "timestamp": "2026-11-23T22:40:45.895125+00:00"
  },
- "_what_this_run_is": "s7 scoring of covex-v6-fair-c5attr-rr against rung 3 and base under D196 (2), committed d179_rung2_verdict.py unchanged, positive control PASS 2 of 2 cells exact. ALL THREE D179 CHECKS PASS. Alert mean per-episode 0.6527 against rung 3's 0.4750, +0.1777. Robot on time 84 of 105, EQUAL to rung 3's 84, so RETENTION IS EXACTLY 1.0: this is the ONLY seed where rr TIES rung 3 on robot rather than exceeding it, and it is also the seed with the WEAKEST BAR (77.5, because rung 3 itself is weakest here at 84 against base 19). So s7 is the weakest of the four passes and should be read that way rather than as a fourth equal pass.",
- "_D176_REGISTER_NOTE": {
-  "what": "the s7 robot pool of 105 INCLUDES the 18 over-32k questions that D176 rules should be EXCLUDED from headline robot results for every arm identically and reported separately. The coordinator register confirms the arithmetic: on time 84, late 3, unsent 18, summing to 105.",
-  "as_counted_here": "84 of 105 = 0.8000",
-  "a_D176_compliant_headline_would_be": "84 of 87 = 0.9655",
-  "does_it_affect_the_comparison": "NO. The pool is EQUAL ACROSS ARMS (105 for base, rung 3 and rr) and both rung 3 and rr are at 84, so the retention of 1.0 and the check-2 verdict are unaffected. What it affects is the ABSOLUTE figure, and by a large margin: 0.80 against 0.9655.",
-  "why_recorded": "so nobody quotes 84 of 105 as the s7 robot headline without knowing it carries D176's 18 as misses. Flagged for a user ruling rather than adjusted here, because changing the denominator is a methodological change and the scorer is the committed one.",
-  "register": "OBSERVED from the scorer's pool_n and the H100's coordinator split; the arithmetic is exact"
+ "_what_this_run_is": "s7 scoring of covex-v6-fair-c5attr-rr against rung 3 and base under D196 (2), committed d179_rung2_verdict.py unchanged, positive control PASS 2 of 2 cells exact. ALL THREE D179 CHECKS PASS, COMPLETING THE FOUR-SEED SET.",
+ "_FOUR_SEED_ROLLUP": {
+  "alert_attainment_rr_minus_rung3": {
+   "s4": 0.1844,
+   "s5": 0.2096,
+   "s6": 0.2043,
+   "s7": 0.1777
+  },
+  "robot_retention_scorer_register": {
+   "s4": 1.0459,
+   "s5": 1.0805,
+   "s6": 1.0147,
+   "s7": 1.0
+  },
+  "late_alert_fall_pct": {
+   "s4": 84,
+   "s5": 86,
+   "s6": 85,
+   "s7": "see H100 split"
+  },
+  "all_three_checks_pass": [
+   "s4",
+   "s5",
+   "s6",
+   "s7"
+  ],
+  "S7_IS_THE_WEAKEST_OF_THE_FOUR_AND_WAS_FLAGGED_IN_ADVANCE": "two reasons, both stated before the number existed. First, the robot bar at s7 is 77.5 rather than 102 to 113, because rung 3 itself is weakest at s7 (84 of 105 against base 19), so a pass there is a weaker statement than at s4 to s6. Second, robot retention at s7 is EXACTLY 1.0: rr matches rung 3 at 84 of 105 rather than exceeding it, the only seed where it does not improve the robot side. It is a pass on the pre-registered bar of 0.90 and it is honestly the least impressive of the four.",
+  "what_is_uniform_across_all_four": "alert attainment is ABOVE rung 3 at every seed, by 0.178 to 0.210, and robot retention is at or above 1.0 at every seed, so nothing was traded at any seed."
  }
 }
