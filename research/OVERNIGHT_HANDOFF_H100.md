@@ -54,7 +54,9 @@ For a new file `runs/<LIST>` on origin:
   respected, an older one with no driver is removed and logged); (2) stops an ORPHANED server of ours on GPU 2 (no
   harness on two consecutive passes) with SIGINT, then SIGKILL; the harness itself restarts the server per cell with the
   committed launch config and the preflight; (3) resumes Claude: `cd /home/pragya/Desktop && claude -c -p 'Read
-  fm-switching/research/OVERNIGHT_HANDOFF.md and continue the H100 queue under D187'` in tmux `claudeh100`, existing
+  fm-switching/research/OVERNIGHT_HANDOFF_H100.md (and fm-switching/research/OVERNIGHT_HANDOFF.md for flash state) and continue
+  the H100 queue under D187'` in tmux `claudeh100` (the user's wording named OVERNIGHT_HANDOFF.md; flash created that
+  file as the track-wide handoff at the same time, so the H100 file is separate and the prompt names both), existing
   permission settings, at most once per 20 min, only when no claude process of ours is running. It runs from
   /home/pragya/Desktop (not the repo root) because that is the project directory of the conversation it continues, so
   the handoff path is given relative to it.
