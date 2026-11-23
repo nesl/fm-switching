@@ -99,3 +99,33 @@ The step decomposition (SH-EP format; workload format; the three mixing schemes 
 rank, fitted without the evaluated clip; on-time only vs every cloud answer) is the remaining piece;
 the ceiling in Part 2 already locates the loss at the workload-format step (model-level EP-G 0.683 to
 cloud-every-instant 0.665), with mixing and lateness acting below the 0.048 MDE.
+
+## Addendum: Part 3 extension (context) and Part 6 (cloud context lifecycle)
+
+Part 3 extension. Cloud-every-instant challenge mAP on crash-clip crops, positives split by the cloud
+episode context at the instant: by context length under 6 frames 0.200, 6 to 12 frames 0.648, over 12
+frames 0.338; by restart, episodes that restarted within 3 s before the event 0.170 against episodes
+that did not 0.663. The workload's 21-frame episode restart leaves near-zero context at many crops and
+collapses the cloud mAP there; instants whose episode covers the run-up score about 0.66.
+
+Part 6 (vs device-only 0.620, cross-fitted ALL, 100 percent crop coverage for every condition):
+
+| condition | challenge mAP | vs device-only [CI] | uncached tok | mAP gain per 1k uncached |
+|---|---|---|---|---|
+| C1 one frame | 0.707 | +0.087 [+0.039, +0.138] | 378 | +0.230 |
+| C3 short window | 0.713 | +0.093 [+0.028, +0.149] | 1056 | +0.088 |
+| C6 short window | 0.706 | +0.085 [+0.008, +0.150] | 2070 | +0.041 |
+| EP-B 5 s blocks | 0.724 | +0.104 [+0.043, +0.155] | 376 | +0.276 |
+| EP-G full run-up | 0.642 | +0.022 [-0.057, +0.093] | 372 | +0.058 |
+
+Decision. The 21-frame restart explains only part of the shrink, and in a direction opposite to the
+hypothesis: a FRESH short recent window is more discriminative at the crop than the full run-up. The
+best context is EP-B (5 s blocks), challenge mAP 0.724 (+0.104 over device-only, CI excludes zero) at
+376 uncached tokens per instant; one frame (C1) is close at lower cost. The full run-up (EP-G) is the
+WORST condition (0.642, CI includes zero), because a long history dilutes the recent signal. So the
+workload loses on two counts: its EP-G episodes dilute like the full run-up, and its restarts leave
+near-zero context at many crops (mAP 0.170). The context that recovers the most challenge mAP per
+uncached token is EP-B (+0.276 per 1k), with C1 second (+0.230 per 1k); EP-G recovers the least per
+token despite its large context. Recommendation only: a 5 s block context, not the full run-up, is
+the best thing for the dashcam cloud, and the device-gating of Part 5 should pick WHICH instants get
+that cloud call. The user decides.

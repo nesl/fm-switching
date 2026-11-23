@@ -1,0 +1,222 @@
+{
+ "_what": "StudyDASH2 addendum: Part 3 ext + Part 6 (D199).",
+ "part3_extension": {
+  "by_context_length": {
+   "<6": {
+    "challenge_mAP": 0.2004412160125386,
+    "n_pos_by_h": {
+     "0.5": 3,
+     "1.0": 4,
+     "1.5": 12
+    }
+   },
+   "6-12": {
+    "challenge_mAP": 0.6479388011947945,
+    "n_pos_by_h": {
+     "0.5": 135,
+     "1.0": 140,
+     "1.5": 140
+    }
+   },
+   ">12": {
+    "challenge_mAP": 0.3378985404432608,
+    "n_pos_by_h": {
+     "0.5": 29,
+     "1.0": 9,
+     "1.5": 4
+    }
+   }
+  },
+  "by_restart": {
+   "restart": {
+    "challenge_mAP": 0.16984825963086833,
+    "n_pos_by_h": {
+     "0.5": 3,
+     "1.0": 2,
+     "1.5": 2
+    }
+   },
+   "no_restart": {
+    "challenge_mAP": 0.6628719424529428,
+    "n_pos_by_h": {
+     "0.5": 143,
+     "1.0": 143,
+     "1.5": 144
+    }
+   }
+  },
+  "_note": "cloud-every-instant challenge mAP on crash-clip crops, positives split by the cloud episode context length (frames since restart) and by whether the episode restarted within 3 s before the event; negatives are the common reference."
+ },
+ "part6": {
+  "device_only_mAP_ALL": 0.6202628430935014,
+  "conditions": {
+   "C1": {
+    "challenge_mAP_ALL": 0.7071083951307536,
+    "ci": [
+     0.6493911280330551,
+     0.7778857887207794
+    ],
+    "vs_device_only": {
+     "diff": 0.0868455520372522,
+     "ci": [
+      0.0387785938475971,
+      0.13829900257829947
+     ]
+    },
+    "horizon_shift_vs_device": {
+     "0.5": 1.0,
+     "1.0": 1.0,
+     "1.5": 1.5
+    },
+    "ap_by_horizon": {
+     "0.5": 0.750832860354981,
+     "1.0": 0.708975419646892,
+     "1.5": 0.6615169053903878,
+     "2.0": 0.643654015337673,
+     "2.5": 0.6173295752519905,
+     "3.0": 0.6202773291944048
+    },
+    "crop_coverage": 1.0,
+    "uncached_tokens_median": 378.0,
+    "prompt_tokens_median": 378.0,
+    "mAP_gain_per_1k_uncached_tok": 0.22975013766468835
+   },
+   "C3": {
+    "challenge_mAP_ALL": 0.7134948464317398,
+    "ci": [
+     0.6614846293163987,
+     0.7687235224700592
+    ],
+    "vs_device_only": {
+     "diff": 0.09323200333823833,
+     "ci": [
+      0.027771286345054234,
+      0.1493719000437268
+     ]
+    },
+    "horizon_shift_vs_device": {
+     "0.5": 0.5,
+     "1.0": 1.5,
+     "1.5": 1.5
+    },
+    "ap_by_horizon": {
+     "0.5": 0.7862253610260074,
+     "1.0": 0.7081080534146444,
+     "1.5": 0.6461511248545678,
+     "2.0": 0.6379741857040859,
+     "2.5": 0.6240398341455438,
+     "3.0": 0.6086389744248204
+    },
+    "crop_coverage": 1.0,
+    "uncached_tokens_median": 1056.0,
+    "prompt_tokens_median": 1056.0,
+    "mAP_gain_per_1k_uncached_tok": 0.08828788194908933
+   },
+   "C6": {
+    "challenge_mAP_ALL": 0.7055261088014181,
+    "ci": [
+     0.6495685459579501,
+     0.7688721083676852
+    ],
+    "vs_device_only": {
+     "diff": 0.08526326570791665,
+     "ci": [
+      0.008407132229573278,
+      0.1502456035092525
+     ]
+    },
+    "horizon_shift_vs_device": {
+     "0.5": 0.5,
+     "1.0": 1.5,
+     "1.5": 1.5
+    },
+    "ap_by_horizon": {
+     "0.5": 0.7704346381719978,
+     "1.0": 0.6971878971479474,
+     "1.5": 0.6489557910843091,
+     "2.0": 0.6491772172109311,
+     "2.5": 0.6280194430338957,
+     "3.0": 0.6061457733552157
+    },
+    "crop_coverage": 1.0,
+    "uncached_tokens_median": 2070,
+    "prompt_tokens_median": 2070,
+    "mAP_gain_per_1k_uncached_tok": 0.04118998343377616
+   },
+   "EP-B": {
+    "challenge_mAP_ALL": 0.7240033904385051,
+    "ci": [
+     0.6707129114148405,
+     0.780438219999353
+    ],
+    "vs_device_only": {
+     "diff": 0.10374054734500371,
+     "ci": [
+      0.04328785121814334,
+      0.15488833628382048
+     ]
+    },
+    "horizon_shift_vs_device": {
+     "0.5": 0.5,
+     "1.0": 1.0,
+     "1.5": 1.5
+    },
+    "ap_by_horizon": {
+     "0.5": 0.7924912895701022,
+     "1.0": 0.7305377175572674,
+     "1.5": 0.6489811641881459,
+     "2.0": 0.6350412289300739,
+     "2.5": 0.6131473433103442,
+     "3.0": 0.5990414100825182
+    },
+    "crop_coverage": 1.0,
+    "uncached_tokens_median": 376.0,
+    "prompt_tokens_median": 1394.0,
+    "mAP_gain_per_1k_uncached_tok": 0.275905711023946
+   },
+   "EP-G": {
+    "challenge_mAP_ALL": 0.6419237438735141,
+    "ci": [
+     0.5799925665905994,
+     0.7096219586205128
+    ],
+    "vs_device_only": {
+     "diff": 0.021660900780012704,
+     "ci": [
+      -0.05651045995017831,
+      0.0926924549679817
+     ]
+    },
+    "horizon_shift_vs_device": {
+     "0.5": 0.0,
+     "1.0": 0.0,
+     "1.5": 1.0
+    },
+    "ap_by_horizon": {
+     "0.5": 0.7027185603413485,
+     "1.0": 0.6252394408523876,
+     "1.5": 0.5978132304268063,
+     "2.0": 0.5962081913311457,
+     "2.5": 0.5796517627988544,
+     "3.0": 0.5619323656617566
+    },
+    "crop_coverage": 1.0,
+    "uncached_tokens_median": 372,
+    "prompt_tokens_median": 5112,
+    "mAP_gain_per_1k_uncached_tok": 0.05822822790325996
+   }
+  }
+ },
+ "decision": {
+  "restart_explains_gap": {
+   "no_restart_mAP": 0.6628719424529428,
+   "restart_mAP": 0.16984825963086833,
+   "long_context_mAP": 0.3378985404432608,
+   "short_context_mAP": 0.2004412160125386,
+   "epg_full_runup_vs_device": 0.021660900780012704,
+   "_reading": "if long-context / no-restart instants score materially higher than short-context / restart instants, and EP-G (full run-up) recovers more than the workload cloud-every, the 21-frame restart explains part of the 0.108 to 0.044 shrink"
+  },
+  "best_condition_per_uncached_token": "EP-B",
+  "best_condition_gain_per_1k": 0.275905711023946
+ }
+}
