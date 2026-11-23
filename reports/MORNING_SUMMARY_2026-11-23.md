@@ -221,3 +221,133 @@ another, with nothing checking the two agree about its meaning. `desired_tier`, 
 register, `_log_decision`'s dropped `key`, `built_tokens` against the engine's prefix, and
 `pending_by_type` declared and never read. I would treat "which code reads this, and does it mean the
 same thing there?" as a standing check rather than an occasional one.
+
+## 9. ADDED AFTER 07:00, so the summary above met its deadline and this did not exist yet
+
+Sections 1 to 8 were committed before 07:00 as instructed. This section covers work that landed
+between 07:00 and 08:00 and is kept separate rather than folded in, so the timeline stays readable.
+
+### 9a. THE RUNG-3 FINDING THAT MATTERS MOST, and it needs a ruling rather than more cells
+
+D186 names `mean_per_episode_attainment` the PRIMARY rule for check 1, and section 5's verdict is on
+that rule: rung 3 meets all three checks at s5 only. Reading the committed verdict file more closely
+turned up something section 5 does not say.
+
+THE TWO STATISTICS DISAGREE IN DIRECTION at both near-noise seeds.
+
+  seed   mean per-episode (D186 PRIMARY)      fraction of episodes at or above the 0.25 bar
+  s4     -0.0013  FAIL                        +0.0056   (0.6053 to 0.6110)
+  s5     +0.0307  PASS                        +0.0546
+  s6     -0.0299  FAIL                        +0.0056   (0.6081 to 0.6138)
+  s7     -0.0788  FAIL                        -0.0574
+
+At s4 and s6 rung 3 puts MORE episodes over the 0.25 bar while its MEAN falls. s5 agrees with its
+pass and s7 agrees with its fail. So on the bar-fraction statistic rung 3 is AHEAD of base at three
+of four seeds and behind only at s7, which is also the only seed whose miss is outside measured
+variance.
+
+THAT IS THE SIGNATURE OF REDISTRIBUTION: pulling episodes that sit near the bar over it, at the cost
+of episodes already well above it. Which is precisely what a per-device deficit feed is built to do,
+so the mechanism is behaving as designed rather than accidentally. It is CLAUDE.md consistency check
+3's stratum-against-mean warning in its sharpest form, the two disagreeing in SIGN and not in
+magnitude.
+
+I DID NOT ACT ON IT AND THE VERDICT STANDS AS SCORED. The SLO-meeting fraction is the project's
+stated objective while the mean is D186's committed primary, and switching the rule now, having just
+seen that it flips three seeds, is exactly the tuning the guardrails forbid. It is recorded in the
+StudyFAIR-FEED row at 52dc3215 as a question for you.
+
+### 9b. THE VARIANCE BAND WAS TESTED AND HELD, which also tested my r2 reading
+
+I had staked the 0.05 to 0.06 run-to-run band in advance on the gain0 s6 cell: land near the
+committed c5attr base and the band holds and check 1's s6 miss is noise; land far and the band was
+wrong AND SO WAS MY READING OF THE R2 REFUTATION, which leans on the same figure. It landed 0.042
+from base (0.289 against 0.331), INSIDE the band, from a third independent decision-identical pair.
+So section 3's r2 conclusion rests on a number that has now been checked rather than assumed.
+
+The feed's lift on its own matched control is consistent at three seeds: +0.29 at s4, +0.25 at s5,
++0.21 at s6, pooled dashcam against gain0. I ARGUED AGAINST SPENDING GPU ON THAT CONTROL and was
+overruled; it is now the best-supported number in the rung. My reason was GPU economy and the axis
+was wrong: s6 and s7 are exactly where check 1 fails by more than noise, so they are where the
+attribution carries the most weight.
+
+### 9c. D189 EDGE CONDITIONS: one condition reposted, one NOT BUILT
+
+ITEM 1, memory. I first posted the LOGICAL-only tag condition. THAT WAS THE WRONG CONDITION: you had
+already ruled at 07:35 to 07:40 for a REAL engine 0.25x, recorded at OVERNIGHT_HANDOFF_H100.md line
+168, and the ruling crossed with my posting. The H100 declined to gate it, which was the right call.
+Reposted at e1b5040b with `--num-gpu-blocks-override 984 --max-model-len 15744` on all 12 lines;
+gated. The launcher entry that makes it possible is at 72e2d718 with the default path proved
+unchanged over 9 flag lists.
+
+TWO FINDINGS FROM THE PROBE, THE SECOND CORRECTING THE FIRST. No arm is unable to run at 0.25x:
+`cstate.py:498-517` evicts rather than raising, and there is NO admission gate on pool size anywhere.
+I then pre-registered that four of the six arms CANNOT BE BOUND, because mooncake, simplestream,
+eco-llm and covex-v6-base never build a prefix, their largest prompt is below the pool, and three of
+them reach the pool only through `arms.py:82 self._caps`, which has exactly ONE occurrence in the
+repo and it is a WRITE. THAT HOLDS ONLY FOR THE LOGICAL CONDITION. The H100 pointed out that under
+the real engine fewer vLLM blocks means more preemption and less concurrency for EVERY arm, so the
+pool binds all six AT THE ENGINE whether or not an arm can observe it. It is right, and the real
+condition is informative for all six where the logical one was informative for two. Engine refusals
+remain a separate channel and hit only llf (20 and 2) and covex-v6-rules (55 and 37).
+
+ITEM 2, network outages: NOT BUILT, and it should not be. The read-only survey found an ABSENT LINK.
+`cstate.py:595` hard-codes `network=NetworkState(connected=True, ...)` as a LITERAL, so every
+`not s.network.connected` branch in every arm is dead code and `coordinator.py:791 on_outage` is
+unreachable. NONE of the seven arms reads a link state; eco-llm's single read is dashcam-only on a
+constant True. The described 56-cell grid would return cells BYTE-IDENTICAL to the no-outage cells.
+`Link.reachable` is declared and written at three sites with no decision-changing read, the
+`desired_tier` shape exactly. `v5/cf_planner.py:697-802 plan_sync` is fully implemented with NO arm
+caller, which is UNEXERCISED under Rule 2, the same class as E36. "Independent vs correlated across
+devices" exists nowhere in the repo. Estimate 30 to 47 hours plus three methodological rulings, and
+D150 SYNC (5) and spec v6's inputs table already order outage scenarios after the core grid, so the
+absence is scheduled rather than an oversight.
+
+ITEM 3, recall deadline 2.5 s and load at 12 and 20 devices: PROPOSED ONLY, not posted. 36 cells,
+roughly 13 hours. Two things to decide first: a 2.5 s deadline changes a PRE-REGISTERED target so it
+must be a separate condition rather than a re-score, and 12 or 20 devices changes fleet size, which
+moves the floors and W_max further from the regime they were derived in. Neither blocks it as
+baseline characterisation; both block reading it against the D179 checks.
+
+### 9d. BASELINE COVERAGE: kvflow-prefetch, and a stale committed proof
+
+KVFLOW_CELLS and DEVWAIT_S67_CELLS posted at d3e8d697, both gated.
+
+kvflow-prefetch PASSES THE PORT RULE on this workload: the characteristic decision `prefetch_ahead`
+occurs 108 times against the base's 9, so 99 attributable, and that 99 EQUALS the arm's own
+`prefetch_ahead_emitted` of 99 exactly, an observed log count and an internal counter arriving at the
+same number by different routes. Off-switch byte-identical to base; name proof through
+run_live2_real.py with a negative control confirming an unknown name still exits 1.
+
+TWO CAVEATS THAT MUST TRAVEL WITH THOSE CELLS. The committed `kvflow_prefetch_proofs.json` records
+`prefills_issued_committed: 0` with verdict UNEXPRESSIBLE, and the arm's module docstring still says
+warming ahead is not expressible. BOTH ARE STALE, pinned to 55ec283: PATCH 1 has since landed
+`Observation.live_sessions`, so THE ARM NEVER CHANGED, THE CHANNEL IT ACTS THROUGH WAS OPENED. Anyone
+reading that docstring would wrongly call these cells a relabelled zero. And
+`prefetch_ahead_unexpressible` is 19,107 against 99 emitted, so the mechanism is live and reaches a
+decision but is NOT FULLY EXPRESSED; these cells are not the published system at full strength.
+
+STREAMSCOUT AND LMCACHE COMPARABILITY: ALL FOUR EXISTING s4/s5 CELLS ARE NOW CLOSED BY MEASUREMENT,
+after an interval where two of them were not. Two cell revisions returned "upload-pack: not our ref"
+from origin because they are PRE-REBASE ORIGINALS whose rebased copies reached origin; the H100 held
+the objects and pushed them to refs/h100/*. streamscout: `git diff 50777f0d ef4a963a` over live2/ and
+baselines/ returns ZERO differing files, run on this box, and the s4 digest is byte-identical to
+origin/main, so s5 follows by composition. lmcache: dry digest `2b789696e98821c4` / 37,080 rows on
+BOTH 4af40941 and origin/main, agreeing with the prior measurement at 469929a, so all three revisions
+match. The static argument alone would NOT have settled lmcache, because `arms_published.py` imports
+every baseline adapter AT MODULE LEVEL and `baselines/device_confidence.py` is NEW, and no static
+reading distinguishes "imported and inert" from "imported and mutating". Provenance recorded: that
+sha reached this box as a recovered object, NOT from origin.
+
+### 9e. ADDED TO THE OPEN ITEMS IN SECTION 7
+
+1. WHICH STATISTIC CHECK 1 SHOULD USE, 9a. The mean and the SLO-bar fraction disagree in direction at
+   two seeds and the choice flips three verdicts. I have not touched it.
+2. WHETHER D189 ITEM 3 RUNS, and under what label, 9c.
+3. WHETHER ITEM 2 IS WORTH 30 TO 47 HOURS, 9c. My recommendation is no, not now.
+4. The `arms_v6state.py:236 id(obs)` cache, still FIXED TOMORROW per D188 (2), prepared behind a
+   switch defaulting OFF and applied to no cell.
+5. Rung 4 is still blocked and still needs the `v5/cf_objective.py` ruling, unchanged from 5/139.
+6. The two STALE committed artefacts in 9d: `kvflow_prefetch_proofs.json`'s UNEXPRESSIBLE verdict and
+   `arms_kvprefetch.py`'s docstring. Neither is wrong about the code at 55ec283; both are wrong about
+   the code now, and a reader has no way to tell.
