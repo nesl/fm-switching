@@ -1,0 +1,45 @@
+{
+ "_what": "Were the committed _kv0.5 cells LOGICAL-only or REAL-ENGINE? Settled from the CELLS THEMSELVES by a token-for-token server argv comparison, not from a summary.",
+ "verdict": "LOGICAL-ONLY. The engine's KV pool was NOT halved.",
+ "evidence": {
+  "argv_identical_token_for_token": true,
+  "argv_token_count": {
+   "kv0.5": 37,
+   "1x": 37
+  },
+  "num_gpu_blocks_override": {
+   "kv0.5": null,
+   "1x": null,
+   "note": "ABSENT FROM BOTH, so the engine pool was never overridden"
+  },
+  "max_model_len": {
+   "kv0.5": "32768",
+   "1x": "32768"
+  },
+  "gpu_memory_utilization": {
+   "kv0.5": "0.9",
+   "1x": "0.9"
+  },
+  "the_only_difference": {
+   "harness_gpu_kv_tokens": {
+    "kv0.5": 31472,
+    "1x": 62944
+   },
+   "kv_capacity_enforced": {
+    "kv0.5": true,
+    "1x": true
+   },
+   "what_it_is": "the COORDINATOR's own budget parameter plus its enforcement, i.e. the harness's BELIEF about how much KV it may use, not the engine's allocation"
+  }
+ },
+ "WHAT_THIS_MEANS_FOR_THE_RESULTS": "The committed _kv0.5 cells at seeds 4 and 5 DO NOT TEST MEMORY PRESSURE. They test a policy operating under a halved SELF-IMPOSED budget while the engine had its full 62,944-token pool, so no vLLM preemption, no extra eviction and no real contention was induced. An arm that cannot observe the coordinator's budget is unaffected by the condition ENTIRELY, which is the four-arm result already recorded in kv025_runnability_probe.json for the logical condition.",
+ "cross_check": "agrees with the H100's independent reading of the _kv0.5 SERVER LOGS, where vLLM reported its KV cache at 62,944 tokens throughout. Two routes, the committed argv and the live log, give the same answer.",
+ "register": "argv and the harness fields are OBSERVED from committed cell headers. The inference that no preemption occurred is DERIVED from the absence of an engine override, not measured from engine preemption counters.",
+ "_provenance": {
+  "git_commit": "b5f518cf49d0d8a61f6077d9078dec5225a4fa6e",
+  "script": "argv comparison, read-only",
+  "device": "cpu",
+  "n": 2,
+  "timestamp": "2026-11-23T11:15:15.745377"
+ }
+}

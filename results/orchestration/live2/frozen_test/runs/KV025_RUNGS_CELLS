@@ -1,0 +1,41 @@
+# D189 / user ruling 2026-11-23: OUR STATE-MANAGEMENT RUNGS at REAL-ENGINE 0.25x, so the memory plot
+# shows them beside the baselines. Four cells: rung 2 and rung 3 at seeds 4 and 5.
+#
+# POSTED AS A SEPARATE LIST ON PURPOSE. KV025_CELLS had just been re-gated at 985 with its first cell
+# about to start, and appending would have changed its sha256 and forced a re-gate mid-flight for no
+# benefit. Gate this list AFTER KV025_CELLS' twelve baselines and AHEAD of the remaining DEADLINE25
+# and LOAD1220 cells, which is the order the user asked for.
+#
+# SAME ENGINE CONDITION AS KV025_CELLS, including the 985 correction: vLLM reserves one block, so
+# usable = (override - 1) x 16 and 985 gives 984 x 16 = 15,744. The _kv0.25 tag keeps the logical pool
+# at 15,736 so the coordinator's belief matches the engine.
+#
+# WHY THESE TWO ARMS. covex-v6-state-uo-c5attr is rung 2 (D184 / D186) and covex-v6-fair-c5attr is
+# rung 3; both definitions are SETTLED, which is what D189's "once the policy is frozen" was guarding.
+# Rung 4 is NOT here: it is still being built and its own 0.25x cells come with its proofs.
+#
+# THREE THINGS A READER MUST CARRY WITH THESE CELLS.
+#
+# 1. THE COMMITTED _kv0.5 CELLS ARE NOT A MEMORY CONDITION, so these are the FIRST cells of ours that
+#    put real pressure on the engine. Proved from the cells themselves in
+#    d189_kv05_logical_only.json: the _kv0.5 and 1x server argv are IDENTICAL TOKEN FOR TOKEN, 37
+#    tokens each, with --num-gpu-blocks-override ABSENT FROM BOTH and --max-model-len 32768 in both.
+#    Only the harness's own gpu_kv_tokens differs, 31,472 against 62,944. Do not read a 0.25x result
+#    here as continuous with the committed 0.5x points.
+#
+# 2. THE FOUR-ARM LOGICAL NULL DOES NOT APPLY HERE. Under the LOGICAL condition the pool cannot bind
+#    an arm that never builds a prefix, and three such arms reach it only through a write-only
+#    `self._caps`. Under the REAL engine, fewer vLLM blocks mean more preemption and less concurrency
+#    for every arm whether or not it can observe the pool, so these cells are informative for both
+#    rungs. Engine REFUSALS remain a separate channel and are reported per cell.
+#
+# 3. THE id(obs) CACHE IS STILL UNFIXED IN THESE ARMS, per D190 (6), which defers the fix to a joint
+#    rerun of rungs 2 to 4. So these four cells are internally consistent with the committed rung-2
+#    and rung-3 grid and will be INCONSISTENT with the ladder once that rerun happens. Either they
+#    are rerun with it or they are labelled pre-fix at that point. Flagged now rather than discovered
+#    then.
+#
+covex-v6-state-uo-c5attr 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+covex-v6-fair-c5attr 16 4 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+covex-v6-state-uo-c5attr 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
+covex-v6-fair-c5attr 16 5 _kv0.25_L3_epg_rq30 --num-gpu-blocks-override 985 --max-model-len 15744
