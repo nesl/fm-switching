@@ -36,7 +36,7 @@ Robot correct-by-deadline reproduces the committed cell.json headline exactly fo
 
 ## Provenance
 
-- runs dir last commit: d5fd703c
+- runs dir last commit: 755bf882
 - device-score traces last commit: da4427de
 - device scores and clip_pts: results/orchestration/live2/frozen_test/traces/<trace>/dashcam_instants.jsonl.gz (regenerated deterministically by the committed generator on flash; provenance in traces/d192_device_scores_provenance.json)
 - thresholds: results/dashcam/study_sh_ep/sh_ep_results.json; Nexar labels and event times: sh_ep_manifest_meta.json and nexar_check.json; SS2: results/casestudy/study_ss2/
