@@ -2,13 +2,13 @@
  "_what": "proof (a) scored over the CANONICAL paper-core baseline set, not a set I chose.",
  "_the_set": "the ACTIVE (non-#) lines of results/orchestration/live2/frozen_test/runs/BASELINE_MATRIX, 'D164 BASELINE MATRIX ... the paper core, seeds 4-7'. 18 distinct arms, every active line at the single tag _L3_epg_rq30, verified by reading the committed file rather than from a relay.",
  "_scoring_rule_ONE_RECIPE_ONLY": "scored against the committed d179 17-arm table ALONE (d208_proof_a_bars.json). An arm absent from d179 may use its own record ONLY if TWO records agree. NEVER a union across records: a union would have taken covex-v6-rules as a3c000f4ae2f37f5 / 12,179 from the single older d175_digest_proofs.json against 18067c4c66bb44b8 / 11,955 in eleven records, scoring a CORRECT cell as MOVED and firing the escalation clause on a sound measurement. d175's value is recorded as SUPERSEDED.",
- "_load_boundary": "for --cutoff-off DIGEST cells load is not a comparability threat, because the planner wall-clock cutoff is patched off so the time-dependent quantity is out of play; for anything TIMING-dependent it is. This rests on TWO legs, the MECHANISM and TODAY'S OWN bit-exact matches at loadavg 10.08 and 13.80, and NOT on precedent: the highest load any committed artefact records is 9.00 (d184_r3_c5attr_proofs.json), d179 carries only a boolean with no magnitude, and the earlier 'precedent at about 20' claim was checked and withdrawn.",
+ "_load_boundary": "for --cutoff-off DIGEST cells load is not a comparability threat, because the planner wall-clock cutoff is patched off so the time-dependent quantity is out of play; for anything TIMING-dependent it is. This rests on TWO legs, the MECHANISM and TODAY'S OWN bit-exact matches at loadavg 10.80 and 13.80, and NOT on precedent: the highest load any committed artefact records is 9.00 (d184_r3_c5attr_proofs.json), d179 carries only a boolean with no magnitude, and the earlier 'precedent at about 20' claim was checked and withdrawn.",
  "_no_new_cells_were_needed": "every matrix arm that HAS a d179 bar is already in the running chain, so the 18-arm table needs no GPU beyond it. The 13 no-bar arms and the three hit-6 readers (preble, b9, uniscale) are NOT in the active matrix at all, so no before-digest is owed for them.",
  "summary": {
   "n_arms": 18,
-  "match": 2,
+  "match": 3,
   "moved": 0,
-  "pending_in_the_running_chain": 11,
+  "pending_in_the_running_chain": 10,
   "coverage_missing": 5
  },
  "arms": {
@@ -18,6 +18,7 @@
     "c7f86bb7755828de",
     12253
    ],
+   "loadavg_1min_at_cell_start": 24.81,
    "verdict": "PENDING in the running chain"
   },
   "attentionstore-prefetch": {
@@ -35,7 +36,12 @@
     12265
    ],
    "loadavg_1min_at_cell_start": 20.45,
-   "verdict": "PENDING in the running chain"
+   "measured": [
+    "b9aadd1c3a2b26d5",
+    12265
+   ],
+   "verdict": "MATCH",
+   "_STRONGEST_LOAD_DATA_POINT": "bit-exact against an independently committed bar at loadavg 20.45, which is MORE THAN TWICE the highest load any committed artefact records (9.00, d184_r3_c5attr_proofs.json). This is now the load boundary's best empirical leg, and it comes from the regime actually in use rather than from a precedent."
   },
   "confidence-cascade": {
    "has_d179_bar": true,
@@ -91,7 +97,7 @@
    "has_d179_bar": false,
    "verdict": "COVERAGE MISSING",
    "why": "no entry in the committed d179 17-arm table; under the one-recipe rule this is NOT scored and NOT reported as unchanged.",
-   "single_record_only": "d189_lmcache_s4_recovered_digest.json gives 2b789696e98821c4 / 37,080 but is the ONLY record carrying it. My rule requires TWO agreeing records for a d179-absent arm, so lmcache FAILS it and stays COVERAGE MISSING. The record's own name, 'recovered digest', is a further reason not to treat it as a clean paired measurement."
+   "single_record_only": "2b789696e98821c4 / 37,080 appears in FIVE committed files but in only ONE PAIRED DIGEST MEASUREMENT, d189_lmcache_s4_recovered_digest.json. The others are a log (frozen_grid.log), a cell list (runs/DEVWAIT_S67_CELLS), a narrative row (results/INDEX.md) and d187_streamscout_lmcache_livepath_check.json, whose OWN digest field is a DIFFERENT value (30b2806a117c9c57), so the number appears there as a mention and not as that file's measurement. Counting FILES rather than MEASUREMENTS is the register error; one record, not two, so my two-record rule EXCLUDES it."
   },
   "mooncake": {
    "has_d179_bar": true,
@@ -153,5 +159,9 @@
    ],
    "verdict": "PENDING in the running chain"
   }
- }
+ },
+ "_two_arms_TO_BE_RE_BARRED_not_in_this_matrix_set": [
+  "covex-v6-state-noprice",
+  "covex-v6-state-uo"
+ ]
 }
