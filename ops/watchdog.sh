@@ -54,6 +54,26 @@ fi
 # next cron tick spawns another. The spawned sessions are also effectively READ-ONLY (refused repo
 # writes and even reads under /tmp), so each restart burned tokens and could not do the work.
 # A live worker touches the heartbeat; if it is fresh, there is nothing to restart.
+# SELF-EXPIRING STANDDOWN, added 09:35Z after 20 restarts and 16 one-shot resumes that each found
+# NOTHING TO DO. Every `claude -c -p` resume works, exits, lets the heartbeat go stale, and the next
+# tick starts another, so with no work left the loop pays for a full session to run one cheap check.
+# ops/STANDDOWN holds a unix EXPIRY on its first line. While now < expiry the watchdog logs and does
+# NOT start Claude. IT EXPIRES ON ITS OWN so a stale file cannot silently disable resilience, and
+# deleting the file restores normal behaviour immediately.
+STANDDOWN=$REPO/ops/STANDDOWN
+if [ -f "$STANDDOWN" ]; then
+  exp=$(head -1 "$STANDDOWN" 2>/dev/null | tr -dc '0-9')
+  now=$(date +%s)
+  if [ -n "$exp" ] && [ "$now" -lt "$exp" ]; then
+    log "STANDDOWN active for $(( (exp - now) / 60 )) more minutes, not starting Claude. \
+Delete ops/STANDDOWN to resume immediately. Reason: $(sed -n 2p "$STANDDOWN")"
+    exit 0
+  fi
+  if [ -n "$exp" ]; then
+    log "STANDDOWN EXPIRED, resuming normal watchdog behaviour"
+  fi
+fi
+
 HEARTBEAT=$REPO/ops/heartbeat
 STALE_S=600
 if [ -f "$HEARTBEAT" ]; then
