@@ -1,0 +1,129 @@
+{
+ "_what": "D189 real-engine 0.25x launcher change: proof that the DEFAULT path is unchanged. Replays the allowlist and pool-expectation logic of the committed source against the candidate, over every flag list that matters. No server is started: the logic is pure over extra_flags, and the H100 owns the GPU.",
+ "cases": [
+  {
+   "extra_flags": [],
+   "allowed_before": false,
+   "allowed_now": false,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true,
+   "intended_change": false
+  },
+  {
+   "extra_flags": [
+    "--long-prefill-token-threshold",
+    "1024"
+   ],
+   "allowed_before": true,
+   "allowed_now": true,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true,
+   "intended_change": false
+  },
+  {
+   "extra_flags": [
+    "--long-prefill-token-threshold",
+    "2048"
+   ],
+   "allowed_before": true,
+   "allowed_now": true,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true,
+   "intended_change": false
+  },
+  {
+   "extra_flags": [
+    "--num-gpu-blocks-override",
+    "984",
+    "--max-model-len",
+    "15744"
+   ],
+   "allowed_before": false,
+   "allowed_now": true,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 15744,
+   "behaviour_identical": false,
+   "intended_change": true
+  },
+  {
+   "extra_flags": [
+    "--num-gpu-blocks-override",
+    "984"
+   ],
+   "allowed_before": false,
+   "allowed_now": false,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true,
+   "intended_change": false
+  },
+  {
+   "extra_flags": [
+    "--max-model-len",
+    "15744"
+   ],
+   "allowed_before": false,
+   "allowed_now": false,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true,
+   "intended_change": false
+  },
+  {
+   "extra_flags": [
+    "--gpu-memory-utilization",
+    "0.5"
+   ],
+   "allowed_before": false,
+   "allowed_now": false,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true,
+   "intended_change": false
+  },
+  {
+   "extra_flags": [
+    "--num-gpu-blocks-override",
+    "984",
+    "--max-model-len",
+    "32768"
+   ],
+   "allowed_before": false,
+   "allowed_now": false,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true,
+   "intended_change": false
+  },
+  {
+   "extra_flags": [
+    "--max-model-len",
+    "15744",
+    "--num-gpu-blocks-override",
+    "984"
+   ],
+   "allowed_before": false,
+   "allowed_now": false,
+   "pool_expected_before": 62944,
+   "pool_expected_now": 62944,
+   "behaviour_identical": true,
+   "intended_change": false
+  }
+ ],
+ "n_cases": 9,
+ "n_behaviour_changed": 1,
+ "changed_cases": [
+  [
+   "--num-gpu-blocks-override",
+   "984",
+   "--max-model-len",
+   "15744"
+  ]
+ ],
+ "verdict": "PASS: behaviour changes for EXACTLY the one allowlisted real-0.25x flag list and for nothing else, including the no-flags default, both committed long-prefill entries, each half of the new entry on its own, the same two flags in the OTHER ORDER, and an unlisted flag. The reordered variant still STOPS, which is correct: the allowlist is an exact list match, so a cell must use the flags in the order the entry declares.",
+ "default_path_unchanged": true,
+ "CONTEXT_LIMIT_TOKENS_left_alone": "hybrid_arm.CONTEXT_LIMIT_TOKENS stays 32768. It is a MODULE CONSTANT every arm reads, so changing it would alter the frozen base for all of them. The user's ruling routes over-15,744 prompts through ENGINE REFUSAL instead, and the committed scorer already handles that correctly: scorer/score.py:refused_request_ids nulls the delivery of a request that never returned an answer so the DEVICE answer stands, and that function's own motivating example is an over-context request with a 38,821-token prefill."
+}
