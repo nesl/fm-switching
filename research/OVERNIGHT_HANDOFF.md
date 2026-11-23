@@ -1,3 +1,56 @@
+## STATE AT 00:02 PST, 2026-11-23, from a watchdog-resumed session. READ THIS BEFORE TOUCHING RUNG 3.
+
+THE RUNG-3 GRID IS PROGRESSING NORMALLY AND MUST NOT BE RERUN. Completed and VALID:
+
+  covex-v6-fair-c5attr        s4  robot 122/132  ss 337/357  dashcam MEETS  pooled 0.5074
+  covex-v6-fair-c5attr        s5  robot 114/127  ss 343/356  dashcam MEETS  pooled 0.4921
+  covex-v6-fair-c5attr-gain0  s4  robot 119/132  ss 337/357  dashcam FAILS  pooled 0.2134
+  covex-v6-fair-c5attr-gain0  s5  robot 114/127  ss 349/356  dashcam FAILS  pooled 0.2461
+
+c5attr s6 started about 23:52 and should end about 00:14; s7 follows, to about 00:36. The driver log
+commits only BETWEEN cells, so the absence of a start line for s6 is expected while it runs.
+
+A TRAP I NEARLY FELL INTO, RECORDED SO THE NEXT SESSION DOES NOT. Several run directories under
+runs/ contain ONLY mm_gate.json and mm_uuid_check.json, with NO cell.json:
+
+  covex-v6-fair-c5attr_n16_s6_...            IN PROGRESS, preflight files written first
+  covex-v6-fair-c5attr_n16_s7_...            NOT STARTED YET
+  ..._rerun directories for gain0 s4, gain0 s5, c5attr s5, c5attr s6, c5attr s7
+
+THESE ARE NOT FAILED CELLS. The _rerun directories are artefacts of the 22:46 arms.py import
+incident: driver v28 auto-skipped the five cells that died at launch, creating _rerun attempts that
+also died, and the H100 then UN-SKIPPED them so they ran under their ORIGINAL names, which is why
+the plain gain0 s4, c5attr s5 and gain0 s5 directories are complete and valid. A session that reads
+"stub only" as "failed" could conclude the grid broke and rerun valid cells, which the H100's
+standing rules forbid outright ("never rerun a valid cell").
+
+WHAT I DID NOT DO, DELIBERATELY: I did not score a partial grid. Two of four seeds are in, and the
+D179 verdict is PER SEED with no pooled rescue, so a two-seed score is not a result and would invite
+being quoted as one.
+
+THE TWO-SEED CONTRAST SO FAR, as an indication and not a verdict: the ordering feed roughly DOUBLES
+pooled dashcam on-time against its own gain-0 control, 0.5074 against 0.2134 at s4 and 0.4921
+against 0.2461 at s5, with robot +3 then unchanged and assistance 0 then -6. Both treatment cells
+clear the 0.25 per-device bar comfortably; both controls sit NEAR it, so the FAIL label on the
+control is a threshold crossing on a quantity whose run-to-run variance is about 0.05 to 0.06 here
+(measured from gain0 against the committed c5attr base, which are decision-identical dry). Quote the
+DOUBLING, which is 4 to 6 times that variance, not the label flip.
+
+NEXT STEP, when s6 and s7 land: score all four seeds with the committed pre-registered scorer,
+unchanged, using --shares-arm covex-v6-fair-c5attr, and DECOMPRESS coordinator_result.json.gz first
+or the diagnostics read as absent without error.
+
+RUNG 4 REMAINS UN-GATED AND CANNOT RUN: its registration was reverted at 67dd0514 because
+arms_v6cf imports cf_protect_defer, which calls cf_objective.attainment_margin at import time, and
+that function exists only in an UNCOMMITTED edit in the shared worktree. Do not re-add the
+registration and do not push that edit to unblock anything: it is half-finished D177 work whose harm
+side was never converted.
+
+THE SHARED WORKTREE AT /tmp/claude-1001/mapwt HAS UNCOMMITTED LIVE-PATH EDITS (arms.py,
+coordinator.py, hybrid_arm.py, share_admission.py, v5/cf_objective.py and others). Anything proved
+there may not hold on origin; that is exactly what caused the 22:46 outage. Prove imports and
+registrations on a CLEAN checkout.
+
 # OVERNIGHT HANDOFF (D187). READ THIS FIRST.
 
 ## STATE AT 07:05Z (23:05 local), rewritten by a watchdog-resumed session
