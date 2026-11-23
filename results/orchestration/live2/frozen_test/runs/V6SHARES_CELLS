@@ -1,0 +1,30 @@
+# D179 SHARE-BASED ADMISSION plus DEADLINE-AWARE RELEASE, rung 2 candidate.
+# One cell per line: "arm n seed tag". Lines starting # are NOT run.
+#
+# Posted by the main flash session, 2026-11-22, under D179 to D181 and the user addenda 1 to 10.
+# POSTING GATE PASSED (user addendum 10 item 3), evidence in
+# results/orchestration/live2/frozen_test/d179_dry_s4_report.json and
+# d179_share_admission_proofs.json:
+#   release re-check alert skip rate 0.1781 on the ISOLATED D162-priced arm (bar 0.50), against
+#     0.999836 before the 414d332a register fix; release_infeasible recall 30, assistance 36
+#   off-switch byte identity against COMMITTED values: covex-v6-base af8befb9420ad86a / 12,085 and
+#     covex-v6-state-uo 9a4be873eb3c5fba / 14,218
+#   Step 2b passes and is attributable to share admission alone, a held instant now carrying its
+#     own decision row
+#   port rule passes: 87 denials over 30 distinct instants; alerts NEVER denied, 0 of 10,064
+#   W does not leak: 241 returns to exactly zero
+#
+# PRE-REGISTERED CHECKS (D179 (6)), to be reported whatever the outcome:
+#   1. alert per-episode target attainment at least the base's
+#   2. at least 90 percent of the committed rung-2 robot on-time gain over base retained
+#   3. assistance within 2 s at least 90 percent
+# If any check fails, rung 2 adopts c5attr as a logged override of the D181 rule (user addendum 9
+# item A), and no further C5 variants are built. Shares is judged on its own checks first.
+#
+# dry-W caveat for whoever reads the cells: the 13.43 percent of virtual time spent above W_max and
+# the 3.56x high water in the dry report are submit-to-SETTLE quantities and size nothing. Live W
+# is submit-to-FIRST-TOKEN and is the smaller of the two.
+covex-v6-state-shares 16 4 _L3_epg_rq30
+covex-v6-state-shares 16 5 _L3_epg_rq30
+covex-v6-state-shares 16 6 _L3_epg_rq30
+covex-v6-state-shares 16 7 _L3_epg_rq30

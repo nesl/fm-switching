@@ -60,6 +60,7 @@ import release_recheck as RR                                            # noqa: 
 # ---- D179 (1) to (3) SHARE ADMISSION (session A), import. BEGIN --------------------------------
 import share_admission as SA                                             # noqa: E402
 from share_capacity import FLOORS_TOKENS as SCAP_FLOORS                  # noqa: E402
+from share_capacity import W_MAX_TOKENS as SCAP_W_MAX                    # noqa: E402
 # ---- END D179 (1) to (3) ----------------------------------------------------------------------
 import touch_policy as TP                                               # noqa: E402
 import cachekeys as CK                                                  # noqa: E402
@@ -1425,6 +1426,43 @@ class Live2Coordinator:
         return rid
 
     # ---- D179 (1) to (3) SHARE ADMISSION (session A), the one gate. BEGIN contiguous block ----
+    def _mirror_d179_stats(self) -> None:
+        """Copy the D179 counters onto the ARM's stats dict.
+
+        `test_hybrid.dry` returns only `getattr(arm, "stats", None)`
+        (hybrid/test_hybrid.py:46), so a counter that lives on the COORDINATOR is invisible to
+        every dry proof. That is not a cosmetic gap: it already made a live share-admission
+        mechanism read as a dead one, and it would do the same to the D179 (4) release re-check,
+        whose `release_infeasible` counters live in the same place. Both prefixes are mirrored, and
+        this is called UNCONDITIONALLY so an arm with only one of the two switches on is still
+        measurable.
+        """
+        _as = getattr(self.arm, "stats", None)
+        if not isinstance(_as, dict):
+            return
+        for _k, _v in self.counts.items():
+            _ks = str(_k)
+            # `submitted_` is mirrored too, because without it a skip COUNT has no in-cell
+            # DENOMINATOR and the rate can only be formed by borrowing another arm's, which is a
+            # cross-arm substitution dressed as a rate. It also serves as the positive control on
+            # this mirror: submitted_monitor cannot be zero in a cell with decision rows.
+            if (_ks.startswith("share_") or _ks.startswith("release_infeasible")
+                    or _ks.startswith("submitted_")):
+                _as[_ks] = _v
+        if self._share_admission:
+            _as["share_admission"] = SA.summary(self._w, enabled=True)
+            _as["share_w_high_water"] = int(getattr(self, "_w_hi", 0))
+            _as["share_w_zero_returns"] = int(getattr(self, "_w_zero", 0))
+            _as["share_w_tracked_at_end"] = int(self._w.as_dict()["tracked_requests"])
+            _as["share_w_over_wmax_periods"] = int(getattr(self, "_w_over", 0))
+            _as["share_w_over_wmax_types"] = {
+                k: int(v) for k, v in getattr(self, "_w_over_types", {}).items()}
+            _as["share_w_samples_per_gate_call"] = int(getattr(self, "_w_samples", 0))
+            _as["share_w_over_wmax_periods_TIME"] = int(getattr(self, "_wp_over", 0))
+            _as["share_w_samples_TIME"] = int(getattr(self, "_wp_samples", 0))
+            _as["share_w_over_wmax_types_TIME"] = {
+                k: int(v) for k, v in getattr(self, "_wp_over_types", {}).items()}
+
     def _share_ok(self, *, qtype, uncached, kind, t, key, feasible=None) -> bool:
         """One admission gate for all four release sites. True means submit.
 
@@ -1465,20 +1503,24 @@ class Live2Coordinator:
         # type sat at or above its floor.
         _wt = self._w.total()
         self._w_hi = max(getattr(self, "_w_hi", 0), _wt)
+        self._w_samples = getattr(self, "_w_samples", 0) + 1
         if _wt == 0:
             self._w_zero = getattr(self, "_w_zero", 0) + 1
+        # D180 (5) and the user's addendum 10 item 3: how often W is over capacity, and WHICH
+        # TYPES are present when it is. Labelled dry-W (submit to SETTLE) wherever it is reported,
+        # and used to size NOTHING: the floors come from live submit-to-first-token behaviour.
+        if _wt > SCAP_W_MAX:
+            self._w_over = getattr(self, "_w_over", 0) + 1
+            _ot = getattr(self, "_w_over_types", None)
+            if _ot is None:
+                _ot = self._w_over_types = {}
+            _present = tuple(sorted(t for t in SA.TYPES if self._w.w(t) > 0))
+            _key = "+".join(_present) if _present else "none"
+            _ot[_key] = _ot.get(_key, 0) + 1
         for _t in SA.TYPES:
             if self._w.w(_t) >= SCAP_FLOORS[_t]:
                 self.counts["share_at_or_above_floor_" + _t] += 1
-        _as = getattr(self.arm, "stats", None)
-        if isinstance(_as, dict):
-            _as["share_admission"] = SA.summary(self._w, enabled=True)
-            _as["share_w_high_water"] = int(self._w_hi)
-            _as["share_w_zero_returns"] = int(getattr(self, "_w_zero", 0))
-            _as["share_w_tracked_at_end"] = int(self._w.as_dict()["tracked_requests"])
-            for _k, _v in self.counts.items():
-                if str(_k).startswith("share_"):
-                    _as[_k] = _v
+        self._mirror_d179_stats()
         if len(self._share_events) < 20000:
             self._share_events.append(dict(
                 t=round(float(t), 6), qtype=qtype, kind=str(kind), uncached=int(uncached),
@@ -1860,6 +1902,36 @@ class Live2Coordinator:
         return ev
 
     def _expire(self, t: float) -> None:
+        # ---- D179 MEASUREMENT MIRROR, called from a per-period hook. BEGIN block --------------
+        # The call used to sit inside `_share_ok`, which returns early when share admission is
+        # off, so I had made the mirror's CONTENTS unconditional while leaving its CALL SITE
+        # gated: the release re-check retest then reported every counter ABSENT, including
+        # `submitted_*`, in a 14,968-row cell. It is called here because `_expire` runs every
+        # period for every arm regardless of either switch.
+        #
+        # The fault was caught by a POSITIVE CONTROL ON THE MEASUREMENT CHANNEL, not by the
+        # result: the retest printed `submitted_*` alongside the counters it was actually after,
+        # and `submitted_monitor` cannot be zero in a cell with 14,968 decision rows. Without that
+        # control the run would have read as an alert skip rate of 0.0000, which is a PASS against
+        # the D179 50 percent bar, and the gate would have been cleared by a mirror that never ran.
+        # A TIME fraction needs a PER-PERIOD sample. The counters above are incremented once per
+        # ADMISSION GATE CALL, so 113 of 10,657 is a fraction of gate invocations, not of time,
+        # and the two differ because gate calls cluster where traffic does. `_expire` runs once
+        # per 100 ms period for every arm, so sampling here gives the quantity the user asked for.
+        # Both are kept, under names that say which is which, rather than one being relabelled.
+        if self._share_admission:
+            self._wp_samples = getattr(self, "_wp_samples", 0) + 1
+            if self._w.total() > SCAP_W_MAX:
+                self._wp_over = getattr(self, "_wp_over", 0) + 1
+                _pt = getattr(self, "_wp_over_types", None)
+                if _pt is None:
+                    _pt = self._wp_over_types = {}
+                _pres = tuple(sorted(_x for _x in SA.TYPES if self._w.w(_x) > 0))
+                _pk = "+".join(_pres) if _pres else "none"
+                _pt[_pk] = _pt.get(_pk, 0) + 1
+        self._mirror_d179_stats()
+        # ---- END D179 block ------------------------------------------------------------------
+
         for oid in self.st.order:
             o = self.st.opps[oid]
             if o.state in ("arrived", "offered") and o.deadline_abs() < t - 1e-9:

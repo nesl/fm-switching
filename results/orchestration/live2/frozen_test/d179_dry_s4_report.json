@@ -1,0 +1,83 @@
+{
+ "_what": "D179 dry s4 report, the posting gate for V6SHARES_CELLS. User addendum 10 item 3: the release re-check retested on a D162-priced arm after the 414d332a register fix, plus the W-over-capacity reporting. Dry cell, seed 4, 16 devices, 1200 s, posted knobs, one cell per process, established digest recipe.",
+ "release_recheck_retest": {
+  "bar": "D179 STOP if the alert skip rate exceeds 0.50",
+  "before_the_register_fix": {
+   "skip_rate": 0.999836,
+   "note": "12,166 of 12,168 on covex-v6-base, classified INCONCLUSIVE wrong-register input under Rule 2"
+  },
+  "isolated_arm_PRIMARY": {
+   "arm": "covex-v6-state-shares-noadmit",
+   "d162_priced": true,
+   "why_this_arm": "share admission OFF and the re-check ON, so the skip rate is attributable to the re-check alone and not to a cell carrying both mechanisms. Share counters are absent in this cell, which is the in-cell control confirming that.",
+   "release_infeasible_alert": 2092,
+   "submitted_monitor": 9651,
+   "denominator": 11743,
+   "skip_rate": 0.1781,
+   "verdict": "PASS, well under 0.50",
+   "release_infeasible_recall": 30,
+   "release_infeasible_assistance": 36
+  },
+  "shares_arm_SECONDARY": {
+   "arm": "covex-v6-state-shares",
+   "release_infeasible_alert": 1651,
+   "alerts_admitted_by_shares": 10064,
+   "alert_share_denials": 0,
+   "denominator": 11715,
+   "skip_rate": 0.1409,
+   "how_the_denominator_was_formed": "from IN-CELL quantities only: the re-check precedes share admission in the code path, and alert share-denials are 0 in this same cell, so no alert was held and re-counted. The first attempt at this rate was a DIVISION ARTEFACT of 1.0000, because that cell predated the mirroring of `submitted_` and the denominator was zero. Not reported as a result."
+  },
+  "COMPOSITION_FINDING": "The re-check skips MORE alerts with shares OFF (2,092) than ON (1,651), a difference of 441. Holding work keeps the queue shallower, so fewer requests become infeasible by the time they reach the wire. The two mechanisms reinforce rather than compete, which is what D179 predicted, and it is measured on both sides rather than inferred from one."
+ },
+ "W_over_capacity": {
+  "LABEL": "dry-W (submit to SETTLE). Used to size NOTHING. See the register note below.",
+  "time_basis_PRIMARY": {
+   "over_wmax_samples": 18476,
+   "total_samples": 137577,
+   "fraction_of_virtual_time": 0.1343,
+   "sampling": "once per uniform event-grid step of about 8.7 ms, from `_expire`, which is called once per step in the main loop, so the samples are equally weighted in virtual time and the fraction is a genuine time fraction",
+   "types_present": {
+    "recall_alone": 15743,
+    "alert+recall": 2434,
+    "assistance+recall": 218,
+    "alert+assistance+recall": 81
+   },
+   "RECALL_IS_PRESENT_IN_ALL_18476": "every overrun involves recall, with no exceptions, which is the oversize exemption behaving exactly as D179 (3) specifies: a request larger than its share is admitted when alone and feasible, nothing can be preempted, so W must overrun. Predicted before the measurement."
+  },
+  "per_gate_call_basis_FOR_CONTRAST": {
+   "over_wmax": 113,
+   "samples": 10657,
+   "fraction": 0.0106,
+   "why_both_are_kept": "the two differ by 12.7x, because gate calls cluster where traffic does. Reporting the per-gate-call figure as a time fraction would have understated the overrun by more than an order of magnitude while passing every arithmetic check. Both are kept under names that say which is which, rather than one being relabelled."
+  },
+  "high_water": 15410,
+  "high_water_vs_wmax": 3.56,
+  "zero_returns": 241,
+  "tracked_at_end": 1,
+  "no_leak": "W returns to exactly zero 241 times; a leak never returns to zero"
+ },
+ "share_admission": {
+  "admits": {
+   "alert": 10064,
+   "recall": 184,
+   "assistance": 322
+  },
+  "denies": {
+   "alert": 0,
+   "recall": 48,
+   "assistance": 39
+  },
+  "digest": "3a5b40d78b9dcb3b",
+  "rows": 13390
+ },
+ "REGISTER_NOTE_READ_THIS_BEFORE_USING_ANY_W_FIGURE": "In a DRY cell W is submit to SETTLE, against the synthetic `_dry_service_s`. In a LIVE cell W is submit to FIRST TOKEN, because `on_first` is wired only when a real backend exists (procsplit.py:430-433). Same name, different quantities, the dry one LARGER. So the 13.43 percent overrun fraction and the 3.56x high water are properties of the dry harness as much as of the policy, and NEITHER sizes a floor, sets W_max, or tests whether a floor binds. The floors were derived from live submit-to-first-token behaviour and are frozen. Relatedly, the ALERT type never reaches its own floor in this cell: that is NOT evidence the alert floor is oversized, for the same reason.",
+ "_provenance": {
+  "git_commit": "c35d0a0d77eaa320da2a0f796e99602c1a87cc05",
+  "script": "fresh_d179.py, one dry cell per process",
+  "model": null,
+  "device": "flash_cpu",
+  "n": 16,
+  "cell": "seed 4, 16 devices, 1200 s, ratio 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0",
+  "timestamp": "2026-11-22T16:05:23.271220"
+ }
+}
