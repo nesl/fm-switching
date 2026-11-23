@@ -1,0 +1,104 @@
+{
+ "_what": "Per-instant DASHCAM tables and full device_answers for the perframe rq30 traces, seeds 4 to 7, for the ORIN's D192 episodic scoring. Two files per trace: device_answers.jsonl.gz (all kinds: monitor, recall, assistive) and dashcam_instants.jsonl.gz (the joined per-instant table the ORIN asked for).",
+ "join_key_for_the_orin": "`frame_ref`, e.g. \"00422.mp4|t0004.00\", is the trace's own clip reference and is carried on every row, with `clip_pts` as its parsed float. That is the authoritative key; join the frame manifest to it.",
+ "FINDING_THAT_CONTRADICTS_THE_REQUEST_PREMISE": "The ORIN reported that t_local is session-relative rather than clip time, citing clip 00422 with instants at t_local 4.0, 4.5 while its manifest puts that clip's frames at pts 10.0, 10.5, and only 15 percent of (clip, t_local) pairs matching. IN THE TRACE, clip_pts EQUALS t_local ON EVERY ONE of the 47,098 instants across the four seeds, exactly. So the offset it hypothesised is NOT in the trace, and the 15 percent match rate has another cause, most likely on the manifest side. Reported rather than worked around: if the ORIN applies an offset correction to reconcile the two, it would be correcting for something the trace does not do.",
+ "dashcam_instants_fields": [
+  "opportunity_id",
+  "play_id",
+  "clip",
+  "device_id",
+  "t_local",
+  "t",
+  "frame_ref",
+  "clip_pts",
+  "episode_id",
+  "episode_index",
+  "episode_frames",
+  "deadline_s",
+  "play_completed",
+  "device_score",
+  "device_p_yes"
+ ],
+ "episode_fields_included_unasked": "episode_id, episode_index and episode_frames are included although not requested, because D192 (1) scores PER TASK EPISODE and these save reconstructing episode boundaries. Episode counts 712 / 714 / 712 / 714 agree with the n_episodes 712 recorded in d185_rung3_verdict.json for the same workload.",
+ "why_regenerated_not_copied": "the ORIN asked for files under /home/pragya/data/live2/frozen_grid/work/traces/, which DOES NOT EXIST ON FLASH: that path is the H100's own disk. Same path confusion as the oversized-log mirror earlier today. Regeneration avoids the transfer entirely.",
+ "knobs": {
+  "n_devices": 16,
+  "ratio": "40:40:20",
+  "run_s": 1200.0,
+  "mode": "A",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "dashcam_min_frames": 3,
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0
+ },
+ "per_seed": {
+  "4": {
+   "instants": 11764,
+   "with_clip_pts": 11764,
+   "with_device_p_yes": 11764,
+   "distinct_episodes": 712,
+   "clip_pts_equals_t_local": 11764,
+   "dash_gz_sha256": "974306ba4b7fbd37a5da253797c90651e2bb948695797028e0a631a9b4e80350",
+   "device_answers_gz_sha256": "66395e5ccf1b7059c6bf628608c62f02624effe1059ca0f9c6c11b05ffeb2585"
+  },
+  "5": {
+   "instants": 11769,
+   "with_clip_pts": 11769,
+   "with_device_p_yes": 11769,
+   "distinct_episodes": 714,
+   "clip_pts_equals_t_local": 11769,
+   "dash_gz_sha256": "8f3419c82143d5115b7d57b305466c26db9e750ff92cf7a77d51890d21d4e838",
+   "device_answers_gz_sha256": "cc6466b8f9cd34d1ede84a32180f5398ac6bf7aa049f9b307211bc17f8b48374"
+  },
+  "6": {
+   "instants": 11786,
+   "with_clip_pts": 11786,
+   "with_device_p_yes": 11786,
+   "distinct_episodes": 712,
+   "clip_pts_equals_t_local": 11786,
+   "dash_gz_sha256": "5364c3a1b4010e80984437e4d9b5f3035cb4fe95d33917feeb59746c6cc68efc",
+   "device_answers_gz_sha256": "8f5a764ca036d88ffe41ff42bdfdb260c8b7fe460437514b3543f5eb334365b5"
+  },
+  "7": {
+   "instants": 11779,
+   "with_clip_pts": 11779,
+   "with_device_p_yes": 11779,
+   "distinct_episodes": 714,
+   "clip_pts_equals_t_local": 11779,
+   "dash_gz_sha256": "a0959c700baf813713cbcadf970ceab2b88581f43aeb56a9474f92dde630bae7",
+   "device_answers_gz_sha256": "45d0b5ce537006ede2f7a5bc1f143dd8f99963f65bdaf4635f66afc535c2668b"
+  }
+ },
+ "controls": {
+  "determinism": {
+   "method": "seed 4 regenerated twice in separate processes",
+   "result": "IDENTICAL GZ BYTES (mtime pinned to 0 so the archive carries no run time)"
+  },
+  "positive_control_vs_committed_seed4": {
+   "_what": "the committed seed4_..._lh_req_ss2 file is a DIFFERENT trace variant, and the ORIN reports it recovers seed 4 fully, so device_p_yes must agree wherever both carry a key",
+   "committed_monitor_rows": 13193,
+   "shared_keys": 11764,
+   "agree": 11764,
+   "pass": true
+  },
+  "reproduces_the_orin_diagnosis": {
+   "_what": "the ORIN measured that committed seed 4 covers seeds 5 to 7 only 64 to 67 percent",
+   "measured_here": {
+    "5": 0.674,
+    "6": 0.643,
+    "7": 0.637
+   },
+   "agrees_with_orin": true
+  }
+ },
+ "_provenance": {
+  "git_commit": "ec2d6a838f915e62b1eba95408b808f23caadabd",
+  "script": "gen.py and join.py, trace generation only, no GPU",
+  "device": "cpu_trace_only",
+  "n": 8,
+  "timestamp": "2026-11-23T10:36:17.887257",
+  "reproducibility": "gzip mtime pinned to 0, so regenerating gives IDENTICAL BYTES; verified by regenerating seed 4 in a separate process"
+ }
+}
