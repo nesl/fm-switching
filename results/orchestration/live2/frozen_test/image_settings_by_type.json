@@ -1,0 +1,509 @@
+{
+ "_what": "image-processor settings, image dimensions as sent and tokens per image, per live2 query type, from committed artefacts only",
+ "_ref": "origin/main",
+ "_ref_sha": "8a9721172b9e58db5dce3e33575066ea078ba02a",
+ "_ref_sha_note": "every input was read with `git show <_ref_sha>:<path>`; the _provenance git_commit below is this box's working-tree HEAD, which may differ",
+ "_cells": [
+  "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+  "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+  "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+  "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30"
+ ],
+ "_cells_are": "covex-v6-base under the D172 mapping; the cells share_capacity.py derives its frozen numbers from; seeds 4 to 7 only",
+ "server_image_settings": {
+  "mm_processor_kwargs": {
+   "size": {
+    "shortest_edge": 4096,
+    "longest_edge": 16777216
+   },
+   "fps": 1.0,
+   "do_sample_frames": false
+  },
+  "min_pixels_shortest_edge": 4096,
+  "max_pixels_longest_edge": 16777216,
+  "limit_mm_per_prompt_last_wins": {
+   "image": 640,
+   "video": 1
+  },
+  "trust_request_mm_kwargs": true,
+  "mm_processor_cache_gb": "128",
+  "enable_prefix_caching_last_wins": true,
+  "_one_setting_server_wide": "the engine is started once per cell and serves all three types; there is no per-type image-processor setting",
+  "_source": "header.json server.command of every cell (study_e10b_mixed.py:78-81 COMMON)"
+ },
+ "body_builder_image_handling": {
+  "_question": "any resize, crop or re-encode in OUR OWN body builder",
+  "answer": "NONE. bodies.image_part (bodies.py:131-147) puts the stored file's bytes on the wire base64-encoded verbatim via _data_url (bodies.py:127-128), or a uuid-only reference when the device already uploaded them; materialize (bodies.py:150-170) only fills a deferred part with that same URL. No PIL import, no size argument, no crop, no re-encode anywhere in the module.",
+  "per_request_mm_processor_kwargs": "NONE. build_body (bodies.py:211-240) assembles model, stream, messages, cache_salt, gen, optional kv_transfer_params and the fm_* / _live2 hint fields; it never sets mm_processor_kwargs, so --trust-request-mm-kwargs on the server has nothing to trust and the server-wide setting is the only one",
+  "the_only_re_encode_is_offline": "data/encode_jpeg.py, PNG or CHW array -> JPEG q90 (Nexar) / q88 (S-EMBER), explicitly 'NO resize in the encode step' (encode_jpeg.py:262) and asserting the expected pixel grid before writing (lines 103-107, 118-120)",
+  "frames_root": "the coordinator resolves frames_root / frame_ref and sends nothing if the file is absent (coordinator.py:1327-1335); a real-server run is REFUSED if any ref has no file (preflight.require_frames), and the committed frames_preflight.json of every cell used here reports n_missing 0, so every image on the wire carried real bytes"
+ },
+ "assistance_vs_the_others": {
+  "_question": "are ASSISTANCE images capped by the same rule as the other two types",
+  "answer": "SAME RULE, and the rule binds nothing. There is exactly one image-processor setting, server-wide, for all three types: min_pixels 4096 and max_pixels 16777216. The largest image any type sends is 1,786,368 px, 9.4x below max_pixels, and the smallest is 196,608 px, 48x above min_pixels, so no image of any type is rescaled by the processor.",
+  "what_actually_differs": "the SOURCE pixel grid, not the cap. Alert and recall frames were downsized OFFLINE to a fixed grid before storage (Nexar SMALL 768x432, S-EMBER D2 352x256); assistance images are stored and sent at the dataset's NATIVE resolution with no pre-resize step anywhere in the pipeline."
+ },
+ "device_measurement_comparison": {
+  "_question": "do these settings match what the DEVICE measurements used (D172)",
+  "single_shot_assistance": {
+   "device": "Orin 4B, vLLM 0.20.0, orin3_serve.sh:16 passes --limit-mm-per-prompt only and NO --mm-processor-kwargs, so the released Qwen3-VL-4B defaults apply: size {shortest_edge 65536, longest_edge 16777216}, patch 16, merge 2 (reports/study_ss2.md:110-113)",
+   "cloud_live2": "size {shortest_edge 4096, longest_edge 16777216}",
+   "match": "PARTIAL BY FLAG, EXACT IN EFFECT. max_pixels is identical; only the min_pixels floor differs (65536 against 4096) and it binds on no SS2 image, the smallest being 196,608 px, 3.0x the device floor. StudySS2 checked this as a census and found prompt-token counts identical on 1,042 of 1,042 questions (reports/study_ss2.md:279-294).",
+   "recorded_where": "ss2_compare.py:546-547 ttft_condition.device_stack / cloud_stack"
+  },
+  "alert_dashcam": {
+   "device": "Orin 4B, sh_ep_server_orin.sh:43 passes the SAME --mm-processor-kwargs string as the H100 (lines 19-20 state the parity requirement explicitly)",
+   "cloud_live2": "identical string",
+   "match": "YES, byte for byte. --limit-mm-per-prompt differs (image 21 on the Orin against image 640 on the H100) but that is an admission limit, not a pixel budget, and EP-G is capped at 21 frames."
+  },
+  "recall_robot": {
+   "device": "the committed robot-recall device baseline is the ORIN2 IN-PROCESS llama.cpp harness (D87), which is not a vLLM image processor at all, and ss2_compare.py:550-553 states the ORIN3 vLLM numbers and the ORIN2 numbers must not be placed side by side as one device's numbers",
+   "cloud_live2": "size {shortest_edge 4096, longest_edge 16777216}",
+   "match": "NOT COMPARABLE as a flag-for-flag check. The frames are 352x256 on both sides because the pixel grid is fixed offline by study_rh3_inputs.load, well inside both pixel budgets, so no rescale occurs either way."
+  },
+  "cost_tables": "reports/phase1_cost_profiling.md and results/cost/cost_matrix.csv are TEXT-token representation costs (full / window / summary) with no image input; they carry no image-processor setting and none is needed."
+ },
+ "finding_settings_differ_without_a_recorded_decision": {
+  "types": [
+   "alert",
+   "recall",
+   "assistance"
+  ],
+  "the_difference": "alert frames reach the store already downsized to 768x432 (338 tokens) and recall frames to 352x256 (90 tokens), while assistance images are sent at native resolution, p50 1152x938 and up to 1536x1536, for a p50 of 1,307 image tokens: 3.9x an alert frame and 14.5x a recall frame. The image-processor SETTING is one and the same for all three; the effective per-image token cost is not.",
+  "d_rows_searched": [
+   "D67",
+   "D70",
+   "D91",
+   "D111",
+   "D136",
+   "D143",
+   "D148",
+   "D153",
+   "D156",
+   "D172"
+  ],
+  "authorising_d_row": null,
+  "what_the_d_rows_do_cover": "D70 and D91 fix the WIRE FORMAT (JPEG) and the stored grids for Nexar and S-EMBER, whose sizes come from the upstream studies (StudyD14 SMALL; study_rh3_inputs.load (352, 256)), not from a live2 sizing decision. D136 and D143 choose the SS datasets and the split and say nothing about image size. D172 requires only that the settings be STATED, which is what this file does.",
+  "status": "DIFFERENCE WITHOUT A RECORDED DECISION. It is a finding to report, not a defect to fix here; whether to equalise the grids is a methodological change and the user's to rule on."
+ },
+ "positive_control_1_epg_law": {
+  "_control": "EP-G prompt-token law 42 + 338 * n_frames (bodies.py:95-99, DECLARED) against the engine's own prompt_tokens (MEASURED) on every alert request of the four base cells",
+  "n_alert_requests": 39945,
+  "n_exact": 39945,
+  "fraction_exact": 1.0,
+  "deviation_histogram": {
+   "0": 39945
+  },
+  "passes": true
+ },
+ "positive_control_2_median_uncached": {
+  "_control": "median uncached tokens per type, recomputed from the same four covex-v6-base cells share_capacity.py names as its source",
+  "rows": {
+   "alert": {
+    "this_run": 374,
+    "committed": 374.0,
+    "source": "share_capacity.FACTORS['alert']['median_uncached']",
+    "ratio": 1.0,
+    "agree": true,
+    "per_seed": {
+     "4": 374,
+     "5": 374.0,
+     "6": 374,
+     "7": 374
+    }
+   },
+   "recall": {
+    "this_run": 7717,
+    "committed": 7717.0,
+    "source": "share_capacity.FACTORS['recall']['median_uncached']",
+    "ratio": 1.0,
+    "agree": true,
+    "per_seed": {
+     "4": 7776.0,
+     "5": 7811,
+     "6": 7360.5,
+     "7": 8530.5
+    }
+   },
+   "assistance": {
+    "this_run": 1372.0,
+    "committed": 1372.0,
+    "source": "share_capacity.FACTORS['assistance']['median_uncached']",
+    "ratio": 1.0,
+    "agree": true,
+    "per_seed": {
+     "4": 1372.0,
+     "5": 1372.0,
+     "6": 1372,
+     "7": 1372
+    }
+   }
+  },
+  "passes": true
+ },
+ "per_type": {
+  "alert": {
+   "n_requests": 39945,
+   "images_per_request": {
+    "n": 39945,
+    "min": 3.0,
+    "p50": 11.0,
+    "p90": 19.0,
+    "max": 21.0,
+    "mean": 11.2729
+   },
+   "prompt_tokens": {
+    "n": 39945,
+    "min": 1056.0,
+    "p50": 3760.0,
+    "p90": 6464.0,
+    "max": 7140.0,
+    "mean": 3852.2234
+   },
+   "uncached_tokens": {
+    "n": 39945,
+    "min": 366.0,
+    "p50": 374.0,
+    "p90": 718.0,
+    "max": 7140.0,
+    "mean": 471.9919
+   },
+   "cached_fraction": {
+    "n": 39945,
+    "min": 0.0,
+    "p50": 0.8930450029222676,
+    "p90": 0.9431,
+    "max": 0.9478991596638655,
+    "mean": 0.8113
+   },
+   "tokens_per_image": {
+    "measured": {
+     "n_points": 19,
+     "n_images_range": [
+      3,
+      21
+     ],
+     "tokens_per_image_from_endpoints": 338.0,
+     "implied_text_tokens": 42.0,
+     "tokens_per_image_ols": 338.0,
+     "implied_text_tokens_ols": 42.0,
+     "_ols_caveat": "the intercept absorbs the per-question text, which varies, so the OLS slope is an estimate and the declared value is the constant"
+    },
+    "declared": 338,
+    "declared_at": "bodies.py:96 (EPG_TOK_PER_FRAME)"
+   },
+   "declared_stored_size_wh": [
+    768,
+    432
+   ],
+   "declared_stored_size_at": "data/encode_jpeg.py:85 NEXAR_EXPECT_SIZE"
+  },
+  "recall": {
+   "n_requests": 179,
+   "images_per_request": {
+    "n": 179,
+    "min": 61.0,
+    "p50": 115.0,
+    "p90": 139.2,
+    "max": 146.0,
+    "mean": 112.5978
+   },
+   "prompt_tokens": {
+    "n": 179,
+    "min": 5584.0,
+    "p50": 10468.0,
+    "p90": 12685.2,
+    "max": 13235.0,
+    "mean": 10269.257
+   },
+   "uncached_tokens": {
+    "n": 179,
+    "min": 2.0,
+    "p50": 7717.0,
+    "p90": 12274.8,
+    "max": 13078.0,
+    "mean": 6341.3911
+   },
+   "cached_fraction": {
+    "n": 179,
+    "min": 0.0,
+    "p50": 0.0,
+    "p90": 0.9712,
+    "max": 0.9998232278592893,
+    "mean": 0.3721
+   },
+   "tokens_per_image": {
+    "measured": {
+     "n_points": 28,
+     "n_images_range": [
+      78,
+      144
+     ],
+     "tokens_per_image_from_endpoints": 88.1212,
+     "implied_text_tokens": 388.5455,
+     "tokens_per_image_ols": 89.8559,
+     "implied_text_tokens_ols": 151.6884,
+     "_ols_caveat": "the intercept absorbs the per-question text, which varies, so the OLS slope is an estimate and the declared value is the constant"
+    },
+    "declared": 90,
+    "declared_at": "data/encode_jpeg.py:86 SEMBER_EXPECT_SIZE['D2'] = (352, 256), token geometry per study_rh3_inputs.py:13"
+   },
+   "declared_stored_size_wh": [
+    352,
+    256
+   ],
+   "declared_stored_size_at": "data/encode_jpeg.py:86 SEMBER_EXPECT_SIZE['D2']"
+  },
+  "assistance": {
+   "n_requests": 1428,
+   "images_per_request": {
+    "n": 1428,
+    "min": 1.0,
+    "p50": 1.0,
+    "p90": 1.0,
+    "max": 1.0,
+    "mean": 1.0
+   },
+   "prompt_tokens": {
+    "n": 1428,
+    "min": 249.0,
+    "p50": 1372.0,
+    "p90": 1661.0,
+    "max": 1888.0,
+    "mean": 1012.3207
+   },
+   "uncached_tokens": {
+    "n": 1428,
+    "min": 249.0,
+    "p50": 1372.0,
+    "p90": 1661.0,
+    "max": 1888.0,
+    "mean": 1012.3207
+   },
+   "cached_fraction": {
+    "n": 1428,
+    "min": 0.0,
+    "p50": 0.0,
+    "p90": 0.0,
+    "max": 0.0,
+    "mean": 0.0
+   },
+   "dimensions_as_sent": {
+    "_source": "results/casestudy/study_ss2/{refspatial,realworldqa}_manifest.jsonl width/height, joined to each request by the qid carried in its mm uuid",
+    "n_joined": 1428,
+    "n_unjoined": 0,
+    "width": {
+     "n": 1428,
+     "min": 384.0,
+     "p50": 1152.0,
+     "p90": 1448.0,
+     "max": 1536.0,
+     "mean": 1030.7591
+    },
+    "height": {
+     "n": 1428,
+     "min": 384.0,
+     "p50": 938.0,
+     "p90": 1536.0,
+     "max": 1536.0,
+     "mean": 858.43
+    },
+    "area_px": {
+     "n": 1428,
+     "min": 196608.0,
+     "p50": 1358224.0,
+     "p90": 1589952.0,
+     "max": 1786368.0,
+     "mean": 964900.2353
+    },
+    "predicted_image_tokens": {
+     "n": 1428,
+     "min": 194.0,
+     "p50": 1307.0,
+     "p90": 1566.0,
+     "max": 1730.0,
+     "mean": 934.659
+    },
+    "residual_text_tokens": {
+     "n": 1428,
+     "min": 53.0,
+     "p50": 69.0,
+     "p90": 105.0,
+     "max": 158.0,
+     "mean": 77.6618
+    },
+    "by_dataset": {
+     "refspatial": {
+      "n": 475,
+      "width": {
+       "n": 475,
+       "min": 384.0,
+       "p50": 480.0,
+       "p90": 640.0,
+       "max": 640.0,
+       "mean": 498.7958
+      },
+      "height": {
+       "n": 475,
+       "min": 384.0,
+       "p50": 512.0,
+       "p90": 640.0,
+       "max": 640.0,
+       "mean": 540.0926
+      },
+      "predicted_image_tokens": {
+       "n": 475,
+       "min": 194.0,
+       "p50": 302.0,
+       "p90": 302.0,
+       "max": 302.0,
+       "mean": 262.8926
+      },
+      "prompt_tokens": {
+       "n": 475,
+       "min": 249.0,
+       "p50": 360.0,
+       "p90": 370.0,
+       "max": 381.0,
+       "mean": 324.8653
+      },
+      "residual_text_tokens": {
+       "n": 475,
+       "min": 53.0,
+       "p50": 61.0,
+       "p90": 68.6,
+       "max": 79.0,
+       "mean": 61.9726
+      }
+     },
+     "realworldqa": {
+      "n": 953,
+      "width": {
+       "n": 953,
+       "min": 480.0,
+       "p50": 1448.0,
+       "p90": 1448.0,
+       "max": 1536.0,
+       "mean": 1295.9035
+      },
+      "height": {
+       "n": 953,
+       "min": 418.0,
+       "p50": 938.0,
+       "p90": 1536.0,
+       "max": 1536.0,
+       "mean": 1017.0976
+      },
+      "predicted_image_tokens": {
+       "n": 953,
+       "min": 262.0,
+       "p50": 1307.0,
+       "p90": 1730.0,
+       "max": 1730.0,
+       "mean": 1269.4848
+      },
+      "prompt_tokens": {
+       "n": 953,
+       "min": 363.0,
+       "p50": 1377.0,
+       "p90": 1834.0,
+       "max": 1888.0,
+       "mean": 1354.9664
+      },
+      "residual_text_tokens": {
+       "n": 953,
+       "min": 62.0,
+       "p50": 87.0,
+       "p90": 110.0,
+       "max": 158.0,
+       "mean": 85.4816
+      }
+     }
+    }
+   }
+  }
+ },
+ "why_assistance_is_larger_than_alert": {
+  "_question": "does image size explain assistance's 1,372 uncached tokens against alert's 374",
+  "answer": "PARTLY, AND IT IS THE PART THAT DECIDES OVERSIZE. Two causes compound and the decomposition separates them.",
+  "cause_1_residency": {
+   "alert_cached_fraction_p50": 0.8930450029222676,
+   "assistance_cached_fraction_max": 0.0,
+   "effect": "alert's EP-G episode is append-only, so a typical alert request is charged about ONE new frame on a warm prefix; assistance holds ZERO residency by construction (trace.py:567-574), so it is charged its whole prompt every time. This alone takes alert from a 3,760-token prompt to 374 uncached.",
+   "alert_prompt_tokens_p50": 3760.0
+  },
+  "cause_2_image_size": {
+   "assistance_image_tokens_p50": 1307.0,
+   "alert_tokens_per_frame": 338,
+   "ratio": 3.867
+  },
+  "counterfactual_assistance_on_the_alert_grid": {
+   "_construction": "a CONSTRUCTED bound, not a measurement: each assistance request's measured text residual plus 338, i.e. what it would cost if its image came to the store downsized to 768x432 as a Nexar frame does",
+   "tokens": {
+    "n": 1428,
+    "min": 391.0,
+    "p50": 407.0,
+    "p90": 443.0,
+    "max": 496.0,
+    "mean": 415.6618
+   },
+   "assistance_floor_tokens": 242.8,
+   "assistance_own_share_at_equal_weights": 843.7,
+   "measured_p50_against_share": 1.626,
+   "counterfactual_p50_against_share": 0.482,
+   "reading": "at the native grid the median assistance request is 1.63x its own share and takes an OVERSIZE branch; on the alert grid it would be about 0.48x its share and inside it. So the type's oversize status turns on the image grid, which no D-row sets, and not on the admission rule."
+  },
+  "_do_not_read_this_as": "a claim that equalising the grids would improve any policy result. It would change the workload, which is a methodological change."
+ },
+ "proxies_declared": [
+  {
+   "proxy": "SS2 manifest width and height, used as 'dimensions as sent'",
+   "what_it_actually_measures": "the dimensions ss2_build_manifests.py recorded when it decoded the source images, not the file that was staged under frames_by_ref for live2",
+   "valid_for_the_claim": "YES, and it is checked rather than assumed: predicting tokens from those dimensions under the live mm-processor-kwargs leaves a residual of 53 to 158 tokens on every one of 1,428 requests, always positive and of the size of the question text, which it could not be if the staged file had been rescaled"
+  },
+  {
+   "proxy": "declared stored sizes 768x432 and 352x256 for alert and recall",
+   "what_it_actually_measures": "the grid data/encode_jpeg.py ASSERTS before writing each frame; the stored files are on the H100, not on flash",
+   "valid_for_the_claim": "YES for the pixel grid, because the measured tokens per image (338 and about 88) are exactly what those grids imply under the live processor setting; the BYTE sizes are not checked here"
+  },
+  {
+   "proxy": "the staging step that put the SS2 images under frames_by_ref",
+   "what_it_actually_measures": "NOT RECOVERABLE: no committed script stages '<qid>|img'; study_live2_pilot.prep links only nexar_q90 and sember_d2_q88. What IS recoverable is that a file existed for every ref (frames_preflight n_missing 0) and that the pixel grid was unchanged (the token check above). Whether the staged file is PNG or JPEG, and its byte size, are NOT recoverable from committed artefacts.",
+   "valid_for_the_claim": "sufficient for TOKENS, which is what D179's W and the D162 cost model consume; NOT sufficient for uplink BYTES"
+  },
+  {
+   "proxy": "assistance uplink bytes",
+   "what_it_actually_measures": "data_sources.py:661 substitutes the committed S-EMBER D2 median byte count for every SS2 image, a 352x256 frame",
+   "valid_for_the_claim": "NO, and the code says so: SS2 areas are 2.2x to 24x larger, so the substitution almost certainly UNDERSTATES assistive uplink. It does not touch token counts and so does not affect this file."
+  }
+ ],
+ "_registers": {
+  "measured": [
+   "prompt_tokens, cached_tokens and the uncached difference (the engine's own counts, 41,552 requests over four cells)",
+   "image dimensions (committed manifest census, 1,428 of 1,428 joined)"
+  ],
+  "declared": [
+   "EPG_TOK_PER_FRAME 338 and EPG_TEXT_TOKENS 42 (bodies.py)",
+   "share_capacity.FACTORS median_uncached",
+   "the stored grids in data/encode_jpeg.py"
+  ],
+  "constructed": [
+   "counterfactual_assistance_on_the_alert_grid, a bound and not a census"
+  ]
+ },
+ "_comparison_conditions": "input, stack and decoding MATCH across the three types within a cell: one engine process per cell serving all three, one image-processor setting, temperature 0.0; what differs between types is the workload (dataset, image grid, residency) and the max_tokens of each body, which is the thing under study. The device-versus-cloud rows of device_measurement_comparison do NOT match on stack (vLLM 0.20.0 Qwen3-VL-4B against vLLM 0.31.0 Qwen3-VL-32B) and are compared on the processor setting only.",
+ "_provenance": {
+  "git_commit": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
+  "script": "image_settings_by_type.py",
+  "model": "32BI",
+  "timestamp": "2026-11-22T18:12:40.197679",
+  "device": "h100nvl (the cells read; this analysis is CPU only on flash)",
+  "n": 41552,
+  "args": {
+   "scratch": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/imgset",
+   "ref": "origin/main",
+   "ref_sha": "8a9721172b9e58db5dce3e33575066ea078ba02a",
+   "out": "results/orchestration/live2/frozen_test/image_settings_by_type.json"
+  }
+ }
+}
