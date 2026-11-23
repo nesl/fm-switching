@@ -234,16 +234,19 @@ def horizon_shift(tab):
 
 # ------------------------------------------------------------------ latency-charged shift (rung-3)
 def delivery_gap():
-    """median and p90 of (cloud delivery - device delivery) for alert instants, rung-3 cells
-    covex-v6-fair-c5attr seeds 4-7. Device delivery from the WARM-table per-instant device latency is
-    not on the alert path; here we use the committed alert (monitor) cloud delivery time minus the
-    device latency recorded in the cell, from robot is not applicable, so we read alert monitor rows:
-    cloud delivered time (t_delivered - t_opportunity) and the device side latency from the cell."""
+    """A1: latency charge. Cloud ALERT deliveries (on-time AND late) minus the measured DEVICE alert
+    latency, over rung-3 cells covex-v6-fair-c5attr seeds 4-7. Device latency from the committed
+    dashcam_latency_table (scorer/score.py), the per-frame-count device completion latency on the
+    dashcam path; the one-frame decision latency is used. Report median and p90 of both the cloud
+    delivery and the net shift (cloud delivery minus device latency)."""
     import statistics
     runs = ROOT / "results/orchestration/live2/frozen_test/runs"
     sys.path.insert(0, str(ROOT / "experiments/orchestration/live2"))
+    sys.path.insert(0, str(ROOT / "experiments/orchestration/live2/scorer"))
     import d179_rung2_verdict as D
-    cloud_d, dev_d, cells = [], [], []
+    import score
+    dev_lat = float(score.dashcam_latency_table()[1])  # one-frame device decision latency
+    cloud_on, cloud_late, cells = [], [], []
     for s in (4, 5, 6, 7):
         cell = runs / f"covex-v6-fair-c5attr_n16_s{s}_1200s_h27_3t_L3_epg_rq30"
         if not (cell / "cell.json").exists():
@@ -257,20 +260,27 @@ def delivery_gap():
                 continue
             td, to = o.get("t_delivered"), o.get("t_opportunity")
             cp = o.get("cloud_payload")
-            if cp and cp.get("on_time") and td is not None and to is not None:
-                cloud_d.append(float(td) - float(to))
-    # device alert latency: StudySH-EP device completion on EP-G is the per-frame device answer; the
-    # alert device latency is the device_latency recorded for monitor instants is not in the cell, so
-    # we use the committed device-side alert latency table from the cell's score block if present.
-    med_cloud = statistics.median(cloud_d) if cloud_d else None
-    p90_cloud = (sorted(cloud_d)[int(0.9 * (len(cloud_d) - 1))] if cloud_d else None)
-    return {"cells": cells, "n_cloud_alert": len(cloud_d),
-            "cloud_delivery_median_s": med_cloud, "cloud_delivery_p90_s": p90_cloud,
-            "note": ("device alert answers are produced on-device at the frame with negligible "
-                     "transport; the dashcam device latency table (orin_rec style) is sub-second, so "
-                     "the cloud-minus-device delivery gap is dominated by the cloud delivery time "
-                     "reported here. The latency-charged shift subtracts this gap (in 0.5 s units) "
-                     "from the measured horizon shift.")}
+            if cp and cp.get("request_id") is not None and td is not None and to is not None:
+                (cloud_on if cp.get("on_time") else cloud_late).append(float(td) - float(to))
+    cloud_all = cloud_on + cloud_late
+
+    def md_p90(xs):
+        if not xs:
+            return None, None
+        return statistics.median(xs), sorted(xs)[int(0.9 * (len(xs) - 1))]
+
+    mc, pc = md_p90(cloud_all)
+    shift = [c - dev_lat for c in cloud_all]
+    ms, ps = md_p90(shift)
+    return {"cells": cells, "device_latency_s": dev_lat,
+            "device_latency_source": "scorer/score.py dashcam_latency_table()[1] (one-frame)",
+            "n_cloud_alert_all": len(cloud_all), "n_on_time": len(cloud_on), "n_late": len(cloud_late),
+            "cloud_delivery_median_s": mc, "cloud_delivery_p90_s": pc,
+            "latency_charge_shift_median_s": ms, "latency_charge_shift_p90_s": ps,
+            "note": ("cloud alert deliveries include both on-time and late (A1). The net latency "
+                     "charge subtracted from the measured horizon shift is cloud delivery minus the "
+                     "one-frame device latency; device alert answers are on-device with negligible "
+                     "transport, so the charge is dominated by the cloud delivery.")}
 
 
 def main():
@@ -428,18 +438,25 @@ def _md(results):
                   f"{lsc['mean_base_rate']:.3f}.")
             A("")
     lc = results["latency_charged"]
-    A("## Latency-charged shift (secondary)")
+    A("## Latency-charged shift (secondary, A1)")
     A("")
-    A(f"Cloud alert delivery over rung-3 cells {lc['cells']}: median {lc['cloud_delivery_median_s']}, "
-      f"p90 {lc['cloud_delivery_p90_s']} s over {lc['n_cloud_alert']} on-time alert deliveries. "
-      "The latency-charged shift subtracts this delivery gap (in 0.5 s horizon units) from the "
-      "measured horizon shift. " + lc["note"])
+    A(f"Over rung-3 cells {lc['cells']}, {lc['n_cloud_alert_all']} cloud alert deliveries "
+      f"({lc['n_on_time']} on-time, {lc['n_late']} late, both included per A1): cloud delivery "
+      f"median {lc['cloud_delivery_median_s']:.3f} s, p90 {lc['cloud_delivery_p90_s']:.3f} s. "
+      f"Device alert latency {lc['device_latency_s']:.3f} s ({lc['device_latency_source']}). "
+      f"Net latency charge (cloud minus device), to subtract from the measured horizon shift: "
+      f"median {lc['latency_charge_shift_median_s']:.3f} s, p90 "
+      f"{lc['latency_charge_shift_p90_s']:.3f} s. " + lc["note"])
     A("")
     A("## Observations (separated from interpretation)")
     A("")
-    A("Observation: the 32B's challenge AP is above the 4B's at every horizon on both formats, and "
-      "its AP at a given level is reached at a larger horizon before the event than the 4B's. The "
-      "per-number splits and CIs are in the tables above and in early1_results.json.")
+    A("Observation (A2). On the 2 fps EP-G format the 32B reaches a given AP at a LARGER horizon "
+      "before the event than the 4B: on EVAL its AP at 0.5 s is matched by the 4B only 2.0 to 2.5 s "
+      "later, and AP_32B(1.5) exceeds AP_4B(0.5). On the one-frame format the 32B is better at every "
+      "horizon but NOT earlier at 0.5 s resolution: the largest AP gap is at 1.5 s, and the horizon "
+      "shift is 0 at t0 = 0.5 and 1.0 s on every split, with the only non-zero one-frame shift being "
+      "EVAL at t0 = 1.5 s (0.5 s). The per-number splits and CIs are in the tables above and in "
+      "early1_results.json.")
     A("")
     A("## Provenance")
     A("")

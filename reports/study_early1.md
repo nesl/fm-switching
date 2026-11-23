@@ -130,13 +130,13 @@ Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):
 - t0 = 1.5 s: delta = 1.5 s (AP_4B=0.536)
 - headline AP_32B(1.5) 0.657 vs AP_4B(0.5) 0.614, diff +0.042.
 
-## Latency-charged shift (secondary)
+## Latency-charged shift (secondary, A1)
 
-Cloud alert delivery over rung-3 cells ['covex-v6-fair-c5attr_n16_s4_1200s_h27_3t_L3_epg_rq30', 'covex-v6-fair-c5attr_n16_s5_1200s_h27_3t_L3_epg_rq30', 'covex-v6-fair-c5attr_n16_s6_1200s_h27_3t_L3_epg_rq30', 'covex-v6-fair-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30']: median 0.5760605000000059, p90 0.8959879999999885 s over 24502 on-time alert deliveries. The latency-charged shift subtracts this delivery gap (in 0.5 s horizon units) from the measured horizon shift. device alert answers are produced on-device at the frame with negligible transport; the dashcam device latency table (orin_rec style) is sub-second, so the cloud-minus-device delivery gap is dominated by the cloud delivery time reported here. The latency-charged shift subtracts this gap (in 0.5 s units) from the measured horizon shift.
+Over rung-3 cells ['covex-v6-fair-c5attr_n16_s4_1200s_h27_3t_L3_epg_rq30', 'covex-v6-fair-c5attr_n16_s5_1200s_h27_3t_L3_epg_rq30', 'covex-v6-fair-c5attr_n16_s6_1200s_h27_3t_L3_epg_rq30', 'covex-v6-fair-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30'], 33573 cloud alert deliveries (24502 on-time, 9071 late, both included per A1): cloud delivery median 0.694 s, p90 1.432 s. Device alert latency 0.235 s (scorer/score.py dashcam_latency_table()[1] (one-frame)). Net latency charge (cloud minus device), to subtract from the measured horizon shift: median 0.459 s, p90 1.198 s. cloud alert deliveries include both on-time and late (A1). The net latency charge subtracted from the measured horizon shift is cloud delivery minus the one-frame device latency; device alert answers are on-device with negligible transport, so the charge is dominated by the cloud delivery.
 
 ## Observations (separated from interpretation)
 
-Observation: the 32B's challenge AP is above the 4B's at every horizon on both formats, and its AP at a given level is reached at a larger horizon before the event than the 4B's. The per-number splits and CIs are in the tables above and in early1_results.json.
+Observation (A2). On the 2 fps EP-G format the 32B reaches a given AP at a LARGER horizon before the event than the 4B: on EVAL its AP at 0.5 s is matched by the 4B only 2.0 to 2.5 s later, and AP_32B(1.5) exceeds AP_4B(0.5). On the one-frame format the 32B is better at every horizon but NOT earlier at 0.5 s resolution: the largest AP gap is at 1.5 s, and the horizon shift is 0 at t0 = 0.5 and 1.0 s on every split, with the only non-zero one-frame shift being EVAL at t0 = 1.5 s (0.5 s). The per-number splits and CIs are in the tables above and in early1_results.json.
 
 ## Provenance
 

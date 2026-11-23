@@ -1270,10 +1270,16 @@
    "covex-v6-fair-c5attr_n16_s6_1200s_h27_3t_L3_epg_rq30",
    "covex-v6-fair-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30"
   ],
-  "n_cloud_alert": 24502,
-  "cloud_delivery_median_s": 0.5760605000000059,
-  "cloud_delivery_p90_s": 0.8959879999999885,
-  "note": "device alert answers are produced on-device at the frame with negligible transport; the dashcam device latency table (orin_rec style) is sub-second, so the cloud-minus-device delivery gap is dominated by the cloud delivery time reported here. The latency-charged shift subtracts this gap (in 0.5 s units) from the measured horizon shift."
+  "device_latency_s": 0.23488,
+  "device_latency_source": "scorer/score.py dashcam_latency_table()[1] (one-frame)",
+  "n_cloud_alert_all": 33573,
+  "n_on_time": 24502,
+  "n_late": 9071,
+  "cloud_delivery_median_s": 0.6937009999999759,
+  "cloud_delivery_p90_s": 1.432388000000003,
+  "latency_charge_shift_median_s": 0.45882099999997594,
+  "latency_charge_shift_p90_s": 1.1975080000000031,
+  "note": "cloud alert deliveries include both on-time and late (A1). The net latency charge subtracted from the measured horizon shift is cloud delivery minus the one-frame device latency; device alert answers are on-device with negligible transport, so the charge is dominated by the cloud delivery."
  },
  "e9c_reproduction": {
   "challenge_mAP_gap": 0.11444048288046893,
