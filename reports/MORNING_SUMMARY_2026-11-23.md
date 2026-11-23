@@ -84,22 +84,71 @@ answer on the exact row it targeted (measured 4.413 s first token against 2.953 
 
 ## 5. RUNG 3 AND RUNG 4
 
-RUNG 3 (covex-v6-fair, D185 per-device normalised deficit): PROVED ON THE c5attr BASE AND GATED.
-V6FAIR_C5ATTR_CELLS, sha256 fe061dd9, four cells at seeds 4 and 5, running about 22:22 to 23:50.
-Step 2b on that base: 4,512 differing decisions against the gain-0 control, computed INDEPENDENTLY
-BY TWO SESSIONS WITH THE SAME ANSWER. The attribution is exact: the ORDER-ONLY arm is BYTE-IDENTICAL
-to the both-consumers arm (12e4f73ce0ebd865 / 13,812) and SPLIT-ONLY is EXACTLY ZERO, identical to
-the control. So rung 3's entire contribution is the ORDERING consumer, and the flexible-split
-consumer contributes nothing on this base, which is what "absent by construction" predicts when
-share admission is not in the chain. Off-switch identity and the name proof with its negative
-control both pass.
+### RUNG 3 IS RUN AND SCORED, AND IT FAILS THE MIRROR IMAGE OF WHAT SHARES FAILED
 
-RUNG 4 (protect-and-defer): BUILT AND PROVED EARLIER, NOT YET RUN ON THE c5attr BASE. Absent link at
-1x memory (declared, not a negative), 19 characteristic decisions at 0.25x, both Step 4 controls
-collapsing exactly to the OFF digest, harm a real distribution (median 0.9995, max 5.996, 70 distinct
-values, ceiling the 6 pending alert devices). Its sign question resolved better than it was posed:
-there are TWO deficit weights, w_j inside the harm sum and w_R scaling the bar, and conflating them
-does not invert the mechanism, it CANCELS it.
+Four seeds, scored by the SAME committed pre-registered scorer, positive control exact on 8 of 8
+cells, with `--shares-arm covex-v6-fair-c5attr` and `--rung2-arm covex-v6-state-uo-c5attr`:
+
+  seed | check 1 alert vs base      | check 2 robot retained | check 3 assistance
+   4   | FAIL by 0.0013            | PASS 1.0610            | PASS
+   5   | PASS by 0.0307            | PASS 0.9886            | PASS
+   6   | FAIL by 0.0299            | PASS 1.0625            | PASS
+   7   | FAIL by 0.0788            | PASS 1.0156            | PASS
+
+CHECK 2 PASSES AT ALL FOUR SEEDS AT 99 TO 106 PERCENT RETENTION, so rung 3 keeps essentially the
+whole rung-2 robot gain over base and slightly exceeds it at three seeds. CHECK 3 PASSES EVERYWHERE.
+CHECK 1 FAILS AT THREE SEEDS. So rung 3 meets all three checks at s5 only, exactly as shares did,
+and by the same rule it does not qualify.
+
+THE SYMMETRY IS THE FINDING, and it is worth more than either arm alone:
+  shares and r1, on the shares base:   check 1 PASS everywhere, check 2 FAIL everywhere
+  rung 3, on the c5attr base:          check 2 PASS everywhere, check 1 FAIL at three seeds
+Alerts and robot trade against each other under BOTH mechanisms, in opposite directions. That argues
+the binding constraint is the shared resource rather than either policy's logic, which is a claim
+about the problem and not about an arm.
+
+WHAT RUNG 3 DOES, measured against its own gain-0 control at the two seeds that have one: the
+ordering feed roughly DOUBLES pooled dashcam on-time, 0.5074 against 0.2134 at s4 and 0.4921 against
+0.2461 at s5, with robot +3 then unchanged and assistance 0 then -6. Against the c5attr base at all
+four seeds it is ahead on robot at three and -1 at s5, ahead on assistance at two, and ahead on
+pooled dashcam at all four (0.49 to 0.55 against 0.26 to 0.33).
+
+TWO MARGIN CAUTIONS THAT DECIDE THREE OF THE FOUR VERDICTS, and neither should be used to argue the
+verdict away:
+  1. s4 fails check 1 by 0.0013 and s6 by 0.0299, both INSIDE the run-to-run variance measured
+     tonight (0.05 to 0.06 on pooled dashcam, from gain0 against the committed c5attr base, which
+     are decision-identical dry). Only s7's 0.0788 is clearly outside it. So rung 3 is at PARITY
+     with base on alerts at s4 and s6 and genuinely below at s7. PARITY IS NOT "AT LEAST", and the
+     check as written is one-sided, so parity fails it.
+  2. Whether a one-sided check should carry a tolerance comparable to measured variance is a
+     METHODOLOGICAL question for the user. Changing it now, after seeing which side the result
+     landed on, would be exactly the tuning D187 (3) forbids. The verdict above is the check as
+     specified.
+
+ALSO MEASURED, because a bound was breached in letter: robot late by the coordinator flag is 8 / 5 /
+12 / 3, and s6's 12 exceeds the "at most 10" bound used for shares and rung 4. A per-opportunity
+join at s6 under one consistent delivery rule shows 11 of those 12 were ALREADY late under the
+c5attr base, with exactly 1 opportunity lost and 2 gained. The c5attr base's own late count at s6 is
+about 13 by the same rule. SO THE BOUND WAS MIS-APPLIED BY ME: it was calibrated on the SHARES base,
+where late ran 0 to 5, and imported to judge an arm on the c5attr base, whose own late count already
+exceeds it. That makes the base's behaviour look like the arm's harm, which is the same error shape
+as the assistance control in item 7.4. Caveat on those counts: they use raw
+`t_delivered - t_opportunity <= deadline` without the committed D144/D146 rewrites, so the JOIN
+direction is trustworthy and the ABSOLUTE counts are not the scorer's.
+
+### RUNG 4 IS BLOCKED AND CANNOT RUN
+
+Built and proved, including Step 2b AT 0.25x ON THE c5attr BASE (switch ON 183a3ad7928452c9 / 13,287
+against OFF 9a4be873eb3c5fba / 14,218; 264 decisions, 39 defers and chunks, 33 protects, harm median
+0.9996 and max 5.996 over 128 computations, 73 over the bar). Its cell list V6CFPD_CELLS is posted
+with the matched-memory control and the logical-pool caveat.
+
+IT CANNOT RUN because its registration was REVERTED at 67dd0514: `arms_v6cf` imports
+`cf_protect_defer`, which calls `cf_objective.attainment_margin` AT IMPORT TIME, and that function
+exists only in an UNCOMMITTED edit in the shared worktree. Pushing that edit would unblock it in one
+line and MUST NOT BE DONE: it is half-finished D177 work whose harm side was never converted. Rung 4
+runs when that change is committed WITH its own proof, or when cf_protect_defer stops depending on it
+at import time. Both are user decisions, not overnight ones.
 
 ## 6. OVERNIGHT DECISIONS, all PROVISIONAL, all in reports/OVERNIGHT_DECISIONS.md with evidence
 
