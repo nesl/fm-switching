@@ -147,3 +147,51 @@ recipe.
   component, and the proof of it is the positive-control and off-switch digests, not the claim.
 * D188 freezes stand: floors and `W_max` frozen, `live2_qcache_key_fix` NOT enabled, and the
   `id(obs)` cache-key fix stays **OFF**.
+
+---
+
+## 6. THE SELF-INFLICTED-LOSS GATE WAS CLEARED, and by what reasoning
+
+Recorded so the decision can be overturned on evidence rather than taste. Measured: **14 of 1,869
+skips, 0.75 percent**, would have made their deadline at the committed fit's own p50 factor of
+1.026069.
+
+1. 14 of 1,869 is 0.75 percent of skips and about **0.12 percent** of the cell's 11,764 alert
+   instants. The mechanism targets 2,290 late instants, so even a tenth of those recovered is 229
+   against 14 lost, better than 16 to 1. The trade is not close.
+2. **The factor was READ, not chosen.** 1.026069 comes out of `cost_model_gate_d162.json` as the
+   fit's own p50 and is independent of the skip decision. Rung 4's zero was an **identity**, because
+   its safety factor **was** the measured worst bias, so the overrun could not be anything but zero.
+   This one has a genuine minimum of 1.0073 and 955 distinct values. One is a measurement; the other
+   was arithmetic wearing a measurement's clothes.
+3. **1,290 of 1,869 skips are over 2x the remaining time**, median overrun 2.357. The mechanism is
+   mostly declining things that comfortably cannot make it, which is what it should be doing.
+4. The favourable **1.39x to 1.87x** under-prediction was **not borrowed**. It was measured on
+   multi-thousand-uncached **recall** requests; these alerts carry about 42 uncached with large queue
+   terms, a different stratum. Using it would have made the skips look safer and would have repeated
+   rung 4's error. The full ratio distribution is in `d190_rr_proofs.json` so the count can be
+   re-read at any factor.
+
+## 7. A REGISTER WARNING THAT MUST SURVIVE INTO THE WRITE-UP
+
+**1,869 is a count of DECISIONS in a DRY cell. It is not 1,869 late instants prevented.** A skipped
+question means the **device** answers that instant; whether the late count falls depends on what the
+freed capacity does for the alert instants behind it, and that is a **scorer** quantity. The honest
+failure mode is precisely that the skips happen and the late count does not move, which is the
+pre-registered failure condition in section 2. Skips are not recoveries.
+
+## 8. THE SCOPE ABLATION IS A RESULT IN ITS OWN RIGHT
+
+`covex-v6-fair-c5attr-rr-alltypes` is r1's type set on this base and is **not** the headline arm.
+With all three types the arm skips 30 recall and 36 assistance questions, **and its alert skips FALL
+from 1,869 to 1,291**, because the recall skips change the queue the alert re-check sees.
+
+**So the two type sets are NOT NESTED IN EFFECT.** Alert-only is a real design choice rather than a
+restriction of the same behaviour, and a reader cannot infer the alert-only result from the
+all-types result or the reverse. This is the kind of claim a reviewer asks for and it is measured
+here rather than argued.
+
+The companion evidence is the traced pair: both requests carry `uncached = 42`, the **skipped** one
+has `queued_uncached_ahead = 7,051` and the **feasible** one `0`. Alert questions are skipped
+because of **the queue ahead, not their own size**, which ties straight to the 84.1 percent
+alert-on-alert figure in section 1.
