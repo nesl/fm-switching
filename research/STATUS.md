@@ -1,6 +1,6 @@
 ## 2026-11-22 (main flash session): shares seed 4 scored, check 2 fails, and three of my own readings corrected
 
-**Last updated: 2026-11-23.** StudyD179-SHARES seed 4, under D179 to D182 and the user addenda 1
+**Last updated: 2026-11-23
 to 12. NOT A VERDICT: seeds 5, 6 and 7 are still running and the verdict is the user's.
 
 **SEED 4, on the pre-registered scorer** (written and pushed before any shares cell existed,

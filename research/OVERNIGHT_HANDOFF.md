@@ -1,104 +1,144 @@
 # HANDOFF. READ THIS FIRST.
 
-## STATE AT 2026-11-23T22:05Z (14:05 PST). THE H100 IS RUNNING; THE EARLIER IDLE CLAIM WAS WRONG.
+## HOW TO READ THIS FILE
 
-CORRECTED 2026-11-23. The line that stood here said the H100 HAD BEEN IDLE ABOUT EIGHT HOURS and
-needed the user. THAT WAS FALSE, and the error was a TIMEZONE READ: this box commits in PST
-(UTC-8) and the commit times were read as if they were UTC, which puts every H100 commit eight
-hours earlier than it happened and turns a machine that has just committed into one idle since
-morning.
+  WRITTEN AT origin/main tip: 06b1acedbaca96969efe84c3de3602f044b2bc7f
+  WRITTEN AT: 2026-11-23T15:21-08:00 (23:21Z). EVERY TIME IN THIS FILE STATES ITS ZONE.
+  EXPIRES: immediately on any new commit to origin/main.
 
-What was actually true at that moment: the H100 committed `-rr` s6 at 2026-11-23T14:05:53-08:00,
-which IS 22:05:53Z, so it had committed ONE MINUTE AFTER the timestamp in the heading rather than
-eight hours before it, and it was already running s7. It needed nothing.
+ORIGIN IS TAKING COMMITS ABOUT ONCE A MINUTE TODAY, so by the time you read this it is almost
+certainly expired. THAT IS NORMAL AND IT MEANS WHAT IT SAYS: re-derive the state from `git log`,
+`results/INDEX.md` and `research/policy_design_log.md` rather than trusting the summary below. Use
+`git log --date=iso-strict`, which prints the UTC offset; a format that drops the offset is how an
+earlier version of this file turned a machine that had just committed into one idle for eight hours.
 
-STANDING RULE, so this cannot recur: EVERY TIME IN THIS HANDOFF STATES ITS ZONE, and idleness is
-DERIVED FROM THE NEWEST H100 COMMIT'S TIMESTAMP WITH ITS OFFSET, not from a bare clock time. Use
-`git log --date=iso-strict`, which prints the offset, rather than a format that drops it. A claim
-that a machine is idle is an operational alarm: it can send the user to a terminal at night, and
-an eight-hour error in the wrong direction is the difference between 'all is well' and 'something
-has been broken since morning'.
+A HANDOFF THAT SAYS STAND DOWN MUST CARRY THE COMMIT IT WAS WRITTEN AT AND AN EXPIRY, and a resumed
+session must check the tip against it before obeying. A stale stand-down already stopped one session
+while real work was pending.
 
-THE PREVIOUS VERSION OF THIS FILE SAID "NO AUTONOMOUS WORK REMAINS, STAND DOWN". THAT WAS WRITTEN AT
-01:11Z AND WAS 178 COMMITS STALE. It is replaced because a watchdog-resumed session that reads a
-stale stand-down will stop while real work is pending, which is what happened. Its three "facts to
-confirm" were all false by the time they were read: rung 4's import block was fixed at a41645df, the
-_kv0.5 sweep finished long ago, and cell lists were waiting on proofs from this box all day.
+## THE H100 IS RUNNING. THERE IS NO IDLE GPU PROBLEM.
 
-LESSON FOR WHOEVER WRITES THE NEXT ONE: a handoff that says STAND DOWN must carry the commit it was
-written at and an EXPIRY, and a resumed session must check the tip against it before obeying. This
-file does both.
+The previous version of this file said THE H100 IS NOT RUNNING, that about eight hours of GPU were
+lost, and that only the user could fix it. THAT WAS FALSE AND IT WAS THE FILE'S HEADLINE ALARM.
 
-  WRITTEN AT: origin/main tip when written is recorded at the bottom.
-  EXPIRES: immediately on any new commit to origin/main. If the tip has moved, this file is stale:
-  re-derive the state from git log and results/INDEX.md rather than trusting the summary below.
+Derived here with offsets: the H100's newest cell-output commit is `8be71182` at
+2026-11-23T15:05:26-08:00, sixteen minutes before this file was written, and it has been committing
+all afternoon (`e608b7aa` 14:05:53-08:00, `9f7cfae8` 14:27:20-08:00, `f82eeea1` 14:49:11-08:00). The
+newest commit of any kind is 15:20:14-08:00. NOTHING IS IDLE AND THE USER DOES NOT NEED TO BE CALLED.
 
-## THE ONE THING THAT NEEDS THE USER
+A CLAIM THAT A MACHINE IS IDLE IS AN OPERATIONAL ALARM. It can send the user to a terminal at night,
+and an error in this direction is the difference between "all is well" and "broken since morning".
+DERIVE IDLENESS FROM THE NEWEST COMMIT'S TIMESTAMP WITH ITS OFFSET, never from a bare clock time.
 
-THE H100 IS NOT RUNNING. Last cell committed 13:44Z (covex-v6-fair-c5attr-rr seed 5); last commit of
-any kind 13:58Z; it is now about 22:05Z. The H100's Claude session is GONE FROM THE PEER LIST, so
-this box cannot reach it, and DIRECT SSH TO THE H100 IS REFUSED BY THIS SESSION'S PERMISSION LAYER
-(attempted twice earlier today for a different task, refused both times, not worked around). So the
-GPU cannot be restarted from here. About eight hours of GPU are already lost and the loss continues
-until the user restores that session.
+## THREE SESSIONS ARE LIVE ON THIS BOX. CHECK BEFORE YOU EDIT A LIVE-PATH FILE.
 
-GATED AND WAITING, in gate order, none of it started:
-  V6RR_CELLS         covex-v6-fair-c5attr-rr s6 and s7 (s4 and s5 both PASSED all four bars)
-  KV025_CELLS        12 real-engine 0.25x baseline cells (engine pool 15,760 confirmed on hardware)
-  KV025_RUNGS_CELLS  4 cells, our rungs 2 and 3 at real 0.25x
-  DEADLINE25_CELLS   12 cells, recall deadline 2.5 s (2 of 12 ran)
-  LOAD1220_CELLS     24 cells, 12 and 20 devices
+Verified by `ps -C python,python3` and `/proc/<pid>/cwd` at 15:21-08:00. Check the same way before
+touching anything; the shared worktree `/tmp/claude-1001/mapwt` carries 106 uncommitted entries from
+several sessions and its ` M` marks are NOT yours to assume.
 
-## WHAT IS SETTLED, with its commit
+  SESSION A   hits 22, 26 and 6 folded into the ladder. Owns `engine_actions.py`, `touch_policy.py`,
+              `live/adapter.py`. Running `d209_digest_driver.py --jobs 10` out of `scratchpad/before`
+              and `scratchpad/after`.
+  SESSION B   the final ladder. Owns `arms_v6state.py`, `v5/*`, the final-rung modules. Running in
+              `scratchpad/ladder_flashD208`.
+  SESSION D   rung 4 completeness at 0.25x, and now `arms.py`. Running in `scratchpad/sessionD/co`.
+  SESSION C   STOPPED ON PURPOSE. Ablations are deferred by D210; do not build, diff or post one.
 
-  RUNG 2   c5attr, under D184. Shares is the trade-off ablation; r2 refuted by its own condition.
-  RUNG 3   covex-v6-fair-c5attr. Four seeds scored. Check 2 and check 3 pass everywhere; check 1
-           fails at s4, s6, s7, two of those three inside measured variance. Digest
-           12e4f73ce0ebd865 / 13,812 on the committed recipe.
-  RUNG 4   covex-v6-cf-c5attr. CLOSED AT 1X AS REACH-LIMITED (D198): 84 percent of late alert
-           instants are blocked by OTHER ALERTS and only 6.9 percent by recall questions, so
-           question deferral cannot reach the problem. Fires under memory pressure at 0.25x.
-  -rr      covex-v6-fair-c5attr-rr, rung 3 plus alert-only release re-check. s4 AND s5 PASS ALL FOUR
-           PRE-REGISTERED BARS AND ARE ABOVE RUNG 3 ON BOTH AXES AT ONCE: alert attainment +0.1844
-           and +0.2096, robot 126 against 122 and 121 against 114, assistance 98.6 percent both.
-           Late alerts fell 84 and 86 percent WITH on-time alerts RISING by 2,485 and 2,798, which is
-           the load-bearing half: it shows the freed capacity reached the alerts behind the skips
-           rather than removing requests from the numerator. Verdicts at d196_rr_s4_verdict.json and
-           d196_rr_s5_verdict.json. s6 and s7 gated, not run.
-  D177     Currency flip landed atomically at 37f9d95d. Byte-identity on 20 arms, and the real proof
-           was a decision-log diff across two trees: 16 of 288 state decisions change.
-  D205     Seven arms read a constant 0.0 which is the MAXIMUM of log P(Yes), so they escalated on
-           every instant. All seven superseded. Three being fixed; de23b354, 9b49801a, 13e9978c.
+IF YOU SEE PAIRED IDENTICAL `cf_pd_one_cell.py` COMMANDS, THAT IS NOT A DUPLICATE RUN. Session A runs
+each arm in a `before/` tree and an `after/` tree at ONE sha, which is the byte-identity method; the
+command lines are identical because only the working directory differs, and each writes to its own
+tmpdir. Confirm with `/proc/<pid>/cwd` before killing anything. Do NOT use `pgrep -f` or `pkill -f` on
+a pattern matching your own command line: it kills the session shell with exit 144.
 
-## IN FLIGHT ON THIS BOX, both resumed at 22:00Z after the teardown
+ANOTHER SESSION DELETED A PEER'S SCRATCHPAD WORKING DIRECTORY TODAY and cost it a 2.2 GB export and
+six in-flight cells. The shared scratchpad root is NOT session-unique in practice. Write cell output
+DIRECTLY into your deliverables directory rather than copying at the end, and use a session-unique
+subdirectory for everything else.
 
-  OPTION D + GATE A (D203): rungs 2 and 3 get an explicit documented constant weight 1 in the shared
-  v5 state planner, byte-identical, rung 3 staying at 12e4f73ce0ebd865; rung 4's planner reads
-  deficit_feed; DeficitCounters deleted; Gate A's would-have-missed count re-derived from the
-  PER-REQUEST ratio distribution because the old one was an algebraic identity (q90 of five points is
-  the maximum). Nothing of it is committed yet. NOTE: two orphaned `d200` python processes were left
-  running by the teardown.
+## WHAT IS SETTLED SINCE THE LAST HANDOFF
 
-  D205 STEPS 2b TO 3: card-specified score per arm, trajectory window sliced to the current episode,
-  proofs on one sha with two trees differing only in the patch, escalation rate per fixed arm, tests
-  on a real trace slice with a guard that raises in measured runs.
+  -rr        `covex-v6-fair-c5attr-rr` PASSES ALL THREE D179 CHECKS AT ALL FOUR SEEDS. Alert mean
+             per-episode attainment against rung 3: 0.4412 to 0.6256, 0.4269 to 0.6366, 0.4356 to
+             0.6399, 0.4750 to 0.6527. Robot 122 to 126, 114 to 121, 109 to 110, 84 to 84; retention
+             1.0459, 1.0805, 1.0147, 1.0000. Late alerts fell 84 to 86 percent WITH on-time alerts
+             RISING by 2,485, 2,798, 2,739 and 2,391, and THAT RISE IS THE LOAD-BEARING HALF: it shows
+             the freed capacity reached the alerts behind the skips rather than removing requests from
+             the numerator, which was the pre-registered failure condition and did not occur.
+             THE FOUR PASSES ARE NOT EQUAL: s7 is weakest, the only robot tie, on the lowest bar.
+             Verdicts `d196_rr_s{4,5,6,7}_verdict.json` and `d196_rr_four_seed_verdict.json`.
+  D208       -rr JOINS RUNG 3 and rung 4 is rebuilt on it.
+  NAMES      RULED. The final ladder is `covex-v6-state-final`, `covex-v6-fair-final`,
+             `covex-v6-final`, ALL THREE SUFFIXED, with every existing registration and committed cell
+             UNTOUCHED. The clean names were already registered arms and `arms.ARMS` is a dict, so
+             re-registering would have silently re-pointed `covex-v6-state`, which carries six
+             committed cells. Mapping block in `results/INDEX.md`. Paper labels map at write-up.
+  D206       Option D built and proved at `0ca54444`: the declared constant returns EXACTLY what the
+             unfed counter returned at all five read sites, 18 of 18 by `==`, each with a positive
+             control that does move the result; a guard proves 0 live paths construct
+             `DeficitCounters`; rung 4's digest MOVED, which IS the Step 2b pass.
+  GATE A     The would-have-missed COUNT IS RETIRED: overrun = (b - SAFETY_FACTOR) x service has the
+             sign of `(b - SAFETY_FACTOR)` alone, so it can only be 0 or N. Replaced by EXPOSURE
+             46 of 463 = 9.94 percent at q90 1.863404, worst overrun 1.5035x. Old count kept only as
+             a labelled identity column.
+  D209/D210  Parity rule, roles, run order; ablations DEFERRED until the policy is frozen. A metric
+             correction is a RESCORE and never needs a rerun; a rerun is needed only when a code fix
+             changes an arm's decisions.
+  D176       Reporting column applied. TWO THINGS A READER GETS WRONG: the column DOES NOT ALWAYS
+             RISE (`eco-llm` falls 0.7810 to 0.7701, `hybrid-F-lhreq` 0.9429 to 0.9310, having
+             answered the questions from a SHORT representation at `tokens_charged` 467, so an
+             on-time answer there is not an over-limit send); and the positive control found a
+             SECOND NON-ZERO CASE OF THE D175 (1) GUARD, `always-cloud-fcfs` s7's committed
+             `robot_pool_on_time` of 1 being a refusal, so THAT CELL'S FIGURE IS STALE, not the
+             column. Arm-invariant BY SET EQUALITY at all four seeds, so no comparison moves.
+
+## TWO FIDELITY FAULTS THAT CHANGE WHAT OLD RESULTS CAN MEAN
+
+  HIT 6 IS PERMANENT, NOT OCCASIONAL. `cstate.py:663` reads `vllm:gpu_cache_usage_perc`; this engine
+  emits `vllm:kv_cache_usage_perc` (0.7215 at capture). So `gpu_kv_fraction` has been 0.0 - THE
+  MINIMUM, the most permissive value an admission gate can be handed - IN EVERY LIVE CELL ON THIS
+  BUILD, independent of the swallowed `except Exception: return {}`. The fix needs BOTH the key and
+  the missing-value policy; fixing only the exception path would leave the gate at 0.0 and look like
+  a pass.
+
+  CAPACITY MAY NEVER REACH A DECISION AT ALL, FOR A SECOND INDEPENDENT REASON. `arms.py:82 _caps` is
+  write-only. If our own arms cannot observe GPU-KV capacity, then a flat 0.25x-versus-1x result was
+  never evidence about the policy: it is an UNEXERCISED channel under Rule 2. Session D owns this and
+  must fix it BEFORE any 0.25x policy cell. DO NOT CONFLATE THE TWO CAUSES; fixing one does not fix
+  the other.
+
+  HIT 26: host residency is observable ONLY IN AGGREGATE on this engine
+  (`vllm:prompt_tokens_by_source_total{source="external_kv_transfer"}` and friends), NOT per request:
+  per request it folds into `prompt_tokens_details.cached_tokens` and cannot be told apart from a GPU
+  hit. So a per-request host belief may be STRUCTURALLY unachievable and RELOAD may be UNEXERCISED
+  for a structural reason, which is a stronger statement than a key fix. Do not invent a key.
 
 ## AWAITING A USER RULING
 
-  1. THE H100 (above). Nothing else on this list matters as much.
-  2. Whether the rung-3 planner-limb decision-log diff enters the final ladder rerun (D190 (6)).
-  3. The framing: -rr is a RULE that moved off the alert-versus-recall curve, which D190 and D198
-     cast as something only the counterfactual could do. D203 (5) records the agreed reading.
-  4. arms_v6state.py:453 buckets state deltas at pre-flip literals including 0.16456; reported, not
+  1. THE SECURITY WARNING (Auto-Mode Bypass) that fired on the session which produced the seven
+     D201/D205 commits (`de23b354`, `9b49801a`, `13e9978c`, `8986f593`, `2487e345`, `29742254`,
+     `1b99b6af`). ALL SEVEN ARE ON ORIGIN AND UNRULED. A later check showed the cell outputs those
+     commits touch are byte-identical across all four warned commits, but the warning itself stands.
+  2. `inar-vl` and `hybrid-llm` changed ZERO decisions after their score fix. That is an ABSENT LINK
+     per Step 2b, NOT a negative: `inar-vl` cancelled by geometry, `hybrid-llm` unexercised. Sweeping
+     either knob is METHODOLOGICAL and was not done.
+  3. `arms_v6state.py:453` buckets state deltas at pre-flip literals including 0.16456; reported, not
      edited, because a stats-key rename changes what committed proofs read.
 
 ## D187 RULES STILL IN FORCE
 
-Every change justified by a measured mechanism and pre-registered, committed before its cells. Never
-change targets, deadlines, metrics, workload, seeds (never 1 to 3, never HOLDOUT), baselines or pass
-bars. Never tune toward passing. Report every result whatever its direction. Held or unproved code
-defaults OFF. One dry cell per process. A digest is comparable ONLY within one recipe, and the
-committed one is cf_pd_one_cell.py --cutoff-off with the posted knobs. fmtk only. D166 commit rules,
-no AI attribution, no em dashes.
+Every change justified by a measured mechanism and PRE-REGISTERED, COMMITTED BEFORE ITS CELLS. Never
+change targets, deadlines, metrics, workload, seeds (NEVER 1 to 3, NEVER HOLDOUT), baselines or pass
+bars. NEVER TUNE TOWARD PASSING. REPORT EVERY RESULT WHATEVER ITS DIRECTION. Held or unproved code
+defaults OFF. One dry cell per process. A DIGEST IS COMPARABLE ONLY WITHIN ONE RECIPE, and the
+committed one is `cf_pd_one_cell.py --cutoff-off` with the posted knobs (16 devices, seed 4, 1200 s,
+ratio 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0); comparing a `--cutoff-off` bar against a
+cutoff-live run has already produced one false alarm. fmtk only, and never a heredoc piped into
+`conda run` (it silently no-ops and exits 0). D166 commit rules: identity shpragya8, NO AI
+ATTRIBUTION, no em dashes, no force-push, reset, stash or amend, no files over 5 MB, proofs on a clean
+checkout. Resolve origin/main to ONE literal sha for read-tree, the INDEX rebuild and commit-tree
+alike, and RE-RESOLVE IMMEDIATELY BEFORE COMMITTING: a split ref silently reverts another session's
+files with a clean fast-forward at push time.
 
-WRITTEN AT origin/main tip: cd7c9ca4b3045fe5633787aa2a947cd20f6eb1a4
+ALSO IN FORCE, FROM D209/D210: NO 0.25x POLICY CELLS until rung 4 is proven dry and the user approves
+the first one; `KV025_RUNGS` stays held. NO ABLATIONS. Baseline fidelity fixes belong to the H100's
+sessions; rescoring and figures belong to the Orin.
