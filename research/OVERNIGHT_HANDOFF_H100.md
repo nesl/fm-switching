@@ -135,3 +135,4 @@ For a new file `runs/<LIST>` on origin:
   toward 118, assistance unchanged; lateness signature if skips fall without on-time rising.
 - 19:08 USER RULING: the resumed session launches with --permission-mode auto (the interactive session's mode). Tested from the repo directory: tmux ls, ps, git status, file write and append all OK. So a resumed H100 session CAN gate lists, commit and check the driver; do so under the same rules as above.
 - 19:10 r1 s4 VALID: robot on time 95/132 (shares 60), recall infeasible 34 (shares 70; pre-reg bar <= 13 NOT met), check 2 72 % FAIL, checks 1 and 3 PASS; no lateness (2 late); residual skips priced ~6.4x engine. r1 s5 started 19:08:45 on the same coordinator.
+- 19:31 r1 s5 VALID: robot on time 113/127 (shares 76), recall infeasible 12 (shares 48), checks 1, 2 (98 %), 3 ALL PASS; no lateness (1 late). r1 s6 started 19:30:10 on the same coordinator.
