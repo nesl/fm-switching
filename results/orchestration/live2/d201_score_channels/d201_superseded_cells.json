@@ -1,0 +1,230 @@
+{
+ "label": "D205 step 1: every committed cell of the SEVEN value readers of EpisodicStream.delivered_scores, marked SUPERSEDED. Reason, for every row: read a constant 0.0 = maximal log P(Yes), escalating on every instant. This file is the authoritative list; results/INDEX.md's header points here.",
+ "reason": "read a constant 0.0 = maximal log P(Yes), escalating on every instant",
+ "why_the_constant_is_not_neutral": "the score is log P(Yes) (baselines/devsplit.py:34-35, live2/scores.py:9-12), so its range is (-inf, 0] and 0.0 is the MAXIMUM. Every threshold v >= tau with tau a quantile of observed negatives is satisfied unconditionally, so these arms did not fail silent, they escalated on every instant.",
+ "the_seven_readers": {
+  "inar-vl": "baselines/inarvl_adapted.py:65, direct",
+  "hybrid-llm": "baselines/hybrid_llm_adapted.py:37, direct",
+  "routellm": "baselines/routellm_adapted.py:94, imports hybrid_llm._features at :32",
+  "confidence-cascade": "baselines/cascade_adapted.py:130, via interface.latest_score()",
+  "thinking-qwenvl-atdm": "baselines/thinking_qwenvl_adapted.py:84, via latest_score()",
+  "uniscale": "baselines/uniscale_adapted.py:59, via latest_score()",
+  "B4-query-type-routing": "baselines/constructed.py:110, via latest_score()"
+ },
+ "the_four_writers_of_0.0": [
+  "live2/coordinator.py:663",
+  "live2/coordinator.py:1917",
+  "live/adapter.py:419",
+  "live/adapter.py:450"
+ ],
+ "superseded_cells": [
+  {
+   "file": "results/orchestration/live2/frozen_test/baseline_prescreen.json",
+   "arms": [
+    "inar-vl",
+    "hybrid-llm",
+    "routellm",
+    "confidence-cascade",
+    "thinking-qwenvl-atdm",
+    "uniscale",
+    "r3-streaming"
+   ],
+   "cell": "seed 4, 16 devices, 1200 s, 40:40:20, lh_req, ss2, dry",
+   "holds": "per-arm decision counts, positional and setwise digests, channel census",
+   "note": "this is the file that CARRIES the evidence of the defect as well as the superseded numbers: inar-vl, routellm and always-cloud-fcfs all land on digest d2f69d4eb94625b4 with 13,570 decisions"
+  },
+  {
+   "file": "results/orchestration/live2/frozen_test/baseline_prescreen_seed0_exclusions.json",
+   "arms": [
+    "inar-vl",
+    "routellm"
+   ],
+   "cell": "seed 0, 16 devices, 1200 s, 40:40:20, lh_req, ss2, dry"
+  },
+  {
+   "file": "results/orchestration/live2/frozen_test/baseline_matrix_table.json",
+   "arms": [
+    "confidence-cascade",
+    "r3-streaming"
+   ],
+   "cell": "seeds 4 to 7, 16 devices, the frozen grid",
+   "note": "confidence-cascade is in scored_arms and r3-streaming in excluded_arms. SEPARATELY, the SWEEP_ARMS header records the 2026-11-20 ruling that inar-vl, routellm, videostorm and vllm-priority are identical to always-cloud-fcfs at both cells so only always-cloud-fcfs runs. THAT RULING RESTS ON THE DEFECT and must be revisited."
+  },
+  {
+   "file": "results/orchestration/live2/covex_harden/leaderboard_published_s4.json",
+   "arms": [
+    "inar-vl",
+    "hybrid-llm",
+    "routellm",
+    "confidence-cascade",
+    "uniscale",
+    "r3-streaming"
+   ],
+   "cell": "seed 4, 8 and 16 devices, 600 s, 50:50, mode A, dry",
+   "is_measurement_in_the_file": false,
+   "holds": "the dashcam delivered and robot on-time rows posted in study_covex_hardening.md s16"
+  },
+  {
+   "file": "results/orchestration/live2/covex_harden/robot_denominators.json",
+   "arms": [
+    "inar-vl",
+    "hybrid-llm",
+    "routellm",
+    "confidence-cascade",
+    "uniscale",
+    "r3-streaming"
+   ],
+   "cell": "a post-processor over the leaderboard cells above, not new cells",
+   "action": "recompute, do not rerun"
+  },
+  {
+   "file": "results/orchestration/live2/baselines_published/arm_independence.json",
+   "arms": [
+    "inar-vl",
+    "hybrid-llm",
+    "routellm",
+    "confidence-cascade",
+    "uniscale",
+    "r3-streaming"
+   ],
+   "cell": "seed 4, 8 devices, 300 s, 50:50, mode A, dry, 20 arms",
+   "is_measurement_in_the_file": true,
+   "holds": "the action-sequence digests behind the D130 collapse claim, e.g. inar-vl e9160c2a0192bb07 excluding `order`, shared with ekya and videostorm"
+  },
+  {
+   "file": "results/orchestration/live2/racefix/proof1_byte_identity.json",
+   "arms": [
+    "inar-vl",
+    "hybrid-llm",
+    "routellm",
+    "confidence-cascade",
+    "thinking-qwenvl-atdm",
+    "uniscale",
+    "r3-streaming"
+   ],
+   "cell": "seed 4, 16 devices, 1200 s, 40:40:20, lh_req, ss2, dry, 50 arms before and after",
+   "note": "an IDENTITY proof, so its claim (before equals after) is unaffected; the DIGESTS it pins for these arms are superseded"
+  },
+  {
+   "file": "results/orchestration/live2/v5/patch1_byte_identity_proof.json",
+   "arms": [
+    "inar-vl",
+    "hybrid-llm",
+    "routellm",
+    "confidence-cascade",
+    "thinking-qwenvl-atdm",
+    "uniscale",
+    "r3-streaming"
+   ],
+   "cell": "the pre-screen cell",
+   "note": "same register as racefix above"
+  },
+  {
+   "file": "results/orchestration/live2/frozen_test/frozen_headline_n16_4seed_d155_measured_warm.json",
+   "arms": [
+    "confidence-cascade",
+    "r3-streaming"
+   ],
+   "cell": "16 devices, seeds 4 to 7, the frozen headline"
+  },
+  {
+   "file": "results/orchestration/live2/frozen_test/frozen_headline_n16_s4_d155_L3_measured_warm.json",
+   "arms": [
+    "confidence-cascade",
+    "r3-streaming"
+   ],
+   "cell": "16 devices, seed 4"
+  },
+  {
+   "file": "results/orchestration/live2/pilot/runs5/hybrid-llm_n8_s0_600s_h27_validity120/",
+   "arms": [
+    "hybrid-llm"
+   ],
+   "cell": "LIVE, seed 0, 8 devices, 120 s, 50:50, mode A, h27 tight",
+   "note": "carries PILOT_NOT_A_ROUND1_RESULT and cell.is_measurement=false"
+  },
+  {
+   "file": "results/orchestration/live2/pilot/runs5/hybrid-llm_n8_s0_600s_h27/",
+   "arms": [
+    "hybrid-llm"
+   ],
+   "cell": "LIVE, seed 0, 8 devices, 600 s",
+   "committed_head": "263b091"
+  },
+  {
+   "file": "results/orchestration/live2/pilot/runs5/hybrid-llm_n10_s0_600s_h27/",
+   "arms": [
+    "hybrid-llm"
+   ],
+   "cell": "LIVE, seed 0, 10 devices, 600 s",
+   "committed_head": "263b091"
+  },
+  {
+   "file": "results/orchestration/live2/pilot/runs5/hybrid-llm_n14_s0_600s_h27/",
+   "arms": [
+    "hybrid-llm"
+   ],
+   "cell": "LIVE, seed 0, 14 devices, 600 s",
+   "committed_head": "227a30a",
+   "note": "ran on a HEAD including the placement commit e924005 while the n8 and n10 cells did not"
+  },
+  {
+   "file": "results/orchestration/live2/pilot/pilot5_summary.json",
+   "arms": [
+    "hybrid-llm"
+   ],
+   "cell": "the summary row over the four LIVE pilot cells above"
+  },
+  {
+   "file": "results/orchestration/live1/live1_stub_runs.json",
+   "arms": [
+    "inar-vl",
+    "hybrid-llm",
+    "routellm",
+    "confidence-cascade",
+    "thinking-qwenvl-atdm",
+    "uniscale",
+    "r3-streaming"
+   ],
+   "cell": "STUB, seed 0, fleet 2, 600 trace-s",
+   "note": "the v1 live adapter, which is the other pair of 0.0 writers (live/adapter.py:419, :450). The file itself states NOTHING HERE IS A MEASUREMENT, so there is no number to supersede, but the cell is listed for completeness"
+  }
+ ],
+ "NOT_superseded_and_why": {
+  "the_offline_simulator": {
+   "files": [
+    "results/orchestration/sim1c/*",
+    "results/orchestration/sim1c_amend2/*",
+    "results/orchestration/sim1d/sim1d_part_a.json",
+    "results/orchestration/study_b_baselines/amend2_part_a_*.json"
+   ],
+   "why": "sim/run.py:237-240 feeds the REAL measured device scores from dev_wall (sim/run.py:160-173, :419) and the real cloud score at :545. The defect is specific to the live2 harness and the v1 live adapter. This is the POSITIVE CONTROL on the audit: a producer that does not have the defect.",
+   "residual_caveat": "sim/run.py:545 appends the CLOUD score to the same deque, so hybrid-llm reads q(L) there. That is the second fault, not the constant, and it is a separate question about the sim cells that this file does not settle."
+  },
+  "the_StudyB_smoke_replay": {
+   "files": [
+    "results/orchestration/study_b_baselines/b_smoke_results.json"
+   ],
+   "why": "baselines/smoke/replay.py:76-85 builds the history from the committed score array, sample-and-held, so the episodic channel is real there. Its separate defect is device_answer_confidence hard-coded None at :102, which is audit hit 15 and is not this reason."
+  },
+  "B4-query-type-routing": {
+   "why": "B4 has NO live2 cell: live2/arms_published.py registers only B7EDFFeasibility (:108) and B10BlockingAwareAdmission (:111) out of constructed.py, not B4. Its read site (constructed.py:110) is live only in the sim and smoke harnesses, both of which feed real scores, so there is no superseded B4 cell. It is still one of the seven readers and is fixed with the others if it is ever registered in live2.",
+   "separate_defect_that_stands": "audit hit 18: B4's query-type routing takes the same branch on every query in every harness because '\"D2\" in have' is always true, so two of its three branches are unreachable"
+  }
+ },
+ "reports_that_post_a_superseded_number": [
+  "reports/study_covex_hardening.md section 16 lines 1586-1606, and section 23.1 lines 2234-2251",
+  "reports/study_frozen_test.md sections 13.2, 13.3 and 14.4",
+  "reports/study_live2_pilot.md section 9 lines 350-353",
+  "reports/study_b_baselines.md the SMOKE table lines 125-126 only; its amendment 2 mAP ladders are simulator cells and stand",
+  "reports/study_sim1c_scoped.md and reports/study_sim1d_validate.md: simulator cells, they stand"
+ ],
+ "_provenance": {
+  "git_commit": "will be the commit that lands this file",
+  "script": "none: enumerated from the committed artefacts",
+  "model": "none",
+  "device": "cpu",
+  "n": 16,
+  "timestamp": "2026-11-23T13:57:56.078349"
+ }
+}
