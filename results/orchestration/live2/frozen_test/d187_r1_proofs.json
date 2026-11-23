@@ -50,16 +50,17 @@
  },
  "WHAT_THESE_PROOFS_DO_NOT_SHOW": "They show the fix is HARMLESS. They show NOTHING about whether it FIRES. On a dry cell session.last_telemetry_cached_tokens is always None because there is no engine, so the repriced branch is never taken dry. The firing proof is the live r1 cells, against the pass check pre-registered at c7c60e5b with its failure condition.",
  "_provenance": {
-  "git_commit": "04aecb8a",
+  "git_commit": "79eedc6d7bc5a4ffaddfbd4a24ead212c48836f0",
   "script": "fresh.py and a name probe, one cell per process",
   "model": null,
   "device": "flash_cpu",
   "n": 16,
-  "timestamp": "2026-11-22T18:41:42.221400"
+  "timestamp": "2026-11-22T18:43:16.394661",
+  "git_commit_CORRECTED_AGAIN": "This field read 04aecb8a while the digests in `final_code` were measured on 79eedc6d, the commit that restored the COLD branch. Caught by the H100. It is the SAME defect it caught earlier today on two other artefacts, where the field held origin/main at writing time rather than the commit containing the executed code, and the earlier correction is in this file's sibling at c28eef46. Repeating it after being corrected once is the part worth recording: the rule is not 'stamp a plausible commit', it is STAMP THE COMMIT THE MEASUREMENT RAN ON, and when an artefact is updated after a code change the stamp has to move with the numbers. The superseded value is kept here rather than overwritten."
  },
  "_SUPERSEDED_DIGESTS_NOTE": "The digests below were first measured on 04aecb8a and re-measured UNCHANGED on the final code after two corrections to the fix. They are re-stated rather than assumed to carry over, because a digest measured on superseded code is not evidence about the code that runs.",
  "final_code": {
-  "commit": "the commit carrying this file",
+  "commit": "79eedc6d7bc5a4ffaddfbd4a24ead212c48836f0",
   "what_changed_after_04aecb8a": [
    "e9569009: the engine telemetry is trusted only while the session is NOT believed COLD, because last_telemetry_cached_tokens is written on a completed request (engine_actions.py:358) and is NEVER RESET ON EVICTION, so on an evicted session it reports a prefix the engine no longer holds. Subtracting it there understates u and ADMITS a request that cannot make its deadline, the mirror image of the bug the block exists to fix. Found by the H100 from the code.",
    "this commit: the COLD branch is restored to its pre-fix behaviour EXACTLY. The e9569009 form still subtracted built_tokens on the COLD branch whenever it was non-zero, which changed COLD pricing in the unsafe direction (an evicted session's build pieces are evicted with it) and added a SECOND change on top of the telemetry fix, so an r1-against-shares comparison would have carried two changes rather than one. Also found by the H100, which noted that my four test cases did not cover COLD with built_tokens > 0, the one case distinguishing the forms."
