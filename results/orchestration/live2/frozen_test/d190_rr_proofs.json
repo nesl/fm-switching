@@ -371,5 +371,39 @@
   "device": "flash_cpu",
   "n": 16,
   "_note": "the commit the clean checkout was archived from, which is the commit measured"
+ },
+ "harness_name_proof": {
+  "_what": "HARNESS NAME PROOF on the POSTED commit 3466d599, added at the H100's request because the result had been reported in a message but was NOT in the committed JSON, so the gate could not be mechanical. This is the register distinction the project cares about: a proof asserted in prose is not a proof a gater can read.",
+  "method": "the entry point's OWN resolution path replicated in a subprocess: `import arms`, then `import hybrid` (which registers the hybrid-* arms, exactly as run_live2_real.py does at :263), then `A.make_arm(name)`, which is :264. No server and no GPU are involved, and that is sound rather than a shortcut: the entry point BUILDS THE ARM BEFORE `_start_server`, a deliberate ordering whose own comment records that a bad arm name used to crash AFTER the server was up and orphan it, costing three idle GPU minutes on 2026-11-21.",
+  "register": "this proves the name RESOLVES AND CONSTRUCTS through the entry point's own sequence. It does NOT execute a cell. The failure mode it is aimed at is the one that killed five cells on 2026-11-22: a name that imports in a friendly process but dies at cell start because only `arms` was imported and not `hybrid`.",
+  "arm": {
+   "name": "covex-v6-fair-c5attr-rr",
+   "returncode": 0,
+   "resolved": true,
+   "class": "V6FairC5AttrRR",
+   "unknown_arm_in_stderr": false,
+   "stderr_tail": ""
+  },
+  "negative_control": {
+   "name": "covex-v6-fair-c5attr-rr-not-an-arm",
+   "returncode": 1,
+   "resolved": false,
+   "class": null,
+   "unknown_arm_in_stderr": true,
+   "stderr_tail": "KeyError: \"unknown arm 'covex-v6-fair-c5attr-rr-not-an-arm'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstore-prefetch-noyield', 'attentionstore-prefetch-off',"
+  },
+  "arms_census": {
+   "stdout": "NARMS 209\nHAS True",
+   "returncode": 0
+  },
+  "verdict": "PASS",
+  "why_the_negative_control_is_the_proof": "a zero exit code on the real name proves nothing on its own, because a check that cannot fail passes trivially. The control confirms the instrument can SEE an unresolved name: `-not-an-arm` must exit non-zero with `unknown arm`.",
+  "_added": {
+   "git_commit": "670efd488fb7e53fb2bab123c2f665fc33c0a8c3",
+   "measured_on_commit": "3466d599",
+   "why_added": "the H100 gated V6RR_CELLS but logged as PROVISIONAL that this proof was reported in a message and NOT present in this JSON, so the gate could not be mechanical. It is right: a proof asserted in prose is not one a gater can read, and that is the same register distinction this project applies to every other number. Re-run independently by the main flash session rather than re-reported by the building session.",
+   "by": "main flash session",
+   "timestamp": "2026-11-23T12:21:44.314186"
+  }
  }
 }
