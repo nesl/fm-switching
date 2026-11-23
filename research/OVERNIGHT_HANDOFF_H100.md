@@ -154,3 +154,9 @@ For a new file `runs/<LIST>` on origin:
   ~/.venvs/fm-switching-vllm/bin/python -c "import sys; sys.path.insert(0,'experiments/orchestration/live2'); import arms" ;
   (3) rm ~/data/live2/watchdog/HOLD results/orchestration/live2/frozen_test/runs/STOP ;
   (4) tmux new-session -d -s frozengrid 'bash experiments/orchestration/study_frozen_grid_driver_v29.sh' .
+- 00:37 RUNG 3 COMPLETE (covex-v6-fair-c5attr, gain 2.0, on the c5attr rung-2 base; all VALID, 0 errors). Robot on time / SS / dashcam pooled:
+  s4 122/132, 337, 0.507 MEET (gain0 119, 337, 0.213 FAIL; c5attr 117, 338, 0.263 FAIL)
+  s5 114/127, 343, 0.492 MEET (gain0 114, 349, 0.246 FAIL; c5attr 115, 344, 0.308 MEET)
+  s6 109/121, 339, 0.500 MEET (c5attr 105, 327, 0.331 MEET)  robot late 12 (> 10, flagged)
+  s7  84/105, 354, 0.547 MEET (c5attr 83, 350, 0.286 MEET)
+  The ordering feed meets dashcam at every seed and roughly doubles on-time against gain0, with robot and SS held. The _kv0.5 sweep resumed 00:35:32 (llf s4); 19 cells to about 07:45.
