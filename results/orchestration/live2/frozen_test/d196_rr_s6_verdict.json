@@ -1181,5 +1181,16 @@
   "n": 1,
   "timestamp": "2026-11-23T22:08:13.649872+00:00"
  },
- "_what_this_run_is": "s6 scoring of covex-v6-fair-c5attr-rr against rung 3 and base under D196 (2), committed d179_rung2_verdict.py unchanged, positive control PASS 2 of 2 cells exact. Robot on-time is 110 of 121 against rung 3 109 and base 41, retention 1.0147, so rr EXCEEDS rung 3 rather than retaining a fraction of its gain. The H100 reported both 110 and 111 in one message; the scorer resolves it as 110. MARGINAL NUMBER AT THIS SEED, flagged by the H100 and recorded: robot LATE by coordinator flag is 10 of 121, which is AT the robot-late <= 10 bound used for shares and rung 4, not over it, and below rung 3 s6 own 12. Assistance per-device minimum 0.9746 against rung 3 0.9407, all three devices above 0.90."
+ "_what_this_run_is": "s6 scoring of covex-v6-fair-c5attr-rr against rung 3 and base under D196 (2), committed d179_rung2_verdict.py unchanged, positive control PASS 2 of 2 cells exact. Alert attainment 0.6399 against rung 3's 0.4356, +0.2043. Robot on-time 110 of 121 against rung 3 109 and base 41, retention 1.0147, so rr EXCEEDS rung 3 rather than retaining a fraction of its gain. Assistance per-device minimum 0.9746 against rung 3 0.9407, all three devices above 0.90.",
+ "_CORRECTED_2026_11_23_two_registers_not_a_slip": {
+  "what_I_got_wrong": "this file previously said the H100 had reported both 110 and 111 and that 'the scorer resolves it as 110', i.e. that 111 was a slip. THAT WAS MY ERROR. The two numbers are TWO REGISTERS of the same quantity and both are correct.",
+  "the_two_registers": {
+   "110": "the SCORER's `robot_pool_on_time`, DELIVERY-BASED on t_delivered. This is the headline and the register check 2 is computed in.",
+   "111": "the COORDINATOR's `cloud_payload.on_time` FIRST-TOKEN flag. 111 + late 10 = 121 with unsent 0, so the coordinator register is internally consistent."
+  },
+  "why_they_differ": "the coordinator flag runs slightly AHEAD of the scorer because t_delivered adds the forward delay to the first-token time. This is the caveat already recorded in the frozen-test summary, so the difference is documented behaviour rather than a discrepancy.",
+  "why_it_matters_for_the_marginal_number": "the robot-late count of 10 of 121 lives in the COORDINATOR register, and the <= 10 bound as used for shares and rung 4 is in that SAME register. So the bound and the number are commensurable, which they would not have been had I been right that one of them was an error. Collapsing the two registers would have compared a delivery-based count against a first-token bound.",
+  "credit": "caught by the H100, which asked that it not be recorded as an error. It is right, and this correction stands in the file rather than being quietly replaced; the H100 will label the register beside every robot figure for s7.",
+  "the_general_lesson": "I flattened two registers into one and then called the difference a slip, which is the opposite of the register discipline CLAUDE.md requires. Two numbers that disagree may be two measurements of different things, and the first question is which register each is in, not which is wrong."
+ }
 }
