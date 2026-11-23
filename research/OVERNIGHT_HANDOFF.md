@@ -1,5 +1,101 @@
 # OVERNIGHT HANDOFF (D187). READ THIS FIRST.
 
+## STATE AT 07:05Z (23:05 local), rewritten by a watchdog-resumed session
+
+THE SECTIONS BELOW THIS ONE WERE WRITTEN AT 05:25Z AND ARE NOW FOUR HOURS STALE. They predate the
+rung-2 verdict, the morning summary, rung 3, rung 4, and an outage. Read THIS section; treat the
+rest as history. I am a watchdog-resumed session: the previous worker's heartbeat went stale at
+625 s and its background tasks were orphaned, so it had ended. I claimed `ops/heartbeat` first.
+
+ENVIRONMENT NOTE THAT WILL WASTE YOUR TIME OTHERWISE: `conda` is NOT on a resumed session's PATH
+(login shell is sh). Use `/home/pragya/miniconda3/bin/conda run -n fmtk`. And `conda run` does NOT
+forward stdin, so a heredoc piped into it runs nothing and EXITS 0: pass a file.
+
+### RUNG 2 IS SETTLED. D184 APPLIES: c5attr IS RUNG 2.
+
+No shares version met all three D179 checks at all four seeds, which is the rule. Check 2, scored by
+the committed pre-registered scorer with its positive control exact:
+
+  shares  0.30 / 0.56 / 0.33 / 0.28      0 of 4 pass
+  r1      0.7229 / 0.9773 / 0.7727 / 0.8906   1 of 4   BEST SHARES VERSION
+  r2      0.53 / 0.98 / 0.77 / 0.875     1 of 4   REFUTED by its own failure condition
+
+Checks 1 and 3 PASS at all four seeds for every version. r1 is the TRADE-OFF ABLATION: it restores
+alert attainment ABOVE base at every seed (0.744 to 0.820, where the committed rung 2 sits at 0.188
+to 0.276, WORSE than base) and holds assistance at 96 to 100 percent, paid for in robot on-time.
+The morning summary is committed at `reports/MORNING_SUMMARY_2026-11-23.md` (36b8da6b) and the
+`StudyD179-SHARES` row carries the full verdict. NOTHING FURTHER IS OWED ON RUNG 2.
+
+### AN OUTAGE I CAUSED, AND WHAT IT STILL BLOCKS
+
+I pushed a rung-4 registration line into `arms.py` that made origin/main UNIMPORTABLE: it pulls in
+`cf_protect_defer`, which calls `cf_objective.attainment_margin` AT IMPORT TIME, and that function
+exists ONLY in an UNCOMMITTED local edit to `v5/cf_objective.py` in the shared worktree. Every arm
+died at cell start. Reverted at `67dd0514`; the H100 confirmed the import on a full checkout, lifted
+its HOLD, and restarted with driver v29, which now STOPS AND HOLDS when a cell produces no
+cell.json within 120 s instead of auto-skipping. GPU idle 22:45 to 22:48 only. Recorded at
+`eaefd73e`.
+
+WHAT IT BLOCKS: RUNG 4 CANNOT RUN. Its registration is still reverted (commented, with the reason
+in place, so do not simply re-add it). `V6CFPD_CELLS` is posted and un-gated. Restoring it requires
+EITHER committing the `cf_objective` change WITH ITS OWN PROOF, or making `cf_protect_defer` not
+depend on it at import time. The previous session deliberately chose NOT to push that change because
+it is half-finished D177 work whose HARM side was never converted. DO NOT push unproven policy code
+to unblock a GPU. If you think rung 4 is worth unblocking tonight, the honest route is the second
+one, and it needs its own proof.
+
+### RUNG 3 IS RUNNING AND ONLY ONE SEED HAS SCORED
+
+DO NOT MISTAKE THE EMPTY DIRECTORIES FOR DATA. This is the trap in the current tree:
+
+  covex-v6-fair-c5attr s4                       HAS cell.json, VALID, the only scored cell
+  s5, s6, s7 and both -gain0 cells              directories exist with NO cell.json
+  the same names with a `_rerun` suffix          also exist with NO cell.json
+
+Every one of those empty directories is from 22:43 to 22:45, BEFORE the import fix: their `.stdout`
+files carry the `AttributeError: module 'cf_objective' has no attribute 'attainment_margin'`
+traceback, and they contain only `mm_gate.json` and `mm_uuid_check.json`. THEY ARE LAUNCH FAILURES,
+NOT RESULTS. A session that globs the run directory and scores whatever matches will silently pick
+them up. Check for `cell.json` before using any cell.
+
+The H100 restarted the queue at 22:48 on `67dd0514`: -gain0 s4, c5attr s5, -gain0 s5, c5attr s6,
+c5attr s7, to about 00:40 local, then the `_kv0.5` sweep resumes.
+
+s4's RESULT, for the record: covex-v6-fair-c5attr robot on time 122/132 against the c5attr base's
+117 and base's 35, SS 337/357, dashcam MEETS at pooled 0.507 with worst device 0.473 where the
+c5attr base FAILS at 0.263, by_deadline 0.629, robot late 8 inside the bound of 10. So at s4 the
+ordering consumer improves robot slightly AND flips the dashcam verdict. ONE SEED. The other three
+are the test, and nothing should be written up as a rung-3 result until they land.
+
+### THE NEXT STEP
+
+1. WAIT for the four remaining rung-3 cells. Do not score a partial grid as if it were complete.
+2. When they land, score with the COMMITTED scorer, unchanged:
+     /home/pragya/miniconda3/bin/conda run -n fmtk python \
+       experiments/orchestration/live2/d179_rung2_verdict.py --runs <dir> \
+       --shares-arm covex-v6-fair-c5attr --rung2-arm covex-v6-state-uo-c5attr \
+       --out ... --report ... --pins results/orchestration/live2/frozen_test/d179_rung2_verdict_prereg.json
+   READ THE `positive control: PASS` LINE FIRST. If it is not that, the scorer is broken rather than
+   the cells. Decompress any `coordinator_result.json.gz` before scoring, or the diagnostics read as
+   ABSENT and will be mistaken for zero.
+3. Rung 3's attribution is already established and does not need re-deriving: ORDERING is the whole
+   contribution, 4,512 differing decisions against the gain-0 control, with the ORDER-ONLY arm
+   byte-identical to the both-consumers arm and SPLIT-ONLY at exactly 0, replicated independently by
+   three sessions to the digit.
+4. Leave rung 4 blocked and say so. Leave the six open items for the user.
+
+### THE SIX OPEN ITEMS FOR THE USER, all in reports/OVERNIGHT_DECISIONS.md with evidence
+
+floors and W_max regime (D188 (1)); the `id(obs)` cache fix prepared behind an OFF switch and never
+used, which DOES change rung-2 decisions at seed 6; the assistance image grid no D-row authorises;
+the assistance control that was written on a shared counter and so was unfalsifiable; the gzipped
+`coordinator_result` scorer defect; and two over-broad `mv` allow rules in `.claude/settings.local.json`.
+
+---
+
+## HISTORY BELOW THIS LINE, WRITTEN AT 05:25Z AND SUPERSEDED
+
+
 ## STATE AT 05:25Z (21:25 local), written by a SECOND watchdog-resumed session
 
 The previous worker's heartbeat went stale at 1,109 s and the watchdog restarted me at 05:10:01Z in
