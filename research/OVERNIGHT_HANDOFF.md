@@ -297,13 +297,22 @@ its 24 arms, and the code it compares is unreachable, so an empty commit would p
 shows E1 is INERT, not that E1 is safely default-off. Corrections are committed at `77b9f702`,
 `20ac7c63` and `dd35ca54`.
 **AND THIS CHANGES THE RUNG-4 STORY, so do not repeat the older sentence.** No `vllm:` key means
-`gpu_kv_fraction` 0.0, means `free_kv` pinned at the full pool (OBSERVED: `pd_free_kv_min` =
-`pd_free_kv_max` = 62944, constant, with `pd_kv_bound_by_engine_metric` ABSENT), means
-`rebuild_fits_without_evicting` fires and **PROTECT-AND-DEFER IS NEVER REACHABLE.** Three independent
+`gpu_kv_fraction` 0.0 and `pd_kv_bound_by_engine_metric` ABSENT, so THE ENGINE CHANNEL BINDS ZERO
+DECISIONS EVERYWHERE. *** THE REST OF THIS CHAIN IS REFUTED AND MUST NOT BE REPEATED. CORRECTED
+2026-11-24 FROM THE COMMITTED LADDER CELLS, committed at `c701f83a`; see the OPEN section below for
+the per-seed numbers. *** `free_kv` IS **NOT** PINNED AT THE FULL POOL: in all four rung-4 ladder
+cells it VARIES (10,115 to 62,944) and `pd_kv_bound_by_belief` EQUALS `pd_decisions`, so THE BELIEF
+CHANNEL SETS IT ON 100 PERCENT OF DECISIONS. The `62944`-constant reading came from ONE fake-server
+cell of 29 decisions; variation is a property of a cell's ROSTER AND DURATION, not of dry versus
+live. AND PROTECT-AND-DEFER IS NOT "NEVER REACHABLE": at s4 and s7 it CROSSED ITS BAR and was
+blocked for want of a channel: `pd_harm_over_bar` = 2 and the
+`pd_gate_wanted_to_act_but_a_request_has_no_slice_channel` counter = 2. That is Rule 2
+**UNEXPRESSIBLE**, not unexercised. s5 and s6 ARE genuinely unexercised (nothing crossed the bar). Three independent
 agreements: a live fake-server cell (29 decisions, 0 `PROTECT_AND_DEFER`), the s5 diagnosis (299
 decisions, same two gates, 0 `PROTECT_AND_DEFER`), and a dry digest collision
 (`covex-v6-cf-pd-c5attr` = `covex-v6-state-uo` at `9a4be873eb3c5fba` / 14,218). **The defensible
-sentence is "rung 4 adds one mechanism that HAS NEVER BEEN REACHABLE and one that fires and loses", NOT
+sentence, CORRECTED 2026-11-24, is "rung 4 adds one mechanism that FIRED AND HAD NO CHANNEL TO ACT
+THROUGH at two seeds of four and was unexercised at the other two, and one that fires and loses", NOT
 "one that does not help".** Rule 2 class is UNEXERCISED with a DEFECT as the cause, so the remedy is a
 FIX, not a finding, and **"protect-and-defer does not help at 1x" IS NOT SUPPORTED and must not be
 written.** Whether rung 4 would beat rung 3 with the metric plumbed is UNKNOWN AND UNTESTED.
@@ -336,9 +345,13 @@ ceiling**, so the assumption held and the escalate-and-report branch did not fir
   (b) The scorer says "at least" where the prereg says "STRICTLY ABOVE". Immaterial on every cell so
   far (rung 3's margins are +0.216424 and +0.166322) but it would bite at exactly zero delta.
 *** AND THE HEADLINE CAVEAT, which belongs with every citation of the above: *** these four seeds do NOT
-test the rung-4 DESIGN. Protect-and-defer has been **unreachable in every cell ever run** (`metrics()`
-does not merge `scrape_metrics`, which has ZERO callers, so `free_kv` sits pinned at the whole pool),
-and the deferral predictor is called with the queueing term HARD ZERO. This is evidence about the
+test the rung-4 DESIGN. **CORRECTED 2026-11-24 (`c701f83a`): protect-and-defer is UNEXPRESSIBLE at
+s4 and s7 and UNEXERCISED at s5 and s6, NOT "unreachable in every cell", and `free_kv` is NOT pinned
+at the whole pool - it varies 10,115 to 62,944 with the BELIEF channel setting it on every decision.**
+What IS true: `metrics()` does not merge `scrape_metrics`, which has ZERO callers, so the ENGINE
+channel binds zero decisions; at s4 and s7 the mechanism crossed its bar and had no channel to act
+through, and THE GATE'S OWN COUNTER NAMES DEVICE_ANSWERS as the candidate that would apply; and the
+deferral predictor is called with the queueing term HARD ZERO. This is evidence about the
 rung-4 IMPLEMENTATION AS RUN. **Whether a fixed rung 4 would beat rung 3 is UNKNOWN AND UNTESTED.**
 
 1. ~~`covex-v6-state-final` s6 -> score RUNG 3 at s6~~ **DONE at `f476ee96`: ALL THREE PASS, robot
