@@ -347,8 +347,15 @@ def belief_update_from_cached_tokens(session, cached_tokens: Optional[int],
     likely, which is the conservative direction for cost (a host reload is charged as a cold
     rebuild) and the wrong direction for a reload decision. `external_tokens` is the separate
     channel for the engine's connector-hit count if vLLM 0.31.0 exposes one; when it is supplied
-    and non-zero the belief goes to `host` rather than `cold`, and until then it is None and the
-    PROVISIONAL label stands.
+    and non-zero the belief goes to `host` rather than `cold`.
+
+    D209 (4) UPGRADES "PROVISIONAL" TO "MEASURED, AND PERMANENT ON THIS ENGINE". The probe (see
+    `EXTERNAL_HIT_KEYS` above) found host hits carrying 26 percent of the engine's prompt tokens
+    AND no per-request field that distinguishes them, so `external_tokens` is None on every
+    request and the `cold` branch below is taken for every zero-reuse request whose prefix was in
+    fact on the host. Read `cold` here as "NOT IN GPU KV", which is what the evidence supports; it
+    is an UPPER BOUND on reconstruction cost and a LOWER BOUND on residency, and it is not
+    evidence that the host tier was empty.
     """
     before = session.believed_tier()
     if cached_tokens is None:
@@ -373,9 +380,10 @@ def belief_update_from_cached_tokens(session, cached_tokens: Optional[int],
                                      % int(external_tokens))
         else:
             after = "cold"
-            reason = ("zero reuse on a %d-token request over a %d-token built prefix: evicted "
-                      "(PROVISIONAL: says cold where host is likely under write-through)"
-                      % (offered, built))
+            reason = ("zero reuse on a %d-token request over a %d-token built prefix: not in GPU "
+                      "KV (D209 (4): no per-request host signal exists on this engine, and 26 "
+                      "percent of its prompt tokens came from the host tier, so this is a lower "
+                      "bound on residency and not evidence of a cold prefix)" % (offered, built))
     session.belief = {"gpu": 0.0, "host": 0.0, "cold": 0.0}
     session.belief[after] = 1.0
     return BeliefUpdate(session.session_id, before, after, ct, prompt_tokens,
@@ -386,26 +394,92 @@ def belief_update_from_cached_tokens(session, cached_tokens: Optional[int],
 # User ruling 2026-11-20: log the engine's external / connector-hit tokens SEPARATELY if vLLM
 # 0.31.0 exposes them, so a GPU hit and a host hit can be told apart.
 #
-# UNVERIFIED, and it must stay labelled so until an engine says otherwise. Nothing on this box
-# runs 0.31.0, no install is permitted (the disk is at 99 percent), and `backend.cached_tokens_of`
-# reads only `prompt_tokens_details.cached_tokens`, which on the committed build does not
-# distinguish a GPU hit from a native-offload hit. This probe therefore returns None whenever the
-# engine reports nothing, and None means NO EVIDENCE, never zero: see
-# `belief_update_from_cached_tokens`, which treats the two differently on purpose.
+# D209 (4), 2026-11-23: THE PROBE HAS BEEN RUN AND THE ANSWER IS NO, STRUCTURALLY. The register of
+# this block changes from CONSTRUCTED to OBSERVED, and so does its verdict.
+# Source: `results/orchestration/live2/frozen_test/engine_probe_hit26/` (README plus the raw
+# `metrics_scrape_h100.txt`), one read-only GET of /metrics on the live H100 server, vLLM
+# 0.31.0+cu129, Qwen3-VL-32B, native CPU offload on, captured 2026-11-23T15:04:47-0800 during a
+# `covex-v6-base` s4 `_kv0.25` cell.
 #
-# The candidate key names below are CONSTRUCTED from the shape of the usage block, not read off a
-# running engine. The first H100 run on the deployment stack must dump one raw usage block and
-# confirm or replace this list; until it does, every belief that says "cold" may be a host hit.
-EXTERNAL_HIT_KEYS = ("external_computed_tokens", "num_external_computed_tokens",
-                     "connector_cached_tokens", "kv_connector_cached_tokens",
-                     "offloaded_cached_tokens")
+# WHAT THE PROBE SETTLED, in two parts that point opposite ways.
+#
+# (1) HOST RESIDENCY IS REAL AND FREQUENT. 26 percent of the engine's prompt tokens came from the
+#     host tier: `vllm:prompt_tokens_by_source_total{source="external_kv_transfer"}` 4,943,072 of
+#     18,707,015, against `local_cache_hit` 10,094,768 and `local_compute` 3,669,175;
+#     `vllm:external_prefix_cache_hits_total` 4,945,760 of 8,618,089 queries; 1,847 CPU-to-GPU
+#     loads moving 1.2965e12 bytes. So a belief that says "cold" on a zero GPU reuse is wrong a
+#     large fraction of the time, and in the MAXIMUM-COST direction.
+#
+# (2) AND IT IS NOT OBSERVABLE PER REQUEST ON THIS ENGINE. The per-request usage schema is fixed by
+#     the installed source (`vllm/entrypoints/serve/engine/protocol.py:121-140`):
+#       UsageInfo            = prompt_tokens, total_tokens, completion_tokens,
+#                              prompt_tokens_details, completion_tokens_details
+#       PromptTokenUsageInfo = cached_tokens, created_cache_tokens, multimodal_tokens
+#     A host hit and a GPU hit are BOTH folded into `prompt_tokens_details.cached_tokens` and
+#     cannot be told apart from it. `vllm:prompt_tokens_cached_total` equals local_cache_hit +
+#     external_kv_transfer EXACTLY, which is the same folding seen from the counter side.
+#
+# SO THE KEY LIST IS NOT REPLACED WITH BETTER GUESSES, AND NOT WITH A REAL NAME, BECAUSE THERE IS
+# NO REAL NAME TO PUT IN IT. The five names stay in the tuple, now labelled REFUTED, and
+# `external_cached_tokens_of` therefore returns None on every request of this engine exactly as it
+# did before - but now by MEASUREMENT rather than by a guess that happened to miss, which is a
+# different claim about the same return value and the reason this edit moves no decision.
+#
+# WHY THE TUPLE IS NOT EMPTIED, which was the first thing written here and was wrong to do.
+# `confirm_engine_actions_32b.py:1358` indexes `EA.EXTERNAL_HIT_KEYS[0]` to prove the lookup
+# mechanism reads an external key WHEN one is present, and `:684` reports the probed list. That
+# file belongs to another session, an empty tuple makes its self-test raise IndexError, and
+# emptying the tuple would therefore have been a silent break of someone else's proof for a
+# cosmetic gain. The refutation is recorded in `EXTERNAL_HIT_KEYS_REFUTED_BY_PROBE` instead, and
+# removing the names is left as a one-line follow-up for that file's owner.
+#
+# WHY NOT DIFFERENCE THE AGGREGATE COUNTERS INSTEAD. `external_prefix_cache_hits_total` is exact
+# per request only when a single request is in flight, which is not our regime (16 devices, three
+# traffic types, `num_requests_running` 3 at capture). Attributing a counter delta to one of
+# several concurrent requests would manufacture a per-request signal that the engine does not
+# emit, so it is NOT wired into any decision path. The aggregate names are recorded in
+# `HOST_RESIDENCY_AGGREGATE_KEYS` for REPORTING ONLY and nothing reads them to decide.
+#
+# CONSEQUENCE FOR THE RELOAD LEVER, which is the finding and must travel with it. RELOAD is offered
+# only at HOST-WARM, and no per-request signal can put a session at HOST-WARM on this engine, so
+# the lever is UNEXERCISED in CLAUDE.md Rule 2's sense for a STRUCTURAL reason (the engine does not
+# expose the state) and not for a coding one (a wrong key name). That is a statement about vLLM
+# 0.31.0's usage schema, not about the policy, and it does not become a negative about RELOAD.
+# Guessed 2026-11-20. REFUTED by the D209 (4) probe: not one of these appears in the per-request
+# usage block of vLLM 0.31.0+cu129, so this lookup returns None on every request of this engine.
+EXTERNAL_HIT_KEYS: Tuple[str, ...] = ("external_computed_tokens", "num_external_computed_tokens",
+                                      "connector_cached_tokens", "kv_connector_cached_tokens",
+                                      "offloaded_cached_tokens")
+EXTERNAL_HIT_KEYS_REFUTED_BY_PROBE = True
+# OBSERVED in the probe scrape. AGGREGATE, cumulative since server start, REPORTING ONLY: no
+# decision path reads these, because a counter delta cannot be attributed to one of several
+# concurrent requests (see above).
+HOST_RESIDENCY_AGGREGATE_KEYS = ("vllm:prompt_tokens_by_source_total",
+                                 "vllm:external_prefix_cache_hits_total",
+                                 "vllm:external_prefix_cache_queries_total",
+                                 "vllm:kv_offload_load_bytes_total",
+                                 "vllm:kv_offload_store_bytes_total",
+                                 "vllm:kv_offload_cpu_cache_usage_perc")
+# OBSERVED: the whole per-request prompt-token schema this engine emits. Written down so the next
+# reader checks a list against the source rather than inventing a sixth candidate.
+PER_REQUEST_PROMPT_TOKEN_FIELDS = ("cached_tokens", "created_cache_tokens", "multimodal_tokens")
+PER_REQUEST_HOST_SIGNAL_AVAILABLE = False
+PER_REQUEST_HOST_SIGNAL_SOURCE = (
+    "results/orchestration/live2/frozen_test/engine_probe_hit26/ (D209 (4); vLLM 0.31.0+cu129, "
+    "UsageInfo / PromptTokenUsageInfo at vllm/entrypoints/serve/engine/protocol.py:121-140)")
 
 
 def external_cached_tokens_of(usage: Optional[Dict[str, Any]]) -> Optional[int]:
     """The engine's connector / external-hit token count, or None if it reports none.
 
     Kept here rather than in `backend.py` so that wiring it needs no edit to a file this session
-    does not own, and so that the UNVERIFIED label travels with the function.
+    does not own.
+
+    ON THIS ENGINE IT RETURNS None FOR EVERY REQUEST, BY MEASUREMENT (D209 (4)). `EXTERNAL_HIT_KEYS`
+    is empty because the probe read the installed per-request schema and found no external-hit
+    field in it; the loop below is kept rather than replaced by `return None` so that an engine
+    which DOES expose one needs a name added to that tuple and no other change. A non-empty tuple
+    whose names are guessed is what this hit was, so a name goes in there only from a capture.
     """
     if not usage:
         return None

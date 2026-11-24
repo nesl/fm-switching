@@ -1,0 +1,30 @@
+{
+ "addendum_to": "d211_host_attribution_prereg.json, sha256 f1c8d8ebdd3671e242ac5cbf0e55d0b7be2b0b446a6a3017f86bbc8a2bae0025",
+ "_why_a_separate_file": "that document is FROZEN BY HASH. These facts arrived after the freeze, they constrain the EVALUATION PROCEDURE and they do NOT touch the bar, the signals or the verdict rule, so they are recorded beside it rather than edited into it. Editing a frozen pre-registration to add a constraint is how a bar moves without anyone deciding to move it.",
+ "the_bar_is_unchanged": true,
+
+ "1_the_capture_fix_exists_PROSPECTIVELY": {
+  "what": "driver v32, origin 31561256, writes runs/<cell>/host_counters_d211.log from the SAME 10 s curl: t (unix s, ms) and loadavg, then raw absolute vllm:prompt_tokens_by_source_total per source (labels KEPT), external_prefix_cache_hits/queries_total, kv_offload_load/store_bytes_total, prompt_tokens_cached/total, kv_cache_usage_perc, kv_offload_cpu_cache_usage_perc.",
+  "relation_to_the_frozen_document": "the frozen document's blocked-ness is about COMMITTED cells and remains exactly true: no committed cell carries any of these series, and v32 does not change that retrospectively. Validation can only be evaluated on cells recorded from the v32 handover onward.",
+  "independently_reproduced": "this session diagnosed the same cause from the driver source before being told (study_frozen_grid_driver_v25.sh:39, a fixed five-series grep, plus `sed 's/{[^}]*}//'` and `awk '{a[$1]+=$2}'` which strip labels and sum by bare key). The H100 fix keeps the labels, which is the part a regex-only fix would have missed."
+ },
+
+ "2_windowing_constraints_that_the_evaluation_MUST_respect": [
+  "THE COUNTERS RESET PER CELL: the server restarts for each cell, so every series starts near 0. Never difference across a cell boundary.",
+  "WINDOWS ARE ABOUT 10.0 to 10.1 s AND NOT A GRID (driver `sleep 10` plus curl time), so every delta must be taken between adjacent `t` stamps and never by assuming a 10 s spacing.",
+  "THE EDGE WINDOWS ARE ASYMMETRIC: the first line can precede the first request and the last can miss the final ~10 s. They are handled EXPLICITLY (excluded from the within-20-percent count, and reported as excluded with their count) rather than allowed to skew it. This is the concrete form of the edge-drift objection already recorded in the frozen document, and it is a reporting rule, not a change to the 20 percent or the 80 percent."
+ ],
+
+ "3_SIGNAL_A_IS_ALSO_BLOCKED_ON_COMMITTED_DATA_AND_THE_REASON_IS_A_DIFFERENT_EMPTY_FIELD": {
+  "_register": "OBSERVED, by reading the whole committed rung-3 live cell covex-v6-fair-c5attr-rr_n16_s4_1200s_h27_3t_L3_epg_rq30 at origin d796f2d5",
+  "finding": "the belief's predicted GPU-resident prefix IN TOKENS is not recorded anywhere for a reported arm. decision.jsonl.gz carries a schema field `belief.gpu_tokens_by_session` (schema.py:316) and it is EMPTY ON ALL 16,840 ROWS, including all 2,667 state_action rows.",
+  "cause": "its ONLY producer is live2/arms_policy.py:1067-1075, and the reported covex-v6 ladder never enters arms_policy.py (the StudyPLACEHOLDER-TRIAGE structural fact S1: no `from policy` import in any ladder module, and C6 is False in CONFIGS['hybrid-F'], which covex-v6-base inherits). So for every reported arm the field is {} by construction: a declared, schema-typed, logged channel that no reported arm fills.",
+  "what_is_available": {
+   "request.jsonl.gz": "cached_tokens, prompt_tokens, cached_fraction, cache_path, t_submit, t_first_token, session_id, per request",
+   "residency.jsonl": "t, session_id, believed_tier, believed_dist, telemetry_cached_tokens: the believed TIER but not the token count",
+   "decision.jsonl.gz": "release_piece rows carry piece_tokens, and state_action rows carry desired_tier, so the built prefix COULD be reconstructed by accumulating piece_tokens per session and resetting on an EVICT"
+  },
+  "decision_and_why": "SIGNAL (a) IS NOT COMPUTED ON COMMITTED DATA IN THIS SESSION. Computing it would mean deriving its second input from that reconstruction, which is a declared proxy, and there is NOTHING TO VALIDATE THE PROXY AGAINST because the counter series does not exist for committed cells. Consistency check 6 forbids a questionable proxy in a headline, and here the proxy would BE the headline. The cheap fix is one line where the decision row is built: populate `belief.gpu_tokens_by_session` from cstate's own session records, after which signal (a) is a join on recorded data rather than a reconstruction. That file is not this session's to edit, so it is escalated with the field named.",
+  "what_is_reportable_today_without_any_reconstruction": "the belief-too-optimistic diagnostic was ASKED FOR as `believed GPU prefix > cached_tokens`, which needs the same missing field. A weaker form that needs nothing new is available and is NOT a substitute: for every request whose session's believed_tier is `gpu` at submission, whether cached_tokens is 0. That is a necessary-not-sufficient test of belief optimism and is left for the measurement pass rather than quoted here as if it were the ruled quantity."
+ }
+}

@@ -1,0 +1,130 @@
+{
+ "study": "StudyD211-HOSTATTR",
+ "ruling": "D211, user decision 2026-11-23, committed at d796f2d5",
+ "status": "PRE-REGISTERED AND FROZEN. No attribution number has been computed.",
+ "_what_was_done_before_this_was_frozen": [
+  "A DATA-AVAILABILITY CENSUS ONLY: which committed file carries which field. It contains no",
+  "value of either signal, no window, no agreement figure and no distribution, so freezing after",
+  "it cannot have been informed by a result. The census is recorded below under",
+  "data_availability because it changes what is RUNNABLE, and two of its findings are stopping",
+  "conditions that D211 itself pre-registered."
+ ],
+ "separate_from": "the StudyLADDER-FINAL pre-registration (sha256 d6d8b6c1...), which a parallel session froze and which this does not touch or restate",
+ "claim_under_test": "per-request host-cache hits can be INFERRED well enough from what the engine does report that the residency belief can carry HOST-WARM and state-based pricing can price it as host-warm (M3 / ENG1b reload, about 0.12 s per 8k tokens) rather than as cold",
+ "signals": {
+  "a_cached_beyond_believed_gpu_prefix": {
+   "definition": "host_tokens(r) = max(0, cached_tokens(r) - gpu_prefix_believed(r, t_submit))",
+   "inputs": {
+    "cached_tokens": "request.jsonl.gz :: cached_tokens, per request, committed",
+    "gpu_prefix_believed": "NOT RECORDED DIRECTLY. Must be reconstructed as the session's built prefix in tokens at t_submit WHEN the belief says gpu, else 0. Reconstruction: residency.jsonl gives (t, session_id, believed_tier, believed_dist, telemetry_cached_tokens); the built prefix in tokens must be joined from decision.jsonl.gz. THIS JOIN IS A DECLARED PROXY and its validity is part of the result, not an assumption."
+   },
+   "reported_whatever_the_outcome": [
+    "the distribution of host_tokens: min, p10, p25, p50, p75, p90, max, mean, n_distinct, and the count of zeros, never a mean alone",
+    "THE BELIEF-TOO-OPTIMISTIC COUNT AND FRACTION: how often gpu_prefix_believed > cached_tokens, which means the belief claimed GPU residency the engine did not honour. Reported whether or not the signal passes the bar, because it is diagnostic in its own right",
+    "the same two, split by traffic type and by cache_path"
+   ]
+  },
+  "b_counter_delta_at_low_concurrency": {
+   "definition": "the aggregate host-counter delta between a request's t_submit and t_first_token, attributed to that request when it is the ONLY one in flight, or split in proportion to predicted uncached tokens when the number in flight is at most CONC_MAX",
+   "CONC_MAX": 2,
+   "inputs": {
+    "host_counter_series": "vllm:prompt_tokens_by_source_total{source=\"external_kv_transfer\"} per window, PLUS vllm:external_prefix_cache_hits_total and vllm:kv_offload_load_bytes_total as corroborating series",
+    "in_flight": "derived from request.jsonl.gz t_submit and t_first_token across all requests of the cell"
+   },
+   "reported_whatever_the_outcome": [
+    "COVERAGE: the fraction of requests attributable at all, with its numerator and denominator. A LOW COVERAGE NUMBER IS THE EXPECTED HONEST OUTCOME and is reported as a finding, not worked around: the H100 probe already established that differencing is exact only with a single request in flight, and the committed cells run 16 devices and three traffic types",
+    "the distribution of attributed host tokens, same quantiles as signal (a)",
+    "the number of windows with any host activity, so the 80-percent criterion below is never quoted over a handful of windows"
+   ]
+  }
+ },
+ "agreement_bar": {
+  "_register": "THE USER'S PROPOSED DEFAULT, FROZEN EXACTLY AS PROPOSED AND NOT ALTERED.",
+  "window_s": 10,
+  "per_window": "attributed host tokens within 20 percent of the aggregate host-counter delta, in at least 80 percent of windows with any host activity",
+  "whole_run": "total attributed host tokens within 10 percent of the counter's total over the run",
+  "verdict_rule": "a signal PASSES only if both the per-window and the whole-run criterion hold",
+  "arguments_made_before_freezing_and_NOT_APPLIED": [
+   "The committed counter cadence is a curl loop with `sleep 10` plus curl latency, so window edges drift by seconds and are not a 10 s grid; a request's attributed tokens and the counter delta it should match can fall in different windows at an edge. A 20 s window, or edge-excluded accounting, would measure the same agreement with less edge noise. NOT APPLIED: the bar is the user's and D187 forbids moving it toward a pass, so it is frozen as given and this objection is recorded for the user to rule on BEFORE any number exists.",
+   "The 80-percent-of-windows criterion has no minimum denominator. With CONC_MAX 2 on a 16-device three-type cell, signal (b) may be attributable in very few windows, and 80 percent of 5 windows is not evidence. NOT APPLIED as a change to the bar; instead the window count is a MANDATORY REPORTED FIGURE above, and any verdict quoted over fewer than 30 host-active windows must be labelled underpowered beside the verdict."
+  ]
+ },
+ "if_neither_passes": "KEEP THE BELIEF AS IS and record the D211 fallback statement: host reload is NATIVE BUT UNOBSERVED BY THE POLICY, so the RELOAD lever is unexercised for a structural reason. No signal is stretched to reach the bar and the bar is not moved (D187).",
+ "if_one_passes": "the residency belief carries HOST-WARM from that signal, and touch_policy / build pricing price host-warm at the committed M3 / ENG1b reload cost, never as cold. Rungs 2 to 4 then differ and the change is reported as the COUNT AND DIRECTION of changed state decisions and changed prices, not merely as 'they changed'.",
+ "proofs_required_before_any_verdict": [
+  "base, rules and EVERY reported baseline BYTE-IDENTICAL, since none reads the belief",
+  "final rungs 2 to 4 MUST differ, reported as counts and directions of changed state decisions and prices",
+  "Step 2b on the dry s4 cell where the effect is expressible, AND AN EXPLICIT LIST OF WHICH EFFECTS ONLY A LIVE CELL CAN SHOW, so a dry-only proof is never left looking complete. Known already: a dry cell carries no usage block, so cached_tokens is None and the belief corrector cannot fire at all, which means signal (a) is NOT EXPRESSIBLE on a dry cell and its Step 2b must be live",
+  "loadavg recorded PER CELL WITH A MAGNITUDE, not a boolean"
+ ],
+ "data_availability": {
+  "_register": "OBSERVED, by reading one committed rung-3 live cell at origin d796f2d5: results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr-rr_n16_s4_1200s_h27_3t_L3_epg_rq30",
+  "per_request_usage_IS_committed": {
+   "file": "request.jsonl.gz",
+   "fields": [
+    "cache_path",
+    "cache_salt",
+    "cached_fraction",
+    "cached_tokens",
+    "decision_id",
+    "device_id",
+    "http_status",
+    "mm_uuids",
+    "opportunity_id",
+    "output_tokens",
+    "prompt_tokens",
+    "request_id",
+    "session_id",
+    "t_done",
+    "t_first_token",
+    "t_submit",
+    "traffic_mix"
+   ],
+   "reading": "cached_tokens EXISTS per request, so D211's escalation condition 'no cached_tokens' is confirmed NOT to hold"
+  },
+  "belief_IS_committed_but_not_the_prefix": {
+   "file": "residency.jsonl",
+   "fields": [
+    "t",
+    "device_id",
+    "session_id",
+    "believed_tier",
+    "believed_dist",
+    "telemetry_cached_tokens"
+   ],
+   "reading": "the believed TIER is recorded per session over time; the believed GPU-resident PREFIX IN TOKENS is not, so signal (a) needs the declared join to decision.jsonl.gz named above"
+  },
+  "THE_AGGREGATE_HOST_COUNTER_IS_NOT_COMMITTED_PER_WINDOW": {
+   "file": "metrics_snapshots.log",
+   "series_present": [
+    "vllm:request_success_total",
+    "vllm:mm_cache_queries_total",
+    "vllm:mm_cache_hits_total",
+    "vllm:prefix_cache_hits_total",
+    "vllm:prefix_cache_queries_total"
+   ],
+   "series_absent": [
+    "vllm:prompt_tokens_by_source_total",
+    "vllm:external_prefix_cache_hits_total",
+    "vllm:external_prefix_cache_queries_total",
+    "vllm:kv_offload_load_bytes_total",
+    "vllm:kv_cache_usage_perc"
+   ],
+   "cause": "the capture is a FIXED grep filter in the cell driver, experiments/orchestration/study_frozen_grid_driver_v25.sh:39, which selects only ^vllm:(prefix_cache_queries|prefix_cache_hits|mm_cache_queries|mm_cache_hits|request_success)(_total)?[{ ] . No host series can appear in any committed cell, on any seed, at any sha.",
+   "second_defect_in_the_same_line": "that line also does `sed 's/{[^}]*}//'` and then `awk '{a[$1]+=$2}'`, which STRIPS THE LABELS AND SUMS BY BARE KEY. Adding prompt_tokens_by_source_total to the regex alone would therefore collapse source=\"local_compute\", source=\"local_cache_hit\" and source=\"external_kv_transfer\" into ONE summed number and the host share would still be unrecoverable. The label must be retained for that series.",
+   "consequence": "SIGNAL (b) CANNOT BE COMPUTED, and NEITHER SIGNAL CAN BE VALIDATED, on any committed cell. This is D211's own pre-registered escalation condition 'the aggregate counter cannot be read per window': TRUE RETROSPECTIVELY. It is fixable prospectively, and the fix is in a file this session does not own."
+  }
+ },
+ "runnable_now_versus_blocked": {
+  "signal_a_compute": "RUNNABLE on committed data, subject to the declared decision.jsonl join",
+  "signal_a_validate": "BLOCKED: no committed host-counter series to validate against",
+  "signal_b_compute": "BLOCKED: its input is the host-counter series",
+  "signal_b_validate": "BLOCKED, same reason",
+  "verdict": "no D211 verdict can be reached from committed data. The first action is not a measurement, it is the one-line capture fix named above plus one live cell that records the host series per window."
+ },
+ "frozen_by": {
+  "sha256_of_this_file_with_this_field_removed": "f1c8d8ebdd3671e242ac5cbf0e55d0b7be2b0b446a6a3017f86bbc8a2bae0025",
+  "recipe": "sha256(json.dumps(doc without frozen_by, sort_keys=True, separators=(\",\",\":\")))",
+  "frozen_at": "2026-11-23 flash Session A, before any attribution number existed"
+ }
+}

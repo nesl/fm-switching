@@ -105,7 +105,52 @@ TOUCH_PRICE_D162 = {"intercept_s": 0.067798, "per_uncached_token_s": 0.00018243,
 # Measured on the s4 cell: uncached per touch p50 3, max 15. The MAX is used, not the median, so
 # the corrected price stays an upper bound on the work and cannot flatter the policy.
 TOUCH_UNCACHED_TOKENS = 15
-TOUCH_PRICE_MODE = "reload-proxy"      # DEFAULT, the committed behaviour; nothing changes
+
+# D209 (2) hit 22: the mode is now ASSIGNED EXPLICITLY to the ruled charge, and the ruling it names
+# is D174 (1): the budget charges UNCACHED TOKENS ONLY. The intercept is occupancy and not work
+# (it adds a flat 0.0678 s per request, tracks nothing the engine does, and takes utilisation past
+# 1.0 of wall on both measured cells), and the queue term is delay SUFFERED, which belongs in the
+# planner's harm. So the ruled touch price is `per_uncached * 15` and nothing else.
+#
+# WHY NOT `d162-warm-hit`. That mode was the first correction written and it is STILL WRONG under
+# D174 (1), because it carries the intercept: 0.067798 + 0.00018243 * 15 = 0.070534 s, which is
+# 25.8x the ruled charge of 0.002736 s. It stays here as the record of the intermediate step and
+# is no longer the mode.
+#
+# THE COEFFICIENT IS IMPORTED, NOT COPIED. `TOUCH_PRICE_D162` above holds the coefficients ROUNDED
+# for reading (0.00018243 against the gate's 0.0001824312597782467). The coordinator charges
+# `d162_price.price_gpu_s` at full precision, so a touch priced from the rounded literal here and
+# charged from the full one there would differ in the ninth decimal - which is exactly the drift
+# `d162_price` was given a gate check to catch. `price_for_touch` therefore delegates to that one
+# price source rather than re-deriving the number.
+TOUCH_PRICE_MODE = "d174-uncached-only"
+TOUCH_PRICE_MODES = ("d174-uncached-only", "d162-warm-hit", "reload-proxy")
+
+
+def _d162_price_module() -> Any:
+    """The ONE price source, imported lazily so this module stays importable on its own.
+
+    NOT guarded into a silent fallback. A missing `d162_price` means the ruled charge cannot be
+    computed, and substituting the reload proxy for it would be the same silent-wrong-default this
+    hit exists to remove, so the ImportError is allowed to travel.
+    """
+    import d162_price as DP                                                    # noqa: PLC0415
+    return DP
+
+
+def touch_price_gpu_s_d174(prefix_tokens: int, belief: Dict[str, float], costs: Any) -> float:
+    """The RULED touch price (D174 (1)): per-uncached work only, from `d162_price`.
+
+    Independent of `prefix_tokens` by construction, which is the shape correction: on a warm hit
+    the prefix is not re-materialised, so the price must not scale with it. Falls back to the
+    reload proxy for a tier that is NOT GPU-warm, where a touch really would pay for the prefix;
+    `mixed_touch_guard` refuses those anyway, so the fallback is the conservative branch and never
+    the live one.
+    """
+    tier, _ = predicted_tier(belief)
+    if tier != "gpu":
+        return float(costs.recall_gpu_s(max(int(prefix_tokens), 1), READINESS[tier]))
+    return float(_d162_price_module().price_gpu_s(TOUCH_UNCACHED_TOKENS, 0, "uncached-only"))
 
 
 def touch_price_gpu_s_d162(prefix_tokens: int, belief: Dict[str, float], costs: Any) -> float:
@@ -125,7 +170,17 @@ def touch_price_gpu_s_d162(prefix_tokens: int, belief: Dict[str, float], costs: 
 
 
 def price_for_touch(prefix_tokens: int, belief: Dict[str, float], costs: Any) -> float:
-    """The ONE read of the touch price, so the mode cannot be set in two places."""
+    """The ONE read of the touch price, so the mode cannot be set in two places.
+
+    An unknown mode RAISES. Before D209 (2) this function fell through to the reload proxy for
+    every value it did not recognise, which is how `TOUCH_PRICE_MODE` could name a corrected price
+    and deliver the uncorrected one.
+    """
+    if TOUCH_PRICE_MODE not in TOUCH_PRICE_MODES:
+        raise ValueError("unknown TOUCH_PRICE_MODE %r; one of %s"
+                         % (TOUCH_PRICE_MODE, list(TOUCH_PRICE_MODES)))
+    if TOUCH_PRICE_MODE == "d174-uncached-only":
+        return touch_price_gpu_s_d174(prefix_tokens, belief, costs)
     if TOUCH_PRICE_MODE == "d162-warm-hit":
         return touch_price_gpu_s_d162(prefix_tokens, belief, costs)
     return touch_price_gpu_s(prefix_tokens, belief, costs)

@@ -1,0 +1,111 @@
+{
+ "_register": "OBSERVED join of committed per-request usage with the committed residency log. UNVALIDATED: no aggregate host counter exists for this cell, so the pre-registered agreement bar cannot be evaluated here.",
+ "_not_the_ruled_signal": "the ruled signal (a) needs belief.gpu_tokens_by_session, which is EMPTY on every decision row (see below). These are the two exact belief-error directions that need no reconstruction.",
+ "cell": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr-rr_n16_s4_1200s_h27_3t_L3_epg_rq30",
+ "rev": "d796f2d50be6818051e169addddf4502c1a19f54",
+ "decision_rows": 16840,
+ "decision_rows_with_nonempty_gpu_tokens_by_session": 0,
+ "requests_in_cell": 12221,
+ "requests_joined_to_a_belief": 2920,
+ "coverage": 0.2389,
+ "by_believed_tier": {
+  "gpu": {
+   "n": 2904,
+   "cached_tokens": {
+    "n": 2904,
+    "min": 0.0,
+    "p10": 9008.0,
+    "p25": 9008.0,
+    "p50": 10000.0,
+    "p75": 10976.0,
+    "p90": 10976.0,
+    "max": 26096.0,
+    "mean": 10090.154,
+    "n_zero": 3,
+    "n_distinct": 128
+   },
+   "prompt_tokens": {
+    "n": 2904,
+    "min": 1091.0,
+    "p10": 9011.0,
+    "p25": 9011.0,
+    "p50": 10001.0,
+    "p75": 10991.0,
+    "p90": 10991.0,
+    "max": 26940.0,
+    "mean": 10227.555,
+    "n_zero": 0,
+    "n_distinct": 164
+   },
+   "n_cached_zero": 3,
+   "n_cached_nonzero": 2901
+  },
+  "host": {
+   "n": 0,
+   "cached_tokens": {
+    "n": 0
+   },
+   "prompt_tokens": {
+    "n": 0
+   },
+   "n_cached_zero": 0,
+   "n_cached_nonzero": 0
+  },
+  "cold": {
+   "n": 16,
+   "cached_tokens": {
+    "n": 16,
+    "min": 992.0,
+    "p10": 992.0,
+    "p25": 992.0,
+    "p50": 4048.0,
+    "p75": 11616.0,
+    "p90": 12512.0,
+    "max": 13776.0,
+    "mean": 5485.0,
+    "n_zero": 0,
+    "n_distinct": 10
+   },
+   "prompt_tokens": {
+    "n": 16,
+    "min": 1991.0,
+    "p10": 1991.0,
+    "p25": 1991.0,
+    "p50": 7262.0,
+    "p75": 12032.0,
+    "p90": 14012.0,
+    "max": 15092.0,
+    "mean": 6972.125,
+    "n_zero": 0,
+    "n_distinct": 11
+   },
+   "n_cached_zero": 0,
+   "n_cached_nonzero": 16
+  }
+ },
+ "belief_too_optimistic": {
+  "_definition": "believed gpu at submission, engine reused 0 prompt tokens",
+  "n": 3,
+  "of": 2904,
+  "fraction": 0.001
+ },
+ "residency_the_belief_cannot_see": {
+  "_definition": "believed cold at submission, engine reused > 0 prompt tokens. UPPER BOUND on unobserved host residency: this engine cannot separate a GPU hit from a host hit per request.",
+  "n": 16,
+  "of": 16,
+  "fraction": 1.0,
+  "cached_tokens_when_it_happens": {
+   "n": 16,
+   "min": 992.0,
+   "p10": 992.0,
+   "p25": 992.0,
+   "p50": 4048.0,
+   "p75": 11616.0,
+   "p90": 12512.0,
+   "max": 13776.0,
+   "mean": 5485.0,
+   "n_zero": 0,
+   "n_distinct": 10
+  }
+ }
+}

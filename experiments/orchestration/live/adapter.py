@@ -15,7 +15,7 @@ WHAT IS LIVE, AND WHERE IT COMES FROM.
 | `streams[].delivered_scores / _times_s` | the shape of what the APPLICATION receives (a cloud answer when its request completed, the device's own score otherwise) but **NOT ITS VALUES**: this harness has no per-instant score source wired, so every value is None = UNKNOWN. Until one is wired, NO SCORE-READING ARM MAY BE RUN HERE, and the seven that read these values RAISE rather than decide. Before D205 both writers put a literal `0.0` here, which is the MAXIMUM of log P(Yes) and made every one of them escalate on every instant. |
 | `streams[].cadence_s`, `frame_count`, `on_cloud` | the orchestrator's own current setting for that stream |
 | `cloud.queued_by_class`, `running_by_class` | the orchestrator's in-flight bookkeeping, cross-checked against the server's `/metrics` |
-| `cloud.gpu_kv_fraction` | the server's `vllm:gpu_cache_usage_perc` |
+| `cloud.gpu_kv_fraction` | the server's KV-usage gauge, read under whichever name the engine emits (`vllm:kv_cache_usage_perc` on vLLM 0.31.0, `vllm:gpu_cache_usage_perc` on the older build and on `fake_server.py`) and republished under the older name so no reader changes. NEVER 0.0 by default: a failed fetch or an absent key is MARKED MISSING and served the last good value at most 1 s old, else UNKNOWN AND CONSERVATIVE (1.0). D209 (2). |
 | `cloud.gpu_warm_sessions`, `host_warm_sessions` | the harness's own session bookkeeping |
 | `cloud.latency_estimate_s` | an EWMA of the MEASURED TTFTs of completed requests, per class |
 | `recall[].readiness`, `readiness_tokens` | the same bookkeeping |
@@ -122,8 +122,19 @@ class HttpBackend:
         return self.pool.submit(self.post, sub)
 
     def start_poller(self, interval_s: float = 0.2) -> None:
-        """Poll /metrics in the background, so a decision epoch never waits on HTTP."""
-        self._metrics: Dict[str, float] = {}
+        """Poll /metrics in the background, so a decision epoch never waits on HTTP.
+
+        The pre-first-poll value is UNKNOWN AND CONSERVATIVE, not `{}` (D209 (2)). `{}` here was a
+        second route to the permissive 0.0, reached by any decision taken in the first poll
+        interval, and it would have survived a fix that only touched the exception path.
+        """
+        # `fm_metrics_degraded` is 0.0 here on purpose: it is computed from the failure counters
+        # and NO FETCH HAS HAPPENED YET, so nothing has failed. A reader that wants to know it is
+        # holding a placeholder reads `fm_kv_state`, which says so by name.
+        self._metrics: Dict[str, Any] = {
+            self.KV_CANONICAL_KEY: float(self.KV_UNKNOWN_CONSERVATIVE),
+            "fm_kv_state": "unknown_conservative_before_first_poll", "fm_kv_missing": 1.0,
+            "fm_metrics_degraded": 0.0}
         self._stop = threading.Event()
 
         def loop():
@@ -134,47 +145,163 @@ class HttpBackend:
 
     @property
     def metrics_failures(self) -> Dict[str, Any]:
-        """How many metrics fetches failed, and the last exception type. Counter only (D205)."""
+        """How many metrics fetches failed, and the last exception type.
+
+        The counter itself is the D205 commit (`29742254`) and is KEPT AS IT WAS, including the
+        two key names `n` and `last` that any existing reader uses. D209 (2) adds the fields
+        beside it that the counter alone could not supply: a failed fetch no longer substitutes a
+        permissive value, so a run needs to say which value it used instead.
+        """
         if not hasattr(self, "_metrics_failures"):
-            self._metrics_failures: Dict[str, Any] = {"n": 0, "last": None}
+            self._metrics_failures: Dict[str, Any] = {
+                "n": 0, "last": None,
+                # D209 (2): what the DECISION was handed when a fetch failed or a key was absent
+                "n_served_last_good": 0,     # a cached value at most LAST_GOOD_MAX_AGE_S old
+                "n_served_unknown": 0,       # no usable recent value: UNKNOWN and CONSERVATIVE
+                "n_kv_key_missing": 0,       # the scrape succeeded and carried no KV-usage key
+                "n_kv_key_aliased": 0,       # served from the engine's current key name
+                "kv_key_seen": None,         # which spelling this engine actually emits
+            }
         return self._metrics_failures
 
-    def metrics(self) -> Dict[str, float]:
+    # ---- D209 (2): the missing-value policy for /metrics
+    #
+    # THE DEFECT. `_fetch_metrics` returned `{}` on a failed fetch, and `{}` makes every reader's
+    # `m.get("vllm:gpu_cache_usage_perc", 0.0)` read 0.0 - the MINIMUM of [0, 1] and therefore the
+    # MOST PERMISSIVE value an admission gate can be handed - silently. `_observation` below and
+    # `live2/cstate.py:663` both read it, and it reaches `arms_v6cf.py:306`,
+    # `engine_actions.py:288` (`free = (1 - frac) * pool`) and four baselines as a gate.
+    #
+    # AND A SECOND, WORSE PATH TO THE SAME 0.0, found by the D209 (4) probe: THE KEY NAME IS WRONG.
+    # vLLM 0.31.0+cu129 emits `vllm:kv_cache_usage_perc` (0.7215 at capture) and NO
+    # `vllm:gpu_cache_usage_perc`, so on a PERFECTLY SUCCESSFUL scrape the gate still read 0.0, on
+    # every cell, by an absent key rather than by an exception. Two in-repo witnesses already use
+    # the current spelling - `experiments/cost/study_r5_fleet.py` and `experiments/cost/
+    # study_x_vllm.py` both read `vllm:kv_cache_usage_perc` - so this is the live2/live path alone
+    # carrying the pre-rename name, not an open question about which name is right. Fixing only
+    # the exception path would have left the gate reading 0.0 for ever and would have looked like
+    # a pass, which is why both are fixed here together. Raw scrape:
+    # `results/orchestration/live2/frozen_test/engine_probe_hit26/metrics_scrape_h100.txt`.
+    #
+    # THE POLICY (D209 (2)). A failed fetch NEVER substitutes 0.0.
+    #   1. the KV fraction is MARKED MISSING, never defaulted;
+    #   2. the decision uses the LAST GOOD VALUE if it is at most LAST_GOOD_MAX_AGE_S old;
+    #   3. otherwise capacity is UNKNOWN AND CONSERVATIVE: `KV_UNKNOWN_CONSERVATIVE` = 1.0, the
+    #      MAXIMUM of [0, 1], which every reader of this field treats as full pressure. Checked
+    #      rather than assumed at each read site: `engine_actions.hold_back` computes
+    #      `free = max(1 - frac, 0) * pool`, so 1.0 gives free = 0 and the hold-back fires;
+    #      `preble_adapted.py:57` and `constructed.py:416` take `max(frac, ...)`, so 1.0 is the
+    #      pressure end of both. An unknown is never permissive, in either direction;
+    #   4. the cell RECORDS THE COUNT, in `metrics_failures` above, split by which of 2 and 3 it
+    #      got; and
+    #   5. the run is FLAGGED through `metrics_health()`, whose `degraded` field is the cell flag.
+    #
+    # WHY A dict SUBCLASS AND NOT A NEW RETURN TYPE. Every reader reaches this through
+    # `m.get(key, default)`, and several of them live in files this session does not own
+    # (`live2/cstate.py`, `live2/arms_v6cf.py`, four baselines). A mapping that already carries
+    # the right value for the key they ask for fixes all of them without an edit to any of them,
+    # and `fm_*` fields beside it carry the marking a reader that WANTS to know can read.
+    KV_KEYS = ("vllm:gpu_cache_usage_perc", "vllm:kv_cache_usage_perc")
+    KV_CANONICAL_KEY = "vllm:gpu_cache_usage_perc"
+    KV_UNKNOWN_CONSERVATIVE = 1.0
+    LAST_GOOD_MAX_AGE_S = 1.0
+
+    def metrics(self) -> Dict[str, Any]:
+        # Dict[str, Any] and not Dict[str, float] since D209 (2): the mapping now carries the
+        # `fm_kv_*` MARKING beside the gauges, and `fm_kv_state` is a string. Every reader asks
+        # for one named numeric key and coerces it, and `AsyncLive2Backend.metrics()` already
+        # returns Any-valued entries into the same `cstate.CState.metrics` field, so this is the
+        # honest annotation rather than a widening.
         if hasattr(self, "_metrics"):
             return self._metrics
         return self._fetch_metrics()
 
-    def _fetch_metrics(self) -> Dict[str, float]:
-        """COUNTER ONLY (D205 handoff): the fallback VALUE is unchanged, and so is every decision.
+    def metrics_health(self) -> Dict[str, Any]:
+        """The cell flag. `degraded` is true for ANY cell in which a fetch failed or a KV key was
+        absent, so no such cell can be read as clean (D209 (2) requirement 5)."""
+        c = dict(self.metrics_failures)
+        degraded = bool(c["n"] or c["n_kv_key_missing"] or c["n_served_last_good"]
+                        or c["n_served_unknown"])
+        return {"metrics_degraded": degraded, "metrics_failures": c,
+                "kv_unknown_conservative_value": self.KV_UNKNOWN_CONSERVATIVE,
+                "last_good_max_age_s": self.LAST_GOOD_MAX_AGE_S,
+                "policy": ("D209 (2): a failed fetch or an absent KV key never substitutes 0.0; "
+                           "the last good value at most %.1f s old, else UNKNOWN and CONSERVATIVE "
+                           "(%.1f)" % (self.LAST_GOOD_MAX_AGE_S, self.KV_UNKNOWN_CONSERVATIVE))}
 
-        On a failed fetch this returns {}, and `{}` makes `_observation` read
-        `gpu_kv_fraction=m.get("vllm:gpu_cache_usage_perc", 0.0)` as 0.0, which is the MINIMUM of
-        [0, 1] and therefore the most permissive value an admission gate can be handed. Four
-        baselines read it as a gate. The failure was SILENT, so the blast radius was unknown by
-        construction; this counts it so a later reader can tell "the pool was empty" from "the
-        fetch failed", which is the same confusion as a score that was never fed.
+    def _kv_fraction_from(self, scraped: Dict[str, float]) -> Tuple[Optional[float], str]:
+        """The KV fraction this scrape carries, under whichever name the engine uses, or None.
 
-        Deliberately NOT a behaviour change: no raise, no different default. Changing the fallback
-        needs a ruling, and this file's owner was asked for the counter only.
+        None is MISSING, and it is returned rather than a number so the caller must choose a
+        policy. That is the whole point: `.get(key, 0.0)` made that choice invisibly.
         """
+        c = self.metrics_failures
+        for i, k in enumerate(self.KV_KEYS):
+            if k in scraped:
+                c["kv_key_seen"] = k
+                if i:
+                    c["n_kv_key_aliased"] = int(c["n_kv_key_aliased"]) + 1
+                return float(scraped[k]), k
+        return None, ""
+
+    def _fetch_metrics(self) -> Dict[str, Any]:
+        """Scrape /metrics, and never hand a decision a permissive default (D209 (2)).
+
+        The returned mapping always carries `KV_CANONICAL_KEY`, so every reader's
+        `m.get("vllm:gpu_cache_usage_perc", 0.0)` gets a REAL, a LAST-GOOD or a CONSERVATIVE
+        value, and the `fm_kv_*` fields beside it say which. The 0.0 default is now unreachable
+        for that key, which is the behaviour change this method exists to make.
+        """
+        c = self.metrics_failures
+        failed: Optional[str] = None
+        scraped: Dict[str, float] = {}
         try:
             with urllib.request.urlopen(self.base_url + "/metrics", timeout=5) as r:
                 txt = r.read().decode()
         except Exception as e:                                        # noqa: BLE001
-            c = self.metrics_failures
+            failed = type(e).__name__
             c["n"] = int(c.get("n", 0)) + 1
-            c["last"] = type(e).__name__
-            return {}
-        out = {}
+            c["last"] = failed
+            txt = ""
         for line in txt.splitlines():
             if line.startswith("#") or " " not in line:
                 continue
             name, _, val = line.rpartition(" ")
             key = name.split("{")[0]
             try:
-                out[key] = float(val)
+                scraped[key] = float(val)
             except ValueError:
                 pass
+
+        out: Dict[str, Any] = dict(scraped)
+        kv, seen = self._kv_fraction_from(scraped)
+        now = time.time()
+        if kv is not None:
+            self._kv_last_good = (float(kv), now)
+            out[self.KV_CANONICAL_KEY] = float(kv)
+            out["fm_kv_state"] = "observed"
+            out["fm_kv_source_key"] = seen
+            out["fm_kv_age_s"] = 0.0
+        else:
+            if failed is None:
+                # the scrape succeeded and carried neither spelling: still a MISSING value, and
+                # the same 0.0 if it were defaulted, so it takes the same policy
+                c["n_kv_key_missing"] = int(c["n_kv_key_missing"]) + 1
+            last = getattr(self, "_kv_last_good", None)
+            age = (now - last[1]) if last else None
+            if last is not None and age is not None and age <= self.LAST_GOOD_MAX_AGE_S:
+                c["n_served_last_good"] = int(c["n_served_last_good"]) + 1
+                out[self.KV_CANONICAL_KEY] = float(last[0])
+                out["fm_kv_state"] = "last_good"
+                out["fm_kv_age_s"] = round(float(age), 4)
+            else:
+                c["n_served_unknown"] = int(c["n_served_unknown"]) + 1
+                out[self.KV_CANONICAL_KEY] = float(self.KV_UNKNOWN_CONSERVATIVE)
+                out["fm_kv_state"] = "unknown_conservative"
+                out["fm_kv_age_s"] = (round(float(age), 4) if age is not None else None)
+            out["fm_kv_missing"] = 1.0
+            out["fm_metrics_fetch_error"] = failed
+        out["fm_metrics_degraded"] = 1.0 if self.metrics_health()["metrics_degraded"] else 0.0
         return out
 
     def close(self) -> None:
@@ -266,7 +393,12 @@ class LiveOrchestrator:
                 "vllm:num_requests_waiting", self.counts["inflight_episodic"]))),
             running_by_class=dict(recall=self.counts["inflight_recall"],
                                   episodic=self.counts["inflight_episodic"]),
-            gpu_kv_fraction=float(m.get("vllm:gpu_cache_usage_perc", 0.0)),
+            # D209 (2): `_fetch_metrics` guarantees this key is present and carries an observed,
+            # a last-good or an UNKNOWN-AND-CONSERVATIVE value, so the 0.0 default below is now
+            # unreachable and is kept only so the expression is still total if a caller hands in
+            # a mapping this class did not build (a test fixture, a replayed scrape).
+            gpu_kv_fraction=float(m.get("vllm:gpu_cache_usage_perc",
+                                        HttpBackend.KV_UNKNOWN_CONSERVATIVE)),
             host_kv_fraction=0.0, gpu_warm_sessions=gpu, host_warm_sessions=host,
             latency_estimate_s=dict(self.lat))
         return Observation(now_s=round(now, 3), epoch=epoch, streams=tuple(eps),
