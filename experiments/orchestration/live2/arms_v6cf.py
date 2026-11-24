@@ -283,7 +283,14 @@ class _ProtectDeferMixin:
         is the engine's KV-usage gauge. CORRECTED 2026-11-23: this line previously said
         `vllm:gpu_cache_usage_perc` READ OFF THE LIVE SERVER. BOTH HALVES WERE WRONG. This engine
         emits `vllm:kv_cache_usage_perc` and NO `vllm:gpu_cache_usage_perc` (H100 probe,
-        frozen_test/engine_probe_hit26/); and it was NOT read off the live server either, because
+        frozen_test/engine_probe_hit26/) - BUT THAT DOES NOT MAKE A READ KEYED ON THE OLDER NAME
+        WRONG, AND THIS NOTE WAS INCOMPLETE UNTIL 2026-11-24: the scrape path reads EITHER spelling
+        (`live/adapter.py:204` `KV_KEYS`) and REPUBLISHES under `vllm:gpu_cache_usage_perc`
+        (`:205` `KV_CANONICAL_KEY`, aliasing counted by `n_kv_key_aliased`) precisely so that no
+        reader has to change. So `cstate.py`'s read of the canonical name is CORRECT BY DESIGN and
+        MUST NOT BE 'FIXED'. The first version of this correction stated the engine fact without the
+        aliasing, which would lead a reader to change a correct read - the same incompleteness, in the
+        opposite direction, as the wording it replaced; and it was NOT read off the live server either, because
         live2 NEVER SCRAPED /metrics AT ALL - `AsyncLive2Backend` is not an `HttpBackend` subclass
         and contains no `/metrics` string, so the field was IDENTICALLY 0.0 in LIVE cells too, not
         only dry ones. D216 (2) adds the scrape; until its wiring lands this gate reads 0.0 live. In a DRY cell
