@@ -514,6 +514,76 @@ cell).
 
 ---
 
+## 5.7 Low disk is a terminal condition, and the 6.9 GB of scratch is gone
+
+Root reached **100 percent with 14 GB free** while this session was stood down, and the two
+`git archive` trees this study extracted were the largest single consumer on the box at **6.9 GB**.
+They are now **264 KB**: both trees were deleted and root went from 18 GB to **25 GB free**.
+
+**Nothing durable was lost, and the one artefact that is not on origin was preserved first.** The
+trees regenerate from one sha in seconds. What they also contained was the **held
+`run_live2_real.py` wiring**, which is deliberately not on origin, so before deleting anything it
+was saved three ways: the full file, a unified patch against the base sha, and both md5s, with the
+patch verified to reproduce the held md5 exactly (`9435b3a7d8039bf27a271c2e596f4d8b`). It is now
+also committed, as a patch and a README under `experiments/orchestration/live2/held/`, **held and
+not applied** - nothing imports or applies either file and the live runner is unchanged - so it no
+longer lives solely in a `/tmp` scratchpad that a cleanup can clear.
+
+`chain.sh` is therefore **self-healing**: it rebuilds both trees from `BASE_SHA`, restores the five
+modules and the held wiring from `held/` (the base sha predates the modules, so a bare archive does
+not contain them), and **asserts every restore**. Three assertions, each with its negative control
+measured rather than assumed:
+
+| assertion | negative control | result |
+|---|---|---|
+| every restored file matches its recorded md5 | append a line to one held module | `f14_one_cell.py: FAILED`, rc 8 |
+| the `before` tree is the pristine base-sha file | append a line to the before tree | `STOP: the before tree's run_live2_real.py is not the base-sha file`, rc 8 |
+| `before` and `after` actually differ | make the held file equal the base file | `STOP: before and after are IDENTICAL, so the proof would compare nothing and PASS for the wrong reason`, rc 8 |
+
+The third is the backstop that matters: a silent restore failure would run the proof with
+`before == after` and produce a **PASS that proves nothing**, which is the same shape as the
+classifier bug in section 4. The happy path was re-run after each control to confirm the controls
+had not left anything broken.
+
+**A trap I walked into while testing those guards, recorded because the failure mode is instructive.**
+The "trees already present" check originally looked for `run_live2_real.py` alone, so the minimal
+stub trees I had created to test the assertions satisfied it: the rebuild was skipped and the proof
+would have run against a tree with no coordinator, no `fleet/` and no tests, failing in a way that
+looks like a code fault rather than a missing tree. The check now requires five files from different
+corners of the archive, and any one missing forces a full rebuild.
+
+### The disk stop itself
+
+Both drivers take `--min-free-gb` (default 5) and `chain.sh` gates every phase, with a larger floor
+for the tree rebuild since that phase alone costs about 7 GB. The important part is **where** the
+check sits:
+
+- **before every cell**, not only at the start, because the cells themselves write; and
+- as a **third terminal condition of the bounded alone-wait**, beside a clear guard and the timeout.
+
+That third condition is the point, and it is the same lesson as the alone-guard and the
+pass-for-the-wrong-reason classifier: **a waiter sitting for an hour on a filling disk looks exactly
+like a waiter that is working**, from outside and from its own log. Silence has to be
+distinguishable from progress. A cell that does not run writes `NOT RUN: LOW DISK` with the free
+space and the floor; the F14 sweep breaks out rather than continuing; and the byte-identity proof
+writes a `VERDICT` of `NOT RUN: LOW DISK` that says in words that it is **neither a pass nor a
+failure**, because a halted proof must never read as a clean one.
+
+Proven in both directions rather than asserted: with a floor below actual free, both drivers
+proceed; with an impossible floor, both return the STOP record and `wait_alone` terminates in
+**0.00 s** instead of spinning for `wait_s`. End to end, the F14 driver refused its first cell,
+recorded the non-run, broke out of the sweep, and **created no cell artefacts**. The chain-level and
+tree-rebuild floors were both confirmed to stop with rc 9, the rebuild floor **without** spending
+the 7 GB.
+
+**Why this is not merely tidy.** A full disk has already silently skipped a commit on this project,
+and it lands on a `git push` as readily as on a cell. Tonight the ladder's live cells and a 52-cell
+byte-identity sweep were both in flight with their results coming back to this box to be scored and
+committed. A disk-full at the wrong moment would have cost a sweep or a commit **and would have
+looked like something else**.
+
+---
+
 ## 6. Mechanism verification and the consistency check
 
 **Items 1 and 3 test no causal claim.** They are instrumentation: they add stamps and a provenance

@@ -1,0 +1,110 @@
+--- /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d214sessF/held/run_live2_real.base.py	2026-11-23 20:18:13.933135042 -0800
++++ /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d214sessF/held/run_live2_real.py	2026-11-23 20:18:13.930134947 -0800
+@@ -48,6 +48,15 @@
+     if _p not in sys.path:
+         sys.path.insert(0, _p)
+ 
++# D214 items 1 and 3 (FIGURE INSTRUMENTATION, LOGGING ONLY). Every emulator this process builds,
++# kept so the figure instrumentation can read the OBJECT the run actually used rather than the
++# config it was asked for. Written by `_emulator`, read only after `em.run()` has returned.
++_EMU: list = []
++# Likewise the coordinator, but ONLY on the `--no-split` path where it lives in this process. In
++# split mode it is in the child and this list stays empty, which is why `speed_record` reports a
++# proved-not-overridden DEFAULT there rather than claiming an instance read it did not make.
++_CO: list = []
++
+ 
+ 
+ def _instrument_placement(st):
+@@ -406,6 +415,53 @@
+                          "n_recall_first_token", "n_recall_letter_differs", "recall_letter_diffs",
+                          "n_monitor_score_differs")}
+     rm["callback_errors"] = (res.get("backend") or {}).get("n_callback_errors")
++    # ---- D214 FIGURE INSTRUMENTATION (items 1 and 3). LOGGING ONLY. BEGIN ---------------------
++    # EVERYTHING IN THIS BLOCK RUNS AFTER `em.run()` HAS RETURNED AND READS ONLY. It cannot move a
++    # decision for any arm because by the time it runs there is no decision left to make: the
++    # emulator's loop has ended, the coordinator is closed and every log file is written. That is
++    # the byte-identity argument and it is structural, not a switch that happens to be off.
++    #
++    # Item 3: the link model is read off `FleetEmulator.links` and `UplinkQueue.spec`, NEVER off
++    # `a.*` or the config, because `link_by_device` has no caller and a config field could say
++    # "per-device" while one process-wide LinkSpec is applied (StudyNET-TIER1 N1).
++    # Item 1: the per-transfer upload stamps already exist on `links.UplinkQueue.log` and have
++    # simply never been written out; `f3_latency_stamps` dumps them and joins them to the stamps
++    # that `decision.jsonl`, `request.jsonl` and `outcomes.jsonl` already carry (D107: reuse, no
++    # second source of truth), marking each stamp EMULATED, MEASURED or DERIVED.
++    _em = em if em is not None else (_EMU[-1] if _EMU else None)
++    rm["figure_instrumentation"] = {"register": "LOGGING ONLY, written after the run ended"}
++    try:
++        import network_header as NH
++        rm["network"] = (NH.read_from_emulator(_em) if _em is not None else
++                         {"link_model_applied": None,
++                          "absent_reason": "no emulator instance was captured in this process"})
++        rm["figure_instrumentation"]["network_header"] = "ok"
++        # D214 item 3: "EVERY CELL'S HEADER must state the link model actually applied". The
++        # header is written before the run (it has to be: it records what the run was asked for),
++        # so the APPLIED link is appended to it here, where the object can be read. The two are
++        # kept distinct on purpose: `header.json` now carries what was asked AND what was applied,
++        # and a disagreement between them is visible instead of being resolved silently.
++        header["network"] = rm["network"]
++        header["network_summary"] = NH.summary_line(rm["network"])
++        (rdir / "header.json").write_text(json.dumps(header, indent=1, default=str) + "\n")
++    except Exception as e:                                            # noqa: BLE001
++        rm["figure_instrumentation"]["network_header"] = f"{type(e).__name__}: {e}"
++    try:
++        import f3_latency_stamps as F3
++        if _em is not None:
++            rm["figure_instrumentation"]["uplink_transfers"] = F3.dump_uplink_transfers(_em, rdir)
++        # `speed` scales t_first_token and t_done (coordinator.py:1807-1808), so without it the
++        # register of those two stamps is UNVERIFIED rather than MEASURED. Nothing recorded it.
++        # In `--no-split` the coordinator object is in this process and is read back off the
++        # INSTANCE; in split mode it is in the child and `_result()` does not expose it, so the
++        # record proves the checkable statement instead (this runner never passes `speed`, so the
++        # applied value is the constructor default) and labels itself as a default, not a read.
++        _sp = F3.speed_record(cfg=cfg, co=(_CO[-1] if _CO else None))
++        rm["figure_instrumentation"]["speed"] = _sp
++        rm["figure_instrumentation"]["f3"] = F3.build(rdir, tdir, speed=_sp)
++    except Exception as e:                                            # noqa: BLE001
++        rm["figure_instrumentation"]["f3"] = f"{type(e).__name__}: {e}"
++    # ---- END D214 FIGURE INSTRUMENTATION -----------------------------------------------------
+     (rdir / "run_meta.json").write_text(json.dumps(rm, indent=2, sort_keys=True) + "\n")
+     (rdir / "coordinator_result.json").write_text(
+         json.dumps(res, indent=1, default=str) + "\n")
+@@ -416,7 +472,13 @@
+                lateness=rm.get("lateness"), run_valid=rm.get("run_valid"),
+                digests_equal=rm.get("digests_equal"),
+                n_requests=res.get("n_requests"), n_errors=res.get("n_errors"),
+-               server_kind=a.server_kind, is_measurement=False)
++               server_kind=a.server_kind, is_measurement=False,
++               # D214 item 3: the applied link model travels with the cell summary too, so a
++               # figure assembled from cell.json alone cannot be provenance-ambiguous.
++               network=(rm.get("network") or {}).get("link_model_applied"),
++               network_spec=(rm.get("network") or {}).get("uniform_spec_applied"),
++               main_operating_point_label=(rm.get("network") or {}).get(
++                   "main_operating_point_label"))
+     if a.score and a.calibration:
+         out["score"] = _score(tdir, rdir, Path(a.calibration), a.arm)
+     (rdir / "cell.json").write_text(json.dumps(out, indent=1, default=str) + "\n")
+@@ -461,7 +523,13 @@
+     kw = {}
+     if a.tick_s is not None:
+         kw["tick_s"] = a.tick_s
+-    return EM.FleetEmulator(tdir, br, a.mode, realtime=True, drain_s=a.drain_s, **kw)
++    em = EM.FleetEmulator(tdir, br, a.mode, realtime=True, drain_s=a.drain_s, **kw)
++    # D214 items 1 and 3: the emulator instance is kept so the LINK MODEL ACTUALLY APPLIED and the
++    # per-transfer upload stamps can be read OFF THE OBJECT after the run. `_inprocess` constructs
++    # and discards its emulator, so a return value would not reach the caller on that path. The
++    # list is appended to and never read during the run.
++    _EMU.append(em)
++    return em
+ 
+ 
+ def _inprocess(a, tdir: Path, rdir: Path, cfg, htok, arm, EM):
+@@ -486,6 +554,7 @@
+                           frame_cache=cache, defer_images=True,
+                           dry_run=not bool(a.server), gpu_budget_s=a.gpu_budget_s,
+                           targets=cfg.get("targets"))
++    _CO.append(co)                   # D214: read back for the `speed` register. Never read in-run
+     co.st.kv_capacity_enforced = bool(a.kv_capacity_enforced)
+     _mp_tot = _instrument_placement(co.st)
+     br = EmulatorBridge(co)
