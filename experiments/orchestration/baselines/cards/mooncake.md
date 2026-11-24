@@ -75,3 +75,10 @@ Proof (`results/orchestration/live2/mooncake_slots/mooncake_slots_proof.json`, o
 dry cell at a time): mooncake 1x IDENTICAL (7544b3aa16433c70), mooncake 0.25x MOVES (7544b3aa ->
 c89aefd5, the unpatched arm being capacity-blind), every other paper arm identical at 1x and 0.25x,
 positive control covex-v6-base af8befb9420ad86a reproduced.
+
+**Reading the 1x row: IDENTICAL BY CONSTRUCTION, a positive control, not a null.** At 1x the rule
+evaluates to round(4 x 62,944 / 62,944) = 4, exactly the hardcoded StudyE10b value, so the fix MUST be a
+no-op there; 7544b3aa16433c70 reproducing at 1x shows the rule reduces correctly at the full pool, i.e.
+nothing was changed that was not meant to change. The rule AGREES with the old constant where that
+constant was right (1x) and departs from it where it was wrong (0.5x: 2, 0.25x: 1). This is the benign
+version of "identical in one condition", unlike a mechanism that is unreachable.
