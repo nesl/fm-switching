@@ -648,6 +648,29 @@ rung-4 IMPLEMENTATION AS RUN. **Whether a fixed rung 4 would beat rung 3 is UNKN
 3. Nothing scorable -> do NOT invent work on run-path files. The handoff's five overnight steps below
    are owned by other sessions.
 
+## *** NEVER EDIT A GATED CELL LIST IN PLACE, NOT EVEN A COMMENT. THIS COST THE H100 ABOUT 45 MINUTES OF POLICY TIME TODAY AND THE FAULT WAS MINE. ***
+
+`RUNG3_KV05R_CELLS` is **hash-gated**: the driver runs a posted list ONLY while its sha256 matches the
+`V6_GATE_OK` / `OPERATOR` line in `frozen_grid.log`. I asked for four explanatory header facts to be added
+to it; an agent added them **as comments only** and diffed the four runnable lines to prove them
+byte-identical - careful about the CONTENT and unaware the FILE was gated. **The hash changed, the list
+silently UN-GATED, and the driver fell through to filler**: rung 3 s5 did not start at 10:13 and ran
+eco-llm 1x s6 instead, until the H100 found it and re-gated at the new hash.
+**THE GATE WAS WORKING CORRECTLY.** To a hash, a comment and an unchecked change are the same event - that
+is the entire point of gating, and a gate that let comments through would not be a gate. So the error was
+not the hash's strictness, it was editing a gated artefact at all. **AND NOTHING LOOKED WRONG**: the H100
+kept busy on filler, no error was raised, and the only visible symptom was a policy cell that quietly did
+not start. A session watching for failures would not have seen it.
+**THE RULE, adopted at the H100's request: notes about a gated list go in a SEPARATE file**
+(`<LIST>.notes.md`) **or in a message to the owner, never into the list.** If a gated list genuinely must
+change, the owner changes it and re-gates in one step; re-gating means appending to `frozen_grid.log`,
+which the driver appends to concurrently, so it is the owner's move and nobody else's.
+**THE GENERALISATION, because this will recur in other forms:** before editing ANY file another process
+reads as an input, ask whether something downstream checks its bytes - a hash, a digest, a signature, a
+manifest. **A content-preserving edit is not behaviour-preserving when something hashes the content.** My
+own byte-identity habit (diff the lines that matter) is exactly the check that passes here while the thing
+that actually matters fails.
+
 ## *** LIVE FILE CLAIMS, 2026-11-24. READ THIS BEFORE YOU EDIT OR BUILD. ***
 
 A peer session asked "who holds E1 + E3?" before starting, which was exactly right, and then RESTARTED
