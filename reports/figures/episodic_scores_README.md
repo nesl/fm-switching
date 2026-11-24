@@ -1,6 +1,6 @@
 # D192 episodic scores: definitions, provenance, validation
 
-One row per (arm, seed), seeds 4 to 7, full-memory final-workload cells (<arm>_n16_s<seed>_1200s_h27_3t_L3_epg_rq30), preferring the _rerun directory when present (which supplies always-cloud-fcfs s5, simplestream s4, simplestream s5, simplestream s6, simplestream s7; DERIVED from the cell_used_rerun column rather than hardcoded). A device-only reference row per seed uses device answers only. CPU only, read-only on every input.
+One row per (arm, seed), seeds 4 to 7, full-memory final-workload cells (<arm>_n16_s<seed>_1200s_h27_3t_L3_epg_rq30), preferring the _rerun directory when present (which supplies always-cloud-fcfs s5, eco-llm s4, eco-llm s5, eco-llm s6, simplestream s4, simplestream s5, simplestream s6, simplestream s7; DERIVED from the cell_used_rerun column rather than hardcoded). A device-only reference row per seed uses device answers only. CPU only, read-only on every input.
 
 ## Standing answer and thresholds
 
@@ -36,7 +36,7 @@ Robot correct-by-deadline reproduces the committed cell.json headline exactly fo
 
 ## Provenance
 
-- runs dir last commit: b0a67946
+- runs dir last commit: 91cf68c1
 - device-score traces last commit: da4427de
 - device scores and clip_pts: results/orchestration/live2/frozen_test/traces/<trace>/dashcam_instants.jsonl.gz (regenerated deterministically by the committed generator on flash; provenance in traces/d192_device_scores_provenance.json)
 - thresholds: results/dashcam/study_sh_ep/sh_ep_results.json; Nexar labels and event times: sh_ep_manifest_meta.json and nexar_check.json; SS2: results/casestudy/study_ss2/
