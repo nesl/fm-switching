@@ -51,12 +51,14 @@ better account of rung 4 at 1x is that it sent 675 FEWER robot requests for 121 
 ### THE ONE PATTERN BEHIND MOST OF TONIGHT'S NEAR-MISSES: AN INSTRUMENT THAT RETURNS A CONFIDENT WRONG
 ### ANSWER POINTING AT A HARMFUL ACTION. Four distinct instances in one evening, each caught only by
 ### someone checking WHAT THE INSTRUMENT CLASSIFIED rather than WHAT IT CONCLUDED.
+### THE FAMILY, stated once: A BOUND NOBODY STATES, PLUS AN OUTPUT THAT LOOKS LIKE PROGRESS.
 
 | instrument | how it failed | what it looked like | what the wrong action would have been |
 |---|---|---|---|
 | alone-guards, THREE sessions | bounded by a name pattern, a hardcoded basename list, and a tree snapshot | `alone: true` while the box was busy | a digest recorded as alone that was not |
 | a byte-identity check | a raw line-number rule swept two function bodies into "post-run" | PASS on the real tree | shipping wiring whose in-run statements were never checked |
 | a hung driver | blocked with 00:00:00 CPU and no children for 59 minutes | indistinguishable from a long cell | waiting out an hour, then reporting a table from nothing |
+| a completeness check | "trees already present" looked for ONE file, so minimal stub trees satisfied it and the rebuild was skipped | a proof running against a tree with no coordinator, no fleet and no tests | a failure that reads as a CODE fault rather than a missing tree |
 | a liveness watch | `grep -lq ... /proc/*/cmdline` exited non-zero on ERROR, not no-match, so the negation read "gone" | a false terminal state | RELAUNCHING a running sweep, putting two drivers on the box and breaking the alone rule it enforced |
 
 THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
@@ -74,6 +76,19 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
 - PREFER EVIDENCE OVER A FLAG. Two independent runs agreeing exactly is DIRECT evidence of determinism;
   an alone-flag is only an argument that nothing COULD have disturbed the cell. Record the census and
   the loadavg magnitudes BESIDE any boolean so it can be re-adjudicated later.
+- NEVER LET A WAIT HAVE ONLY THE TWO TERMINAL CONDITIONS A READER EXPECTS, and RECORD WHICH ONE FIRED.
+  One session's waits now end on a clear guard, a timeout, OR low disk, each written into a
+  `wait_terminated_by` field, so "still waiting", "gave up" and "stopped on disk" are three
+  DISTINGUISHABLE states in the output rather than one silence. A bounded wait that also ends on
+  PROCESS-DISAPPEARANCE would have caught the hung driver with nobody watching.
+- A HALTED PROOF MUST NEVER READ AS A CLEAN ONE. The same session's byte-identity proof now writes a
+  VERDICT of "NOT RUN: LOW DISK" saying IN WORDS that it is NEITHER A PASS NOR A FAILURE.
+- HELD CODE LIVES AS A `.patch`, NOT A `.py`, AND IN GIT RATHER THAN ONLY IN /tmp. The D214 wiring
+  existed ONLY inside a scratchpad tree that was about to be deleted for disk; it is now committed at
+  `experiments/orchestration/live2/held/` as a patch plus a README, verified to reproduce the held
+  md5, with NOTHING importing it and `run_live2_real.py` on origin still at ZERO occurrences of
+  `figure_instrumentation`. COMMITTING A PATCH IS NOT LANDING THE WIRING, and storing it as `.patch`
+  rather than `.py` is what keeps it out of an import or a glob.
 - AND FOR RELAYED CLAIMS: a NEGATIVE assertion about a primary artefact is cheap to check and expensive
   to propagate. Three were relayed unverified today (a loadavg precedent that did not exist, a
   touch-price magnitude off by about 26x, and two metric names that did exist). Check a negative against
