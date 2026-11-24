@@ -777,6 +777,25 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
   md5, with NOTHING importing it and `run_live2_real.py` on origin still at ZERO occurrences of
   `figure_instrumentation`. COMMITTING A PATCH IS NOT LANDING THE WIRING, and storing it as `.patch`
   rather than `.py` is what keeps it out of an import or a glob.
+- *** A FIXED DEFECT WHOSE OLD DESCRIPTION SURVIVES IN A CODE COMMENT WILL BE RE-REPORTED FOREVER.
+  I DID IT TWICE AND SEEDED TWO AGENT BRIEFS WITH IT. *** `cstate.py:138` says, in the code,
+  "`desired_tier` was declared here with TWO WRITES and NO READ anywhere in live2". **THAT COMMENT IS A
+  HISTORY, NOT A STATE**: `:468` and `:486` record that `placement_enacted` makes it READ, and `:527`
+  and `:530` ARE the reads. A grep that lands on the comment reproduces the stale claim with apparent
+  code backing. Same for `_caps`: it is `live2/arms.py:82` and IS read at `arms_published.py:209`, and
+  **`baselines/arms.py` DOES NOT EXIST** - a grep against that path returns rc=128, an ERROR, which a
+  careless check reads as "no match", so the write-only claim looked confirmed twice over.
+  **FOUR STANDING ABSENT-LINK NOTES ARE NOW FIXED AND MUST STOP BEING RE-REPORTED:** `desired_tier` is
+  read; `delivered_scores`'s literal-0.0 writers are gone and none of D205's seven readers reads values;
+  `telemetry_cached_tokens` is live at three decision sites; `TOUCH_PRICE_MODE` is assigned.
+  **THE RULE: to claim a field is write-only, name the READS you searched for and show the search, not
+  the comment that says it once had none.** A comment is evidence about the past.
+- *** AND THE MISCITATION THAT COMMENT CARRIES HAS PROPAGATED INTO TWO COMMITTED REPORTS. ***
+  `cstate.py:138`, `:468` and `:486`, plus `reports/policy_fidelity.md:52` and
+  `reports/study_engine_actions.md:129`, cite **"D133 Part A"** for making `desired_tier` enacted. **D133
+  is robot capacity over feasible questions and says nothing about placement; the governing row is D134
+  (1).** A wrong citation survives every arithmetic check and spreads by copy, so check a cited D-row
+  against the log before repeating it.
 - *** NEVER ESTABLISH AN ABSENCE BY GREPPING THE SHARED WORKTREE. IT IS ABOUT 1,500 COMMITS BEHIND
   ORIGIN. *** `/home/pragya/Desktop/FM-switching` sat at `17bdf159` while origin was at `7ca9d1e7`:
   1,500 commits. A file committed tonight IS NOT THERE, so `grep -r` over it returns nothing for a file
