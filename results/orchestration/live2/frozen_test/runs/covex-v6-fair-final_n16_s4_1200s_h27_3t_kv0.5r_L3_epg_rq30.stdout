@@ -1,0 +1,35 @@
+[09:51:46] starting vLLM server: /home/pragya/.venvs/fm-switching-vllm/bin/vllm serve /home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb --served-model-name 32BI --port 8031 --max-model-len 32768 --gpu-memory-utilization 0.9 --tensor-parallel-size 1 --no-enable-prefix-caching --limit-mm-per-prompt {"image": 16} --dtype bfloat16 --seed 0 --limit-mm-per-prompt {"image": 640, "video": 1} --mm-processor-kwargs {"size": {"shortest_edge": 4096, "longest_edge": 16777216}, "fps": 1.0, "do_sample_frames": false} --trust-request-mm-kwargs --host 127.0.0.1 --enable-prefix-caching --enable-prompt-tokens-details --mm-processor-cache-gb 128 --kv-offloading-backend native --kv-offloading-size 27 --enable-log-requests --enable-logging-iteration-details --num-gpu-blocks-override 1968 --max-model-len 31472
+[09:52:50] server up: {"key": "32BI", "repo": "Qwen/Qwen3-VL-32B-Instruct", "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb", "startup_s": 63.8, "log": "logs/study_x_server_32BI_1124_095146.log", "max_model_len": 32768, "gpu_memory_utilization": 0.9, "tensor_parallel_size": 1, "prefix_caching": false, "kv_cache_tokens": 31488, "max_concurrency_at_max_len": 1.0, "available_kv_gib": "15.37", "model_weights_gib": "62.66", "attention_backend_lines": ["(EngineCore pid=3015965) INFO 2026-11-24 09:52:03.839 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention", "(EngineCore pid=3015965) INFO 2026-11-24 09:52:03.840 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.", "(EngineCore pid=3015965) INFO 2026-11-24 09:52:04.330 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].", "(EngineCore pid=3015965) INFO 2026-11-24 09:52:04.330 [flash_attn.py:1167] Using FlashAttention version 3", "(EngineCore pid=3015965) INFO 2026-11-24 09:52:14.071 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."], "cuda_graphs": true, "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)", "extra_server_args": ["--limit-mm-per-prompt", "{\"image\": 640, \"video\": 1}", "--mm-processor-kwargs", "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}",
+D223 (2) context limit: 31472 tokens, source=the started server's argv (header.json server.command)
+[10:12:59] server 32BI stopped
+{
+ "arm": "covex-v6-fair-final",
+ "n_devices": 16,
+ "mode": "A",
+ "run_s": 1200.0,
+ "seed": 4,
+ "robot_upload": "per-frame",
+ "split": true,
+ "err": null,
+ "wall_s": 1201.727,
+ "run_dir": "/home/pragya/data/live2/frozen_grid/runs/covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30",
+ "trace_dir": "/home/pragya/data/live2/frozen_grid/work/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2_L3_epg_perframe_rq30",
+ "lateness": {
+  "max_ms": 20.5751,
+  "mean_ms": 0.0736,
+  "n": 42024,
+  "p50_ms": 0.0667,
+  "p90_ms": 0.0959,
+  "p99_ms": 0.1437
+ },
+ "run_valid": true,
+ "digests_equal": true,
+ "n_requests": 10178,
+ "n_errors": 0,
+ "server_kind": "vllm",
+ "is_measurement": false,
+ "score": {
+  "ok": false,
+  "error": "ScoringRefused: D226: 1 delivered cloud answer(s) in covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30 have request ids absent from the request log (10174 rows); their refusal status is unverifiable and keeping them risks a silent mis-score. First few: ['r10175']"
+ }
+}
