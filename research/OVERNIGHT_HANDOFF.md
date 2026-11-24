@@ -565,6 +565,32 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
 
 ## OPEN, NEEDING A USER RULING
 
+- *** THE D209 PROOF-LOAD TWIN FOR THE n20 CELLS IS A DIFFERENT ARM, AND ITS `twin_note` SAYS "THE SAME
+  ARM". FOUND 2026-11-24 ON `3b95abd1`. THE CELL IS ALREADY `reportable: False`, SO NOTHING PUBLISHED IS
+  AFFECTED - BUT THE TWIN LOGIC WILL BE REUSED FOR MORE n20 CELLS. ***
+  `covex-v6-base_n20_s4_1200s_h27_3t_L3_epg_rq30`'s `proof_load_d209` block records
+  `twin = hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30` with
+  `twin_note = "the twin is the committed 16-device 3 s 1x cell of the same arm and seed"`.
+  **THOSE ARE DIFFERENT ARMS.** `covex-v6-base` and `hybrid-F-lhreq-noc3` are scored as distinct arms all
+  night (the ladder's positive control treats them as two cells).
+  **THE SUBSTITUTION WAS NECESSARY, SO THIS IS NOT CARELESSNESS:** there is NO
+  `covex-v6-base_n16_s4_1200s_h27_3t_L3_epg_rq30`. Verified by listing all 14 committed `covex-v6-base`
+  dirs: the n16 s4 ones are `kv0.25`, `kv0.5` and `L2.5` variants, all different CONDITIONS, and the only
+  same-arm same-condition cell at another fleet size is `covex-v6-base_n12_s4...L3_epg_rq30`.
+  *** THE CONSEQUENCE, WHICH IS THE PART TO WRITE DOWN: `decision_p99_ratio = 2.145` CONFLATES THREE
+  CHANGES AT ONCE - ARM, FLEET SIZE (16 to 20) AND LOAD (`loadavg_1m` 50.89, `other_cpu_cores` 46.257).
+  SO IT CANNOT BE READ AS A LOAD EFFECT, AND THE `decision_p99_up_gt_10pct: True` FLAG IT FIRED IS NOT
+  EVIDENCE OF LOAD INFLATION. *** No available twin isolates load for this arm, because the same-arm
+  same-condition n16 cell does not exist; the n12 cell would at least hold the ARM fixed at the cost of a
+  bigger fleet jump. **RECOMMENDED, NOT APPLIED: either name the n12 same-arm cell and say the fleet jump
+  is 12 to 20, or keep this twin and change the note to say plainly that the ratio spans an ARM CHANGE
+  and is therefore NOT a load measure.** The honest version of that field is more useful than a tighter
+  ratio.
+  **WHAT IS WORKING AND SHOULD NOT BE CHANGED:** `host_load_peak` carries MAGNITUDES
+  (`loadavg_1m: 50.89`, `other_cpu_cores: 46.257`) rather than a boolean, which is the convention
+  adopted after the false "loadavg 20.13" claim, and `reportable: False` is doing the real protective
+  work here.
+
 - *** A FIGURE'S README MISSTATES WHICH CELLS IT USED. FOUND 2026-11-24 ON THE D192 FIGURE COMMITS
   (`c6ceb5a8`, `9346ba32`, `30f2be8d`). THE DATA IS CORRECT; THE PROSE IS WRONG. NOT FIXED BY ME,
   BECAUSE THE USER WAS COMMITTING IN `reports/figures/` AT THE TIME. ***
