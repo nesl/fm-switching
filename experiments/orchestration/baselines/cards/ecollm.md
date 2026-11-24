@@ -190,3 +190,13 @@ representation does not change eco-llm's selections is **not** evidence that pri
 It is evidence that this rule consults price only after quality has already decided. The
 D135 token reconciliation moved 3 decisions at 16 devices precisely because it changed
 **feasibility**, which is the one channel price has.
+
+## D209 hits 14 and 16, closed as NOTED GAPS (user ruling 2026-11-24)
+
+- **Hit 14 does not apply.** eco-llm reads no GPU-KV capacity (no capacity term in this card or in
+  `ecollm_adapted.py`); its 0.25x / 0.5x cells are valid as they stand.
+- **Hit 16: no code change.** eco-llm already selects on the committed trace-weighted measured qualities
+  (D137: RECENT 0.3963, D2 0.4286, RICH 0.4255) and reads no `rho`. Its RICH branch is dead because live2
+  builds only RECENT and D2 evidence (`cstate.py:481-483`), so RICH is UNEXPRESSIBLE in live2. Recorded
+  as a noted gap: under the measured qualities RICH is dominated by D2 at equal token scale, so it could
+  change a decision only if a RICH representation existed and were cheaper than D2.
