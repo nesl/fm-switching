@@ -116,11 +116,47 @@ Baselines run vLLM defaults; the per-type controls are policy actions (D164).
 
 | decision kind | candidates | horizon |
 |---|---|---|
-| **request** (recall) | admit now with full history; defer to the latest safe start (deadline minus predicted service x a measured safety factor, re-plan on slip); leave to the device | until its own deadline plus the deadlines it displaces |
+| **request** (recall) | admit now with full history; leave to the device (DEVICE_ANSWERS, D218 (1), D221). **Deferral to the latest safe start is NOT a candidate at rung 4 (D232 (2)); see below** | until its own deadline plus the deadlines it displaces |
 | **state** | for each recall history: warm, touch, reload, hold, let go cold | until the history's next likely question (capped 60 to 120 s) |
 | **sync** | backlog order after reconnect; question-first vs wait vs leave to the device (D54) | until caught up |
 
 Alerts and assistance stay rule-based (D151 (2)).
+
+**Question deferral is removed from the request row (D232 (2), 2026-11-24).** Deferring a recall
+question to the latest safe start was built and ran live, and it is ruled out on its own evidence, so
+the candidate set above is admit-now and leave-to-the-device. The leg fired about 54 times across the
+two cells that scored it, `covex-v6-final_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun` (22 deferrals,
+`rd_question_defers` = 22) and `covex-v6-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30_ms` (32,
+`rd_question_defers` = 32), with **0 rescues**. At 1x s4 the 22 deferrals pair one-to-one with their
+questions on `(device_id, opportunity_id)` and resolve to 0 rescues, 1 on-time loss and 21 no change
+(`results/orchestration/live2/d222_pass1/d222_1x_s4_verdict.json`, committed `b0767b46`); the loss is
+`robo006 / opp0003132`, a 1.9455 s deferral spent on a question holding 0.95 s of slack, 2.052 s in
+rung 3 against 3.1737 s in rung 4 on a 3.0 s deadline. On the 227 alert instants that fall inside the
+deferral windows, the stratum the leg exists to buy, rung 4's alert on-time is 33.9 percent against
+rung 3's 45.8, **-11.9 pp**, against -0.9 pp outside and a mixing weight of 1.93 percent; the windows
+are defined by rung 4's own decisions, so this is a real difference on the same instants and **not a
+causal estimate**. At kv0.5r s4 the cell gives 110 of 132 robot questions answered by the cloud within
+deadline (D232 records "about 111 / 132") against rung 3's 122, and that comparator is
+**provisional**: rung 3's `covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30` is
+`ScoringRefused` with no rows under the D226 guard (request id `r10175`) and is being rescored
+outcome-keyed. Robot denominators also move between seeds (132 at 1x s4 against 127 / 121 / 105 at
+kv0.5r s5 / s6 / s7), so bare fractions are not comparable across seeds.
+
+**Why the headline does not say this.** Rung 4's 1x s4 robot on-time is 127 of 132 against rung 3's
+126, a net +1, and that +1 comes from two questions (`robo006 / opp0003111` and `robo006 /
+opp0009518`) that were **never deferred**; the one deferred question whose on-time status moved went
+the wrong way. Scored on the deferred set alone the leg is -1. "Robot on-time did not fall overall" is
+true and is not evidence that the leg helped.
+
+**Rule 2 class: FIRED AND DID NOT HELP.** Not `unexercised` (54 live firings), not `unexpressible`
+(the gate had its channel: enacted at `arms_v6cfr3.py:297`, and the 22 deferrals at 1x s4 pair
+one-to-one with scored questions, every defer row consumed exactly once), not `cancelled by geometry` and not `unscorable` (the objective sees the on-time counts the
+deferral moves, and one of them moved). This is the only inconclusive class that is evidence about the
+policy, and per CLAUDE.md it is **still not a settled negative**, because the Step 4 control that
+disables the leg and shows the result collapse has not been run on either cell.
+
+The candidate set in the table is what rung 4 is specified to offer; DEVICE_ANSWERS's build state is
+carried by `research/conformance_matrix.md` row 10.1 and not by this section.
 
 **Compound candidates** (D165 (D)), from the coupling measured on the live engine (eviction):
 - **protect and defer:** warm or touch recall history H AND defer cold rebuild R to its latest safe start, when R's allocation would evict H before H's expected question;

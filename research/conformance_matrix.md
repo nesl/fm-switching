@@ -284,7 +284,7 @@ is carried into the freeze-gate list in section 10 for that reason.
 |---|---|---|---|---|---|
 | D151 (1), D132 | base policy executed by default; deviate only when predicted gain beats the base by MARGIN_CF | `v5/cf_planner.py` | -/-/-/-/live | `pd_decisions` 302/299/293/259; `rd_decisions` 157/152/146/106 | built and live |
 | D165 (D), D184 (2), D190 (3), D191 (1) | compound PROTECT AND DEFER: warm/touch H and defer the cold rebuild R that would evict it | switch `live2_cf_protect_defer` `cf_protect_defer.py:118`; gate **`arms_v6cf.py:420`**; enacted **`arms_v6cf.py:494`** `ra.decision="DEFER"` | -/-/-/-/**True** | s4 and s7: `pd_harm_over_bar` 2, `pd_request_crossed_bar_unexpressible` 2, `pd_gate_wanted_to_act_but_a_request_has_no_slice_channel` 2. s5 and s6: nothing crossed the bar | built and live, **and its Rule 2 class DIFFERS BY SEED: unexpressible at s4 and s7, unexercised at s5 and s6.** No blanket class is correct. Reported by D198 (1) as reach-limited at 1x |
-| D191 (1), D151 (3) | QUESTION DEFERRAL to the latest safe start when an alert episode is active | switch `live2_cf_request_defer` `cf_request_defer.py:149`, set `arms_final_ladder.py:255`; gate **`arms_v6cfr3.py:256`**; enacted **`arms_v6cfr3.py:297`** | -/-/-/-/**True** | `rd_question_defers` **29/37/29/25**, non-zero at all four seeds; `rd_gate_defer_to_latest_safe_start` same | built and live. **This is rung 4's characteristic decision and it fires at every seed** (D225 port rule satisfied) |
+| D191 (1), D151 (3) | QUESTION DEFERRAL to the latest safe start when an alert episode is active | switch `live2_cf_request_defer` `cf_request_defer.py:149`, set `arms_final_ladder.py:255`; gate **`arms_v6cfr3.py:256`**; enacted **`arms_v6cfr3.py:297`** | -/-/-/-/**True** | `rd_question_defers` **29/37/29/25**, non-zero at all four seeds; `rd_gate_defer_to_latest_safe_start` same | **REMOVED FROM RUNG 4 BY D232 (2)** (2026-11-24), ruled out on its own live evidence. It was built and live and it fired at every seed (D225 port rule satisfied); it is removed because it did not help. About 54 live firings across the two scored cells, **0 rescues**; at 1x s4 `_rerun` 22 deferrals pair to 0 rescues / 1 on-time loss / 21 no change, and alert on-time inside the deferral windows is **-11.9 pp**. **Rule 2: FIRED AND DID NOT HELP**, and NOT a settled negative (no Step 4 control). Full record and provenance in **10.19** |
 | D191 (2), D171 (1), D178 (5) | deviation units: gain and harm are COUNTS of expected on-time cloud answers, each weighted by the device's own w_d; deviate iff weighted gain minus weighted harm exceeds w_d x MARGIN_CF | `_pd_bar_reading='decider'`; bar `cf_protect_defer.py:205`; `effective_margin` in `v5/cf_planner.py` | -/-/-/-/decider | `rd_reached_harm` 98/106/97/73; `rd_gate_saving_does_not_exceed_margin` 69/69/68/48 | built and live. The wrong reading is reachable only as a labelled arm (`...-barmaxharmed`) |
 | D177 (3), D154 (2), D157 (2), D158 (1), D169 | MARGIN_CF set once, frozen, never swept: 0.6582 in on-time units | `v5/margin_cf_d169.py`; P_hat `cf_ontime_model_d162.json` | -/-/-/-/0.6582 | D171: n=476, warm 271 | built and live |
 | D200 (1),(2), D171 (1) | the counterfactual reads per-device w_d from `live2/deficit_feed.py`, one deficit source | `_pd_w_source=W_SOURCE_LIVE`, set `arms_final_ladder.py:272-277` with a construction probe | -/-/-/-/LIVE | D203 (1) measured 17 distinct values over 22 decisions, w in [1.148, 3.0] | built and live. D200 (5)'s "deficit-blind" label applies PER LIMB (D203 (2)), not as a blanket |
@@ -293,9 +293,9 @@ is carried into the freeze-gate list in section 10 for that reason.
 | CLAUDE.md Step 4, D218 (1) | Step 4 negative controls: harm-zero and margin-huge collapse the branch to BASE | `arms_v6cf.py:130,:131`; read **`arms_v6cf.py:359,:361`** and **`arms_v6cfr3.py:211,:213`**; `MARGIN_CONTROL_SCALE=1e9` | -/-/-/-/False, False | one control arm disables both legs, so a control is one cell | built and OFF by design; controls exist and are reachable |
 | D203 (3), D206 (1), D222 (1) item 4 | Gate A replaced: report EXPOSURE (fraction of sent recall whose observed/predicted ratio exceeds the per-request q90) and the overrun magnitude | `cf_request_defer.py:137` `SAFETY_FACTOR` from `d190_measured_safety`, which RAISES rather than defaulting | -/-/-/-/measured | D206 (1): 46 of 463, 9.94 percent, q90 1.863404, worst overrun 1.5035x | built and live. The would-have-missed count is retired (it was an algebraic identity) |
 | D218 (1), D221 | third request candidate DEVICE_ANSWERS: leave the question to the device, enacted as `ra.decision = DEVICE` | **`cf_request_defer.py:177` `ACTIONS = ("BASE","DEFER_TO_LATEST_SAFE_START")`, two actions only.** `cf_protect_defer.py:530` says in its own gate string that DEVICE_ANSWERS "is not built here". The only `ra.decision` writes in the tree are `"DEFER"` at `arms_v6cf.py:494` and `arms_v6cfr3.py:297`; the coordinator channel exists unwritten at `coordinator.py:865` | **absent at R4** | no `rd_*`/`pd_*` counter for it in any committed cell | **ORDERED, NOT BUILT.** Freeze-gate row, 10.1. The four committed `covex-v6-final` cells are the ones D221 declares SUPERSEDED |
-| D222 (1) item 1 | the latest-safe-start service prediction must pass the REAL queued-ahead work | **`arms_v6cfr3.py:198-199` `pred = CC.predict(cf.model, int(u_request), 0, 0, 0)`** against `v5/cf_cost.py:148-151 predict(model, tokens, cached_tokens=0, overlap_ft=0, overlap_decode=0)`. The first `0` is correct by construction (`u_request` is already uncached, computed `:173-192`); the defect is `overlap_ft`/`overlap_decode` hard zero, the queue term | not applied | - | **ORDERED, NOT APPLIED.** Freeze-gate row. This is the quantity `reports/study_rung4_s5_failure.md` attributes 12 of 14 s5 losses to |
-| D222 (1) item 2 | debit one 100 ms decision period from the deferral | `v5/cf_cost.py:281 deferral_s=max(lss - now_s, 0.0)`; `cf_request_defer.py:175 MIN_DEFERRAL_S = PD.DECISION_PERIOD_S` is used only as a FLOOR at `:267` | not applied | - | **ORDERED, NOT APPLIED.** A floor that rejects sub-period deferrals is not a debit that shortens every deferral |
-| D222 (1) item 5 | commit the per-decision `rd_decisions` log beside `decision.jsonl` | accumulated in memory capped at 4,000 (`arms_v6cfr3.py:234-235`), dumped by `cfr3_one_cell.py:78` | not committed | **`find -name '*rd_decision*'` over all 334 cell dirs returns 0** | **ORDERED, NOT SATISFIED in the committed set.** Freeze-gate row |
+| D222 (1) item 1 | the latest-safe-start service prediction must pass the REAL queued-ahead work | **`arms_v6cfr3.py:198-199` `pred = CC.predict(cf.model, int(u_request), 0, 0, 0)`** against `v5/cf_cost.py:148-151 predict(model, tokens, cached_tokens=0, overlap_ft=0, overlap_decode=0)`. The first `0` is correct by construction (`u_request` is already uncached, computed `:173-192`); the defect is `overlap_ft`/`overlap_decode` hard zero, the queue term | not applied | - | **ORDERED, NOT APPLIED, AND NOW MOOT FOR RUNG 4** under D232 (2): the only read of this prediction is the question-deferral leg, which is removed from the arm. This is the quantity `reports/study_rung4_s5_failure.md` attributes 12 of 14 s5 losses to, which is part of why the leg is removed rather than repaired. Still live as a code defect if the leg is ever re-admitted. Freeze-gate row 10.2, see 10.19 |
+| D222 (1) item 2 | debit one 100 ms decision period from the deferral | `v5/cf_cost.py:281 deferral_s=max(lss - now_s, 0.0)`; `cf_request_defer.py:175 MIN_DEFERRAL_S = PD.DECISION_PERIOD_S` is used only as a FLOOR at `:267` | not applied | - | **ORDERED, NOT APPLIED, AND NOW MOOT FOR RUNG 4** under D232 (2): there is no deferral left at rung 4 to debit a period from. A floor that rejects sub-period deferrals is not a debit that shortens every deferral, so the order was never satisfied and is now withdrawn by removal rather than met. Freeze-gate row 10.3, see 10.19 |
+| D222 (1) item 5 | commit the per-decision `rd_decisions` log beside `decision.jsonl` | accumulated in memory capped at 4,000 (`arms_v6cfr3.py:234-235`), dumped by `cfr3_one_cell.py:78` | not committed | **`find -name '*rd_decision*'` over all 334 cell dirs returns 0** | **ORDERED, NOT SATISFIED in the committed set.** Freeze-gate row. **Touched by D232 (2):** this log records the removed leg's own decisions, so no future rung-4 cell will produce one, but it remains the only per-decision audit trail for the two pass-1 cells the removal rests on. Not declared closed here; the user's call, see 10.19 |
 | D220 (1) | harm is the displacement loss weighted by the ACCURACY GAIN (cloud minus device for the displaced type); the device-discounted form is rejected | **`v5/cf_objective.py:712` computes `w_o x (p_before - p_after)` only**, and its docstring `:728-739` states the accuracy factor is deliberately gone under D177 (1). `cf_protect_defer.py:380-395` computes `harm_device_discounted` too but only reports it; `HARM_FORM_DEFAULT` `:336` is a LABEL with no branch anywhere (grep returns only definition, dict string and describe block, rc=0) | not applied | `pd_harms`, `pd_harm_distribution` | **ORDERED, NOT APPLIED, AND IT IS A GENUINE TENSION, NOT A BUG.** D177 removes accuracy because within a type the gap is a constant; D220 (1) reinstates a gain because harm sums ACROSS types, where it is not. The user's call. Freeze-gate row, 10.6 |
 | D165 (D) | compound KEEP-READY SET: touch the top-k histories by expected value of their next question | spec v6 line 245: not built | absent | - | **ORDERED, NOT BUILT, no D-row removes it.** Freeze-gate row |
 | D165 (D) | compound ADMIT WITH PROTECTED VICTIM: admit q now and touch the history its rebuild would evict | spec v6 line 245: not built | absent | - | **ORDERED, NOT BUILT, no D-row removes it.** Freeze-gate row |
@@ -596,14 +596,14 @@ pre-registration record, is not present in `experiments/orchestration/live2/`.
 **Closes when:** built per D221's rule, with the D218 (1) proofs. The four committed `covex-v6-final`
 cells are already SUPERSEDED by D221, so no posted number depends on this.
 
-**10.2 D222 (1) item 1, the hard-coded zero queued-ahead.**
+**10.2 D222 (1) item 1, the hard-coded zero queued-ahead. MOOT FOR RUNG 4 under D232 (2), see 10.19.**
 `arms_v6cfr3.py:198-199` `pred = CC.predict(cf.model, int(u_request), 0, 0, 0)`. Be precise about
 which zero: the first (`cached_tokens`) is correct by construction because `u_request` is already the
 uncached count (computed `:173-192`); the defect is `overlap_ft` and `overlap_decode` hard zero, the
 queue term. **Closes when:** the real queued-ahead work is passed. This is the quantity
 `reports/study_rung4_s5_failure.md` attributes 12 of 14 s5 losses to.
 
-**10.3 D222 (1) item 2, debit one decision period from the deferral.**
+**10.3 D222 (1) item 2, debit one decision period from the deferral. MOOT FOR RUNG 4 under D232 (2), see 10.19.**
 `v5/cf_cost.py:281` `deferral_s = max(lss - now_s, 0.0)`; `cf_request_defer.py:175`
 `MIN_DEFERRAL_S = PD.DECISION_PERIOD_S` is used only as a FLOOR at `:267`. A floor that rejects
 sub-period deferrals is not a debit that shortens every deferral. Checked inside `LatestSafeStart`
@@ -792,6 +792,86 @@ And one correction to the briefed path rather than the claim: `_caps` is written
 not `baselines/arms.py` (which does not exist, rc=2, an error and not a no-match). It has exactly one
 read in the tree, `arms_published.py:209`, where mooncake sizes warm slots to the pool. So it is
 write-only WITHIN the covex chain and read by exactly one baseline.
+
+### 10.19 QUESTION DEFERRAL IS REMOVED FROM RUNG 4. D232 (2), 2026-11-24. Rule 2: FIRED AND DID NOT HELP
+
+This is the one row in this section that closes by **removal of the mechanism**, not by building it or
+by ruling it unexercised. D232 (2) (`research/policy_design_log.md`, read at origin `1a092abd`) rules
+that question deferral is removed from rung 4, which becomes rung 3 plus protect-and-defer plus
+DEVICE_ANSWERS plus the deficit-fed state planner, built as `covex-v6-final-nqd`. D232 (3) adds that
+the pass-1 1x cell is not rerun after the E1 fix because it carries the removed leg.
+
+**The evidence, with the cell named for every number** (the hazard being a number that is right about a
+cell nobody meant):
+
+| quantity | value | cell directory / file |
+|---|---|---|
+| live firings, 1x | `rd_question_defers` = 22 | `covex-v6-final_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun` |
+| live firings, 0.5x | `rd_question_defers` = 32, all 32 `rd_defer_would_miss_at_measured_worst_bias` | `covex-v6-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30_ms` |
+| total | about 54 firings, **0 rescues** | the two cells above |
+| 1x pairing | 22 deferrals -> **0 rescues, 1 on-time loss, 21 no change**, keyed on `(device_id, opportunity_id)`, 22 of 22 one-to-one with every defer row consumed exactly once | `results/orchestration/live2/d222_pass1/d222_1x_s4_verdict.json`, committed `b0767b46` |
+| the loss | `robo006 / opp0003132`: a **1.9455 s** deferral on a question with **0.95 s** of slack, latency 2.052 s in rung 3 against **3.1737 s** in rung 4 on a 3.0 s deadline | same verdict file |
+| the stratum | on the **227** alert instants inside the deferral windows, rung 4 alert on-time **33.9 percent** against rung 3's **45.8**, **-11.9 pp**, against **-0.9 pp** outside, mixing weight **1.93 percent** | same verdict file |
+| 0.5x robot on-time | **110 of 132** cloud answers standing by deadline (D232's own text says "about 111 / 132") against rung 3's **122** | `..._kv0.5r_..._ms/cell.json` `score.score.robot_value.n_cloud_standing`; rung 3's 122 from D232 |
+| 1x alert attainment | 0.609181 against same-code rung 3's 0.619234 on an identical 712-episode key universe, FAIL | the verdict file, deliverable 1 |
+
+**The stratum's limitation, carried and not dropped.** The 227 instants are selected by rung 4's OWN
+deferral windows, and the gate only fires when an alert episode is active, so the stratum is selected
+on alert congestion. The cross-arm comparison is on the SAME instants with an identical key universe,
+so **-11.9 pp is a real difference on those instants and is NOT a causal estimate** of deferring:
+rung 3 has no deferrals and so no comparable window set of its own.
+
+**The 0.5x comparator is PROVISIONAL.** Rung 3's
+`covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30` carries
+`score.ok = false`, `ScoringRefused` under the D226 guard (1 delivered cloud answer with a request id
+absent from the 10,174-row request log, `r10175`), so it has no scored rows; the Orin is rescoring it
+outcome-keyed. The **122** is therefore a provisional bar and must not be read as settled. Likewise
+the robot denominator moves between seeds (132 at 1x s4 against 127 / 121 / 105 at kv0.5r s5 / s6 /
+s7), so bare fractions are not comparable across seeds.
+
+**THE THING THAT WOULD HAVE HIDDEN THIS, recorded because a reader of the headline reaches the
+opposite conclusion.** The 1x headline is robot on-time **127 of 132 against rung 3's 126**, a net
+**+1**. That +1 is **+2** from `robo006 / opp0003111` and `robo006 / opp0009518`, **both of which were
+never deferred**, **minus 1** from the single deferred question that moved, which moved the wrong way;
+129 of 132 opportunities did not flip. Scored on the deferred set alone the leg is 0 rescues against 1
+loss. **"Robot on-time did not fall overall" is true and is not evidence that the leg helped.** The
+second correctness loss in the pairing (`robo002 / opp0008560`) was on time in BOTH arms and is a
+decode difference (cloud letter D against B, gold B), so it is not charged to the deferral.
+
+**Rule 2 class: FIRED AND DID NOT HELP.** Not `unexercised`: it fired about 54 times live. Not
+`unexpressible`: the gate had its channel, enacted at `arms_v6cfr3.py:297`, and all 22 deferrals at 1x
+were paired to a scored question with none unpaired. Not `cancelled by geometry`: the deferral changes
+one arm's latencies and does not cancel between the compared branches. Not `unscorable`: the objective
+is on-time cloud answers and the leg moved one of them, plus 11.9 pp on its own stratum. **This is the
+only inconclusive class that is evidence about the policy** (CLAUDE.md Rule 2), and by that same rule
+it is **NOT a settled negative**, because the **Step 4 control has NOT been run** on either cell: no
+run disables the leg and shows the result collapse. `reports/study_rung4_s5_failure.md` reports a
+negative control that changes the result (121 against 107) on the **s5** cells, which is a different
+pair and does not discharge Step 4 for these two. Record it as ruled out by decision on the evidence
+above, not as a measured settled negative.
+
+**What the removal does to this section.** 10.2 and 10.3 were BUILD items for a mechanism that no
+longer exists in the arm, and both become **MOOT for rung 4**: 10.2's hard-coded `overlap_ft` /
+`overlap_decode` zero has its only read in `arms_v6cfr3.py:198-199`, the removed leg's latest-safe-start
+prediction, and 10.3's missing one-period debit has nothing left to debit. Say it plainly: the
+verification's recommendation to **build** 10.2 is overtaken for rung 4 by the removal of its only
+consumer, and neither row can close by being built now. They remain real code defects if the leg is
+ever re-admitted, which is why they are marked MOOT rather than deleted. 10.4 (the `rd_decisions` log)
+is also implicated and is deliberately NOT closed here: no future rung-4 cell will emit one, but the
+log is the audit trail for the two cells this removal rests on. 10.16 survives the removal with half
+its surface gone: its 247x unit error applies to both rung-4 legs, and protect-and-defer still prices
+through `cf_cost.predict` at `arms_v6cf.py`; the accidental mercy recorded there (the 247x is LATENT
+because `overlap_ft` is the hard zero of 10.2) is unchanged. The freeze-gate counts stated in section
+10 and in the verification's section 10 are stale by this row and are not rewritten here.
+
+**Agreement with the independent verification** (`research/conformance_matrix_verification.md`,
+committed `b7970806`). This row touches three rows that verification examined, and in no case does it
+contradict it. `rd_question_defers` 29 / 37 / 29 / 25 is CONFIRMED there as exact, and that number is
+the reason the leg satisfied the D225 port rule; the removal does not dispute the count, it disputes
+the count's value to the arm. 10.2 is CONFIRMED there, with the added note that D228 (1) removed its
+ambiguity and made it an ordinary build item; that recommendation is what the removal overtakes. 10.3
+is CONFIRMED there as a floor and not a debit, unchanged by this row and now moot. The two documents
+should be read together on these three rows.
 
 ## 11. WHAT THIS MATRIX DOES NOT COVER, SAID HERE RATHER THAN DISCOVERED LATER
 
