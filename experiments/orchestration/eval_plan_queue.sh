@@ -57,7 +57,7 @@ cat <<'EOF'
 #
 # D212 entries
 a  | FILLER_A_CELLS  confidence-cascade 16 s4-s7 _L3_epg_rq30_rerun | ready (gated)
-b  | FILLER_C_CELLS  cascade-routing 16 s4-s7 _L3_epg_rq30 | ready (DEVWAIT_READY at 10dae57d). REPORTED, PORT-RULE FAIL: its sufficiency proxy cannot fire here (0 of 489 recall decisions are its skip-or-cascade choice; lambda 0.02 vs 2.0 moves 0), so it sits on the device-only floor by construction; its lambda was fitted offline against a cost budget live2 lacks (D58, D174 (1)); never counted as a baseline we beat (D212 (3), D213)
+b  | FILLER_C_CELLS  cascade-routing 16 s4-s7 _L3_epg_rq30 | ready (DEVWAIT_READY at 10dae57d). REPORTED, PORT-RULE FAIL: its sufficiency proxy cannot fire here (0 of 489 recall decisions are its skip-or-cascade choice; lambda 0.02 vs 2.0 moves 0), so it sits on the device-only floor by construction (census holds at every seed; s7 recount: 464 recall-path decisions, 446 declines + 18 releases, ZERO the proxy cascade choice; the 18 are RECENT sends of the only over-32k session, robo004 s000, which exists only at s7, D176); its lambda was fitted offline against a cost budget live2 lacks (D58, D174 (1)); never counted as a baseline we beat (D212 (3), D213)
 c1 | simplestream reruns on committed conditions | waiting on hits 14, 7
 c2 | llf: UNAFFECTED by hit 14 (card check); mooncake: unaffected at 1x, memory conditions await the hit-14 adaptation ruling; eco-llm: waiting on hits 14, 16
 c3 | kvflow-prefetch, lmcache (hit 9), attentionstore-prefetch (hit 8) reruns | waiting on hits 9, 8
