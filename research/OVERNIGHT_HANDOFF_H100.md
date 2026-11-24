@@ -1,5 +1,23 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## D229, user ruling 2026-11-24 (recorded first, before acting; a session turnover must not lose it)
+
+The D187 watchdog keeps restarting the run DRIVER, but its Claude-relaunch section is OFF while the
+user drives the H100 interactively in the daytime.
+1. `experiments/orchestration/h100_overnight_watchdog.sh`, section 3 (Claude session) ONLY: if
+   `$ST/claude_resume_off` exists, log "claude: relaunch disabled by D229 flag" and do NOT launch a
+   session; otherwise behave exactly as before. Sections 1 (driver restart) and 2 untouched, byte for
+   byte. Create the flag file now; dry-run (DRY=1) with and without the flag; commit citing D229.
+2. Report: claude processes under this user; which tmux session is the interactive one and which (if
+   any) is watchdog-launched (claudeh100); relaunches today and their times. A watchdog-launched
+   claudeh100 running beside the interactive session is let finish its current step, then stopped
+   (tmux kill-session -t claudeh100), so only the interactive session acts.
+3. RE-ENABLE (unattended periods, the user's call): `rm <flag file>` (full path recorded below).
+4. STANDING RULE: every ruling or instruction received goes into THIS FILE FIRST (dated, with its
+   D-number if it has one), then it is acted on.
+5. Nothing else changes: policy cells first (rung 3 kv0.5r s5-s7 now; covex-v6-final 1x s4 and kv0.5r
+   s4 the moment flash posts them), filler otherwise, GPU never idles, no 0.25x.
+
 This is the H100 handoff. flash keeps the track-wide handoff in `research/OVERNIGHT_HANDOFF.md` (its rung-2 / rung-3 / rung-4 plans and lists); read that too, but the H100 queue and rules are here. Read this first if you are a resumed H100 session (`claude -c -p ...` from the watchdog). The user is away until
 morning and no approvals will come. Do one careful pass: check the driver, the GPU, origin for new cell lists, gate any
 that qualify, record what you did at the bottom of this file, commit under D166, then stop. The cron watchdog
