@@ -648,6 +648,40 @@ rung-4 IMPLEMENTATION AS RUN. **Whether a fixed rung 4 would beat rung 3 is UNKN
 3. Nothing scorable -> do NOT invent work on run-path files. The handoff's five overnight steps below
    are owned by other sessions.
 
+## *** LIVE FILE CLAIMS, 2026-11-24. READ THIS BEFORE YOU EDIT OR BUILD. ***
+
+A peer session asked "who holds E1 + E3?" before starting, which was exactly right, and then RESTARTED
+before I could answer, so the answer is written here instead of in a message. **A claim in a message dies
+with the session; a claim in the repo does not.** That duplication already cost an hour of compute today
+and one session deleted another's proof tree mid-run, so this section exists to stop the third instance.
+
+**HELD BY THE A6000 [6736b0] E1+E3 AGENT, DO NOT EDIT OR BUILD ON THESE:** `live2/asyncbackend.py`,
+`live2/run_live2_real.py`, `live2/procsplit.py`, `live/adapter.py`, `live2/cstate.py`,
+`live2/metrics_trust.py` (new), `live2/d227_e1_metrics_proofs.py` (new). **E1 + E3 IS ALREADY BUILT AND
+PROVED (five parts PASS) AND UNCOMMITTED**, held on the H100's two shas. **PART 2 IS WHAT DISCHARGES THE
+ITEM**: until the harness flag and the one `cell.json` line land, `METRICS_SCRAPE_DEFAULT` stays False and
+the capability is DORMANT - correct under D187, so `metrics_health` existing with no caller is the
+expected intermediate state, NOT a defect to re-fix.
+**HELD BY THE H100 FOR ITS TORN-TREE COMMIT:** `live2/run_live2_real.py` and `live2/procsplit.py` until
+its sha is read back from origin. Those two are claimed by BOTH, in sequence: H100 first, then the one
+`metrics_health` line rebased onto it.
+
+*** `/tmp/claude-1001/mapwt` CARRIES 15 UNCOMMITTED EDITS, 632 LINES, THAT ARE NOT SCRATCH. ***
+`coordinator.py` (483), `v5/cf_objective.py` (123) and `arms.py` (33) - the D182 deficit-ordering hook,
+belonging to neither the context-limit work nor this session. **DO NOT CLEAN IT UNILATERALLY** and do not
+assume it is yours. `research/policy_design_log.md` there IS this session's (the D220-D227 append,
+committed) and is dirty-but-equal-to-origin, so it is scratch.
+**THE HAZARD, WHICH I HIT TODAY: `git archive` reads the COMMIT and is safe, but `git hash-object` on a
+worktree path PICKS UP WHATEVER IS SITTING THERE.** That is how I nearly committed stale `EXPERIMENTS.md`
+and `INDEX.md` over other sessions' work; the exact-count assert caught it (expected 3, changed 2). **So
+restore every file from `git show <sha>:<path>` IMMEDIATELY BEFORE editing it, and assert the EXACT file
+count both ways, never a bound.**
+
+*** AND GIVE EVERY PROOF TREE A PER-SESSION SUFFIX. *** Two sessions both defaulted to
+`scratchpad/d223x/a3`; one finished, cleaned up, and deleted the other's tree under a running 1200 s
+sweep. The victim's control correctly FAILED and its script refused to report, which is the guard working,
+but the compute was gone. A per-session suffix removes the whole class and costs nothing.
+
 ## WHERE THE WORK IS
 
 RUNNING NOW (H100): nine final-ladder cells, s5 to s7 for `covex-v6-fair-final`, `covex-v6-final`,
