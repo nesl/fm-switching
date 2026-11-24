@@ -777,6 +777,33 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
   md5, with NOTHING importing it and `run_live2_real.py` on origin still at ZERO occurrences of
   `figure_instrumentation`. COMMITTING A PATCH IS NOT LANDING THE WIRING, and storing it as `.patch`
   rather than `.py` is what keeps it out of an import or a glob.
+- *** THE LADDER IS COMPOSITION, NOT INHERITANCE, SO AN MRO WALK CANNOT ESTABLISH AN ABSENCE. TOKEN:
+  MRO-ABSENCE-INVALID. *** Hit from three directions in one day, which is why it belongs here:
+  **(1)** the conformance-matrix build found that a naive `vars()` + MRO diff reports **TWENTY FALSE
+  INHERITANCE BREAKS**, because the arms define `__call__` so `callable(_rules)` is true and a walker
+  skips it. Caught mid-build.
+  **(2)** a session used an MRO walk to conclude that `over_limit_infeasible` is write-only and that
+  rung 3 never calls `limit_tokens()`, and nearly sent a user-facing ruling request on a non-problem.
+  Its own summary of the fault is the best statement of it: **"my statement was true and my conclusion
+  false - no method in rung 3's MRO calls `limit_tokens()`, but the call LEAVES THE MRO THROUGH
+  COMPOSITION."** The real chain is `arms_v5rules2.py:107` composing a real `HybridArm`, `:111-112`
+  setting the flag on BOTH `self` and `self._base`, `:278` delegating via `self._base.decide(obs)`,
+  reached from `arms_v6state.py:379` through `self._rules`, arriving at `hybrid_arm.py:421`.
+  **(3)** the SAME unsound method underpinned the E1 licensing warrant for the 0.5x cells. Re-checked
+  COMPOSITION-AWARE and the conclusion held: `arms_v5rules2.py`, `hybrid/hybrid_arm.py`,
+  `arms_v6state.py`, `arms_v6fair.py`, `arms_final_ladder.py`, `arms_v6fairfeed.py` all carry ZERO
+  references to `gpu_kv_fraction` / `kv_cache_usage` / `scrape_metrics`, and `hybrid_arm.py` composes
+  nothing further (no `self._base`, no `self._rules`), so the chain TERMINATES there. Verified
+  independently here. **The warrant was right and its method was not, which is the case worth fearing:
+  a sound conclusion from an unsound method teaches the method.**
+  **THE RULE: to claim any mechanism is absent from an arm, WALK `_rules -> _base -> _b7` AND SHOW THE
+  PATH WALKED, then show the chain terminates. `d225_switch_diff.py` already does this and prints its
+  path; copy it rather than writing a fresh MRO walk.**
+- *** AND A READ-BACK CHECK CAN CRY WOLF. *** My own published-bytes check reported MISSING on a commit
+  that had landed correctly, because I grepped a prose sentence in the wrong CASE. A verification that
+  fails on capitalisation will send someone hunting a phantom revert, and train them to ignore it.
+  **Grep a token the writer controls exactly - a sha, a count, a key name, or a planted marker like the
+  one on the line above - never a prose sentence.**
 - *** TEXT ABOUT A PAST STATE READS AS A PRESENT STATE. THREE INSTANCES TODAY, THREE DIFFERENT
   CARRIERS, AND THE THIRD HAD THE CORRECTION ON THE PRECEDING LINE. *** Collect them, because the
   carrier changes and the error does not:
