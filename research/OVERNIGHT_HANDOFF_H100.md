@@ -1,5 +1,25 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## D232, user ruling 2026-11-24, revisit later (recorded first, before acting)
+
+1. Alert bar: rung 4's 1x comparator is same-code covex-v6-fair-final (0.619). Rung-4 pass 1 1x s4 is
+   recorded as FAIL on the alert item.
+2. Cell (b) as planned (covex-v6-final-da) is CANCELLED: do not run it. Do NOT rerun cell (a) after the
+   E1 fix.
+3. NEXT POLICY CELLS, ahead of filler, as flash's main session posts them: (i) covex-v6-final-nqd
+   kv0.5r s4; (ii) covex-v6-final-nqd 1x s4; (iii) later, covex-v6-final-nqd kv0.5r s4 _e1, once flash's
+   E1 split-mode fix has landed and been proved. This arm has NO question deferral and HAS
+   DEVICE_ANSWERS: check per cell that rd_question_defers is zero and DEVICE_ANSWERS is enabled; report
+   it if either is not.
+4. Score and report each in the D231 format: against covex-v6-fair-final at the same memory and seed,
+   robot on-time and robot correct-by-deadline WITH denominators, single-shot within 2 s;
+   metrics_health; pd bound by engine vs belief; DEVICE_ANSWERS actions; protect-and-defer by kind.
+   Alert attainment from flash.
+5. Filler continues meanwhile (eco-llm 1x s7, b7 1x s4 and s5, then the kv0.5r sweep). GPU never idles.
+   Act on gating or posting instructions only from flash's main session.
+Standing rules unchanged (D166, shpragya8 identity, never set user.*, never -c user.email, no
+attribution, no em dashes, never seeds 1-3, no 0.25x, every ruling into this file first).
+
 ## D231, user ruling 2026-11-24, revisit later (recorded first, before acting)
 
 1. Policy-cell order: a) the pass-1 covex-v6-final kv0.5r s4 _ms cell, as gated (~12:02);
