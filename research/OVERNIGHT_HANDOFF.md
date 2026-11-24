@@ -508,6 +508,25 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
   CPU, state `Rl`). A parent blocked on a working child is the NORMAL shape of a driver. So walk the
   tree with `ps -eo pid,ppid,time,stat` and ask whether any DESCENDANT is accumulating CPU; reporting a
   healthy driver as hung would have had someone kill a running cell.
+- *** TWO ARMS CAN LAND ON THE SAME NUMBER FOR DIFFERENT REASONS. EQUALITY WITH A FLOOR IS NOT
+  EVIDENCE OF A MECHANISM. *** I built a "three-arm convergence" out of `cascade-routing`, `SimpleStream`
+  and the D152 `RECENT` measurement, all sitting at or below the device-only floor, and called it one
+  mechanism: a short representation cannot answer a long-history question. **THE H100 REFUSED IT AND WAS
+  RIGHT.** `cascade-routing` sits on the floor because IT ALMOST NEVER SENDS ANYTHING - its port-rule
+  failure - so its `by_deadline` equals the floor BY CONSTRUCTION, not because a short representation was
+  delivered fast. **AND I HAD ESTABLISHED THAT MYSELF EARLIER THE SAME NIGHT**, including that its 18
+  `RECENT` sends were too few to move its headline, and then used the arm as evidence for the opposite
+  reading. The convergence is `SimpleStream` PLUS D152, with `cascade-routing` as a FOOTNOTE for its 18
+  sends only. Before grouping arms by an outcome, state each one's CAUSE and confirm they match; this is
+  consistency check 3's artefact-spread hazard with the sign reversed - not a spread that cannot mean
+  what it says, but an AGREEMENT that does not mean what it looks like.
+- *** DO NOT UPGRADE AN OBSERVATION INTO A MECHANISM IN THE WORDING. *** I wrote that SimpleStream's
+  below-floor result shows a representation that "ACTIVELY DESTROYS information the device already had".
+  **The H100 kept "WORSE than the device-only fallback" instead, because the first is a mechanism claim
+  nobody has traced.** The observation is that cloud answers scored below the device's own; the
+  explanation is a hypothesis. Both may be true and only one is measured. **A mechanism claim smuggled in
+  as an adjective survives every arithmetic check**, which is the register rule applied to prose rather
+  than to numbers.
 - AND FOR RELAYED CLAIMS: a NEGATIVE assertion about a primary artefact is cheap to check and expensive
   to propagate. Three were relayed unverified today (a loadavg precedent that did not exist, a
   touch-price magnitude off by about 26x, and two metric names that did exist). Check a negative against
