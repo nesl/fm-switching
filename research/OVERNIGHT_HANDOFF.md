@@ -67,10 +67,57 @@ mid-work on them.** **A RUN-PATH FREEZE IS ALSO IN FORCE until the ladder comple
 so TOUCH NO RUN-PATH FILE for either reason.
 
 *** WHAT IS ALREADY SCORED. DO NOT RE-SCORE. ***
+
+*** READ THIS BEFORE SCORING RUNG 4 ANYTHING. THE SCORER IMPLEMENTS RUNG 3's CHECK 1, NOT RUNG 4's, AND
+I GOT THIS WRONG FOR FOUR SEEDS BEFORE THE H100 CAUGHT IT BY COMPARING MY OWN STATEMENTS. ***
+The FROZEN `results/orchestration/live2/ladder_final/StudyLADDER_FINAL_prereg.json` says, VERBATIM:
+  `THE_BARS/covex-v6-fair-final/check_1_alert`: "mean per-episode alert attainment STRICTLY ABOVE
+     base's at that seed (s4 > 0.44249, s5 > 0.396211, s6 > 0.465479, s7 > 0.553811)"
+  `THE_BARS/covex-v6-final/check_1_alert`:      "mean per-episode alert attainment STRICTLY ABOVE
+     **covex-v6-fair-final's** at that seed"
+**TWO RUNGS, TWO REFERENCE ARMS.** `d179_rung2_verdict.py` is named for the rung it was written for: its
+check 1 is `delta_shares_minus_base` and its own label says "AT LEAST THE BASE'S", which is RUNG 3's
+bar. **RUN IT FOR RUNG 4 AND ITS `check_1_alert.pass` IS THE WRONG CHECK.** It also says "at least"
+where the prereg says "STRICTLY ABOVE" (immaterial on every cell so far, since rung 3's margins are
++0.216424 and +0.166322, but it would bite at exactly zero delta).
+**HOW TO SCORE RUNG 4's CHECK 1 CORRECTLY, from the SAME scorer output, no re-run needed:** read
+`per_seed[0].check_1_alert.COMMITTED_RULE_PRIMARY.mean_per_episode_attainment` and compare `shares`
+against `rung2_committed` (which IS fair-final when you pass `--rung2-arm covex-v6-fair-final`), strictly
+greater. **IGNORE that block's own `pass` field for rung 4.**
+*** WHY IT STAYED INVISIBLE, which is the lesson: shares comfortably exceeds BASE at every seed, so the
+WRONG BAR PASSED EVERYWHERE. A wrong check that always passes is harder to see than one that always
+fails. *** Corrected across the three verdicts at `5a861434`.
+
+*** RUNG 4 IS NOW COMPLETE ON ALL FOUR SEEDS, AND IT PASSES ALL THREE CHECKS AT ONE SEED OF FOUR. ***
+| seed | check 1 (vs fair-final, STRICT) | check 2 (retention, bar 0.90) | check 3 | verdict |
+|---|---|---|---|---|
+| s4 | PASS +0.004066 (qualified) | PASS 0.945 | PASS | ALL PASS |
+| s5 | PASS **+0.000294, A HAIR** | **FAIL 0.851064** | PASS | fail |
+| s6 | PASS +0.006431 | **FAIL 0.871429** | PASS | fail |
+| s7 | **FAIL -0.019534** | **FAIL 0.892307** | PASS | fail, TWO OF THREE |
+s7 verdict `0e7ab17d`; check-1 correction `5a861434`. **s7's check-2 threshold was PRE-COMPUTED AND
+PUBLISHED AS 78 OF 105 BEFORE THE CELL EXISTED, with 77 failing at 0.8923; the cell came in at 77 and the
+scorer returned 0.892307.** Second seed where the pre-computation held exactly (s6's 104 was the first),
+which is what makes "the bar did not move toward the result" checkable rather than asserted.
+**AND AT s7 THERE IS NO TRADE AT ALL:** at s4 to s6 rung 4 was level or slightly up on alerts while
+losing robot answers, so "a trade" was fair. At s7 it is DOWN ON BOTH, alert -0.019534 against the
+comparator AND dashcam 265 on-time answers lower AND 7 robot answers lost. **The trade framing holds for
+s4 to s6 and MUST NOT be extended to s7.** The H100 found this; it is the sharpest thing about s7.
+**SO THE LINE BELOW SAYING "its checks 1 and 3 pass everywhere" IS SUPERSEDED: check 1 FAILS at s7.**
+
+*** THE ONLY OUTSTANDING VERDICT IS RUNG 3 AT s7, AND AS OF 23:11 PST IT IS NOT YET SCORABLE. ***
+`covex-v6-state-final` s7 is **0 files on origin**; the other three s7 cells are present (`covex-v6-final`
+17, `covex-v6-fair-final` 17, `hybrid-F-lhreq-noc3` 16). It was due about 23:25. **When it lands:**
+`d179_rung2_verdict.py --runs <dir> --seeds 7 --shares-arm covex-v6-fair-final --base-arm
+hybrid-F-lhreq-noc3 --rung2-arm covex-v6-state-final`, confirm `positive control: PASS` FIRST, and for
+RUNG 3 the scorer's `check_1_alert.pass` IS the right check (base-referenced, bar s7 > 0.553811).
+Rung 3 so far: ALL THREE PASS at s4, s5 (retention 1.1059) and s6 (1.0769), EXCEEDING its comparator's
+gain rather than merely retaining 0.90 of it.
+
 | arm | s4 | s5 | s6 | s7 |
 |---|---|---|---|---|
-| rung 3 `covex-v6-fair-final` | ALL THREE PASS | **ALL THREE PASS**, retention 1.1059 (`3c644d81`) | **ALL THREE PASS**, retention 1.0769 (`f476ee96`) | cell missing |
-| rung 4 `covex-v6-final` | ALL THREE PASS | **check 2 FAIL 0.851** (`8e05580e`) | **check 2 FAIL 0.871** (`c7c92285`) | cell missing |
+| rung 3 `covex-v6-fair-final` | ALL THREE PASS | **ALL THREE PASS**, retention 1.1059 (`3c644d81`) | **ALL THREE PASS**, retention 1.0769 (`f476ee96`) | NOT SCORABLE, state-final s7 absent |
+| rung 4 `covex-v6-final` | ALL THREE PASS | **check 2 FAIL 0.851** (`8e05580e`) | **check 2 FAIL 0.871** (`c7c92285`) | **CHECKS 1 AND 2 BOTH FAIL** (`0e7ab17d`, `5a861434`) |
 
 **RUNG 4 PASSES CHECK 2 AT ONE SEED OF THREE, ON ROBOT RETENTION ALONE**; its checks 1 and 3 pass
 everywhere and its alert attainment is slightly ABOVE rung 3's at both failing seeds, so it buys a small
