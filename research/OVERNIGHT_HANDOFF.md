@@ -648,6 +648,42 @@ rung-4 IMPLEMENTATION AS RUN. **Whether a fixed rung 4 would beat rung 3 is UNKN
 3. Nothing scorable -> do NOT invent work on run-path files. The handoff's five overnight steps below
    are owned by other sessions.
 
+## *** NEVER `pkill -f` ON A SHARED BOX. A PATTERN SPECIFIC ENOUGH TO NAME YOUR OWN PROCESS IS SPECIFIC ENOUGH TO NAME A PEER'S, BECAUSE WAITING ON A SHARED FILENAME IS WHAT COORDINATION LOOKS LIKE. ***
+
+Two distinct kills today, both exit **144**, both mine.
+**The self-kill**, which the existing note covers: `pgrep -f "p1_abc.py e5 final"` inside a waiter whose own
+command line contained that string, so the process-death branch could never fire and a crashed sweep would
+have been indistinguishable from a running one.
+**The sibling kill, which is new and is the expensive one.** I cleared that waiter with
+`pkill -f "until \[ -f .*p1_proofs_report"` and **it also killed a subagent's summariser**, because that
+summariser was waiting on the same file. The agent then reported its artefact had "died", inferred the
+cause was its own single-background-task design, and re-engineered around a fault that was mine. **A wrong
+cause produces the wrong fix**, and the agent's own lesson is the better one: it attributed the failure to
+the nearest plausible feature of its own code without evidence distinguishing that from anything else.
+**THE RULE: kill by pid, read from `/proc`, after confirming the pid is yours.** Never by name pattern. And
+note the shape: the more precisely a pattern describes the thing you want to kill, the more likely a peer is
+doing the same thing under the same description - **shared filenames are the coordination mechanism, so they
+are also the collision surface.**
+**And a waiter must have three distinguishable outcomes**, not two: result appeared / the process died
+without writing it / the wait hit its own bound. Silence must never be ambiguous between "still working" and
+"dead". That is the same requirement E3's `metrics_health` exists to meet for the scrape, reproduced in our
+own tooling - and it was reproduced as a DEFECT in mine before it was reproduced as a rule.
+
+## *** A DEFAULT IS WHAT RUNS, NOT WHAT A CLASS ATTRIBUTE SAYS. ***
+
+E1 part 2 shipped `--metrics-scrape` with `default=True` while `asyncbackend.METRICS_SCRAPE_DEFAULT` was
+`False`, and the runner assigned over the class default and passed it into the split cfg. **So every live
+cell on the box would have scraped**, and the gated rung-4 1x cell would have run scraped against a rung-3
+comparator that never scraped - differing in an input nobody had declared, on the cell the freeze gate turns
+on. **I twice told the H100 "the class default is OFF, so nothing scrapes unless a cell asks", describing
+the attribute while believing I was describing the system.** The H100 caught it by reading the argparse line
+on origin instead of accepting my description. Fixed at `3b610470` (`default=False`), citing D187 and the
+committed pre-registration's own words, so the code matches the registration rather than the registration
+being quietly rewritten around the code.
+**THE RULE: turning a switch on for every cell is a DEPLOYMENT DEFAULT and only the user rules it** (D187:
+held or unproved code defaults OFF). **And when you describe a default, read the line that runs** - the
+argparse default, the assignment that overrides it, and the consumer - not the class attribute that names it.
+
 ## *** A SCRATCH PATH MUST CARRY THE SESSION ID. A TASK-NAMED PATH IS NOT EXCLUSIVE, AND MINE WAS NOT. ***
 
 I briefed a session to claim `scratchpad/matrix_verify_d225`. **Another session was already writing into it**
