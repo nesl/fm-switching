@@ -29,7 +29,7 @@ blk=$(jq -n --argjson pr $pr --argjson pp $pp --argjson la $la --argjson oc $oc 
    flags: {proof_cores_gt_8: ($pp > 8),
            decision_p99_up_gt_10pct: (if ($mp != null and $tp != null and $tp > 0) then ($mp > 1.10 * $tp) else null end)},
    reportable: ($pr and (($pp > 8) or (if ($mp != null and $tp != null and $tp > 0) then ($mp > 1.10 * $tp) else false end))),
-   twin_note: "the twin is the committed 16-device 3 s 1x cell of the same arm and seed, so for a 0.25x, 2.5 s or 12/20-device cell the p99 ratio also carries the condition; only a cell with proof_ran = true is reported",
+   twin_note: "the twin is the committed 16-device 3 s 1x cell of the same arm and seed (for covex-v6-base / covex-v6-rules it is that arm under its committed name, hybrid-F-lhreq-noc3 / v5-rules-2, per arm_names_v6.OLD_TO_RUNG), so for a 0.25x, 2.5 s or 12/20-device cell the p99 ratio also carries the condition; only a cell with proof_ran = true is reported",
    rule: "D209 user ruling 2026-11-23 option 2: proofs unpinned, nice 19, <= 2, never across a boundary"}')
 jq --argjson b "$blk" '. + {proof_load_d209: $b}' $d/cell.json > $d/cell.json.tmp && mv $d/cell.json.tmp $d/cell.json
 echo "$c $(echo "$blk" | jq -c '{proof_ran, proof_peak_cores, host_load_peak, decision_p99_ms, twin_decision_p99_ms, decision_p99_ratio, flags, reportable}')"
