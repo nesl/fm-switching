@@ -44,6 +44,7 @@ base and rules each cover two raw arm names at different memory: base = hybrid-F
 - covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-fair-final_n16_s5_1200s_h27_3t_kv0.5r_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-fair-final_n16_s6_1200s_h27_3t_kv0.5r_L3_epg_rq30: name did not match the rq30 cell pattern
+- covex-v6-fair-final_n16_s7_1200s_h27_3t_kv0.5r_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-rules_n12_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-rules_n12_s5_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-rules_n16_s4_1200s_h27_3t_L2.5_epg_rq30: name did not match the rq30 cell pattern
@@ -72,7 +73,7 @@ base and rules each cover two raw arm names at different memory: base = hybrid-F
 
 ## Provenance
 
-- runs dir last commit: 3d2a2809
+- runs dir last commit: 3829b7de
 - scorer score.py last commit: 35e3c57e
 - d179_rung2_verdict.py last commit: 35e3c57e
 - build time is deliberately NOT stamped here: the output is byte-deterministic given the input, so the D190 poll commits only on a real data change. The git commit of this file is the build time of record.
