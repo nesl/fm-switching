@@ -1,31 +1,50 @@
 {
- "arm": "covex-v6-fair-final",
- "n_devices": 16,
- "mode": "A",
- "run_s": 1200.0,
- "seed": 4,
- "robot_upload": "per-frame",
- "split": true,
- "err": null,
- "wall_s": 1201.727,
- "run_dir": "/home/pragya/data/live2/frozen_grid/runs/covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30",
- "trace_dir": "/home/pragya/data/live2/frozen_grid/work/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2_L3_epg_perframe_rq30",
- "lateness": {
-  "max_ms": 20.5751,
-  "mean_ms": 0.0736,
-  "n": 42024,
-  "p50_ms": 0.0667,
-  "p90_ms": 0.0959,
-  "p99_ms": 0.1437
- },
- "run_valid": true,
- "digests_equal": true,
- "n_requests": 10178,
- "n_errors": 0,
- "server_kind": "vllm",
- "is_measurement": false,
- "score": {
-  "ok": false,
-  "error": "ScoringRefused: D226: 1 delivered cloud answer(s) in covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30 have request ids absent from the request log (10174 rows); their refusal status is unverifiable and keeping them risks a silent mis-score. First few: ['r10175']"
- }
+  "arm": "covex-v6-fair-final",
+  "n_devices": 16,
+  "mode": "A",
+  "run_s": 1200,
+  "seed": 4,
+  "robot_upload": "per-frame",
+  "split": true,
+  "err": null,
+  "wall_s": 1201.727,
+  "run_dir": "/home/pragya/data/live2/frozen_grid/runs/covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30",
+  "trace_dir": "/home/pragya/data/live2/frozen_grid/work/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2_L3_epg_perframe_rq30",
+  "lateness": {
+    "max_ms": 20.5751,
+    "mean_ms": 0.0736,
+    "n": 42024,
+    "p50_ms": 0.0667,
+    "p90_ms": 0.0959,
+    "p99_ms": 0.1437
+  },
+  "run_valid": true,
+  "digests_equal": true,
+  "n_requests": 10178,
+  "n_errors": 0,
+  "server_kind": "vllm",
+  "is_measurement": false,
+  "score": {
+    "ok": false,
+    "error": "ScoringRefused: D226: 1 delivered cloud answer(s) in covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30 have request ids absent from the request log (10174 rows); their refusal status is unverifiable and keeping them risks a silent mis-score. First few: ['r10175']"
+  },
+  "proof_load_d209": {
+    "proof_ran": true,
+    "proof_peak_cores": 2.05,
+    "host_load_peak": {
+      "loadavg_1m": 49.9,
+      "other_cpu_cores": 49.743
+    },
+    "decision_p99_ms": 3.4548,
+    "twin": "covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "twin_decision_p99_ms": 3.6788,
+    "decision_p99_ratio": 0.939,
+    "flags": {
+      "proof_cores_gt_8": false,
+      "decision_p99_up_gt_10pct": false
+    },
+    "reportable": false,
+    "twin_note": "the twin is the committed 16-device 3 s 1x cell of the same arm and seed (for covex-v6-base / covex-v6-rules it is that arm under its committed name, hybrid-F-lhreq-noc3 / v5-rules-2, per arm_names_v6.OLD_TO_RUNG), so for a 0.25x, 2.5 s or 12/20-device cell the p99 ratio also carries the condition; only a cell with proof_ran = true is reported",
+    "rule": "D209 user ruling 2026-11-23 option 2: proofs unpinned, nice 19, <= 2, never across a boundary"
+  }
 }
