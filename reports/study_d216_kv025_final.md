@@ -152,6 +152,12 @@ percent, and the demotions that are the eviction signal are 37 in 35 cells - abo
 The path works; it is thin. Reporting the verdict without the magnitude would overstate it in
 exactly the direction the ruling is relying on.
 
+**And no dry cell can stand in for the missing measurement, which is why this section is the
+load-bearing one.** On a dry cell `cached_tokens` is `None` and the corrector treats that as no
+evidence (`engine_actions.py:362-364`), so the reactive channel is structurally inert there. Check
+3's dry cells therefore bear on the reactive claim in **neither direction**, however flat or lively
+their digests are. See 3.4a.
+
 **A second reactive channel exists and is not engine telemetry, so it must not be folded in.** The
 coordinator's own capacity enforcement (`cstate.py:520-535`) evicts by the **configured** pool when
 `kv_capacity_enforced`, and that path moves the belief through `set_tier`, which **does** carry the
@@ -295,10 +301,48 @@ Seed 4, 16 devices, 1,200 s, posted knobs, planner wall-clock cutoff off, one ce
 | F11_harm0_kv025 | covex-v6-final-harm0 | 0.25 | off | 188.3 | 1.33 -> 1.09 | True | 0.0 | `5a03c2807da3681a` / 14,539 |
 | F12_marginhuge_kv025 | covex-v6-final-margin-huge | 0.25 | off | 189.3 | 1.09 -> 1.25 | True | 0.0 | `5a03c2807da3681a` / 14,539 |
 
-**13 of 14 cells ran alone**, at loadavg 1.0 to 1.5 throughout. The one exception is `F0a_base_1x`:
-the guard found a window, started it, and two foreign `cf_pd_one_cell.py` cells started during it.
-It is recorded `alone=False`. It reproduced its committed digest exactly anyway, which is a datum
-about load-insensitivity and not a licence - it is reported as a reproduction, not as a bar.
+**13 of 14 cells are GUARD-ASSERTED alone**, at loadavg 1.0 to 1.5 throughout. The one exception is
+`F0a_base_1x`: the guard found a window, started it, and two foreign `cf_pd_one_cell.py` cells
+started during it. It is recorded `alone=False`. It reproduced its committed digest exactly anyway,
+which is a datum about load-insensitivity and not a licence - it is reported as a reproduction, not
+as a bar.
+
+**GUARD-ASSERTED, not plain true, and the bound is stated because three sessions today found their
+alone-guards blind to processes they had no name for.** `alone=True` in this manifest means
+precisely: *at the moment before and the moment after the cell, this guard saw no process whose
+cmdline contained a token whose basename matches a `*.py` file under `experiments/orchestration/
+live2/`, excluding this driver, its ancestors, and any process carrying `D216_CELL_MARKER`.* What
+that **cannot** see: a cell runner living outside `live2` (for example under
+`experiments/orchestration/policy/audit/`), a script renamed or newly added since the driver
+started (the name list is built once, at startup), a `python -c` invocation, and any non-Python
+compute. loadavg at start and end is recorded as a magnitude beside every cell for exactly this
+reason, so `alone` can be **re-adjudicated from evidence** later rather than taken on the guard's
+word. The loadavg figures (1.01 to 1.46, one cell at a time) are consistent with the assertion but
+do not prove it.
+
+**And for the digest that matters most there is direct evidence of determinism, which is stronger
+than any aloneness argument.** `5a03c2807da3681a` / 14,539 was produced **five** independent times
+in this run - F1, F3, F4, F6, F8 - across two memory settings, two enforcement settings and two arm
+names, with 0 differing decisions in every pairing. Five agreeing runs is evidence that the
+quantity is deterministic, not an argument that nothing could have disturbed any of them.
+
+### 3.1a An INDEPENDENT session re-read these cells and agrees on all 14
+
+While the box was being cleared, the A6000 session `[0ce3c2]` - **not** the author of this study -
+read all fourteen committed per-cell JSONs **directly**, deliberately not from this manifest or
+this report, and recorded the result at
+`results/orchestration/live2/d216_final_kv025/d216_digest_crosscheck_0ce3c2.json` (provenance
+`3e03ecbc`, no cell run). **Every digest and every row count matches this report exactly**, and it
+reaches the same three readings independently: the off-switch identity passes on the final rungs,
+rung 3 does not move with memory at all, and rung 4 responds to the pool's **declared size** rather
+than to observed occupancy.
+
+That is worth more than a duplicate table. CLAUDE.md check 7's blind spot is *a side of the
+comparison that is never audited*, and the side least likely to be audited here is **this report's
+own reading of its own manifest**. An outside session reading the primary artifacts and landing on
+the same numbers closes that gap in a way self-checking cannot. Its caveats are the same as this
+report's and are adopted: seed 4 only, dry only, logical KV scaling, and nothing here speaks to
+whether any trade **helps**.
 
 ### 3.2 Positive controls: both PASS, and only one of them is admissible as a bar
 
@@ -346,11 +390,39 @@ is not mine.
 | F2 vs F3 (Step 2b at 1x) | does the switch reach a decision | **942** | 7,852 | **yes** |
 | F5 vs F6 (Step 2b at 0.25x) | the same at the setting under test | **1,691** | 9,863 | **yes** |
 
-**Rung 3 at 0.25x reproduces its own 1x digest with zero rows of difference.** Under the ruling of
-2026-11-23 that is **capacity-blindness by design**, not a defect, and it is reported in Rule 2's
-vocabulary as **INCONCLUSIVE - UNEXERCISED** for the proposition "the pool reaches a rung-3
-decision", never as an equivalence and never as a finding about the policy. Section 1 is what makes
-that reading legitimate rather than a cover: the reactive path is alive on this rung.
+### 3.4a RUNG 3 DOES NOT MOVE WITH MEMORY AT ALL - the three digests, the classification, and the reason, in one place
+
+**The observation.** `5a03c2807da3681a` / 14,539 is the digest of **F1 (rung 3, 1x)**, **F4 (rung 3,
+0.25x)** and **F8 (rung 3, 0.25x with coordinator eviction ON)**. Three conditions, one digest, byte
+for byte, 0 differing decisions in every pairing. Rung 4 by contrast does respond:
+`57bed6ace2eb07d1` at 1x against `278da529349ff8c2` at 0.25x, with F7 (enforced) also
+`278da529349ff8c2`.
+
+**The classification.** Rule 2 **INCONCLUSIVE - UNEXERCISED** for the proposition "the configured
+pool reaches a rung-3 decision". It is **not an equivalence** and **not a finding about rung 3's
+policy**.
+
+**The reason, which is the whole point of attaching it here.** Two independent facts make three
+identical digests the **expected** outcome rather than a surprise:
+
+1. **Rung 3 makes no memory trade-offs by design.** Trade-offs are rung 4's counterfactual (D151,
+   D163), and the user ruled on 2026-11-23 that rung-2 and rung-3 capacity-blindness **for
+   decisions** is not a defect, is not fixed, and gets no reruns. The structural half is already
+   committed: `self._caps` (`arms.py:82`) has exactly one occurrence repo-wide, the write, so the
+   arms cannot see the configured pool at all.
+2. **A DRY CELL HAS NO ENGINE TELEMETRY.** The ruled framing is that rungs 2 and 3 adapt to memory
+   pressure **only reactively, through engine telemetry**. `backend.cached_tokens_of` returns
+   `None` with no engine, and `belief_update_from_cached_tokens` treats `None` as **no evidence**
+   and leaves the belief untouched (`engine_actions.py:362-364`). So on a dry cell the reactive
+   channel is not merely quiet, it is **structurally inert**: rung 3 has nothing to react to.
+
+**Therefore: NO RUNG-3 0.25x DRY CELL IS REPORTED HERE AS A MEMORY RESULT**, and the three identical
+digests do **not** bear on the reactive claim in either direction. They cannot confirm it and they
+cannot refute it. **Only check 1 can**, which is why check 1 is the load-bearing part of this study
+and not a formality: it is measured on **live** cells, where `cached_tokens` exists, and it is what
+establishes that "adapt reactively through engine telemetry" is a true sentence for rungs 2 and 3
+rather than an unfalsifiable one. Had check 1 come back absent or GPU-only, the ruled sentence could
+not have been written at all, and these three digests would have looked exactly the same.
 
 **And the enforcement channel fires hard and changes nothing, on both rungs.** The switch provably
 arrived - read back off the coordinator instance as `True`, type `bool`, pool 15,736 - and
@@ -363,10 +435,29 @@ enforcement did real work:
 
 Over 43,000 tokens of history were evicted to the host tier in each cell and not one decision
 moved. This reproduces Session D's section 3.3 on the final ladder, and F8's 47,588 is the same
-magnitude Session D measured. The reason is section 2's: the eviction moves `measured_tier`, the
-belief follows only on a complete build (`cstate.py:207`), and the prices read a predicted tier
-that no capacity signal reaches. Rule 2: **INCONCLUSIVE - UNEXERCISED**, and the diagnostic is
-section 2's missing survival predictor, not a policy result.
+magnitude Session D measured. Rule 2: **INCONCLUSIVE - UNEXERCISED**.
+
+**And the cause is NOT established here, which I am saying rather than letting a plausible one
+stand.** The eviction demonstrably moved `measured_tier` - `host_peak_tokens` is computed over
+sessions whose `measured_tier == "host"`, so `set_tier("host", ...)` certainly ran. What happened to
+the **belief** is **not recoverable from this runner's output**: the cell JSON carries the arm's
+`stats` and `pd_counters`, not the coordinator's `counts`, so there is no `placement_events`,
+`evicted` or `belief_*` figure in these artifacts to read. Two candidate explanations are therefore
+live and this run does not separate them:
+
+- the **complete-build gate** (`cstate.py:207`): `set_tier` moves the belief only when
+  `built_tokens >= est_tokens`, so on partial prefixes the arm-visible readiness
+  (`cstate.py:636`, which goes through the belief) would never have changed; or
+- the belief **did** move and the price change was simply never large enough to flip an admission.
+
+**One half can be settled from the code and it argues against the first explanation being the whole
+story.** The coordinator's own two reads, `coordinator.py:1294` and `:1331`, go through
+`residency_readiness()`, which returns `HOST-WARM` whenever `measured_tier == "host"` **regardless
+of the belief** (`cstate.py:152-170`). So those two prices **did** see host on the evicted sessions,
+and still no decision changed. The complete-build gate can only account for the arm-visible half.
+
+Adding the coordinator's `counts` to this runner's output would separate them; it is one small
+change to a file I do not own, and it is listed in section 7 rather than made.
 
 ### 3.5 Characteristic decisions by kind, with explicit zeros
 
@@ -600,16 +691,27 @@ express a partial prefix is present and **unreachable**, because every belief wr
 The accuracy fix is costed in 2.1 at roughly one session plus 6 dry cells and a rung-2-to-4 re-bar,
 **blocked on the D216 (2) `/metrics` scrape**, and is **NOT BUILT**: it needs a ruling.
 
-**(5) Session D's 711-row contamination is CURED in the final ladder.** The off arm is byte-
-identically final rung 3 at both memory settings, 0 differing decisions. The redundant double-swap
-that made it safe is a latent hazard and is reported, not fixed.
+**(5) Session D's 711-row contamination is CURED in the final ladder, and both halves of that
+belong on the record.** The defect was real: `covex-v6-cf-c5attr-off` was 711 rows off its own
+declared rung-3 bar because `_Rung4Mixin._cf_engine` swapped the planner's deficit weight
+unconditionally, reading neither compound switch - a **second** cause for a number D195 (1) had
+closed as a recipe mismatch. On the final ladder the off arm is byte-identically final rung 3 at
+both memory settings, 0 differing decisions, because final rung 3 wires that same source itself. So
+the earlier finding was **right** and is now **fixed**. The two Step 4 controls landing on rung 3's
+digest as well (F11, F12) is the same statement from the other side: that is what a working control
+on rung 4's harm term should do. The redundant double-swap that makes the cure hold is a latent
+hazard and is reported, not fixed.
 
 **(6) Rung 4 binds at 0.25x; rung 3 does not; the coordinator-eviction channel binds for neither.**
 1,397 decisions move for rung 4 between 1x and 0.25x, and the Step 4 controls show that difference
-**is** the mechanism. Rung 3 reproduces its 1x digest exactly: **INCONCLUSIVE - UNEXERCISED**, which
-the ruling makes by-design rather than a defect. Enforcement evicted 43,613 and 47,588 host tokens
-and changed **0** decisions: also **INCONCLUSIVE - UNEXERCISED**, and its diagnostic is conclusion
-(4), the missing predictor.
+**is** the mechanism. Rung 3 gives **one digest across three conditions** (1x, 0.25x, 0.25x
+enforced): **INCONCLUSIVE - UNEXERCISED**, never an equivalence, and **expected** under the ruling,
+because rung 3 makes no memory trade-offs by design *and* a dry cell has no engine telemetry for it
+to react to. **No rung-3 0.25x dry cell is reported as a memory result**, and these digests bear on
+the reactive claim in neither direction - only check 1, on live cells, can. Enforcement evicted
+43,613 and 47,588 host tokens and changed **0** decisions: also **INCONCLUSIVE - UNEXERCISED**, with
+the cause explicitly **not established** (see 3.4), because this runner does not dump the
+coordinator's counts.
 
 **(7) The two legs swap places and are NOT additive.** At 1x the compound is byte-identically
 question-deferral alone (4 deferrals, all four protect-and-defer kinds zero); at 0.25x it is byte-
@@ -632,7 +734,7 @@ Rule 2 **unexpressible**, reported, not fixed.
 
 ### 6.1 Proposed `research/policy_design_log.md` row
 
-| D217 | 2026-11-23 | THE REACTIVE RESIDENCY PATH IS REAL ON RUNGS 2 AND 3, ABSENT ON THE BASELINES, AND THERE IS NO SURVIVAL PREDICTOR. (1) The belief IS corrected per request from engine `cached_tokens` and the correction REACHES rung-2 and rung-3 pricing: over 35 committed live cells, 53,673 corrections offered, 383 applied, 346 to gpu and 37 to cold, consumed at coordinator.py:1161, :1238, :1294, :1331 and arms_v6state.py:416. So "rungs 2 and 3 adapt to memory pressure only reactively, through engine telemetry" is WRITABLE for those rungs, with two limits that travel with it: the channel is thin (about one demotion per cell) and 0 of 23 committed reduced-pool live cells run an arm that applies it, so at a reduced pool it is UNMEASURED. (2) For rung 0, rung 1 and every paper baseline including b7-edf-feasibility the sentence is FALSE: 7,525 corrections changed a belief and all 7,525 were reverted by the observe-only gate (coordinator.py:1803). Rule 2 unexpressible; a labelling obligation, not a defect. (3) belief_to_host = 0 in all 159 live cells: the corrector can say gpu or cold and never host (D209 (4) - no per-request host signal exists), so host-warm is priced as cold and RELOAD is structurally unexercised. D211 confirmed from the counter side. (4) CHECK 2 IS NO: the predicted cache state used in state pricing (touch_policy.py:39, :63, :210) and in b7 (baselines/constructed.py:184) consults no pool size, no occupancy and no time - it is the argmax of a one-hot belief holding the last observed tier. M5's step function is NOT IMPLEMENTED anywhere in live2, so this is an absent predictor rather than a wrong variable; the M6 straddling guard is present and unreachable because every belief writer is one-hot. Accuracy fix costed at about one session plus 6 dry cells and a rung-2-to-4 re-bar, blocked on the D216 (2) metrics scrape, NOT BUILT pending a ruling. (5) The final ladder CURES Session D's 711-row contamination: covex-v6-final-off is byte-identically covex-v6-fair-final at 1x and at 0.25x (5a03c2807da3681a / 14,539, 0 differing decisions), because final rung 3 wires the planner feed itself; the redundant double-swap remains a latent hazard. (6) FINAL-LADDER 0.25x: rung 4 binds (1,397 decisions between 1x and 0.25x, Step 4 controls both collapse to the off arm exactly), rung 3 does not (0 rows, Rule 2 unexercised, by design under the 2026-11-23 ruling), and coordinator eviction binds for neither despite 43,613 and 47,588 host tokens evicted (Rule 2 unexercised, diagnostic = item 4). The two legs swap places and are not additive. Decision latency worst p99 2.0035 ms, 4 of 199,992 over 20 ms and all four shown to be instrument noise. Gate A for covex-v6-final not computable from dry cells. | Flash Session, 13 of 14 cells ALONE under D216 (1), measured at 87ca3503. |
+| D217 | 2026-11-23 | THE REACTIVE RESIDENCY PATH IS REAL ON RUNGS 2 AND 3, ABSENT ON THE BASELINES, AND THERE IS NO SURVIVAL PREDICTOR. (1) The belief IS corrected per request from engine `cached_tokens` and the correction REACHES rung-2 and rung-3 pricing: over 35 committed live cells, 53,673 corrections offered, 383 applied, 346 to gpu and 37 to cold, consumed at coordinator.py:1161, :1238, :1294, :1331 and arms_v6state.py:416. So "rungs 2 and 3 adapt to memory pressure only reactively, through engine telemetry" is WRITABLE for those rungs, with two limits that travel with it: the channel is thin (about one demotion per cell) and 0 of 23 committed reduced-pool live cells run an arm that applies it, so at a reduced pool it is UNMEASURED. (2) For rung 0, rung 1 and every paper baseline including b7-edf-feasibility the sentence is FALSE: 7,525 corrections changed a belief and all 7,525 were reverted by the observe-only gate (coordinator.py:1803). Rule 2 unexpressible; a labelling obligation, not a defect. (3) belief_to_host = 0 in all 159 live cells: the corrector can say gpu or cold and never host (D209 (4) - no per-request host signal exists), so host-warm is priced as cold and RELOAD is structurally unexercised. D211 confirmed from the counter side. (4) CHECK 2 IS NO: the predicted cache state used in state pricing (touch_policy.py:39, :63, :210) and in b7 (baselines/constructed.py:184) consults no pool size, no occupancy and no time - it is the argmax of a one-hot belief holding the last observed tier. M5's step function is NOT IMPLEMENTED anywhere in live2, so this is an absent predictor rather than a wrong variable; the M6 straddling guard is present and unreachable because every belief writer is one-hot. Accuracy fix costed at about one session plus 6 dry cells and a rung-2-to-4 re-bar, blocked on the D216 (2) metrics scrape, NOT BUILT pending a ruling. (5) The final ladder CURES Session D's 711-row contamination: covex-v6-final-off is byte-identically covex-v6-fair-final at 1x and at 0.25x (5a03c2807da3681a / 14,539, 0 differing decisions), because final rung 3 wires the planner feed itself; the redundant double-swap remains a latent hazard. (6) FINAL-LADDER 0.25x: rung 4 binds (1,397 decisions between 1x and 0.25x, Step 4 controls both collapse to the off arm exactly), and rung 3 gives ONE DIGEST ACROSS THREE CONDITIONS (5a03c2807da3681a / 14,539 at 1x, at 0.25x and at 0.25x enforced, 0 differing decisions). That flatness is Rule 2 unexercised, never an equivalence, and it is EXPECTED rather than a surprise for two independent reasons: rung 3 makes no memory trade-offs by design (arms.py:82 `self._caps` is a write with no read repo-wide), AND a dry cell has no engine telemetry, so the reactive channel is structurally inert (cached_tokens is None, which engine_actions.py:362 treats as no evidence). NO RUNG-3 0.25x DRY CELL IS REPORTED AS A MEMORY RESULT, and these digests bear on the reactive claim in neither direction; only item (1), on live cells, can settle it. Coordinator eviction binds for neither rung despite 43,613 and 47,588 host tokens evicted (Rule 2 unexercised, and the cause is explicitly NOT established, because cf_pd_one_cell dumps the arm's stats and not the coordinator's counts; the two coordinator-side prices do see host through residency_readiness regardless of the belief, so the complete-build gate can only account for the arm-visible half). The two legs swap places and are not additive. Decision latency worst p99 2.0035 ms, 4 of 199,992 over 20 ms and all four shown to be instrument noise by a byte-identical decision set. Gate A for covex-v6-final not computable from dry cells. | Flash Session, 13 of 14 cells GUARD-ASSERTED alone under D216 (1) with loadavg and a foreign-process census beside each, measured at 87ca3503. The one digest everything turns on was produced five independent times with 0 differing decisions, which is determinism evidence rather than an aloneness argument. |
 
 ### 6.2 Proposed `research/EXPERIMENTS.md` row
 
@@ -641,7 +743,7 @@ Rule 2 **unexpressible**, reported, not fixed.
 | question | Does an eviction reach rung-2 / rung-3 pricing and b7 through the residency belief; does the survival prediction consult the GPU-KV pool; and do the final rungs respond to a 0.25x pool? |
 | scripts | `experiments/orchestration/live2/d216_belief_correction_census.py`, `d216_survival_predictor_readsites.py`, `d216_final_kv025_one_cell.py`, `d216_final_kv025_driver.py`, `d216_final_kv025_report.py` |
 | output | `results/orchestration/live2/d216_final_kv025/` (census, read-site proof, 14 cells, assembled report) |
-| verdict | Check 1 FIRES AND VARIES on rungs 2+ / UNEXPRESSIBLE on rung 0, rung 1 and all baselines / CONSTANT for host everywhere. Check 2 NO, and the predictor is absent rather than wrong. Check 3: off-switch identity holds, rung 4 binds at 0.25x, rung 3 does not (unexercised, by design), eviction channel unexercised, Step 4 both controls pass, 20 ms budget met. |
+| verdict | Check 1 FIRES AND VARIES on rungs 2+ / UNEXPRESSIBLE on rung 0, rung 1 and all baselines / CONSTANT for host everywhere. Check 2 NO, and the predictor is absent rather than wrong. Check 3: off-switch identity holds (Session D's 711-row defect cured), rung 4 binds at 0.25x, rung 3 gives one digest across three conditions (unexercised, expected by design AND because a dry cell has no telemetry - not reported as a memory result), eviction channel unexercised with its cause not established, Step 4 both controls pass, 20 ms budget met. |
 | status | COMPLETE (dry); Gate A and the reduced-pool reactive path pending live cells |
 | consistency_check | PASS, 7 of 7 recorded in report section 4 |
 | mechanism_verification | Step 2b run before scoring (both off-switch identities and both Step 2b pairs); Step 4 run as two named-arm controls, both collapse; characteristic decisions reported by kind with explicit zeros |
@@ -677,5 +779,17 @@ and a ruling is pending on the costed accuracy fix.
    planner double-swap in `arms_v6cfr3` (latent, would silently reopen the 711-row defect),
    `pd_request_crossed_bar_unexpressible` growing to 27 at 0.25x, and the unreachable
    `PURE_TIER_MIN_BELIEF` guard in `touch_policy`.
-7. **The `.rows.json` intermediates** (about 7 MB each) were moved out of the results tree after the
+7. **The enforcement channel's cause is unresolved for want of instrumentation.** `cf_pd_one_cell`
+   dumps the arm's `stats` and not the coordinator's `counts`, so no `placement_events`, `evicted`
+   or `belief_*` figure exists in these cells. Adding the coordinator's counts to that runner's
+   output would separate the two candidate explanations in 3.4 in one cell. It is a small change to
+   a file I do not own.
+8. **No further cell was started.** The box went to Session B for proofs (b) and (c) and for posting
+   `FINAL_LADDER_CELLS`, which gates the paper's critical path. If the item above is wanted as a
+   cell, it needs sequencing after that.
+9. **The `.rows.json` intermediates** (about 7 MB each) were moved out of the results tree after the
    report was assembled and are not committed.
+10. **`alone=True` is GUARD-ASSERTED, not verified.** The bound on what this guard can see is stated
+   in 3.1, and the loadavg magnitude and foreign-process census are carried beside every cell so the
+   claim can be re-adjudicated from evidence. For the one digest everything turns on, five
+   independent runs agreeing exactly is the stronger evidence and is what is relied on.
