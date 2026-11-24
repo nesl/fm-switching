@@ -18,7 +18,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
-for _p in (str(HERE), str(HERE / "fleet"), str(HERE / "scorer"), str(HERE / "hybrid"),
+for _p in (str(HERE), str(HERE / "fleet"), str(HERE / "v5"), str(HERE / "scorer"), str(HERE / "hybrid"),
            str(REPO / "experiments/orchestration/live"), str(REPO / "experiments/orchestration/baselines"),
            str(REPO / "experiments/orchestration/sim"), str(REPO / "experiments/lib")):
     if _p not in sys.path:
