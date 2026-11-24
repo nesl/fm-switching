@@ -395,6 +395,24 @@ complete and committed.
    (D216 (2)). `asyncbackend.py` is uncontested, so this can proceed independently of hit 7.
 3. **ITEM 3 (D216 (3))**: record the belief's predicted GPU-resident prefix per request so D211 signal
    (a) is computable. Site is `coordinator.py:2126`, so IT WAITS FOR HIT 7.
+   *** UPDATED 2026-11-24 09:15 PST: HIT 7 HAS LANDED AND ITEM 3 IS NOT BLOCKED. ITS BYTE-IDENTITY
+   SWEEP IS RUNNING RIGHT NOW. DO NOT START A CELL AND DO NOT RE-LAUNCH IT. ***
+     pid 378337 = `d213_digest_driver.py --out out/item3_digests.json`, with a LIVE CHILD (pid 381059,
+     1:19 CPU) running a `cf_pd_one_cell.py` cell. The orchestrator itself shows `00:00:00` own CPU,
+     which per this file's own corrected rule is a HEALTHY ORCHESTRATOR, not a hang: the discriminator
+     is CHILDREN, and it has one burning CPU. loadavg 1.25. **THE ALONE RULE THEREFORE BINDS: any dry
+     cell of your own MUST WAIT.**
+   Hit 7 landed as `c511050` (four files, +59 -3), read back from origin byte-identically rather than
+   trusted from the push. **THE SITE MOVED: `coordinator.py:2126` -> `:2138`**, because hit 7 added 15
+   `window_s` occurrences to that file. Both of item 3's anchors still occur EXACTLY ONCE, which is why
+   its `count == 1` assertions were worth keeping.
+   *** AND THE "IT BLOCKS ITEM 3" CLAIM IN THE CONCURRENCY SECTION ABOVE IS STALE. *** That section says
+   `coordinator.py`'s 9 worktree-only lines pose a held-code-versus-abandoned-WIP question that BLOCKS
+   item 3. **IT DOES NOT: item 3 never needed the shared worktree's copy.** It builds its A and B trees
+   from a PRIVATE `git archive` of a re-resolved origin sha, so the dirty shared copy is irrelevant to
+   it. The held-versus-abandoned question REMAINS OPEN for anything that would overwrite those three
+   files, and it is still a user question, but it is NOT an item-3 blocker and no resume should wait on
+   it for that reason.
 4. **THE 0.25x PAIR, user-approved FOR THIS PAIR ONLY**, once 1 to 3 pass: `covex-v6-fair-final` and the
    DEVICE_ANSWERS build of `covex-v6-final` at 0.25x s4, REAL ENGINE POOL
    (`--num-gpu-blocks-override 985 --max-model-len 15744`, pool of record 15,760 = 985 x 16), posted
