@@ -21,7 +21,7 @@ exec 9>$ST/lock; flock -n 9 || exit 0
 OUT=results/orchestration/live2/frozen_test/runs
 LOG=results/orchestration/live2/frozen_test/frozen_grid.log
 WL=$ST/watchdog.log
-DRIVER=experiments/orchestration/study_frozen_grid_driver_v35.sh
+DRIVER=experiments/orchestration/study_frozen_grid_driver_v36.sh
 GPU=4f1d7e47
 HP='^/home/pragya/.venvs/fm-switching-vllm/bin/python[0-9.]* experiments/orchestration/live2/(run_live2_real|offload_verify)\.py'
 DRY=${DRY:-0}
