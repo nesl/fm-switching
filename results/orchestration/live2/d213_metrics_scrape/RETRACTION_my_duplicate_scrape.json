@@ -1,0 +1,18 @@
+{
+ "_STATUS": "RETRACTED AS A LANDING PROOF. The change it proves must NOT be committed.",
+ "what_I_got_wrong": "I built a /metrics scrape for AsyncLive2Backend believing live2 had none. E1 WAS ALREADY LANDED as b6cbb0a9, 'asyncbackend: a /metrics scrape for live2, DEFAULT OFF pending its byte-identity proof', and b6cbb0a9 IS AN ANCESTOR OF MY OWN BASE SHA 35b5bc85. So my base tree already contained the scrape and my patch added a SECOND, independent implementation.",
+ "how_it_is_verified": {
+  "blob_of_asyncbackend.py": {
+   "4ed40ec9 (E1 parent)": "079099b1b0c0c9329cc9d3c98c56fa037c02a3d0",
+   "b6cbb0a9 (E1)": "ff183c503cd36ac1faba924a036b292930a8a7c1",
+   "35b5bc85 (my base)": "ff183c503cd36ac1faba924a036b292930a8a7c1",
+   "1479d324 (origin now)": "ff183c503cd36ac1faba924a036b292930a8a7c1"
+  },
+  "ancestry": "git merge-base --is-ancestor b6cbb0a9 35b5bc85 -> true",
+  "my_base_already_had_it": "git show 35b5bc85:...asyncbackend.py | grep -c METRICS_SCRAPE_DEFAULT -> 3"
+ },
+ "why_the_duplicate_is_not_merely_redundant_but_incoherent": "In my patched tree B1 there are TWO `metrics_health` definitions, mine at line 259 and the landed one at 423. Python keeps the LAST, so MY metrics_health is SHADOWED AND DEAD: the `not_published` allowlist marker and my counters are not what any caller receives. Meanwhile my poller thread and `_fetch_engine_metrics` do still run and my `metrics()` merge does still publish, so the result is a hybrid whose publication is mine and whose health reporting is the landed code's. It also defaults the scrape ON, which contradicts D187 and the landed commit's explicit gating, and it reimplements the KV policy that the landed commit deliberately delegates to adapter.HttpBackend._fetch_metrics precisely so the two paths cannot drift.",
+ "what_my_commit_guard_did": "The guard compares origin/main's blob for asyncbackend.py against the blob the patch was built on. Both are ff183c50, so the guard would have PASSED and the commit would have gone through. It protects against the file moving under me, not against the change already existing. That is a real gap in my own check and it is the reason this was caught by reading the directory rather than by the guard.",
+ "what_my_earlier_step_2b_numbers_actually_measured": "gpu_kv_fraction 0.0 -> 0.7215 and rung-4 free KV 51,944 -> 17,527 are a correct OFF-versus-ON contrast: the A side read 0.0 because the LANDED scrape is DEFAULT OFF and publishes {}, not because no scrape exists. The numbers stand; my attribution of them to 'live2 never scrapes' was stale by one commit and is withdrawn.",
+ "what_is_genuinely_still_missing": "Exactly what the landed file names as pending: the ON-STATE proof that would let D187's default be flipped. b6cbb0a9's own proof (d213_e1_offstate_byte_identity.json, 3 arms) covers the OFF state. Nobody has yet shown, with the scrape ENABLED on the LANDED code, that only rung 4 moves across the D213 paper set, and nobody has the rung-4 count. That needs NO code change, only the switch, and it must be LIVE cells because a dry cell builds no backend at all."
+}

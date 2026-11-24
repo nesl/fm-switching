@@ -1,0 +1,75 @@
+{
+ "_HEADLINE": "THE LANDED E1 SCRAPE IS AN ABSENT LINK. It is a scraper that NOTHING CALLS, so cloud.gpu_kv_fraction is STILL 0.0 in every live2 cell on origin today, and flipping METRICS_SCRAPE_DEFAULT to True would change NOTHING. CONFIRMED LIVE: on a landed-code cell with a real /metrics endpoint, be.metrics() carried no vllm: key, free_kv was CONSTANT at the full 62,944-token pool across all 29 rung-4 decisions, the engine metric bound the gate ZERO times, and PROTECT_AND_DEFER fired ZERO times.",
+ "_STOPPING_CONDITION": "CLAUDE.md Step 2: 'A quantity that is written and never read is ABSENT, and is a stopping condition exactly as a zero or a constant is.' The authorised enabled-state proof therefore CANNOT BE RUN as specified: there is no switch whose flip reaches a decision, Step 2b would produce identical logs, and that is an ABSENT LINK, never a negative. NOT RUN.",
+ "sha_audited": "origin/main 1479d3245acd0aa44d2e67be14b405e6fbdba45d",
+ "blob_audited": "experiments/orchestration/live2/asyncbackend.py = ff183c503cd36ac1faba924a036b292930a8a7c1",
+ "the_chain_as_landed": [
+  {
+   "link": "the ONLY writer of st.metrics",
+   "evidence": "coordinator.py:489 `self.st.metrics = self.be.metrics()`",
+   "ok": true
+  },
+  {
+   "link": "so the scrape must reach metrics()",
+   "evidence": "the landed metrics() body returns n_built, callback_errors, wire_image_parts, wire_extra_delay_ms, submit_delay_total_ms, first_line_to_first_content_ms, n_callback_errors, build_ms_total, build_ms_mean, cache. It does NOT call scrape_metrics() and carries NO vllm: key. The body is unchanged from before E1.",
+   "ok": false
+  },
+  {
+   "link": "scrape_metrics() is called by something",
+   "evidence": "ZERO callers in the tree. git grep over experiments finds only its own definition at asyncbackend.py:175; the only other hits are this session's own d213_* proof scripts and a prose comment in n5_queued_by_class_census.py:291.",
+   "ok": false
+  },
+  {
+   "link": "metrics_health() reaches cell.json",
+   "evidence": "zero production callers; only d209_unit_proofs.py:97, a proof script.",
+   "ok": false
+  },
+  {
+   "link": "something sets metrics_scrape so the gate can open",
+   "evidence": "__init__ does not accept or set it; nothing in run_live2_real.py, procsplit.py, coordinator.py or cstate.py mentions scrape at all; METRICS_SCRAPE_DEFAULT = False. The only assignments of .metrics_scrape in the tree are in this session's own scripts.",
+   "ok": false
+  }
+ ],
+ "why_every_surface_sign_said_it_was_live": "a named method, a documented D209 (2) policy, an explicit D187 default-off gate, a delegation to the one KV policy in adapter.HttpBackend, and a byte-identity proof. This is the desired_tier shape from CLAUDE.md's dead-channel catalogue, and in one respect worse: the proof that was taken as evidence of safe gating is also what an entirely empty file would have produced.",
+ "the_landed_proof_is_correct_and_uninformative": "d213_e1_offstate_byte_identity.json reports ALL THREE ARMS BYTE-IDENTICAL ACROSS E1, INCLUDING RUNG 4. True, and it cannot fail: the code it compares is unreachable. It establishes that E1 is inert, not that E1 is safely default-off, and those are different claims with different remedies. A reader looking for an implausible RESULT would catch neither.",
+ "the_fix_is_one_line_plus_a_plumb": "metrics() must merge self.scrape_metrics() into its returned dict, and a harness must be able to set metrics_scrape (a run_live2_real.py flag, or an __init__ kwarg). asyncbackend.py is this session's owned file; run_live2_real.py is not. NOT APPLIED: the authorisation was explicitly 'LANDED CODE, NO PATCH ANYWHERE', and changing the landed behaviour is a different ruling from proving it.",
+ "what_this_does_NOT_change": "nothing about the dry regime, and nothing about item 3. It also does not make the OFF-state proof wrong, only mis-scoped.",
+ "LIVE_END_TO_END_CONFIRMATION_on_the_landed_code": {
+  "_what": "not a grep. A real run_live2_real.py cell, covex-v6-cf-pd-c5attr (rung 4), 16 devices, seed 4, 300 s, against live/fake_server.py which DOES serve /metrics with a varying vllm:gpu_cache_usage_perc. The tree is the pristine base = the LANDED blob ff183c50. 797 requests built, 0 errors. This cell was started to test something else and is reused here; only its A side (landed code) is cited.",
+  "be_metrics_returned": {
+   "keys": [
+    "build_ms_mean",
+    "build_ms_total",
+    "cache",
+    "callback_errors",
+    "first_line_to_first_content_ms",
+    "n_built",
+    "n_callback_errors",
+    "submit_delay_total_ms",
+    "wire_extra_delay_ms",
+    "wire_image_parts",
+    "wire_image_parts_with_uuid"
+   ],
+   "any_vllm_key": "NONE",
+   "metrics_health_present": false,
+   "n_built": 797
+  },
+  "so_the_whole_chain_is_measured_not_argued": "no vllm: key in be.metrics() -> st.metrics carries no KV gauge -> cstate.py:663 reads its 0.0 default -> arms_v6cf.py:306 computes occ_metric = 0.0 * pool -> free_kv = the ENTIRE pool.",
+  "the_arms_own_counters_for_that_cell": {
+   "pd_free_kv_min": 62944,
+   "pd_free_kv_max": 62944,
+   "_free_kv_is_a_CONSTANT_equal_to_the_whole_pool": true,
+   "pd_kv_bound_by_belief": 29,
+   "pd_kv_bound_by_engine_metric": "ABSENT (zero): the engine metric bound the gate NOT ONCE",
+   "pd_decisions": 29,
+   "pd_decisions_state": 27,
+   "pd_decisions_request": 2,
+   "pd_gate_no_active_alert_episode": 6,
+   "pd_gate_rebuild_fits_without_evicting": 23,
+   "PROTECT_AND_DEFER_actions": 0,
+   "_gates_account_for_all_29": "6 + 23 = 29"
+  },
+  "AND_THIS_IS_THE_PART_THAT_MATTERS_BEYOND_E1": "the gate that kills protect-and-defer is CAUSED BY the absent scrape. Because free_kv is pinned at the full pool, `rebuild_fits_without_evicting` fires on 23 of 29 decisions. So rung 4's null is NOT 'protect-and-defer ran and did not help'; it is 'protect-and-defer was never reachable', and the reason is one unread method. Under Rule 2 this is UNEXERCISED, not a real negative.",
+  "independent_agreement_three_ways": "(1) this live cell: 29 pd_decisions, 0 PROTECT_AND_DEFER, free_kv constant at the pool; (2) the user-commissioned s5 diagnosis: 299 pd_decisions, all stopped at the same TWO gates, 0 PROTECT_AND_DEFER; (3) the dry byte-identity table: covex-v6-cf-pd-c5attr shares digest 9a4be873eb3c5fba / 14,218 with its rung-2 base covex-v6-state-uo. Different harnesses, different scales, dry and live, same conclusion."
+ }
+}

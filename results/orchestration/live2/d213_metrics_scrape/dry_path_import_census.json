@@ -1,0 +1,44 @@
+{
+ "claim": "on a DRY cell `asyncbackend` is never imported, so E1 cannot move any dry decision of any arm. This is the structural backbone of the byte-identity table: the sweep confirms it end to end, this establishes it by reading.",
+ "every_asyncbackend_import_in_the_tree": [
+  {
+   "file": "live2/run_live2_real.py",
+   "line": 475,
+   "scope": "inside _inprocess()",
+   "on_dry_path": false
+  },
+  {
+   "file": "live2/procsplit.py",
+   "line": 311,
+   "scope": "inside a function",
+   "on_dry_path": false
+  },
+  {
+   "file": "live2/harness_checks.py",
+   "line": 75,
+   "scope": "inside a function",
+   "on_dry_path": false
+  },
+  {
+   "file": "live2/tests/test_live2_harness.py",
+   "line": 36,
+   "scope": "module level, a test",
+   "on_dry_path": false
+  },
+  {
+   "file": "live2/d213_readsite_proofs.py",
+   "line": 44,
+   "scope": "this session's own proof",
+   "on_dry_path": false
+  },
+  {
+   "file": "live2/d213_metrics_scrape_proofs.py",
+   "line": 65,
+   "scope": "this session's own proof",
+   "on_dry_path": false
+  }
+ ],
+ "the_dry_path": "cf_pd_one_cell.py -> hybrid/test_hybrid.dry, whose imports are arms, cachekeys, cstate, emulator, hybrid, trace, bridge.EmulatorBridge, coordinator.{Live2Coordinator,Logs} and test_live2_coord. None of the six files above is among them, and all six imports are function-local except a test.",
+ "and_the_second_half": "even if it were imported, test_hybrid.dry constructs the coordinator with be=None and dry_run=True, so coordinator.py:489 (`self.st.metrics = self.be.metrics()`) is guarded off and st.metrics stays {}.",
+ "why_this_matters_for_the_count": "it is also why the dry sweep CANNOT count rung-4 decisions moved: the mechanism is absent dry, so a zero there is UNEXERCISED under Rule 2, not a measurement. The count is taken on a cell with a server, by d213_rung4_live_count.py."
+}
