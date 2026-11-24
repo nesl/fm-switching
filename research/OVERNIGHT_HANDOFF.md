@@ -884,6 +884,30 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
   explanation is a hypothesis. Both may be true and only one is measured. **A mechanism claim smuggled in
   as an adjective survives every arithmetic check**, which is the register rule applied to prose rather
   than to numbers.
+- *** A PROOF'S OWN INSTRUMENT DESERVES THE SAME ABSENCE-CHECKING THE POLICY GETS, AND TWO OF TODAY'S
+  WORST FAILURES WERE INSTRUMENTS, NOT POLICIES. *** One proof COMPUTED the D216 (1) alone census and
+  loadavg and then DROPPED them before writing its artefact, so the rule it claimed was unevidenced in
+  the very file claiming it. Another walked an MRO to rule a mechanism absent, when the call leaves the
+  MRO entirely through COMPOSITION, so it reported confidently on a path the decision does not take.
+  **Both were instruments reporting about something they could not see, and both were caught only by
+  trying to READ THE CLAIM BACK against the thing it described.** So: apply Step 2's own test to your
+  harness. Name the read, name the path walked, and read your own artefact back before you believe it.
+- *** TWO AGENTS AGREEING VIA THE SAME UNSOUND INSTRUMENT IS ONE OBSERVATION, NOT TWO. *** Two sessions
+  independently concluded rung 3 does not enforce the context limit; both had walked the MRO, and the
+  agreement read as corroboration. It was one method applied twice. **Before counting an agreement as
+  independent, ask whether the two parties used the SAME instrument** - and when they did, say so, because
+  an accidental duplicate is not a replication. (The same applies to the eleven-arm digest agreement
+  reached by two sessions today: real as a cross-check, but unplanned, and not presented as a planned
+  replication.)
+- *** WHEN AN INSTRUMENT IS FOUND UNSOUND, RE-ESTABLISH EVERYTHING IT ESTABLISHED. *** The MRO walk that
+  produced the false absence had ALSO produced the claim that rung 3 reads no KV telemetry and therefore
+  does not wait on E1 - the claim that LICENSES the kv0.5r rung-3 cells. That was re-done on a
+  composition-aware walk with a stated terminus: six modules in rung 3's actual chain
+  (`arms_v5rules2`, `hybrid/hybrid_arm`, `arms_v6state`, `arms_v6fair`, `arms_final_ladder`,
+  `arms_v6fairfeed`), **ZERO references to `gpu_kv_fraction` / `kv_cache_usage` / `scrape_metrics`**, and
+  `hybrid_arm.py` composes nothing further (no `self._base` / `self._rules`), so the chain ends there.
+  **Conclusion unchanged, foundation replaced** - and verified independently from origin. A sound result
+  resting on an unsound method is not yet a result.
 - AND FOR RELAYED CLAIMS: a NEGATIVE assertion about a primary artefact is cheap to check and expensive
   to propagate. Three were relayed unverified today (a loadavg precedent that did not exist, a
   touch-price magnitude off by about 26x, and two metric names that did exist). Check a negative against
