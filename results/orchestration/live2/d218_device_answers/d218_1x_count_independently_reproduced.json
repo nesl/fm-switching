@@ -1,0 +1,47 @@
+{
+ "_what": "INDEPENDENT REPRODUCTION of the single fact that fired StudyD218-DA's pre-registered stop condition and is now the TOP OPEN USER RULING: the DEVICE_ANSWERS 1x firing count. Reproduced by a different session from the HELD bundle, not read off the original session's report.",
+ "why_this_was_worth_doing": "the 1x count is the load-bearing number of that study - it is why the session stopped instead of deciding, and it is what makes the posted `covex-v6-final` s4 cell superseded IF the candidate is adopted. It had never been checked by anyone but its author. An agent-reported number that decides a ruling should be reproduced before the ruling is made.",
+ "how": "`git archive` of origin at the sha below into a PRIVATE tree; the three preserved patches from `experiments/orchestration/live2/held/d218_device_answers/` applied with `patch -p0`; the two `.held` new files restored; then ONE dry cell, `d218_da_one_cell.py --arm covex-v6-final-da --seed 4 --n 16 --run-s 1200 --cutoff-off`. Nothing landed, origin untouched, box idle at loadavg 0.02 with ZERO live2 processes.",
+ "RESULT_reported_vs_reproduced": {
+  "digest": {
+   "reported": "3cddb4b7c7322a25",
+   "reproduced": "3cddb4b7c7322a25",
+   "agree": true
+  },
+  "rows": {
+   "reported": 14510,
+   "reproduced": 14510,
+   "agree": true
+  },
+  "pd_request_device_answers": {
+   "reported": 1,
+   "reproduced": 1,
+   "agree": true
+  },
+  "n_denials": {
+   "reported": 1,
+   "reproduced": 1,
+   "agree": true
+  },
+  "net trade": {
+   "reported": 3.474977,
+   "reproduced": 3.474976566975963,
+   "agree": true
+  },
+  "_verdict": "*** THE 1x COUNT IS 1. THE STOP CONDITION GENUINELY FIRED. *** The original report is accurate on every quantity checked."
+ },
+ "and_the_switch_REACHED_THE_OBJECT_not_merely_passed": "`device_answers_enabled` True and `da_wired_proof.arm_enables` True on the arm actually built, with `arm_version_da` `covex-v6-final-da-1.0`. The by-type decomposition also closes: worst absolute residual over denials 4.04e-10.",
+ "*** TWO FINDINGS THAT BEAR ON THE RULING ***": {
+  "1_the_arm_is_registered_AT RUNTIME_BY_DESIGN": "after applying ALL THREE patches and restoring the new files, `covex-v6-final-da` appears ZERO times in `arms_v6cf.py`. It is registered in-process: `arms_v6cf_device.py` carries its own `register()`, which the runner invokes by replacing `cfr3_one_cell._register_capturing` with a wrapper that adds the DA names 'additively and last'. So 'does not resolve on the normal import path' is CONFIRMED and is a DELIBERATE CHOICE, not an oversight: **no committed cell can reach this arm unless someone wires it**, which is exactly the property that keeps the posted cell safe while the ruling is open.",
+  "2_the_ONE_1x_DENIAL_ALSO_VANISHES_UNDER_THE_DEVICE_DISCOUNTED_HARM": "the traced denial record reads `harm 5.295616144403798` with **`harm_device_discounted: 0.0`**. So the single 1x firing - the very event that fired the stop condition - rests ENTIRELY on the on-time-cloud harm form and would not occur at all under the device-discounted reading. **THAT MAKES THE HARM-FORM RULING LOGICALLY PRIOR TO THE ADOPTION RULING**: if the device-discounted form governs, the 1x count is 0, the stop condition would never have fired, and the posted cell is unaffected either way."
+ },
+ "_and_it_PROVES_THE_HELD_BUNDLE_IS_RUNNABLE_not_merely_byte_identical": "the preservation at `f097f5d3` was verified byte-identical against the author's working tree, which is NOT the same as runnable. All three patches applied cleanly to a fresh archive, every dependency resolved (`cfr3_one_cell`, `d216_final_kv025_one_cell`, `d210_kv025_one_cell` are all committed), and the reconstructed tree produced the expected digest. **A BUNDLE THAT CANNOT BE REBUILT IS NOT A BACKUP**, and this is the test that establishes it is one.",
+ "_what_is_NOT_claimed": "nothing LIVE. This is a DRY cell, as the original study's was. `covex-v6-final-da` has still never run a live cell, the live pair remains PREPARED AND NOT POSTED, and the adoption decision, the harm-form decision and which of the two agreeing pre-registrations is the record all remain the USER'S and are untouched.",
+ "_provenance": {
+  "origin_sha_archived": "fe2f3da4",
+  "script": "d218_da_one_cell.py (from the held bundle)",
+  "device": "flash",
+  "n": 1,
+  "timestamp": "2026-11-24"
+ }
+}
