@@ -69,7 +69,11 @@ else
 fi
 
 # 3. Claude session
-if pgrep -u pragya -x $CPROC >/dev/null || tmux has-session -t $CSESS 2>/dev/null; then
+# D229 (user, 2026-11-24): relaunch is OFF while the user drives the H100 interactively. The flag file
+# $ST/claude_resume_off switches it off; remove the file to re-enable for unattended periods.
+if [ -f $ST/claude_resume_off ]; then
+  w "claude: relaunch disabled by D229 flag"
+elif pgrep -u pragya -x $CPROC >/dev/null || tmux has-session -t $CSESS 2>/dev/null; then
   w "claude: a session is running"
 elif [ -f $ST/claude_launched ] && [ $(( $(date +%s) - $(stat -c %Y $ST/claude_launched) )) -lt 600 ]; then
   w "claude: absent, last launch under 10 min ago, waiting"
