@@ -20,6 +20,58 @@ A HANDOFF THAT SAYS STAND DOWN MUST CARRY THE COMMIT IT WAS WRITTEN AT AND AN EX
 session must check the tip against it before obeying. A stale stand-down already stopped one session
 while real work was pending.
 
+## STATE AT 2026-11-23T18:05-0800. NEWEST BLOCK; SUPERSEDES EVERY STATE BLOCK BELOW.
+
+  WRITTEN AT origin/main tip: f0451ca77c36d829af09b8d6c606dcd7372110d5
+  NEWEST COMMIT WHEN WRITTEN: f0451ca7 at 2026-11-23T17:53:44-08:00
+  EXPIRES: immediately on any new commit to origin/main. Re-derive; do not trust this summary.
+
+WHO WROTE THIS: the session the watchdog started at 18:00:01 PST as RESTART 3/12. If you are a later
+restart, the facts below are minutes old at best.
+
+WHAT I DID, AND IT IS OPERATIONAL RATHER THAN SCIENTIFIC:
+
+  1. TOUCHED `ops/heartbeat`, which had been STALE SINCE 14:40 PST, about 3.4 hours. That staleness is
+     why the watchdog was on RESTART 3/12, spawning a session every ten minutes. The watchdog's own
+     comment says it: "A live worker touches the heartbeat; if it is fresh, there is nothing to
+     restart." IF YOU ARE WORKING, TOUCH IT, or the watchdog will spawn a duplicate beside you, which
+     is the failure its 02:40Z and 09:35Z comments were both added to stop.
+  2. DELETED `ops/STANDDOWN`. It was EXPIRED (the watchdog logged "STANDDOWN EXPIRED" at 01:50Z and
+     02:00Z) and its text was FALSE as of now: it said "No autonomous work remains", when
+     FINAL_LADDER_CELLS is still unposted. Its own last line says "Delete this file to resume at
+     once." This file's own rules warn that a stale stand-down already stopped one session while real
+     work was pending, so a false one left lying about is a hazard, not a record. It is in git history
+     if it is ever wanted.
+
+THE ONE REMAINING BLOCK IS UNCHANGED AND IT IS NOT MINE TO CLEAR:
+
+  FINAL_LADDER_CELLS IS STILL NOT POSTED. Verified: absent from `frozen_test/runs/` on origin.
+  *** SESSION B CANNOT BE REACHED FROM A NEW SESSION. *** Its agent belongs to the peer session
+  A6000 [6736b0] (interactive), not to any restart of `fmsw-overnight`; `ListAgents` from a fresh
+  session shows NO subagents. So "resume with SendMessage" is only possible FROM THAT PEER. DO NOT
+  START A REPLACEMENT: a replacement already duplicated an in-flight chain once today. The correct
+  move is to ask peer A6000 [6736b0] to resume it, which I have done.
+  Both flash agents were rate-limited until 19:00 PST and that window is now minutes away.
+
+RUNNING ON FLASH AT 18:05 PST, by `ps` plus the out-dir mtimes rather than assumed:
+  `d216_final_kv025_driver.py` (pid 251074, started ~17:25), the 0.25x DRY proof on `covex-v6-final`,
+  which is check 3 of the user's StudyD210-KV025 section 1.6 ruling. IT IS PROGRESSING, NOT STUCK: it
+  finished `F7_r4_final_kv025_enf` and started `F8_r3_final_kv025_enf` at 17:59.
+  SO THE BOX IS NOT FREE AND D216 (1) FORBIDS STARTING ANOTHER PROOF CELL, including the D214
+  byte-identity proof, which is armed and polling for exactly that window. loadavg 1.26.
+
+A HAZARD IN THE ALONE RULE ITSELF, found by the D214 session and worth repeating here because it makes
+every `alone: true` weaker than it reads: the existing driver's alone-guard identifies foreign live2
+processes by the `.py` BASENAMES UNDER ITS OWN TREE SNAPSHOT, so a file it does not know about is
+INVISIBLE to it. A new module can run beside it with `alone: true` recorded truthfully by that guard
+and falsely in fact. Check `ps` and `/proc/<pid>/cwd` yourself; do not rely on the guard alone.
+
+STILL AWAITING THE USER, none of it startable without a ruling: the 12 Mbit/s / 142 ms poor cell (both
+numbers are cited, same city, same operator, same 80 tests, which the 5 Mbit/s stress point is not);
+the unidentifiable ICCCN citation that anchors the sweep's fast RTT; `vllm:num_requests_waiting`
+(census done, it is NOT constant, so connecting it would replace a live value, but only mooncake's
+decision LABEL would move and no scored result would); and owners for E3 plus the two stale doc lines.
+
 ## STATE AT 2026-11-23T17:45-0800. TWO OF THE THREE BLOCKS ARE CLEARED.
 
 THE "NEXT STEP" SECTION BELOW IS PARTLY STALE. Read this first; it was written later.
