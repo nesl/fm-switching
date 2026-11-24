@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+"""covex-v6-final-da: THE FINAL RUNG 4 WITH SPEC v6 SECTION 7'S THIRD REQUEST CANDIDATE (D218 (1)).
+
+    rung 4 + DEVICE_ANSWERS   covex-v6-final-da
+
+ITS OWN VERSION LABEL, AND THAT IS THE WHOLE POINT OF THIS FILE. `covex-v6-final` is POSTED and
+`FINAL_LADDER_CELLS` is running, so its behaviour may not move in place: a second registration
+under that key would re-point every reader of its cells (`arms.ARMS` is a dict), and a behaviour
+change under the same name would supersede the posted cell under D209 (1). The new candidate is
+therefore behind `cf_protect_defer.DEVICE_ANSWERS_SWITCH_ATTR`, an arm-scoped INSTANCE attribute
+defaulting to FALSE, and this module is the ONLY place that turns it on.
+
+WHAT IT ADDS, IN ONE SENTENCE. In the request leg's one branch where protect-and-defer measurably
+reached "harm crosses the bar" and had no channel - the latest safe start is already now, so it
+cannot defer, and a recall query is one prompt, so it cannot be sliced - the arm now compares the
+weighted harm to others against this question's own weighted P(on time) and, if the difference
+exceeds `w_d x MARGIN_CF`, leaves the question to the device (`ra.decision = "DEVICE"`).
+
+NOTHING HERE RE-IMPLEMENTS A MECHANISM. The rule lives in `cf_protect_defer.decide`; the
+enactment and the counters live in `arms_v6cf._ProtectDeferMixin`; the rung is built by
+`arms_final_ladder.make_rung4`, which reads every one of its own switches back and raises if one
+did not take. This file passes one more keyword and reads THAT one back the same way.
+
+WHY THE READ-BACK IS NOT CEREMONY. `make_arm` has silently discarded a keyword in this project
+before (`c_inflight=8` returned the default arm), and a switch that was passed and did not arrive
+is the exact shape CLAUDE.md Step 2b names. So the switch is read back off EVERY object in the
+decide chain, with its type, and a mismatch raises here rather than producing a plausible null
+three minutes into a cell.
+
+REGISTRATION IS ADDITIVE AND IS NOT ON THE NORMAL IMPORT PATH. `arms.py` is another session's
+file and is not touched. No fourth name is added to `arms_v6cfr3.V6CFR3_ARMS`, so latent hazard 2
+(`results/orchestration/live2/ladder_final/d208_latent_hazards.json`: the shadow check there
+raises only `if _k in V6CFR3_ARMS` and NOT against the nine protected committed names) is not
+exercised at all. `register()` below nevertheless checks its own keys against
+`arms_final_ladder.PROTECTED_NAMES`, against the final ladder's own three names, against the
+committed rung-4 family and against whatever is already in `arms.ARMS`, and it snapshots the
+protected arms' factories before and after and raises if any of them moved. That is the
+enforcement the hazard note asks for, in the code rather than in a comment.
+"""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+from typing import Any, Dict, List
+
+HERE = Path(__file__).resolve().parent
+for _p in (str(HERE), str(HERE / "v5"), str(HERE / "fleet"), str(HERE / "hybrid"),
+           str(HERE.parent / "baselines")):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+import arms_final_ladder as FL                                                 # noqa: E402
+import arms_v6cfr3 as R4                                                       # noqa: E402
+import cf_protect_defer as PD                                                  # noqa: E402
+
+DA_VERSION = "covex-v6-final-da-1.0"
+
+RUNG4_DA = "covex-v6-final-da"
+
+BUILT_FROM = {RUNG4_DA: FL.RUNG4}
+
+# What the label means, carried in the data so a cell can never be read as the posted arm.
+DA_NOTE = (
+    "covex-v6-final plus spec v6 section 7's THIRD request candidate, DEVICE_ANSWERS, built under "
+    "D218 (1). covex-v6-final itself is UNCHANGED and keeps its posted behaviour; this is a "
+    "separate version label and a separate arm.")
+
+
+class DeviceAnswersWiringError(RuntimeError):
+    """The DEVICE_ANSWERS switch did not arrive on the instance it was asked for."""
+
+
+def _read_back(arm: Any, want: bool) -> Dict[str, Any]:
+    """The switch READ BACK off every object the decide path can bind `self` to, with its type."""
+    chain = [{"class": type(o).__name__,
+              "declared_on_instance": PD.DEVICE_ANSWERS_SWITCH_ATTR in vars(o),
+              "value": vars(o).get(PD.DEVICE_ANSWERS_SWITCH_ATTR),
+              "type": type(vars(o).get(PD.DEVICE_ANSWERS_SWITCH_ATTR)).__name__}
+             for o in arm._pd_targets()]
+    got = PD.device_answers_enabled(arm)
+    rep = {"attr": PD.DEVICE_ANSWERS_SWITCH_ATTR, "asked_for": bool(want),
+           "arm_enables": bool(got), "chain": chain,
+           "ARRIVED": bool(got == bool(want)),
+           "declared_on_every_object": all(c["declared_on_instance"] for c in chain),
+           "type_on_every_object": sorted({c["type"] for c in chain})}
+    if not rep["ARRIVED"]:                                                 # pragma: no cover
+        raise DeviceAnswersWiringError(
+            "%s was asked for as %r and reads back as %r on %s. A switch that was passed and did "
+            "not arrive is CLAUDE.md Step 2b's named failure, and it would have produced a null "
+            "that looked like the candidate not firing."
+            % (PD.DEVICE_ANSWERS_SWITCH_ATTR, bool(want), bool(got), type(arm).__name__))
+    if not rep["declared_on_every_object"]:                                # pragma: no cover
+        raise DeviceAnswersWiringError(
+            "%s is missing from an object in the decide chain: %r. `V5Rules2Arm.decide` calls "
+            "`self._base.decide`, so a reader that runs against an inner object would read the "
+            "class default." % (PD.DEVICE_ANSWERS_SWITCH_ATTR, chain))
+    if rep["type_on_every_object"] != ["bool"]:                            # pragma: no cover
+        raise DeviceAnswersWiringError(
+            "%s arrived with a type other than bool: %r. A field declared int and coerced to "
+            "bool turned a 2 into a 1 in this project already."
+            % (PD.DEVICE_ANSWERS_SWITCH_ATTR, rep["type_on_every_object"]))
+    return rep
+
+
+def make(name: str = RUNG4_DA, *, device_answers: bool = True, **kw: Any) -> Any:
+    """Build the final rung 4 with the DEVICE_ANSWERS candidate, through `make_rung4`.
+
+    Every other switch is `make_rung4`'s and is read back by `make_rung4` itself. `device_answers`
+    travels as a keyword into `_ProtectDeferMixin.__init__` (neither `_Rung4Mixin` nor
+    `V6FairFinal` declares an `__init__`, so the keyword is not intercepted) and is read back
+    here.
+    """
+    arm = FL.make_rung4(name, device_answers=bool(device_answers), **kw)
+    arm.arm_version_da = DA_VERSION
+    arm.DA_WIRED_PROOF = _read_back(arm, bool(device_answers))
+    arm.DA_NOTE = DA_NOTE
+    return arm
+
+
+# The arms. One scorable arm, one off-switch bar and the two CLAUDE.md Step 4 controls, each a
+# NAMED ARM so the control is a cell and not a code edit - the pattern `arms_v6cfr3` uses, and the
+# same keywords, so the ablation is the same ablation.
+DA_ARMS: Dict[str, Any] = {
+    # THE ARM. Final rung 4 with the third request candidate on.
+    RUNG4_DA: (lambda **kw: make(RUNG4_DA, **kw)),
+    # THE OFF-SWITCH BAR. Both compounds off while the DEVICE_ANSWERS switch stays ON, so the
+    # candidate has nowhere to fire from: it must collapse to `covex-v6-fair-final`
+    # byte-identically, exactly as `covex-v6-final-off` does. It is the test that the new switch
+    # does nothing on its own.
+    RUNG4_DA + "-off": (lambda **kw: make(RUNG4_DA + "-off", protect_defer=False,
+                                          request_defer=False, **kw)),
+    # CLAUDE.md STEP 4, both directions, ON THE NEW BRANCH. `harm0` zeroes the harm at its source,
+    # so `crosses_bar` is False and the branch is never reached; `margin-huge` scales THE BAR AND
+    # ONLY THE BAR, with the same consequence by the other route. Each must collapse to the off
+    # arm's digest and must report `pd_request_device_answers = 0`. A branch that survives its own
+    # negative control is not a mechanism.
+    RUNG4_DA + "-harm0": (lambda **kw: make(RUNG4_DA + "-harm0", control_harm_zero=True, **kw)),
+    RUNG4_DA + "-margin-huge": (lambda **kw: make(RUNG4_DA + "-margin-huge",
+                                                  control_margin_huge=True, **kw)),
+}
+
+# Everything this module must not shadow. The nine protected committed names come from the final
+# ladder itself rather than being retyped, plus the final ladder's own three rungs and the whole
+# committed rung-4 family.
+MUST_NOT_SHADOW = tuple(sorted(set(FL.PROTECTED_NAMES)
+                               | set(FL.FINAL_LADDER_ARMS)
+                               | set(R4.V6CFR3_ARMS)))
+
+
+def register() -> List[str]:
+    """Additive registration with the collision check the D208 hazard note asks for IN CODE."""
+    import arms as A                                                       # noqa: PLC0415
+    clash = sorted(set(DA_ARMS) & set(MUST_NOT_SHADOW))
+    if clash:                                                              # pragma: no cover
+        raise DeviceAnswersWiringError(
+            "this module would REPLACE existing arm name(s) %r. arms.ARMS is a dict, so a second "
+            "registration under an existing key re-points every reader of that arm's committed "
+            "cells." % (clash,))
+    already = sorted(n for n in DA_ARMS if n in A.ARMS)
+    if already:                                                            # pragma: no cover
+        raise DeviceAnswersWiringError(
+            "name(s) %r are already in arms.ARMS and would be replaced" % (already,))
+    watch = tuple(sorted(set(FL.PROTECTED_NAMES) | set(FL.FINAL_LADDER_ARMS)))
+    before = {n: A.ARMS.get(n) for n in watch if n in A.ARMS}
+    A.ARMS.update(DA_ARMS)
+    after = {n: A.ARMS.get(n) for n in watch if n in A.ARMS}
+    if before != after:                                                    # pragma: no cover
+        raise DeviceAnswersWiringError("registration changed a protected arm's factory")
+    return sorted(DA_ARMS)
+
+
+ARMS = DA_ARMS

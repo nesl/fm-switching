@@ -1,0 +1,339 @@
+#!/usr/bin/env python3
+"""The StudyD218-DA dry cells. ONE TREE, TWO FILE STATES, with the alone census recorded per cell.
+
+WHY ONE TREE AND NOT TWO, AND IT IS A BETTER PROOF AS WELL AS 3.5 GB CHEAPER. The first version of
+this driver exported a pristine `git archive` of `origin/main` BESIDE the patched copy and ran every
+proof-1 arm in both. That is 7 GB on a root filesystem that was at 100 percent, and a full disk on
+this project has already silently skipped a commit. It is also a weaker comparison than it looks:
+two trees can differ in ways nobody checked. This driver keeps ONE tree and swaps the ONLY TWO FILES
+this change touches - `cf_protect_defer.py` and `arms_v6cf.py` - between their ORIGIN blob and their
+PATCHED version, verifying the sha256 of what is installed before every cell and recording it in the
+manifest. So in mode P the tree IS origin for every byte that any cell can read, and the two sides of
+a byte-identity pair differ in exactly the two files under test and in nothing else.
+
+  mode P   origin blobs installed; runner `d216_final_kv025_one_cell.py` (the committed wrapper,
+           which does not import this study's modules at all)
+  mode W   patched files installed; runner `d218_da_one_cell.py`
+
+The three files this study ADDS (`arms_v6cf_device.py`, `d218_da_one_cell.py`, this driver) are never
+imported in mode P: the committed wrapper's import graph does not reach them. An unimported file
+cannot change a decision, which is why adding a file needs no swap and the two edited files do.
+
+WHY THE FIRST RUN OF THIS DRIVER PRODUCED NOTHING FOR AN HOUR, recorded here because a driver that
+waits forever is a defect and not an inconvenience. Its `wait_until_alone` polled every 15 s for up
+to 3,600 s with NO OUTPUT and NO CPU, and from the outside - `ps` showed 00:00:00 of cputime and no
+cell children - that is indistinguishable from a long cell. It then gave up having run nothing. Two
+separate faults made that happen and both are fixed here:
+
+  1. NO DEADLINE AND NO VOICE. It printed nothing while waiting, so its own log could not say
+     whether it was working. It now prints every poll with what it is waiting on, and it does NOT
+     wait indefinitely: after `--wait-s` it RUNS THE CELL ANYWAY and records `alone: false` with the
+     census beside it, because a cell that ran under recorded contention is evidence and a cell that
+     never ran is not.
+  2. THE CENSUS COUNTED THINGS THAT ARE NOT CONTENTION, and that made the alone state UNREACHABLE
+     rather than merely rare. It treated ANY process whose `/proc/<pid>/cwd` is inside the repo as
+     foreign, which includes two idle interactive `/bin/bash` shells that have been parked in the
+     repo all night and a `sleep 30`. Those consume no CPU and decide nothing, so they can never
+     clear, and the guard would have blocked for ever even after the real sweep beside it ended.
+     The census now requires the process to be AN INTERPRETER (python, python3 or conda) and then
+     counts it if a live2 `.py` basename appears in its cmdline, or its cwd is inside the repo or
+     this tree, or it carries an argument path inside either. That keeps the breadth that matters -
+     it still catches a runner nobody thought to enumerate, because it keys on what the process IS
+     rather than on a name list - and it drops the shells that were never contention.
+
+`--min-free-gb` HALTS the sweep rather than filling the disk, checked before every cell.
+
+REGISTER: DRY and LOGICAL. `--kv-scale` scales `test_live2_coord.GPU_KV`, the coordinator's own
+logical pool. No engine, no `--num-gpu-blocks-override`, no real KV allocator, no H100.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+import uuid
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+HERE = Path(__file__).resolve().parent
+
+import d216_final_kv025_driver as D216D                                        # noqa: E402
+
+MARKER_ENV = D216D.MARKER_ENV
+SWAPPED = ("cf_protect_defer.py", "arms_v6cf.py")
+INTERPRETERS = ("python", "python3", "conda")
+
+# (tag, mode, arm, kv_scale, want_rd, want_da, enforce)
+CELLS: List[Tuple[str, str, str, float, bool, bool, bool]] = [
+    # 1. THE POSITIVE CONTROL ON THE CHECK ITSELF (CLAUDE.md check 7), in both file states.
+    ("G0a_base_1x_P",            "P", "covex-v6-base",             1.00, False, False, False),
+    ("G0a_base_1x_W",            "W", "covex-v6-base",             1.00, False, False, False),
+    # 2. PROOF 2 FIRST, because latent hazard 1 records the off-switch identity holding through a
+    #    double-swap keyed on a DIFFERENT flag name, so it is the thing most likely to break
+    #    silently. Checked FIRST rather than last.
+    ("G1_fairfinal_1x_P",        "P", "covex-v6-fair-final",       1.00, False, False, False),
+    ("G1_fairfinal_1x_W",        "W", "covex-v6-fair-final",       1.00, False, False, False),
+    ("G2_finaloff_1x_P",         "P", "covex-v6-final-off",        1.00, False, False, False),
+    ("G2_finaloff_1x_W",         "W", "covex-v6-final-off",        1.00, False, False, False),
+    ("G3_fairfinal_kv025_P",     "P", "covex-v6-fair-final",       0.25, False, False, False),
+    ("G3_fairfinal_kv025_W",     "W", "covex-v6-fair-final",       0.25, False, False, False),
+    ("G4_finaloff_kv025_P",      "P", "covex-v6-final-off",        0.25, False, False, False),
+    ("G4_finaloff_kv025_W",      "W", "covex-v6-final-off",        0.25, False, False, False),
+    # 3. THE NEW BUILD, EARLY, because the 1x count is the hard stop the whole study turns on.
+    ("G5_final_1x_P",            "P", "covex-v6-final",            1.00, True,  False, False),
+    ("G5_final_1x_W",            "W", "covex-v6-final",            1.00, True,  False, False),
+    ("G9_da_1x_W",               "W", "covex-v6-final-da",         1.00, True,  True,  False),
+    ("G6_final_kv025_P",         "P", "covex-v6-final",            0.25, True,  False, False),
+    ("G6_final_kv025_W",         "W", "covex-v6-final",            0.25, True,  False, False),
+    ("G10_da_kv025_W",           "W", "covex-v6-final-da",         0.25, True,  True,  False),
+    # 4. CLAUDE.md STEP 4 ON THE NEW BRANCH, as named arms.
+    ("G12_da_harm0_kv025_W",     "W", "covex-v6-final-da-harm0",   0.25, True,  True,  False),
+    ("G13_da_marginhuge_kv025_W", "W", "covex-v6-final-da-margin-huge",
+     0.25, True, True, False),
+    # 5. the new switch on its own: both compounds off with DEVICE_ANSWERS still enabled.
+    ("G11_da_off_kv025_W",       "W", "covex-v6-final-da-off",     0.25, True,  True,  False),
+    # 6. the rest of the non-counterfactual set.
+    ("G7_rules_1x_P",            "P", "covex-v6-rules",            1.00, False, False, False),
+    ("G7_rules_1x_W",            "W", "covex-v6-rules",            1.00, False, False, False),
+    ("G8_statefinal_1x_P",       "P", "covex-v6-state-final",      1.00, False, False, False),
+    ("G8_statefinal_1x_W",       "W", "covex-v6-state-final",      1.00, False, False, False),
+]
+
+REPO = Path("/home/pragya/Desktop/FM-switching")
+
+
+def sha256(p: Path) -> str:
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def install(mode: str, tree: Path, orig: Path, patched: Path) -> Dict[str, str]:
+    """Install the origin or the patched version of the two swapped files, and READ BACK the sha."""
+    src = orig if mode == "P" else patched
+    live2 = tree / "experiments" / "orchestration" / "live2"
+    got: Dict[str, str] = {}
+    for f in SWAPPED:
+        shutil.copyfile(src / f, live2 / f)
+        got[f] = sha256(live2 / f)
+        want = sha256(src / f)
+        if got[f] != want:                                                 # pragma: no cover
+            raise RuntimeError("install of %s in mode %s did not take: %s against %s"
+                               % (f, mode, got[f], want))
+    # stale bytecode would defeat the swap silently
+    for pyc in live2.rglob("__pycache__"):
+        shutil.rmtree(pyc, ignore_errors=True)
+    return got
+
+
+def census(marker: str, names: frozenset, mine: set, roots: List[str]) -> List[Dict[str, Any]]:
+    """Every INTERPRETER process that is not this driver, its ancestors or a cell it launched.
+
+    `seen_by` records WHICH test saw it, so the record says what was observed rather than only that
+    something was. A process is foreign if any test sees it AND it is an interpreter: an idle shell
+    parked in the repo and a `sleep` are not contention, and counting them made the alone state
+    unreachable in the first version of this driver.
+    """
+    out: List[Dict[str, Any]] = []
+    for ent in sorted(os.listdir("/proc")):
+        if not ent.isdigit():
+            continue
+        pid = int(ent)
+        if pid in mine:
+            continue
+        try:
+            with open("/proc/%d/cmdline" % pid, "rb") as fh:
+                parts = [x.decode("utf-8", "replace") for x in fh.read().split(b"\0") if x]
+        except Exception:                                                  # noqa: BLE001
+            continue
+        if not parts:
+            continue
+        exe = os.path.basename(parts[0])
+        if not any(exe == i or exe.startswith(i) for i in INTERPRETERS):
+            continue
+        by: List[str] = []
+        if [t for t in parts if os.path.basename(t) in names]:
+            by.append("live2_basename_in_cmdline")
+        try:
+            cwd = os.readlink("/proc/%d/cwd" % pid)
+        except Exception:                                                  # noqa: BLE001
+            cwd = None
+        if cwd and any(cwd == r or cwd.startswith(r + "/") for r in roots):
+            by.append("cwd_inside_the_repo_or_the_tree")
+        if any(any(t == r or t.startswith(r + "/") for r in roots) for t in parts[1:]):
+            by.append("argument_path_inside_the_repo_or_the_tree")
+        if not by:
+            continue
+        if D216D._has_marker(pid, marker):
+            continue
+        try:
+            with open("/proc/%d/stat" % pid, "rb") as fh:
+                fields = fh.read().rsplit(b")", 1)[1].split()
+            cpu_ticks = int(fields[11]) + int(fields[12])
+        except Exception:                                                  # noqa: BLE001
+            cpu_ticks = -1
+        out.append({"pid": pid, "seen_by": by, "cwd": cwd, "exe": exe,
+                    "cpu_ticks_utime_plus_stime": cpu_ticks,
+                    "cmdline": " ".join(parts)[:300]})
+    return out
+
+
+def free_gb(p: Path) -> float:
+    st = os.statvfs(str(p))
+    return (st.f_bavail * st.f_frsize) / (1024.0 ** 3)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--tree", required=True)
+    ap.add_argument("--orig-dir", required=True)
+    ap.add_argument("--patched-dir", required=True)
+    ap.add_argument("--seed", type=int, default=4)
+    ap.add_argument("--n", type=int, default=16)
+    ap.add_argument("--run-s", type=float, default=1200.0)
+    ap.add_argument("--only", default=None)
+    ap.add_argument("--skip-existing", action="store_true")
+    ap.add_argument("--wait-s", type=float, default=120.0,
+                    help="how long to wait for an alone window BEFORE running anyway and "
+                         "recording alone=false with the census beside it")
+    ap.add_argument("--min-free-gb", type=float, default=5.0)
+    a = ap.parse_args()
+
+    tree, orig, patched = Path(a.tree), Path(a.orig_dir), Path(a.patched_dir)
+    out = Path(a.out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    live2 = tree / "experiments" / "orchestration" / "live2"
+    roots = [str(REPO), str(tree.resolve())]
+    marker = uuid.uuid4().hex
+    names = frozenset(p.name for p in live2.rglob("*.py"))
+    mine = D216D._ancestors(os.getpid())
+    only = set(a.only.split(",")) if a.only else None
+
+    expect = {m: {f: sha256((orig if m == "P" else patched) / f) for f in SWAPPED}
+              for m in ("P", "W")}
+
+    man: List[Dict[str, Any]] = []
+    mpath = out / "manifest.json"
+    if mpath.exists():
+        try:
+            man = list(json.loads(mpath.read_text()).get("cells") or [])
+        except Exception:                                                  # noqa: BLE001
+            man = []
+    done = {r["tag"] for r in man if r.get("returncode") == 0}
+
+    def flush(note: Optional[str] = None) -> None:
+        mpath.write_text(json.dumps({
+            "_register": ("DRY and LOGICAL. --kv-scale scales test_live2_coord.GPU_KV, the "
+                          "coordinator's own logical pool; no engine, no real KV allocator, "
+                          "flash CPU."),
+            "_method": ("ONE TREE, TWO FILE STATES. Mode P installs the origin/main blobs of "
+                        "cf_protect_defer.py and arms_v6cf.py; mode W installs the patched "
+                        "versions. The sha256 of what was installed is read back and recorded per "
+                        "cell, and __pycache__ is removed before every cell so stale bytecode "
+                        "cannot defeat the swap."),
+            "_alone_rule": ("D216 (1), with a BOUNDED wait. Every cell polls for an alone window; "
+                            "after --wait-s it runs ANYWAY and records alone=false with the "
+                            "census beside it, because a cell run under recorded contention is "
+                            "evidence and a cell that never ran is not. The census counts only "
+                            "INTERPRETER processes (python, python3, conda) seen by a live2 .py "
+                            "basename in the cmdline, a cwd inside the repo or the tree, or an "
+                            "argument path inside either, excluding this driver's own cells by "
+                            "the D216_CELL_MARKER environment variable. Idle shells and sleeps "
+                            "are NOT counted: counting them made the alone state unreachable."),
+            "_expected_shas": expect,
+            "_tree": str(tree), "_roots_scanned": roots,
+            "_min_free_gb": a.min_free_gb,
+            "marker": marker, "seed": a.seed, "n": a.n, "run_s": a.run_s,
+            "note": note, "cells": man}, indent=1))
+
+    for tag, mode, arm, kv, rd, da, enf in CELLS:
+        if only is not None and tag not in only:
+            continue
+        if a.skip_existing and tag in done:
+            continue
+        fg = free_gb(out)
+        if fg < a.min_free_gb:
+            flush("HALTED: %.2f GB free is below the --min-free-gb %.2f stop; cells from %s on "
+                  "were not run" % (fg, a.min_free_gb, tag))
+            print("HALTED ON DISK: %.2f GB free < %.2f" % (fg, a.min_free_gb), file=sys.stderr)
+            return 3
+
+        t0 = time.time()
+        busy = census(marker, names, mine, roots)
+        while busy and (time.time() - t0) < a.wait_s:
+            print("waiting for an alone window (%.0f s so far, %d foreign interpreter(s): %s)"
+                  % (time.time() - t0, len(busy),
+                     [b["cmdline"][:50] for b in busy]), flush=True)
+            time.sleep(15.0)
+            busy = census(marker, names, mine, roots)
+        waited = time.time() - t0
+
+        shas = install(mode, tree, orig, patched)
+        if shas != expect[mode]:                                           # pragma: no cover
+            raise RuntimeError("the file swap for mode %s did not take" % (mode,))
+
+        runner = live2 / ("d218_da_one_cell.py" if mode == "W"
+                          else "d216_final_kv025_one_cell.py")
+        cell, err = out / ("%s.json" % tag), out / ("%s.err" % tag)
+        lat = out / ("%s.lat.json" % tag)
+        cmd = [sys.executable, str(runner), "--arm", arm, "--seed", str(a.seed), "--n", str(a.n),
+               "--run-s", str(a.run_s), "--cutoff-off", "--kv-scale", str(kv),
+               "--lat-out", str(lat)]
+        if enf:
+            cmd += ["--enforce-kv"]
+        if rd:
+            cmd += ["--rd-out", str(out / ("%s.rd.json" % tag)),
+                    "--pd-out", str(out / ("%s.pd.json" % tag))]
+        if da:
+            cmd += ["--da-out", str(out / ("%s.da.json" % tag))]
+        env = dict(os.environ)
+        env[MARKER_ENV] = marker
+        env["PYTHONDONTWRITEBYTECODE"] = "1"
+        l0 = os.getloadavg()
+        tc = time.time()
+        with open(cell, "w") as fo, open(err, "w") as fe:
+            rc = subprocess.call(cmd, cwd=str(live2), stdout=fo, stderr=fe, env=env)
+        rec: Dict[str, Any] = {
+            "tag": tag, "mode": mode, "arm": arm, "kv_scale": kv,
+            "kv_capacity_enforced": bool(enf), "runner": runner.name,
+            "installed_shas": shas, "installed_shas_match_mode": True,
+            "returncode": rc, "wall_s": round(time.time() - tc, 1),
+            "loadavg_at_start": [round(x, 2) for x in l0],
+            "loadavg_at_end": [round(x, 2) for x in os.getloadavg()],
+            "free_gb_at_start": round(fg, 2),
+            "waited_for_alone_s": round(waited, 1),
+            "census_before_the_cell": busy,
+            "cmd": " ".join(cmd)}
+        if rc == 0:
+            try:
+                d = json.loads(cell.read_text())
+                rec.update(digest=d.get("digest"), rows=d.get("rows"),
+                           gpu_kv_tokens=d.get("gpu_kv_tokens"))
+            except Exception as exc:                                       # noqa: BLE001
+                rec["parse_error"] = repr(exc)
+        else:
+            rec["stderr_tail"] = err.read_text()[-3000:]
+        after = census(marker, names, mine, roots)
+        rec["census_after_the_cell"] = after
+        rec["alone"] = bool(not busy and not after)
+        rec["alone_note"] = ("ALONE end to end" if rec["alone"] else
+                             "NOT ALONE: foreign interpreter(s) recorded; the census and both "
+                             "loadavg magnitudes travel with this digest")
+        man.append(rec)
+        flush()
+        print("%-30s %s rc=%s wall=%ss load %s -> %s alone=%s %s/%s"
+              % (tag, mode, rec["returncode"], rec["wall_s"], rec["loadavg_at_start"][0],
+                 rec["loadavg_at_end"][0], rec["alone"], rec.get("digest"), rec.get("rows")),
+              flush=True)
+    flush("complete")
+    # leave the tree in the PATCHED state, which is what the deliverable is
+    install("W", tree, orig, patched)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,105 @@
+--- /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessA_held/o.coordinator.py	2026-11-24 04:32:29.812514312 -0800
++++ /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2/coordinator.py	2026-11-23 18:56:53.000000000 -0800
+@@ -853,8 +853,6 @@
+             # INJECTED, and the credit axis is the only thing distinguishing an arm that decided
+             # from one that declined to. A missing field should raise, not default.
+             o.representation_defaulted = bool(ra.representation_defaulted)
+-            # Hit 7 (user ruling 2026-11-23), plain access for the same reason as above.
+-            o.requested_window_s = ra.window_s
+             self.counts["recall_" + ra.decision] += 1
+             if ra.decision == "DEFER":
+                 o.defer_until = t + max(float(ra.defer_s or 0.0), 0.0)
+@@ -1292,8 +1290,7 @@
+         # window, 467 tokens, not the whole history), and `residency_readiness` costs from WHERE
+         # THE KV IS rather than from what the policy believes, so an offloaded history is charged
+         # as a host reload. Both helpers are committed in `cstate.py`.
+-        tokens = s.tokens_for_representation(getattr(o, "requested_representation", None),
+-                                             o.requested_window_s)
++        tokens = s.tokens_for_representation(getattr(o, "requested_representation", None))
+         cost = C.recall_gpu_s(tokens, s.residency_readiness())
+         # UNCACHED, not tokens: a warm recall re-presents a prefix the engine already holds, and
+         # charging it for the whole history is the same wrong shape the touch charge had.
+@@ -1428,15 +1425,6 @@
+         if str(getattr(o, "requested_representation", None) or "").upper() == "RECENT" and refs:
+             whole_tok = max(int(s.est_tokens), 1)
+             k = max(1, min(len(refs), -(-len(refs) * int(tokens) // whole_tok)))
+-            # Hit 7 (user ruling 2026-11-23): a RECENT recall that names window_s sends exactly the
+-            # frames inside that window (cstate.window_frame_count), not a count re-derived from the
+-            # charged tokens, whose ceiling would overshoot by a frame. None keeps the line above.
+-            kw = (s.window_frame_count(o.requested_window_s)
+-                  if o.requested_window_s is not None else None)
+-            if kw is not None:
+-                k = max(1, min(len(refs), kw))
+-                self.counts["recent_window_s_sends"] += 1
+-                self.counts["recent_window_s_frames"] += k
+             idx0 = len(refs) - k
+             self.counts["recent_window_sends"] += 1
+         if whole:
+@@ -2135,7 +2123,7 @@
+             kind=kind, opportunity_ids=list(opp_ids), piece_tokens=piece_tokens,
+             predicted=(pr if pr else SC.asdict(SC.Predicted())),
+             cost_model_id=preds.get("cost_model_id"), mu=preds.get("mu"), H=preds.get("H"),
+-            belief=(preds.get("belief") or self._belief_prefix_record()),
++            belief=(preds.get("belief") or SC.asdict(SC.Belief())),
+             decision_latency_ms=round(float(latency_ms), 4),
+             traffic_mix=dict(mix or {}), defer_s=defer_s,
+             representation=representation, desired_tier=desired_tier,
+@@ -2145,58 +2133,6 @@
+             self.logs.decision.write(rec)
+         return did
+ 
+-    def _belief_prefix_record(self) -> Dict[str, Any]:
+-        """D213 item 3: the belief's PREDICTED RESIDENT PREFIX per session, in tokens, recorded on
+-        the decision row at submission so D211 signal (a) is a join on recorded data.
+-
+-        WHY. D211 signal (a) is `host_tokens = max(0, cached_tokens - believed GPU-resident
+-        prefix)`. `cached_tokens` is recorded per request; the second input was not recorded for any
+-        reported arm. `belief.gpu_tokens_by_session` (`schema.py:316`) is logged on every decision
+-        row and was EMPTY on all 16,840 rows of the committed rung-3 cell, because its only producer
+-        (`arms_policy.py:1067-1075`) is never entered by the ladder. So the primary input of D211's
+-        primary signal did not exist and only signal (b) could ever have been validated.
+-
+-        THE DEFINITION, stated here because the join must not have to guess it. For each open or
+-        held session with a non-zero history, the value is the prefix the cloud has actually built,
+-        `min(built_tokens, est_tokens)`, filed under the session's CURRENT BELIEVED TIER
+-        (`SessionRec.believed_tier()`, the argmax of `belief`). So `gpu_tokens_by_session[sid]` is
+-        exactly "the number of this session's tokens the policy believes are GPU-resident right
+-        now", which is what the ruled signal subtracts; a session believed host or cold contributes
+-        0 there by construction, and its built prefix is filed under its own tier so the join can
+-        see what the belief thought instead. This is NOT `arms_policy._belief_tokens`'s quantity
+-        (the whole history size from the rollout's own fleet model) and is not mixed with it:
+-        `preds["belief"]` still wins wherever an arm supplies one, so nothing that already fills
+-        this field changes.
+-
+-        IT IS A RECORDING, AND BOTH HALVES OF THAT ARE PROVED, NOT ASSERTED.
+-          * It feeds no decision. `_log_decision` is called AFTER the action is chosen and after
+-            `latency_ms` has been measured by the caller, it writes to `self.logs.decision` and
+-            returns a decision id, and nothing in live2 reads `DecisionRecord.belief` during a run
+-            (the only reader in the tree is the offline `d211_signal_a_available.py`).
+-          * It moves no dry digest. The digested rows ARE the decision records
+-            (`hybrid/test_hybrid.dry` reads `decision.jsonl` and strips only `arm`,
+-            `decision_latency_ms` and `decision_id`), so filling `belief` on a dry cell WOULD move
+-            every arm's dry digest, including rung 4, while a ladder build is in flight. That is a
+-            methodological change nobody ruled, so the record is LIVE-CELL ONLY and a dry cell keeps
+-            the committed empty `Belief()` byte for byte. D211 needs it on the first final-ladder
+-            LIVE cells, which is exactly where it is now written.
+-        """
+-        if self.dry_run:
+-            return SC.asdict(SC.Belief())
+-        out: Dict[str, Any] = {"gpu_tokens_by_session": {}, "host_tokens_by_session": {},
+-                               "cold_tokens_by_session": {}}
+-        field_of = {"gpu": "gpu_tokens_by_session", "host": "host_tokens_by_session",
+-                    "cold": "cold_tokens_by_session"}
+-        for sid, s in self.st.sessions.items():
+-            est = int(getattr(s, "est_tokens", 0) or 0)
+-            if est <= 0:
+-                continue
+-            f = field_of.get(s.believed_tier())
+-            if f is None:
+-                continue
+-            out[f][sid] = min(int(getattr(s, "built_tokens", 0) or 0), est)
+-        return out
+-
+     def _log_residency(self, t: float, session_id: str, telemetry=None) -> None:
+         s = self.st.sessions.get(session_id)
+         if s is None or self.logs is None:

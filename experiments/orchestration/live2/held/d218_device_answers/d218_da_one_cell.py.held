@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""ONE dry cell per process for StudyD218-DA, the DEVICE_ANSWERS request candidate (D218 (1)).
+
+A FOURTH WRAPPER OVER THE SAME RUNNER, AND IT ADDS NOTHING TO THE DIGEST PATH. The chain is
+`cf_pd_one_cell` (posted knobs, seed allowlist, planner wall-clock patch, THE DIGEST RECIPE) ->
+`d210_kv025_one_cell` (decision latency kept and stripped again, `--enforce-kv` on the coordinator
+INSTANCE, the `.rows.json` dump) -> `d216_final_kv025_one_cell` (the final ladder's registration
+and its ablation names) -> this file. There is no `sha256` and no `json.dumps` of a decision row
+here, and the digests this file produces are therefore comparable with the committed ones by
+construction rather than by inspection.
+
+THE TWO THINGS IT ADDS.
+
+  1. REGISTRATION of `arms_v6cf_device`'s four names, through that module's own `register()`, so
+     its collision check against the nine protected committed names, the final ladder's three
+     rungs and the committed rung-4 family runs on every cell. The factories are then re-wrapped
+     so each instance built is captured in `cfr3_one_cell._BUILT`, which is what the `--rd-out`
+     dump already reads.
+
+  2. `--da-out`, the PER-DENIAL TRADE RECORD required by the D218 (1) addendum: for every denial,
+     this question's forfeited weighted P(on time), the predicted on-time answers saved BY THE TYPE
+     OF THE DEVICES SAVED with explicit zeros, the net, the bar, and the totals. It is written
+     from `arms_v6cf._ProtectDeferMixin.pd_device_trade_report()`, which builds each record AT the
+     denial, so this file reports a record rather than reconstructing one.
+
+REGISTER: every number is DRY and LOGICAL on flash's CPU. `--kv-scale` scales
+`test_live2_coord.GPU_KV`, the coordinator's own logical pool. No engine, no
+`--num-gpu-blocks-override`, no real KV allocator, no H100.
+
+Flags: exactly `d216_final_kv025_one_cell.py`'s, plus `--da-out`.
+"""
+from __future__ import annotations
+
+import json
+import runpy
+import sys
+from pathlib import Path
+from typing import Any, Dict, List
+
+HERE = Path(__file__).resolve().parent
+for _p in (str(HERE), str(HERE / "fleet"), str(HERE / "v5"), str(HERE / "hybrid"),
+           str(HERE.parent / "baselines")):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+import arms_v6cf_device as DA                                                  # noqa: E402
+import cf_protect_defer as PD                                                  # noqa: E402
+import cfr3_one_cell as X                                                      # noqa: E402
+import d216_final_kv025_one_cell as D216                                       # noqa: E402
+
+
+def _register_da_capturing() -> None:
+    """Register the DEVICE_ANSWERS arms, capturing every instance built."""
+    import arms as A                                                       # noqa: PLC0415
+
+    def wrap(fn: Any) -> Any:
+        def _f(**kw: Any) -> Any:
+            arm = fn(**kw)
+            X._BUILT.append(arm)
+            return arm
+        return _f
+
+    DA.register()                      # the collision check, on every cell
+    A.ARMS.update({k: wrap(v) for k, v in DA.DA_ARMS.items()})
+
+
+def _da_dump() -> Dict[str, Any]:
+    """The trade report of whichever built arm carries one, plus the switch read-back."""
+    out: Dict[str, Any] = {
+        "_what": ("D218 (1) addendum: the PREDICTED TRADE of every denial, recorded at the "
+                  "denial by arms_v6cf._ProtectDeferMixin._pd_record"),
+        "_rule": PD.DEVICE_ANSWERS_RULE,
+        "_sign_source": PD.DEVICE_ANSWERS_SIGN_SOURCE,
+        "_harm_types_always_reported": list(PD.HARM_TYPES),
+        "arms_seen": [],
+    }
+    arms: List[Any] = [a for a in X._BUILT if hasattr(a, "pd_device_trade_report")]
+    for a in arms:
+        rec: Dict[str, Any] = {
+            "arm": getattr(a, "name", None),
+            "arm_version_da": getattr(a, "arm_version_da", None),
+            "device_answers_enabled": PD.device_answers_enabled(a),
+            "da_wired_proof": getattr(a, "DA_WIRED_PROOF", None),
+            "da_note": getattr(a, "DA_NOTE", None),
+            "controls": {"harm_zero": getattr(a, "_pd_control_harm_zero", None),
+                         "margin_huge": getattr(a, "_pd_control_margin_huge", None)},
+            "counters": {k: v for k, v in sorted(dict(getattr(a, "stats", {}) or {}).items())
+                         if str(k).startswith("pd_request_device")
+                         or str(k) == "pd_request_crossed_bar_unexpressible"},
+            "trade_report": a.pd_device_trade_report(),
+        }
+        tr = getattr(a, "_pd_trace_device", None)
+        rec["traced_denial"] = (PD.trace_lines(tr) if tr else None)
+        rec["traced_denial_record"] = tr
+        out["arms_seen"].append(rec)
+    if not arms:
+        out["VERDICT"] = ("NO ARM WITH A TRADE REPORT WAS BUILT: this cell's arm is not a "
+                          "protect-and-defer arm, so there is no denial channel to report")
+    return out
+
+
+if __name__ == "__main__":
+    da_out = None
+    if "--da-out" in sys.argv:
+        i = sys.argv.index("--da-out")
+        da_out = sys.argv[i + 1]
+        del sys.argv[i:i + 2]
+
+    _orig = X._register_capturing
+
+    def _all() -> None:
+        _orig()                        # the committed rung-4 family
+        D216._register_final_capturing()   # the final ladder and its ablations
+        _register_da_capturing()       # plus this study's four names, additively and last
+
+    X._register_capturing = _all
+    rc = 0
+    try:
+        runpy.run_path(str(HERE / "d210_kv025_one_cell.py"), run_name="__main__")
+    except SystemExit as exc:          # the inner runner ends with SystemExit(rc)
+        rc = int(exc.code or 0)
+    if da_out:
+        Path(da_out).write_text(json.dumps(_da_dump(), default=float, indent=1))
+    raise SystemExit(rc)

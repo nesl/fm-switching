@@ -1,0 +1,313 @@
+#!/usr/bin/env python3
+"""Apply the D218 (1) DEVICE_ANSWERS change to cf_protect_defer.py and arms_v6cf.py.
+
+Reads the ORIGIN blob of each file (passed in), applies exact-match replacements, writes the result.
+Every replacement must match exactly once or this script raises.
+"""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+
+def sub1(s: str, old: str, new: str, tag: str) -> str:
+    n = s.count(old)
+    if n != 1:
+        raise SystemExit("patch %s matched %d times, expected 1" % (tag, n))
+    return s.replace(old, new)
+
+
+# ---------------------------------------------------------------------------- cf_protect_defer.py
+
+PD_SWITCH = '''
+# ---------------------------------------------------------------------------
+# THE SECOND SWITCH: DEVICE_ANSWERS, spec v6 section 7's THIRD request candidate (D218 (1)).
+#
+# WHY IT IS A SEPARATE SWITCH AND NOT PART OF `SWITCH_ATTR`. `FINAL_LADDER_CELLS` is posted and
+# running, so `covex-v6-final`'s behaviour must not change in place (D209 (1), and the user's
+# ruling of 2026-11-23). With this switch absent from the instance the branch below is not
+# reached and the module decides exactly what the committed module decided, which is what the
+# byte-identity proofs of this study measure. The reader is the same strict one `SWITCH_ATTR`
+# uses, for the same reason: a truthy CLASS attribute would turn the candidate on for every arm
+# in the run and make the cells incomparable.
+DEVICE_ANSWERS_SWITCH_ATTR = "live2_cf_device_answers"
+
+
+class DeviceAnswersSwitchError(RuntimeError):
+    """The DEVICE_ANSWERS switch was declared in a shape this component forbids."""
+
+
+def device_answers_enabled(arm: Any) -> bool:
+    """Is the DEVICE_ANSWERS candidate on for THIS ARM INSTANCE? Default False."""
+    try:
+        own = vars(arm)
+    except TypeError:                                                       # pragma: no cover
+        own = {}
+    if DEVICE_ANSWERS_SWITCH_ATTR not in own:
+        for klass in type(arm).__mro__:
+            if bool(klass.__dict__.get(DEVICE_ANSWERS_SWITCH_ATTR, False)):
+                raise DeviceAnswersSwitchError(
+                    "%s is ON as a CLASS attribute of %s and the instance declares nothing. This "
+                    "candidate requires an arm-scoped INSTANCE attribute: a class-level switch "
+                    "turns it on for every arm in the run."
+                    % (DEVICE_ANSWERS_SWITCH_ATTR, klass.__name__))
+        return False
+    return bool(own[DEVICE_ANSWERS_SWITCH_ATTR])
+
+
+DEVICE_ANSWERS_RULE = (
+    "spec v6 section 7's request row lists THREE candidates: admit now with full history; defer "
+    "to the latest safe start; LEAVE TO THE DEVICE. The third was specified and never built "
+    "(D218 (1)). It applies in exactly one branch: the harm of admitting this recall query's cold "
+    "rebuild crosses the bar, the latest safe start is ALREADY NOW so the request cannot be "
+    "deferred, and the request is ONE PROMPT so it cannot be sliced. Deviate to the device iff "
+    "weighted harm to others MINUS this question's own weighted P(on time) exceeds w_d x "
+    "MARGIN_CF. Units are D191 (2)'s: both sides are COUNTS of expected on-time cloud answers, "
+    "each device weighted by its own w_d (D185), with no division by the number served.")
+'''
+
+
+PD_BRANCH_OLD = '''    if chunk_tokens is None:
+        out["gate"] = ("wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start "
+                       "is already here and a recall query is one prompt, so there is nothing to "
+                       "send less of. The registered candidate that WOULD apply is "
+                       "DEVICE_ANSWERS (spec v6 section 7\'s request row), which is not part of "
+                       "the protect-and-defer compound and is not built here")
+        return out
+'''
+
+PD_BRANCH_NEW = '''    if chunk_tokens is None:
+        # DEVICE_ANSWERS, spec v6 section 7's third request candidate (D218 (1)). This is the
+        # branch StudyD216-KV025 measured reaching "harm crosses the bar" and then discarding the
+        # deviation: 2 decisions at 1x and 27 at 0.25x arrived here, and all of them fell back to
+        # the base and admitted the harmful cold rebuild. The channel that applies is not a slice
+        # and not a deferral, it is LEAVING THE QUESTION TO THE DEVICE.
+        if not device_answers:
+            out["gate"] = ("wanted_to_act_but_a_request_has_no_slice_channel: the latest safe "
+                           "start is already here and a recall query is one prompt, so there is "
+                           "nothing to send less of. The registered candidate that WOULD apply "
+                           "is DEVICE_ANSWERS (spec v6 section 7's request row), which is not "
+                           "built on this arm (%s is not set)"
+                           % (DEVICE_ANSWERS_SWITCH_ATTR,))
+            return out
+        # THE FORFEIT, AND WHY ITS SIGN IS A MINUS. Replacement semantics (D165 (B), D177,
+        # D175 (1)): a cloud answer DELIVERED by the deadline replaces the device's, and a
+        # refused request leaves the device's answer standing. So leaving THIS question to the
+        # device gives up THIS question's own expected on-time CLOUD answer. That forfeit is a
+        # COST of the deviation, in the same currency as the harm the deviation avoids, so it is
+        # SUBTRACTED from the gain before the gain meets the bar. With the opposite sign the
+        # deviation would look BETTER the more valuable the question was, which is backwards.
+        #
+        # ONE ARITHMETIC, NOT A SECOND ONE. `p_on_time` is the same injected callable every harm
+        # row is valued through, evaluated at THIS request's own predicted service and its own
+        # slack; `w_d` is the same single read the bar is built from, under the ruled `decider`
+        # reading (D171 (1)). No new price and no new constant enters here.
+        if deadline_abs_s is None or pred is None:
+            out["gate"] = ("wanted_to_act_but_this_request_carries_no_deadline_or_prediction: "
+                           "DEVICE_ANSWERS prices the forfeited own answer and cannot be decided "
+                           "without P(on time) for this question")
+            return out
+        w_self = float(b["w_d"])
+        p_self = float(p_on_time(float(pred.engine_s), float(deadline_abs_s) - float(now_s)))
+        own = w_self * p_self
+        net = float(h["harm"]) - own
+        out["device_answers"] = {
+            "p_self_on_time": p_self,
+            "w_d": w_self,
+            "own_weighted_on_time_forfeited": own,
+            "weighted_harm_to_others": float(h["harm"]),
+            "net": net,
+            "bar": float(b["bar"]),
+            "crosses": bool(net > float(b["bar"])),
+            "units": ("counts of expected on-time cloud answers, per-device w_d, no division by "
+                      "the number served (D191 (2))"),
+            "sign": ("the own term is SUBTRACTED: under replacement semantics leaving the "
+                     "question to the device forfeits this question's own expected on-time cloud "
+                     "answer (D165 (B), D177)"),
+            "rule": DEVICE_ANSWERS_RULE}
+        out["device_answers_net"] = net
+        out["device_answers_own_value"] = own
+        if net > float(b["bar"]):
+            out["action"] = "DEVICE_ANSWERS"
+            out["gate"] = ("leave_to_the_device: admitting this query's %d-token cold rebuild now "
+                           "costs others %.6f on-time answers, leaving it to the device forfeits "
+                           "its own %.6f, and the net %.6f exceeds the bar %.6f"
+                           % (int(u_rebuild), float(h["harm"]), own, net, float(b["bar"])))
+            return out
+        out["gate"] = ("device_answers_net_does_not_exceed_the_bar: the harm to others %.6f is "
+                       "above the bar but the forfeited own answer %.6f brings the net to %.6f, "
+                       "which the bar %.6f does not clear, so the base stands. This is a DECIDED "
+                       "candidate, not an absent channel"
+                       % (float(h["harm"]), own, net, float(b["bar"])))
+        return out
+'''
+
+PD_SIG_OLD = '''           chunk_tokens: Optional[int],
+           p_on_time: Callable[[float, float], float],'''
+PD_SIG_NEW = '''           chunk_tokens: Optional[int],
+           p_on_time: Callable[[float, float], float],
+           device_answers: bool = False,'''
+
+PD_DOC_OLD = '''      PROTECT_AND_CHUNK    protect H and send R as one chunk instead of the whole tail, because
+                           R's latest safe start is already here and holding it whole would miss
+                           its deadline
+    and the reason for every gate it did not pass. Nothing is enacted here: the arm enacts.
+    """'''
+PD_DOC_NEW = '''      PROTECT_AND_CHUNK    protect H and send R as one chunk instead of the whole tail, because
+                           R's latest safe start is already here and holding it whole would miss
+                           its deadline
+      DEVICE_ANSWERS       leave the recall query to the device, because its latest safe start is
+                           already here, a query is one prompt so it cannot be sliced, and the
+                           harm of admitting it now exceeds the bar even after the question's own
+                           forfeited on-time answer is charged against the saving (D218 (1)).
+                           Offered only when `device_answers` is True.
+    and the reason for every gate it did not pass. Nothing is enacted here: the arm enacts.
+    """'''
+
+PD_OUT_OLD = '''        "w_source": w_source, "action": "BASE", "gate": None,
+    }'''
+PD_OUT_NEW = '''        "w_source": w_source, "action": "BASE", "gate": None,
+        "device_answers_offered": bool(device_answers),
+    }'''
+
+PD_TRACE_OLD = '''    L.append("  ACTION: %s" % d.get("action"))
+    L.append("    reason: %s" % d.get("gate"))
+    return L'''
+PD_TRACE_NEW = '''    da = d.get("device_answers") or {}
+    if da:
+        L.append("  DEVICE_ANSWERS (spec v6 section 7's third request candidate, D218 (1))")
+        L.append("    weighted harm to others          %.6f on-time answers"
+                 % da.get("weighted_harm_to_others", 0.0))
+        L.append("    this question's own P(on time)    %.6f, weighted by w_d %.6f = %.6f"
+                 % (da.get("p_self_on_time", 0.0), da.get("w_d", 1.0),
+                    da.get("own_weighted_on_time_forfeited", 0.0)))
+        L.append("    NET = harm - own forfeit         %.6f - %.6f = %.6f"
+                 % (da.get("weighted_harm_to_others", 0.0),
+                    da.get("own_weighted_on_time_forfeited", 0.0), da.get("net", 0.0)))
+        L.append("    TEST: net %.6f %s bar %.6f"
+                 % (da.get("net", 0.0), ">" if da.get("crosses") else "<=", da.get("bar", 0.0)))
+    L.append("  ACTION: %s" % d.get("action"))
+    L.append("    reason: %s" % d.get("gate"))
+    return L'''
+
+PD_ASDICT_OLD = '''        "switch": {"attr": SWITCH_ATTR, "scope": "arm instance", "default": False,
+                   "class_level_on": "RAISES"},'''
+PD_ASDICT_NEW = '''        "switch": {"attr": SWITCH_ATTR, "scope": "arm instance", "default": False,
+                   "class_level_on": "RAISES"},
+        "device_answers": {"attr": DEVICE_ANSWERS_SWITCH_ATTR, "scope": "arm instance",
+                           "default": False, "class_level_on": "RAISES",
+                           "ruling": "D218 (1)", "rule": DEVICE_ANSWERS_RULE,
+                           "enacted_by_the_arm_as": 'ra.decision = "DEVICE"'},'''
+
+
+def patch_pd(s: str) -> str:
+    s = sub1(s, "\n\n# ---------------------------------------------------------------------------\n"
+                "# THE BAR. Derived from two committed constants",
+             PD_SWITCH + "\n\n# ----------------------------------------------------------------"
+             "-----------\n# THE BAR. Derived from two committed constants", "pd_switch")
+    s = sub1(s, PD_SIG_OLD, PD_SIG_NEW, "pd_signature")
+    s = sub1(s, PD_DOC_OLD, PD_DOC_NEW, "pd_docstring")
+    s = sub1(s, PD_OUT_OLD, PD_OUT_NEW, "pd_out_init")
+    s = sub1(s, PD_BRANCH_OLD, PD_BRANCH_NEW, "pd_branch")
+    s = sub1(s, PD_TRACE_OLD, PD_TRACE_NEW, "pd_trace")
+    s = sub1(s, PD_ASDICT_OLD, PD_ASDICT_NEW, "pd_asdict")
+    return s
+
+
+# ---------------------------------------------------------------------------------- arms_v6cf.py
+
+ARM_INIT_OLD = '''    def __init__(self, name: str, *,
+                 protect_defer: bool = True,'''
+ARM_INIT_NEW = '''    def __init__(self, name: str, *,
+                 protect_defer: bool = True,
+                 device_answers: bool = False,'''
+
+ARM_SETSWITCH_OLD = '''        for obj in self._pd_targets():
+            setattr(obj, PD.SWITCH_ATTR, bool(protect_defer))'''
+ARM_SETSWITCH_NEW = '''        for obj in self._pd_targets():
+            setattr(obj, PD.SWITCH_ATTR, bool(protect_defer))
+        # D218 (1). DEFAULT FALSE, so every arm built before this ruling decides what it decided:
+        # `covex-v6-final` is posted and running and must not move in place (D209 (1)).
+        if device_answers:
+            for obj in self._pd_targets():
+                setattr(obj, PD.DEVICE_ANSWERS_SWITCH_ATTR, True)
+            if not PD.device_answers_enabled(self):                        # pragma: no cover
+                raise PD.DeviceAnswersSwitchError(
+                    "%s did not take on the instance of %s"
+                    % (PD.DEVICE_ANSWERS_SWITCH_ATTR, type(self).__name__))'''
+
+ARM_DECIDE_CALL_OLD = '''                      chunk_tokens=chunk_tokens,
+                      p_on_time=(lambda eng, slack: float(CC.p_on_time(res, eng, slack))),'''
+ARM_DECIDE_CALL_NEW = '''                      chunk_tokens=chunk_tokens,
+                      p_on_time=(lambda eng, slack: float(CC.p_on_time(res, eng, slack))),
+                      device_answers=PD.device_answers_enabled(self),'''
+
+ARM_REQ_OLD = '''            if d["action"] != "PROTECT_AND_DEFER":
+                if d.get("crosses_bar"):
+                    # the harm cleared the bar and no channel of THIS compound could express the
+                    # deviation; counted, never silently dropped
+                    self.stats["pd_request_crossed_bar_unexpressible"] += 1
+                continue'''
+ARM_REQ_NEW = '''            if d["action"] == "DEVICE_ANSWERS":
+                # THE THIRD REGISTERED REQUEST CANDIDATE (spec v6 section 7, D218 (1)). The
+                # channel is `ra.decision = "DEVICE"`, which coordinator.py:863 READS: the
+                # opportunity goes to state "declined" and the DEVICE's own answer stands, which
+                # is exactly replacement semantics with no cloud answer delivered (D175 (1)).
+                # `representation` is left as the base set it and is ignored on a DEVICE decision
+                # (baselines/interface.py validates a representation only for CLOUD).
+                ra.decision = "DEVICE"
+                self.stats["pd_request_device_answers"] += 1
+                continue
+            if d["action"] != "PROTECT_AND_DEFER":
+                if d.get("crosses_bar"):
+                    if (d.get("device_answers") or {}).get("crosses") is False:
+                        # THE CANDIDATE WAS EVALUATED AND DECLINED, which is a DECISION and not
+                        # an absent channel. Counted apart from the unexpressible, so the fall in
+                        # that counter can never be won by relabelling (the pre-registered
+                        # partition, D218 (1)).
+                        self.stats["pd_request_device_declined"] += 1
+                    else:
+                        # the harm cleared the bar and no channel could express the deviation;
+                        # counted, never silently dropped
+                        self.stats["pd_request_crossed_bar_unexpressible"] += 1
+                continue'''
+
+ARM_DESCRIBE_OLD = '''                     switch=self.pd_switch_report(),'''
+ARM_DESCRIBE_NEW = '''                     switch=self.pd_switch_report(),
+                     device_answers=self.pd_device_answers_report(),'''
+
+ARM_REPORT_OLD = '''    def pd_harm_distribution(self) -> Dict[str, Any]:'''
+ARM_REPORT_NEW = '''    def pd_device_answers_report(self) -> Dict[str, Any]:
+        """What the D218 (1) switch reads as on EVERY object of the chain, and with what type."""
+        return {"attr": PD.DEVICE_ANSWERS_SWITCH_ATTR,
+                "ruling": "D218 (1)",
+                "chain": [{"class": type(o).__name__,
+                           "declared_on_instance": PD.DEVICE_ANSWERS_SWITCH_ATTR in vars(o),
+                           "value": vars(o).get(PD.DEVICE_ANSWERS_SWITCH_ATTR),
+                           "type": type(vars(o).get(PD.DEVICE_ANSWERS_SWITCH_ATTR)).__name__}
+                          for o in self._pd_targets()],
+                "arm_enables": PD.device_answers_enabled(self),
+                "enacted_as": 'ra.decision = "DEVICE"',
+                "counters": {"fired": "pd_request_device_answers",
+                             "evaluated_and_declined": "pd_request_device_declined",
+                             "still_unexpressible": "pd_request_crossed_bar_unexpressible"}}
+
+    def pd_harm_distribution(self) -> Dict[str, Any]:'''
+
+
+def patch_arm(s: str) -> str:
+    s = sub1(s, ARM_INIT_OLD, ARM_INIT_NEW, "arm_init")
+    s = sub1(s, ARM_SETSWITCH_OLD, ARM_SETSWITCH_NEW, "arm_setswitch")
+    s = sub1(s, ARM_DECIDE_CALL_OLD, ARM_DECIDE_CALL_NEW, "arm_decide_call")
+    s = sub1(s, ARM_REQ_OLD, ARM_REQ_NEW, "arm_request_leg")
+    s = sub1(s, ARM_DESCRIBE_OLD, ARM_DESCRIBE_NEW, "arm_describe")
+    s = sub1(s, ARM_REPORT_OLD, ARM_REPORT_NEW, "arm_report")
+    return s
+
+
+if __name__ == "__main__":
+    which, src, dst = sys.argv[1], Path(sys.argv[2]), Path(sys.argv[3])
+    text = src.read_text()
+    out = patch_pd(text) if which == "pd" else patch_arm(text)
+    dst.write_text(out)
+    print("patched %s: %d -> %d bytes" % (which, len(text), len(out)))

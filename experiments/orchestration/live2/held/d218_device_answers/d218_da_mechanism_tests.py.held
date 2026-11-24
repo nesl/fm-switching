@@ -1,0 +1,217 @@
+#!/usr/bin/env python3
+"""D218 (1) DEVICE_ANSWERS: the mechanism driven directly, before any cell.
+
+CLAUDE.md Step 2 (every link instantiated and shown to vary), Step 2b (the switch reaches a
+decision, both conditions diffed on one unit), Step 3 (one hand-checkable trace) and Step 4 (the
+negative controls collapse the branch), on `cf_protect_defer.decide` with every quantity injected,
+so each link can be driven to a chosen value. No harness, no coordinator, no cell.
+
+THE SIGN TEST IS THE ONE THAT MATTERS. The own-answer forfeit must be SUBTRACTED, so raising THIS
+question's own P(on time) must make the deviation LESS attractive, never more.
+
+HOW THE OWN P(ON TIME) IS ISOLATED, declared because it is synthetic. `p_on_time` is one injected
+callable serving both the harm rows and the question's own term, so it is dispatched on the
+PREDICTED SERVICE: the harm rows carry engine_s 0.30 and the question under decision carries 2.0.
+The dispatch lets the own term be driven while the harm is held exactly fixed, which no single
+monotone curve can do. It is a test instrument and no number here is a measurement of the workload.
+"""
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+from typing import Any, Callable, Dict, List
+
+HERE = Path(__file__).resolve().parent
+for _p in (str(HERE), str(HERE / "v5"), str(HERE / "fleet"), str(HERE.parent / "baselines")):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+import cf_protect_defer as PD                                                  # noqa: E402
+
+SELF_ENGINE_S = 2.0
+OTHER_ENGINE_S = 0.30
+OTHER_SLACK_S = 0.55
+
+
+class _Pred:
+    def __init__(self, engine_s: float) -> None:
+        self.engine_s = float(engine_s)
+        self.total_s = float(engine_s)
+        self.total_prefill_only_s = float(engine_s)
+
+    def as_dict(self) -> Dict[str, Any]:
+        return {"engine_s": self.engine_s, "total_s": self.total_s,
+                "total_prefill_only_s": self.total_prefill_only_s}
+
+
+def _others(n: int) -> List[Dict[str, Any]]:
+    return [{"req_id": "alert%d" % i, "device_id": "dash%03d" % i, "session_id": None,
+             "qtype": "alert", "engine_s": OTHER_ENGINE_S, "slack_s": OTHER_SLACK_S,
+             "p_device_on_time": 1.0} for i in range(n)]
+
+
+def _curve(engine_s: float, slack_s: float) -> float:
+    """The declared monotone stand-in used for the HARM rows only."""
+    if slack_s <= 0.0:
+        return 0.0
+    r = float(engine_s) / float(slack_s)
+    if r <= 0.5:
+        return 1.0
+    if r >= 1.5:
+        return 0.0
+    return float(1.5 - r)
+
+
+def _p(p_self: float) -> Callable[[float, float], float]:
+    def f(engine_s: float, slack_s: float) -> float:
+        if abs(float(engine_s) - SELF_ENGINE_S) < 1e-12:
+            return float(p_self)
+        return _curve(engine_s, slack_s)
+    return f
+
+
+# The deadline that puts the latest safe start ALREADY NOW, which is the branch's own
+# precondition. kappa is read, never set here, so the offset is derived from it.
+def _deadline(now_s: float) -> float:
+    return now_s + PD.KAPPA * SELF_ENGINE_S + 0.5 * PD.DECISION_PERIOD_S
+
+
+def call(*, device_answers: bool, p_self: float = 0.9, w: float = 1.0,
+         n_others: int = 12, harm_scale: float = 1.0, margin_scale: float = 1.0,
+         u: int = 7000, chunk_tokens: Any = None) -> Dict[str, Any]:
+    now = 100.0
+    return PD.decide(
+        decider_device_id="robo000", now_s=now,
+        alert_active=True, n_alert_pending=n_others,
+        u_rebuild=u, free_kv_tokens=0.0,
+        victim={"session_id": "s001", "device_id": "robo001",
+                "next_question_in_s": 5.0, "p_question": 0.9, "warm_tokens": 5000},
+        others=_others(n_others),
+        deadline_abs_s=_deadline(now), pred=_Pred(SELF_ENGINE_S),
+        chunk_tokens=chunk_tokens,
+        p_on_time=_p(p_self),
+        w_of=(lambda _d: float(w)),
+        device_answers=device_answers,
+        harm_scale=harm_scale, margin_scale=margin_scale)
+
+
+def main() -> int:
+    rep: Dict[str, Any] = {
+        "_what": ("D218 (1) DEVICE_ANSWERS driven directly on cf_protect_defer.decide: Step 2, "
+                  "Step 2b, Step 3 and Step 4, before any cell"),
+        "_register": ("SYNTHETIC inputs chosen to put the decision inside the branch under test; "
+                      "the p_on_time curve is a declared stand-in dispatched on predicted "
+                      "service so the own term can be driven with the harm held fixed. It exists "
+                      "so the SIGN and the ALGEBRA can be checked by hand. No number here is a "
+                      "measurement of the workload."),
+        "margin_cf_on_time": PD.MARGIN_CF_ON_TIME,
+        "margin_source": PD.MARGIN_CF_ON_TIME_SOURCE,
+        "kappa": PD.KAPPA, "decision_period_s": PD.DECISION_PERIOD_S,
+        "switch": {"attr": PD.DEVICE_ANSWERS_SWITCH_ATTR, "default": False},
+    }
+    checks: List[Dict[str, Any]] = []
+
+    off = call(device_answers=False)
+    on = call(device_answers=True)
+
+    diff = sorted(k for k in set(off) | set(on)
+                  if json.dumps(off.get(k), default=str) != json.dumps(on.get(k), default=str))
+    checks.append({
+        "check": "step_2b_the_switch_reaches_a_decision",
+        "off_action": off["action"], "on_action": on["action"],
+        "off_gate": (off["gate"] or "")[:110], "on_gate": (on["gate"] or "")[:160],
+        "n_fields_differing": len(diff), "fields_differing": diff,
+        "VERDICT": ("PASS: the switch changes the ACTION on this unit"
+                    if off["action"] != on["action"] else
+                    "FAIL: ABSENT LINK, the two conditions decide identically")})
+
+    rows = []
+    for ps in (0.0, 0.2, 0.5, 0.8, 0.95, 1.0):
+        d = call(device_answers=True, p_self=ps)
+        x = d.get("device_answers") or {}
+        rows.append({"p_self_on_time": ps, "harm": x.get("weighted_harm_to_others"),
+                     "own_forfeit": x.get("own_weighted_on_time_forfeited"),
+                     "net": x.get("net"), "bar": x.get("bar"), "action": d["action"]})
+    nets = [r["net"] for r in rows]
+    harms = {round(float(r["harm"]), 12) for r in rows}
+    monotone = all(nets[i] > nets[i + 1] for i in range(len(nets) - 1))
+    checks.append({
+        "check": "step_2_the_sign_of_the_own_answer_term",
+        "_claim": ("the forfeited own answer is SUBTRACTED, so a question with a HIGHER own "
+                   "P(on time) is LESS attractive to leave to the device"),
+        "rows": rows,
+        "harm_held_fixed": len(harms) == 1, "distinct_harms": sorted(harms),
+        "net_falls_strictly_as_p_self_rises": bool(monotone),
+        "actions_seen": sorted({r["action"] for r in rows}),
+        "VERDICT": ("PASS: net = harm - w_d x p_self and it falls strictly as p_self rises, with "
+                    "the harm held fixed" if monotone and len(harms) == 1 else
+                    "FAIL: the sign or the isolation is wrong")})
+
+    wrows = []
+    for w in (1.0, 1.5, 2.0, 3.0):
+        d = call(device_answers=True, w=w)
+        x = d.get("device_answers") or {}
+        wrows.append({"w_d": w, "harm": x.get("weighted_harm_to_others"),
+                      "own_forfeit": x.get("own_weighted_on_time_forfeited"),
+                      "net": x.get("net"), "bar": x.get("bar"), "action": d["action"]})
+    checks.append({
+        "check": "step_2_w_d_enters_harm_the_forfeit_and_the_bar",
+        "rows": wrows,
+        "n_distinct_nets": len({round(r["net"], 9) for r in wrows}),
+        "n_distinct_bars": len({round(r["bar"], 9) for r in wrows}),
+        "VERDICT": ("PASS: the weight moves three quantities and the comparison does not cancel"
+                    if len({round(r["net"], 9) for r in wrows}) > 1 else
+                    "FAIL: w_d is inert in this inequality")})
+
+    rep["step_3_trace"] = PD.trace_lines(on)
+
+    h0 = call(device_answers=True, harm_scale=0.0)
+    mh = call(device_answers=True, margin_scale=1e9)
+    checks.append({
+        "check": "step_4_harm_zero_collapses_the_new_branch",
+        "action": h0["action"], "gate": (h0["gate"] or "")[:90],
+        "reached_the_branch": "device_answers" in h0,
+        "VERDICT": ("PASS: BASE, and the branch is not reached"
+                    if h0["action"] == "BASE" else "FAIL: the branch survived its own control")})
+    checks.append({
+        "check": "step_4_margin_huge_collapses_the_new_branch",
+        "action": mh["action"], "gate": (mh["gate"] or "")[:90],
+        "reached_the_branch": "device_answers" in mh,
+        "VERDICT": ("PASS: BASE, and the branch is not reached"
+                    if mh["action"] == "BASE" else "FAIL: the branch survived its own control")})
+
+    # the DECLINED path: the channel exists, is priced, and the base stands. Driven by making the
+    # question's own forfeited answer large enough to eat the saving.
+    dec = None
+    for ps in (1.0, 2.0, 4.0, 8.0, 16.0, 32.0):
+        d = call(device_answers=True, p_self=ps, n_others=12)
+        if d["action"] == "BASE" and (d.get("device_answers") or {}).get("crosses") is False:
+            dec = d
+            break
+    checks.append({
+        "check": "the_declined_path_is_reachable_and_is_NOT_the_unexpressible",
+        "found": dec is not None,
+        "device_answers": (dec or {}).get("device_answers"),
+        "action": (dec or {}).get("action"),
+        "gate": ((dec or {}).get("gate") or "")[:200],
+        "VERDICT": ("PASS: the candidate was evaluated and declined, and the arm counts that "
+                    "apart from the unexpressible" if dec is not None else
+                    "NOT EXERCISED at these inputs; reported, not tuned")})
+
+    st = call(device_answers=True, chunk_tokens=2048)
+    checks.append({
+        "check": "the_state_leg_cannot_reach_the_new_branch",
+        "action": st["action"], "has_device_answers_field": "device_answers" in st,
+        "VERDICT": ("PASS: chunk_tokens is not None on a state call, so the branch is "
+                    "request-only by construction"
+                    if "device_answers" not in st else "FAIL: the state leg reached it")})
+
+    rep["checks"] = checks
+    rep["ALL_PASS"] = all(str(c["VERDICT"]).startswith("PASS") for c in checks)
+    print(json.dumps(rep, indent=1, default=str))
+    return 0 if rep["ALL_PASS"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

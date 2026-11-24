@@ -1,0 +1,347 @@
+--- /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessA_held/o.cf_protect_defer.py	2026-11-24 04:32:29.801513976 -0800
++++ /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2/cf_protect_defer.py	2026-11-23 23:30:04.781117291 -0800
+@@ -10,6 +10,11 @@
+ built one at a time: `keep-ready set` and `admit with protected victim` are NOT here, and neither
+ is `plan_sync`.
+ 
++D218 (1) ADDS ONE THING AND ONLY ONE: spec v6 section 7's THIRD REQUEST CANDIDATE, `leave to the
++device`, inside the request leg's one branch that measurably reached a decision and had no channel
++to express it in. It is behind its OWN arm-scoped switch (`DEVICE_ANSWERS_SWITCH_ATTR`), default
++off, because `covex-v6-final` is posted and its behaviour may not move in place.
++
+ THE THREE QUANTITIES, AND WHERE EACH ONE COMES FROM. None of them is declared in this file.
+ 
+   HARM     on-time cloud answers LOST BY OTHERS (D177 (1), D178 (5)). A rebuild of `u` uncached
+@@ -146,6 +151,98 @@
+ 
+ 
+ # ---------------------------------------------------------------------------
++# D218 (1): THE THIRD REQUEST CANDIDATE, DEVICE_ANSWERS, BEHIND ITS OWN SWITCH.
++#
++# WHAT IT IS AND WHY IT IS NOT A NEW CANDIDATE. Spec v6 section 7's request row lists THREE
++# candidates - "admit now with full history; defer to the latest safe start; leave to the device" -
++# and the third was specified and never built here. `v5/cf_planner.py:167` already names it
++# DEVICE_ANSWERS in `REQUEST_CANDIDATES` and scores it at `:549`. This is that candidate inside the
++# protect-and-defer compound's REQUEST leg, in the one branch that measurably reached a decision
++# and had nowhere to put it.
++#
++# THE MEASURED GAP IT CLOSES. StudyD216-KV025 section 3.5:
++# `pd_request_crossed_bar_unexpressible` is 2 at 1x and 27 at 0.25x, and all 27 arrive at the ONE
++# gate below (`a request has no slice channel`). The mechanism reached "harm crosses the bar", had
++# no channel, fell back to the BASE and admitted the harmful cold rebuild. The latest safe start
++# was already now, so it could not defer; a recall query is one prompt, so it could not be sliced.
++#
++# A SEPARATE SWITCH, NOT A WIDENING OF `SWITCH_ATTR`. `covex-v6-final` is POSTED and running, so
++# its behaviour may not move in place (the user's ruling, and D209 (1) on superseding). The
++# candidate is therefore off unless an arm declares this second switch on its own instance, with
++# the same strict reader shape: a truthy CLASS attribute RAISES, for the reason `arm_enables`
++# gives.
++DEVICE_ANSWERS_SWITCH_ATTR = "live2_cf_device_answers"
++
++
++class DeviceAnswersSwitchError(RuntimeError):
++    """The DEVICE_ANSWERS switch was declared in a shape this component forbids."""
++
++
++def device_answers_enabled(arm: Any) -> bool:
++    """Is the DEVICE_ANSWERS request candidate on for THIS ARM INSTANCE? Default False."""
++    try:
++        own = vars(arm)
++    except TypeError:                                                       # pragma: no cover
++        own = {}
++    if DEVICE_ANSWERS_SWITCH_ATTR not in own:
++        for klass in type(arm).__mro__:
++            if bool(klass.__dict__.get(DEVICE_ANSWERS_SWITCH_ATTR, False)):
++                raise DeviceAnswersSwitchError(
++                    "%s is ON as a CLASS attribute of %s and the instance declares nothing. "
++                    "This candidate requires an arm-scoped INSTANCE attribute: a class-level "
++                    "switch turns it on for every arm in the run and would move covex-v6-final, "
++                    "which is posted." % (DEVICE_ANSWERS_SWITCH_ATTR, klass.__name__))
++        return False
++    return bool(own[DEVICE_ANSWERS_SWITCH_ATTR])
++
++
++# THE RULE, ITS UNITS AND ABOVE ALL ITS SIGN, written down where the arithmetic is.
++#
++#     deviate to the device IFF   harm_others - w_d * p_self  >  w_d * MARGIN_CF
++#
++# UNITS (D191 (2)): gain and harm are both COUNTS of expected on-time cloud answers, each device
++# weighted by its per-device `w_d` (D185). There is NO division by the number served - the target
++# normalisation lives inside `w_d` (D171, D177).
++#
++# WHY THE OWN TERM IS SUBTRACTED, which is the sign this component has to get right. Replacement
++# semantics (D165 (B), D177 (1)): a cloud answer delivered by the deadline REPLACES the device's.
++# Leaving the question to the device therefore FORFEITS this question's own expected on-time cloud
++# answer. That forfeit is a cost of the deviation, so it is SUBTRACTED from the harm the deviation
++# saves, and only what is left is compared against the bar.
++#
++# THE SIGN IS NOT ASSERTED, IT IS DERIVED FROM COMMITTED CODE. `v5/cf_planner.py` scores request
++# candidates as `value = gain - harm`:
++#
++#     ADMIT_NOW_D2    value = option_value(w, p_self) - harm_to_others = w * p_self - harm
++#     DEVICE_ANSWERS  value = device_only_value(...)                   = 0.0 EXACTLY
++#                     (`v5/cf_objective.py:683`, D177 (1): a device answer delivers no on-time
++#                      CLOUD answers, so it is the reference option and not a competitor on value)
++#
++# The committed deviation rule (D151 (1), D171 (1)) is `value_cf - value_base > w_d * MARGIN_CF`,
++# which for exactly these two candidates is
++#
++#     (0 - (w * p_self - harm)) > w_d * MARGIN_CF   <=>   harm - w * p_self > w_d * MARGIN_CF
++#
++# the rule above. So this branch is the committed planner's own arithmetic for the same two
++# candidates, and a reader can check the sign without trusting this comment.
++DEVICE_ANSWERS_RULE = (
++    "deviate to the device iff (weighted harm to others MINUS this question's own weighted "
++    "P(on time)) > w_d x MARGIN_CF; D191 (2) units (counts of expected on-time cloud answers, "
++    "weighted per device, no division by the number served); the own term is SUBTRACTED because "
++    "replacement semantics (D165 B, D177 (1)) mean leaving the question to the device forfeits "
++    "this question's own expected on-time cloud answer")
++DEVICE_ANSWERS_SIGN_SOURCE = (
++    "v5/cf_planner.py:549 scores DEVICE_ANSWERS at value 0.0 (cf_objective.device_only_value) "
++    "against ADMIT_NOW_D2 at w*p_self - harm, so value_cf - value_base > w_d x MARGIN_CF is "
++    "harm - w*p_self > w_d x MARGIN_CF. Derived from committed code, not asserted here.")
++
++# The three deadline types of spec v6 section 2, fixed so a type that saved NOTHING appears as an
++# explicit zero. A type that is never the one saved is a finding about where the mechanism acts,
++# and a missing key reads as an omission rather than as a zero.
++HARM_TYPES: Tuple[str, ...] = ("alert", "recall", "assistance")
++
++
++# ---------------------------------------------------------------------------
+ # THE BAR. Derived from two committed constants by a committed function; never retyped.
+ 
+ # IMPORT-TIME DEPENDENCY, AND WHY IT IS NOW RESOLVED AND NOT ASSUMED. This line read
+@@ -375,6 +472,7 @@
+         int(u_rebuild), rows, p_on_time=p_on_time,
+         acc_cloud=1.0, acc_device=0.0, counters=None)
+     by_type: Dict[str, float] = {}
++    n_by_type: Dict[str, int] = {}
+     discounted = 0.0
+     pdev = {str(r.get("req_id")): float(r.get("p_device_on_time", 1.0)) for r in rows}
+     qtype = {str(r.get("req_id")): str(r.get("qtype", "?")) for r in rows}
+@@ -382,6 +480,14 @@
+         rid = str(r.get("req_id"))
+         qt = qtype.get(rid, "?")
+         by_type[qt] = by_type.get(qt, 0.0) + float(r["value_lost"])
++        # COUNTED HERE AND NOT AT THE CALLER, because the TYPE lives here. A harm row as
++        # `cf_objective.harm_warm_from_queue_delay` returns it carries req_id, device_id, weight,
++        # the two probabilities and value_lost, and NO qtype: the type is on the INPUT row and is
++        # recovered through the `qtype` map above. A caller that counted `r.get("qtype")` on the
++        # returned rows would read "?" on every one and report a column of zeros beside a non-zero
++        # by-type value - which is exactly what the first version of the D218 trade record did,
++        # and the two columns contradicting each other is what caught it.
++        n_by_type[qt] = n_by_type.get(qt, 0) + 1
+         discounted += float(r["value_lost"]) * (1.0 - pdev.get(rid, 1.0))
+     sc = float(harm_scale)
+     return {"form": HARM_FORM_DEFAULT,
+@@ -397,6 +503,7 @@
+             "n_others_considered": len(rows),
+             "n_others_moved": int(wh.n_affected),
+             "harm_by_type": {k: float(v) for k, v in sorted(by_type.items())},
++            "n_moved_by_type": {k: int(v) for k, v in sorted(n_by_type.items())},
+             "rows": [dict(r) for r in wh.rows],
+             # REPORTING ONLY, and `getattr` for the same reason the bar above is resolved:
+             # `cf_objective.ON_TIME_UNITS` is the D177 flag another session is landing and it is
+@@ -433,6 +540,84 @@
+     return d
+ 
+ 
++def device_answers_trade(h: Dict[str, Any], b: Dict[str, Any], *,
++                         decider_device_id: str,
++                         w_of: Callable[[str], float],
++                         p_self: float) -> Dict[str, Any]:
++    """THE PREDICTED TRADE of leaving this one question to the device, term by term.
++
++    Built AT THE DECISION and not reconstructed from an aggregate afterwards, because the point of
++    the record is to make the mechanism auditable per denial rather than merely counted.
++
++    `w_self` is read EXPLICITLY through `w_of(decider_device_id)` and is NOT taken from `b["w_d"]`.
++    They are the same number under the ruled `decider` reading, and they are DIFFERENT numbers
++    under `max_harmed`, where `b["w_d"]` is a harmed device's weight. The own term is this
++    question's own, so it must carry its own device's weight whichever reading the bar is on.
++
++    THE BY-TYPE BREAKDOWN SUMS TO THE HARM THAT WAS COMPARED, by construction: `harm_on_time`
++    accumulates `harm_by_type` from the same rows whose `value_lost` sums to
++    `cf_objective.harm_warm_from_queue_delay`'s total, so `sum(by_type) == harm_unscaled`, and
++    `harm == harm_unscaled * harm_scale`. The residual is computed and reported rather than
++    claimed, so a reader sees the identity hold instead of being told it does.
++    """
++    w_self = float(w_of(str(decider_device_id)))
++    own = w_self * float(max(min(float(p_self), 1.0), 0.0))
++    by_type_raw = dict(h.get("harm_by_type") or {})
++    saved = {t: float(by_type_raw.get(t, 0.0)) for t in HARM_TYPES}
++    other_types = {k: float(v) for k, v in by_type_raw.items() if k not in HARM_TYPES}
++    moved_raw = dict(h.get("n_moved_by_type") or {})
++    moved_by_type = {t: int(moved_raw.get(t, 0)) for t in HARM_TYPES}
++    n_rows = len(list(h.get("rows") or []))
++    harm = float(h.get("harm", 0.0))
++    # THE IDENTITY'S TOLERANCE IS DERIVED FROM THE ROUNDING THAT CAUSES THE RESIDUAL, not chosen
++    # to make the check pass. `cf_objective.harm_warm_from_queue_delay` ROUNDS each row's
++    # `value_lost` to 9 decimals in the row dict while accumulating its total UNROUNDED, so a sum
++    # over the rounded rows can differ from the total by up to 5e-10 per row. The first version of
++    # this check used a flat 1e-9 and reported `holds: false` at a residual of 1.265e-09 over 15
++    # denials, which is the rounding and not a defect in the breakdown.
++    tol = 5e-10 * max(n_rows, 1) + 1e-12
++    return {
++        "rule": DEVICE_ANSWERS_RULE,
++        "sign_source": DEVICE_ANSWERS_SIGN_SOURCE,
++        "register": ("PREDICTED at decision time from the committed D162 price and the committed "
++                     "on-time curve. Not an observed outcome: a dry cell has no engine."),
++        # the term the rule SUBTRACTS
++        "p_self_on_time": float(p_self),
++        "w_self": w_self,
++        "w_self_source": "w_of(decider_device_id), read explicitly and not from the bar dict",
++        "own_lost_weighted_p_on_time": own,
++        # what the deviation SAVES, by the TYPE OF THE DEVICES SAVED, with explicit zeros
++        "saved_on_time_answers_by_type": saved,
++        "saved_total": harm,
++        "saved_total_unscaled": float(h.get("harm_unscaled", harm)),
++        "harm_scale": float(h.get("harm_scale", 1.0)),
++        "by_type_sum": sum(saved.values()) + sum(other_types.values()),
++        "by_type_sum_residual_against_unscaled": (
++            sum(saved.values()) + sum(other_types.values())
++            - float(h.get("harm_unscaled", harm))),
++        "by_type_sum_tolerance": tol,
++        "by_type_sum_tolerance_source": (
++            "5e-10 x n_harm_rows + 1e-12: cf_objective rounds each row's value_lost to 9 decimals "
++            "while accumulating the total unrounded, so the residual is that rounding"),
++        "by_type_sum_holds": bool(abs(
++            sum(saved.values()) + sum(other_types.values())
++            - float(h.get("harm_unscaled", harm))) <= tol),
++        "n_harm_rows": n_rows,
++        "types_outside_the_declared_three": other_types,
++        "n_moved_by_type": moved_by_type,
++        "n_others_considered": int(h.get("n_others_considered", 0) or 0),
++        "n_others_moved": int(h.get("n_others_moved", 0) or 0),
++        # the comparison itself
++        "net": harm - own,
++        "bar": float(b.get("bar", 0.0)),
++        "margin_cf_on_time": float(b.get("margin_cf_on_time", 0.0)),
++        "bar_w_d": float(b.get("w_d", 0.0)),
++        "bar_weight_source": b.get("bar_weight_source"),
++        "bar_reading": b.get("reading"),
++        "crosses": bool((harm - own) > float(b.get("bar", 0.0))),
++    }
++
++
+ def decide(*, decider_device_id: str, now_s: float,
+            alert_active: bool, n_alert_pending: int,
+            u_rebuild: int, free_kv_tokens: float,
+@@ -445,7 +630,8 @@
+            w_source: str = W_SOURCE_DEFAULT,
+            bar_reading: str = WEIGHT_ON_BAR_DEFAULT,
+            harm_scale: float = 1.0,
+-           margin_scale: float = 1.0) -> Dict[str, Any]:
++           margin_scale: float = 1.0,
++           device_answers: bool = False) -> Dict[str, Any]:
+     """The protect-and-defer decision for ONE pending cold rebuild R, with its whole trace.
+ 
+     Returns `action` in:
+@@ -454,6 +640,11 @@
+       PROTECT_AND_CHUNK    protect H and send R as one chunk instead of the whole tail, because
+                            R's latest safe start is already here and holding it whole would miss
+                            its deadline
++      DEVICE_ANSWERS       D218 (1), and only when `device_answers` is True: leave the question to
++                           the device, because R is a RECALL QUERY whose latest safe start is
++                           already here, so it can neither wait nor be sliced, and the harm it
++                           does others exceeds its own forfeited on-time answer by more than the
++                           bar. Spec v6 section 7's third request candidate.
+     and the reason for every gate it did not pass. Nothing is enacted here: the arm enacts.
+     """
+     out: Dict[str, Any] = {
+@@ -463,6 +654,9 @@
+         "u_rebuild": max(int(u_rebuild), 0), "free_kv_tokens": float(free_kv_tokens),
+         "victim": (dict(victim) if victim else None),
+         "w_source": w_source, "action": "BASE", "gate": None,
++        # recorded on EVERY decision, firing or not, so a cell can never be read as having had
++        # the candidate available when it did not
++        "device_answers_enabled": bool(device_answers),
+     }
+     # GATE 1: the compound is defined for a rebuild that exists. Nothing to defer, no decision.
+     if int(u_rebuild) <= 0:
+@@ -524,6 +718,41 @@
+     # 1x c5attr cell were request legs that enacted nothing. That is the write-only field wearing
+     # a third mask, and it inflated the gate mix while deflating the port-rule count.
+     if chunk_tokens is None:
++        # D218 (1). THE CANDIDATE THAT APPLIES HERE IS THE THIRD REQUEST CANDIDATE, and it is now
++        # built. Spec v6 section 7's request row: "leave to the device". The rule, its units and
++        # its sign are `DEVICE_ANSWERS_RULE` and `DEVICE_ANSWERS_SIGN_SOURCE` above.
++        if device_answers:
++            if deadline_abs_s is None or pred is None:
++                # p_self is this question's own expected on-time cloud answer, and without a
++                # deadline or a service prediction there is no p_self to forfeit. The deviation
++                # cannot be priced, so it is NOT taken and the decision remains unexpressible -
++                # which is what it is, and it is counted as that and not as a declined trade.
++                out["device_answers_unpriceable"] = True
++                out["gate"] = ("wanted_to_act_but_the_device_trade_cannot_be_priced: "
++                               "DEVICE_ANSWERS needs this question's own P(on time), and this "
++                               "decision carries no deadline or no service prediction")
++                return out
++            p_self = float(p_on_time(float(pred.engine_s),
++                                     float(deadline_abs_s) - float(now_s)))
++            tr = device_answers_trade(h, b, decider_device_id=decider_device_id,
++                                      w_of=w_of, p_self=p_self)
++            out["device_answers_trade"] = tr
++            out["device_answers_net"] = float(tr["net"])
++            if tr["crosses"]:
++                out["action"] = "DEVICE_ANSWERS"
++                out["gate"] = ("leave_to_the_device: the rebuild cannot wait and cannot be "
++                               "sliced, and it costs others %.6f on-time answers against this "
++                               "question's own %.6f, a net %.6f over a bar of %.6f"
++                               % (tr["saved_total"], tr["own_lost_weighted_p_on_time"],
++                                  tr["net"], tr["bar"]))
++                return out
++            # THE BRANCH WAS REACHED AND THE TRADE WAS DECLINED. That is a DECISION, not an
++            # absent channel, and it gets its own gate so the fall in the unexpressible counter
++            # can never be read as larger than the channel actually made it.
++            out["gate"] = ("device_trade_declined: the channel exists and the net %.6f does not "
++                           "exceed the bar %.6f, so the base's admission stands"
++                           % (tr["net"], tr["bar"]))
++            return out
+         out["gate"] = ("wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start "
+                        "is already here and a recall query is one prompt, so there is nothing to "
+                        "send less of. The registered candidate that WOULD apply is "
+@@ -616,6 +845,30 @@
+                  "must start now %s)" % (lss.get("latest_start_s", 0.0),
+                                          lss.get("deferral_s", 0.0),
+                                          lss.get("must_start_now")))
++    tr = d.get("device_answers_trade")
++    if tr:
++        L.append("  THE DEVICE TRADE (D218 (1), spec v6 section 7's third request candidate)")
++        L.append("    THIS question's own forfeit (replacement semantics, D165 B)")
++        L.append("      P(on time) if admitted now        %.6f" % tr.get("p_self_on_time", 0.0))
++        L.append("      w_self = %.6f  (%s)"
++                 % (tr.get("w_self", 1.0), tr.get("w_self_source")))
++        L.append("      own lost = w_self x p_self        %.6f on-time cloud answers"
++                 % tr.get("own_lost_weighted_p_on_time", 0.0))
++        L.append("    SAVED FOR OTHERS, by the type of the devices saved (explicit zeros kept)")
++        for t in HARM_TYPES:
++            L.append("      %-12s %12.6f on-time answers   (%d request(s) moved)"
++                     % (t, float((tr.get("saved_on_time_answers_by_type") or {}).get(t, 0.0)),
++                        int((tr.get("n_moved_by_type") or {}).get(t, 0))))
++        for t, v in sorted((tr.get("types_outside_the_declared_three") or {}).items()):
++            L.append("      %-12s %12.6f on-time answers   [OUTSIDE the declared three types]"
++                     % (t, float(v)))
++        L.append("      by-type sum %.9f against the compared harm %.9f, residual %.3e"
++                 % (tr.get("by_type_sum", 0.0), tr.get("saved_total_unscaled", 0.0),
++                    tr.get("by_type_sum_residual_against_unscaled", 0.0)))
++        L.append("    TEST: saved %.6f - own %.6f = net %.6f %s bar %.6f"
++                 % (tr.get("saved_total", 0.0), tr.get("own_lost_weighted_p_on_time", 0.0),
++                    tr.get("net", 0.0), ">" if tr.get("crosses") else "<=",
++                    tr.get("bar", 0.0)))
+     L.append("  ACTION: %s" % d.get("action"))
+     L.append("    reason: %s" % d.get("gate"))
+     return L
+@@ -628,6 +881,12 @@
+         "not_built_here": ["keep-ready set", "admit with protected victim", "plan_sync"],
+         "switch": {"attr": SWITCH_ATTR, "scope": "arm instance", "default": False,
+                    "class_level_on": "RAISES"},
++        "device_answers": {"attr": DEVICE_ANSWERS_SWITCH_ATTR, "scope": "arm instance",
++                           "default": False, "class_level_on": "RAISES",
++                           "candidate": "spec v6 section 7's third request candidate, D218 (1)",
++                           "rule": DEVICE_ANSWERS_RULE,
++                           "sign_source": DEVICE_ANSWERS_SIGN_SOURCE,
++                           "harm_types_reported": list(HARM_TYPES)},
+         "margin": {"value": MARGIN_CF_ON_TIME, "source": MARGIN_CF_ON_TIME_SOURCE,
+                    "tuned": False, "swept": False},
+         "weight": {"injected": True, "default": W_SOURCE_DEFAULT,
