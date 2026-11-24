@@ -369,6 +369,676 @@
   "host": "flash (A6000 box); these are DRY proofs and no GPU is used",
   "register": "PROOF, not a measurement: no latency or accuracy here is reportable",
   "timestamp": "2026-11-24T09:29:41.127791",
-  "note": "the BEFORE tree is a private `git archive` of base_sha; the AFTER tree is that archive plus this commit's edits. See d223_assemble_proofs.py for why _provenance.stamp was not used."
- }
+  "note": "the BEFORE tree is a private `git archive` of base_sha; the AFTER tree is that archive plus this commit's edits. See d223_assemble_proofs.py for why _provenance.stamp was not used.",
+  "amended": "2026-11-24T09:45:37.746559",
+  "amendment": "added the two final-ladder arms and a seed-7 sweep at the seed where the over-limit rule is reachable; the original eight-arm table is unchanged"
+ },
+ "final_ladder_and_seed7_coverage_ADDED": {
+  "_what": "ADDED: the two FINAL-LADDER arms (D208 (2)), which the eight-arm table above does not cover, plus a seed-7 sweep at the only seed where the over-limit rule is reachable.",
+  "_why_it_was_a_gap": "D223 (2) says byte-identical at 1x and the task said for every arm. covex-v6-fair-final and covex-v6-final are NOT their -c5attr ancestors: fair-final adds the D188 (2) id(obs) cache-key fix, the D185 per-device deficit feed with the state planner reading it (D206 (2)), and the D179 (4) alert release re-check. covex-v6-fair-final is also the arm posted at 0.5x in frozen_test/runs/RUNG3_KV05R_CELLS, so it is precisely the arm that needed the proof.",
+  "trees": {
+   "before": "private git archive of 4a73e12537cb74008de26c2ff046ae46dafd6de3 (a43ad7f7's parent)",
+   "after": "private git archive of a43ad7f7, as published",
+   "verified": "every file a43ad7f7 touched was sha-compared against its blob at both shas in both trees before any run; context_limit.py is correctly ABSENT in the before tree, since a43ad7f7 adds it"
+  },
+  "seed4": {
+   "_what": "seed 4, n=16, run_s=300, the same cell as the eight-arm table",
+   "run_1_control_on_covex-v6-fair-final": {
+    "control": "PASS: both trees reproduce their own digest exactly, so this instrument can carry a byte-identity claim and an equal digest below means equal decisions.",
+    "control_deterministic": true,
+    "control_digests": {
+     "before": [
+      "62b0f9a977189c78",
+      "62b0f9a977189c78"
+     ],
+     "after": [
+      "62b0f9a977189c78",
+      "62b0f9a977189c78"
+     ]
+    },
+    "arms": {
+     "covex-v6-fair-final": {
+      "IDENTICAL": true,
+      "n_rows": [
+       2814,
+       2814
+      ],
+      "digest_before": "62b0f9a977189c78",
+      "digest_after": "62b0f9a977189c78",
+      "comparison": {
+       "n_rows": [
+        2814,
+        2814
+       ],
+       "row_counts_equal": true,
+       "n_differing_rows": 0,
+       "differing_fields": {},
+       "first_difference": null
+      }
+     },
+     "covex-v6-final": {
+      "IDENTICAL": true,
+      "n_rows": [
+       2814,
+       2814
+      ],
+      "digest_before": "62b0f9a977189c78",
+      "digest_after": "62b0f9a977189c78",
+      "comparison": {
+       "n_rows": [
+        2814,
+        2814
+       ],
+       "row_counts_equal": true,
+       "n_differing_rows": 0,
+       "differing_fields": {},
+       "first_difference": null
+      }
+     }
+    },
+    "moved": [],
+    "notrun": []
+   },
+   "run_2_control_on_covex-v6-final": {
+    "control": "PASS: both trees reproduce their own digest exactly, so this instrument can carry a byte-identity claim and an equal digest below means equal decisions.",
+    "control_deterministic": true,
+    "control_digests": {
+     "before": [
+      "62b0f9a977189c78",
+      "62b0f9a977189c78"
+     ],
+     "after": [
+      "62b0f9a977189c78",
+      "62b0f9a977189c78"
+     ]
+    },
+    "arms": {
+     "covex-v6-final": {
+      "IDENTICAL": true,
+      "n_rows": [
+       2814,
+       2814
+      ],
+      "digest_before": "62b0f9a977189c78",
+      "digest_after": "62b0f9a977189c78",
+      "comparison": {
+       "n_rows": [
+        2814,
+        2814
+       ],
+       "row_counts_equal": true,
+       "n_differing_rows": 0,
+       "differing_fields": {},
+       "first_difference": null
+      }
+     }
+    },
+    "moved": [],
+    "notrun": []
+   },
+   "_two_runs_on_purpose": "the harness runs its A/A determinism control on the FIRST arm only, so the sweep was run twice with a different arm first. Each final arm therefore carries its OWN control rather than inheriting one.",
+   "_both_final_arms_share_a_digest": "covex-v6-fair-final and covex-v6-final return the SAME digest here. That is expected and is recorded rather than smoothed: rung 4's distinguishing limb is protect-and-defer, whose free-KV estimate reads obs.cloud.gpu_kv_fraction (arms_v6cf.py:329, inside _pd_free_kv), and on a DRY cell there is no backend and that field is 0.0, so the limb cannot separate them. The identity claim is per arm, before against after, and is unaffected; but this instrument does NOT distinguish rung 3 from rung 4, so it is not evidence that they behave alike in a live cell."
+  },
+  "seed7_where_the_rule_is_reachable": {
+   "_what": "seed 7, the ONLY seed where a robot recall history exceeds either limit (18 do, 34,051 to 52,861 tokens). At seed 4 the largest is 26,851, so the comparison `tok > CL.limit_tokens()` is REACHABLE there (the switch is on) and never REACHED, which is CLAUDE.md Rule 2 UNEXERCISED. An identity result on an unreached branch is not evidence about the branch, so the sweep was repeated where it fires.",
+   "control": "PASS: both trees reproduce their own digest exactly, so this instrument can carry a byte-identity claim and an equal digest below means equal decisions.",
+   "control_deterministic": true,
+   "arms": {
+    "covex-v6-fair-final": {
+     "IDENTICAL": true,
+     "n_rows": [
+      2978,
+      2978
+     ],
+     "digest_before": "a3c1c0b1094380a7",
+     "digest_after": "a3c1c0b1094380a7",
+     "comparison": {
+      "n_rows": [
+       2978,
+       2978
+      ],
+      "row_counts_equal": true,
+      "n_differing_rows": 0,
+      "differing_fields": {},
+      "first_difference": null
+     }
+    },
+    "covex-v6-final": {
+     "IDENTICAL": true,
+     "n_rows": [
+      2978,
+      2978
+     ],
+     "digest_before": "a3c1c0b1094380a7",
+     "digest_after": "a3c1c0b1094380a7",
+     "comparison": {
+      "n_rows": [
+       2978,
+       2978
+      ],
+      "row_counts_equal": true,
+      "n_differing_rows": 0,
+      "differing_fields": {},
+      "first_difference": null
+     }
+    },
+    "covex-v6-cf-c5attr": {
+     "IDENTICAL": true,
+     "n_rows": [
+      2943,
+      2943
+     ],
+     "digest_before": "8c8bc05a0b67fc16",
+     "digest_after": "8c8bc05a0b67fc16",
+     "comparison": {
+      "n_rows": [
+       2943,
+       2943
+      ],
+      "row_counts_equal": true,
+      "n_differing_rows": 0,
+      "differing_fields": {},
+      "first_difference": null
+     }
+    },
+    "covex-v6-cf-pd-c5attr": {
+     "IDENTICAL": true,
+     "n_rows": [
+      2943,
+      2943
+     ],
+     "digest_before": "c6305fcb502c7333",
+     "digest_after": "c6305fcb502c7333",
+     "comparison": {
+      "n_rows": [
+       2943,
+       2943
+      ],
+      "row_counts_equal": true,
+      "n_differing_rows": 0,
+      "differing_fields": {},
+      "first_difference": null
+     }
+    }
+   },
+   "moved": [],
+   "notrun": [],
+   "VERDICT": "PASS: every arm's decisions are byte-identical at 1x on a deterministic instrument whose determinism was measured first."
+  },
+  "THE_CHANGED_COMPARISON_IS_UNEXERCISED_IN_THIS_INSTRUMENT": {
+   "_what": "THE LIMIT OF THIS PROOF, measured rather than left for a reader to discover. The sweep shows NO DECISION MOVED. It does NOT show that the changed comparison `tok > CL.limit_tokens()` behaves identically WHEN IT FIRES, because in this instrument it never fires - at seed 4 OR seed 7, for ANY arm swept.",
+   "evidence": "the arms' own counters after a dry run. `over_limit_infeasible`, `pd_other_skipped_over_limit` and `rd_skipped_over_limit` are created on first increment, and NONE of them exists in any arm's stats. The probe read a live object: stats carries 52 keys for covex-v6-cf-pd-c5attr, 61 for covex-v6-cf-c5attr and 63 for covex-v6-final, so an empty over-limit result is the branch not firing and not the probe missing the object.",
+   "why_not_at_seed_4": "the largest recall history is 26,851 tokens, below both limits. The switch is ON and the branch is REACHABLE but never REACHED: Rule 2 UNEXERCISED by workload.",
+   "why_not_at_seed_7_either": "eighteen histories DO exceed both limits at s7, so the workload reaches the limit. The reads still do not fire because of WHERE they sit: rung 4's `_Rung4Mixin.decide` request-defer limb and `_ProtectDeferMixin._pd_others`, both reach-limited at 1x (FINAL_LADDER_CELLS records pd 249 decisions with 246 stopping at a gate, D198's reach-limited closure), and on a DRY cell there is no backend so `_pd_free_kv` reads gpu_kv_fraction 0.0 and gates out. For rung 3 there is no such read at all (below).",
+   "where_the_comparison_IS_exercised": "the unit proofs, not this sweep: `proof_read_sites_follow` in d223_context_limit_unit_proofs.json sets the run limit to 31,472 and then 12,345 and evaluates each read site's own expression, observing that each FOLLOWS. That is the test of the comparison; this sweep is the test that nothing else moved. NEITHER SUBSTITUTES FOR THE OTHER, and the pair is what D223 (2) asks for.",
+   "counters_seed4_and_seed7_final_arms": {
+    "_what": "does the over-limit branch FIRE in a dry cell, per seed, per arm; counters read from the arm itself after the run",
+    "_why": "an identity result on a branch that was never reached is Rule 2 UNEXERCISED and is not evidence about the branch",
+    "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/a3/experiments/orchestration/live2",
+    "workload": {
+     "ratio": "40:40:20",
+     "robot_question_set": "lh_req",
+     "ss_question_set": "ss2",
+     "dashcam_format": "epg",
+     "robot_upload": "per-frame",
+     "robot_reask_mean_s": 30.0
+    },
+    "arms": {
+     "covex-v6-fair-final": {
+      "s4": {
+       "n_decision_rows": 2814,
+       "over_limit_counters": {},
+       "BRANCH_FIRED": false,
+       "classification": "UNEXERCISED (Rule 2): switch on, branch reachable, no question at this seed reaches the limit, so identity here says nothing about the comparison itself"
+      },
+      "s7": {
+       "n_decision_rows": 2978,
+       "over_limit_counters": {},
+       "BRANCH_FIRED": false,
+       "classification": "UNEXERCISED (Rule 2): switch on, branch reachable, no question at this seed reaches the limit, so identity here says nothing about the comparison itself"
+      }
+     },
+     "covex-v6-final": {
+      "s4": {
+       "n_decision_rows": 2814,
+       "over_limit_counters": {},
+       "BRANCH_FIRED": false,
+       "classification": "UNEXERCISED (Rule 2): switch on, branch reachable, no question at this seed reaches the limit, so identity here says nothing about the comparison itself"
+      },
+      "s7": {
+       "n_decision_rows": 2978,
+       "over_limit_counters": {},
+       "BRANCH_FIRED": false,
+       "classification": "UNEXERCISED (Rule 2): switch on, branch reachable, no question at this seed reaches the limit, so identity here says nothing about the comparison itself"
+      }
+     }
+    }
+   },
+   "counters_seed7_rung4_arms_with_full_stats_keys": {
+    "_what": "does the CHANGED comparison (tok > CL.limit_tokens()) actually fire in the dry instrument? Counters read off the arm, with the FULL stats key list beside them so an empty result is distinguishable from a probe that read the wrong object.",
+    "arms": {
+     "covex-v6-cf-pd-c5attr": {
+      "s7": {
+       "n_decision_rows": 2943,
+       "n_stats_keys_TOTAL": 52,
+       "all_stats_keys": [
+        "cf_budget_ms",
+        "cf_planner_decisions",
+        "cf_planner_decisions_state",
+        "gain_HOLD_BACK_max_milli",
+        "gain_HOLD_BACK_milli_sum",
+        "gain_HOLD_BACK_n",
+        "gain_TOUCH_max_milli",
+        "gain_TOUCH_milli_sum",
+        "gain_TOUCH_n",
+        "gain_WARM_max_milli",
+        "gain_WARM_milli_sum",
+        "gain_WARM_n",
+        "harm_warm_max_milli",
+        "harm_warm_milli_sum",
+        "harm_warm_no_queue",
+        "harm_warm_nonzero",
+        "harm_warm_priced",
+        "pd_decisions",
+        "pd_decisions_request",
+        "pd_decisions_state",
+        "pd_free_kv_max",
+        "pd_free_kv_min",
+        "pd_free_kv_sum",
+        "pd_gate_no_active_alert_episode",
+        "pd_gate_rebuild_fits_without_evicting",
+        "pd_kv_bound_by_belief",
+        "pd_u_max",
+        "pd_u_sum",
+        "pd_victim_found",
+        "state_chosen_KEEP",
+        "state_decisions",
+        "state_decisions_with_a_rebuild",
+        "state_decisions_without_a_rebuild",
+        "state_delta_gt_0",
+        "state_delta_gt_0p01",
+        "state_delta_gt_0p05",
+        "state_delta_gt_0p1",
+        "state_delta_gt_0p12",
+        "state_delta_gt_0p14",
+        "state_delta_gt_0p16",
+        "state_delta_gt_0p16456",
+        "state_delta_gt_0p18",
+        "state_delta_gt_0p2",
+        "state_delta_gt_0p25",
+        "state_delta_max_milli",
+        "state_delta_milli_sum",
+        "state_delta_n",
+        "state_skipped_no_question_estimate",
+        "state_skipped_nothing_built",
+        "submitted_monitor",
+        "submitted_piece",
+        "submitted_recall"
+       ],
+       "proof_the_probe_read_a_live_object": "stats carries 52 keys; an empty over-limit result below is therefore the branch not firing, not the probe missing the object",
+       "over_limit_counters": {},
+       "BRANCH_FIRED": false
+      }
+     },
+     "covex-v6-cf-c5attr": {
+      "s7": {
+       "n_decision_rows": 2943,
+       "n_stats_keys_TOTAL": 61,
+       "all_stats_keys": [
+        "cf_budget_ms",
+        "cf_planner_decisions",
+        "cf_planner_decisions_state",
+        "deficit_feed",
+        "deficit_feed_completions",
+        "gain_HOLD_BACK_max_milli",
+        "gain_HOLD_BACK_milli_sum",
+        "gain_HOLD_BACK_n",
+        "gain_TOUCH_max_milli",
+        "gain_TOUCH_milli_sum",
+        "gain_TOUCH_n",
+        "gain_WARM_max_milli",
+        "gain_WARM_milli_sum",
+        "gain_WARM_n",
+        "harm_warm_max_milli",
+        "harm_warm_milli_sum",
+        "harm_warm_no_queue",
+        "harm_warm_nonzero",
+        "harm_warm_priced",
+        "pd_decisions",
+        "pd_decisions_request",
+        "pd_decisions_state",
+        "pd_free_kv_max",
+        "pd_free_kv_min",
+        "pd_free_kv_sum",
+        "pd_gate_no_active_alert_episode",
+        "pd_gate_rebuild_fits_without_evicting",
+        "pd_kv_bound_by_belief",
+        "pd_u_max",
+        "pd_u_sum",
+        "pd_victim_found",
+        "rd_decisions",
+        "rd_gate_must_start_now_no_slack",
+        "rd_gate_no_active_alert_episode",
+        "rd_skipped_already_deferred",
+        "rd_u_built_only_minus_u_sum",
+        "rd_u_cold",
+        "rd_u_differs_from_built_only",
+        "state_chosen_KEEP",
+        "state_decisions",
+        "state_decisions_with_a_rebuild",
+        "state_decisions_without_a_rebuild",
+        "state_delta_gt_0",
+        "state_delta_gt_0p01",
+        "state_delta_gt_0p05",
+        "state_delta_gt_0p1",
+        "state_delta_gt_0p12",
+        "state_delta_gt_0p14",
+        "state_delta_gt_0p16",
+        "state_delta_gt_0p16456",
+        "state_delta_gt_0p18",
+        "state_delta_gt_0p2",
+        "state_delta_gt_0p25",
+        "state_delta_max_milli",
+        "state_delta_milli_sum",
+        "state_delta_n",
+        "state_skipped_no_question_estimate",
+        "state_skipped_nothing_built",
+        "submitted_monitor",
+        "submitted_piece",
+        "submitted_recall"
+       ],
+       "proof_the_probe_read_a_live_object": "stats carries 61 keys; an empty over-limit result below is therefore the branch not firing, not the probe missing the object",
+       "over_limit_counters": {},
+       "BRANCH_FIRED": false
+      }
+     },
+     "covex-v6-final": {
+      "s7": {
+       "n_decision_rows": 2978,
+       "n_stats_keys_TOTAL": 63,
+       "all_stats_keys": [
+        "cf_budget_ms",
+        "cf_planner_decisions",
+        "cf_planner_decisions_state",
+        "deficit_feed",
+        "deficit_feed_completions",
+        "gain_HOLD_BACK_max_milli",
+        "gain_HOLD_BACK_milli_sum",
+        "gain_HOLD_BACK_n",
+        "gain_TOUCH_max_milli",
+        "gain_TOUCH_milli_sum",
+        "gain_TOUCH_n",
+        "gain_WARM_max_milli",
+        "gain_WARM_milli_sum",
+        "gain_WARM_n",
+        "harm_warm_max_milli",
+        "harm_warm_milli_sum",
+        "harm_warm_no_queue",
+        "harm_warm_nonzero",
+        "harm_warm_priced",
+        "pd_decisions",
+        "pd_decisions_request",
+        "pd_decisions_state",
+        "pd_free_kv_max",
+        "pd_free_kv_min",
+        "pd_free_kv_sum",
+        "pd_gate_no_active_alert_episode",
+        "pd_gate_rebuild_fits_without_evicting",
+        "pd_kv_bound_by_belief",
+        "pd_u_max",
+        "pd_u_sum",
+        "pd_victim_found",
+        "rd_decisions",
+        "rd_gate_must_start_now_no_slack",
+        "rd_gate_no_active_alert_episode",
+        "rd_skipped_already_deferred",
+        "rd_u_built_only_minus_u_sum",
+        "rd_u_cold",
+        "rd_u_differs_from_built_only",
+        "release_infeasible",
+        "release_infeasible_alert",
+        "state_chosen_KEEP",
+        "state_decisions",
+        "state_decisions_with_a_rebuild",
+        "state_decisions_without_a_rebuild",
+        "state_delta_gt_0",
+        "state_delta_gt_0p01",
+        "state_delta_gt_0p05",
+        "state_delta_gt_0p1",
+        "state_delta_gt_0p12",
+        "state_delta_gt_0p14",
+        "state_delta_gt_0p16",
+        "state_delta_gt_0p16456",
+        "state_delta_gt_0p18",
+        "state_delta_gt_0p2",
+        "state_delta_gt_0p25",
+        "state_delta_max_milli",
+        "state_delta_milli_sum",
+        "state_delta_n",
+        "state_skipped_no_question_estimate",
+        "state_skipped_nothing_built",
+        "submitted_monitor",
+        "submitted_piece",
+        "submitted_recall"
+       ],
+       "proof_the_probe_read_a_live_object": "stats carries 63 keys; an empty over-limit result below is therefore the branch not firing, not the probe missing the object",
+       "over_limit_counters": {},
+       "BRANCH_FIRED": false
+      }
+     }
+    }
+   }
+  },
+  "RUNG_3_NEVER_READS_THE_LIMIT_TO_DECIDE": {
+   "_what": "A FINDING, and the reason rung-3 byte-identity holds by construction. Across the WHOLE MRO of covex-v6-fair-final the ONLY references to the limit are V6StateArm.__init__ and V6StateUoC5AttrArm.__init__ STORING over_limit_infeasible. No method in the MRO calls limit_tokens(); no method reads the stored flag to decide. HybridArm is NOT in rung 3's MRO, so hybrid_arm.py's over-limit branch is not on its path either.",
+   "mro_of_covex_v6_fair_final": [
+    "V6FairFinalWired",
+    "_PlannerFeedMixin",
+    "V6FairFinal",
+    "_AlertRecheckMixin",
+    "V6FairFeed_covex_v6_state_final",
+    "DeficitFeedMixin",
+    "V6StateFinal",
+    "V6StateUoC5AttrArm"
+   ],
+   "rung_3_limit_references": [
+    "V6StateArm.__init__ stores over_limit_infeasible",
+    "V6StateUoC5AttrArm.__init__ stores over_limit_infeasible",
+    "arms_v6fair.live2_describe reports limit_tokens (REPORT-ONLY)"
+   ],
+   "rung_4_limit_references": [
+    "_Rung4Mixin.decide CALLS limit_tokens()",
+    "_ProtectDeferMixin._pd_others CALLS limit_tokens()"
+   ],
+   "consequence_a": "D223 (2) cannot move a rung-3 decision at any limit value, so the 0.5x rung-3 cells in frozen_test/runs/RUNG3_KV05R_CELLS are unaffected by this change by construction. Measured anyway, at both seeds.",
+   "consequence_b_FLAGGED_FOR_A_USER_RULING": "over_limit_infeasible=True on rung 3 is a WRITE-ONLY FIELD in the CLAUDE.md sense: set in __init__, reported as `on: true` by live2_describe, read by nothing that decides. A reader of that describe record would reasonably conclude rung 3 enforces the context limit. IT DOES NOT: at 0.5x rung 3 will SEND an over-limit prompt and the engine will refuse it. This is NOT a new exposure, because the same 18 questions are over limit at 1x and at 0.5x (between = 0), so the 0.5x cells inherit exactly the 1x behaviour, and D223 (2) already rules the scoring (D175: the device answer stands, reported per arm by error kind). Whether rung 3 SHOULD enforce the limit is a policy question for the user, not a plumbing one, and nothing in this commit changes it either way.",
+   "switch_state_read_off_the_constructed_arms": {
+    "covex-v6-fair-final": true,
+    "covex-v6-final": true,
+    "covex-v6-cf-c5attr": true,
+    "covex-v6-cf-pd-c5attr": true,
+    "covex-v6-base": true,
+    "hybrid-c1c2k2c5": false
+   }
+  },
+  "switch_state_read_from_the_arms": {
+   "_what": "over_limit_infeasible, read off each constructed arm, not assumed",
+   "covex-v6-fair-final": true,
+   "covex-v6-final": true,
+   "covex-v6-cf-c5attr": true,
+   "covex-v6-cf-pd-c5attr": true,
+   "covex-v6-base": true,
+   "hybrid-c1c2k2c5": false,
+   "_consequence": "hybrid-c1c2k2c5 has the rule OFF, so hybrid_arm.py's over-limit site is unexercised for that arm AT ANY SEED by switch, not by workload. Its identity result stands; it is simply not evidence about that branch. The branch itself is covered by the unit proofs' read-site probe instead."
+  },
+  "alone_D216_1": {
+   "_what": "the census classifies by WHAT A PROCESS IS (a Python interpreter by /proc/<pid>/exe whose cwd or argv resolves under a watched root), never by a basename pattern, which cannot see a script nobody listed. Detection is by what the process is; ATTRIBUTION then reads the cmdline to say whose it is.",
+   "loadavg_1min_magnitude": {
+    "start": 0.87,
+    "mid": 1.0,
+    "end": 1.67
+   },
+   "loadavg_full": {
+    "start": [
+     0.87,
+     0.6,
+     0.73
+    ],
+    "mid": [
+     1.0,
+     0.65,
+     0.74
+    ],
+    "end": [
+     1.67,
+     1.53,
+     1.13
+    ]
+   },
+   "foreign_python_not_mine": {
+    "start": "n/a (pre-attribution)",
+    "mid": 0,
+    "end": 0
+   },
+   "this_sweeps_own_processes": {
+    "mid": 3,
+    "end": 2
+   },
+   "censuses": {
+    "start": {
+     "when": "2026-11-24T09:36:37",
+     "loadavg": [
+      0.87,
+      0.6,
+      0.73
+     ],
+     "loadavg_1min_MAGNITUDE": 0.87,
+     "n_foreign_python_under_watched_roots": 3,
+     "watched_roots": [
+      "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3",
+      "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/a3",
+      "/home/pragya/Desktop/FM-switching"
+     ],
+     "census": [
+      {
+       "pid": 494928,
+       "exe": "/home/pragya/miniconda3/bin/python3.13",
+       "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/a3/experiments/orchestration/live2",
+       "under": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3",
+       "cmd": "/home/pragya/miniconda3/bin/python /home/pragya/miniconda3/bin/conda run -n fmtk python d223_dry_digest_identity.py --before /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-"
+      },
+      {
+       "pid": 494950,
+       "exe": "/home/pragya/miniconda3/envs/fmtk/bin/python3.10",
+       "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/a3/experiments/orchestration/live2",
+       "under": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3",
+       "cmd": "python d223_dry_digest_identity.py --before /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3/experiments/orchestration/live2 --after /tmp/cla"
+      },
+      {
+       "pid": 495125,
+       "exe": "/home/pragya/miniconda3/envs/fmtk/bin/python3.10",
+       "cwd": "/",
+       "under": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3",
+       "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python -c \nimport json, sys\ntree = sys.argv[1]\narm = sys.argv[2]\nseed = int(sys.argv[3]); n = int(sys.argv[4]); run_s = float(sys.argv[5])\nwl = json.loads(sys.arg"
+      }
+     ],
+     "method": "python interpreter by /proc/<pid>/exe whose cwd or argv resolves under a watched root; my own process subtree excluded; NOT a basename match"
+    },
+    "mid": {
+     "when": "2026-11-24T09:37:00",
+     "loadavg": [
+      1.0,
+      0.65,
+      0.74
+     ],
+     "loadavg_1min_MAGNITUDE": 1.0,
+     "n_python_under_watched_roots": 3,
+     "n_THIS_SWEEP": 3,
+     "n_FOREIGN_not_mine": 0,
+     "watched_roots": [
+      "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3",
+      "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/a3",
+      "/home/pragya/Desktop/FM-switching"
+     ],
+     "census": [
+      {
+       "pid": 494928,
+       "exe": "/home/pragya/miniconda3/bin/python3.13",
+       "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/a3/experiments/orchestration/live2",
+       "under": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3",
+       "cmd": "/home/pragya/miniconda3/bin/python /home/pragya/miniconda3/bin/conda run -n fmtk python d223_dry_digest_identity.py --before /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-",
+       "attribution": "THIS D223 SWEEP"
+      },
+      {
+       "pid": 494950,
+       "exe": "/home/pragya/miniconda3/envs/fmtk/bin/python3.10",
+       "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/a3/experiments/orchestration/live2",
+       "under": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3",
+       "cmd": "python d223_dry_digest_identity.py --before /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3/experiments/orchestration/live2 --after /tmp/cla",
+       "attribution": "THIS D223 SWEEP"
+      },
+      {
+       "pid": 495553,
+       "exe": "/home/pragya/miniconda3/envs/fmtk/bin/python3.10",
+       "cwd": "/",
+       "under": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3",
+       "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python -c \nimport json, sys\ntree = sys.argv[1]\narm = sys.argv[2]\nseed = int(sys.argv[3]); n = int(sys.argv[4]); run_s = float(sys.argv[5])\nwl = json.loads(sys.arg",
+       "attribution": "THIS D223 SWEEP"
+      }
+     ],
+     "method": "python interpreter by /proc/<pid>/exe whose cwd or argv resolves under a watched root; my own process subtree excluded; NOT a basename match"
+    },
+    "end": {
+     "when": "2026-11-24T09:42:51",
+     "loadavg": [
+      1.67,
+      1.53,
+      1.13
+     ],
+     "loadavg_1min_MAGNITUDE": 1.67,
+     "n_python_under_watched_roots": 2,
+     "n_THIS_SWEEP": 2,
+     "n_FOREIGN_not_mine": 0,
+     "watched_roots": [
+      "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3",
+      "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/a3",
+      "/home/pragya/Desktop/FM-switching"
+     ],
+     "census": [
+      {
+       "pid": 502855,
+       "exe": "/home/pragya/miniconda3/envs/fmtk/bin/python3.10",
+       "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/harness",
+       "under": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3",
+       "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python d223_dry_digest_identity.py --before /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/b3/experiment",
+       "attribution": "THIS D223 SWEEP"
+      },
+      {
+       "pid": 503103,
+       "exe": "/home/pragya/miniconda3/envs/fmtk/bin/python3.10",
+       "cwd": "/",
+       "under": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/a3",
+       "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python -c \nimport json, sys\ntree = sys.argv[1]\narm = sys.argv[2]\nseed = int(sys.argv[3]); n = int(sys.argv[4]); run_s = float(sys.argv[5])\nwl = json.loads(sys.arg",
+       "attribution": "THIS D223 SWEEP"
+      }
+     ],
+     "method": "python interpreter by /proc/<pid>/exe whose cwd or argv resolves under a watched root; my own process subtree excluded; NOT a basename match"
+    }
+   },
+   "_note": "the dry instrument runs on a SIMULATED clock (realtime=False) and its determinism was measured on both trees, so box load cannot change its result. The census is recorded because D216 (1) asks for it, not because the result depends on it."
+  }
+ },
+ "ALL_IDENTICAL_INCLUDING_FINAL_LADDER_AND_SEED7": true,
+ "ARMS_COVERED": [
+  "b7-edf-feasibility",
+  "covex-v6-base",
+  "covex-v6-cf-c5attr",
+  "covex-v6-cf-pd-c5attr",
+  "covex-v6-fair-c5attr",
+  "covex-v6-fair-final",
+  "covex-v6-final",
+  "covex-v6-state-uo-c5attr",
+  "hybrid-base",
+  "hybrid-c1c2k2c5"
+ ]
 }

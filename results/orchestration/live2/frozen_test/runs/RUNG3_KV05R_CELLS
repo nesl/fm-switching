@@ -1,4 +1,86 @@
 # POLICY (user 2026-11-24 queue item 1; flash: D223 (2) landed a43ad7f7 + 2e4c5961, verified on origin): rung 3 covex-v6-fair-final at REAL 0.5x (engine pool 1968 blocks / 31,488 tokens, max-model-len 31472), s4-s7. Ahead of all filler.
+#
+# ---- ADDED (flash, D223 (2)): WHY THESE CELLS ARE LICENSED, AND THE THREE FACTS A READER NEEDS ----
+#
+# 1. THE POOL OF RECORD. 1,968 blocks x 16 tokens per block = 31,488 tokens of engine KV pool. The
+#    LOGICAL maximum prompt is 31,472 (31,488 minus one 16-token block), which is exactly what
+#    `--max-model-len 31472` sets and what the engine serves under. The two numbers are different
+#    quantities and both appear above on purpose. NOTE for anyone reading header.json afterwards:
+#    `gpu_kv_tokens` is the harness's LOGICAL POOL, not the model length. It reads 31,472 at 0.5x
+#    and 62,944 at 1x against a max-model-len of 32,768, so it COINCIDES with the limit at 0.5x and
+#    does NOT at 1x. Do not read it as the context limit (D223 (2); measured in
+#    results/orchestration/live2/d223_context_limit_unit_proofs.json).
+#
+# 2. RUNG 3 READS NO KV TELEMETRY, SO THESE CELLS DO NOT WAIT ON E1. Verified from code, not
+#    assumed: the ONLY policy read of `gpu_kv_fraction` is `arms_v6cf.py:329`, inside
+#    `_pd_free_kv`, which is protect-and-defer, i.e. RUNG 4's limb. `covex-v6-fair-final` is
+#    `V6FairFinalWired` = `_PlannerFeedMixin` + `_AlertRecheckMixin` + the feed-over-rung2 base +
+#    `V6StateFinal`, and that MRO does NOT include `VCF._ProtectDeferMixin`; only `V6Final`
+#    (rung 4) adds it (`arms_final_ladder.py:221`). `arms_v6fair.py`, `arms_final_ladder.py`,
+#    `arms_v6state.py` and `arms_v6fairfeed.py` contain ZERO references to `gpu_kv_fraction`,
+#    `kv_cache_tokens` or `/metrics`. So E1 (the uncommitted /metrics scrape) gates RUNG 4 ONLY,
+#    exactly as FINAL_LADDER_CELLS states, and rung 3 is free to run now. NO RUNG-4 0.5x CELL IS
+#    POSTED HERE: that needs E1 live AND a user-approved 0.5x bar, and neither exists.
+#
+# 2b. STRONGER, AND THE FACT THAT MATTERS MOST FOR THESE FOUR CELLS: RUNG 3 NEVER READS THE
+#     CONTEXT LIMIT TO MAKE A DECISION, SO D223 (2) CANNOT MOVE A RUNG-3 DECISION AT ALL.
+#     Measured, not argued: across the WHOLE MRO of covex-v6-fair-final (V6FairFinalWired ->
+#     _PlannerFeedMixin -> V6FairFinal -> _AlertRecheckMixin -> V6FairFeed_covex_v6_state_final ->
+#     DeficitFeedMixin -> V6StateFinal -> V6StateUoC5AttrArm -> V6StateArm), the ONLY references to
+#     the limit are `V6StateArm.__init__` and `V6StateUoC5AttrArm.__init__` STORING
+#     `over_limit_infeasible`. NO method in the MRO calls `limit_tokens()`, and no method reads the
+#     stored flag. `HybridArm` is NOT in rung 3's MRO, so `hybrid_arm.py`'s over-limit branch is not
+#     on its path either. Rung 3's only context-limit touch is the REPORT-ONLY `limit_tokens` field
+#     in `arms_v6fair.live2_describe`.
+#     TWO CONSEQUENCES, and the second is a defect to be ruled on, not a reassurance:
+#       (a) the 1x byte-identity result for this arm holds BY CONSTRUCTION, not by luck. Confirmed
+#           anyway by measurement at BOTH seeds (below).
+#       (b) `over_limit_infeasible=True` on rung 3 is a WRITE-ONLY FIELD in the CLAUDE.md sense: it
+#           is set in __init__, reported as `on: true` by live2_describe, and read by nothing that
+#           decides. A reader of that describe record would reasonably conclude rung 3 enforces the
+#           limit. IT DOES NOT. Enforcement lives only in rung 4's limbs (`_Rung4Mixin.decide` and
+#           `_ProtectDeferMixin._pd_others`, both of which DO call `limit_tokens()`) and in
+#           `HybridArm`, whose own switch is off in the hybrid arm tested. SO: at 0.5x rung 3 will
+#           SEND an over-limit prompt rather than decline it, and the engine will refuse it. That is
+#           not a new exposure (see item 3: the same 18 questions are over limit at 1x and 0.5x, so
+#           these cells inherit exactly the 1x behaviour), and D223 (2) already rules the scoring:
+#           rejected prompts are scored as D175 rules, the device answer stands, reported per arm by
+#           error kind. FLAGGED FOR A USER RULING: whether rung 3 SHOULD enforce the limit is a
+#           policy question, not a plumbing one, and nothing here changes it either way.
+#
+# 3. THE 0.5x ROBOT QUESTION SET IS IDENTICAL TO 1x, so D176's over-32k column applies UNCHANGED.
+#    Recomputed from the deterministic trace on D170's definition with only the threshold moved
+#    (results/orchestration/live2/d223_overlimit_counts.json), and cross-checked quantity by
+#    quantity against the independently written frozen_test/d223_context_limit_offered.json:
+#      seed | recall opps | > 31,472 (0.5x) | > 32,768 (1x) | BETWEEN the two | max history
+#      s4   |     489     |       0         |      0        |       0         |   26,851
+#      s5   |     483     |       0         |      0        |       0         |   26,941
+#      s6   |     478     |       0         |      0        |       0         |   26,671
+#      s7   |     464     |      18         |     18        |       0         |   52,861
+#    BETWEEN IS ZERO AT EVERY SEED. The 18 are the same questions at both limits, all at s7 in
+#    robo004 s000, running 34,051 to 52,861 tokens; the largest question at or below the limit at
+#    s7 is 26,941, a 4,531-token GAP, so the identity is structural at this workload and not a near
+#    miss. Moving to 0.5x therefore introduces NO new robot context rejection.
+#    READ s4 TO s6 AS UNEXERCISED, NOT AS AGREEMENT (CLAUDE.md Rule 2): no history at those seeds
+#    comes near either limit, so a zero there carries no information about any arm's over-limit
+#    behaviour. s7 is the only seed where the rule is exercised at all.
+#
+# 4. THE BYTE-IDENTITY ARTEFACT THAT LICENSES THESE CELLS.
+#    results/orchestration/live2/d223_byte_identity_1x.json
+#    The fix is a43ad7f7; the artefact was re-pinned to the published bytes in 2e4c5961; THIS
+#    commit extends it to the two FINAL-LADDER arms, which the earlier sweep did not cover.
+#    covex-v6-fair-final  before 62b0f9a977189c78  after 62b0f9a977189c78  2,814 rows  IDENTICAL
+#    covex-v6-final       before 62b0f9a977189c78  after 62b0f9a977189c78  2,814 rows  IDENTICAL
+#    BEFORE is a private `git archive` of 4a73e125 (a43ad7f7's parent); AFTER is one of a43ad7f7 as
+#    published. Never the shared worktree, which has uncommitted edits to `coordinator.py`,
+#    `v5/cf_objective.py` and `arms.py`. Each arm carries its OWN A/A determinism control, run
+#    before the comparison was read, and each tree reproduced its own digest exactly.
+#    SCOPE, stated so it is read here and not discovered: the instrument is
+#    `hybrid/test_hybrid.dry` (`realtime=False`), which builds the coordinator IN-PROCESS, so it
+#    exercises the arm read sites and NOT the `procsplit` hand-off that a split-mode cell uses;
+#    that hand-off is covered by the unit proofs and by its own fail-loud instead. The realtime
+#    dry-cell instrument was REJECTED for this claim because the same tree disagreed with itself
+#    (d223_byte_identity_realtime_probe.json).
 covex-v6-fair-final 16 4 _kv0.5r_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
 covex-v6-fair-final 16 5 _kv0.5r_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
 covex-v6-fair-final 16 6 _kv0.5r_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
