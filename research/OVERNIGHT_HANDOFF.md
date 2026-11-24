@@ -78,6 +78,19 @@ before anything was written. **Count pipe CHARACTERS (`tr -cd '|' | wc -c`) agai
 against a header or a `split()` length** - two counting methods disagreed here and that disagreement was
 the real defect.
 
+*** SUPERSEDED BLOCK, KEPT FOR THE TRAIL. DO NOT ACT ON THE TEST IT PRESCRIBES. USE THE
+"WORKTREE-ONLY LINES" TEST ABOVE INSTEAD. *** What it gets RIGHT: `git diff --stat origin/main` in a
+stale worktree really does report staleness as deletion, and `git diff HEAD` really does detect
+uncommitted working-tree edits. **WHAT IT GETS WRONG IS THE INFERENCE IT LICENSES.** It concludes
+"anything it prints is an UNCOMMITTED WORKING-TREE EDIT" and then treats that as "another session is
+working, so do not touch". MEASURED ON 2026-11-24, THAT INFERENCE IS FALSE THREE WAYS: `git diff HEAD`
+flagged `results/INDEX.md`, which held **ZERO** lines origin lacked and was simply stale-older, so the
+INDEX row it blocked was never blocked at all; it flagged files last written **25 to 36 hours** earlier
+with **no process running**, so "is an edit" does not imply "is active"; and it cannot tell
+HELD-DELIBERATELY from ABANDONED, which is the distinction that actually decides what to do.
+*** AN UNCOMMITTED EDIT IS A FACT ABOUT THE FILE. ACTIVITY AND SAFETY ARE SEPARATE QUESTIONS AND NEED
+THEIR OWN EVIDENCE: mtime, a process census, and the worktree-only line count. ***
+
 *** HOW TO CHECK CONCURRENCY CORRECTLY (the shared worktree lies): ***
 `/tmp/claude-1001/mapwt` is HUNDREDS of commits behind origin (1,500 earlier tonight, 670 later), so
 `git status` there reports STALENESS AS MODIFICATION and shows committed files as `??` untracked. *** THE TEST THIS FILE PREVIOUSLY PRESCRIBED IS ALSO WRONG, AND FOR THE SAME REASON IT WARNS ABOUT.
