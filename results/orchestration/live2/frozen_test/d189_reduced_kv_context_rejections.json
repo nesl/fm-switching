@@ -50,5 +50,59 @@
  "WHY_THIS_MATTERS_FOR_THE_PENDING_0p25x_RULING": "the user has approved ONE real-engine 0.25x pair (`covex-v6-fair-final` against the DEVICE_ANSWERS build). If those two arms build prompts of different lengths - and DEVICE_ANSWERS exists precisely to change what is sent - **THEIR REJECTION COUNTS MAY DIFFER, AND THAT DIFFERENCE IS AN EFFECT OF THE POLICY RATHER THAN NOISE.** It therefore has to be pre-registered BEFORE the pair runs: whether a context rejection counts as a robot miss inside the denominator (which is what D189's 'misses' implies) or is excluded, AND reported per arm either way. Deciding it afterwards would be choosing a denominator in sight of the numbers.",
  "_the_1x_contrast_that_makes_it_unmistakable": "at 1x every arm in this set records n_errors 0, and the only context-limit effect is D176's 18 over-32k robot questions at seed 7, which I verified are the IDENTICAL set across arms and therefore DO cancel between them. **At 0.25x the over-limit set is arm-dependent and does NOT cancel.** The same phrase, 'misses over the context limit', means a shared constant at 1x and a per-arm outcome at 0.25x - one name, two behaviours, which is consistency check 4's hazard.",
  "_register": "OBSERVED from committed `cell.json` `n_errors` and `n_requests` at origin. The CLASSIFICATION of the 33 as HTTP 400 robot prompts over the limit with null `prompt_tokens` is the H100's, from `request.jsonl`, and is REPORTED not re-verified by me. Whether the 14 (`eco-llm`) and the 38/50 (`always-cloud-fcfs`) are the same kind is NOT established and must be classified before those cells are cited.",
- "_recommendation_NOT_A_DECISION": "classify the errors in every reduced-KV cell by the same method before any of them is cited, report the count per arm beside its result, and pre-register the denominator treatment before the approved 0.25x pair runs. None of this is a decision I can take."
+ "_recommendation_NOT_A_DECISION": "classify the errors in every reduced-KV cell by the same method before any of them is cited, report the count per arm beside its result, and pre-register the denominator treatment before the approved 0.25x pair runs. None of this is a decision I can take.",
+ "*** CLASSIFICATION DONE 2026-11-24. THE ERRORS ARE TWO DIFFERENT KINDS, AND ONLY ONE IS A CONTEXT-LIMIT MISS ***": {
+  "_why_this_was_needed": "the previous version of this file said the classification of eco-llm's 14 and always-cloud-fcfs's 38/50 was NOT ESTABLISHED and must be done before those cells are cited, and the H100 said it would classify mooncake's 2 'the same way next'. *** CLASSIFYING THEM THE SAME WAY WOULD HAVE MISLABELLED THEM. *** Done now, read-only from each cell's committed request log.",
+  "KIND_1_CONTEXT_LIMIT_REJECTION_the_H100's_33_CONFIRMED": {
+   "cell": "confidence-cascade_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30",
+   "rows": 3564,
+   "bad": 33,
+   "http_status": "400 on all 33",
+   "device": "robo on ALL 33",
+   "prompt_tokens": "null on all 33",
+   "verdict": "CONFIRMED as the H100 reported, and RE-VERIFIED BY ME rather than relayed. These ARE engine rejections of prompts over the 0.25x --max-model-len of 15,744, so D189 applies and the citation '33 robot misses over the 0.25x context limit (D189)' is correct for THIS cell."
+  },
+  "KIND_2_NO_RESPONSE_RECORDED_and_it_is_NOT_a_context_limit_miss": {
+   "cells": {
+    "eco-llm kv0.25 s4": {
+     "rows": 10815,
+     "bad": 14,
+     "devices": {
+      "dash": 14
+     }
+    },
+    "always-cloud-fcfs kv0.5 s4": {
+     "rows": 7881,
+     "bad": 50,
+     "devices": {
+      "dash": 49,
+      "asst": 1
+     }
+    },
+    "always-cloud-fcfs kv0.5 s5": {
+     "rows": 7584,
+     "bad": 38,
+     "devices": {
+      "dash": 35,
+      "asst": 2,
+      "robo": 1
+     }
+    },
+    "mooncake kv0.5r s4": {
+     "rows": 12157,
+     "bad": 2,
+     "devices": {
+      "dash": 1,
+      "asst": 1
+     }
+    }
+   },
+   "the_signature_that_separates_them": "`http_status` is **None**, NOT 400; `t_first_token` is null; `output_tokens` is null; `prompt_tokens` is null. So NO HTTP RESPONSE WAS RECORDED AT ALL, which is a different event from an engine returning 400.",
+   "*** AND THE DECISIVE ARGUMENT IS THE QUERY TYPE, NOT THE STATUS CODE ***": "these failures are OVERWHELMINGLY DASHCAM (14 of 14, 49 of 50, 35 of 38, 1 of 2), where the context-limit kind was 33 of 33 ROBOT. **DASHCAM PROMPTS IN THESE CELLS RUN ABOUT 1,056 TO 3,084 TOKENS** (observed from the same request logs) against a limit of **15,744 at kv0.25 and 31,472 at kv0.5** - five to thirty times below it. **A DASHCAM PROMPT CANNOT EXCEED THE CONTEXT WINDOW IN THESE CELLS, SO THESE CANNOT BE CONTEXT-LIMIT REJECTIONS.** The one `robo` row at always-cloud-fcfs s5 also carries `http_status` None rather than 400, so it does not change the kind.",
+   "_what_they_ACTUALLY_are_NOT_ESTABLISHED": "the POSITIVE cause is NOT determined here and must not be guessed. The signature is consistent with a transport or client-side failure, a timeout, or a cancelled submission, but nothing in the committed request log distinguishes those. **STATE THEM AS 'N requests with no response recorded, cause not established' and NOT as context-limit misses.** Determining the cause needs the engine or harness logs for those cells, which is a separate job.",
+   "_does_it_threaten_the_D189_finding_above": "NO, and it slightly sharpens it. The arm-dependence of CONTEXT-LIMIT rejections still rests on confidence-cascade's 33 robot 400s against covex-v6-base's ZERO at the same kv0.25 setting with MORE requests. Kind 2 is a separate, mostly-dashcam failure mode that is ALSO arm-dependent in count but for an unknown reason, so BOTH must be reported per arm and they must not be summed into one 'errors' figure."
+  },
+  "_a_probe_hazard_worth_recording": "my first probe reported ZERO errors in all three kind-2 cells, because it looked for a key named `status` and for values `>= 400`. The field is `http_status` and the failing value is `None`, so both halves of the predicate missed. **A zero from a wrong predicate looks exactly like a clean cell.** Separately, `confidence-cascade`'s log is `request.jsonl` UNCOMPRESSED while the others are `.gz`, so a loop that only tries `.gz` silently skips it - which is what made that cell absent from my first pass.",
+  "_register": "OBSERVED by flash from the committed request logs at origin, re-verified per cell, not relayed."
+ }
 }
