@@ -134,10 +134,37 @@ def start_server(host_gib, scheduling_policy=None, extra_flags=None):
     # CONTEXT LIMIT away from the user's 15,744 ruling, which is a methodological change and not
     # a launcher fix.
     _REAL_KV025 = ["--num-gpu-blocks-override", "985", "--max-model-len", "15744"]
+    # REAL-ENGINE 0.5x, ADDED 2026-11-23 for the D212 evaluation matrix (tag _kv0.5r). DERIVED
+    # FROM THE 0.25x EVIDENCE, NOT GUESSED, and the derivation is worth stating because two
+    # plausible readings give different flags.
+    #
+    # TWO MEASURED FACTS from the 0.25x work above. (1) ON THE OVERRIDE PATH THE POOL IS
+    # override * 16, not (override - 1) * 16: the engine reported 15,760 = 985 * 16, which
+    # FALSIFIED the reserved-block prediction that the 1x log (num_gpu_blocks=3935, pool 62,944,
+    # (3935 - 1) * 16) had suggested. (2) THE START CHECK NEEDS THE POOL STRICTLY GREATER THAN
+    # max_model_len, not equal: 984 would have given exactly 15,744 = max_model_len and vLLM
+    # REFUSED TO START, while 985 (15,760) started. The comment above calls the engine test
+    # strict so that equal passes; that sentence belongs to the SUPERSEDED prediction and the
+    # 984 failure is the evidence against it.
+    #
+    # SO THE RULE IS override = max_model_len / 16 + 1, which reproduces 985 at 0.25x.
+    # At 0.5x the logical pool is 31,472 = 0.5 * 62,944 exactly (and 1967 * 16), which is what the
+    # driver already passes as --gpu-kv-tokens, so it is the context limit by the same construction
+    # that made 15,744 the 0.25x limit (the logical target taken up to a 16-token boundary; 31,472
+    # is already on one). override = 31,472 / 16 + 1 = 1968, pool = 1968 * 16 = 31,488.
+    #
+    # THE EXPECTED POOL 31,488 IS A PREDICTION, NOT A MEASUREMENT. It is left to the pool check
+    # below to confirm, exactly as at 0.25x, where that check is what caught the falsified
+    # reserved-block inference instead of letting it reach a cell. If the engine reports anything
+    # else the launcher STOPS and the number here must be corrected from the engine, never the
+    # other way round. 1969 is NOT allowlisted: an allowlist that already accepts the next guess
+    # stops being a check.
+    _REAL_KV05 = ["--num-gpu-blocks-override", "1968", "--max-model-len", "31472"]
     if extra_flags:
         if list(extra_flags) not in (["--long-prefill-token-threshold", "1024"],
                                      ["--long-prefill-token-threshold", "2048"],
-                                     _REAL_KV025):
+                                     _REAL_KV025,
+                                     _REAL_KV05):
             raise SystemExit(f"unsupported extra server flags {extra_flags!r}: STOP")
         flags = flags + list(extra_flags)
     os.environ["PYTHONPATH"] = str(M.PLUGIN_DIR)
@@ -164,7 +191,8 @@ def start_server(host_gib, scheduling_policy=None, extra_flags=None):
     #
     # THE CELL LINES DO NOT CHANGE, so KV025_CELLS (e6b19712) and KV025_RUNGS_CELLS (52ecf2ae)
     # keep their hashes and need only a re-gate.
-    _expect_kv = 15760 if list(extra_flags or []) == _REAL_KV025 else GPU_KV
+    _ef = list(extra_flags or [])
+    _expect_kv = 15760 if _ef == _REAL_KV025 else (31488 if _ef == _REAL_KV05 else GPU_KV)
     if info.get("kv_cache_tokens") != _expect_kv:
         srv.stop()
         raise SystemExit(f"GPU pool {info.get('kv_cache_tokens')} != expected {_expect_kv}: STOP")
