@@ -199,10 +199,31 @@ CLAUDE.md CLOSEOUT IS DONE. NOTHING IN THIS SECTION IS OUTSTANDING. DO NOT RE-SC
   `results/INDEX.md` line 1122 carries the complete-ladder row; and `research/STATUS.md` now opens with a
   2026-11-24 section (`5cf93024`). **SO THE 'STILL OWED: the results/INDEX.md row' ITEM FURTHER DOWN THIS
   FILE IS STALE - THAT ROW EXISTS.**
-  **AND THE RUN-PATH FREEZE'S LADDER REASON HAS LAPSED**, because the ladder is complete. The OTHER
-  reason stands unchanged: there are live uncommitted edits to run-path files in the shared worktree
-  (1,482 insertions across 8 files under `experiments/` against its own HEAD), so still TOUCH NO
-  RUN-PATH FILE, and build any commit from ORIGIN's content as every commit has.
+  **AND THE RUN-PATH FREEZE'S LADDER REASON HAS LAPSED**, because the ladder is complete.
+  *** RECONCILED 2026-11-24: THE OTHER REASON HAS LAPSED TOO, AND THIS FILE'S OWN CORRECTED CONCURRENCY
+  SECTION ALREADY CONTAINED THE REFUTATION FOR THESE EXACT FILES. THE "1,482 INSERTIONS" ARE NOT LIVE
+  EDITS, THEY ARE A STALE TREE. *** Measured on `/tmp/claude-1001/mapwt`:
+    the worktree is **815 COMMITS BEHIND** origin, and ALL 8 dirty tracked files under `experiments/` have
+    mtimes of **2026-11-22** (one 11-23 16:12). Nothing running: ZERO live2 python under the repo or any
+    scratchpad, loadavg 0.12.
+    `v5/cf_objective.py`, the largest diff: **origin 911 lines, worktree 640** - **421 ORIGIN-ONLY** lines
+    against 150 worktree-only, so the worktree is **271 LINES SHORTER**. A sample of its "worktree-only"
+    lines is explanatory COMMENT PROSE appearing in **0 files** on origin: text origin REWROTE.
+    `coordinator.py` 10 worktree-only, `arms.py` 2, and **FIVE OF THE EIGHT have ZERO.**
+  *** "INSERTIONS AGAINST ITS OWN HEAD" IS THE WRONG MEASURE, and it is the same coarse test this file
+  corrects three times above. *** A tree 815 commits behind differs from its own HEAD for reasons that have
+  nothing to do with anyone editing now, and a line count cannot tell NEW CONTENT from AN OLDER VERSION OF
+  A LINE SINCE REWRITTEN. The corrected section's own figures already include `640 vs 911` for this file.
+  *** WHAT TO DO INSTEAD OF A BLANKET FREEZE, because this is what actually protects: *** (1) BUILD EVERY
+  COMMIT FROM ORIGIN'S CONTENT, never from either stale worktree - unchanged, and every commit has;
+  (2) CENSUS THE BOX by what processes ARE before any cell; (3) for a live-path file, PROVE DECISION
+  NEUTRALITY on a dry A/B from ONE literal sha rather than asserting it, because a COMMENT-ONLY edit here
+  was measured to move an arm by 85 decisions. **THAT IS WHAT `fbd2f64b` DID for `cstate.py`'s doc lines:
+  A = B = `57bed6ace2eb07d1` / 14,509, which is also the posted committed value.** The blanket wording
+  blocked that work for hours and would have blocked it again.
+  NOTE THERE ARE **TWO** STALE TREES AT DIFFERENT DISTANCES: `/tmp/claude-1001/mapwt` at 815 commits and
+  `/home/pragya/Desktop/FM-switching` at about 1,678. Neither is a source of content and neither is
+  evidence of an absence.
 
 *** THE ONLY OUTSTANDING VERDICT IS RUNG 3 AT s7, AND AS OF 23:11 PST IT IS NOT YET SCORABLE. *** [SUPERSEDED, KEPT FOR THE TRAIL]
 
