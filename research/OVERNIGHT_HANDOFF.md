@@ -1,5 +1,74 @@
 # HANDOFF. READ THIS FIRST.
 
+## STATE AT 2026-11-23T19:03-0800. NEWEST BLOCK. IT CORRECTS THE BLOCK BELOW, WHICH IS NOW FALSE.
+
+  WRITTEN AT origin/main tip: 6f20f7e7fc8e048ab073559991862d90706c4f28
+  EXPIRES: immediately on any new commit to origin/main. Re-derive; do not trust this summary.
+
+*** THE BLOCK BELOW SAYS `FINAL_LADDER_CELLS` IS STILL NOT POSTED AND THAT SESSION B CANNOT BE REACHED.
+BOTH WERE TRUE WHEN WRITTEN AND BOTH ARE NOW FALSE. DO NOT ACT ON THEM. *** A fresh session obeying
+them would try to clear a block that is already cleared, which is the one failure mode a stale handoff
+actually causes.
+
+  1. `FINAL_LADDER_CELLS` IS POSTED. Committed at `43ad8be8` (2026-11-23T18:41-0800) and GATED above
+     all filler by the H100 at `665793c5`. Verified present on origin at the tip above. Three s4 lines
+     in fail-fast order: `covex-v6-fair-final`, `covex-v6-final`, `covex-v6-state-final`, all 16
+     devices seed 4 tag `_L3_epg_rq30`.
+  2. SESSION B FINISHED ITS WORK. It delivered proofs (b), (c) and (d), closed the registration
+     blocker, and wrote the posted list. Its task notification was misleading. NOTHING NEEDS RESUMING
+     ON ITS ACCOUNT.
+  3. THE REGISTRATION BLOCKER IS CLOSED, and it was real: `arms_final_ladder.register()` had NO
+     production caller and the three final names resolved NOWHERE in `arms.py` or `arm_names_v6.py`, so
+     every posted cell would have raised "unknown arm". Fixed as a PURE ADDITION in `arms_v6cfr3.py`
+     (49 lines added, 0 removed or changed) with lazy call-time imports, proved four ways, and
+     independently confirmed by the H100 on its own box.
+
+WHAT IS ACTUALLY RUNNING AND WHAT IS OWED, re-derived at the tip above:
+
+  THE H100 IS RUNNING THE POSTED LADDER. `covex-v6-fair-final` s4 started about 18:45 PST. A live cell
+  at this recipe takes ABOUT 22 MINUTES (measured from the `-rr` commit spacing: 13:01, 13:44, 14:05,
+  14:27), so expect the three s4 cells to complete by roughly 19:50 PST. A rung continues to s5 to s7
+  ONLY IF ITS s4 PASSES its pre-registered bars (D196 fail-fast).
+  WARNING ON READING THE ALERT BAR: base's alert attainment EXCEEDS committed rung 2's at every seed,
+  so "above base's" is MATERIALLY HARDER than the "above rung 3's" bar that `-rr` cleared. A
+  rung-3-versus-base miss is NOT a regression; it is a different and harder question.
+
+  FLASH IS IDLE (loadavg 0.25 at 19:01 PST). The one piece of policy work pending there is D218 (1),
+  the DEVICE_ANSWERS request candidate in `cf_protect_defer.py`, whose agent stopped without
+  committing anything and has been resumed. It must register under its own version label and must NOT
+  disturb the posted cells.
+
+  NO 0.25x POLICY CELLS. That chain needs, in order: hit 7 landing on `coordinator.py` (the H100's, and
+  it is first extending hit 7's identity proof to the three final rungs because the original proof
+  predates their existence), then the belief-prefix record at `coordinator.py:2126`, then E1's
+  `AsyncLive2Backend` /metrics wiring with its byte-identity proof, then D218 (1) proven, then user
+  approval. At least two of those gates are not on flash.
+
+  D219 HOLDS THE NETWORK EXACTLY AS IS: uniform 13.6 Mbit/s, 44 ms. NO Tier 1 plumbing, NO network
+  cells, NO outage build until the user revisits on 2026-11-24. Nothing network-related is running;
+  verified by `ps`.
+
+THREE OPERATIONAL FACTS A RESUMED SESSION NEEDS:
+
+  TOUCH `ops/heartbeat` IF YOU ARE WORKING. It was stale at 1,132 s at 03:00:01Z, which is why the
+  watchdog logged RESTART 1/12. A watchdog restarting because the LIVENESS SIGNAL went stale while the
+  work was proceeding normally is a failure of the signal, not of the work. Touched at 19:01:39 PST.
+
+  THE SHARED WORKTREE `/tmp/claude-1001/mapwt` HAS 38 DIRTY PYTHON FILES, including `arms.py` and
+  `coordinator.py`, both in EVERY arm's import graph. RUN EVERY PROOF CELL FROM A PRIVATE `git archive`
+  OF ONE LITERAL SHA and state which sha; a cell run in that worktree would carry another session's
+  half-finished edit into the digest AND LOOK LIKE A CLEAN MEASUREMENT.
+
+  ALONE-GUARDS ARE NOT TRUSTWORTHY. Three sessions today found their own guards blind to processes they
+  had no name for, each bounded differently: a tree snapshot, a `"one_cell"` command-line pattern, and
+  a hardcoded basename list. Count live2 processes by WHAT THEY ARE (an interpreter plus a path under
+  the repo or a scratchpad tree, or enumerate `/proc/<pid>/cwd`), NEVER by a name pattern, and record
+  the foreign-process census and loadavg magnitudes BESIDE any `alone` flag so it can be
+  re-adjudicated from evidence. Session B DOWNGRADED a recorded alone claim on its own re-bar cell for
+  exactly this reason; the digest stood because TWO INDEPENDENT RUNS AGREED EXACTLY, which is direct
+  evidence of determinism rather than an argument that nothing could have disturbed the cell.
+
+
 ## HOW TO READ THIS FILE
 
   WRITTEN AT origin/main tip: 9537bddeeb068d206d05553704695f8ffdbd0302
