@@ -1,6 +1,6 @@
 # StudyTABLE1: canonical correct-by-deadline table (D209)
 
-Pipeline sha canon e8f8eae9 (episodic_lib e8f8eae9, dsmap e8f8eae9, dashcam_episodic 1d0125c9). Seeds 4-7, four-seed means. Superseded arms dropped (D205): confidence-cascade.
+Pipeline sha canon 35e3c57e (episodic_lib 35e3c57e, dsmap 35e3c57e, dashcam_episodic 1d0125c9). Seeds 4-7, four-seed means. Superseded arms dropped (D205): confidence-cascade.
 
 Columns: robot correct-by-deadline (correct by 3 s, cloud if on time else device); robot D176 (same, excluding the over-32k context-refusal recalls); single-shot correct by 2 s (StudySS2); pooled correct-in-time over robot and single-shot units; dashcam delivered-stream Nexar challenge mAP (D199, on-time cloud only, EVAL); the on-time service columns; and the dashcam per-episode on-time attainment SERVICE columns.
 
@@ -16,11 +16,11 @@ Columns: robot correct-by-deadline (correct by 3 s, cloud if on time else device
 | state-shares | 0.427 | 0.427 | 0.600 | 0.557 | 0.659 | 0.482 | 0.972 | 0.667 | 0.901 |
 | base | 0.359 | 0.359 | 0.600 | 0.540 | 0.669 | 0.249 | 0.968 | 0.464 | 0.627 |
 | rules | 0.341 | 0.341 | 0.578 | 0.518 | 0.627 | 0.266 | 0.719 | 0.092 | 0.136 |
-| streamscout | 0.222 | 0.222 | 0.600 | 0.504 | 0.651 | 0.955 | 0.999 | 0.674 | 0.953 |
+| streamscout | 0.222 | 0.222 | 0.600 | 0.504 | 0.651 | 0.955 | 0.999 | 0.675 | 0.953 |
 | simplestream | 0.209 | 0.209 | 0.600 | 0.501 | 0.662 | 0.998 | 0.999 | 0.828 | 0.993 |
-| eco-llm | 0.272 | 0.272 | 0.567 | 0.494 | 0.658 | 0.356 | 0.479 | 0.368 | 0.467 |
+| eco-llm | 0.272 | 0.272 | 0.567 | 0.494 | 0.659 | 0.358 | 0.475 | 0.362 | 0.461 |
 | llf | 0.277 | 0.277 | 0.561 | 0.489 | 0.639 | 0.051 | 0.431 | 0.543 | 0.742 |
-| mooncake | 0.276 | 0.276 | 0.558 | 0.487 | 0.663 | 0.053 | 0.373 | 0.287 | 0.363 |
+| mooncake | 0.276 | 0.276 | 0.558 | 0.487 | 0.664 | 0.053 | 0.373 | 0.288 | 0.363 |
 | b7-edf-feasibility | 0.273 | 0.273 | 0.556 | 0.485 | 0.662 | 0.053 | 0.367 | 0.286 | 0.361 |
 | edf | 0.268 | 0.278 | 0.541 | 0.472 | 0.618 | 0.030 | 0.155 | 0.239 | 0.338 |
 | kvflow-prefetch | 0.268 | 0.282 | 0.535 | 0.468 | 0.632 | 0.031 | 0.098 | 0.071 | 0.089 |
@@ -43,7 +43,7 @@ Diff = arm minus comparator, pooled over seeds 4-7, clusters resampled by questi
 |---|---|---|---|---|
 | fair-c5attr-rr | n/a | +0.112 [+0.071, +0.155] | +0.260 [+0.208, +0.313] | +0.062 [+0.008, +0.115] |
 | state-uo | -0.004 [-0.008, +0.000] | +0.108 [+0.068, +0.150] | +0.247 [+0.197, +0.300] | +0.060 [+0.007, +0.112] |
-| fair-c5attr | -0.005 [-0.010, +0.001] | +0.107 [+0.070, +0.148] | +0.252 [+0.200, +0.302] | +0.058 [+0.006, +0.108] |
+| fair-c5attr | -0.004 [-0.009, +0.001] | +0.108 [+0.070, +0.148] | +0.252 [+0.200, +0.302] | +0.059 [+0.006, +0.109] |
 | fair-c5attr-gain0 | -0.007 [-0.012, -0.002] | +0.105 [+0.066, +0.146] | +0.241 [+0.190, +0.293] | +0.059 [+0.006, +0.110] |
 | state-uo-c5attr | -0.009 [-0.014, -0.004] | +0.103 [+0.063, +0.144] | +0.235 [+0.185, +0.288] | +0.058 [+0.006, +0.108] |
 | state-shares-r1 | -0.011 [-0.019, -0.005] | +0.100 [+0.060, +0.142] | +0.212 [+0.162, +0.263] | +0.062 [+0.008, +0.114] |
