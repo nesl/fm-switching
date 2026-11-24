@@ -1,0 +1,28 @@
+{
+  "label": "Hit 7 (SimpleStream window_steps fitted, never applied): is it moot at this workload?",
+  "cell": "simplestream_n16_s4_1200s_h27_3t_L3_epg_rq30 (committed, 1x)",
+  "method": "jq over request.jsonl.gz robot requests: frame video timestamps parsed from mm_uuids (|f<seconds>); frames sent per request; frames within 1.0 s (window_steps 4 x 0.25 s, the card fit) of the newest frame sent",
+  "is_measurement": true,
+  "robot_recent_sends": 132,
+  "frames_sent": [
+    {
+      "frames": 6,
+      "sends": 132
+    }
+  ],
+  "frames_in_fitted_1s_window": [
+    {
+      "frames": 1,
+      "sends": 132
+    }
+  ],
+  "newest_frame_gap_s": [
+    {
+      "gap_s": 2,
+      "sends": 132
+    }
+  ],
+  "sends_where_window_equals_sent": 0,
+  "verdict": "NOT MOOT: the fixed RECENT budget (cstate.py:56, 467 tokens) sends 6 frames on all 132 robot sends; the fitted 1 s window holds 1 frame on all 132 (frames 2 s apart). Applying window_steps would change every robot send.",
+  "caveat": "one cell, seed 4, 1x; the window is measured from the newest frame sent, which is the session tail at send time"
+}
