@@ -83,6 +83,51 @@ alone is WORSE THAN BASE on alerts (0.2407 vs 0.3962 at s5) and would fail check
 ZERO on a gate reached only when other requests are queued.** 14 losses, 0 gains, residual ZERO at s5;
 s4 had 2 gains and passed, so **s4's pass is the luckier draw of the same losing trade.**
 
+*** STATE AS OF 2026-11-23 22:55 PST, FROM A PROCESS CENSUS, SO NO RESUME RE-DERIVES IT. ***
+- *** E1's 52-CELL SWEEP IS FINISHED AND ITS RESULT IS NOW COMMITTED (this commit). *** It wrote
+  `out/digests_e1.json` at 22:46:26 and EXITED; pid 304781 is GONE, which is COMPLETION, not a crash.
+  **VERDICT: precheck_passed true, n_arms 24, n_identical 24, n_moved 0, moved_arms [], setwise
+  decisions moved 0.** So E1's NON-INTERFERENCE gate PASSES and the ESCALATE-AND-STOP condition did not
+  fire. **THE SWEEP'S OWN FILE LABELS WHAT IT CANNOT SHOW, and that label must travel with it:** "how
+  many rung-4 decisions the scrape moves: a dry cell builds no backend, so the mechanism is ABSENT and a
+  zero here is UNEXERCISED, not a measurement". `covex-v6-final` IS NOT ONE OF THE 24 ARMS; this proves
+  only that the scrape disturbs nothing else. CAVEAT RECORDED, NOT BURIED: `n_cells_not_alone = 24`, all
+  24 pairs ran with foreign load at loadavg 1.15 to 2.22. A and B agreeing bit-exactly under varying
+  load is direct evidence of determinism, and tonight a digest reproduced bit-exactly at loadavg 34.97,
+  so the not-alone condition weakens the ALONE claim but not the identity conclusion.
+- **THE DEVICE_ANSWERS DRIVER IS WAITING, NOT HUNG, AND THE HANG RULE IN THIS FILE WOULD HAVE
+  MISDIAGNOSED IT.** pid 346850 shows `00:00:00` CPU and `ps --ppid` EMPTY after 11 minutes, which this
+  file's corrected rule calls a hang. **IT IS NOT: a foreign cell IS running** (`run_live2_real.py
+  --arm covex-v6-cf-pd-c5attr`, pid 351013, whose parent chain ends at init, so it is NOT a DA
+  descendant), and the DA driver carries `--wait-s 90` and an alone-wait. *** SO THE DISCRIMINATOR NEEDS
+  A THIRD STATE, and this is its final form: 0 CPU + no descendants + NOTHING ELSE RUNNING = HANG;
+  0 CPU + a live descendant = WORKING ORCHESTRATOR; 0 CPU + no descendants + A FOREIGN CELL RUNNING =
+  CORRECTLY WAITING ON THE ALONE RULE. *** Check descendants by walking the parent chain to init, not
+  by `ps --ppid` alone, because a cell launched through a shell is not a direct child.
+- Ladder at **10 of 12**: `covex-v6-fair-final` s7 IS on origin (17 files); `covex-v6-final` s7 and
+  `covex-v6-state-final` s7 are ABSENT. Rung 4 s7 started 22:41:30; state-final s7 due about 23:25.
+- Watchdog at **RESTART 5/12**. The budget is finite: 7 restarts left, so do not spend one re-deriving
+  what is written above.
+
+*** PRE-COMPUTED FOR s7 SO THE NEXT RESUME READS THE CELL IMMEDIATELY, NOT AFTER AN HOUR OF SETUP: ***
+- **RUNG 4's s7 CHECK-2 THRESHOLD IS 78 OF 105, NOT 77.5.** base 19, fair-final 84, gain 65;
+  `(shares - 19)/65 >= 0.90` needs `shares >= 77.5`, and answers are integers, so **78 PASSES (0.9077)
+  AND 77 FAILS (0.8923)**. Rung 4 may therefore lose AT MOST 6 robot answers against rung 3's 84. **IT
+  LOST 14 AT s5 AND 9 AT s6.** That is context, NOT a prediction: s7's mix differs sharply (2,445 robot
+  requests against 681 at s6) and base is unusually strong on alerts here at pooled 0.638.
+- **THE s7 SERVABLE POOL IS 87, NOT 105, AND THIS IS VERIFIED, NOT PRESUMED.** fair-final s7 has 18
+  robot rows with NO `t_delivered`, and those 18 opportunity ids are the IDENTICAL SET to D176's 18
+  over-32k questions at seed 7 (intersection 18, zero either way, checked against
+  `frozen_test/d170_overlimit.json`). Declining them is D170 behaviour, not a loss. So fair-final is
+  **84 of 105 = 0.800 OFFERED but 84 of 87 = 0.966 SERVABLE**. *** REPORT BOTH AND NAME THE DENOMINATOR
+  AT THE POINT OF USE; THE PRE-REGISTERED BAR STAYS ON 105, because switching it to 87 would be moving
+  a bar after the numbers exist. ***
+- `dashcam_all_meet` is PER DEVICE against the 0.25 attainment target (`scorer/score.py:713-719`,
+  `meets = eligible and frac >= p_dash - 1e-12`, all-of over ELIGIBLE devices), NOT pooled. So
+  state-final s6 reading TRUE at a pooled 0.3161 is CORRECT. "Meets the target" and "is good" are
+  different statements. **And the dashcam denominator key is `n_instants`, NOT `n`:** summing `n` gives
+  a ZERO denominator and a silent 0.0 fraction.
+
 *** THE NEXT STEP, WHICHEVER APPLIES FIRST: ***
 1. ~~`covex-v6-state-final` s6 -> score RUNG 3 at s6~~ **DONE at `f476ee96`: ALL THREE PASS, robot
    retention 1.076923, check 1 +0.166322, positive control 2 of 2 exact.** Rung 3 now passes everything
