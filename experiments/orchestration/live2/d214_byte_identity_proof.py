@@ -280,6 +280,29 @@ def classify_text(before_text: str, after_text: str) -> Dict[str, Any]:
     }
 
 
+def free_gb(path: str = "/tmp") -> float:
+    """Free gigabytes on the filesystem holding `path`. Decimal GB, as `df -BG` reports."""
+    st = os.statvfs(path)
+    return (st.f_bavail * st.f_frsize) / 1e9
+
+
+def disk_stop(min_free_gb: float, path: str = "/tmp") -> Optional[Dict[str, Any]]:
+    """None when there is room, else the record of WHY the run is stopping.
+
+    A full disk has already silently skipped a commit on this project and it hits a `git push` as
+    readily as a cell, so low disk is a TERMINAL condition here and not a warning: a cell that
+    fills the box lands on another session's sweep or push and the failure looks like something
+    else. Checked before EVERY cell, not only at the start, because the cells themselves write.
+    """
+    have = free_gb(path)
+    if have >= float(min_free_gb):
+        return None
+    return {"STOP": "LOW DISK",
+            "free_gb": round(have, 2), "min_free_gb": float(min_free_gb), "path": path,
+            "why": ("halting rather than filling the disk. A disk-full here would land on another "
+                    "session's push or sweep and would be misread as that session's fault.")}
+
+
 def _ancestors(pid: int) -> set:
     out, cur = {pid}, pid
     for _ in range(64):
@@ -328,15 +351,26 @@ def foreign(marker: str, mine: set) -> List[Dict[str, Any]]:
     return out
 
 
-def wait_alone(marker: str, mine: set, wait_s: float) -> Dict[str, Any]:
+def wait_alone(marker: str, mine: set, wait_s: float,
+               min_free_gb: float = 5.0) -> Dict[str, Any]:
+    """Bounded wait with THREE terminal conditions: a clear guard, the timeout, or low disk.
+
+    The third exists because a waiter sitting for an hour on a filling disk looks exactly like a
+    waiter that is working, from outside and from its own log.
+    """
     t0 = time.time()
     while True:
+        low = disk_stop(min_free_gb)
+        if low is not None:
+            return {"alone_at_start": False, "waited_s": round(time.time() - t0, 1),
+                    "terminated_by": "LOW DISK", "disk": low}
         f = foreign(marker, mine)
         if not f:
-            return {"alone_at_start": True, "waited_s": round(time.time() - t0, 1)}
+            return {"alone_at_start": True, "waited_s": round(time.time() - t0, 1),
+                    "terminated_by": "guard clear"}
         if time.time() - t0 >= wait_s:
             return {"alone_at_start": False, "waited_s": round(time.time() - t0, 1),
-                    "foreign_at_give_up": f}
+                    "terminated_by": "timeout", "foreign_at_give_up": f}
         time.sleep(20.0)
 
 
@@ -363,7 +397,14 @@ def run_one(tree: Path, tag: str, work: Path, a: Any, wait_s: float) -> Dict[str
     rdir.mkdir(parents=True, exist_ok=True)
     marker = uuid.uuid4().hex
     mine = _ancestors(os.getpid())
-    gate = wait_alone(marker, mine, wait_s)
+    min_free = float(getattr(a, "min_free_gb", 5.0))
+    low = disk_stop(min_free)
+    if low is not None:
+        return {"tag": tag, "tree": str(tree), "NOT RUN": "LOW DISK", "disk": low}
+    gate = wait_alone(marker, mine, wait_s, min_free_gb=min_free)
+    if gate.get("terminated_by") == "LOW DISK":
+        return {"tag": tag, "tree": str(tree), "NOT RUN": "LOW DISK",
+                "disk": gate.get("disk"), "waited_for_alone_s": gate.get("waited_s")}
     cmd = [sys.executable, str(tree / "run_live2_real.py"),
            "--arm", a.arm, "--seed", str(a.seed), "--n-devices", str(a.n),
            "--run-s", str(a.run_s), "--mode", "A", "--out", str(rdir),
@@ -394,6 +435,8 @@ def run_one(tree: Path, tag: str, work: Path, a: Any, wait_s: float) -> Dict[str
                   else "FOREIGN LIVE2 PROCESS SEEN"),
         "alone_guard_bound": 'the guard enumerates foreign live2 processes by a hardcoded list of .py BASENAMES, so a process whose script name is not in that list is INVISIBLE to it. A cell can therefore record a clear guard truthfully and still not have been alone. THE BOOLEAN IS A SUMMARY OF THE CENSUS, NEVER THE FINDING: re-adjudicate from foreign_live2_at_start / _at_end and the loadavg magnitudes beside it. Direct evidence of determinism (two independent runs agreeing exactly) outranks any alone claim.',
         "waited_for_alone_s": gate.get("waited_s"),
+        "wait_terminated_by": gate.get("terminated_by"),
+        "free_gb_at_start": round(free_gb(), 2),
         "foreign_at_start": gate.get("foreign_at_give_up") or [],
         "foreign_at_end": after,
         "n_decision_rows": len(rows),
@@ -476,6 +519,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument("--n", type=int, default=8)
     ap.add_argument("--run-s", type=float, default=120.0)
     ap.add_argument("--wait-s", type=float, default=14400.0)
+    ap.add_argument("--min-free-gb", type=float, default=5.0,
+                    help="halt rather than fill the disk. Checked before every cell and as a "
+                         "terminal condition of the alone-wait.")
     a = ap.parse_args(argv)
     before, after, work = Path(a.before), Path(a.after), Path(a.work)
     work.mkdir(parents=True, exist_ok=True)
@@ -485,6 +531,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     recs: Dict[str, Dict[str, Any]] = {}
     for tag, tree in cells:
         recs[tag] = run_one(tree, tag, work, a, a.wait_s)
+        if recs[tag].get("NOT RUN") == "LOW DISK":
+            Path(a.out).write_text(json.dumps(
+                {"VERDICT": ("NOT RUN: LOW DISK. The proof halted before completing its cells "
+                             "rather than filling the disk, so there is NO byte-identity result "
+                             "here. This is not a pass and not a failure."),
+                 "disk": recs[tag].get("disk"), "cells": recs}, indent=1, default=float) + "\n")
+            print(json.dumps({"STOP": "LOW DISK", "tag": tag}), flush=True)
+            return 9
         print(json.dumps({k: recs[tag].get(k) for k in
                           ("tag", "returncode", "alone", "n_decision_rows",
                            "decision_digest_timing_stripped", "loadavg_at_start",

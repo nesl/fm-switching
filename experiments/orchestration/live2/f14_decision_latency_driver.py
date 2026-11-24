@@ -81,6 +81,29 @@ LIVE2_NAMES = frozenset((
 ))
 
 
+def free_gb(path: str = "/tmp") -> float:
+    """Free gigabytes on the filesystem holding `path`. Decimal GB, as `df -BG` reports."""
+    st = os.statvfs(path)
+    return (st.f_bavail * st.f_frsize) / 1e9
+
+
+def disk_stop(min_free_gb: float, path: str = "/tmp") -> Optional[Dict[str, Any]]:
+    """None when there is room, else the record of WHY the run is stopping.
+
+    A full disk has already silently skipped a commit on this project and it hits a `git push` as
+    readily as a cell, so low disk is a TERMINAL condition here and not a warning: a cell that
+    fills the box lands on another session's sweep or push and the failure looks like something
+    else. Checked before EVERY cell, not only at the start, because the cells themselves write.
+    """
+    have = free_gb(path)
+    if have >= float(min_free_gb):
+        return None
+    return {"STOP": "LOW DISK",
+            "free_gb": round(have, 2), "min_free_gb": float(min_free_gb), "path": path,
+            "why": ("halting rather than filling the disk. A disk-full here would land on another "
+                    "session's push or sweep and would be misread as that session's fault.")}
+
+
 def _ancestors(pid: int) -> List[int]:
     out, seen = [], set()
     while pid and pid not in seen:
@@ -134,31 +157,55 @@ def foreign_live2(marker: str, mine: set) -> List[Dict[str, Any]]:
     return out
 
 
-def wait_alone(marker: str, mine: set, wait_s: float, poll_s: float = 20.0) -> Dict[str, Any]:
+def wait_alone(marker: str, mine: set, wait_s: float, poll_s: float = 20.0,
+               min_free_gb: float = 5.0) -> Dict[str, Any]:
+    """Bounded wait with THREE terminal conditions: a clear guard, the timeout, or low disk.
+
+    The third one matters because the other two are the only ones a reader expects, and a waiter
+    that sits for an hour on a filling disk looks exactly like a waiter that is working.
+    """
     t0 = time.time()
     seen: List[Dict[str, Any]] = []
     while True:
+        low = disk_stop(min_free_gb)
+        if low is not None:
+            return {"alone_at_start": False, "waited_s": round(time.time() - t0, 1),
+                    "terminated_by": "LOW DISK", "disk": low}
         f = foreign_live2(marker, mine)
         if not f:
             return {"alone_at_start": True, "waited_s": round(time.time() - t0, 1),
+                    "terminated_by": "guard clear",
                     "foreign_seen_while_waiting": seen[:20]}
         if not seen:
             seen = f
         if time.time() - t0 >= wait_s:
             return {"alone_at_start": False, "waited_s": round(time.time() - t0, 1),
+                    "terminated_by": "timeout",
                     "foreign_at_give_up": f, "foreign_seen_while_waiting": seen[:20]}
         time.sleep(poll_s)
 
 
 def run_cell(tag: str, arm: str, n: int, out_dir: Path, seed: int, run_s: float,
-             wait_s: float, enforce: bool) -> Dict[str, Any]:
+             wait_s: float, enforce: bool, min_free_gb: float = 5.0) -> Dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
     cell = out_dir / ("%s.json" % tag)
     lat = out_dir / ("%s.lat.json" % tag)
     err = out_dir / ("%s.err" % tag)
     marker = uuid.uuid4().hex
     mine = set(_ancestors(os.getpid()))
-    gate = wait_alone(marker, mine, wait_s)
+    low = disk_stop(min_free_gb)
+    if low is not None:
+        rec = {"tag": tag, "arm": arm, "n_devices": n, "NOT RUN": "LOW DISK", "disk": low}
+        (out_dir / ("%s.rec.json" % tag)).write_text(
+            json.dumps(rec, indent=1, default=float) + "\n")
+        return rec
+    gate = wait_alone(marker, mine, wait_s, min_free_gb=min_free_gb)
+    if gate.get("terminated_by") == "LOW DISK":
+        rec = {"tag": tag, "arm": arm, "n_devices": n, "NOT RUN": "LOW DISK",
+               "disk": gate.get("disk"), "waited_for_alone_s": gate.get("waited_s")}
+        (out_dir / ("%s.rec.json" % tag)).write_text(
+            json.dumps(rec, indent=1, default=float) + "\n")
+        return rec
 
     cmd = [sys.executable, "-I", str(RUNNER), "--arm", arm, "--seed", str(seed),
            "--n", str(n), "--run-s", str(run_s), "--cutoff-off", "--lat-out", str(lat)]
@@ -351,6 +398,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument("--enforce-kv", dest="enforce_kv", action="store_true", default=False,
                     help="run with coordinator KV eviction ON (the committed frozen-grid live "
                          "regime). Default OFF, to match the 1x final-ladder bar cells.")
+    ap.add_argument("--min-free-gb", type=float, default=5.0,
+                    help="halt rather than fill the disk. Checked before every cell and as a "
+                         "terminal condition of the alone-wait, because a disk-full here lands on "
+                         "another session's push or sweep and gets misread as their fault.")
     ap.add_argument("--skip-control", action="store_true")
     ap.add_argument("--assemble-only", action="store_true")
     a = ap.parse_args(argv)
@@ -370,10 +421,16 @@ def main(argv: Optional[List[str]] = None) -> int:
             if (out / ("%s.rec.json" % tag)).exists():
                 print("skip (already present): %s" % tag, flush=True)
                 continue
-            rec = run_cell(tag, arm, n, out, a.seed, a.run_s, a.wait_s, bool(a.enforce_kv))
+            rec = run_cell(tag, arm, n, out, a.seed, a.run_s, a.wait_s, bool(a.enforce_kv),
+                           min_free_gb=a.min_free_gb)
             print(json.dumps({k: rec.get(k) for k in
                               ("tag", "arm", "n_devices", "returncode", "alone", "wall_s",
-                               "loadavg_at_start", "loadavg_at_end")}), flush=True)
+                               "loadavg_at_start", "loadavg_at_end", "NOT RUN",
+                               "free_gb_at_start")}), flush=True)
+            if rec.get("NOT RUN") == "LOW DISK":
+                print("STOPPING THE SWEEP: low disk. %s" % json.dumps(rec.get("disk")),
+                      flush=True)
+                break
 
     rep = assemble(out)
     (out / "f14_decision_latency.json").write_text(
