@@ -524,6 +524,36 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
   the stop condition fired. Adopt into `covex-v6-final` (D209 (1) supersedes the posted s4 cell and rung
   4 is rerun) or keep as a separate arm (posted cell stands)? Also: which of the two parallel
   pre-registrations is the record. See step 1 above.
+- *** ANSWERED 2026-11-24 FROM THE COMMITTED LADDER CELLS. THE BELIEF CHANNEL *DOES* VARY LIVE, SO THIS
+  GATE IS CLEARED AND NO LIVE CELL IS NEEDED TO CLEAR IT. *** The item below is kept for its reasoning
+  but its premise is superseded; do NOT spend a cell re-deriving it.
+  The `pd_` counters were IN THE COMMITTED CELLS ALL ALONG, nested inside
+  `coordinator_result.json` -> `arm_stats`, NOT at top level. A probe for top-level `pd_` keys found none
+  in 35 files and concluded they were uncommitted; they are committed. Read with
+  `git show origin/main:results/orchestration/live2/frozen_test/runs/covex-v6-final_n16_s<seed>_1200s_h27_3t_L3_epg_rq30/coordinator_result.json`.
+  MEASURED, rung 4 at 1x, ALL FOUR ladder cells:
+    seed 4: free_kv 14,993 - 62,944   bound_by_belief 302/302   bound_by_engine ABSENT
+    seed 5: free_kv 16,017 - 62,944   bound_by_belief 299/299   bound_by_engine ABSENT
+    seed 6: free_kv 21,258 - 62,944   bound_by_belief 293/293   bound_by_engine ABSENT
+    seed 7: free_kv 10,115 - 62,944   bound_by_belief 259/259   bound_by_engine ABSENT
+  **SO THE BELIEF CHANNEL DETERMINES free_kv ON 100 PERCENT OF DECISIONS AND IS FAR FROM FLAT.** The
+  "flat in both live cells examined" reading came from two SHORT, SMALL-ROSTER cells (one fake-server
+  cell of 29 decisions). That file's own note that a 300 s dry cell was also constant over 77 decisions
+  is the right explanation and it generalises: **VARIATION IS A PROPERTY OF THE CELL'S ROSTER AND
+  DURATION, NOT OF DRY-VERSUS-LIVE**, and the full 1,200 s 16-device ladder cells vary in both.
+  **CONSEQUENCE: "DEVICE_ANSWERS WILL NOT FIRE LIVE EITHER" IS REFUTED. A null in the live pair would
+  be readable, not unreadable.** The engine channel being absent everywhere STANDS and is unaffected.
+- *** AND THE SAME COUNTERS UPGRADE PROTECT-AND-DEFER'S RULE 2 CLASS FROM UNEXERCISED TO
+  **UNEXPRESSIBLE** AT TWO SEEDS. *** At s4 and s7: `pd_harm_over_bar = 2`, `pd_harm_gt_0p65824 = 2`
+  (the MARGIN_CF on-time bar), `pd_gate_wanted_to_act_but_a_request_has_no_slice_channel = 2` and
+  `pd_request_crossed_bar_unexpressible = 2`. So the mechanism FIRED, computed a harm ABOVE its bar and
+  WANTED TO ACT, and could not, because the only action is to send less and that counter's own name
+  says "the latest safe start is already here and a recall query is one prompt, so there is nothing to
+  send less of". s5 and s6 are genuinely UNEXERCISED (nothing crossed the bar). **THE GATE THEN NAMES
+  ITS OWN REMEDY: "The registered candidate that WOULD apply is DEVICE_ANSWERS."** So DEVICE_ANSWERS is
+  the exact channel the existing gate asks for by name and cannot find, and the counts AGREE ACROSS
+  HARNESSES: StudyD218-DA's dry report measured that unexpressible count as 2 going to 0 at 1x, and the
+  committed s4 cell independently shows 2. Full record at commit `c701f83a`.
 - *** BEFORE THE PREPARED LIVE PAIR RUNS: DOES `free_kv` VARY AT ALL LIVE, THROUGH EITHER CHANNEL? ***
   `arms_v6cf.py:322` is `max(pool - max(occ_metric, occ_belief), 0)`, so free_kv has TWO channels. The
   ENGINE channel is absent everywhere (`scrape_metrics` has zero callers). The BELIEF channel was ALSO
