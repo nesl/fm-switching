@@ -12,7 +12,9 @@ while true; do
     git add results/orchestration/live2/frozen_test/frozen_grid.log results/orchestration/live2/pilot/pilot_monitor.jsonl 2>>$P
     git diff --cached --quiet || git commit -q -m "logs" 2>>$P
     git status --porcelain | grep -v '^??' | sed 's/^/  dirty: /' >> $P
-    if timeout 90 git pull --rebase -q origin main 2>>$P && timeout 90 git push -q origin HEAD:main 2>>$P; then
+    # No `git pull`: a concurrent fetch can rewrite FETCH_HEAD under it ("Cannot rebase onto multiple branches").
+    # Rebase onto the remote-tracking ref instead, which no other process rewrites mid-operation.
+    if timeout 90 git fetch -q origin main 2>>$P && timeout 90 git rebase -q origin/main 2>>$P && timeout 90 git push -q origin HEAD:main 2>>$P; then
       git fetch -q origin 2>>$P; echo "[$(date '+%F %T')] pushed; HEAD $(git rev-parse --short HEAD) on origin: $(git merge-base --is-ancestor HEAD origin/main && echo yes || echo NO)" >> $P
     else echo "[$(date '+%F %T')] PUSH FAILED (see stderr above)" >> $P; fi
   fi
