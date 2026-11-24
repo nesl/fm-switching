@@ -1,0 +1,80 @@
+{
+ "_what": "PRE-REGISTRATION of D218 (1): the THIRD request candidate of spec v6 section 7, DEVICE_ANSWERS, built in cf_protect_defer and registered under its own version label. Written and FROZEN BY HASH before any cell of this study runs.",
+ "_study": "StudyD218-DA",
+ "_session": "flash, 2026-11-23",
+ "_measured_at_origin_sha": "6f20f7e7fc8e048ab073559991862d90706c4f28",
+ "_why_this_exists_and_what_it_is_not": {
+  "the_measured_gap": "StudyD216-KV025 section 3.5 measured pd_request_crossed_bar_unexpressible = 2 at 1x and 27 at 0.25x on covex-v6-final. All 27 arrive at ONE gate, pd_gate_wanted_to_act_but_a_request_has_no_slice_channel, counted in results/orchestration/live2/d216_final_kv025/d216_final_kv025_report.json :: characteristic_decisions.F5_r4_final_kv025. The mechanism reached 'harm crosses the bar', had no channel, fell back to BASE and admitted the harmful cold rebuild.",
+  "why_the_channel_was_absent": "the latest safe start is already now, so the request cannot be deferred (deferral_s < DECISION_PERIOD_S), and a recall query is ONE PROMPT, so it cannot be sliced (chunk_tokens is None, declared by the caller at arms_v6cf.py's request leg).",
+  "this_is_not_a_new_candidate": "policy_spec_v6.md section 7 lists THREE request candidates: 'admit now with full history; defer to the latest safe start ...; leave to the device'. The third was specified and never built. v5/cf_planner.py:167 already names it DEVICE_ANSWERS in REQUEST_CANDIDATES and scores it at v5/cf_planner.py:549. This builds the same candidate in the rung-4 compound's request leg.",
+  "this_is_a_mechanism_gap_not_a_tuning_choice": "no parameter is moved. MARGIN_CF is unchanged, the harm arithmetic is unchanged, the weights are unchanged, the deadlines, targets, metrics, workload, seeds and baselines are unchanged."
+ },
+ "THE_RULE_FIXED_BEFORE_ANY_CELL": {
+  "branch_it_lives_in_EXACTLY": [
+  "GATE 1 u_rebuild > 0",
+  "GATE 2 alert_active",
+  "GATE 3 the rebuild does not fit the free pool AND a victim history exists inside the state horizon",
+  "harm > bar (crosses_bar is True)",
+  "deferral_s < DECISION_PERIOD_S (the latest safe start is ALREADY NOW)",
+  "chunk_tokens is None (the caller declares a RECALL QUERY: one prompt, no slice channel)"
+  ],
+  "the_inequality": "deviate to the device IFF (weighted harm to others MINUS this question's own weighted P(on time)) > w_d x MARGIN_CF",
+  "in_symbols": "harm_others - w_d * p_self > w_d * MARGIN_CF_ON_TIME",
+  "UNITS": "D191 (2). Gain and harm are both COUNTS of expected on-time cloud answers, each device weighted by its per-device w_d (D185). NO division by the number served: the target normalisation lives inside w_d (D171, D177).",
+  "MARGIN_CF": "0.6582 in on-time units (D177 (3)), DERIVED in cf_protect_defer as cf_margin.MARGIN_CF / A_D2_DEV and never retyped. The bar is w_d x MARGIN_CF under the committed 'decider' reading (D171 (1)): w_d is the weight of the device the DECISION IS ABOUT.",
+  "THE_SIGN_AND_WHY_THE_OWN_TERM_IS_SUBTRACTED": "replacement semantics, D165 (B) and D177 (1): a cloud answer delivered by the deadline REPLACES the device's. Leaving the question to the device therefore FORFEITS this question's own expected on-time cloud answer, which is why w_d x p_self is SUBTRACTED from the harm rather than added.",
+  "the_sign_is_confirmed_independently_by_the_committed_planner": "v5/cf_planner.py scores candidates as value = gain - harm. ADMIT_NOW_D2 has value = option_value(w, p_self) - harm_to_others = w*p_self - harm. DEVICE_ANSWERS has value = device_only_value(...) = 0.0 exactly (v5/cf_objective.py:683, D177 (1)). The committed deviation rule (D151 (1), D171 (1)) is value_cf - value_base > w_d x MARGIN_CF, which for these two candidates is (0 - (w*p_self - harm)) > w_d x MARGIN_CF, i.e. harm - w*p_self > w_d x MARGIN_CF. That is the rule above, derived from committed code rather than asserted.",
+  "p_self_is_not_a_new_quantity": "p_self = p_on_time(pred.engine_s, deadline_abs_s - now_s), through the SAME injected p_on_time callable and the SAME cf_cost.predict prediction the harm rows and the latest safe start already use in this decision. One price source.",
+  "w_self_is_read_explicitly": "w_of(decider_device_id), not taken from the bar dict, so the own term is correct under both weight-on-bar readings and does not silently inherit 'max_harmed'.",
+  "ENACTMENT": "ra.decision = \"DEVICE\" on the RecallAction the base set to CLOUD. 'DEVICE' is a registered value of baselines/interface.RECALL_ACTIONS and is READ at coordinator.py:863, which declines the opportunity and records the device as the answerer. No coordinator change, no interface change."
+ },
+ "COUNTERS_DECLARED_BEFORE_THE_RUN": {
+  "pd_request_device_answers": "the NEW characteristic decision: the branch fired and ra.decision was set to DEVICE. This is the arm's own decision kind for the port rule.",
+  "pd_request_crossed_bar_unexpressible": "KEPT, not replaced. It counts anything that crossed the bar and STILL has no expressible channel, which after this build is exactly: the state leg's exhausted slice ladder, and a request leg where p_self could not be computed because the deadline or the prediction was absent.",
+  "pd_request_device_declined": "a THIRD counter, declared here so the fall in pd_request_crossed_bar_unexpressible cannot be read as larger than it is: the branch was REACHED and the net did NOT exceed the bar, so the base's admission stands. This is a DECISION, not an absent channel, and it must not be counted as either of the other two.",
+  "pd_request_device_no_p_self": "the branch was reached, device answers were enabled, and p_self was not computable (deadline_abs_s or pred absent). Counted separately and ALSO counted as unexpressible, because that is what it is."
+ },
+ "PASS_CONDITION_FIXED_NOW_AND_NOT_MOVED_AFTERWARDS": {
+  "cell": "the 0.25x dry s4 cell of this study's new arm, same recipe as StudyD216-KV025: seed 4, n 16, run_s 1200, posted knobs, --cutoff-off, --kv-scale 0.25, coordinator eviction OFF",
+  "condition_1": "pd_request_crossed_bar_unexpressible FALLS against covex-v6-final's 27 on the same cell",
+  "condition_2": "pd_request_device_answers > 0",
+  "the_1x_count_is_REPORTED_WHATEVER_IT_IS": "no pass or fail attaches to the 1x count. It is reported because D209 (1) needs it: if the 1x count is 0 the posted covex-v6-final s4 cell is unaffected; if it is non-zero the posted cell is SUPERSEDED under D209 (1) and this session STOPS rather than deciding.",
+  "D187_ACKNOWLEDGED": "this bar is not moved after the fact and no parameter is tuned toward passing. If condition 1 or 2 fails the result is reported as a failure with its gate mix."
+ },
+ "PROOFS_DECLARED_BEFORE_THE_RUN": {
+  "proof_1_non_counterfactual_byte_identity": "every non-counterfactual arm must be BYTE-IDENTICAL between the pristine origin tree and the patched tree, measured as its own cell in BOTH trees on the same box at the same recipe: covex-v6-base, covex-v6-rules, covex-v6-state-final, covex-v6-fair-final (1x and 0.25x), covex-v6-final (1x and 0.25x), covex-v6-final-off (1x and 0.25x). covex-v6-base additionally carries a COMMITTED bar (af8befb9420ad86a / 12,085) and is the POSITIVE CONTROL on the check itself. ESCALATE AND STOP on any movement.",
+  "proof_2_off_switch_identity": "covex-v6-final-off must STILL equal covex-v6-fair-final at 5a03c2807da3681a / 14,539 with 0 differing decisions at BOTH 1x and 0.25x. CHECKED FIRST, before anything else is read, because latent hazard 1 (results/orchestration/live2/ladder_final/d208_latent_hazards.json) records that this identity holds through a redundant double-swap using a DIFFERENT FLAG NAME from the one it mirrors and is the thing most likely to break silently.",
+  "proof_3_step_4_controls": "the harm0 and margin-huge controls of the NEW arm must COLLAPSE THE NEW BRANCH TO BASE: pd_request_device_answers = 0 and the digest equal to the off arm's at the same setting, 0 differing decisions. A branch that survives its own negative control is not a mechanism.",
+  "proof_4_per_kind_counts": "per-kind characteristic counts at 1x AND 0.25x, with every explicit zero treated as a stopping condition per the PORT RULE and never as a number in passing.",
+  "proof_5_rerun_the_0p25x_dry_report": "the StudyD216-KV025 check-3 report assembler re-pointed at the new build's cells, through the same imported diff and characteristic helpers, so the decision-diff rule and the port-rule wording are not restated."
+ },
+ "REGISTRATION": {
+  "version_label": "covex-v6-final-da",
+  "ablations": ["covex-v6-final-da-off", "covex-v6-final-da-harm0", "covex-v6-final-da-margin-huge"],
+  "covex_v6_final_IS_NOT_MODIFIED_IN_PLACE": "the new candidate is behind an arm-scoped INSTANCE switch live2_cf_device_answers, default FALSE, with the strict reader shape of cf_protect_defer.arm_enables: a truthy CLASS attribute RAISES. covex-v6-final does not set it, so its behaviour is unchanged, and proof 1 measures that rather than asserting it.",
+  "NOT_on_the_normal_import_path": "the new names are registered IN THIS STUDY'S PROCESS ONLY, the way d216_final_kv025_one_cell.py registers the final ladder's ablations. No fourth name is added to V6CFR3_ARMS, so latent hazard 2 (the shadow check that raises only `if _k in V6CFR3_ARMS` and not against the nine protected committed names) is not exercised at all. Registration nevertheless checks its own keys against arms_final_ladder.PROTECTED_NAMES and against the existing registry before it updates anything.",
+  "the_posted_FINAL_LADDER_CELLS_is_not_disturbed": "no file the posted ladder resolves is re-pointed, no committed arm name is re-registered, and nothing is written under results/orchestration/live2/ladder_final/."
+ },
+ "MECHANISM_VERIFICATION_STEPS_0_TO_5": {
+  "step_0_what_would_invalidate_this_run": [
+   "the comparator moving: covex-v6-final and covex-v6-final-off are measured in BOTH trees in this study rather than cited from the committed report, so a code change on origin since 87ca3503 cannot be mistaken for my edit.",
+   "a default being restored: the new switch defaults FALSE and a truthy class attribute raises, so a class-level default cannot turn it on for every arm.",
+   "a dependency keying into the analysis: the only inputs are this study's own cells.",
+   "the mechanism having no reachable path at this size and regime: it is reachable BY MEASUREMENT, because the 27 decisions that reach the exact branch were already counted on this cell on this box.",
+   "contention: every cell runs ALONE under D216 (1) with loadavg recorded as a magnitude at start and end and a foreign-process census beside it."
+  ],
+  "step_1_causal_chain": "IF a recall question's cold rebuild would, by the committed D162 queued-ahead price (FORMULATION / spec v6 section 7 objective), destroy more weighted on-time cloud answers for OTHER devices than this question's own weighted expected on-time cloud answer by more than the model-error bar w_d x MARGIN_CF (spec v6 section 7 margin, D151 (1), D171 (1)), THEN the ruled candidate is to leave the question to the device (spec v6 section 7's third request candidate), WHICH under replacement semantics (D165 B, D177 (1)) costs exactly this question's own expected on-time cloud answer and saves the others', SO the count of on-time cloud answers rises and the decision that previously fell back to BASE and admitted the harmful rebuild is now expressed.",
+  "step_2_instantiation": "the implementing quantities are harm (cf_protect_defer.harm_on_time, via cf_objective.harm_warm_from_queue_delay on the imported d162_price coefficients), the bar (cf_protect_defer.bar), p_self (the injected p_on_time on cf_cost.predict), and w_d (the live rung-3 deficit feed). Every one is already MEASURED non-zero and varying on this cell in the committed study: harm n = 133, min 0.000249, median 1.0069, max 5.2638, 0 zeros; the bar takes more than one value (1.2003 and 1.3348 appear in the committed gate mix); free_kv varies 0 to 15,736. THE READ THAT CONSUMES THE NEW QUANTITY is the comparison in cf_protect_defer.decide and the enactment ra.decision = \"DEVICE\" in the arm's request leg, which coordinator.py:863 reads. This is recorded here and the file-and-line table is filled in the report from the landed code.",
+  "step_2b_the_switch_reaches_a_decision": "covex-v6-final-da against covex-v6-final at 0.25x, same recipe, decision logs diffed row by row: the number of differing decisions and the first one are reported. If the logs are identical the result is an ABSENT LINK, never a negative.",
+  "step_3_one_traced_unit": "one request-leg decision that fired, printed term by term through cf_protect_defer.trace_lines, extended with the new own-value and net lines, readable by hand.",
+  "step_4_negative_controls": "proof 3 above.",
+  "step_5_alternative_explanation": "a difference between covex-v6-final-da and covex-v6-final could be produced by (a) the DEVICE_ANSWERS candidate firing on the 27 decisions that crossed the bar [the claimed mechanism], or (b) the extra code path perturbing the arm's state or the decision order and changing decisions that never reached the branch [the alternative]. The two are distinguished by the counters: under (a) every differing decision traces to a request-leg opportunity counted in pd_request_device_answers plus its downstream consequences, and the harm0 and margin-huge controls collapse the arm to the off digest exactly; under (b) the controls would NOT collapse, because the perturbation does not depend on the harm or on the bar. Both controls are therefore the discriminator and not a formality."
+ },
+ "NOT_IN_SCOPE_AND_RULED_ELSEWHERE": [
+  "D218 (2): the absent survival predictor for rungs 2 and 3 is NOT built; recorded as a limitation.",
+  "D218 (3): vllm:num_requests_waiting stays unpublished.",
+  "D219: the network is held exactly as is, uniform 13.6 Mbit/s and 44 ms. No link, emulator, Tier 1, network cell or outage work.",
+  "no live cell and no 0.25x policy cell: D218 (1) requires proof and user approval first. Every number in this study is DRY and LOGICAL on flash's CPU."
+ ],
+ "REGISTER_OF_EVERY_NUMBER_THIS_STUDY_WILL_PRODUCE": "DRY and LOGICAL. --kv-scale scales test_live2_coord.GPU_KV, the coordinator's own logical pool. No engine, no --num-gpu-blocks-override, no real KV allocator, no H100. Decision counts are observed; nothing here is an engine measurement."
+}

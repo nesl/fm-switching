@@ -1,0 +1,35 @@
+{
+ "_what": "ADDENDUM to the StudyD218-DA pre-registration, received after d218_prereg.json was frozen at PREREG_SHA256 e08117903db9caf64b4fca6b0b195836c65625cf518831cadb3fbe28049ed1ef and BEFORE any cell of this study ran.",
+ "_why_it_is_a_separate_file": "the first file is frozen by hash. A frozen pre-registration is not edited in place, so the two additions arrive as their own hashed document and both hashes are reported. The precedent is results/orchestration/live2/placeholder_fixes/d211_host_attribution_prereg_addendum.json.",
+ "_what_it_does_and_does_not_change": {
+  "unchanged": "the rule, its sign, its units, MARGIN_CF, the enactment, the counters already declared, the pass condition, the proofs and the registration plan. No parameter moves and no bar moves (D187).",
+  "added": "an INSTRUMENTATION requirement (item 1) and a PREPARED-NOT-POSTED live pair (item 2). Item 1 adds a record per denial; it cannot change a decision because nothing reads it."
+ },
+ "ITEM_1_PER_DENIAL_TRADE_RECORD": {
+  "requirement": "for EVERY denial (every decision where the new branch fires and ra.decision becomes DEVICE) the PREDICTED TRADE is recorded AT THE DENIAL, not reconstructed afterwards from an aggregate.",
+  "fields_per_denial": {
+   "own_lost_weighted_p_on_time": "w_d x p_self: THE TERM THE RULE SUBTRACTS. Under replacement semantics (D165 B, D177 (1)) it is this question's own expected on-time cloud answer, forfeited by leaving it to the device.",
+   "saved_on_time_answers_by_type": "the predicted on-time cloud answers saved, BROKEN DOWN BY THE TYPE OF THE DEVICES SAVED: alert, recall, assistance, each as its own number.",
+   "saved_total": "the harm term that was actually compared against the bar",
+   "bar": "w_d x MARGIN_CF under the committed decider reading",
+   "net": "saved_total - own_lost_weighted_p_on_time, the quantity compared against the bar",
+   "context": "time, decider device, session, query id, u_rebuild, free KV, w_d, p_self, the number of other requests moved, by type"
+  },
+  "THE_SUMMATION_OBLIGATION_STATED_IN_ADVANCE": "the by-type breakdown must SUM to the harm term compared against the bar. It does so by construction: cf_protect_defer.harm_on_time accumulates harm_by_type from the SAME rows whose value_lost sums to cf_objective.harm_warm_from_queue_delay's total, so sum(by_type) == harm_unscaled exactly. harm == harm_unscaled x harm_scale, and harm_scale is 1.0 on every scorable path, so sum(by_type) == the compared harm on every scorable path. The report states the residual explicitly rather than claiming it; where harm_scale is not 1.0 the arm is the harm0 NEGATIVE CONTROL, which fires no denial at all, so no denial record can exist under a scale other than 1.0.",
+  "EXPLICIT_ZEROS_ARE_REQUIRED": "all three types appear in every record and in every total, with a value of 0.0 where no device of that type was saved. A type that is never the one saved is a finding about WHERE the mechanism acts and is not omitted. harm_by_type as returned carries only the types that had rows, so the three keys are filled from a fixed list.",
+  "TOTALS": "the per-type and overall totals are reported at 1x AND at 0.25x.",
+  "register_of_these_numbers": "PREDICTED, not observed. Every term is the policy's own prediction at decision time from the committed D162 price and the committed on-time curve. A dry cell has no engine, so no denial's realised outcome is observable and none is claimed."
+ },
+ "ITEM_2_LIVE_PAIR_PREPARED_AND_NOT_POSTED": {
+  "status": "PREPARED, NOT POSTED. The coordinator holds the post pending the user's resolution of the D216 (2) E1 conflict. This session writes the cell lines and the header and posts nothing.",
+  "authorisation": "the user has approved ONE FAIL-FAST LIVE PAIR, FOR THIS PAIR ONLY, conditional on the dry proof passing ALL pre-registered conditions.",
+  "pair": ["covex-v6-fair-final", "covex-v6-final-da"],
+  "setting": "0.25x, seed 4, REAL ENGINE POOL",
+  "gating": "GATED BEHIND the current FINAL_LADDER_CELLS, which is live on the H100 and must not be disturbed",
+  "real_engine_flags_exact_order": "--num-gpu-blocks-override 985 --max-model-len 15744",
+  "pool_of_record": "engine pool 15,760 = 985 x 16 confirmed on hardware; logical 15,736 via the _kv0.25 tag",
+  "pre_registered_bar": "the FROZEN D190 (3) rung-4 test at 0.25x: alert attainment ABOVE rung 3's AND robot on-time retention at least 0.90 of rung 3's gain over base, REPORTED BESIDE robot correct-by-deadline, single-shot within 2 s, and total on-time cloud answers.",
+  "THE_HELD_CONFLICT_RECORDED_HERE_BECAUSE_IT_BEARS_ON_INTERPRETATION": "D216 (2) requires E1, the AsyncLive2Backend /metrics scrape, to land BEFORE any 0.25x policy cell, and E1 has not landed. Without it obs.cloud.gpu_kv_fraction is 0.0 in every live2 cell, which is the MINIMUM of [0, 1] and the most permissive value an admission gate can be handed, and it is 0.0 because nothing reads /metrics at all rather than because a fetch failed. Rung 4's protect-and-defer free-KV gate is the only covex-v6 read of that field. On a 0.25x live pair without E1 the one gate meant to see memory pressure would read KV EMPTY throughout the cell that exists to test memory pressure, so a null there would be Rule 2 UNEXERCISED and must not be read as 'rung 4 does not help under pressure'. The committed d216 cells measured pd_kv_bound_by_engine_metric = 0 in every cell, so every rung-4 magnitude so far rests on the belief-side estimate and is unvalidated against a real occupancy reading.",
+  "why_the_dry_work_is_unaffected": "a dry cell has no engine, so gpu_kv_fraction is structurally absent there and the belief-side estimate is the declared source. Nothing in the frozen pre-registration or in the proofs depends on E1."
+ }
+}

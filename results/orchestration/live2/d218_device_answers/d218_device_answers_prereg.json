@@ -32,5 +32,18 @@
   "written_at": "2026-11-23T19:22:57.513804",
   "author": "flash main session, resumed; the building agent did not survive the session restart"
  },
- "_FROZEN_SHA256": "7b1fb09c883ea141c67660997b5fe7165388e8d361dc9fe23ca783e713b193f6"
+ "_FROZEN_SHA256": "7b1fb09c883ea141c67660997b5fe7165388e8d361dc9fe23ca783e713b193f6",
+ "*** FACTUAL CORRECTION 2026-11-23, APPENDED BY FLASH. THIS DOCUMENT'S CLAIM ABOUT THE OTHER AGENT IS FALSE ***": {
+  "the_claim_corrected": "this document states that 'The agent that was building this stopped with the previous session WITHOUT writing one' and that 'Its owning agent died with the previous session without writing one'. *** BOTH STATEMENTS ARE FALSE. *** That agent HAD frozen its pre-registration BEFORE this document was written, and it is still alive and has since delivered a full report.",
+  "the_evidence_OBSERVED_from_the_filesystem_and_git": {
+   "d218_prereg.json": "mtime 2026-11-23 19:06:05 PST, sha256 e08117903db9caf64b4fca6b0b195836c65625cf518831cadb3fbe28049ed1ef",
+   "d218_prereg_addendum.json": "mtime 2026-11-23 19:06:55 PST, sha256 9baf5db26951ddfaeb16a299afe12d5260bd218982ac7927183fb653d61b16a9",
+   "this_document's_own_commit_77cf269e": "committed 2026-11-23 19:23:20",
+   "_so": "the other agent's prereg predates this document's commit BY 17 MINUTES, and both hashes it reported independently match the files on disk. Both documents are now committed side by side."
+  },
+  "_what_is_NOT_in_dispute_and_matters_more": "*** THE TWO PRE-REGISTRATIONS AGREE ON THE PASS CONDITION VERBATIM. *** No bar differs, so nothing about the study's outcome turns on which is the record. Which one IS the record of StudyD218-DA is the user's call and is reported to them unresolved; this correction settles only the factual claim about the other agent, not precedence.",
+  "_why_this_is_appended_rather_than_edited": "a frozen pre-registration is not edited in place. The original text stands as a record of what was believed at 19:23, and this block records what was true. Deleting it would hide that two sessions duplicated the same ruling, which is itself worth knowing.",
+  "_the_underlying_hazard": "TWO SESSIONS BUILT THE SAME RULING IN PARALLEL AND NEITHER KNEW. This one inferred from a detached driver and an absent commit that no prereg existed; the prereg existed but was UNCOMMITTED, so it was invisible to a peer checking origin. An uncommitted artefact is not evidence of absence to anyone but its author, which is the same shape as tonight's stale-worktree-grep failure: AN ABSENCE OBSERVED FROM AN INCOMPLETE VIEW.",
+  "_a_terminology_correction_of_MY_OWN_while_here": "I relayed '77cf269e' to the building agent as a FROZEN PREREG HASH. It is not a document hash, it is a GIT COMMIT SHA (`git cat-file -t` returns `commit`) - this document's commit. The agent caught it. A commit sha and a document sha256 are different registers and conflating them would make a pre-registration unverifiable by hash."
+ }
 }
