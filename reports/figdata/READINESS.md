@@ -89,10 +89,10 @@ The standard-grid cells DO apply the committed D75 link model (fleet/links.py, a
 
 ## Table row counts
 
-- F1: 112 rows
-- F2: 267 rows
-- F3: 1041514 rows
-- F4: 1360 rows
+- F1: 114 rows
+- F2: 273 rows
+- F3: 1066021 rows
+- F4: 1392 rows
 - F6: 16 rows
 - F7: 0 rows
 - F8: 30 rows
@@ -100,9 +100,9 @@ The standard-grid cells DO apply the committed D75 link model (fleet/links.py, a
 - F10: 5 rows
 - F11: 0 rows
 - F12: 0 rows
-- F13: 118 rows
-- F14: 118 rows
+- F13: 120 rows
+- F14: 120 rows
 - F15: 1 rows
 - F16: 1 rows
 - F17: 0 rows
-- F1_units: 42493 rows
+- F1_units: 43435 rows
