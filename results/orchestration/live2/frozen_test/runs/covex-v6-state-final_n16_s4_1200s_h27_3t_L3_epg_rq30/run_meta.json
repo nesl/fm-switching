@@ -1,0 +1,381 @@
+{
+  "callback_errors": 0,
+  "caveats": [
+    "D85: dashcam task value is streaming AP over the clip-PLAYS completed in the run, indexed by play id and paired across arms. It is NOT comparable to the committed 300-clip AP. D84: repeated clips or sessions across devices are separate plays and are NOT independent samples.",
+    "D87: robot device answers are the 4B-I x RECENT set of StudyO-Q4 (845 questions, 32.78 %), restricted to EVAL. They were produced by the 4B on the A6000 / H100, NOT on the Orin. StudyD15 Part A rejected the H100-for-Orin proxy as an exact numerical stand-in, so these answers are valid for ordering and first-order value, not as exact device numbers.",
+    "D70: the wire format is JPEG. S-EMBER q88 parity is NOT proven within the pre-registered +/- 2 pp rule (K3 +0.83 pp [-0.24, +2.01], K1 -0.6 pp with lower bound -2.14, about 6 % of letters change). S-EMBER cloud accuracy here is the cloud's actual answers on JPEG input.",
+    "D81: vLLM's prefix-cache path is not output-identical to recompute (StudyORIN3 Part 2: first-token drift p50 0.22, max 0.45 nats; 39 / 40 answers agree). Robot accuracy is reported split WARM / COLD from the request log's cache_path."
+  ],
+  "completion_to_emulator_ms": {
+    "max_ms": 11.9686,
+    "n": 9317,
+    "p50_ms": 4.7083,
+    "p90_ms": 8.7626,
+    "p99_ms": 10.0842
+  },
+  "completion_to_forward_ms": {
+    "max_ms": 3.3681,
+    "n": 9317,
+    "p50_ms": 0.0446,
+    "p90_ms": 0.0834,
+    "p99_ms": 0.1142
+  },
+  "cpu_fraction": 0.0578,
+  "cpu_s": 69.365441,
+  "decision_latency_ms": {
+    "max": 9.2466,
+    "n": 11998,
+    "p50": 1.8952,
+    "p99": 3.4336
+  },
+  "decision_time": {
+    "candidates": {
+      "max": 8,
+      "n": 11998,
+      "p50": 6,
+      "p90": 6,
+      "p99": 7
+    },
+    "candidates_source": "pending items ordered",
+    "cpu_clock": "time.thread_time() of the deciding thread",
+    "cpu_ms": {
+      "max": 9.1536,
+      "n": 11998,
+      "p50": 1.8895,
+      "p90": 2.4593,
+      "p99": 3.3852
+    },
+    "n": 11998,
+    "wall_ms": {
+      "max": 9.2466,
+      "n": 11998,
+      "p50": 1.8952,
+      "p90": 2.4721,
+      "p99": 3.4336
+    },
+    "wall_over_cpu": {
+      "max": 1.9574,
+      "n": 11998,
+      "p50": 1.0026,
+      "p90": 1.0038,
+      "p99": 1.0244
+    }
+  },
+  "digests_equal": true,
+  "fairness_digest": "96c1a0b486381709e2fc63e9b0f33f9e1ba1d887d6cedf21d89d407621177849",
+  "fairness_digest_definition": "D96 (2) canonical: order-independent sha256 over sorted event tuples covering device_register, session_start, session_end, history_append, recall_question, and monitor_offer (pull mode) or monitor_frame (push mode). monitor_frame is EXCLUDED in pull mode because which frames exist depends on the arm's pulls.",
+  "first_line_to_first_content_ms": {
+    "max": 27.6587,
+    "n": 11863,
+    "p50": 0.1106,
+    "p99": 2.7139
+  },
+  "first_token_to_forward_ms": {
+    "max_ms": 3.3681,
+    "n": 9317,
+    "p50_ms": 0.0446,
+    "p90_ms": 0.0834,
+    "p99_ms": 0.1142
+  },
+  "forward_at": "first",
+  "forward_on_completion": true,
+  "forwarding": {
+    "n_forward_mismatch": 0,
+    "n_forwarded_on_completion": 9317,
+    "n_monitor_score_differs": 0,
+    "n_recall_first_token": 488,
+    "n_recall_letter_differs": 0,
+    "n_skipped_forwarded": 9316,
+    "recall_letter_diffs": []
+  },
+  "git_commit": "25ecfc1b034983938278b6270343682861a4d58c",
+  "history_preload_note": "D101: a history_preload charges NO uplink time and occupies no uplink slot, so it never queues ahead of a frame; the frames were on cloud-side disk before the run clock started.",
+  "history_preload_uplink_bytes_charged": 0,
+  "host_load": {
+    "host_busy_frac": {
+      "max": 0.6456,
+      "n": 1227,
+      "p50": 0.2665,
+      "p90": 0.3121,
+      "p99": 0.4961
+    },
+    "loadavg_1m": {
+      "max": 52.53,
+      "n": 1227,
+      "p50": 32.48,
+      "p90": 44.37,
+      "p99": 51.18
+    },
+    "n": 1227,
+    "note": "other_cpu_cores: CPU used by processes not in this run's process tree, in cores; other users anonymised",
+    "other_cpu_cores": {
+      "max": 74.036,
+      "n": 1227,
+      "p50": 32.502,
+      "p90": 38.813,
+      "p99": 58.65
+    },
+    "period_s": 1.0
+  },
+  "is_measurement": null,
+  "label": "FROZEN_TEST_THREE_TYPE dashcam-EP-G upload-pf rq30 reask-device-PROVISIONAL covex-v6-state-final_n16_s4_1200s_h27_3t_L3_epg_rq30 [robot-upload=per-frame]",
+  "lateness": {
+    "max_ms": 8.4675,
+    "mean_ms": 0.0721,
+    "n": 43695,
+    "p50_ms": 0.0668,
+    "p90_ms": 0.0877,
+    "p99_ms": 0.1491
+  },
+  "lateness_by_kind": {
+    "answer_delivered": {
+      "max_ms": 8.4675,
+      "n": 9317,
+      "n_over_50ms": 0,
+      "p50_ms": 0.0611,
+      "p90_ms": 0.0834,
+      "p99_ms": 0.1069
+    },
+    "frame_arrived": {
+      "max_ms": 1.8075,
+      "n": 11764,
+      "n_over_50ms": 0,
+      "p50_ms": 0.0679,
+      "p90_ms": 0.0872,
+      "p99_ms": 0.1111
+    },
+    "history_arrived": {
+      "max_ms": 0.6132,
+      "n": 4549,
+      "n_over_50ms": 0,
+      "p50_ms": 0.0682,
+      "p90_ms": 0.0873,
+      "p99_ms": 0.1081
+    },
+    "history_batch": {
+      "max_ms": 0.7679,
+      "n": 4549,
+      "n_over_50ms": 0,
+      "p50_ms": 0.0687,
+      "p90_ms": 0.1007,
+      "p99_ms": 0.1709
+    },
+    "history_preload": {
+      "max_ms": 0.3253,
+      "n": 7,
+      "n_over_50ms": 0,
+      "p50_ms": 0.3043,
+      "p90_ms": 0.3253,
+      "p99_ms": 0.3253
+    },
+    "monitor_opportunity": {
+      "max_ms": 1.7219,
+      "n": 11764,
+      "n_over_50ms": 0,
+      "p50_ms": 0.0682,
+      "p90_ms": 0.0877,
+      "p99_ms": 0.1167
+    },
+    "question_arrived": {
+      "max_ms": 0.1267,
+      "n": 489,
+      "n_over_50ms": 0,
+      "p50_ms": 0.0598,
+      "p90_ms": 0.0709,
+      "p99_ms": 0.0989
+    },
+    "recall_question": {
+      "max_ms": 0.7387,
+      "n": 489,
+      "n_over_50ms": 0,
+      "p50_ms": 0.148,
+      "p90_ms": 0.1992,
+      "p99_ms": 0.2472
+    },
+    "register": {
+      "max_ms": 0.2171,
+      "n": 16,
+      "n_over_50ms": 0,
+      "p50_ms": 0.16,
+      "p90_ms": 0.2093,
+      "p99_ms": 0.2171
+    },
+    "session_end": {
+      "max_ms": 0.223,
+      "n": 372,
+      "n_over_50ms": 0,
+      "p50_ms": 0.0707,
+      "p90_ms": 0.0972,
+      "p99_ms": 0.1487
+    },
+    "session_start": {
+      "max_ms": 0.2696,
+      "n": 379,
+      "n_over_50ms": 0,
+      "p50_ms": 0.0701,
+      "p90_ms": 0.0924,
+      "p99_ms": 0.2503
+    }
+  },
+  "lateness_limit_p99_ms": 50.0,
+  "maxrss_kb": 149340,
+  "memory_setting": "tight",
+  "mode": "A",
+  "n_devices": 16,
+  "n_history_preload": 7,
+  "n_opportunities": 12253,
+  "n_served": 9317,
+  "n_within_L": 3184,
+  "out_dir": "/home/pragya/data/live2/frozen_grid/runs/covex-v6-state-final_n16_s4_1200s_h27_3t_L3_epg_rq30",
+  "ratio": "40:40:20",
+  "realtime": true,
+  "run_s": 1200.0,
+  "run_valid": true,
+  "seed": 4,
+  "server_kind": "vllm",
+  "split_processes": true,
+  "submit_delay_ms": {
+    "max": 70.6676,
+    "n": 11873,
+    "p50": 6.2194,
+    "p90": 14.923,
+    "p99": 24.846
+  },
+  "submit_delay_total_ms": {
+    "max": 1938.4825,
+    "n": 11873,
+    "p50": 15.1728,
+    "p90": 28.2808,
+    "p99": 48.5477
+  },
+  "tick_s": 0.01,
+  "trace_dir": "/home/pragya/data/live2/frozen_grid/work/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2_L3_epg_perframe_rq30",
+  "trace_fairness_digest": "96c1a0b486381709e2fc63e9b0f33f9e1ba1d887d6cedf21d89d407621177849",
+  "uplink": {
+    "asst000": {
+      "busy_s": 1.8039,
+      "n": 238,
+      "queue_max": 0.014453,
+      "queue_p50": 0.014453,
+      "queue_p99": 0.014453
+    },
+    "asst001": {
+      "busy_s": 1.819059,
+      "n": 240,
+      "queue_max": 0.014453,
+      "queue_p50": 0.014453,
+      "queue_p99": 0.014453
+    },
+    "asst002": {
+      "busy_s": 1.788741,
+      "n": 236,
+      "queue_max": 0.014453,
+      "queue_p50": 0.014453,
+      "queue_p99": 0.014453
+    },
+    "dash000": {
+      "busy_s": 82.664665,
+      "n": 1940,
+      "queue_max": 0.0,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    },
+    "dash001": {
+      "busy_s": 85.054192,
+      "n": 1967,
+      "queue_max": 0.0,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    },
+    "dash002": {
+      "busy_s": 82.092015,
+      "n": 1957,
+      "queue_max": 0.0,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    },
+    "dash003": {
+      "busy_s": 81.771602,
+      "n": 1965,
+      "queue_max": 0.0,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    },
+    "dash004": {
+      "busy_s": 79.842666,
+      "n": 1983,
+      "queue_max": 0.0,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    },
+    "dash005": {
+      "busy_s": 79.556741,
+      "n": 1952,
+      "queue_max": 0.0,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    },
+    "robo000": {
+      "busy_s": 8.685882,
+      "n": 620,
+      "queue_max": 0.014453,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    },
+    "robo001": {
+      "busy_s": 8.657682,
+      "n": 619,
+      "queue_max": 0.014453,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    },
+    "robo002": {
+      "busy_s": 8.654153,
+      "n": 614,
+      "queue_max": 0.014453,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    },
+    "robo003": {
+      "busy_s": 8.6679,
+      "n": 614,
+      "queue_max": 0.014453,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    },
+    "robo004": {
+      "busy_s": 8.6799,
+      "n": 631,
+      "queue_max": 0.014453,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    },
+    "robo005": {
+      "busy_s": 8.652035,
+      "n": 611,
+      "queue_max": 0.014453,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    },
+    "robo006": {
+      "busy_s": 8.682353,
+      "n": 615,
+      "queue_max": 0.014453,
+      "queue_p50": 0.0,
+      "queue_p99": 0.0
+    }
+  },
+  "uplink_queue_p99_s_median": 0.0,
+  "validity_note": "HARNESS VALIDITY, not a result threshold: p99 scheduling lateness above 50 ms means the emulator could not keep run-clock time on this host at this fleet size.",
+  "voluntary_ctx": 543346,
+  "wall_s": 1200.000144,
+  "wire_events_from_coordinator": 9317,
+  "wire_events_to_coordinator": 17576,
+  "wire_extra_delay_ms": {
+    "max": 1934.7277,
+    "n": 11873,
+    "p50": 8.5704,
+    "p90": 15.7135,
+    "p99": 26.0377
+  }
+}
