@@ -34,7 +34,7 @@ Device WARM latencies are about 0.25 to 0.31 s on the cells seen so far, far bel
 
 ## Provenance
 
-- runs dir last commit: bacdf376
+- runs dir last commit: 866739ca
 - WARM table last commit: 00a223d1
 - inputs: each cell's cell.json (robot_rows, robot_headline), outcomes.jsonl.gz and request.jsonl.gz; delivery rule experiments/orchestration/live2/d179_rung2_verdict.py
 - build is byte-deterministic given the inputs; the git commit of this file is the build time of record.
