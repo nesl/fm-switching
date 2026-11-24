@@ -32,6 +32,7 @@ from interface import (Action, DEFAULTS, Observation, Policy, RecallAction, Stre
 # The recent-window options we actually hold: StudyRH4's RECENT representation and the committed
 # episodic frame counts. A window is expressed as the number of 0.25-s grid steps of history.
 WINDOW_OPTIONS_STEPS = (4, 12, 20, 40)        # 1 s, 3 s, 5 s, 10 s
+GRID_STEP_S = 0.25                            # one grid step, so window_s = window_steps x 0.25
 
 
 class SimpleStreamAdapted(Policy):
@@ -83,7 +84,12 @@ class SimpleStreamAdapted(Policy):
     def decide(self, obs: Observation) -> Action:
         # The paper's baseline: feed the most recent N frames to an off-the-shelf VLM. In our
         # action space that is the RECENT representation on the cloud, with no history reuse.
-        rec = [RecallAction(q.query_id, "CLOUD", representation="RECENT") for q in obs.recall]
+        # Hit 7 (user ruling 2026-11-23): the FITTED window is now applied. window_steps counts 0.25-s
+        # grid steps (WINDOW_OPTIONS_STEPS), so the window is window_steps x 0.25 s of stream time,
+        # carried as RecallAction.window_s and read by cstate.tokens_for_representation and the
+        # coordinator's RECENT frame slice. Before this, window_steps was fitted and never read.
+        rec = [RecallAction(q.query_id, "CLOUD", representation="RECENT",
+                            window_s=self.window_steps * GRID_STEP_S) for q in obs.recall]
         # amendment 2 item 2 (2026-11-13): the episodic stream action follows
         # DEFAULTS["episodic_mode"], as this module's own docstring says it does.
         return Action(streams=[StreamAction(s.stream_id, DEFAULTS["episodic_mode"])

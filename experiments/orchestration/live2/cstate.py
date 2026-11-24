@@ -169,7 +169,29 @@ class SessionRec:
             return "HOST-WARM"
         return self.readiness()
 
-    def tokens_for_representation(self, rep: Optional[str]) -> int:
+    @staticmethod
+    def frame_time_s(ref: str) -> Optional[float]:
+        """A frame ref's stream timestamp: the `|f<seconds>` suffix the trace writes (e.g.
+        `..._end_599.995|f00134.00` is 134.0 s), or None if the ref carries none."""
+        tail = str(ref).rsplit("|f", 1)
+        if len(tail) != 2:
+            return None
+        try:
+            return float(tail[1])
+        except ValueError:
+            return None
+
+    def window_frame_count(self, window_s: float) -> Optional[int]:
+        """Hit 7: how many of the session's most recent frames fall within `window_s` seconds of
+        its newest frame (at least 1). None if any frame has no timestamp, so a caller falls back
+        to the committed RECENT budget rather than guessing."""
+        ts = [self.frame_time_s(r) for r in self.frames]
+        if not ts or any(t is None for t in ts):
+            return None
+        newest = max(ts)
+        return max(1, sum(1 for t in ts if t >= newest - float(window_s) - 1e-9))
+
+    def tokens_for_representation(self, rep: Optional[str], window_s: Optional[float] = None) -> int:
         """How many tokens a recall actually sends for representation `rep`.
 
         D133 Part A second field. `RecallAction.representation` is written by arms, declared in
@@ -180,9 +202,18 @@ class SessionRec:
         RECENT sends the recent window only, which is the committed `RECENT_WINDOW_TOKENS`; any
         other representation sends the whole history. The cap keeps a short history from being
         inflated by asking for RECENT.
+
+        Hit 7 (user ruling 2026-11-23): a RECENT recall that names `window_s` sends the frames
+        within that window of the newest frame, charged at the session's mean tokens per frame:
+        ceil(k x whole / len(frames)), capped at the whole history. `window_s` None is the
+        committed path above, byte for byte.
         """
         whole = max(int(self.est_tokens), 1)
         if str(rep or "").upper() == "RECENT":
+            if window_s is not None and self.frames:
+                k = self.window_frame_count(window_s)
+                if k is not None:
+                    return max(min(-(-k * whole // len(self.frames)), whole), 1)
             return max(min(int(RECENT_WINDOW_TOKENS), whole), 1)
         return whole
 
@@ -249,6 +280,9 @@ class Opportunity:
     # "H100 wiring for placement" for the exact two-line change.
     requested_representation: Optional[str] = None
     representation_defaulted: bool = False
+    # Hit 7 (user ruling 2026-11-23): RecallAction.window_s, carried from the action loop to the
+    # submit path exactly as requested_representation is. None = the committed RECENT budget.
+    requested_window_s: Optional[float] = None
     # The S-EMBER question category, carried from the trace. It was emitted by
     # `fleet/trace.py:421` as `category=q.category` all along and DROPPED here, which is why
     # `arms_policy` pinned a single type: the field the observation offers was documented as the

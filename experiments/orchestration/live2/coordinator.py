@@ -853,6 +853,8 @@ class Live2Coordinator:
             # INJECTED, and the credit axis is the only thing distinguishing an arm that decided
             # from one that declined to. A missing field should raise, not default.
             o.representation_defaulted = bool(ra.representation_defaulted)
+            # Hit 7 (user ruling 2026-11-23), plain access for the same reason as above.
+            o.requested_window_s = ra.window_s
             self.counts["recall_" + ra.decision] += 1
             if ra.decision == "DEFER":
                 o.defer_until = t + max(float(ra.defer_s or 0.0), 0.0)
@@ -1290,7 +1292,8 @@ class Live2Coordinator:
         # window, 467 tokens, not the whole history), and `residency_readiness` costs from WHERE
         # THE KV IS rather than from what the policy believes, so an offloaded history is charged
         # as a host reload. Both helpers are committed in `cstate.py`.
-        tokens = s.tokens_for_representation(getattr(o, "requested_representation", None))
+        tokens = s.tokens_for_representation(getattr(o, "requested_representation", None),
+                                             o.requested_window_s)
         cost = C.recall_gpu_s(tokens, s.residency_readiness())
         # UNCACHED, not tokens: a warm recall re-presents a prefix the engine already holds, and
         # charging it for the whole history is the same wrong shape the touch charge had.
@@ -1425,6 +1428,15 @@ class Live2Coordinator:
         if str(getattr(o, "requested_representation", None) or "").upper() == "RECENT" and refs:
             whole_tok = max(int(s.est_tokens), 1)
             k = max(1, min(len(refs), -(-len(refs) * int(tokens) // whole_tok)))
+            # Hit 7 (user ruling 2026-11-23): a RECENT recall that names window_s sends exactly the
+            # frames inside that window (cstate.window_frame_count), not a count re-derived from the
+            # charged tokens, whose ceiling would overshoot by a frame. None keeps the line above.
+            kw = (s.window_frame_count(o.requested_window_s)
+                  if o.requested_window_s is not None else None)
+            if kw is not None:
+                k = max(1, min(len(refs), kw))
+                self.counts["recent_window_s_sends"] += 1
+                self.counts["recent_window_s_frames"] += k
             idx0 = len(refs) - k
             self.counts["recent_window_sends"] += 1
         if whole:

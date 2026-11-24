@@ -288,6 +288,10 @@ class RecallAction:
     # outside it. It is the same shape as the defect this work started from: a plausible value
     # that looks like a real choice.
     representation_defaulted: bool = False
+    # Hit 7 (user ruling 2026-11-23). The length, in seconds of stream time, of the recent window a
+    # RECENT recall sends. None keeps the committed fixed RECENT budget (cstate.RECENT_WINDOW_TOKENS),
+    # so every arm that does not set it is unchanged. SimpleStream sets it from its fitted window.
+    window_s: Optional[float] = None
 
 
 @dataclass
