@@ -250,6 +250,34 @@ implementation correction a supersede-plus-rerun which would invalidate committe
 HEADER because applying it creates a duplicate scrape; do not apply it.
 
 *** THE NEXT STEP, WHICHEVER APPLIES FIRST: ***
+
+*** 0. THE LADDER IS COMPLETE AND FULLY SCORED. THERE IS NOTHING LEFT SCORABLE. STATE AS OF
+2026-11-23 23:35 PST. *** All 12 cells on one experiments/ tree. Complete result committed at
+`8feed0fe` as `d208_LADDER_FINAL_COMPLETE.json`:
+  **RUNG 3 `covex-v6-fair-final`: ALL THREE CHECKS PASS AT ALL FOUR SEEDS. 4 of 4.**
+  **RUNG 4 `covex-v6-final`: ALL THREE PASS AT ONE SEED OF FOUR (s4 only).** check 2 fails at s5
+  (0.851064), s6 (0.871429) and s7 (0.892307); **check 1 ALSO fails at s7 (-0.019534).**
+Rung 3 s7 is now **OBSERVED, not the constructed bound an earlier resume recorded**: check 1 +0.094501
+(0.648312 against base's 0.553811), check 2 **retention EXACTLY 1.000000** (state-final 84, fair-final
+84, base 19, pool 105), check 3 min 0.991667, positive control 2 of 2 exact.
+**THE BOUND'S ONE OPEN ASSUMPTION IS RETIRED:** it assumed state-final would also decline the
+over-limit 18 under D170 and needed state-final <= 91; observed is **84, inside the 87 servable
+ceiling**, so the assumption held and the escalate-and-report branch did not fire.
+*** TWO SCORING CORRECTIONS THAT MUST NOT BE RE-INTRODUCED: ***
+  (a) **RUNG 4's CHECK 1 IS "STRICTLY ABOVE covex-v6-fair-final's", NOT ABOVE BASE'S.** Frozen prereg
+  `THE_BARS/covex-v6-final/check_1_alert`. `d179_rung2_verdict.py`'s `check_1` is
+  `delta_shares_minus_base` and is **RUNG 3's bar**; the scorer is NAMED for the rung it was written
+  for. Scoring rung 4 with it passed check 1 at all four seeds, which was WRONG and is withdrawn at
+  `5a861434`. Read rung 4's check 1 off the SAME run's `rung2_committed` column instead. A wrong check
+  that always passes is harder to see than one that always fails.
+  (b) The scorer says "at least" where the prereg says "STRICTLY ABOVE". Immaterial on every cell so
+  far (rung 3's margins are +0.216424 and +0.166322) but it would bite at exactly zero delta.
+*** AND THE HEADLINE CAVEAT, which belongs with every citation of the above: *** these four seeds do NOT
+test the rung-4 DESIGN. Protect-and-defer has been **unreachable in every cell ever run** (`metrics()`
+does not merge `scrape_metrics`, which has ZERO callers, so `free_kv` sits pinned at the whole pool),
+and the deferral predictor is called with the queueing term HARD ZERO. This is evidence about the
+rung-4 IMPLEMENTATION AS RUN. **Whether a fixed rung 4 would beat rung 3 is UNKNOWN AND UNTESTED.**
+
 1. ~~`covex-v6-state-final` s6 -> score RUNG 3 at s6~~ **DONE at `f476ee96`: ALL THREE PASS, robot
    retention 1.076923, check 1 +0.166322, positive control 2 of 2 exact.** Rung 3 now passes everything
    at s4, s5 AND s6, and EXCEEDS its comparator's gain at both s5 (1.1059) and s6 (1.0769), not merely
