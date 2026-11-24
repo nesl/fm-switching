@@ -1,0 +1,45 @@
+# FINAL_LADDER_CELLS_S5_S7 - posted 2026-11-23 after the complete s4 verdict.
+#
+# WHY THESE ARE POSTED: D196 fail-fast requires a rung's s4 to pass ITS OWN BARS before s5 to s7 run.
+# The s4 verdict is now COMPLETE for all three rungs, scored with the committed d179_rung2_verdict.py
+# unchanged, positive control PASS 2 of 2 cells EXACT on every scoring run.
+#
+#   covex-v6-fair-final (FINAL RUNG 3)  ALL THREE CHECKS PASS
+#     check 1 alert mean per-episode, bar ABOVE BASE: 0.4425 -> 0.6192, +0.1767. This is the HARDER
+#             bar: base's alert attainment EXCEEDS committed rung 2's at every seed, so "above base's"
+#             asks the alert-rich end of the curve, unlike the "above rung 3's" bar -rr cleared.
+#     check 2 robot retention, bar 0.90 of state-final's gain over base: 1.083333. on time 126 of 132
+#             against state-final 119 and base 35; pool EQUAL across arms at 132.
+#     check 3 single-shot per-device min 0.9667, all devices at or above 0.90.
+#
+#   covex-v6-final (FINAL RUNG 4)  ALL THREE CHECKS PASS, WITH CHECK 1 QUALIFIED
+#     check 1 alert mean, bar ABOVE RUNG 3: 0.619234 -> 0.6233, +0.004066. PASSES the pre-registered
+#             bar, which is the MEAN. BUT AT 712 EPISODES THAT IS WORTH ABOUT 2.9 EPISODES, WHILE THE
+#             FRACTION OF EPISODES MEETING THE 0.25 TARGET FELL 0.845506 -> 0.834270, ABOUT 8 FEWER
+#             EPISODES. THE TWO ALERT MEASURES DISAGREE IN SIGN. Read as redistribution, not
+#             improvement, and never quoted as a clean win.
+#     check 2 robot retention, bar 0.90 of fair-final's gain over base: 0.945056.
+#     check 3 single-shot per-device min 0.9833.
+#     THE BETTER FRAMING OF RUNG 4 AT 1x IS NOT THE ALERT MEAN: it sent 2,275 robot requests against
+#     rung 3's 2,950, i.e. 675 FEWER, and still delivered 121 on time against 126, with by_deadline
+#     0.629 IDENTICAL to rung 3's. Level on the correctness headline for materially less robot traffic.
+#
+#   covex-v6-state-final (FINAL RUNG 2)  NO BAR OF ITS OWN in the pre-registration, so it RIDES WITH
+#     fair-final, as pre-registered. Its dashcam shape (pooled 0.231 against base's 0.509) is the KNOWN
+#     RUNG-2 SHAPE, base's alert attainment being above rung 2's, and is NOT a failure of a bar it has.
+#
+# EVERY RESULT IS REPORTED WHATEVER ITS DIRECTION. Seeds 5, 6, 7 only; never 1 to 3, never HOLDOUT.
+# The driver stable-sorts by seed, so within each seed the written order below is the run order.
+# Recipe unchanged: 16 devices, 1200 s, tag _L3_epg_rq30, three-type grid, 1x memory.
+#
+# STILL TRUE: no 0.25x policy cells (E1 has not landed and D216 (2) requires it first), no ablations
+# (D210), KV025_RUNGS held.
+covex-v6-fair-final 16 5 _L3_epg_rq30
+covex-v6-final 16 5 _L3_epg_rq30
+covex-v6-state-final 16 5 _L3_epg_rq30
+covex-v6-fair-final 16 6 _L3_epg_rq30
+covex-v6-final 16 6 _L3_epg_rq30
+covex-v6-state-final 16 6 _L3_epg_rq30
+covex-v6-fair-final 16 7 _L3_epg_rq30
+covex-v6-final 16 7 _L3_epg_rq30
+covex-v6-state-final 16 7 _L3_epg_rq30
