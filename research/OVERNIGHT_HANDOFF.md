@@ -774,6 +774,32 @@ INVENT WORK, DO NOT TOUCH A RUN-PATH FILE, AND DO NOT DECIDE ANY OF THE FIVE OPE
 
 ## OPEN, NEEDING A USER RULING
 
+*** THE SEARCH FOR UNLISTED DECISIONS IS DONE. DO NOT REPEAT IT; EXTEND IT INSTEAD. ***
+A resume with spare capacity kept finding that the costly errors were in THIS FILE rather than in the
+results, so the method became: grep the code for decisions it DEFERS TO THE USER, then check whether
+anyone ever asked. **SIX CANDIDATES EXAMINED, TWO WERE GENUINELY UNLISTED AND ARE NOW ABOVE.**
+  `git grep -ihoE "(is|remains) a user ruling|the user's (call|ruling)" origin/main -- experiments/`
+  ADDED: **the harm form** (`cf_protect_defer.py`'s `HARM_FORM_NOTE`: "the choice is a user ruling, not
+    this module's") and **the r2 queue register** (`d187_r2_queue_register_diagnosis.py:1076`: "THAT IS
+    THE USER'S CALL and is not decided here").
+  EXAMINED AND DELIBERATELY **NOT** ADDED, with the reason, so the judgement is auditable:
+    - `arms_v6fair.py:67`, D170 OFF for rungs 0 to 2. The comment documents the default AND its
+      number-neutrality, and that neutrality is a fact INDEPENDENTLY VERIFIED here: all 18 over-limit
+      questions are at seed 7 and `covex-v6-fair-final` declined every one (identical set, checked
+      against `d170_overlimit.json`). It is about a VERSION LABEL, not a number.
+    - `experiments/orchestration/policy/closed_form.py:6`, "Acceptance is the user's call after the H100
+      pilot". A REAL open decision but PROPERLY TRACKED - 3 mentions in `research/EXPERIMENTS.md`, 1 in
+      `research/policy_design_log.md`, pre-registered in `reports/study_live2_perf.md` section Option B,
+      **OFF BY DEFAULT and enabled nowhere** (`Coordinator.sh_cost` defaults to "rollout"), which is
+      D187-compliant. It belongs to a different workstream and gating it here would only duplicate it.
+    - `hybrid/policy_f_proofs.py:13` and `fleet/data_sources.py:177` reference rulings ALREADY MADE
+      (the freeze ruling, and the part-1 D81 to D94 rulings), so they are historical, not open.
+**THE LESSON WORTH KEEPING: a decision the code reserves to the user is not thereby ON a list, and two of
+six were not.** Both of the two found govern how rung 4 is READ rather than any number, and both were
+sitting in a docstring that every reader skips. If a later resume wants more of this, the productive
+direction is NOT re-running the same grep: try `NOT APPLIED`, `RECOMMENDED`, `ESCALATE`, `is owed` and
+`not decided` over `results/` and `reports/` as well, which this pass did not cover.
+
 - *** THE r2 QUEUE REGISTER: KEEP A CORRECT INPUT THAT COSTS 16 ROBOT ANSWERS, OR KEEP r1? NEW TO THIS
   LIST 2026-11-24. ITS OWN DIAGNOSIS DEFERS IT TO THE USER AND IT APPEARS IN **NO** OPEN LIST. ***
   Found by the same search that surfaced the harm form: code that says "the user's call" and is nowhere
