@@ -648,6 +648,46 @@ rung-4 IMPLEMENTATION AS RUN. **Whether a fixed rung 4 would beat rung 3 is UNKN
 3. Nothing scorable -> do NOT invent work on run-path files. The handoff's five overnight steps below
    are owned by other sessions.
 
+## *** EVERY ASSERT IS A HARD STOP. AN ASSERT THAT PRINTS AND CONTINUES IS A DEFECT, NOT A WARNING. (standing rule, D228 addendum item 4, from my own failure) ***
+
+**What happened.** I pushed a commit that landed E1 part 1's bookkeeping and DROPPED the three files that
+implement the mechanism. Three patches failed to apply; my file-count check printed `files changed: 6
+(expect EXACTLY 9)` and **the push went ahead anyway**. For four minutes origin asserted in
+`EXPERIMENTS.md`, `INDEX.md` and `STATUS.md` that the engine-metric scrape was wired and proved, while
+`asyncbackend.py` on origin still had `metrics()` not consulting it. **A commit that lands the paperwork
+and drops the mechanism is strictly worse than one that fails, because the paperwork is what a later reader
+trusts.**
+
+**THE CAUSE, MEASURED RATHER THAN GUESSED. `set -e` IS SUPPRESSED FOR COMMANDS INSIDE `&&` / `||` LISTS,
+AND THAT IS WHERE I PUT EVERY ASSERT.** Four one-line experiments, run to settle it:
+
+| shape | result |
+|---|---|
+| `set -e; for x in a b c; do false && echo yes; done; echo AFTER` | **prints AFTER** - the loop swallows all three failures |
+| `set -e; N=6; echo ok && [ "$N" -eq 9 ] && echo A; echo B` | **prints B, rc 0** - this is exactly what I ran |
+| `set -e; N=6; [ "$N" -eq 9 ]` as its own statement | rc 1, correctly aborts |
+| `set -e; N=6; if [ "$N" -ne 9 ]; then echo STOP; exit 1; fi` | **rc 1, correctly aborts** |
+
+So the same root cause produced BOTH failures in that commit: the `git apply --check && git apply` chain
+inside a `for` loop swallowed three patch failures, and the `&& [ "$N" -eq 9 ]` chain swallowed the count
+mismatch. **`set -e` plus `&&` is not a check. It reads like one.**
+
+**THE RULE.** Every landing, proof or check script fails hard:
+- **Write `if [ "$N" -ne "$EXPECTED" ]; then echo "STOP: ..."; exit 1; fi`.** Never a bare `[ ... ]` and
+  never an `&& [ ... ]` relying on errexit.
+- **Never chain a check with `&&` onto the thing it is checking**, and never put one in a loop body without
+  its own explicit `exit`.
+- **Assert the EXACT count both ways, never a bound**, and name what the number should be.
+- **After every commit, read the published bytes back FROM ORIGIN** and grep for a string taken **from the
+  FILE, not from your commit message**. I made that mistake minutes later and got a clean false absence:
+  the grep pattern came from the commit text, the file said it slightly differently, and the result was
+  `0`. **A probe searching the wrong string reports an absence indistinguishable from a real one.**
+- Prefer the shape the D225 and stub-marking sessions used: copy into a clean `git archive` checkout, stage
+  a scoped list, assert added-versus-modified counts separately with explicit `exit 9`, then push.
+
+**There is no single script to fix: the fault was an inline chain, repeated.** The durable fix is this rule
+plus the measured reason, because the pattern will otherwise look correct every time it is written.
+
 ## *** NEVER EDIT A GATED CELL LIST IN PLACE, NOT EVEN A COMMENT. THIS COST THE H100 ABOUT 45 MINUTES OF POLICY TIME TODAY AND THE FAULT WAS MINE. ***
 
 `RUNG3_KV05R_CELLS` is **hash-gated**: the driver runs a posted list ONLY while its sha256 matches the
