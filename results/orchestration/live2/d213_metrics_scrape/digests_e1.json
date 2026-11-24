@@ -7035,5 +7035,32 @@
    },
    "pd_counters": {}
   }
- ]
+ ],
+ "_RETRACTION": "THIS TABLE DOES NOT PROVE WHAT ITS FILENAME AND ITS RESCUE COMMIT MESSAGE SUGGEST. Side A was base sha 35b5bc85, which ALREADY CONTAINED the landed E1 scrape with METRICS_SCRAPE_DEFAULT = False, because E1 landed at b6cbb0a9 which is an ANCESTOR of that sha. Side B was the same tree plus a DUPLICATE scrape that is RETRACTED and must never be applied. So '24 of 24 byte-identical, 0 moved' is a valid non-interference result for a withdrawn patch on DRY cells, and it is PROOF OF THE WRONG THING. See RETRACTION_my_duplicate_scrape.json.",
+ "_AND_THE_SWEEP_COULD_NOT_HAVE_TESTED_IT_ANYWAY": "Two independent reasons, either alone sufficient. (1) A dry cell constructs the coordinator with be=None, so no backend exists, asyncbackend is never imported and st.metrics stays empty; see dry_path_import_census.json. (2) The LANDED scrape has ZERO callers: metrics() does not call scrape_metrics() and returns no vllm: key, so the mechanism is absent on live cells too; see E1_IS_AN_ABSENT_LINK.json. A byte-identity table over an unreachable mechanism cannot fail.",
+ "_what_this_file_establishes": "Only two things, both properties of the harness rather than of any fix. (1) THE RECIPE REPRODUCES: A/A and B/B both byte-identical, and both committed positive controls matched (covex-v6-base af8befb9420ad86a; covex-v6-fair-c5attr 12e4f73ce0ebd865 / 13,812). (2) The two digest collisions below, which were not looked for.",
+ "observed_digest_collisions": {
+  "_what_this_is": "NOT something this run set out to measure. Two sets of arms produce BYTE-IDENTICAL dry decision logs. Reported to the owners of those arms.",
+  "collisions": [
+   {
+    "digest": "18067c4c66bb44b8",
+    "rows": 11955,
+    "arms": [
+     "covex-v6-rules",
+     "v5-rules-2"
+    ]
+   },
+   {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "arms": [
+     "covex-v6-state-uo",
+     "covex-v6-state-uo-c5attr",
+     "covex-v6-cf-pd-c5attr"
+    ]
+   }
+  ],
+  "the_one_that_matters": "covex-v6-cf-pd-c5attr has the SAME digest and row count as covex-v6-state-uo and covex-v6-state-uo-c5attr (9a4be873eb3c5fba / 14,218), so rung 4's protect-and-defer makes ZERO different dry decision from its rung-2 base. This is the DRY half of a three-way agreement: a live fake-server cell counted 29 pd_decisions with 0 PROTECT_AND_DEFER and free_kv constant at the full 62,944-token pool, and the s5 live diagnosis counted 299 pd_decisions stopped at the same two gates with 0 PROTECT_AND_DEFER. The cause is the absent scrape, so this is UNEXERCISED under Rule 2 and not evidence about the policy. By contrast covex-v6-cf-c5attr, rung 4 on the RUNG-3 base, has its own digest f5b627392839527c / 14,470.",
+  "the_other_one": "covex-v6-rules and v5-rules-2 are byte-identical (18067c4c66bb44b8 / 11,955), so neither can serve as a bar for the other."
+ }
 }
