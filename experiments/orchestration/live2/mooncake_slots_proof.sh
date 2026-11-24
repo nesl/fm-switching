@@ -15,7 +15,7 @@ mkdir -p $SP/before $SP/after $SP/cells
 [ -f $SP/before/.done ] || { git archive $SHA experiments | tar -x -C $SP/before && touch $SP/before/.done; }
 [ -f $SP/after/.done ] || { git archive $SHA experiments | tar -x -C $SP/after && cp $PATCHED $SP/after/experiments/orchestration/live2/arms_published.py && touch $SP/after/.done; }
 cmp -s $SP/before/experiments/orchestration/live2/arms_published.py $SP/after/experiments/orchestration/live2/arms_published.py && { echo "after tree NOT patched"; exit 1; }
-diff -rq $SP/before/experiments $SP/after/experiments | grep -v "arms_published.py" | grep -q . && { echo "trees differ outside the patch"; exit 1; }
+diff -rq -x __pycache__ $SP/before/experiments $SP/after/experiments | grep -v "arms_published.py" | grep -q . && { echo "trees differ outside the patch"; exit 1; }
 one() {   # tree arm kv
   local t=$1 a=$2 k=$3 f=$SP/cells/${1}_${2}_kv${3}.json
   [ -s $f ] && return

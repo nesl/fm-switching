@@ -12,7 +12,7 @@ cd /home/pragya/Desktop/fm-switching
 SHA=$1; SP=$2; OUTJ=$3
 PY=/home/pragya/.venvs/fm-switching-vllm/bin/python
 mkdir -p $SP/cells
-CH=$(diff -rq $SP/before/experiments $SP/after/experiments | grep -vE "baselines/interface.py|live2/cstate.py|live2/coordinator.py|baselines/simplestream_adapted.py")
+CH=$(diff -rq -x __pycache__ $SP/before/experiments $SP/after/experiments | grep -vE "baselines/interface.py|live2/cstate.py|live2/coordinator.py|baselines/simplestream_adapted.py")
 [ -n "$CH" ] && { echo "trees differ outside the patch: $CH"; exit 1; }
 run() {   # tree label script args...
   local t=$1 lab=$2; shift 2; local f=$SP/cells/${t}_${lab}.json
