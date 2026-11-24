@@ -1,0 +1,54 @@
+{
+ "_what": "*** AT REDUCED KV, ENGINE CONTEXT REJECTIONS ARE AN ARM-DEPENDENT OUTCOME, NOT A COMMON NUISANCE TERM. *** D189 rules that prompts over the 0.25x `--max-model-len 15744` are misses reported separately. That is right for ACCOUNTING a single arm. It must NOT be read as a term that cancels between arms, because the count varies by arm by more than an order of magnitude at the SAME setting.",
+ "the_evidence_OBSERVED_from_committed_cells": {
+  "kv0.25, seed 4, identical context limit of 15,744": {
+   "confidence-cascade": {
+    "n_errors": 33,
+    "n_requests": 3568
+   },
+   "eco-llm": {
+    "n_errors": 14,
+    "n_requests": 12253
+   },
+   "covex-v6-base": {
+    "n_errors": 0,
+    "n_requests": 7246
+   }
+  },
+  "kv0.5, same pattern": {
+   "always-cloud-fcfs s4": {
+    "n_errors": 50,
+    "n_requests": 10138
+   },
+   "always-cloud-fcfs s5": {
+    "n_errors": 38,
+    "n_requests": 9622
+   },
+   "attentionstore-prefetch s4": {
+    "n_errors": 1,
+    "n_requests": 9002
+   },
+   "covex-v6-base s4": {
+    "n_errors": 0,
+    "n_requests": 10327
+   },
+   "covex-v6-rules s4": {
+    "n_errors": 0,
+    "n_requests": 5427
+   },
+   "llf s4": {
+    "n_errors": 0,
+    "n_requests": 10682
+   },
+   "edf s4": {
+    "n_errors": 0,
+    "n_requests": 8013
+   }
+  }
+ },
+ "*** AND IT IS PROMPT LENGTH, NOT REQUEST VOLUME. THE COMPARISON IS CLEAN ***": "`covex-v6-base` sent 7,246 requests at kv0.25 and was rejected ZERO times; `confidence-cascade` sent 3,568 - ABOUT HALF AS MANY - and was rejected 33 times. **MORE REQUESTS WITH ZERO REJECTIONS AGAINST FEWER REQUESTS WITH 33 REJECTIONS RULES OUT VOLUME AND LEAVES PROMPT LENGTH.** So the rejection count measures the arm's own representation and history policy running into the reduced context window. That is a PROPERTY OF THE ARM at 0.25x, and it has NO ANALOGUE AT 1x where the limit is 32,768 and every one of these arms records zero.",
+ "WHY_THIS_MATTERS_FOR_THE_PENDING_0p25x_RULING": "the user has approved ONE real-engine 0.25x pair (`covex-v6-fair-final` against the DEVICE_ANSWERS build). If those two arms build prompts of different lengths - and DEVICE_ANSWERS exists precisely to change what is sent - **THEIR REJECTION COUNTS MAY DIFFER, AND THAT DIFFERENCE IS AN EFFECT OF THE POLICY RATHER THAN NOISE.** It therefore has to be pre-registered BEFORE the pair runs: whether a context rejection counts as a robot miss inside the denominator (which is what D189's 'misses' implies) or is excluded, AND reported per arm either way. Deciding it afterwards would be choosing a denominator in sight of the numbers.",
+ "_the_1x_contrast_that_makes_it_unmistakable": "at 1x every arm in this set records n_errors 0, and the only context-limit effect is D176's 18 over-32k robot questions at seed 7, which I verified are the IDENTICAL set across arms and therefore DO cancel between them. **At 0.25x the over-limit set is arm-dependent and does NOT cancel.** The same phrase, 'misses over the context limit', means a shared constant at 1x and a per-arm outcome at 0.25x - one name, two behaviours, which is consistency check 4's hazard.",
+ "_register": "OBSERVED from committed `cell.json` `n_errors` and `n_requests` at origin. The CLASSIFICATION of the 33 as HTTP 400 robot prompts over the limit with null `prompt_tokens` is the H100's, from `request.jsonl`, and is REPORTED not re-verified by me. Whether the 14 (`eco-llm`) and the 38/50 (`always-cloud-fcfs`) are the same kind is NOT established and must be classified before those cells are cited.",
+ "_recommendation_NOT_A_DECISION": "classify the errors in every reduced-KV cell by the same method before any of them is cited, report the count per arm beside its result, and pre-register the denominator treatment before the approved 0.25x pair runs. None of this is a decision I can take."
+}
