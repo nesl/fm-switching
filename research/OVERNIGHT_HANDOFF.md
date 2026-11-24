@@ -2,10 +2,13 @@
 
 ## HOW TO READ THIS FILE
 
-  WRITTEN AT origin/main tip: b987157dacf3cb46b65810bce44c09cd181d33d6
-  WRITTEN AT: 2026-11-23T16:13-0800. EVERY TIME IN THIS FILE STATES ITS ZONE.
-  NEWEST COMMIT WHEN WRITTEN: b987157d at 2026-11-23T16:13:23-08:00
+  WRITTEN AT origin/main tip: 9537bddeeb068d206d05553704695f8ffdbd0302
+  WRITTEN AT: 2026-11-23T17:45-0800. EVERY TIME IN THIS FILE STATES ITS ZONE.
+  NEWEST COMMIT WHEN WRITTEN: 9537bdde at 2026-11-23T17:43:44-08:00
   EXPIRES: immediately on any new commit to origin/main.
+  REFRESHED 2026-11-23T17:45-0800, after 66 commits had landed since the previous stamp. Every
+  section below is UNCHANGED; the STATE block that follows this one is the newest text in the file
+  and SUPERSEDES the NEXT STEP section.
 
 ORIGIN TAKES COMMITS EVERY FEW MINUTES, so this is probably already expired. THAT IS NORMAL AND IT
 MEANS WHAT IT SAYS: re-derive state from `git log`, `results/INDEX.md` and
@@ -16,6 +19,49 @@ earlier version of this file turned a machine that had just committed into one i
 A HANDOFF THAT SAYS STAND DOWN MUST CARRY THE COMMIT IT WAS WRITTEN AT AND AN EXPIRY, and a resumed
 session must check the tip against it before obeying. A stale stand-down already stopped one session
 while real work was pending.
+
+## STATE AT 2026-11-23T17:45-0800. TWO OF THE THREE BLOCKS ARE CLEARED.
+
+THE "NEXT STEP" SECTION BELOW IS PARTLY STALE. Read this first; it was written later.
+
+  (a) RE-BAR confidence-cascade  DONE. Record at `ladder_final/rebar/rebar_record.json`. New bar
+      `b1ff48e40387a997` / 3,834, superseding `b9290071679f1baa` / 12,253. Ran ALONE: 0 other cell
+      runners before, 0 appeared DURING, loadavg 0.60 at start and 1.00 at end AS MAGNITUDES, from a
+      clean archive of `3fa41f51` with `8986f593` verified an ancestor first.
+      AND THE PART WORTH MORE THAN THE ALONE RUN: TWO INDEPENDENT RUNS AGREE, the earlier one (NOT
+      formally alone, loadavg 2.21) and the guarded one (0.60), both giving `b1ff48e40387a997` /
+      3,834. This arm's determinism question is settled by AGREEMENT ACROSS A 3.7x LOAD RANGE, not by
+      preferring the quiet run.
+      TWO STALE FIELDS IN ITS BAR ROW WERE CORRECTED at `49827c88`: `_bar_validity` still read "BAR IS
+      STALE" with `proof_a_escalates` FALSE and "RE-BAR OWED" while the row's own `_escalates_on_move`
+      read True, and `_provenance` still pointed at the file that produced the SUPERSEDED bar. A reader
+      trusting `proof_a_escalates` FALSE would NOT escalate on a future move, which is exactly the
+      mis-score the D213 item 4 provenance rule exists to prevent. Both originals kept beside.
+  (b) E1 (`asyncbackend.py`)  LANDED at `5c319fc8`, byte-identical while default-off, proved on three
+      arms including rung 4. The D216 (2) precondition on a 0.25x POLICY cell is satisfied IN CODE.
+      NOTE IT LANDED DEFAULT-OFF: enabling it is a SEPARATE step, and a 0.25x policy cell still needs
+      the user's approval of the first one.
+  (c) Session B posts FINAL_LADDER_CELLS  STILL OPEN, AND THE ONLY REMAINING BLOCK. No
+      `FINAL_LADDER_CELLS` exists under `frozen_test/runs/`. SESSION B CANNOT BE RESUMED UNTIL 19:00
+      AMERICA/LOS_ANGELES. DO NOT START A REPLACEMENT: resume with SendMessage, or its in-flight chain
+      is duplicated, which has already happened once today.
+
+RUNNING ON FLASH AT THE TIME OF WRITING, verified by `ps` plus `/proc/<pid>/cwd` rather than assumed:
+`d216_final_kv025_driver.py`, the 0.25x DRY proof on `covex-v6-final` ordered as check 3 of the user's
+StudyD210-KV025 section 1.6 ruling. SO THE BOX IS NOT FREE AND THE D216 (1) ALONE RULE FORBIDS STARTING
+ANOTHER PROOF CELL. Session D's counts do NOT transfer to `covex-v6-final`, which differs by the
+id(obs) fix, the planner-on-feed at rung 3 and the alert release re-check, all decision-changing; its
+structure and channel analysis DO transfer.
+
+ALSO STOPPED AND NEEDING A RESUME RATHER THAN A REPLACEMENT: the D214 figure-instrumentation agent did
+not finish before the previous session ended. Its transcript is saved.
+
+`ops/watchdog.log` AND `ops/track.log` ARE BOTH EMPTY, so the instruction to read them for
+who-holds-what yields nothing; derive ownership from `ps`, `/proc/<pid>/cwd` and `git status` instead.
+The shared worktree currently carries 113 UNCOMMITTED PATHS from other sessions INCLUDING live-path
+files (`arms.py`, `coordinator.py`, `v5/cf_objective.py`, `hybrid/hybrid_arm.py`,
+`share_admission.py`). DO NOT EDIT A LIVE-PATH FILE THERE: ship such a change as a PATCH SCRIPT
+asserting `count == 1` per replacement, which is the pattern that has worked today.
 
 ## THE TWO FLASH AGENTS ARE RATE-LIMITED UNTIL 19:00 AMERICA/LOS_ANGELES. THE COMPUTE IS NOT.
 
