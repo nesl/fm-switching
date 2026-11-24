@@ -748,6 +748,42 @@ different one in the pattern. **Fixing it means matching the interpreter and the
 `--permission-mode`, not an adjacency of two flags.** Not fixed here: this session is standing down, not
 editing live-path files, and the flag makes it moot until the user rules.
 
+## *** D232: QUESTION DEFERRAL IS REMOVED FROM RUNG 4. THE NEW ARM IS `covex-v6-final-nqd`. (user, 2026-11-24, revisit later) ***
+
+**Rung 4 is now rung 3 + protect-and-defer + DEVICE_ANSWERS + the deficit-fed state planner, with the
+request-defer leg REMOVED.** Built as `covex-v6-final-nqd`, run at **kv0.5r s4 then 1x s4**, and rerun with
+`_e1` once the split fix lands. **`covex-v6-final-da` is NOT run** - it carries the removed leg - and
+**cell (a) is not rerun.**
+
+**Why the leg went, with the evidence that removed it.** Question deferral fired about **54 times live**
+across the 1x `_rerun` and kv0.5r `_ms` cells with **ZERO rescues**. At 1x: 1 on-time loss, and alert
+on-time **-11.9 pp inside the deferral windows** against -0.9 pp outside. At 0.5x: robot on time about
+**111 against rung 3's 122**. Rule 2 class: **fired and did not help** - the only inconclusive class that
+is evidence about the policy. **The +1 robot on-time at 1x came from two questions that were never
+deferred**, so "robot on-time did not fall" was never evidence the leg helped.
+
+*** THE BAR IS SETTLED BY THE SAME-CODE RULE, AND THIS CLOSES THE 1.40x AMBIGUITY. *** Rung 4's 1x
+comparator is **same-code `covex-v6-fair-final` at 0.619**, not the frozen pre-registration's literal
+**0.441** - which was `covex-v6-fair-c5attr`'s value, a superseded rung-3 cell. **Same name, same
+definition, two cells, 1.40x apart**; D195's same-code rule decides it. Worth remembering that the scorer's
+own check 1 would have passed the cell trivially, because its rule is "attainment at least the BASE's"
+(0.609 >= 0.442): **a wrong check that always passes, on this row, twice.**
+
+*** AND D232 (6) IS A RULING ABOUT OUR OWN TOOLING, NOT THE POLICY: THE CHAIN THAT RAN ITS SWEEP AFTER
+`TREE GUARD: FAIL` AND `exit=1` IS FIXED TO HARD-STOP, AND NO PROOF FROM A CHAIN THAT IGNORED ITS GUARD IS
+ACCEPTED. *** That run's guard failure was in fact benign - `UNDECLARED differences: 0`, with 8
+declared-but-unchanged (files that had since LANDED on origin) and one "forbidden held marker" that was the
+**intentionally restored** `arms_v6cf_device.py`. **Benign is the worst possible luck**: the control was
+wired to nothing and the outcome was fine, which is exactly how ignoring it becomes habit. The
+forbidden-marker rule must now **allow a declared, intentionally restored module and state how it is
+declared.** Same family as `set -e` swallowed by an `&&` list: a sound check pointed at nothing.
+
+**Also recorded: E1 never reached a decision in split mode**, so protect-and-defer binds on the belief
+meanwhile and `metrics_health` must say **`never_scraped_by_decisions`** honestly rather than `scraped_ok`.
+The keep-ready-set pre-flight runs in parallel on flash with no H100 time; at 0.5x only **33 percent** of
+protect-and-defer decisions find the rebuild fits without evicting, against 85 percent at 1x, so the
+rationing premise that three committed 1x measurements showed absent may exist at reduced memory.
+
 ## *** HOW DEVICE_ANSWERS IS SWITCHED ON: A SEPARATE ARM NOW, FOLDED LATER. (user ruling, 2026-11-24, D231 (1) implementation) ***
 
 **The ruling, and the reason it is the right shape.** `covex-v6-final-da` is created as a **separate arm** =
