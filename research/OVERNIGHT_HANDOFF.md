@@ -91,6 +91,29 @@ HELD-DELIBERATELY from ABANDONED, which is the distinction that actually decides
 *** AN UNCOMMITTED EDIT IS A FACT ABOUT THE FILE. ACTIVITY AND SAFETY ARE SEPARATE QUESTIONS AND NEED
 THEIR OWN EVIDENCE: mtime, a process census, and the worktree-only line count. ***
 
+*** AND THE "HELD OR ABANDONED?" QUESTION IS NOW CHARACTERISED, 2026-11-24 00:20 PST. ANSWER: NEITHER.
+ALL THREE ARE STALE OLDER SNAPSHOTS, AND NO UNIQUE *CODE* IS AT RISK. *** I read the worktree-only lines
+instead of leaving the blocker vague:
+- `arms.py`, 2 lines: BOTH ARE COMMENTED OUT - `# from arms_v6cf import V6CF_ARMS` and
+  `# ARMS.update(V6CF_ARMS)`. Dead text, and a PRE-v6cf-registration state of the file.
+- `coordinator.py`, 9 lines: fragments of `_device_answer` referencing
+  **`requested_representation`**, which is the **PRE-HIT-7 FORM**; hit 7 (`c511050`) replaced that path
+  with `RecallAction.window_s` read in `cstate.tokens_for_representation`. Definitively older.
+- `v5/cf_objective.py`, 150 lines: **ZERO symbols origin lacks** - a grep for `def `/`class `/CONST
+  among the worktree-only lines returns NOTHING, and every function named in them
+  (`attainment_delta`, `attainment_margin`, `device_only_value`, `lex_better`, `option_value`) is
+  ALREADY ON ORIGIN. The lines are REWORDED DOCSTRING AND COMMENT PROSE; origin's copy is LONGER (911
+  lines against 640).
+*** SO ITEM 3 IS NOT BLOCKED BY HELD CODE. *** The three files are superseded snapshots, origin is ahead
+of them on every one, and nothing of substance would be lost. **THE LIMIT OF THIS CHECK, STATED:** I
+verified that no NEW SYMBOL is defined and that the sampled unique lines are prose or older variants; I
+did NOT line-by-line audit all 150. Combined with origin being longer on all three, the pre-hit-7 form in
+`coordinator.py`, and nothing having written them for 25 to 36 hours with no process running, the reading
+is consistent and strong but it is a CHARACTERISATION, not an exhaustive audit. **A session that wants to
+land item 3 should still build from ORIGIN's content (as every commit tonight did) rather than from the
+worktree copy, which is the practice that made this question moot for every file I committed.**
+
+
 *** HOW TO CHECK CONCURRENCY CORRECTLY (the shared worktree lies): ***
 `/tmp/claude-1001/mapwt` is HUNDREDS of commits behind origin (1,500 earlier tonight, 670 later), so
 `git status` there reports STALENESS AS MODIFICATION and shows committed files as `??` untracked. *** THE TEST THIS FILE PREVIOUSLY PRESCRIBED IS ALSO WRONG, AND FOR THE SAME REASON IT WARNS ABOUT.
