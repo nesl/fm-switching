@@ -638,7 +638,7 @@ LOOKING FOR SOMETHING TO DO; READ THIS LIST FIRST. ***
   prechecks identical, positive control matched the committed `af8befb9420ad86a`. Driver exited AFTER
   writing its result, which is COMPLETION. Verdict and the raw file are committed at
   `results/orchestration/live2/d213_metrics_scrape/item3_belief_prefix_byte_identity.json` and
-  `item3_digests_RAW.json`. THE CODE IS NOT LANDED. ***
+  `item3_digests_RAW.json`. *** SUPERSEDED: THE CODE *IS* LANDED. See the correction immediately below. *** ***
   **READ THE VERDICT FILE, NOT THE RAW ONE: the raw result's `fix_in_B`, `B_is` and
   `what_this_cannot_show` ARE STALE E1 METADATA** and say the change under test was `asyncbackend.py`.
   It was not. E1 is already on origin so BOTH trees carry it (`asyncbackend.py` byte-identical in A1 and
@@ -658,9 +658,29 @@ LOOKING FOR SOMETHING TO DO; READ THIS LIST FIRST. ***
   (`arms_policy.py:1067-1075`) is NEVER ENTERED BY THE LADDER. So only signal (b) could ever have been
   validated, and this file's earlier framing that signal (a) merely "lacked a 1x live cell"
   UNDERSTATES it: the field was STRUCTURALLY EMPTY, not just late.
-  **LANDING IT IS THE NEXT STEP AND IS THE USER'S CALL** (`coordinator.py` is run-path, the worktree's
-  live uncommitted edits stand, and the live half is argued rather than measured), together with whether
-  that argument suffices or a live cell is wanted first.
+  *** CORRECTED 2026-11-24: ITEM 3 IS LANDED AND WIRED. THIS IS NO LONGER THE NEXT STEP AND NO LONGER
+  NEEDS A RULING. DO NOT LAND IT AGAIN AND DO NOT ASK THE USER ABOUT IT. *** Verified on origin, not
+  taken on report:
+    `coordinator.py:2138`  `belief=(preds.get("belief") or self._belief_prefix_record()),`   <- CALL SITE
+    `coordinator.py:2148`  `def _belief_prefix_record(self) -> Dict[str, Any]:`              <- METHOD
+    `56a73293` is an ANCESTOR of origin/main, and the verdict file
+    `d213_metrics_scrape/item3_belief_prefix_byte_identity.json` is on origin.
+  The "worktree's live uncommitted edits" that this entry worried about were STALE, NOT LIVE: the shared
+  worktree runs ~1,678 commits behind, and its `coordinator.py` holds ZERO lines origin lacks (mtime
+  2026-11-22). That reading is the same coarse concurrency test this file corrects three times above.
+  *** AND IT CLOSES THE SIGNAL-(a) GAP THAT THE ENTRY ABOVE CALLS "BIGGER THAN ITEM 3", which is worth
+  stating because the two sit side by side and read as unrelated. *** The landed method's own docstring
+  names the same defect - `belief.gpu_tokens_by_session` EMPTY on all 16,840 rows of the committed
+  rung-3 cell because its only producer `arms_policy.py:1067-1075` is never entered by the ladder - and
+  then SUPPLIES the value as a FALLBACK: `min(built_tokens, est_tokens)` filed under the session's
+  CURRENT BELIEVED TIER, with `preds["belief"]` still winning wherever an arm supplies one, so nothing
+  that already fills the field changes. **SO SIGNAL (a) IS COMPUTABLE FROM NOW ON AND ON NO COMMITTED
+  CELL**, since all twelve ladder cells predate it. The remaining limit is unchanged and still ARGUED
+  RATHER THAN MEASURED: the record is LIVE-CELL ONLY by design (dry returns `asdict(Belief())`, because
+  filling it dry would move every arm's dry digest), so the 24-of-24 dry sweep proves the 52 added lines
+  perturb no dry decision through the allocation-order channel, NOT that the live recording is
+  decision-neutral. **THAT is the only part a live cell would settle, and it is a much narrower question
+  than "should we land it".**
 
   [SUPERSEDED, KEPT FOR THE TRAIL:]
 - **Step 3 item 3: ITS BYTE-IDENTITY SWEEP IS RUNNING. DO NOT RE-LAUNCH AND DO NOT START A DRY CELL.**
