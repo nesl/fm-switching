@@ -1,0 +1,36 @@
+{
+ "_what": "PRE-REGISTRATION for D218 (1): the DEVICE_ANSWERS request candidate in cf_protect_defer, on covex-v6-final. Written from the user's own words of 2026-11-23 and frozen by sha256 BEFORE the pass condition is evaluated.",
+ "_why_this_exists_and_who_wrote_it": "D187 requires every change to be PRE-REGISTERED AND COMMITTED BEFORE ITS CELLS, and the user's instruction said PRE-REGISTER FIRST. The agent that was building this stopped with the previous session WITHOUT writing one, and its detached driver (d218_da_driver.py, pid 294064) was already running when this was written. THAT ORDERING IS RECORDED HONESTLY BELOW rather than smoothed over.",
+ "the_motivating_finding": "At 0.25x protect-and-defer's REQUEST leg reaches 'harm crosses the bar' and then has NO EXPRESSIBLE CHANNEL: pd_request_crossed_bar_unexpressible is 2 at 1x and 27 at 0.25x. The latest safe start is ALREADY NOW so it cannot defer, and a recall query is ONE PROMPT so it cannot be sliced. It then falls back to the base and ADMITS THE HARMFUL COLD REBUILD. Spec v6 section 7 lists three request candidates and the third, DEVICE_ANSWERS, was SPECIFIED AND NEVER BUILT; cf_protect_defer.py:530 on origin says so in its own words.",
+ "the_rule": "in the branch where harm crosses the bar AND the latest safe start is already now AND chunk_tokens is None (a recall query): deviate to the device IFF (weighted harm to others MINUS this question's own weighted P(on time)) > w_d x MARGIN_CF. Enacted as ra.decision = 'DEVICE'.",
+ "the_units": "D191 (2): gain and harm are both COUNTS of expected on-time cloud answers, each device weighted by its per-device w_d (D185), with NO division by the number served. MARGIN_CF is 0.6582 in on-time units (D177 (3)). Replacement semantics (D165 B): a cloud answer delivered by the deadline REPLACES the device's, so leaving this question to the device FORFEITS its own expected on-time answer, which is why that term is SUBTRACTED.",
+ "the_counters": {
+  "pd_request_device_answers": "the new branch's own count",
+  "pd_request_crossed_bar_unexpressible": "KEPT, for anything still unexpressible, so the two are distinguishable rather than one silently replacing the other"
+ },
+ "THE_PASS_CONDITION": "on the 0.25x DRY s4 cell: pd_request_crossed_bar_unexpressible FALLS AND pd_request_device_answers > 0. The 1x count is REPORTED WHATEVER IT IS.",
+ "per_denial_trade_logging_user_addendum": "for EVERY denial, log the predicted trade: this question's LOST WEIGHTED P(on time) (the subtracted term), and the PREDICTED ON-TIME ANSWERS SAVED BROKEN DOWN BY THE TYPE OF THE DEVICES SAVED (alert, recall, assistance, separately), plus the TOTALS at 1x and 0.25x. The by-type breakdown MUST SUM to the harm term actually compared against the bar; state that it does or say where it does not. A type whose saved count is ZERO is stated explicitly, never omitted, because a type that is never the one saved is a finding about where the mechanism acts.",
+ "required_proofs": [
+  "non-counterfactual arms BYTE-IDENTICAL on the committed recipe; ESCALATE AND STOP if any paper-set arm, covex-v6-base or covex-v6-rules moves",
+  "covex-v6-final-off STILL EQUALS covex-v6-fair-final (currently 5a03c2807da3681a / 14,539, 0 differing decisions at 1x and 0.25x). CHECK THIS FIRST: the double-swap holding that identity is keyed on a DIFFERENT FLAG NAME (latent hazard 2, d208_latent_hazards.json), so it is the thing most likely to break silently",
+  "Step 4 controls harm_zero and margin_huge must COLLAPSE THE NEW BRANCH TO BASE; a branch that survives its own negative control is not a mechanism",
+  "per-kind counts at 1x AND 0.25x, with an explicit zero treated as a PORT-RULE stopping condition",
+  "re-run the 0.25x dry report on the new build",
+  "answer explicitly WHETHER THE POSTED covex-v6-final s4 CELL WOULD HAVE DIFFERED, with the 1x count; if non-zero the posted cell is superseded under D209 (1) and the build STOPS rather than deciding"
+ ],
+ "must_not_disturb_the_posted_cells": "FINAL_LADDER_CELLS is posted (43ad8be8) and RUNNING on the H100. The new build registers UNDER ITS OWN VERSION LABEL and never modifies covex-v6-final's behaviour in place.",
+ "live_pair_authorised_for_this_pair_only": {
+  "condition": "ONLY if the dry proof passes ALL conditions above",
+  "what": "ONE fail-fast live pair at 0.25x s4, REAL ENGINE POOL as KV025: covex-v6-fair-final and the covex-v6-final build with DEVICE_ANSWERS, GATED BEHIND the current FINAL_LADDER_CELLS",
+  "flags": "--num-gpu-blocks-override 985 --max-model-len 15744 (that order); engine pool of record 15,760 = 985 x 16; logical 15,736 via the _kv0.25 tag",
+  "bar": "the FROZEN D190 (3) rung-4 test at 0.25x: alert attainment above rung 3's AND robot on-time retention at least 0.90 of rung 3's gain over base, REPORTED BESIDE robot correct-by-deadline, single-shot within 2 s, and total on-time cloud answers",
+  "OPEN_CONFLICT_THE_USER_MUST_RESOLVE_BEFORE_THIS_PAIR_POSTS": "D216 (2) requires E1 to land BEFORE ANY 0.25x POLICY CELL, and E1 HAS NOT LANDED. Without it obs.cloud.gpu_kv_fraction is 0.0 in every live2 cell, the MINIMUM of [0,1] and the most permissive value an admission gate can be handed, because NOTHING READS /metrics at all. Rung 4's protect-and-defer free-KV gate is the ONLY covex-v6 read of that field (arms_v6cf.py:306 into :336). So on a 0.25x live pair without E1, THE ONE GATE MEANT TO SEE MEMORY PRESSURE WOULD READ 'KV EMPTY' THROUGHOUT THE CELL THAT EXISTS TO TEST MEMORY PRESSURE, and a null there would be UNEXERCISED under Rule 2 rather than a result. The committed d216 work measured pd_kv_bound_by_engine_metric = 0 in every cell, so every rung-4 magnitude currently rests on the belief-side estimate. THE POST IS HELD until the user rules."
+ },
+ "ORDERING_DISCLOSURE": "THE DETACHED DRIVER d218_da_driver.py (pid 294064) STARTED AT ABOUT 19:14 PST, BEFORE THIS PRE-REGISTRATION WAS COMMITTED. Its owning agent died with the previous session without writing one. This document is written from the USER'S OWN VERBATIM RULE, UNITS AND PASS CONDITION, so nothing in it is chosen with knowledge of a result, and no cell output had been produced when it was written (the driver had written no new cell directory). But the ordering is NOT what D187 asks for, and that is stated here rather than left for a reader to notice. If any cell output produced before this commit is later used to judge the pass condition, it must be re-run after it.",
+ "_provenance": {
+  "written_at_origin": "9b542cbeb3016cba2ec095e915c66af8badd2e1a",
+  "written_at": "2026-11-23T19:22:57.513804",
+  "author": "flash main session, resumed; the building agent did not survive the session restart"
+ },
+ "_FROZEN_SHA256": "7b1fb09c883ea141c67660997b5fe7165388e8d361dc9fe23ca783e713b193f6"
+}
