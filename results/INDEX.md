@@ -1283,3 +1283,59 @@ of the policy.** The stub list's own `item (e)` rerun rationale is corrected acc
 worth running for `counts` and the decision-latency columns, **not** to recover `arm_stats`.
 
 **The original text above is left unedited** so the record shows what was claimed and when.
+
+## RUNG-4 0.5x COMPARATOR SCORED (D226 (3), D166; 2026-11-24, on flash)
+
+| field | value |
+|---|---|
+| result file | `results/orchestration/live2/frozen_test/runs/covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30/cell.json` |
+| script | `experiments/orchestration/live2/d226_rescore_refused_cell.py` |
+| scorer | `experiments/orchestration/live2/scorer/score.py`, blob `2d8cc8f034d1`, commit `35e3c57e`, imported unmodified |
+| model | none; offline CPU scorer, no GPU and no model |
+| device | `a6000` box (flash), which is where the gold grading inputs are |
+| n | 132 robot rows + 357 single-shot rows = 489 |
+| headline | the no-rows stub is replaced by a real score: robot on-time **121 of 132** (0.916667), robot correct-by-deadline **0.621212 over n 132** (82 of 132 for D192), single-shot on-time **331 of 357**, `d226_rowless` **{delivered: 1, refused: 0, undetermined: 0}** |
+| old name | none; same path, the previous stub is kept in the same file under `score_refused_pre_d226_3` |
+
+**Why it was a stub, and why the refusal was wrong.** The pre-D226 (3) guard stopped on `r10175`, a
+delivered cloud answer with no request-log row. It is a genuine delivery: `cloud_letter` **"A"**, a real
+letter and not the `"X"` no-letter sentinel, with `t_opportunity` 1199.285107 to `t_cloud_done` 1199.962219,
+so **0.677 s** of cloud compute against the **0.017 s** D175 refusal signature, and `within_L` true at a
+2.0 s deadline. **A refusal cannot carry a completion stamp.** Its absence from the log is a WRITER defect
+at the end of the run: the log holds exactly `r1` to `r10174` with no gaps, `r10175` is the next id, and
+this run's own `run_meta.json` records **n = 10178** submitted requests, so the last four rows were never
+flushed before the 1200 s run ended. The committed three-way `delivery_status` keeps it.
+
+**What this cell still does NOT carry, and it is an instrument limit rather than a policy fact.**
+`dashcam_value`, `device_only`, `history_preload`, `diagnostics`, `frame_bytes_source`, `calibration` and
+`is_measurement` are **ABSENT**. They are the only score fields that read `Loaded.records`
+(`trace.jsonl`) or the calibration map, and **`trace.jsonl` and `trace_meta.json` for this trace are not
+committed**: the committed `d192_device_scores_provenance.json` records that
+`/home/pragya/data/live2/frozen_grid/work/traces/` is the **H100's** disk and is not on flash. They were
+left absent rather than filled from a stand-in trace, so **the dashcam streaming AP for this cell is still
+owed and must come from a box that holds the trace.** The robot gold came from the committed
+`device_answers.jsonl.gz`, sha256 `66395e5c`, matching the committed D192 provenance for seed 4.
+
+### CONSEQUENCE BEYOND THIS FILE, ROUTED TO WHOEVER OWNS `reports/figdata/F8.csv`
+
+**`dash_attain_per_episode` is not a mean of per-episode attainments. It divides every episode's on-time
+instant count by a FIXED 19, not by that episode's own instant count.** On this cell it is exactly
+6398 / (712 x 19) = 6398 / 13528 = **0.472945**, which is the committed F8 value to all six digits, while
+the true mean of per-episode attainment is **0.543782** and the pooled instant attainment is **0.543863**
+(6398 / 11764). The real `episode_frames` distribution runs 4 to 21 (527 of 712 episodes at 21, 94 at 12),
+so 19 is neither the per-episode length nor the maximum.
+
+**The tell is a constant where a distribution belongs:** across every arm in F8.csv,
+`dash_attain_per_episode / dash_on_time_pooled` is **0.869603**, from `base`'s 0.433176 / 0.498130 through
+`rules`'s 0.061502 / 0.070724 to `simplestream`'s 0.812315 / 0.934121. That constant is
+`mean_instants_per_episode / 19` = 16.522472 / 19. **So the column is a pure rescaling of
+`dash_on_time_pooled` and carries no per-episode information at all**, although its spread across arms
+(0.0615 to 0.8123) looks like a per-episode measurement. This is the artefact-spread failure mode: a
+plausible spread does not advertise breakage.
+
+**`dash_frac_ep_ge_025` inherits the same denominator**, and here it changes a gate-shaped number: at the
+fixed 19 it is 492 of 712 = **0.691011** (the committed value), and on each episode's own instant count it
+is 521 of 712 = **0.731742**, so **29 episodes are reclassified** across the 0.25 line. Note that this
+per-episode object is NOT the committed D64 / D71 capacity gate, which `score.py::attainment` applies to
+each DEVICE's own instant fraction; on this cell all six dashcam devices are eligible and pass, with
+fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edited here.**
