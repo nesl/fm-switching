@@ -518,6 +518,25 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
   It was committed, and `ALL_PASS` is in THIRTEEN committed files. ALWAYS use `git grep <literal-sha>`
   or `git show <sha>:<path>`, never a filesystem grep of that tree, for any claim about what is or is
   not in the repo. The same staleness is why files committed tonight show as `??` untracked there.
+- *** THE STALE-TREE HAZARD, NOW QUANTIFIED, AND IT HAS BITTEN TWO SESSIONS. A FILESYSTEM PROBE OF
+  THAT TREE SEES 8.6 PERCENT OF THE DATA AND REPORTS A CONFIDENT ZERO. *** Measured:
+  `/home/pragya/Desktop/FM-switching` holds **35** `coordinator_result.json`; origin holds **408**; the
+  tree is **1,678 commits behind**. A peer's census reported "zero committed cells carry `pd_` stats, 35
+  checked" - **and the number 35 made it SOUND LIKE A CENSUS while being 8.6 percent of the
+  population.** The counters were there all along, in 408 files. My own instance earlier the same night
+  was a `grep -rln` for `ALL_PASS` that returned empty while the string sat in 13 committed files.
+  **A SAMPLE SIZE QUOTED BESIDE A NEGATIVE MAKES THE NEGATIVE SOUND MEASURED.** State the tree any
+  census walked, and on this repo read git (`git ls-tree`, `git show <sha>:<path>`, `git grep <sha>`)
+  rather than the disk. Committing through a temporary index without ever checking out - which is the
+  right practice here - guarantees the disk is stale, so the two habits must go together.
+- *** A PARTIAL FIX THAT REPRODUCES THE WRONG ANSWER READS AS CONFIRMATION. *** That peer's probe had
+  TWO faults: it read the wrong nesting level (`d` instead of `d["arm_stats"]`) AND it walked the stale
+  tree. I diagnosed only the first and told it so. **Had it fixed only the nesting, the probe would have
+  returned ZERO AGAIN - from the stale tree - and the zero would have looked like confirmation that my
+  correction was wrong.** It escaped that only by re-running and noticing the count was still zero, then
+  asking why. So when a fix does not change a result, ask whether a SECOND cause is holding it; and when
+  you hand someone a diagnosis, say what you checked and what you did not, so a null after their fix is
+  readable.
 - *** A SUMMARISER THAT PROBES FOR A KEY NAMED AFTER A VALUE PRINTS `None` FOREVER. *** A proof wrote
   `{"verdict": "ALL_PASS", ...}` and a summary line reported `ALL_PASS: None`, which reads as an
   unset aggregate and sent me hunting a swallowed fifth check. There was none: four `P*` keys, all
