@@ -120,6 +120,7 @@ class _ProtectDeferMixin:
 
     def __init__(self, name: str, *,
                  protect_defer: bool = True,
+                 device_answers: bool = False,
                  w_of: Optional[Callable[[str], float]] = None,
                  w_source: Optional[str] = None,
                  bar_reading: str = PD.WEIGHT_ON_BAR_DEFAULT,
@@ -143,11 +144,20 @@ class _ProtectDeferMixin:
         self.pd_decisions: List[Dict[str, Any]] = []
         self.pd_trace_kept: Optional[Dict[str, Any]] = None
         self.pd_trace_crossed: Optional[Dict[str, Any]] = None
+        # D218 (1), the addendum of 2026-11-23: the PREDICTED TRADE of every denial, recorded AT
+        # the denial. UNCAPPED, unlike `pd_decisions`: a denial is a characteristic decision and
+        # there are tens of them, so none of them is dropped to a cap.
+        self.pd_device_trades: List[Dict[str, Any]] = []
+        self._pd_trace_device: Optional[Dict[str, Any]] = None
         self._pd_gpu_kv_tokens: Optional[float] = None
         self._pd_rows_key: Any = None
         self._pd_rows: List[Dict[str, Any]] = []
         for obj in self._pd_targets():
             setattr(obj, PD.SWITCH_ATTR, bool(protect_defer))
+            # The third request candidate is a SEPARATE switch on the same chain of objects, for
+            # the same reason: `V5Rules2Arm.decide` calls `self._base.decide`, so a reader that
+            # runs against the inner object sees the attribute only if the attribute is there.
+            setattr(obj, PD.DEVICE_ANSWERS_SWITCH_ATTR, bool(device_answers))
 
     # ---- the switch, on every object the decide path can bind `self` to -----------------------
     def _pd_targets(self) -> List[Any]:
@@ -170,7 +180,20 @@ class _ProtectDeferMixin:
                            "value": vars(o).get(PD.SWITCH_ATTR),
                            "type": type(vars(o).get(PD.SWITCH_ATTR)).__name__}
                           for o in self._pd_targets()],
-                "arm_enables": PD.arm_enables(self)}
+                "arm_enables": PD.arm_enables(self),
+                # D218 (1): the SECOND switch, read back the same way and on the same chain. A
+                # single getattr on the wrapper is the check that passes while the inner object
+                # decides differently, and that applies to this switch exactly as to the first.
+                "device_answers": {
+                    "attr": PD.DEVICE_ANSWERS_SWITCH_ATTR,
+                    "chain": [{"class": type(o).__name__,
+                               "declared_on_instance": (
+                                   PD.DEVICE_ANSWERS_SWITCH_ATTR in vars(o)),
+                               "value": vars(o).get(PD.DEVICE_ANSWERS_SWITCH_ATTR),
+                               "type": type(vars(o).get(
+                                   PD.DEVICE_ANSWERS_SWITCH_ATTR)).__name__}
+                              for o in self._pd_targets()],
+                    "arm_enables": PD.device_answers_enabled(self)}}
 
     # ---- the one input the scrubbed Observation does not carry --------------------------------
     def live2_configure(self, **kw: Any) -> None:
@@ -357,7 +380,8 @@ class _ProtectDeferMixin:
 
     def _pd_one(self, obs: Observation, *, kind: str, decider_device_id: str,
                 session_id: str, u_rebuild: int, deadline_abs_s: Optional[float],
-                chunk_tokens: Optional[int]) -> Dict[str, Any]:
+                chunk_tokens: Optional[int],
+                query_id: Optional[str] = None) -> Dict[str, Any]:
         cf = self._cf_engine()
         others = self._pd_others(obs, session_id)
         victim = self._pd_victim(obs, session_id)
@@ -378,9 +402,13 @@ class _ProtectDeferMixin:
                       # off. 1.0 on every scorable path.
                       harm_scale=(0.0 if self._pd_control_harm_zero else 1.0),
                       margin_scale=(self.MARGIN_CONTROL_SCALE
-                                    if self._pd_control_margin_huge else 1.0))
+                                    if self._pd_control_margin_huge else 1.0),
+                      # D218 (1). The read of the second switch, at the point it changes a
+                      # decision rather than where it is set.
+                      device_answers=PD.device_answers_enabled(self))
         d["kind"] = kind
         d["session_id"] = str(session_id)
+        d["query_id"] = (str(query_id) if query_id is not None else None)
         d["controls"] = {"harm_zero": self._pd_control_harm_zero,
                          "margin_huge": self._pd_control_margin_huge}
         self._pd_record(d)
@@ -434,6 +462,22 @@ class _ProtectDeferMixin:
             self.pd_trace_kept = d
         if self.pd_trace_crossed is None and bool(d.get("crosses_bar")):
             self.pd_trace_crossed = d
+        # D218 (1) addendum: the per-denial trade, recorded AT the denial. The record is kept for
+        # the decision that FIRED; a declined trade is counted by its gate and is not a denial.
+        tr = d.get("device_answers_trade")
+        if tr is not None and str(d.get("action")) == "DEVICE_ANSWERS":
+            self.pd_device_trades.append({
+                "t": d.get("now_s"), "kind": d.get("kind"),
+                "decider_device_id": d.get("decider_device_id"),
+                "session_id": d.get("session_id"),
+                "query_id": d.get("query_id"),
+                "u_rebuild": d.get("u_rebuild"),
+                "free_kv_tokens": d.get("free_kv_tokens"),
+                "n_alert_pending": d.get("n_alert_pending"),
+                "victim_session_id": (d.get("victim") or {}).get("session_id"),
+                "trade": tr})
+            if self._pd_trace_device is None:
+                self._pd_trace_device = d
 
     def decide(self, obs: Observation) -> Action:
         act = super().decide(obs)
@@ -499,12 +543,36 @@ class _ProtectDeferMixin:
             d = self._pd_one(obs, kind="request", decider_device_id=str(did), session_id=sid,
                              u_rebuild=u, deadline_abs_s=float(qy.deadline_s),
                              # a request has no chunk channel: a query is one prompt
-                             chunk_tokens=None)
+                             chunk_tokens=None,
+                             query_id=str(ra.query_id))
+            if d["action"] == "DEVICE_ANSWERS":
+                # D218 (1). THE THIRD CHANNEL, and the one the measured 27 decisions needed.
+                # `DEVICE` is a registered value of `interface.RECALL_ACTIONS` and is READ at
+                # `coordinator.py:863`, which declines the opportunity and records the device as
+                # the answerer, so this is a channel the harness carries rather than a field
+                # written and never read. `representation` is left as the base set it: the
+                # coordinator's DEVICE branch does not read it, and `validate_action` constrains
+                # the representation only on a CLOUD decision.
+                #
+                # THE VICTIM IS NOT PROTECTED ON THIS BRANCH, deliberately and stated rather
+                # than left to be noticed. The deviation is that the rebuild never happens, so
+                # there is nothing left to evict H and a KEEP_GPU_WARM would be a SECOND
+                # mechanism riding on the ruled one. D218 (1) rules the device deviation and
+                # nothing else.
+                ra.decision = "DEVICE"
+                self.stats["pd_request_device_answers"] += 1
+                continue
             if d["action"] != "PROTECT_AND_DEFER":
-                if d.get("crosses_bar"):
+                if d.get("device_answers_trade") is not None:
+                    # the channel EXISTS and the trade was declined: a decision, not an absent
+                    # channel, and it is counted as neither of the other two
+                    self.stats["pd_request_device_declined"] += 1
+                elif d.get("crosses_bar"):
                     # the harm cleared the bar and no channel of THIS compound could express the
                     # deviation; counted, never silently dropped
                     self.stats["pd_request_crossed_bar_unexpressible"] += 1
+                    if d.get("device_answers_unpriceable"):
+                        self.stats["pd_request_device_no_p_self"] += 1
                 continue
             # THE CHANNEL. `defer_s` is READ at coordinator.py:785 (`o.defer_until = t +
             # defer_s`), which is what withholds the opportunity until the latest safe start and
@@ -551,12 +619,76 @@ class _ProtectDeferMixin:
                 "bar_at_w1": PD.MARGIN_CF_ON_TIME,
                 "n_over_bar_at_w1": sum(1 for x in v if x > PD.MARGIN_CF_ON_TIME)}
 
+    def pd_device_trade_report(self) -> Dict[str, Any]:
+        """D218 (1) addendum: every denial's PREDICTED TRADE, plus the totals.
+
+        THE EXPLICIT ZERO IS THE POINT OF THE FIXED TYPE LIST. A type that never appears among the
+        devices saved is a finding about WHERE the mechanism acts, so all three types are present
+        in every total with a value of 0.0 rather than omitted.
+        """
+        tr = [dict(x) for x in self.pd_device_trades]
+        tot = {t: 0.0 for t in PD.HARM_TYPES}
+        moved = {t: 0 for t in PD.HARM_TYPES}
+        own = saved = net = 0.0
+        resid = 0.0
+        outside: Dict[str, float] = {}
+        for x in tr:
+            t = x.get("trade") or {}
+            for k in PD.HARM_TYPES:
+                tot[k] += float((t.get("saved_on_time_answers_by_type") or {}).get(k, 0.0))
+                moved[k] += int((t.get("n_moved_by_type") or {}).get(k, 0))
+            for k, v in (t.get("types_outside_the_declared_three") or {}).items():
+                outside[k] = outside.get(k, 0.0) + float(v)
+            own += float(t.get("own_lost_weighted_p_on_time", 0.0))
+            saved += float(t.get("saved_total", 0.0))
+            net += float(t.get("net", 0.0))
+            resid = max(resid, abs(float(
+                t.get("by_type_sum_residual_against_unscaled", 0.0))))
+        holds = all(bool(x.get("trade", {}).get("by_type_sum_holds", True)) for x in tr)
+        return {
+            "_register": ("PREDICTED at decision time from the committed D162 price and the "
+                          "committed on-time curve, NOT observed: a dry cell has no engine, so "
+                          "no denial's realised outcome exists to be measured."),
+            "_units": ("counts of expected on-time cloud answers, each device weighted by its "
+                       "per-device w_d (D191 (2)); no division by the number served"),
+            "n_denials": len(tr),
+            "totals": {
+                "own_lost_weighted_p_on_time": own,
+                "saved_on_time_answers_by_type": tot,
+                "saved_total": saved,
+                "net": net,
+                "n_requests_moved_by_type": moved,
+                "types_outside_the_declared_three": outside,
+                "types_with_zero_saved": sorted(k for k, v in tot.items() if v == 0.0),
+            },
+            "by_type_sum_identity": {
+                "claim": ("the by-type breakdown sums to the harm term compared against the bar, "
+                          "because harm_by_type accumulates the same rows whose value_lost sums "
+                          "to the total, and harm_scale is 1.0 on every scorable path"),
+                "worst_abs_residual_over_denials": resid,
+                "residual_cause": ("cf_objective rounds each harm row's value_lost to 9 decimals "
+                                   "while accumulating the total unrounded; the per-denial "
+                                   "tolerance is 5e-10 x n_harm_rows and travels with each "
+                                   "record"),
+                "holds": bool(holds),
+            },
+            "per_denial": tr,
+        }
+
     def live2_describe(self) -> Dict[str, Any]:
         d = dict(super().live2_describe())
         d.update(arm=self.name, arm_version=V6CF_VERSION,
                  covex_v6_cf=dict(
                      compound="protect and defer (spec v6 section 7, D165 (D))",
                      decision_kinds=["request", "state"],
+                     device_answers=dict(
+                         enabled=PD.device_answers_enabled(self),
+                         attr=PD.DEVICE_ANSWERS_SWITCH_ATTR,
+                         candidate=("spec v6 section 7's THIRD request candidate, 'leave to the "
+                                    "device', built under D218 (1)"),
+                         rule=PD.DEVICE_ANSWERS_RULE,
+                         sign_source=PD.DEVICE_ANSWERS_SIGN_SOURCE,
+                         n_denials=len(self.pd_device_trades)),
                      not_built=["keep-ready set", "admit with protected victim", "plan_sync"],
                      base=dict(BASES[self.pd_base_key], key=self.pd_base_key),
                      contingency=CONTINGENCY,
@@ -615,6 +747,54 @@ def _arms() -> Dict[str, Any]:
 
 
 V6CF_ARMS: Dict[str, Any] = _arms()
+
+# ---------------------------------------------------------------------------------------------
+# D232 (2): `covex-v6-final-nqd` AND THE DEVICE_ANSWERS FAMILY, ON THE NORMAL IMPORT PATH.
+#
+# `run_live2_real.py` imports `arms` and `hybrid` and nothing else, and reaches the arm through
+# `arms.make_arm`. `arms.py` already does `from arms_v6cf import V6CF_ARMS; ARMS.update(...)`, so
+# a key added here exists in the harness's process. A name registered only in
+# `arms_v6cf_device.register()` does not, and a posted cell list would die at launch - the same
+# registration gap that made eleven `covex-v6-cf-pd` arms invisible and that D208 fixed for the
+# final ladder with exactly this lazy shape.
+#
+# THE FACTORIES ARE LAZY because `arms_v6cf_device` imports THIS module, so a module-level import
+# of it here would be a circular import and would fail. The import happens inside each factory at
+# CALL time. Nothing is imported at registration time.
+DEVICE_ANSWERS_LAZY_NAMES = (
+    # D232 (2), the reshaped rung 4 and its bars
+    "covex-v6-final-nqd",
+    "covex-v6-final-nqd-off",
+    "covex-v6-final-nqd-daoff",
+    "covex-v6-final-nqd-harm0",
+    "covex-v6-final-nqd-margin-huge",
+    # D218 (1), kept so its dry proofs reproduce
+    "covex-v6-final-da",
+    "covex-v6-final-da-off",
+    "covex-v6-final-da-harm0",
+    "covex-v6-final-da-margin-huge",
+)
+
+
+def _device_answers_lazy() -> Dict[str, Any]:
+    """One lazy factory per DEVICE_ANSWERS arm, each importing its module at CALL time."""
+    out: Dict[str, Any] = {}
+    for _n in DEVICE_ANSWERS_LAZY_NAMES:
+        def _f(_name: str = _n, **kw: Any) -> Any:
+            import arms_v6cf_device as _DA                                 # noqa: PLC0415
+            return _DA.ARMS[_name](**kw)
+        # marked so `arms_v6cf_device.register()` can tell its own shim from a real collision: a
+        # name already in `arms.ARMS` is normally a refusal, and this one is not a collision.
+        _f.is_device_answers_lazy_shim = True                              # type: ignore[attr-defined]
+        _f.shim_for = _n                                                   # type: ignore[attr-defined]
+        out[_n] = _f
+    return out
+
+
+for _k, _v in _device_answers_lazy().items():
+    if _k in V6CF_ARMS:                                                    # pragma: no cover
+        raise RuntimeError("the DEVICE_ANSWERS family would shadow an arms_v6cf name: %r" % (_k,))
+    V6CF_ARMS[_k] = _v
 
 
 def register() -> None:
