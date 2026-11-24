@@ -1136,3 +1136,118 @@ TWO THINGS A READER OF THE OLD NUMBERS MUST KNOW.
 | `results/orchestration/live2/frozen_test/d226_missing_r10175_adjudication.json` | read-only adjudication from the cell's own committed outcomes and request logs | n/a | A6000 (flash) | 1 cell | **ANSWERS THE 10:15 STOP AND ESCALATE: SCORE THE CELL. `MISSING = 1` CANNOT HIDE A REFUSAL HERE.** The one missing outcome, `r10175`, carries **`t_cloud_done = 1199.962`** and `t_delivered = 1199.984` in a 1,200 s cell, and **a refused request can never have a completion stamp** (every branch of `refused_request_ids` is a case where generation never completes), so its delivery is independently evidenced in the OUTCOMES log without reference to `request.jsonl`. Cause is the known split-path writer gap: the abandoned-row write sits in `Live2Coordinator.run()`'s end drain, which split mode never reaches, so a request still streaming at finish gets no row - the cell ran on `b8001001`'s CHECK but before the WRITER FIX. **Bound: ONE ASSISTANCE question of 356 (0.28 pp against a 90 percent bar), with ROBOT AND ALERT UNTOUCHED** since the request is `asst001`. Proposed refinement: refuse only when a MISSING outcome has NO `t_cloud_done`, which is the only case that could hide a refusal. | new |
 | `results/orchestration/live2/d227_e1_metrics/d227_e1_metrics_proofs.json` | d227_e1_metrics_proofs.py (11-24) | n/a (CPU stub, not an engine) | flash (CPU) | 1 capture + 3 smoke cells, 21 replays | **E1 + E3 part 1: the ABSENT LINK IS CLOSED AND MEASURED.** Over 601 real live observations `_pd_free_kv` binds the ENGINE METRIC on 596 and the belief on 5, `free_kv` spread over 134 distinct values; with the gauge forced to 0.0 `free_kv` is the CONSTANT 62,944 and the belief binds 601 of 601, reproducing the committed rung-4 cells' signature as the negative control. Byte identity holds for all six arms that do not read the field, each reading it ZERO times by census. `metrics_health` separates three states for real. The allow-list withholds `vllm:num_requests_waiting` (D218 (3)) and the unfiltered control shows it would otherwise be published. Part 2 (the harness flag and the `cell.json` line) is HELD, so the capability is dormant and no cell scrapes yet. |
 | `results/orchestration/live2/request_log_writer/{split_mode_writer_proof,split_mode_writer_negative_control,writer_split_guard_identity_proof}.json` | live2/writer_split_proof.py (split mode, fakestream, CPU) + cf_pd_one_cell.py (dry) | - | h100nvl (CPU) | 1 split cell + negative control; 2 arms x 2 trees | **D226 (3) WRITER NOW LIVE IN SPLIT MODE (user ruling 2026-11-24) + torn-tree guard + close timeout. Split finish handler: final _collect, then write_abandoned_requests(first_forwarded): a request whose answer was forwarded at first token gets a real row (row_source first_token_forwarded_stream_unfinished, abandoned false); only undelivered in-flight requests are abandoned; runner backstop writes completed_row_reconstructed from outcomes.jsonl; check fails on any delivered answer resolving to an abandoned row. Split proof: 12 submitted, 12 rows (completed 4, first-token-unfinished 2, abandoned 6), delivered_resolving_to_abandoned 0, PASS; negative control (fix off): 4 of 12 rows, 2 delivered unresolved, FAIL. Decisions byte-identical (covex-v6-base af8befb9420ad86a / 12,085; eco-llm f32fa95c6953c64e / 12,253; base 1fd0cdc9). Torn-tree: source_agreement.py, cases runner_child_mismatch / moved_after_import (warn) / torn_lazy_import (INVALID), full-tree hash (464 files, 0.03 s); 6 unit controls PASS. procsplit close wait 30 -> 180 s; missing result flagged child_never_sent_result / parent_closed_before_result, child's file no longer overwritten.** |
+
+## STUB_EVIDENCE_LOST (D228, D166; marked 2026-11-24)
+
+**31 committed cells lost their `coordinator_result.json` to the procsplit drain.** In `procsplit`
+mode the parent closed at 30 s while the child drained for 60 s, so the child's wire-level summary
+OVERWROTE the coordinator's own result file. `arm_stats`, `counts` and every coordinator-side
+aggregate are LOST, and `run_meta.json` still says `run_valid: true`, so an affected cell does not
+advertise the loss. Split mode is the DEFAULT, which is why this is broad. **The implementation fix
+is owned by another session (D228 item a) and is NOT applied by this marking.**
+
+**The visible signature, and how this list was derived.** Not inherited from another session's
+count: every `coordinator_result.json` committed at `7fdd058270db943ee91fd8565c49f2a289e38ccb` was read with
+`git show <sha>:<path>` (428 files; never from the working tree, which is ~1,800 commits behind and
+holds 35 of them). **34** carry exactly the five-key wire signature
+(`wire_events_sent`, `wire_replies_received`, `wire_write_errors`, `wire_max_send_backlog`,
+`completion_to_emulator_ms`) with `arm` and `arm_stats` and `counts` genuinely absent. Of those 34,
+**31 also have `run_valid: true` in `run_meta.json`** and are the stub cells listed below. The count
+31 is therefore confirmed by independent derivation, and it decomposes as **30 in
+`results/orchestration/live2/frozen_test/runs/` plus 1 in
+`results/dashcam/study_sh_ep/h100/load_background/`** - the 30 agreeing exactly with the
+`research/conformance_matrix.md` census, whose walked tree was `frozen_test/runs` alone.
+
+**The three near-misses, excluded and why.** `run_valid` is in `run_meta.json`, not in
+`coordinator_result.json`; a probe for it at top level returns missing for all 428 and is a schema
+error, not a finding.
+
+| cell | why excluded |
+|---|---|
+| `results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s5_1200s_h27_3t_L3_epg` | `run_valid: false`. Already invalid on its own terms; its `_rerun` IS in the list |
+| `results/orchestration/live2/frozen_test/runs/eco-llm_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun` | no `run_valid` key, no `outcomes.jsonl*`, `wire_events_sent` 30 and `wire_replies_received` 0: an aborted launch, not a drained run. Its `_rerun_rerun` IS in the list |
+| `results/orchestration/live2/pilot/runs3/policy-core_n32_600s_h27` | carries `SUPERSEDED_INVALID.txt`; no `run_valid`, no outcomes. **INVALID, never cite** |
+
+**THE SCORES STAND (D228 item d).** The answers log `outcomes.jsonl.gz` is INTACT in **31 of 31**
+cells, checked at `7fdd058270db943ee91fd8565c49f2a289e38ccb` and not inherited: 0 JSON parse failures and 0
+duplicate `opportunity_id` in every cell, and three independent agreements with `run_meta.json`,
+which was written by the parent and so is not a copy of the log - outcomes line count equals
+`n_opportunities` (31/31), the `cloud_payload` count equals `n_served` (31/31), and the `within_L`
+count equals `n_within_L` (31/31). `max(t_opportunity) / run_s` is 0.9998 or better in every cell, so
+no log is truncated at the tail where the drain failed. Controls were run on the check itself, not
+only on the result: three committed non-stub cells PASS it
+(`b7-edf-feasibility_n16_s4` and `_s6_1200s_h27_3t`, `confidence-cascade_n16_s4_1200s_h27_3t_L3_epg_rq30`),
+and removing 100 records from a stub's log FAILS it, so the check discriminates in both directions.
+**Only the `arm_stats` instrumentation was lost. Accuracy, on-time and attainment for these cells are
+usable.**
+
+**Where the flag is, and why it cannot alter a result.** Each cell carries an ADDITIVE sibling file
+`<cell>/STUB_EVIDENCE_LOST.json`, beside the data, in the pattern this tree already uses for
+`SUPERSEDED_INVALID.txt`. **No measured value was rewritten, re-derived or touched**:
+`coordinator_result.json`, `run_meta.json` and `outcomes.jsonl.gz` are byte-identical to their
+committed state, so no number any committed claim rests on can move, and deleting the one file
+restores the tree exactly. The filename cannot enter a computation either: the three scripts that
+walk cells (`experiments/analysis/figdata/figdata.py:138`,
+`experiments/analysis/d226_rescore/d226_rescore.py:268`,
+`experiments/analysis/deadline_recut/l25_recut.py:135`) glob run DIRECTORIES and then open files by
+name, and no site in `experiments/` or `plots/` enumerates files inside a cell directory.
+
+**Matrix rule (D228 item c).** A mechanism row whose only witness cell is a stub is **UNSCORABLE,
+not UNEXERCISED**: an absent counter in a stub means the file was overwritten, not that the mechanism
+never fired. Re-checked against `research/conformance_matrix.md` at `4a73e125`: **no row changes.**
+All 31 stubs are baseline arms; every UNEXERCISED and every ABSENT-counter row is witnessed by
+`covex-v6-*` ladder cells, all of which carry `arm_stats`. The one baseline cell the matrix cites as
+live evidence, `attentionstore-prefetch` at kv0.5 (section 10.8), is not a stub.
+
+| # | stub cell | arm | seed | outcomes lines = run_meta n_opportunities | dup opp ids | parse fails | tail cov | decision_time log survives | scores |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | `results/dashcam/study_sh_ep/h100/load_background/b7-edf-feasibility_n16_s4_3000s_h27_3t_shep_load` | `b7-edf-feasibility` | 4 | 34200 = 34200 (YES) | 0 | 0 | 1.0 | yes | STAND |
+| 2 | `results/orchestration/live2/frozen_test/runs/b7-edf-feasibility_n16_s4_1200s_h27_3t_L3_epg_rq30` | `b7-edf-feasibility` | 4 | 12253 = 12253 (YES) | 0 | 0 | 0.9998 | **no** | STAND |
+| 3 | `results/orchestration/live2/frozen_test/runs/b7-edf-feasibility_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30` | `b7-edf-feasibility` | 4 | 12253 = 12253 (YES) | 0 | 0 | 0.9998 | yes | STAND |
+| 4 | `results/orchestration/live2/frozen_test/runs/b7-edf-feasibility_n16_s5_1200s_h27_3t_L3_epg_rq30` | `b7-edf-feasibility` | 5 | 12252 = 12252 (YES) | 0 | 0 | 0.9999 | yes | STAND |
+| 5 | `results/orchestration/live2/frozen_test/runs/b7-edf-feasibility_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30` | `b7-edf-feasibility` | 5 | 12252 = 12252 (YES) | 0 | 0 | 0.9999 | yes | STAND |
+| 6 | `results/orchestration/live2/frozen_test/runs/confidence-cascade_n16_s5_1200s_h27_3t_L3_epg_rq30` | `confidence-cascade` | 5 | 12252 = 12252 (YES) | 0 | 0 | 0.9999 | yes | STAND |
+| 7 | `results/orchestration/live2/frozen_test/runs/confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30` | `confidence-cascade` | 6 | 12264 = 12264 (YES) | 0 | 0 | 0.9998 | **no** | STAND |
+| 8 | `results/orchestration/live2/frozen_test/runs/confidence-cascade_n16_s7_1200s_h27_3t_L3_epg_rq30` | `confidence-cascade` | 7 | 12243 = 12243 (YES) | 0 | 0 | 0.9999 | **no** | STAND |
+| 9 | `results/orchestration/live2/frozen_test/runs/eco-llm_n16_s5_1200s_h27_3t_L3_epg_rq30` | `eco-llm` | 5 | 12252 = 12252 (YES) | 0 | 0 | 0.9999 | yes | STAND |
+| 10 | `results/orchestration/live2/frozen_test/runs/eco-llm_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun_rerun` | `eco-llm` | 5 | 12252 = 12252 (YES) | 0 | 0 | 0.9999 | **no** | STAND |
+| 11 | `results/orchestration/live2/frozen_test/runs/lmcache_n16_s4_1200s_h27_3t_L3_epg_rq30` | `lmcache` | 4 | 12253 = 12253 (YES) | 0 | 0 | 0.9998 | **no** | STAND |
+| 12 | `results/orchestration/live2/frozen_test/runs/lmcache_n16_s5_1200s_h27_3t_L3_epg_rq30` | `lmcache` | 5 | 12252 = 12252 (YES) | 0 | 0 | 0.9999 | **no** | STAND |
+| 13 | `results/orchestration/live2/frozen_test/runs/lmcache_n16_s6_1200s_h27_3t_L3_epg_rq30` | `lmcache` | 6 | 12264 = 12264 (YES) | 0 | 0 | 0.9998 | yes | STAND |
+| 14 | `results/orchestration/live2/frozen_test/runs/lmcache_n16_s7_1200s_h27_3t_L3_epg_rq30` | `lmcache` | 7 | 12243 = 12243 (YES) | 0 | 0 | 0.9999 | **no** | STAND |
+| 15 | `results/orchestration/live2/frozen_test/runs/mooncake_n16_s4_1200s_h27_3t_L3_epg_rq30` | `mooncake` | 4 | 12253 = 12253 (YES) | 0 | 0 | 0.9998 | **no** | STAND |
+| 16 | `results/orchestration/live2/frozen_test/runs/mooncake_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30` | `mooncake` | 4 | 12253 = 12253 (YES) | 0 | 0 | 0.9998 | yes | STAND |
+| 17 | `results/orchestration/live2/frozen_test/runs/mooncake_n16_s5_1200s_h27_3t_L3_epg_rq30` | `mooncake` | 5 | 12252 = 12252 (YES) | 0 | 0 | 0.9999 | **no** | STAND |
+| 18 | `results/orchestration/live2/frozen_test/runs/mooncake_n16_s6_1200s_h27_3t_L3_epg_rq30` | `mooncake` | 6 | 12264 = 12264 (YES) | 0 | 0 | 0.9998 | yes | STAND |
+| 19 | `results/orchestration/live2/frozen_test/runs/querystream-proactive_n16_s4_1200s_h27_3t_L3_epg` | `querystream-proactive` | 4 | 12141 = 12141 (YES) | 0 | 0 | 0.9998 | yes | STAND |
+| 20 | `results/orchestration/live2/frozen_test/runs/querystream-proactive_n16_s5_1200s_h27_3t_L3_epg` | `querystream-proactive` | 5 | 12150 = 12150 (YES) | 0 | 0 | 0.9999 | yes | STAND |
+| 21 | `results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n20_s4_1200s_h27_3t_L3_epg_ls20` | `warm-all-lru-reactive` | 4 | 16172 = 16172 (YES) | 0 | 0 | 1.0 | **no** | STAND |
+| 22 | `results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n20_s5_1200s_h27_3t_L3_epg_ls20` | `warm-all-lru-reactive` | 5 | 16225 = 16225 (YES) | 0 | 0 | 0.9999 | **no** | STAND |
+| 23 | `results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f_rf` | `warm-all-lru` | 4 | 13570 = 13570 (YES) | 0 | 0 | 0.9998 | yes | STAND |
+| 24 | `results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s4_1200s_h27_3t_L3_epg_rf` | `warm-all-lru` | 4 | 12141 = 12141 (YES) | 0 | 0 | 0.9998 | **no** | STAND |
+| 25 | `results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s4_1200s_h27_3t_L3_epg_rq30` | `warm-all-lru` | 4 | 12253 = 12253 (YES) | 0 | 0 | 0.9998 | **no** | STAND |
+| 26 | `results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rf` | `warm-all-lru` | 4 | 12141 = 12141 (YES) | 0 | 0 | 0.9998 | yes | STAND |
+| 27 | `results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s5_1200s_h27_3t_L3_epg_rerun` | `warm-all-lru` | 5 | 12150 = 12150 (YES) | 0 | 0 | 0.9999 | **no** | STAND |
+| 28 | `results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s5_1200s_h27_3t_L3_epg_rq30` | `warm-all-lru` | 5 | 12252 = 12252 (YES) | 0 | 0 | 0.9999 | **no** | STAND |
+| 29 | `results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30` | `warm-all-lru` | 5 | 12252 = 12252 (YES) | 0 | 0 | 0.9999 | yes | STAND |
+| 30 | `results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s6_1200s_h27_3t_L3_epg_rq30` | `warm-all-lru` | 6 | 12264 = 12264 (YES) | 0 | 0 | 0.9998 | **no** | STAND |
+| 31 | `results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s7_1200s_h27_3t_L3_epg_rq30` | `warm-all-lru` | 7 | 12243 = 12243 (YES) | 0 | 0 | 0.9999 | **no** | STAND |
+
+**Rerun list (D228 item e).** `b7-edf-feasibility_n16_s4_1200s_h27_3t_L3_epg_rq30` and
+`..._s5_...` are rerun as H100 filler after the fix. Beyond those, a stub needs rerunning only where a
+committed figure column is actually damaged, and two are:
+
+- **`reports/figdata/F13.csv`: `gpu_busy_s_measured` and `correct_per_gpu_s` are BLANK in 18 of 18
+  stub rows and in 0 of 121 non-stub rows.** That separation is the control: the column is lost to the
+  stub, not missing everywhere. `uncached_tokens_D174` and `output_tokens` survive from
+  `request.jsonl.gz`, so only the GPU-seconds denominator and the efficiency ratio are gone.
+- **`reports/figdata/F14.csv`: `n_decisions` is 0 and the four decision-latency percentiles are blank
+  in 10 of 18 stub rows, and in 0 of 121 non-stub rows, while `basis` still reads `live` in all 18.**
+  The discriminator is exactly whether `decision_time.jsonl.gz` survives in the cell. **The `live`
+  basis on a zero row is a register error** and should read as unavailable rather than measured.
+
+F1, F2, F4, F8, `reports/figures/table1.csv` and `reports/figures/l25_recut.csv` are outcomes-derived
+and are NOT damaged: no accuracy, on-time or attainment column is blank for a stub beyond the
+seed-7 `dsmap` pooling convention, which blanks 21 non-stub rows alongside 2 stub rows and is
+unrelated to this defect.
+

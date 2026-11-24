@@ -1,0 +1,58 @@
+{
+ "flag": "STUB_EVIDENCE_LOST",
+ "decisions": [
+  "D228",
+  "D166"
+ ],
+ "dated": "2026-11-24",
+ "cell": "results/orchestration/live2/frozen_test/runs/lmcache_n16_s4_1200s_h27_3t_L3_epg_rq30",
+ "what_happened": "procsplit mode: the parent process closed at 30 s while the child drained for 60 s, so this cell's coordinator_result.json was OVERWRITTEN by the child's wire-level summary. arm_stats, counts and every coordinator-side aggregate are LOST. run_meta.json still carries run_valid true, so the cell does NOT advertise the loss.",
+ "fix_owner": "the H100 session owns the implementation fix (item a of the D228 instruction); it is not applied here",
+ "signature_observed_at_sha": "7fdd058270db943ee91fd8565c49f2a289e38ccb",
+ "signature": {
+  "coordinator_result_keys": [
+   "completion_to_emulator_ms",
+   "wire_events_sent",
+   "wire_max_send_backlog",
+   "wire_replies_received",
+   "wire_write_errors"
+  ],
+  "arm_stats_present": false,
+  "counts_present": false,
+  "run_meta.run_valid": true,
+  "run_meta.split_processes": true
+ },
+ "lost": [
+  "arm_stats (all policy counters)",
+  "counts (completed_/submitted_/recall_ wire counts)",
+  "n_requests, n_decisions, n_on_time, n_monitor_answers, n_recall_answers, n_cloud_answers",
+  "budget_gpu_s / budget_spent_gpu_s",
+  "decision_latency_ms and decision_time (unless decision_time.jsonl.gz survives)",
+  "cpu_s, wall_s, cpu_percent, epoch_overruns, max_epoch_lag_s, mu_time_average, first_errors"
+ ],
+ "intact": {
+  "answers_log": "outcomes.jsonl.gz",
+  "verdict": "INTACT - this cell's SCORES STAND",
+  "checks_at_sha": "7fdd058270db943ee91fd8565c49f2a289e38ccb",
+  "outcomes_lines": 12253,
+  "run_meta_n_opportunities": 12253,
+  "lines_equal_n_opportunities": true,
+  "cloud_payload_count": 7460,
+  "run_meta_n_served": 7460,
+  "cloud_payload_equals_n_served": true,
+  "within_L_count": 842,
+  "run_meta_n_within_L": 842,
+  "within_L_equals_run_meta": true,
+  "duplicate_opportunity_ids": 0,
+  "t_opportunity_max_over_run_s": 0.9998,
+  "json_parse_failures": 0,
+  "trailing_newline": true
+ },
+ "other_logs_present": {
+  "decision_time.jsonl(.gz)": false,
+  "request.jsonl(.gz)": true,
+  "decision.jsonl(.gz)": false
+ },
+ "reversible": "This file is ADDITIVE. No committed byte of coordinator_result.json, run_meta.json, outcomes.jsonl.gz or any other result in this directory was read, rewritten or re-derived. Deleting this one file restores the tree exactly. No analysis script enumerates files inside a cell directory (the three cell-walking scripts, experiments/analysis/figdata/figdata.py:138, experiments/analysis/d226_rescore/d226_rescore.py:268 and experiments/analysis/deadline_recut/l25_recut.py:135, glob run DIRECTORIES and then open named files), so this filename cannot enter any computation.",
+ "citation_rule": "Do NOT cite an arm_stats counter, a counts entry or a coordinator aggregate from this cell. Scores and attainment derived from outcomes.jsonl.gz are usable. A mechanism row whose ONLY witness is this cell is UNSCORABLE, not UNEXERCISED: an absent counter here means the file was overwritten, not that the mechanism never fired."
+}
