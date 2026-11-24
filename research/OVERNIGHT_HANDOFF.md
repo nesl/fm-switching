@@ -748,6 +748,44 @@ different one in the pattern. **Fixing it means matching the interpreter and the
 `--permission-mode`, not an adjacency of two flags.** Not fixed here: this session is standing down, not
 editing live-path files, and the flag makes it moot until the user rules.
 
+## *** HOW DEVICE_ANSWERS IS SWITCHED ON: A SEPARATE ARM NOW, FOLDED LATER. (user ruling, 2026-11-24, D231 (1) implementation) ***
+
+**The ruling, and the reason it is the right shape.** `covex-v6-final-da` is created as a **separate arm** =
+`covex-v6-final` (pass 1) + DEVICE_ANSWERS on, rule as D218 in D177 units. **This is race-free and that is
+the point.** Under the alternative - switching it on inside `covex-v6-final` - cell (a), the pass-1 kv0.5r
+s4 `_ms` cell, would be a pass-1 cell **only because its module loads before the commit lands**. A push a
+minute earlier would have made (a) a different arm under the pass-1 name, with nothing in the cell's name
+to say so. **Two cells differing by ARM cannot be confused by when a commit landed; two cells differing by
+a commit's timing can.**
+**The guard that makes it checkable rather than trusted:** the H100 asserts `device_answers_enabled` from
+the switch state **the arm itself publishes** in each cell - **False for (a), True for (b)** - and **if (a)
+reads True it is NOT scored against the pass-1 pre-registration and that is reported.** So the claim is
+evidenced per cell, not inferred from a name or a push time.
+
+**Order.** (a) `covex-v6-final` kv0.5r s4 `_ms` runs as planned at about 12:01 with DEVICE_ANSWERS **off**;
+(b) `covex-v6-final-da` kv0.5r s4 `_ms` next; then `covex-v6-fair-final-ptg` 1x s4; rung-4 1x s5 to s7 wait
+for the user.
+**Proofs for (b), minimal:** non-counterfactual arms byte-identical; **`covex-v6-final` UNCHANGED, proved by
+reproducing the pass-1 digest** (that is the half that protects (a)'s meaning); `-da` moves decisions. Plus
+a one-line pre-registration amendment **before** the cell.
+
+*** AND THE FOLD, WHICH IS THE PART THAT PROTECTS THE RECORD. *** After (b) is scored, and **only when no
+rung-4 cell is starting**, DEVICE_ANSWERS is folded into `covex-v6-final` itself, because D221 makes it part
+of rung 4 - **and the pass-1 behaviour is kept available as `covex-v6-final-p1`, so the committed pass-1
+cells keep a name true to what they ran.** Byte-identity both ways: new `covex-v6-final` == `-da`, and
+`covex-v6-final-p1` == the pass-1 digest. Arm-name mapping and the conformance matrix updated with it.
+**That is the fix for a hazard this project has hit repeatedly from the other direction: a name whose
+meaning changed under already-committed results.** `arm_names_v6.py`'s `V6_LADDER` still names rungs 2 to 4
+by superseded names, which an independent verification flagged as a gate row; keeping `-p1` means the
+rung-4 cells already on origin do not quietly become cells of a different arm.
+
+**Scoring note for both 0.5x cells, to be recorded in each result:** the comparator
+`covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30` was **unscored at run time** -
+`ScoringRefused` under the D226 guard at `MISSING = 1` (`r10175`), **with no rows at all** - so the 0.5x
+verdicts are **final only once the Orin's outcome-keyed rescore lands.** Run the cells regardless; the cells
+are the expensive part and the comparison is arithmetic afterwards. **Nobody should later read a missing
+comparison as a failed one.**
+
 ## *** D231: THE RUNG-4 1x s4 RESULT, AND A BUILD MISS I SHOULD HAVE CAUGHT. (user, 2026-11-24, revisit later) ***
 
 **The result.** `covex-v6-final` `_rerun` 1x s4: robot on time **127/132** against rung 3's 126 and base's
