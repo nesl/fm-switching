@@ -1,0 +1,15 @@
+{
+ "_what": "A MISLABELLED FIELD IN THE COMMITTED SCORER d179_rung2_verdict.py. The verdicts are CORRECT; the field's `rule` STRING describes a different and much weaker test than the code performs.",
+ "field": "check_2_robot_retention.absolute_fallback_bound",
+ "the_rule_string_says": "shares on-time fraction must not fall more than 0.01 below the base's",
+ "what_the_code_actually_tests": "d179_rung2_verdict.py:825, `fallback = (delta is not None and gain is not None and delta >= gain - GAIN_EPS)`, i.e. THE SHARES ARM'S GAIN OVER BASE MUST BE AT LEAST RUNG 2'S GAIN OVER BASE. That is PARITY WITH RUNG 2, not a floor near base.",
+ "why_this_matters_even_though_no_verdict_is_wrong": "the two tests differ enormously in strictness. On rung 4 s4 the string's test would pass TRIVIALLY (on-time fraction 0.9167 against base's 0.2652) while the code's test FAILS (delta 86 against gain 91). It is NOT the governing branch when `gain_class == NORMAL`, where the ratio basis decides (`:826-827`), so rung 4's PASS on retention 0.945 against the 0.90 bar stands. BUT IF A FUTURE SEED HAS A NON-NORMAL gain_class THE FALLBACK BECOMES THE GOVERNING TEST (`:828-829`), and a reader trusting the label would expect a near-base floor while the code demands full parity with rung 2. A fail there could be misread as catastrophic, or a pass wrongly expected.",
+ "it_was_True_on_the_rr_cells_and_that_is_consistent": "-rr EXCEEDED rung 3 on robots at every seed (126 vs 122, 121 vs 114, 110 vs 109, 84 vs 84), so delta >= gain held at all four. The False on rung 4 is simply rung 4 delivering 121 against rung 3's 126, which the 0.945 retention already states.",
+ "action_taken": "NOT FIXED IN THE SCORER, deliberately: it is the COMMITTED scorer and every ladder verdict including the four -rr seeds was produced with it, so editing it would break comparability for a label. Recorded here instead. The H100 has been told not to cite that field for any arm.",
+ "recommended": "when the scorer is next revised for an independent reason, correct the string to describe parity with rung 2, or rename the field; do not change the computation.",
+ "_provenance": {
+  "scorer": "d179_rung2_verdict.py:825 at origin",
+  "found_at": "a380be80",
+  "found_while": "investigating why the field returned false on rung 4 s4"
+ }
+}
