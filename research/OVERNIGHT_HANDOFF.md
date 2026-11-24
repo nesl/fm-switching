@@ -29,11 +29,11 @@ process census at 22:40, so no resume needs to re-derive it. ***
   the window elapses (`if [ $((now - first)) -gt $WINDOW_S ]; then first=$now; count=0; fi`). The poll
   fires every TEN MINUTES, so it can only ever reach **6 restarts per hour against a budget of 12**:
   **THE GUARD IS STRUCTURALLY UNREACHABLE.** Measured rather than argued: `BUDGET SPENT` has fired
-  **0 times**; the log holds **107 RESTART lines** (re-counted restart 14) spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
+  **0 times**; the log holds **108 RESTART lines** (re-counted restart 15) spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
   about 37 hours; and the counter histogram shows it reset to `1/12` **18 times**, never exceeding
   `7/12`. So a resume must NOT read `RESTART n/12` as a countdown to a stop. **IT WILL KEEP SPENDING
   ABOUT SIX SESSIONS AN HOUR, INDEFINITELY, UNTIL THE USER STOPS THE `fmsw-overnight` WATCHDOG OR
-  ANSWERS THE RULINGS.** **107 sessions have been spent so far** (re-counted restart 9, 07:40 PST; `BUDGET SPENT` still 0). Stopping it is the USER'S call and outside
+  ANSWERS THE RULINGS.** **108 sessions have been spent so far** (re-counted restart 9, 07:40 PST; `BUDGET SPENT` still 0). Stopping it is the USER'S call and outside
   what this file authorises, so do not touch it; the correct action is to say so plainly in the reply,
   which is now this file's standing instruction for every further resume. DO NOT read the restarts as evidence that anything broke, and do not go
   hunting for the crash. Each restart does cost a full session, so leave this file accurate.
@@ -168,6 +168,34 @@ Each entry: the claim, the verdict, and the restart that checked it. **PICK ONE 
   0.5455.** So on this arm family those 35 extra on-time answers bought ZERO correctness. That is the
   on-time-versus-correct distinction again, and it means the 16 answers r2 "costs" should not be assumed
   to carry 16 answers' worth of value either. Both r1 and r2 do beat the original 60 on on-time.
+*** EXTENDED AT RESTART 15: ALL THREE OF `READINESS.md`'s STATED GAPS ARE STALE, AND ALL THREE
+UNDERSTATE WHAT IS AVAILABLE. CHECKED AGAINST ORIGIN, NOT AGAINST THE FILE. ***
+`reports/figdata/READINESS.md` section "Gaps until reruns land" lists three. Every one is now out of date:
+  1. **"cascade-routing: no scored cell yet"** -> **FALSE. ALL FOUR SEEDS EXIST, VALID, 0 ERRORS AND
+     SCORED**: robot on-time 0 of 132 (s4), 0 of 127 (s5), 0 of 121 (s6), **18 of 105 (s7)**. The 18 at
+     s7 are the D176 over-32k set, verified earlier as the identical set and sent as `RECENT`. Its
+     `by_deadline` equals the device-only floor at every seed - but BY CONSTRUCTION, because it barely
+     sends, NOT because a short representation was delivered fast. If it goes in as "the
+     device-only-floor baseline" that distinction must travel with it.
+  2. **"confidence-cascade: gap until the D205 rerun lands"** -> **FALSE. ALL FOUR D205 RERUNS HAVE
+     LANDED** (`confidence-cascade_n16_s{4,5,6,7}_..._rq30_rerun`).
+  3. **"final ladder: not present"** -> **FALSE FOR TWO OF THE THREE ARMS.** `covex-v6-state-final` and
+     `covex-v6-fair-final` are ALREADY IN SEVEN TABLES (F1, F2, F3, F4, F13, F14, F1_units; 89
+     occurrences each, including 49,012 rows in F3). **ONLY `covex-v6-final` (RUNG 4) IS GENUINELY
+     ABSENT** - zero occurrences in every table, with the two present arms' counts exactly symmetric, so
+     the exclusion is systematic rather than sporadic. The promised migration ("development rows kept as
+     status=superseded-by-final") has therefore PARTLY HAPPENED WITHOUT THE TABLE RECORDING IT: the
+     arm-coverage table still names only the DEVELOPMENT arms as the rung rows.
+**THE SHAPE OF THIS, AND IT IS THIS FILE'S OWN LESSON POINTING AT SOMEONE ELSE'S FILE: A READINESS NOTE
+GOES STALE FASTER THAN THE DATA IT DESCRIBES**, and all three errors run the same way - they say work is
+missing when it has landed. A reader trusting the gaps section would hold back three arms that are
+available and would not learn that rung 4 is the one real absence.
+**RUNG 4's ABSENCE MAY STILL BE THE RIGHT EDITORIAL CALL** - it passes its pre-registered checks at ONE
+SEED OF FOUR - but it is nowhere stated as a choice, which is the only part that needs fixing.
+**NOT ACTED ON, DELIBERATELY:** `READINESS.md` says "NO FIGURES until the user says plot", the user has
+been committing to that directory every few minutes this morning, and D187 forbids touching another
+session's work in progress. REPORTED, NOT EDITED.
+
 *** ONE OBSERVATION FOR THE USER, FOUND AT RESTART 14 AND NOT ACTED ON, BECAUSE THE FILES BELONG TO
 THE USER'S LIVE FIGURE WORK. RUNG 4 IS ABSENT FROM EVERY FIGURE TABLE. ***
 `reports/figdata/` (StudyFIGDATA, D214, pipeline sha `b5264100`, generated 2026-11-23) carries the final
