@@ -70,7 +70,7 @@ The standard-grid cells DO apply the committed D75 link model (fleet/links.py, a
 | mooncake | results/orchestration/live2/frozen_test/runs/mooncake_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 8298 | yes |
 | querystream-proactive | results/orchestration/live2/frozen_test/runs/querystream-proactive_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 7429 | yes |
 | rules | results/orchestration/live2/frozen_test/runs/v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 5276 | yes |
-| simplestream | results/orchestration/live2/frozen_test/runs/simplestream_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 12247 | yes |
+| simplestream | results/orchestration/live2/frozen_test/runs/simplestream_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun | 4 | 0.02218 | 12247 | yes |
 | state-uo-c5attr | results/orchestration/live2/frozen_test/runs/covex-v6-state-uo-c5attr_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 9511 | yes |
 | streamscout | results/orchestration/live2/frozen_test/runs/streamscout_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 12244 | yes |
 | v5-rules | results/orchestration/live2/frozen_test/runs/v5-rules_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 3742 | yes |
