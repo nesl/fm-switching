@@ -647,7 +647,8 @@ def build_external():
             "port_limited": False, "date_scored": TODAY,
             "notes": "F15 (history matters) source: StudyEARLY1 reconstruction cost vs history "
                      "length. Extract the per-N reconstruction cost series into this table on "
-                     "request; not yet transcribed."}]
+                     "request; not yet transcribed. " + UPLINK_SWEEP + "."}]
+    f15[0]["cond_network"] = NETWORK_LABEL
     write_table("F15", f15, [], "history-matters data; source StudyEARLY1 / phase1 cost profiling "
                 "(pointer row until transcribed).")
     f16 = [{"arm": "-", "policy_version": "-", "rung": "-",
@@ -657,7 +658,10 @@ def build_external():
             "cond_ratio": "-", "cond_network": "-", "cond_extras": "-", "status": "gap",
             "port_limited": False, "date_scored": TODAY,
             "notes": "F16 (cold vs warm cost) source: phase1 cost profiling and cost_matrix.csv "
-                     "(cold prefill vs warm append per depth). Pointer row until transcribed."}]
+                     "(cold prefill vs warm append per depth). Pointer row until transcribed. "
+                     "Delivery latency, where used, is at " + NETWORK_LABEL + ". " + UPLINK_SWEEP
+                     + "."}]
+    f16[0]["cond_network"] = NETWORK_LABEL
     write_table("F16", f16, [], "cold-vs-warm cost data; source phase1 cost profiling / "
                 "cost_matrix.csv (pointer row until transcribed).")
     write_table("F17", [], [], "real-deployment figure: PLACEHOLDER, no real-deployment data exists "

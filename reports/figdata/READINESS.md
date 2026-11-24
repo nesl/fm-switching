@@ -42,6 +42,12 @@ Pipeline sha (D209 canonical scorer): `b5264100`. Generated 2026-11-23. Tables i
 - F11 composition/reask: present NONE beyond rq30 / 40:40:20.
 - F12 network: present NONE (no network-condition cells exist).
 
+## Network / uplink operating point (corrected label, user 2026-11-23)
+
+- Main operating point: uniform 13.6 Mbit/s / 44 ms uplink: best-performing US carrier's 5G median (Ookla H2 2025), close to the 12 Mbit/s Bay Area 5G median (Khan et al. 2024). It is the BEST-PERFORMING US carrier's 5G median (T-Mobile per Ookla H2 2025), NOT the US 5G median.
+- Tier-1 uplink values are the committed StudyE1 sweep: 5 / 12 / 13.6 / 25 / 88 Mbit/s and RTT 22 / 44 / 142 ms, each with its cited uplink source; never the Irish 5G downlink percentiles.
+- The orchestration standard grid cells are NOT bandwidth-limited (header network=none; the uplink is modelled as a near-instant wire hop, uplink_queue_p99 ~0 s), so their provenance carries cond_network=none, not this operating point. The 13.6 Mbit/s / 44 ms label belongs to the StudyE1 Nexar-lead delivery study (reports/study_e1_nexar_lead.md, corrected in place) and to any network-conditioned figure (F12) when its cells land.
+
 ## Instrumentation gaps by field
 
 - **F3 latency stamps**: request.jsonl records t_submit, t_first_token, t_done only, so only two composite stamps exist (queue+prefill, decode). ABSENT: upload, coordinator hold, engine queue (separate), return hop. Producer: the live runner (flash/H100) would need to emit them.
