@@ -102,7 +102,7 @@ repl = '''        self.first_gap_ms: List[float] = []      # first SSE line -> f
     #   `cstate.py:663`  gpu_kv_fraction = metrics.get("vllm:gpu_cache_usage_perc", 0.0)   <- the fix
     #   `cstate.py:657`  episodic queued  = metrics.get("vllm:num_requests_waiting", in_flight)
     # Publishing the raw scrape, as the v1 adapter does, would ALSO connect the second one for the
-    # first time, which would change `cloud.queued_by_class` for EVERY arm on EVERY live cell. That
+    # first time, which would change `cloud.queued_by_class` for EVERY arm on EVERY live cell [CORRECTED 2026-11-23 by the n5 census, StudyQCLASS-CENSUS: that is true of the VALUE and overstated for the DECISIONS. Exactly ONE paper-set arm reads the field (mooncake), NO scored result would move because coordinator.py:863 merges DEVICE and REJECT and scorer/score.py never reads REJECT, and our rungs are unexercised on it (guard_backlog 100 against an observed max of 28). What WOULD move is mooncake's recall_REJECT counter, which is its characteristic decision under the port rule, so the blast radius is one arm's decision LABEL and the proofs citing it, not the paper set's numbers]. That
     # is a methodological change nobody ruled, and it would have ridden in invisibly behind a fix
     # whose stated blast radius is one gate. So `vllm:num_requests_waiting` is DELIBERATELY NOT
     # PUBLISHED and `cstate.py:657` keeps its committed in-flight fallback; whether to connect it is
