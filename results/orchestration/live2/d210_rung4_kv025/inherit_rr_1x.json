@@ -1,0 +1,440 @@
+{
+ "_what": "every counter the arm kept on one dry cell; NO DIGEST CLAIM",
+ "_register": "DRY, LOGICAL pool (--kv-scale scales test_live2_coord.GPU_KV), flash CPU. No engine and no --num-gpu-blocks-override.",
+ "arm": "covex-v6-fair-c5attr-rr",
+ "seed": 4,
+ "n": 16,
+ "run_s": 1200.0,
+ "kv_scale": 1.0,
+ "gpu_kv_tokens": null,
+ "kv_capacity_enforced": false,
+ "n_decision_rows": 13841,
+ "stats_all": {
+  "cf_budget_ms": 20.0,
+  "cf_planner_decisions": 60934,
+  "cf_planner_decisions_state": 60934,
+  "deficit_feed": {
+   "gain": 2.0,
+   "gain_ruling": "D178 (2), corrected by flash addendum 12 item 2",
+   "form": "w_d = 1 + gain * (shortfall_d / target_d), floored at 1, PER DEVICE",
+   "targets": {
+    "alert": 0.25,
+    "recall": 0.9,
+    "assistance": 0.9
+   },
+   "target_source": "D178 (1), spec v6 sections 2 and 8",
+   "units": {
+    "alert": "device-episode",
+    "recall": "device",
+    "assistance": "device"
+   },
+   "currency": "on-time CLOUD answers only (D177, D178 (1)); device_on_time recorded, never added to the numerator",
+   "alert_decision_instants_per_episode": 19,
+   "n_offers": 12010,
+   "n_completions": 9342,
+   "per_device": {
+    "asst000": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 117,
+     "cloud_on_time": 117
+    },
+    "asst001": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 117,
+     "cloud_on_time": 117
+    },
+    "asst002": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 116,
+     "cloud_on_time": 116
+    },
+    "dash000": {
+     "type": "alert",
+     "shortfall": 0.012343,
+     "weight": 1.098742,
+     "episodes_closed": 113,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash001": {
+     "type": "alert",
+     "shortfall": 0.006701,
+     "weight": 1.053606,
+     "episodes_closed": 108,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash002": {
+     "type": "alert",
+     "shortfall": 0.008612,
+     "weight": 1.0689,
+     "episodes_closed": 110,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash003": {
+     "type": "alert",
+     "shortfall": 0.007775,
+     "weight": 1.062201,
+     "episodes_closed": 110,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash004": {
+     "type": "alert",
+     "shortfall": 0.015529,
+     "weight": 1.124229,
+     "episodes_closed": 111,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash005": {
+     "type": "alert",
+     "shortfall": 0.009054,
+     "weight": 1.072429,
+     "episodes_closed": 109,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "robo000": {
+     "type": "recall",
+     "shortfall": 0.321053,
+     "weight": 1.71345,
+     "episodes_closed": null,
+     "offered": 19,
+     "cloud_on_time": 11
+    },
+    "robo001": {
+     "type": "recall",
+     "shortfall": 0.614286,
+     "weight": 2.365079,
+     "episodes_closed": null,
+     "offered": 21,
+     "cloud_on_time": 6
+    },
+    "robo002": {
+     "type": "recall",
+     "shortfall": 0.4625,
+     "weight": 2.027778,
+     "episodes_closed": null,
+     "offered": 16,
+     "cloud_on_time": 7
+    },
+    "robo003": {
+     "type": "recall",
+     "shortfall": 0.566667,
+     "weight": 2.259259,
+     "episodes_closed": null,
+     "offered": 15,
+     "cloud_on_time": 5
+    },
+    "robo004": {
+     "type": "recall",
+     "shortfall": 0.49375,
+     "weight": 2.097222,
+     "episodes_closed": null,
+     "offered": 32,
+     "cloud_on_time": 13
+    },
+    "robo005": {
+     "type": "recall",
+     "shortfall": 0.284615,
+     "weight": 1.632479,
+     "episodes_closed": null,
+     "offered": 13,
+     "cloud_on_time": 8
+    },
+    "robo006": {
+     "type": "recall",
+     "shortfall": 0.614286,
+     "weight": 2.365079,
+     "episodes_closed": null,
+     "offered": 14,
+     "cloud_on_time": 4
+    }
+   },
+   "weights_by_type_over_all_devices": {
+    "alert": 1.124229,
+    "recall": 2.365079,
+    "assistance": 1.0
+   },
+   "weights_by_type_pending": null,
+   "type_shortfall_DIAGNOSTIC_ONLY": {
+    "alert": 0.010033,
+    "recall": 0.479594,
+    "assistance": 0.0
+   },
+   "n_units": {
+    "alert": 661,
+    "recall": 7,
+    "assistance": 3
+   },
+   "counts": {
+    "alert_cloud_late": 60,
+    "alert_cloud_on_time": 8831,
+    "alert_device_on_time": 8891,
+    "alert_episode_key_agree": 8891,
+    "alert_episode_key_from_record": 8891,
+    "alert_episodes_closed": 661,
+    "alert_episodes_open": 6,
+    "alert_instant_repeat": 6896,
+    "alert_instants_offered": 11530,
+    "assistance_cloud_on_time": 350,
+    "assistance_device_late": 95,
+    "assistance_device_on_time": 255,
+    "assistance_questions_offered": 350,
+    "completion_background_skipped": 158,
+    "order_key_resolved": 71543,
+    "recall_cloud_late": 47,
+    "recall_cloud_on_time": 54,
+    "recall_device_on_time": 101,
+    "recall_question_repeat": 4,
+    "recall_questions_offered": 130
+   }
+  },
+  "deficit_feed_completions": 9668,
+  "gain_HOLD_BACK_max_milli": 998,
+  "gain_HOLD_BACK_milli_sum": 998,
+  "gain_HOLD_BACK_n": 60934,
+  "gain_HOLD_BACK_over_margin": 1,
+  "gain_TOUCH_max_milli": 823,
+  "gain_TOUCH_milli_sum": 8281268,
+  "gain_TOUCH_n": 60934,
+  "gain_TOUCH_over_margin": 2271,
+  "gain_WARM_max_milli": 709,
+  "gain_WARM_milli_sum": 15174,
+  "gain_WARM_n": 114,
+  "gain_WARM_over_margin": 4,
+  "harm_warm_capped": 1,
+  "harm_warm_max_milli": 998,
+  "harm_warm_milli_sum": 1276,
+  "harm_warm_no_queue": 58775,
+  "harm_warm_nonzero": 1602,
+  "harm_warm_priced": 2273,
+  "release_infeasible": 1869,
+  "release_infeasible_alert": 1869,
+  "state_chosen_HOLD_BACK": 1,
+  "state_chosen_KEEP": 58662,
+  "state_chosen_TOUCH": 2267,
+  "state_chosen_WARM": 4,
+  "state_decisions": 60934,
+  "state_decisions_with_a_rebuild": 114,
+  "state_decisions_without_a_rebuild": 60820,
+  "state_deferred_to_guard_epochs": 1044,
+  "state_delta_gt_0": 58720,
+  "state_delta_gt_0p01": 36014,
+  "state_delta_gt_0p05": 26676,
+  "state_delta_gt_0p1": 21498,
+  "state_delta_gt_0p12": 19854,
+  "state_delta_gt_0p14": 18495,
+  "state_delta_gt_0p16": 17408,
+  "state_delta_gt_0p16456": 17108,
+  "state_delta_gt_0p18": 16240,
+  "state_delta_gt_0p2": 15183,
+  "state_delta_gt_0p25": 12551,
+  "state_delta_max_milli": 998,
+  "state_delta_milli_sum": 8282301,
+  "state_delta_n": 60934,
+  "state_delta_over_margin": 2272,
+  "state_deviations": 2272,
+  "state_hold_back_enacted": 1,
+  "state_skipped_no_question_estimate": 14783,
+  "state_skipped_nothing_built": 975,
+  "state_touch_emitted": 2267,
+  "submitted_monitor": 9050,
+  "submitted_piece": 162,
+  "submitted_recall": 460
+ },
+ "enforcement_proof": {
+  "asked_for": false,
+  "read_back": false,
+  "gpu_kv_tokens_on_the_state": 62944,
+  "pressure": {
+   "epochs": 12001,
+   "epochs_over_cap": 0,
+   "host_epochs_over_cap": 0,
+   "host_peak_tokens": 0,
+   "intervals": [],
+   "peak_tokens": 57257
+  }
+ },
+ "describe": {
+  "arm": "covex-v6-fair-c5attr-rr",
+  "arm_version": "covex-v6-fair-c5attr-rr-1.0",
+  "uses_h": false,
+  "h_s": null,
+  "releases_one_per_epoch": false,
+  "sends_requests": true,
+  "piece_tokens": null,
+  "reads_device_answer": false,
+  "source": "arms_v5rules2.V5Rules2Arm (covex-v6-rules) plus v5/cf_planner.plan_state for the TOUCH / KEEP decision, offload_policy per-type host retention, touch_policy state pricing, and coordinator belief-apply from engine telemetry",
+  "card": "baselines/cards/constructed.md",
+  "adapted_from": "baselines/constructed.py::B7EDFFeasibility",
+  "card_experiments": [
+   "C-mixed"
+  ],
+  "in_card_scope_for_live2": true,
+  "hybrid": {
+   "c1": true,
+   "c2": true,
+   "c3": false,
+   "c4": false,
+   "c5": true,
+   "c6": false,
+   "k_r": 1.5,
+   "k_r_frac": 0.3,
+   "m_d": 0.05,
+   "defs": "v2",
+   "reserve": false,
+   "workload": "lh_req",
+   "quality_fit": "lh_req_dev",
+   "throttle_floor": 2,
+   "c3_always": false
+  },
+  "hybrid_name": "hybrid-F-lhreq-noc3",
+  "v5_rules2": {
+   "base": "hybrid-F-lhreq-noc3",
+   "warm_ahead": true,
+   "chunk_tokens": 2048,
+   "just_in_time": true,
+   "guard": true,
+   "guard_lag_s": 2.0,
+   "guard_backlog": 100,
+   "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load",
+   "horizon": "causal EWMA of this arm's own observed inter-question intervals per device (D11 / D48)",
+   "slice_tokens": 1024,
+   "candidates": "robot sessions with an unwarmed tail at or above the chunk, or a question expected within the horizon",
+   "counterfactual": false,
+   "planner": false,
+   "margin_cf": null,
+   "engine_actions_version": "v5-engine-actions-1.0"
+  },
+  "rung": {
+   "ladder": "spec v6 section 10 (D172)",
+   "rung": 2,
+   "name": "covex-v6-state",
+   "adds_over_the_rung_below": "per-type host retention (max_offload_tokens = 0 for alert and single-shot), TOUCH chosen by plan_state, residency belief corrected from engine telemetry including host hits, state-based pricing",
+   "implemented_by": "covex-v6-state",
+   "committed_under": [],
+   "cells_are_reused_not_rerun": false,
+   "identity_proof": "live2/v6_alias_proof.py (decision digest on a dry cell)"
+  },
+  "covex_v6_state": {
+   "rules_base": "v5-rules-2",
+   "plan_state": true,
+   "per_type_host_retention": "offload_policy.RULE (alert and single-shot: max_offload_tokens = 0; robot: retained)",
+   "touch": "touch_policy.should_touch with the M6 mixed-tier guard; the CHOICE is plan_state's, the guard is the coordinator's",
+   "belief_correction": "apply (engine telemetry, including host hits)",
+   "state_priced_costs": true,
+   "offload_controls": true,
+   "touch_requests": true,
+   "belief_apply": true,
+   "d162_pricing": true,
+   "budget_charge_mode": "uncached-only",
+   "one_price_source": "D162 predicted first token, read identically by the planner's TOUCH harm and the coordinator's budget charge (user ruling, 2026-11-21)",
+   "harm_warm": "COMPUTED from the D162 model's per_queue_token coefficient per research/prereg_harm_warm_d172.md; never a declared grid value. Capped at the healthy-regime bound with harm_warm_capped counted",
+   "margin": "cf_margin.MARGIN_CF",
+   "scorable": true
+  },
+  "c5_attribution": {
+   "rule": "C5 does not halve its cap for a slow monitor whose wait overlapped a robot prefill the coordinator itself released (uncached >= 200 tokens); on suppression the cap is HELD and the recovery timer is not restarted",
+   "enabled": true,
+   "overlap_source": "coordinator._self_released_overlap, reported on live2_completed as self_released_prefill_overlap",
+   "uncached_definition": "the uncached count the COORDINATOR CHARGED at release (its own prediction), not the engine's later prompt - cached",
+   "counters": [
+    "c5_attr_suppressed_decrease",
+    "c5_attr_slow_all_self_released",
+    "c5_attr_slow_mixed",
+    "c5_attr_trip_without_slow_evidence"
+   ],
+   "status": "CANDIDATE, default off, adopted only by a user ruling"
+  },
+  "covex_v6_fair_feed": {
+   "rung": 3,
+   "rules_base": "covex-v6-state-uo-c5attr",
+   "switch": "live2_deficit_feed",
+   "switch_on": true,
+   "switch_chain": [
+    true,
+    true,
+    true
+   ],
+   "gain": 2.0,
+   "gain_declared": 2.0,
+   "gain_ruling": "D178 (2), corrected by flash addendum 12 item 2",
+   "gain_source": "user's flash addendum 9 item B1, 2026-11-22, pre-registered: at gain 2.0 a unit at HALF its target carries weight 2 and so counts double; the weight range is bounded at 1 to 3; a 3x range cannot let one unit monopolise, because D179's floors already guarantee the other types a minimum and only the FLEXIBLE pool and the ORDERING are weighted",
+   "value_reader": "REMOVED (D177 (2)); no accuracy value is read on this path",
+   "currency": "on-time CLOUD answers only (D177, D178 (1))",
+   "targets": {
+    "alert": 0.25,
+    "recall": 0.9,
+    "assistance": 0.9
+   },
+   "units": {
+    "alert": "device-episode",
+    "recall": "device",
+    "assistance": "device"
+   },
+   "alert_decision_instants_per_episode": 19,
+   "consumers": {
+    "ordering": {
+     "on": true,
+     "role": "PRIMARY (addendum 12 item 3a)",
+     "read": "hybrid/hybrid_arm.py `_deficit_order_key`, the first key at both deadline-ordering sites; overridden on the INNER HybridArm instance to return the NEGATIVE w_d",
+     "known_gap": "the committed call sites pass getattr(<frozen dataclass>, 'device_id', None) and neither EpisodicStream nor RecallQuery has that field, so every call receives None and an unresolved item takes the neutral 0.0; see order_key_unresolved_device"
+    },
+    "flexible_split": {
+     "on": true,
+     "read": "share_admission.py:162-168 via the coordinator's SA.allowed(weights_by_type=) call site",
+     "rule": "per type, the MAXIMUM w_d over that type's devices with pending work; 1.0 for a type with none",
+     "weighted": "the FLEXIBLE pool only; floors, W_max and the oversize rule are UNCHANGED (D179 intact)"
+    }
+   },
+   "consumer_wired": false
+  },
+  "covex_v6_fair_c5attr_rr": {
+   "built_on": "covex-v6-fair-c5attr",
+   "adds": "release_recheck (D179 (4)) for the ALERT type only",
+   "switch": "live2_release_recheck",
+   "switch_on": true,
+   "types_attr": "live2_release_recheck_types",
+   "types": [
+    "alert"
+   ],
+   "types_default_for_other_arms": [
+    "alert",
+    "recall",
+    "assistance"
+   ],
+   "share_admission": "OFF; the c5attr base carries none",
+   "floors": "PARKED (D188). They exist only inside share admission, so there is no way to have them here without pulling in shares, which would be a second change. Not re-derived.",
+   "recall_path": "DELIBERATELY OUT OF SCOPE. r1 ran all three types and skipped 34 recall questions at s4, taking robot on time to 95 against rung 3's 122.",
+   "why_the_alert_path": "84.1 percent of the 2,290 sent-and-late alert instants in the committed rung-3 s4 cell are dominant-blocked by OTHER ALERT FRAMES; recall questions dominate 6.9 percent (d190_rung4_margin_diagnosis.json)",
+   "prerequisite": {
+    "live2_d162_pricing_on_the_instance": true,
+    "live2_release_recheck_on_the_instance": true,
+    "live2_release_recheck_types_on_the_instance": [
+     "alert"
+    ],
+    "share_admission_on_the_instance": null,
+    "arm_enables_reads": true,
+    "types_reads": [
+     "alert"
+    ],
+    "why_one_factor": "rung 3 on the c5attr base already declares live2_d162_pricing, so enabling the re-check changes exactly one switch and nothing else"
+   },
+   "frame_is_kept": "the skip returns before _mon_sent, and EP-G is append-only, so the frame is carried by reference on the next request and that request's n_new rises by it; asserted on the real request body in tests/test_release_recheck.py"
+  }
+ },
+ "w_wired_proof": null,
+ "w_source": null
+}

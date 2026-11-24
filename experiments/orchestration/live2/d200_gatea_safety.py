@@ -24,10 +24,19 @@ NOTHING IS REIMPLEMENTED. The rows come from the committed `cost_model_gate_d162
 zone from the committed `cost_model_gate_d162.classify`, the first-token coefficients from the
 committed `cost_model_gate_d162.json`, and the quantile from the committed
 `d190_measured_safety._nearest_rank`. One price source, one quantile rule.
+
+D208 (1) ADDENDUM (Session D, 2026-11-23). `covex-v6-fair-c5attr-rr` joined rung 3, so the cells
+the safety factor is derived FROM change when the final rung 3 is built. `--cell-template` and
+`--out` make that re-derivation a flag and not an edit, and the DEFAULTS ARE THE COMMITTED ONES:
+run with no flags this script writes the same file from the same four
+`covex-v6-fair-c5attr_n16_s%d_...` cells as before. The factor itself is NOT re-pinned here; the
+addendum run is reported BESIDE the committed one so a reader can see how much the input moved.
+The final rungs (`covex-v6-state-final`, `covex-v6-fair-final`, `covex-v6-final`) have no cells
+yet, so Gate A for the FINAL rung cannot be computed and is not reported as if it could be.
 """
 from __future__ import annotations
 
-import gzip
+import argparse
 import json
 import statistics as st
 import sys
@@ -62,14 +71,14 @@ def coeffs() -> Dict[str, float]:
             "per_queue_token": float(m["per_queue_token"])}
 
 
-def ratios() -> Dict[str, Any]:
+def ratios(cell_template: str = CELL) -> Dict[str, Any]:
     """Per-request observed-over-predicted first token, healthy windows, robot rows, seeds 4 to 7."""
     c = coeffs()
     rows: List[Dict[str, Any]] = []
     per_seed: Dict[str, int] = {}
     nonhealthy: Dict[str, int] = {}
     for s in SEEDS:
-        run = RUNS / (CELL % s)
+        run = RUNS / (cell_template % s)
         if not run.is_dir():
             raise SystemExit("MISSING committed rung-3 cell: %s" % (run,))
         rs = G.features(run)
@@ -92,7 +101,7 @@ def ratios() -> Dict[str, Any]:
     v = sorted(x["observed_over_predicted"] for x in rows)
     n = len(v)
     q90 = MS._nearest_rank(v, Q)
-    dist = {"n": n, "per_seed": per_seed, "robot_rows_NOT_healthy": nonhealthy,
+    dist = {"cell_template": cell_template, "n": n, "per_seed": per_seed, "robot_rows_NOT_healthy": nonhealthy,
             "min": v[0], "q10": MS._nearest_rank(v, 0.10), "median": st.median(v),
             "q90": q90, "max": v[-1], "n_distinct": len(set(v)),
             "n_strictly_above_q90": sum(1 for x in v if x > q90),
@@ -131,7 +140,13 @@ def deferrals() -> List[Dict[str, Any]]:
 
 
 def main() -> int:
-    r = ratios()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--cell-template", default=CELL,
+                    help="run-directory name template taking the seed, e.g. the committed "
+                         "covex-v6-fair-c5attr cells (the default) or the -rr cells")
+    ap.add_argument("--out", default=str(OUT))
+    a = ap.parse_args()
+    r = ratios(a.cell_template)
     dist = r["distribution"]
     sf = float(dist["q90"])
     defs_ = deferrals()
@@ -249,7 +264,8 @@ def main() -> int:
         "_provenance": {"script": "d200_gatea_safety.py", "model": "n/a (read-only)",
                         "device": "flash (CPU only)", "n": dist["n"]},
     }
-    OUT.write_text(json.dumps(res, indent=1, default=float))
+    res["_cell_template"] = a.cell_template
+    Path(a.out).write_text(json.dumps(res, indent=1, default=float))
     print(json.dumps({"n": dist["n"], "min": dist["min"], "median": dist["median"],
                       "q90": dist["q90"], "max": dist["max"],
                       "n_distinct": dist["n_distinct"],

@@ -1,0 +1,2422 @@
+{
+ "_what": "D209 (4) / D210: the 0.25x dry report for the committed rung-4 arm",
+ "_register": {
+  "every_number_here": "DRY and LOGICAL. --kv-scale scales test_live2_coord.GPU_KV, the coordinator's logical pool. No engine, no --num-gpu-blocks-override, no --max-model-len.",
+  "the_real_engine_condition_is_different": "the posted live 0.25x cells run --num-gpu-blocks-override 985 --max-model-len 15744 (that order), engine pool of record 15,760 = 985 x 16 confirmed on hardware, logical 15,736. NONE of that applies to a cell here.",
+  "decision_latency": "flash CPU wall clock inside the arm's decide (coordinator.py:2127), under whatever host load the manifest records. NOT an H100 number.",
+  "digests_are_provisional": "D209 (1) / the TOUCH_PRICE_MODE fix is expected to move rung 3's and rung 4's digests. Every digest here is dated to the commit in _provenance."
+ },
+ "cells": {
+  "_what": "D209 (4) / D210 0.25x rung-4 dry cells, one process each, sequential",
+  "_register": "DRY and LOGICAL: --kv-scale scales test_live2_coord.GPU_KV, the logical coordinator pool. No engine, no --num-gpu-blocks-override.",
+  "seed": 4,
+  "n": 16,
+  "run_s": 1200.0,
+  "cutoff_off": true,
+  "cells": [
+   {
+    "tag": "N1_harm0_kv025",
+    "arm": "covex-v6-cf-c5attr-harm0",
+    "kv_scale": 0.25,
+    "kv_capacity_enforced": false,
+    "returncode": 0,
+    "wall_s": 252.3,
+    "load1_at_start": 2.369140625,
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessionD/co/experiments/orchestration/live2/d210_kv025_one_cell.py --arm covex-v6-cf-c5attr-harm0 --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/N1_harm0_kv025.lat.json --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/N1_harm0_kv025.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/N1_harm0_kv025.pd.json",
+    "digest": "dc686e63f9a313ec",
+    "rows": 14523,
+    "gpu_kv_tokens": 15736
+   },
+   {
+    "tag": "P1_state_uo_1x",
+    "arm": "covex-v6-state-uo",
+    "kv_scale": 1.0,
+    "kv_capacity_enforced": false,
+    "returncode": 0,
+    "wall_s": 568.5,
+    "load1_at_start": 12.54443359375,
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessionD/co/experiments/orchestration/live2/d210_kv025_one_cell.py --arm covex-v6-state-uo --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 1.0 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/P1_state_uo_1x.lat.json",
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "gpu_kv_tokens": null
+   },
+   {
+    "tag": "R3_rung3_1x",
+    "arm": "covex-v6-fair-c5attr",
+    "kv_scale": 1.0,
+    "kv_capacity_enforced": false,
+    "returncode": 0,
+    "wall_s": 284.0,
+    "load1_at_start": 1.88330078125,
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessionD/co/experiments/orchestration/live2/d210_kv025_one_cell.py --arm covex-v6-fair-c5attr --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 1.0 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R3_rung3_1x.lat.json",
+    "digest": "12e4f73ce0ebd865",
+    "rows": 13812,
+    "gpu_kv_tokens": null
+   },
+   {
+    "tag": "R3_rung3_kv025",
+    "arm": "covex-v6-fair-c5attr",
+    "kv_scale": 0.25,
+    "kv_capacity_enforced": false,
+    "returncode": 0,
+    "wall_s": 248.4,
+    "load1_at_start": 2.26904296875,
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessionD/co/experiments/orchestration/live2/d210_kv025_one_cell.py --arm covex-v6-fair-c5attr --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R3_rung3_kv025.lat.json",
+    "digest": "12e4f73ce0ebd865",
+    "rows": 13812,
+    "gpu_kv_tokens": 15736
+   },
+   {
+    "tag": "R4_full_1x",
+    "arm": "covex-v6-cf-c5attr",
+    "kv_scale": 1.0,
+    "kv_capacity_enforced": false,
+    "returncode": 0,
+    "wall_s": 609.9,
+    "load1_at_start": 25.42333984375,
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessionD/co/experiments/orchestration/live2/d210_kv025_one_cell.py --arm covex-v6-cf-c5attr --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 1.0 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_full_1x.lat.json --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_full_1x.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_full_1x.pd.json",
+    "digest": "f5b627392839527c",
+    "rows": 14470,
+    "gpu_kv_tokens": null
+   },
+   {
+    "tag": "R4_full_kv025",
+    "arm": "covex-v6-cf-c5attr",
+    "kv_scale": 0.25,
+    "kv_capacity_enforced": false,
+    "returncode": 0,
+    "wall_s": 429.0,
+    "load1_at_start": 11.21875,
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessionD/co/experiments/orchestration/live2/d210_kv025_one_cell.py --arm covex-v6-cf-c5attr --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_full_kv025.lat.json --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_full_kv025.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_full_kv025.pd.json",
+    "digest": "cde9545ac1d383f3",
+    "rows": 14445,
+    "gpu_kv_tokens": 15736
+   },
+   {
+    "tag": "R4_full_kv025_enf",
+    "arm": "covex-v6-cf-c5attr",
+    "kv_scale": 0.25,
+    "kv_capacity_enforced": true,
+    "returncode": 0,
+    "wall_s": 255.8,
+    "load1_at_start": 2.25,
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessionD/co/experiments/orchestration/live2/d210_kv025_one_cell.py --arm covex-v6-cf-c5attr --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_full_kv025_enf.lat.json --enforce-kv --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_full_kv025_enf.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_full_kv025_enf.pd.json",
+    "digest": "cde9545ac1d383f3",
+    "rows": 14445,
+    "gpu_kv_tokens": 15736
+   },
+   {
+    "tag": "R4_pdonly_kv025",
+    "arm": "covex-v6-cf-c5attr-pdonly",
+    "kv_scale": 0.25,
+    "kv_capacity_enforced": false,
+    "returncode": 0,
+    "wall_s": 247.4,
+    "load1_at_start": 2.05126953125,
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessionD/co/experiments/orchestration/live2/d210_kv025_one_cell.py --arm covex-v6-cf-c5attr-pdonly --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_pdonly_kv025.lat.json --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_pdonly_kv025.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_pdonly_kv025.pd.json",
+    "digest": "cde9545ac1d383f3",
+    "rows": 14445,
+    "gpu_kv_tokens": 15736
+   },
+   {
+    "tag": "R4_rqonly_kv025",
+    "arm": "covex-v6-cf-c5attr-rqonly",
+    "kv_scale": 0.25,
+    "kv_capacity_enforced": false,
+    "returncode": 0,
+    "wall_s": 268.3,
+    "load1_at_start": 2.28662109375,
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessionD/co/experiments/orchestration/live2/d210_kv025_one_cell.py --arm covex-v6-cf-c5attr-rqonly --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_rqonly_kv025.lat.json --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_rqonly_kv025.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4_rqonly_kv025.pd.json",
+    "digest": "f5b627392839527c",
+    "rows": 14470,
+    "gpu_kv_tokens": 15736
+   },
+   {
+    "tag": "R4off_1x",
+    "arm": "covex-v6-cf-c5attr-off",
+    "kv_scale": 1.0,
+    "kv_capacity_enforced": false,
+    "returncode": 0,
+    "wall_s": 740.1,
+    "load1_at_start": 20.7099609375,
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessionD/co/experiments/orchestration/live2/d210_kv025_one_cell.py --arm covex-v6-cf-c5attr-off --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 1.0 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4off_1x.lat.json",
+    "digest": "dc686e63f9a313ec",
+    "rows": 14523,
+    "gpu_kv_tokens": null
+   },
+   {
+    "tag": "R4off_kv025",
+    "arm": "covex-v6-cf-c5attr-off",
+    "kv_scale": 0.25,
+    "kv_capacity_enforced": false,
+    "returncode": 0,
+    "wall_s": 554.1,
+    "load1_at_start": 19.2314453125,
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessionD/co/experiments/orchestration/live2/d210_kv025_one_cell.py --arm covex-v6-cf-c5attr-off --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4off_kv025.lat.json",
+    "digest": "dc686e63f9a313ec",
+    "rows": 14523,
+    "gpu_kv_tokens": 15736
+   },
+   {
+    "tag": "R4off_kv025_enf",
+    "arm": "covex-v6-cf-c5attr-off",
+    "kv_scale": 0.25,
+    "kv_capacity_enforced": true,
+    "returncode": 0,
+    "wall_s": 251.9,
+    "load1_at_start": 5.66845703125,
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/sessionD/co/experiments/orchestration/live2/d210_kv025_one_cell.py --arm covex-v6-cf-c5attr-off --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d210_rung4_kv025/cells/R4off_kv025_enf.lat.json --enforce-kv",
+    "digest": "dc686e63f9a313ec",
+    "rows": 14523,
+    "gpu_kv_tokens": 15736
+   }
+  ]
+ },
+ "positive_controls": {
+  "P1_state_uo_1x": {
+   "arm": "covex-v6-state-uo",
+   "expected": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "source": "frozen_test/c5attr_digest_proofs.json P1"
+   },
+   "measured_digest": "9a4be873eb3c5fba",
+   "measured_rows": 14218,
+   "VERDICT": "PASS"
+  },
+  "R4off_1x_is_rung_3": {
+   "_claim": "rung 4's off arm must be the COMMITTED rung-3 arm byte-identically. This is the second positive control and also the off-switch identity proof.",
+   "expected_at_the_D190_commit": {
+    "digest": "12e4f73ce0ebd865",
+    "rows": 13812,
+    "source": "frozen_test/d190_rung4_r3_proofs.json proof_3_off_switch_identity"
+   },
+   "measured_digest": "dc686e63f9a313ec",
+   "measured_rows": 14523,
+   "VERDICT": "THE BAR DOES NOT APPLY AT THIS COMMIT, and that is a finding and not a check failure. `arms_v6cfr3._Rung4Mixin._cf_engine` swaps the state planner's deficit weight UNCONDITIONALLY (it reads neither compound switch), so the off arm is rung 3 PLUS the D206 (2) planner weight. The contamination is +711 decision rows, confirmed mechanically as +661 state_touch_emitted and +662 state_deviations by the counter census.",
+   "the_uncontaminated_rung3_bar": "measured in this run under its own name: covex-v6-fair-c5attr = 12e4f73ce0ebd865 / 13,812 at 1x AND at 0.25x, equal to the committed bar"
+  },
+  "_D216_bar_rule": {
+   "_what": "D216 (1) landed while these cells ran: an unfixed rung-2 digest (qcache fix off) is never used as a bar, and any cell whose digest is a bar runs ALONE.",
+   "P1_state_uo_1x": "reproduced its committed digest exactly at host load 12.54, but is WITHDRAWN AS A BAR under D216 (1) and kept as a reproduction datum only. The study does not depend on it: the admissible bars are rung 4, rung 3, the Gate A JSON and the 1x leg counters.",
+   "R3_rung3_1x": "ran concurrently with the counter census, so it violated the ALONE rule and is NOT cited as a bar.",
+   "R3_rung3_1x_ALONE": "the compliant re-run, alone at host load 0.60: 12e4f73ce0ebd865 / 13,812, identical. This is the cited bar."
+  }
+ },
+ "pairs": {
+  "step2b_rung4_vs_off_at_1x": {
+   "A": "R4_full_1x",
+   "B": "R4off_1x",
+   "digest_A": "f5b627392839527c",
+   "digest_B": "dc686e63f9a313ec",
+   "rows_A": 14470,
+   "rows_B": 14523,
+   "digests_equal": false,
+   "differing_setwise": 2105,
+   "differing_positional": 9173,
+   "identical": false,
+   "first_difference": {
+    "index": 5350,
+    "A": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": 1.006723,
+     "desired_tier": null,
+     "kind": "defer",
+     "mu": null,
+     "note": null,
+     "opportunity_ids": [
+      "opp0005455"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 542.9,
+     "traffic_mix": {
+      "monitor": 3,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "opportunity_ids": [
+      "opp0005455"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 542.9,
+     "traffic_mix": {
+      "monitor": 3,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    }
+   },
+   "_why": "CLAUDE.md Step 2b at 1x: does rung 4 move a decision against its own off arm"
+  },
+  "step2b_rung4_vs_off_at_0p25x": {
+   "A": "R4_full_kv025",
+   "B": "R4off_kv025",
+   "digest_A": "cde9545ac1d383f3",
+   "digest_B": "dc686e63f9a313ec",
+   "rows_A": 14445,
+   "rows_B": 14523,
+   "digests_equal": false,
+   "differing_setwise": 1756,
+   "differing_positional": 10192,
+   "identical": false,
+   "first_difference": {
+    "index": 4331,
+    "A": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": "gpu",
+     "kind": "state_action",
+     "mu": null,
+     "note": "session=robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "opportunity_ids": [],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 443.3,
+     "traffic_mix": {
+      "monitor": 4,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=robo005|s001|791449306887400_start_0.0_end_304.403",
+     "opportunity_ids": [
+      "opp0004420"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 443.3,
+     "traffic_mix": {
+      "monitor": 4,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    }
+   },
+   "_why": "Step 2b at the memory setting the cells run at, enforcement off"
+  },
+  "step2b_rung4_vs_off_at_0p25x_enforced": {
+   "A": "R4_full_kv025_enf",
+   "B": "R4off_kv025_enf",
+   "digest_A": "cde9545ac1d383f3",
+   "digest_B": "dc686e63f9a313ec",
+   "rows_A": 14445,
+   "rows_B": 14523,
+   "digests_equal": false,
+   "differing_setwise": 1756,
+   "differing_positional": 10192,
+   "identical": false,
+   "first_difference": {
+    "index": 4331,
+    "A": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": "gpu",
+     "kind": "state_action",
+     "mu": null,
+     "note": "session=robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "opportunity_ids": [],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 443.3,
+     "traffic_mix": {
+      "monitor": 4,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=robo005|s001|791449306887400_start_0.0_end_304.403",
+     "opportunity_ids": [
+      "opp0004420"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 443.3,
+     "traffic_mix": {
+      "monitor": 4,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    }
+   },
+   "_why": "Step 2b at 0.25x in the regime the posted cells run in (enforcement on)"
+  },
+  "binding_rung4_1x_vs_0p25x": {
+   "A": "R4_full_1x",
+   "B": "R4_full_kv025",
+   "digest_A": "f5b627392839527c",
+   "digest_B": "cde9545ac1d383f3",
+   "rows_A": 14470,
+   "rows_B": 14445,
+   "digests_equal": false,
+   "differing_setwise": 1051,
+   "differing_positional": 9602,
+   "identical": false,
+   "first_difference": {
+    "index": 4331,
+    "A": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=robo005|s001|791449306887400_start_0.0_end_304.403",
+     "opportunity_ids": [
+      "opp0004420"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 443.3,
+     "traffic_mix": {
+      "monitor": 4,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": "gpu",
+     "kind": "state_action",
+     "mu": null,
+     "note": "session=robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "opportunity_ids": [],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 443.3,
+     "traffic_mix": {
+      "monitor": 4,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    }
+   },
+   "_why": "THE BINDING TEST for rung 4: the same arm at the two memory settings"
+  },
+  "binding_rung3_1x_vs_0p25x": {
+   "A": "R4off_1x",
+   "B": "R4off_kv025",
+   "digest_A": "dc686e63f9a313ec",
+   "digest_B": "dc686e63f9a313ec",
+   "rows_A": 14523,
+   "rows_B": 14523,
+   "digests_equal": true,
+   "differing_setwise": 0,
+   "differing_positional": 0,
+   "identical": true,
+   "first_difference": null,
+   "_why": "THE BINDING TEST for rung 3 (the off arm IS rung 3): flat means the pool never reached a rung-3 decision"
+  },
+  "binding_rung3_named_arm_vs_off_at_0p25x": {
+   "A": "R3_rung3_kv025",
+   "B": "R4off_kv025",
+   "digest_A": "12e4f73ce0ebd865",
+   "digest_B": "dc686e63f9a313ec",
+   "rows_A": 13812,
+   "rows_B": 14523,
+   "digests_equal": false,
+   "differing_setwise": 1741,
+   "differing_positional": 9009,
+   "identical": false,
+   "first_difference": {
+    "index": 5514,
+    "A": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=asst001|ss0055",
+     "opportunity_ids": [
+      "opp0005617"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 559.4,
+     "traffic_mix": {
+      "monitor": 1,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_piece",
+     "mu": null,
+     "note": "session=robo003|s001|3703477849945137_start_0.0_end_599.96",
+     "opportunity_ids": [],
+     "piece_tokens": 1024,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 559.4,
+     "traffic_mix": {
+      "monitor": 1,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    }
+   },
+   "_why": "the committed rung-3 arm by its own name against rung 4's off arm, both at 0.25x: confirms the off arm is rung 3 at this setting too"
+  },
+  "enforcement_channel_rung3": {
+   "A": "R4off_kv025",
+   "B": "R4off_kv025_enf",
+   "digest_A": "dc686e63f9a313ec",
+   "digest_B": "dc686e63f9a313ec",
+   "rows_A": 14523,
+   "rows_B": 14523,
+   "digests_equal": true,
+   "differing_setwise": 0,
+   "differing_positional": 0,
+   "identical": true,
+   "first_difference": null,
+   "_why": "the COORDINATOR-EVICTION channel alone, on an arm that reads no pool"
+  },
+  "enforcement_channel_rung4": {
+   "A": "R4_full_kv025",
+   "B": "R4_full_kv025_enf",
+   "digest_A": "cde9545ac1d383f3",
+   "digest_B": "cde9545ac1d383f3",
+   "rows_A": 14445,
+   "rows_B": 14445,
+   "digests_equal": true,
+   "differing_setwise": 0,
+   "differing_positional": 0,
+   "identical": true,
+   "first_difference": null,
+   "_why": "the coordinator-eviction channel on rung 4, which also reads the pool itself"
+  },
+  "leg_pd_only_vs_off_at_0p25x": {
+   "A": "R4_pdonly_kv025",
+   "B": "R4off_kv025",
+   "digest_A": "cde9545ac1d383f3",
+   "digest_B": "dc686e63f9a313ec",
+   "rows_A": 14445,
+   "rows_B": 14523,
+   "digests_equal": false,
+   "differing_setwise": 1756,
+   "differing_positional": 10192,
+   "identical": false,
+   "first_difference": {
+    "index": 4331,
+    "A": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": "gpu",
+     "kind": "state_action",
+     "mu": null,
+     "note": "session=robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "opportunity_ids": [],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 443.3,
+     "traffic_mix": {
+      "monitor": 4,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=robo005|s001|791449306887400_start_0.0_end_304.403",
+     "opportunity_ids": [
+      "opp0004420"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 443.3,
+     "traffic_mix": {
+      "monitor": 4,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    }
+   },
+   "_why": "protect-and-defer ALONE at 0.25x (addendum 12 item 5: attribute each leg)"
+  },
+  "leg_rq_only_vs_off_at_0p25x": {
+   "A": "R4_rqonly_kv025",
+   "B": "R4off_kv025",
+   "digest_A": "f5b627392839527c",
+   "digest_B": "dc686e63f9a313ec",
+   "rows_A": 14470,
+   "rows_B": 14523,
+   "digests_equal": false,
+   "differing_setwise": 2105,
+   "differing_positional": 9173,
+   "identical": false,
+   "first_difference": {
+    "index": 5350,
+    "A": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": 1.006723,
+     "desired_tier": null,
+     "kind": "defer",
+     "mu": null,
+     "note": null,
+     "opportunity_ids": [
+      "opp0005455"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 542.9,
+     "traffic_mix": {
+      "monitor": 3,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "arm_version": "covex-v6-fair-feed-1.0",
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "opportunity_ids": [
+      "opp0005455"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 542.9,
+     "traffic_mix": {
+      "monitor": 3,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    }
+   },
+   "_why": "question-deferral ALONE at 0.25x"
+  },
+  "step4_negative_control_harm0": {
+   "A": "N1_harm0_kv025",
+   "B": "R4off_kv025",
+   "digest_A": "dc686e63f9a313ec",
+   "digest_B": "dc686e63f9a313ec",
+   "rows_A": 14523,
+   "rows_B": 14523,
+   "digests_equal": true,
+   "differing_setwise": 0,
+   "differing_positional": 0,
+   "identical": true,
+   "first_difference": null,
+   "_why": "CLAUDE.md Step 4: harm zeroed at source must COLLAPSE to the off arm"
+  }
+ },
+ "characteristic_decisions": {
+  "R4_full_1x": {
+   "cell": "R4_full_1x",
+   "arm": "covex-v6-cf-c5attr",
+   "kv_scale": 1.0,
+   "by_kind": {
+    "pd_state_defers": 0,
+    "pd_state_chunks": 0,
+    "pd_request_defers": 0,
+    "pd_protects": 0,
+    "rd_question_defers": 6
+   },
+   "TOTAL_characteristic_decisions": 6,
+   "non_zero": true,
+   "PORT_RULE": "PASS: the arm makes its own characteristic decision at least once",
+   "decisions_offered": {
+    "pd_decisions": 251,
+    "pd_decisions_state": 163,
+    "pd_decisions_request": 88,
+    "rd_decisions": 88,
+    "rd_deferred_to_guard_epochs": 1046,
+    "rd_skipped_over_limit": 0,
+    "rd_skipped_already_deferred": 4
+   },
+   "unexpressible": {
+    "pd_request_crossed_bar_unexpressible": 3
+   },
+   "gate_mix_pd": {
+    "pd_gate_no_active_alert_episode": 50,
+    "pd_gate_rebuild_fits_without_evicting": 198,
+    "pd_gate_wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here": 3
+   },
+   "gate_mix_rd": {
+    "rd_gate_defer_to_latest_safe_start": 6,
+    "rd_gate_must_start_now_no_slack": 46,
+    "rd_gate_no_active_alert_episode": 20,
+    "rd_gate_saving_does_not_exceed_margin": 16
+   },
+   "free_kv_seen": {
+    "pd_free_kv_max": 62944,
+    "pd_free_kv_min": 8759,
+    "pd_free_kv_sum": 9850507
+   },
+   "kv_bound_by": {
+    "pd_kv_bound_by_belief": 251
+   },
+   "no_kv_pool_configured": 0
+  },
+  "R4_full_kv025": {
+   "cell": "R4_full_kv025",
+   "arm": "covex-v6-cf-c5attr",
+   "kv_scale": 0.25,
+   "by_kind": {
+    "pd_state_defers": 5,
+    "pd_state_chunks": 2,
+    "pd_request_defers": 16,
+    "pd_protects": 19,
+    "rd_question_defers": 0
+   },
+   "TOTAL_characteristic_decisions": 42,
+   "non_zero": true,
+   "PORT_RULE": "PASS: the arm makes its own characteristic decision at least once",
+   "decisions_offered": {
+    "pd_decisions": 261,
+    "pd_decisions_state": 163,
+    "pd_decisions_request": 98,
+    "rd_decisions": 82,
+    "rd_deferred_to_guard_epochs": 1043,
+    "rd_skipped_over_limit": 0,
+    "rd_skipped_already_deferred": 20
+   },
+   "unexpressible": {
+    "pd_protect_unexpressible_session_busy": 1,
+    "pd_request_crossed_bar_unexpressible": 29
+   },
+   "gate_mix_pd": {
+    "pd_gate_defer_to_latest_safe_start": 21,
+    "pd_gate_harm_does_not_exceed_the_bar": 83,
+    "pd_gate_must_start_now_so_send_less: the whole tail of 1024 tokens carries 2.0864 on-time answers of harm against a bar of 1.3348, and a slice of 512 carries 1.0946": 1,
+    "pd_gate_must_start_now_so_send_less: the whole tail of 1024 tokens carries 2.0919 on-time answers of harm against a bar of 1.3348, and a slice of 512 carries 1.1412": 1,
+    "pd_gate_no_active_alert_episode": 52,
+    "pd_gate_rebuild_fits_without_evicting": 74,
+    "pd_gate_wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here": 29
+   },
+   "gate_mix_rd": {
+    "rd_gate_must_start_now_no_slack": 49,
+    "rd_gate_no_active_alert_episode": 22,
+    "rd_gate_saving_does_not_exceed_margin": 11
+   },
+   "free_kv_seen": {
+    "pd_free_kv_max": 15736,
+    "pd_free_kv_min": 0,
+    "pd_free_kv_sum": 1230553
+   },
+   "kv_bound_by": {
+    "pd_kv_bound_by_belief": 261
+   },
+   "no_kv_pool_configured": 0
+  },
+  "R4_full_kv025_enf": {
+   "cell": "R4_full_kv025_enf",
+   "arm": "covex-v6-cf-c5attr",
+   "kv_scale": 0.25,
+   "by_kind": {
+    "pd_state_defers": 5,
+    "pd_state_chunks": 2,
+    "pd_request_defers": 16,
+    "pd_protects": 19,
+    "rd_question_defers": 0
+   },
+   "TOTAL_characteristic_decisions": 42,
+   "non_zero": true,
+   "PORT_RULE": "PASS: the arm makes its own characteristic decision at least once",
+   "decisions_offered": {
+    "pd_decisions": 261,
+    "pd_decisions_state": 163,
+    "pd_decisions_request": 98,
+    "rd_decisions": 82,
+    "rd_deferred_to_guard_epochs": 1043,
+    "rd_skipped_over_limit": 0,
+    "rd_skipped_already_deferred": 20
+   },
+   "unexpressible": {
+    "pd_protect_unexpressible_session_busy": 1,
+    "pd_request_crossed_bar_unexpressible": 29
+   },
+   "gate_mix_pd": {
+    "pd_gate_defer_to_latest_safe_start": 21,
+    "pd_gate_harm_does_not_exceed_the_bar": 83,
+    "pd_gate_must_start_now_so_send_less: the whole tail of 1024 tokens carries 2.0864 on-time answers of harm against a bar of 1.3348, and a slice of 512 carries 1.0946": 1,
+    "pd_gate_must_start_now_so_send_less: the whole tail of 1024 tokens carries 2.0919 on-time answers of harm against a bar of 1.3348, and a slice of 512 carries 1.1412": 1,
+    "pd_gate_no_active_alert_episode": 52,
+    "pd_gate_rebuild_fits_without_evicting": 74,
+    "pd_gate_wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here": 29
+   },
+   "gate_mix_rd": {
+    "rd_gate_must_start_now_no_slack": 48,
+    "rd_gate_no_active_alert_episode": 22,
+    "rd_gate_saving_does_not_exceed_margin": 12
+   },
+   "free_kv_seen": {
+    "pd_free_kv_max": 15736,
+    "pd_free_kv_min": 0,
+    "pd_free_kv_sum": 1230553
+   },
+   "kv_bound_by": {
+    "pd_kv_bound_by_belief": 261
+   },
+   "no_kv_pool_configured": 0
+  },
+  "R4_pdonly_kv025": {
+   "cell": "R4_pdonly_kv025",
+   "arm": "covex-v6-cf-c5attr-pdonly",
+   "kv_scale": 0.25,
+   "by_kind": {
+    "pd_state_defers": 5,
+    "pd_state_chunks": 2,
+    "pd_request_defers": 16,
+    "pd_protects": 19,
+    "rd_question_defers": 0
+   },
+   "TOTAL_characteristic_decisions": 42,
+   "non_zero": true,
+   "PORT_RULE": "PASS: the arm makes its own characteristic decision at least once",
+   "decisions_offered": {
+    "pd_decisions": 261,
+    "pd_decisions_state": 163,
+    "pd_decisions_request": 98,
+    "rd_decisions": 0,
+    "rd_deferred_to_guard_epochs": 0,
+    "rd_skipped_over_limit": 0,
+    "rd_skipped_already_deferred": 0
+   },
+   "unexpressible": {
+    "pd_protect_unexpressible_session_busy": 1,
+    "pd_request_crossed_bar_unexpressible": 29
+   },
+   "gate_mix_pd": {
+    "pd_gate_defer_to_latest_safe_start": 21,
+    "pd_gate_harm_does_not_exceed_the_bar": 83,
+    "pd_gate_must_start_now_so_send_less: the whole tail of 1024 tokens carries 2.0864 on-time answers of harm against a bar of 1.3348, and a slice of 512 carries 1.0946": 1,
+    "pd_gate_must_start_now_so_send_less: the whole tail of 1024 tokens carries 2.0919 on-time answers of harm against a bar of 1.3348, and a slice of 512 carries 1.1412": 1,
+    "pd_gate_no_active_alert_episode": 52,
+    "pd_gate_rebuild_fits_without_evicting": 74,
+    "pd_gate_wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here": 29
+   },
+   "gate_mix_rd": {},
+   "free_kv_seen": {
+    "pd_free_kv_max": 15736,
+    "pd_free_kv_min": 0,
+    "pd_free_kv_sum": 1230553
+   },
+   "kv_bound_by": {
+    "pd_kv_bound_by_belief": 261
+   },
+   "no_kv_pool_configured": 0
+  },
+  "R4_rqonly_kv025": {
+   "cell": "R4_rqonly_kv025",
+   "arm": "covex-v6-cf-c5attr-rqonly",
+   "kv_scale": 0.25,
+   "by_kind": {
+    "pd_state_defers": 0,
+    "pd_state_chunks": 0,
+    "pd_request_defers": 0,
+    "pd_protects": 0,
+    "rd_question_defers": 6
+   },
+   "TOTAL_characteristic_decisions": 6,
+   "non_zero": true,
+   "PORT_RULE": "PASS: the arm makes its own characteristic decision at least once",
+   "decisions_offered": {
+    "pd_decisions": 0,
+    "pd_decisions_state": 0,
+    "pd_decisions_request": 0,
+    "rd_decisions": 88,
+    "rd_deferred_to_guard_epochs": 1046,
+    "rd_skipped_over_limit": 0,
+    "rd_skipped_already_deferred": 4
+   },
+   "unexpressible": {},
+   "gate_mix_pd": {},
+   "gate_mix_rd": {
+    "rd_gate_defer_to_latest_safe_start": 6,
+    "rd_gate_must_start_now_no_slack": 46,
+    "rd_gate_no_active_alert_episode": 20,
+    "rd_gate_saving_does_not_exceed_margin": 16
+   },
+   "free_kv_seen": {},
+   "kv_bound_by": {},
+   "no_kv_pool_configured": 0
+  },
+  "N1_harm0_kv025": {
+   "cell": "N1_harm0_kv025",
+   "arm": "covex-v6-cf-c5attr-harm0",
+   "kv_scale": 0.25,
+   "by_kind": {
+    "pd_state_defers": 0,
+    "pd_state_chunks": 0,
+    "pd_request_defers": 0,
+    "pd_protects": 0,
+    "rd_question_defers": 0
+   },
+   "TOTAL_characteristic_decisions": 0,
+   "non_zero": false,
+   "PORT_RULE": "STOPPING CONDITION: zero characteristic decisions. CLAUDE.md 'Citing results' - this is an ABSENT LINK, never a negative about the policy",
+   "decisions_offered": {
+    "pd_decisions": 245,
+    "pd_decisions_state": 163,
+    "pd_decisions_request": 82,
+    "rd_decisions": 82,
+    "rd_deferred_to_guard_epochs": 1046,
+    "rd_skipped_over_limit": 0,
+    "rd_skipped_already_deferred": 4
+   },
+   "unexpressible": {},
+   "gate_mix_pd": {
+    "pd_gate_harm_does_not_exceed_the_bar": 125,
+    "pd_gate_no_active_alert_episode": 47,
+    "pd_gate_rebuild_fits_without_evicting": 73
+   },
+   "gate_mix_rd": {
+    "rd_gate_must_start_now_no_slack": 42,
+    "rd_gate_no_active_alert_episode": 18,
+    "rd_gate_saving_does_not_exceed_margin": 22
+   },
+   "free_kv_seen": {
+    "pd_free_kv_max": 15736,
+    "pd_free_kv_min": 0,
+    "pd_free_kv_sum": 1219402
+   },
+   "kv_bound_by": {
+    "pd_kv_bound_by_belief": 245
+   },
+   "no_kv_pool_configured": 0
+  }
+ },
+ "latency": {
+  "N1_harm0_kv025": {
+   "_register": "DRY cell, flash CPU wall-clock inside the arm's decide, measured by coordinator.py:2127. NOT an H100 number and not an engine number.",
+   "budget_ms": 20.0,
+   "n": 14523,
+   "rows_seen": 14523,
+   "rows_without_the_field": 0,
+   "min": 0.1168,
+   "p25": 0.8056,
+   "median": 0.9365,
+   "p75": 0.9787,
+   "iqr": 0.1731,
+   "p90": 1.0064,
+   "p99": 2.0873,
+   "max": 4.8222,
+   "mean": 0.894859,
+   "n_distinct": 3652,
+   "constant_where_a_distribution_is_expected": false,
+   "n_over_budget": 0,
+   "frac_over_budget": 0.0,
+   "p99_within_budget": true,
+   "max_within_budget": true,
+   "by_kind": {
+    "decline": {
+     "n": 29,
+     "min": 0.7366,
+     "median": 0.9573,
+     "p99": 1.0652,
+     "max": 1.0652,
+     "n_distinct": 29
+    },
+    "defer": {
+     "n": 4,
+     "min": 0.727,
+     "median": 0.7769,
+     "p99": 0.9053,
+     "max": 0.9053,
+     "n_distinct": 4
+    },
+    "release_monitor": {
+     "n": 10913,
+     "min": 0.1168,
+     "median": 0.9048,
+     "p99": 1.7234,
+     "max": 3.7741,
+     "n_distinct": 3405
+    },
+    "release_piece": {
+     "n": 163,
+     "min": 0.2605,
+     "median": 2.0658,
+     "p99": 4.8222,
+     "max": 4.8222,
+     "n_distinct": 144
+    },
+    "release_recall": {
+     "n": 460,
+     "min": 0.1618,
+     "median": 1.0043,
+     "p99": 1.3594,
+     "max": 2.2,
+     "n_distinct": 429
+    },
+    "state_action": {
+     "n": 2954,
+     "min": 0.9174,
+     "median": 0.9786,
+     "p99": 2.0717,
+     "max": 4.6304,
+     "n_distinct": 888
+    }
+   },
+   "kv_capacity_enforced": false,
+   "enforcement_proof": {
+    "_what": "the switch READ BACK OFF THE OBJECT UNDER TEST, not merely passed",
+    "n_coordinators_built": 1,
+    "asked_for": false,
+    "read_back": false,
+    "type_read_back": "bool",
+    "ARRIVED": true,
+    "gpu_kv_tokens_on_the_state": 15736,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 10934,
+     "host_epochs_over_cap": 0,
+     "host_peak_tokens": 0,
+     "intervals": [
+      3971,
+      6117
+     ],
+     "peak_tokens": 58281
+    }
+   }
+  },
+  "P1_state_uo_1x": {
+   "_register": "DRY cell, flash CPU wall-clock inside the arm's decide, measured by coordinator.py:2127. NOT an H100 number and not an engine number.",
+   "budget_ms": 20.0,
+   "n": 14218,
+   "rows_seen": 14218,
+   "rows_without_the_field": 0,
+   "min": 0.1641,
+   "p25": 0.8288,
+   "median": 0.9706,
+   "p75": 1.3955,
+   "iqr": 0.5667,
+   "p90": 1.6177,
+   "p99": 3.4094,
+   "max": 11.535,
+   "mean": 1.134454,
+   "n_distinct": 5476,
+   "constant_where_a_distribution_is_expected": false,
+   "n_over_budget": 0,
+   "frac_over_budget": 0.0,
+   "p99_within_budget": true,
+   "max_within_budget": true,
+   "by_kind": {
+    "decline": {
+     "n": 29,
+     "min": 0.7572,
+     "median": 0.9997,
+     "p99": 1.5353,
+     "max": 1.5353,
+     "n_distinct": 28
+    },
+    "defer": {
+     "n": 4,
+     "min": 0.7647,
+     "median": 0.7822,
+     "p99": 1.315,
+     "max": 1.315,
+     "n_distinct": 4
+    },
+    "release_monitor": {
+     "n": 11296,
+     "min": 0.1641,
+     "median": 0.925,
+     "p99": 1.9173,
+     "max": 11.535,
+     "n_distinct": 4933
+    },
+    "release_piece": {
+     "n": 162,
+     "min": 0.2708,
+     "median": 2.6986,
+     "p99": 11.535,
+     "max": 11.535,
+     "n_distinct": 144
+    },
+    "release_recall": {
+     "n": 460,
+     "min": 0.2199,
+     "median": 1.0024,
+     "p99": 1.8587,
+     "max": 3.712,
+     "n_distinct": 447
+    },
+    "state_action": {
+     "n": 2267,
+     "min": 0.877,
+     "median": 1.3971,
+     "p99": 2.4918,
+     "max": 7.6683,
+     "n_distinct": 1637
+    }
+   },
+   "kv_capacity_enforced": false
+  },
+  "R3_rung3_1x": {
+   "_register": "DRY cell, flash CPU wall-clock inside the arm's decide, measured by coordinator.py:2127. NOT an H100 number and not an engine number.",
+   "budget_ms": 20.0,
+   "n": 13812,
+   "rows_seen": 13812,
+   "rows_without_the_field": 0,
+   "min": 0.1074,
+   "p25": 0.7729,
+   "median": 0.8876,
+   "p75": 0.9489,
+   "iqr": 0.176,
+   "p90": 0.9851,
+   "p99": 1.9464,
+   "max": 4.9467,
+   "mean": 0.863109,
+   "n_distinct": 3817,
+   "constant_where_a_distribution_is_expected": false,
+   "n_over_budget": 0,
+   "frac_over_budget": 0.0,
+   "p99_within_budget": true,
+   "max_within_budget": true,
+   "by_kind": {
+    "decline": {
+     "n": 29,
+     "min": 0.7151,
+     "median": 0.899,
+     "p99": 0.9687,
+     "max": 0.9687,
+     "n_distinct": 29
+    },
+    "defer": {
+     "n": 4,
+     "min": 0.7687,
+     "median": 0.7887,
+     "p99": 0.8584,
+     "max": 0.8584,
+     "n_distinct": 4
+    },
+    "release_monitor": {
+     "n": 10890,
+     "min": 0.1074,
+     "median": 0.8625,
+     "p99": 1.691,
+     "max": 4.4703,
+     "n_distinct": 3572
+    },
+    "release_piece": {
+     "n": 162,
+     "min": 0.2066,
+     "median": 1.9037,
+     "p99": 4.9467,
+     "max": 4.9467,
+     "n_distinct": 141
+    },
+    "release_recall": {
+     "n": 460,
+     "min": 0.1503,
+     "median": 0.9301,
+     "p99": 1.1412,
+     "max": 2.0871,
+     "n_distinct": 441
+    },
+    "state_action": {
+     "n": 2267,
+     "min": 0.8827,
+     "median": 0.9485,
+     "p99": 1.9322,
+     "max": 4.4703,
+     "n_distinct": 1057
+    }
+   },
+   "kv_capacity_enforced": false,
+   "enforcement_proof": {
+    "_what": "the switch READ BACK OFF THE OBJECT UNDER TEST, not merely passed",
+    "n_coordinators_built": 1,
+    "asked_for": false,
+    "read_back": false,
+    "type_read_back": "bool",
+    "ARRIVED": true,
+    "gpu_kv_tokens_on_the_state": 62944,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 0,
+     "host_epochs_over_cap": 0,
+     "host_peak_tokens": 0,
+     "intervals": [],
+     "peak_tokens": 57257
+    }
+   }
+  },
+  "R3_rung3_kv025": {
+   "_register": "DRY cell, flash CPU wall-clock inside the arm's decide, measured by coordinator.py:2127. NOT an H100 number and not an engine number.",
+   "budget_ms": 20.0,
+   "n": 13812,
+   "rows_seen": 13812,
+   "rows_without_the_field": 0,
+   "min": 0.1033,
+   "p25": 0.7548,
+   "median": 0.8925,
+   "p75": 0.9397,
+   "iqr": 0.1849,
+   "p90": 0.9645,
+   "p99": 1.9516,
+   "max": 3.9563,
+   "mean": 0.852632,
+   "n_distinct": 3568,
+   "constant_where_a_distribution_is_expected": false,
+   "n_over_budget": 0,
+   "frac_over_budget": 0.0,
+   "p99_within_budget": true,
+   "max_within_budget": true,
+   "by_kind": {
+    "decline": {
+     "n": 29,
+     "min": 0.7183,
+     "median": 0.9074,
+     "p99": 0.9958,
+     "max": 0.9958,
+     "n_distinct": 29
+    },
+    "defer": {
+     "n": 4,
+     "min": 0.7308,
+     "median": 0.7566,
+     "p99": 0.8484,
+     "max": 0.8484,
+     "n_distinct": 4
+    },
+    "release_monitor": {
+     "n": 10890,
+     "min": 0.1033,
+     "median": 0.8709,
+     "p99": 1.284,
+     "max": 3.9517,
+     "n_distinct": 3353
+    },
+    "release_piece": {
+     "n": 162,
+     "min": 0.1881,
+     "median": 1.9234,
+     "p99": 3.9563,
+     "max": 3.9563,
+     "n_distinct": 143
+    },
+    "release_recall": {
+     "n": 460,
+     "min": 0.1477,
+     "median": 0.9436,
+     "p99": 1.0791,
+     "max": 2.147,
+     "n_distinct": 421
+    },
+    "state_action": {
+     "n": 2267,
+     "min": 0.8893,
+     "median": 0.9431,
+     "p99": 1.9485,
+     "max": 3.9517,
+     "n_distinct": 858
+    }
+   },
+   "kv_capacity_enforced": false,
+   "enforcement_proof": {
+    "_what": "the switch READ BACK OFF THE OBJECT UNDER TEST, not merely passed",
+    "n_coordinators_built": 1,
+    "asked_for": false,
+    "read_back": false,
+    "type_read_back": "bool",
+    "ARRIVED": true,
+    "gpu_kv_tokens_on_the_state": 15736,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 10934,
+     "host_epochs_over_cap": 0,
+     "host_peak_tokens": 0,
+     "intervals": [
+      3971,
+      6117
+     ],
+     "peak_tokens": 57257
+    }
+   }
+  },
+  "R4_full_1x": {
+   "_register": "DRY cell, flash CPU wall-clock inside the arm's decide, measured by coordinator.py:2127. NOT an H100 number and not an engine number.",
+   "budget_ms": 20.0,
+   "n": 14470,
+   "rows_seen": 14470,
+   "rows_without_the_field": 0,
+   "min": 0.2024,
+   "p25": 1.0541,
+   "median": 1.2359,
+   "p75": 1.6029,
+   "iqr": 0.5488,
+   "p90": 1.7191,
+   "p99": 2.9918,
+   "max": 11.6238,
+   "mean": 1.34193,
+   "n_distinct": 5115,
+   "constant_where_a_distribution_is_expected": false,
+   "n_over_budget": 0,
+   "frac_over_budget": 0.0,
+   "p99_within_budget": true,
+   "max_within_budget": true,
+   "by_kind": {
+    "decline": {
+     "n": 29,
+     "min": 1.1171,
+     "median": 1.7035,
+     "p99": 2.0082,
+     "max": 2.0082,
+     "n_distinct": 29
+    },
+    "defer": {
+     "n": 10,
+     "min": 1.3614,
+     "median": 1.573,
+     "p99": 2.134,
+     "max": 2.134,
+     "n_distinct": 10
+    },
+    "release_monitor": {
+     "n": 10854,
+     "min": 0.2024,
+     "median": 1.3244,
+     "p99": 2.5636,
+     "max": 11.6238,
+     "n_distinct": 4741
+    },
+    "release_piece": {
+     "n": 163,
+     "min": 0.4733,
+     "median": 2.634,
+     "p99": 11.6238,
+     "max": 11.6238,
+     "n_distinct": 144
+    },
+    "release_recall": {
+     "n": 460,
+     "min": 0.2858,
+     "median": 1.3642,
+     "p99": 2.1468,
+     "max": 4.1143,
+     "n_distinct": 446
+    },
+    "state_action": {
+     "n": 2954,
+     "min": 0.978,
+     "median": 1.0732,
+     "p99": 2.5213,
+     "max": 11.6238,
+     "n_distinct": 1351
+    }
+   },
+   "kv_capacity_enforced": false,
+   "enforcement_proof": {
+    "_what": "the switch READ BACK OFF THE OBJECT UNDER TEST, not merely passed",
+    "n_coordinators_built": 1,
+    "asked_for": false,
+    "read_back": false,
+    "type_read_back": "bool",
+    "ARRIVED": true,
+    "gpu_kv_tokens_on_the_state": 62944,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 0,
+     "host_epochs_over_cap": 0,
+     "host_peak_tokens": 0,
+     "intervals": [],
+     "peak_tokens": 58281
+    }
+   }
+  },
+  "R4_full_kv025": {
+   "_register": "DRY cell, flash CPU wall-clock inside the arm's decide, measured by coordinator.py:2127. NOT an H100 number and not an engine number.",
+   "budget_ms": 20.0,
+   "n": 14445,
+   "rows_seen": 14445,
+   "rows_without_the_field": 0,
+   "min": 0.1948,
+   "p25": 0.8893,
+   "median": 1.0104,
+   "p75": 1.0516,
+   "iqr": 0.1623,
+   "p90": 1.4864,
+   "p99": 2.4927,
+   "max": 9.1134,
+   "mean": 1.0474,
+   "n_distinct": 4117,
+   "constant_where_a_distribution_is_expected": false,
+   "n_over_budget": 0,
+   "frac_over_budget": 0.0,
+   "p99_within_budget": true,
+   "max_within_budget": true,
+   "by_kind": {
+    "decline": {
+     "n": 29,
+     "min": 0.8066,
+     "median": 1.0246,
+     "p99": 1.4523,
+     "max": 1.4523,
+     "n_distinct": 29
+    },
+    "defer": {
+     "n": 20,
+     "min": 0.8231,
+     "median": 1.2612,
+     "p99": 1.9435,
+     "max": 1.9435,
+     "n_distinct": 20
+    },
+    "release_monitor": {
+     "n": 10831,
+     "min": 0.1948,
+     "median": 0.9923,
+     "p99": 1.7644,
+     "max": 9.1134,
+     "n_distinct": 3723
+    },
+    "release_piece": {
+     "n": 158,
+     "min": 0.428,
+     "median": 2.4161,
+     "p99": 5.7158,
+     "max": 9.1134,
+     "n_distinct": 139
+    },
+    "release_recall": {
+     "n": 460,
+     "min": 0.2633,
+     "median": 1.1043,
+     "p99": 1.9641,
+     "max": 2.7218,
+     "n_distinct": 439
+    },
+    "state_action": {
+     "n": 2947,
+     "min": 0.9468,
+     "median": 1.0425,
+     "p99": 2.3933,
+     "max": 5.7158,
+     "n_distinct": 1195
+    }
+   },
+   "kv_capacity_enforced": false,
+   "enforcement_proof": {
+    "_what": "the switch READ BACK OFF THE OBJECT UNDER TEST, not merely passed",
+    "n_coordinators_built": 1,
+    "asked_for": false,
+    "read_back": false,
+    "type_read_back": "bool",
+    "ARRIVED": true,
+    "gpu_kv_tokens_on_the_state": 15736,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 10845,
+     "host_epochs_over_cap": 0,
+     "host_peak_tokens": 0,
+     "intervals": [
+      3971,
+      6117
+     ],
+     "peak_tokens": 53071
+    }
+   }
+  },
+  "R4_full_kv025_enf": {
+   "_register": "DRY cell, flash CPU wall-clock inside the arm's decide, measured by coordinator.py:2127. NOT an H100 number and not an engine number.",
+   "budget_ms": 20.0,
+   "n": 14445,
+   "rows_seen": 14445,
+   "rows_without_the_field": 0,
+   "min": 0.1149,
+   "p25": 0.7993,
+   "median": 0.9238,
+   "p75": 0.9869,
+   "iqr": 0.1876,
+   "p90": 1.0146,
+   "p99": 2.0717,
+   "max": 4.6559,
+   "mean": 0.89492,
+   "n_distinct": 3714,
+   "constant_where_a_distribution_is_expected": false,
+   "n_over_budget": 0,
+   "frac_over_budget": 0.0,
+   "p99_within_budget": true,
+   "max_within_budget": true,
+   "by_kind": {
+    "decline": {
+     "n": 29,
+     "min": 0.7439,
+     "median": 0.9466,
+     "p99": 1.0345,
+     "max": 1.0345,
+     "n_distinct": 29
+    },
+    "defer": {
+     "n": 20,
+     "min": 0.7524,
+     "median": 1.1692,
+     "p99": 1.4675,
+     "max": 1.4675,
+     "n_distinct": 20
+    },
+    "release_monitor": {
+     "n": 10831,
+     "min": 0.1149,
+     "median": 0.8936,
+     "p99": 1.3248,
+     "max": 4.6559,
+     "n_distinct": 3447
+    },
+    "release_piece": {
+     "n": 158,
+     "min": 0.2645,
+     "median": 2.0162,
+     "p99": 4.5424,
+     "max": 4.6559,
+     "n_distinct": 143
+    },
+    "release_recall": {
+     "n": 460,
+     "min": 0.1673,
+     "median": 0.9832,
+     "p99": 1.3248,
+     "max": 2.3002,
+     "n_distinct": 443
+    },
+    "state_action": {
+     "n": 2947,
+     "min": 0.9124,
+     "median": 0.9899,
+     "p99": 2.1319,
+     "max": 4.6559,
+     "n_distinct": 983
+    }
+   },
+   "kv_capacity_enforced": true,
+   "enforcement_proof": {
+    "_what": "the switch READ BACK OFF THE OBJECT UNDER TEST, not merely passed",
+    "n_coordinators_built": 1,
+    "asked_for": true,
+    "read_back": true,
+    "type_read_back": "bool",
+    "ARRIVED": true,
+    "gpu_kv_tokens_on_the_state": 15736,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 12,
+     "host_epochs_over_cap": 0,
+     "host_peak_tokens": 39396,
+     "intervals": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "peak_tokens": 16626
+    }
+   }
+  },
+  "R4_pdonly_kv025": {
+   "_register": "DRY cell, flash CPU wall-clock inside the arm's decide, measured by coordinator.py:2127. NOT an H100 number and not an engine number.",
+   "budget_ms": 20.0,
+   "n": 14445,
+   "rows_seen": 14445,
+   "rows_without_the_field": 0,
+   "min": 0.114,
+   "p25": 0.8073,
+   "median": 0.9263,
+   "p75": 0.9761,
+   "iqr": 0.1688,
+   "p90": 1.0042,
+   "p99": 2.0771,
+   "max": 4.6881,
+   "mean": 0.89336,
+   "n_distinct": 3626,
+   "constant_where_a_distribution_is_expected": false,
+   "n_over_budget": 0,
+   "frac_over_budget": 0.0,
+   "p99_within_budget": true,
+   "max_within_budget": true,
+   "by_kind": {
+    "decline": {
+     "n": 29,
+     "min": 0.7467,
+     "median": 0.9559,
+     "p99": 1.0301,
+     "max": 1.0301,
+     "n_distinct": 28
+    },
+    "defer": {
+     "n": 20,
+     "min": 0.7659,
+     "median": 1.1539,
+     "p99": 1.3979,
+     "max": 1.3979,
+     "n_distinct": 20
+    },
+    "release_monitor": {
+     "n": 10831,
+     "min": 0.114,
+     "median": 0.8981,
+     "p99": 1.2368,
+     "max": 4.6881,
+     "n_distinct": 3381
+    },
+    "release_piece": {
+     "n": 158,
+     "min": 0.2673,
+     "median": 2.0258,
+     "p99": 4.6377,
+     "max": 4.6881,
+     "n_distinct": 143
+    },
+    "release_recall": {
+     "n": 460,
+     "min": 0.1691,
+     "median": 0.9915,
+     "p99": 1.3119,
+     "max": 2.3,
+     "n_distinct": 431
+    },
+    "state_action": {
+     "n": 2947,
+     "min": 0.9102,
+     "median": 0.9757,
+     "p99": 2.0774,
+     "max": 4.6881,
+     "n_distinct": 879
+    }
+   },
+   "kv_capacity_enforced": false,
+   "enforcement_proof": {
+    "_what": "the switch READ BACK OFF THE OBJECT UNDER TEST, not merely passed",
+    "n_coordinators_built": 1,
+    "asked_for": false,
+    "read_back": false,
+    "type_read_back": "bool",
+    "ARRIVED": true,
+    "gpu_kv_tokens_on_the_state": 15736,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 10845,
+     "host_epochs_over_cap": 0,
+     "host_peak_tokens": 0,
+     "intervals": [
+      3971,
+      6117
+     ],
+     "peak_tokens": 53071
+    }
+   }
+  },
+  "R4_rqonly_kv025": {
+   "_register": "DRY cell, flash CPU wall-clock inside the arm's decide, measured by coordinator.py:2127. NOT an H100 number and not an engine number.",
+   "budget_ms": 20.0,
+   "n": 14470,
+   "rows_seen": 14470,
+   "rows_without_the_field": 0,
+   "min": 0.1105,
+   "p25": 0.7997,
+   "median": 0.9204,
+   "p75": 0.9834,
+   "iqr": 0.1837,
+   "p90": 1.0095,
+   "p99": 1.9896,
+   "max": 4.4105,
+   "mean": 0.890457,
+   "n_distinct": 3739,
+   "constant_where_a_distribution_is_expected": false,
+   "n_over_budget": 0,
+   "frac_over_budget": 0.0,
+   "p99_within_budget": true,
+   "max_within_budget": true,
+   "by_kind": {
+    "decline": {
+     "n": 29,
+     "min": 0.748,
+     "median": 0.9382,
+     "p99": 1.5844,
+     "max": 1.5844,
+     "n_distinct": 29
+    },
+    "defer": {
+     "n": 10,
+     "min": 0.7675,
+     "median": 1.1383,
+     "p99": 1.2759,
+     "max": 1.2759,
+     "n_distinct": 10
+    },
+    "release_monitor": {
+     "n": 10854,
+     "min": 0.1105,
+     "median": 0.8909,
+     "p99": 1.493,
+     "max": 4.4105,
+     "n_distinct": 3469
+    },
+    "release_piece": {
+     "n": 163,
+     "min": 0.1942,
+     "median": 1.9569,
+     "p99": 4.4105,
+     "max": 4.4105,
+     "n_distinct": 144
+    },
+    "release_recall": {
+     "n": 460,
+     "min": 0.1618,
+     "median": 0.9805,
+     "p99": 1.2212,
+     "max": 2.0586,
+     "n_distinct": 443
+    },
+    "state_action": {
+     "n": 2954,
+     "min": 0.8995,
+     "median": 0.9871,
+     "p99": 1.9896,
+     "max": 4.4105,
+     "n_distinct": 1003
+    }
+   },
+   "kv_capacity_enforced": false,
+   "enforcement_proof": {
+    "_what": "the switch READ BACK OFF THE OBJECT UNDER TEST, not merely passed",
+    "n_coordinators_built": 1,
+    "asked_for": false,
+    "read_back": false,
+    "type_read_back": "bool",
+    "ARRIVED": true,
+    "gpu_kv_tokens_on_the_state": 15736,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 10934,
+     "host_epochs_over_cap": 0,
+     "host_peak_tokens": 0,
+     "intervals": [
+      3971,
+      6117
+     ],
+     "peak_tokens": 58281
+    }
+   }
+  },
+  "R4off_1x": {
+   "_register": "DRY cell, flash CPU wall-clock inside the arm's decide, measured by coordinator.py:2127. NOT an H100 number and not an engine number.",
+   "budget_ms": 20.0,
+   "n": 14523,
+   "rows_seen": 14523,
+   "rows_without_the_field": 0,
+   "min": 0.1824,
+   "p25": 0.9499,
+   "median": 1.5249,
+   "p75": 1.6674,
+   "iqr": 0.7175,
+   "p90": 1.7716,
+   "p99": 4.3452,
+   "max": 13.9166,
+   "mean": 1.370445,
+   "n_distinct": 5044,
+   "constant_where_a_distribution_is_expected": false,
+   "n_over_budget": 0,
+   "frac_over_budget": 0.0,
+   "p99_within_budget": true,
+   "max_within_budget": true,
+   "by_kind": {
+    "decline": {
+     "n": 29,
+     "min": 0.8172,
+     "median": 1.0496,
+     "p99": 1.195,
+     "max": 1.195,
+     "n_distinct": 27
+    },
+    "defer": {
+     "n": 4,
+     "min": 0.8656,
+     "median": 0.868,
+     "p99": 0.9798,
+     "max": 0.9798,
+     "n_distinct": 4
+    },
+    "release_monitor": {
+     "n": 10913,
+     "min": 0.1824,
+     "median": 1.0279,
+     "p99": 2.3067,
+     "max": 9.1629,
+     "n_distinct": 4587
+    },
+    "release_piece": {
+     "n": 163,
+     "min": 0.3188,
+     "median": 2.7045,
+     "p99": 13.9166,
+     "max": 13.9166,
+     "n_distinct": 145
+    },
+    "release_recall": {
+     "n": 460,
+     "min": 0.2565,
+     "median": 1.1365,
+     "p99": 2.1281,
+     "max": 2.7158,
+     "n_distinct": 440
+    },
+    "state_action": {
+     "n": 2954,
+     "min": 1.4983,
+     "median": 1.6565,
+     "p99": 4.4896,
+     "max": 10.6386,
+     "n_distinct": 1316
+    }
+   },
+   "kv_capacity_enforced": false
+  },
+  "R4off_kv025": {
+   "_register": "DRY cell, flash CPU wall-clock inside the arm's decide, measured by coordinator.py:2127. NOT an H100 number and not an engine number.",
+   "budget_ms": 20.0,
+   "n": 14523,
+   "rows_seen": 14523,
+   "rows_without_the_field": 0,
+   "min": 0.1183,
+   "p25": 0.9994,
+   "median": 1.0761,
+   "p75": 1.5833,
+   "iqr": 0.5839,
+   "p90": 1.6723,
+   "p99": 2.5705,
+   "max": 10.3361,
+   "mean": 1.254445,
+   "n_distinct": 5033,
+   "constant_where_a_distribution_is_expected": false,
+   "n_over_budget": 0,
+   "frac_over_budget": 0.0,
+   "p99_within_budget": true,
+   "max_within_budget": true,
+   "by_kind": {
+    "decline": {
+     "n": 29,
+     "min": 1.0373,
+     "median": 1.5854,
+     "p99": 1.8699,
+     "max": 1.8699,
+     "n_distinct": 29
+    },
+    "defer": {
+     "n": 4,
+     "min": 0.8986,
+     "median": 1.5414,
+     "p99": 1.6949,
+     "max": 1.6949,
+     "n_distinct": 4
+    },
+    "release_monitor": {
+     "n": 10913,
+     "min": 0.1183,
+     "median": 1.0488,
+     "p99": 1.9882,
+     "max": 8.8558,
+     "n_distinct": 4581
+    },
+    "release_piece": {
+     "n": 163,
+     "min": 0.2248,
+     "median": 2.5082,
+     "p99": 10.3361,
+     "max": 10.3361,
+     "n_distinct": 144
+    },
+    "release_recall": {
+     "n": 460,
+     "min": 0.1632,
+     "median": 1.1585,
+     "p99": 1.9684,
+     "max": 3.3978,
+     "n_distinct": 442
+    },
+    "state_action": {
+     "n": 2954,
+     "min": 0.9875,
+     "median": 1.5571,
+     "p99": 2.5234,
+     "max": 10.3361,
+     "n_distinct": 1410
+    }
+   },
+   "kv_capacity_enforced": false,
+   "enforcement_proof": {
+    "_what": "the switch READ BACK OFF THE OBJECT UNDER TEST, not merely passed",
+    "n_coordinators_built": 1,
+    "asked_for": false,
+    "read_back": false,
+    "type_read_back": "bool",
+    "ARRIVED": true,
+    "gpu_kv_tokens_on_the_state": 15736,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 10934,
+     "host_epochs_over_cap": 0,
+     "host_peak_tokens": 0,
+     "intervals": [
+      3971,
+      6117
+     ],
+     "peak_tokens": 58281
+    }
+   }
+  },
+  "R4off_kv025_enf": {
+   "_register": "DRY cell, flash CPU wall-clock inside the arm's decide, measured by coordinator.py:2127. NOT an H100 number and not an engine number.",
+   "budget_ms": 20.0,
+   "n": 14523,
+   "rows_seen": 14523,
+   "rows_without_the_field": 0,
+   "min": 0.1086,
+   "p25": 0.7962,
+   "median": 0.9207,
+   "p75": 0.9747,
+   "iqr": 0.1785,
+   "p90": 1.0047,
+   "p99": 1.9676,
+   "max": 4.3184,
+   "mean": 0.884114,
+   "n_distinct": 3683,
+   "constant_where_a_distribution_is_expected": false,
+   "n_over_budget": 0,
+   "frac_over_budget": 0.0,
+   "p99_within_budget": true,
+   "max_within_budget": true,
+   "by_kind": {
+    "decline": {
+     "n": 29,
+     "min": 0.7645,
+     "median": 0.9374,
+     "p99": 1.0304,
+     "max": 1.0304,
+     "n_distinct": 29
+    },
+    "defer": {
+     "n": 4,
+     "min": 0.752,
+     "median": 0.7624,
+     "p99": 0.9349,
+     "max": 0.9349,
+     "n_distinct": 4
+    },
+    "release_monitor": {
+     "n": 10913,
+     "min": 0.1086,
+     "median": 0.8901,
+     "p99": 1.238,
+     "max": 3.6295,
+     "n_distinct": 3449
+    },
+    "release_piece": {
+     "n": 163,
+     "min": 0.1881,
+     "median": 1.9332,
+     "p99": 4.3184,
+     "max": 4.3184,
+     "n_distinct": 143
+    },
+    "release_recall": {
+     "n": 460,
+     "min": 0.1537,
+     "median": 0.9796,
+     "p99": 1.1529,
+     "max": 2.065,
+     "n_distinct": 434
+    },
+    "state_action": {
+     "n": 2954,
+     "min": 0.9015,
+     "median": 0.9747,
+     "p99": 1.9681,
+     "max": 4.3184,
+     "n_distinct": 991
+    }
+   },
+   "kv_capacity_enforced": true,
+   "enforcement_proof": {
+    "_what": "the switch READ BACK OFF THE OBJECT UNDER TEST, not merely passed",
+    "n_coordinators_built": 1,
+    "asked_for": true,
+    "read_back": true,
+    "type_read_back": "bool",
+    "ARRIVED": true,
+    "gpu_kv_tokens_on_the_state": 15736,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 14,
+     "host_epochs_over_cap": 0,
+     "host_peak_tokens": 47588,
+     "intervals": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "peak_tokens": 16747
+    }
+   }
+  }
+ },
+ "deferred_and_exposed": {
+  "R4_full_kv025": {
+   "_register": "CONSTRUCTED BOUND, NOT AN OBSERVED COUNT. A dry cell has no engine, so no deferral can be observed to overrun. The estimate applies the COMMITTED rung-3 exposure (n = 463 sent robot requests, seeds 4 to 7) to deferrals whose retained margin is zero by construction.",
+   "observed_deferred_and_exposed": "NOT MEASURABLE IN A DRY CELL: no engine, so no observed first token and no realised overrun",
+   "n_deferrals": 0,
+   "safety_factor_q90_in_force": 1.863404,
+   "exposure_per_deferral": 0.099352,
+   "expected_n_deferrals_exposed": 0.0,
+   "worst_ratio_multiple_over_the_factor": 1.503537,
+   "per_deferral": [],
+   "n_deferrals_carrying_a_predicted_service": 0,
+   "bar_distribution": {
+    "n": 11,
+    "min": 0.9995496296296298,
+    "median": 1.661272380952381,
+    "max": 1.97472,
+    "n_distinct": 9,
+    "at_w1": 0.65824,
+    "n_above_w1_floor": 11
+   },
+   "net_gain_distribution": {
+    "n": 11,
+    "min": -0.04509402393738593,
+    "median": -0.015342294040210806,
+    "p90": 1.0030883447473626,
+    "max": 1.0176597587631113,
+    "n_distinct": 11
+   }
+  },
+  "R4_full_kv025_enf": {
+   "_register": "CONSTRUCTED BOUND, NOT AN OBSERVED COUNT. A dry cell has no engine, so no deferral can be observed to overrun. The estimate applies the COMMITTED rung-3 exposure (n = 463 sent robot requests, seeds 4 to 7) to deferrals whose retained margin is zero by construction.",
+   "observed_deferred_and_exposed": "NOT MEASURABLE IN A DRY CELL: no engine, so no observed first token and no realised overrun",
+   "n_deferrals": 0,
+   "safety_factor_q90_in_force": 1.863404,
+   "exposure_per_deferral": 0.099352,
+   "expected_n_deferrals_exposed": 0.0,
+   "worst_ratio_multiple_over_the_factor": 1.503537,
+   "per_deferral": [],
+   "n_deferrals_carrying_a_predicted_service": 0,
+   "bar_distribution": {
+    "n": 12,
+    "min": 0.9995496296296298,
+    "median": 1.6090311111111113,
+    "max": 1.97472,
+    "n_distinct": 10,
+    "at_w1": 0.65824,
+    "n_above_w1_floor": 12
+   },
+   "net_gain_distribution": {
+    "n": 12,
+    "min": -0.04509402393738593,
+    "median": -0.027157062401354404,
+    "p90": 0.9880355452077562,
+    "max": 1.0176597587631113,
+    "n_distinct": 12
+   }
+  },
+  "R4_full_1x": {
+   "_register": "CONSTRUCTED BOUND, NOT AN OBSERVED COUNT. A dry cell has no engine, so no deferral can be observed to overrun. The estimate applies the COMMITTED rung-3 exposure (n = 463 sent robot requests, seeds 4 to 7) to deferrals whose retained margin is zero by construction.",
+   "observed_deferred_and_exposed": "NOT MEASURABLE IN A DRY CELL: no engine, so no observed first token and no realised overrun",
+   "n_deferrals": 6,
+   "safety_factor_q90_in_force": 1.863404,
+   "exposure_per_deferral": 0.099352,
+   "expected_n_deferrals_exposed": 0.5961,
+   "worst_ratio_multiple_over_the_factor": 1.503537,
+   "per_deferral": [
+    {
+     "t": 542.9,
+     "action": "DEFER_TO_LATEST_SAFE_START",
+     "deferral_s": 1.006723,
+     "predicted_total_service_s": 1.0011627197300879,
+     "safety_factor_used": 1.8721,
+     "retained_margin_s": 0.0,
+     "miss_threshold_ratio": 1.863404,
+     "estimated_exposure": 0.099352,
+     "worst_case_overrun_s": 1.505285
+    },
+    {
+     "t": 677.4,
+     "action": "DEFER_TO_LATEST_SAFE_START",
+     "deferral_s": 1.067657,
+     "predicted_total_service_s": 0.9910492221864373,
+     "safety_factor_used": 1.8721,
+     "retained_margin_s": 0.0,
+     "miss_threshold_ratio": 1.863404,
+     "estimated_exposure": 0.099352,
+     "worst_case_overrun_s": 1.490079
+    },
+    {
+     "t": 743.5,
+     "action": "DEFER_TO_LATEST_SAFE_START",
+     "deferral_s": 0.439147,
+     "predicted_total_service_s": 1.3262394264902873,
+     "safety_factor_used": 1.8721,
+     "retained_margin_s": 0.0,
+     "miss_threshold_ratio": 1.863404,
+     "estimated_exposure": 0.099352,
+     "worst_case_overrun_s": 1.99405
+    },
+    {
+     "t": 747.1,
+     "action": "DEFER_TO_LATEST_SAFE_START",
+     "deferral_s": 0.37529,
+     "predicted_total_service_s": 1.3587470971663071,
+     "safety_factor_used": 1.8721,
+     "retained_margin_s": 0.0,
+     "miss_threshold_ratio": 1.863404,
+     "estimated_exposure": 0.099352,
+     "worst_case_overrun_s": 2.042927
+    },
+    {
+     "t": 935.0,
+     "action": "DEFER_TO_LATEST_SAFE_START",
+     "deferral_s": 0.601225,
+     "predicted_total_service_s": 1.2348567522565868,
+     "safety_factor_used": 1.8721,
+     "retained_margin_s": 0.0,
+     "miss_threshold_ratio": 1.863404,
+     "estimated_exposure": 0.099352,
+     "worst_case_overrun_s": 1.856653
+    },
+    {
+     "t": 935.5,
+     "action": "DEFER_TO_LATEST_SAFE_START",
+     "deferral_s": 0.610225,
+     "predicted_total_service_s": 1.2348567522565868,
+     "safety_factor_used": 1.8721,
+     "retained_margin_s": 0.0,
+     "miss_threshold_ratio": 1.863404,
+     "estimated_exposure": 0.099352,
+     "worst_case_overrun_s": 1.856653
+    }
+   ],
+   "n_deferrals_carrying_a_predicted_service": 6,
+   "bar_distribution": {
+    "n": 22,
+    "min": 0.7557570370370371,
+    "median": 1.4023373913043478,
+    "max": 1.97472,
+    "n_distinct": 17,
+    "at_w1": 0.65824,
+    "n_above_w1_floor": 22
+   },
+   "net_gain_distribution": {
+    "n": 22,
+    "min": -0.04509402393738593,
+    "median": -0.012226848347845307,
+    "p90": 2.016206652892879,
+    "max": 4.08082971127398,
+    "n_distinct": 22
+   }
+  }
+ },
+ "gate_a": {
+  "committed_rung3_c5attr": {
+   "_status": "D206: THE GATE. Exposure and overrun magnitude, both measurements.",
+   "safety_factor_q90": 1.863404,
+   "exposure_fraction_of_sent_recall_requests_over_the_safety_factor": 0.099352,
+   "exposure_n_over_n": "46 of 463",
+   "overrun_magnitude_worst_as_a_multiple_of_predicted_service": 1.503537,
+   "quantile_is_non_degenerate": true,
+   "n_rows_strictly_above_the_factor": 46,
+   "_how_to_read": "a deferral placed at the latest safe start carries about the exposure probability of overrunning, and the overrun costs (ratio - safety_factor) x predicted service seconds; both are measured on real sent requests, which the retired count was not"
+  },
+  "rung3_plus_rr_addendum": {
+   "_status": "D206: THE GATE. Exposure and overrun magnitude, both measurements.",
+   "safety_factor_q90": 1.792192,
+   "exposure_fraction_of_sent_recall_requests_over_the_safety_factor": 0.099352,
+   "exposure_n_over_n": "46 of 463",
+   "overrun_magnitude_worst_as_a_multiple_of_predicted_service": 2.342371,
+   "quantile_is_non_degenerate": true,
+   "n_rows_strictly_above_the_factor": 46,
+   "_how_to_read": "a deferral placed at the latest safe start carries about the exposure probability of overrunning, and the overrun costs (ratio - safety_factor) x predicted service seconds; both are measured on real sent requests, which the retired count was not"
+  },
+  "retired_identity_column": {
+   "at_median_ratio": {
+    "bias": 1.314313,
+    "n_deferrals": 1,
+    "would_have_missed": 0,
+    "ratio_to_deferral_count": 0.0,
+    "is_an_identity": false,
+    "per_deferral": [
+     {
+      "predicted_total_service_s": 1.0011627197300879,
+      "bias": 1.314313,
+      "overrun_s": -0.549729,
+      "would_miss": false
+     }
+    ]
+   },
+   "at_q90_ratio_THE_SAFETY_FACTOR_ITSELF": {
+    "bias": 1.863404,
+    "n_deferrals": 1,
+    "would_have_missed": 0,
+    "ratio_to_deferral_count": 0.0,
+    "is_an_identity": true,
+    "per_deferral": [
+     {
+      "predicted_total_service_s": 1.0011627197300879,
+      "bias": 1.863404,
+      "overrun_s": 0.0,
+      "would_miss": false
+     }
+    ]
+   },
+   "at_max_ratio": {
+    "bias": 3.366941,
+    "n_deferrals": 1,
+    "would_have_missed": 1,
+    "ratio_to_deferral_count": 1.0,
+    "is_an_identity": false,
+    "per_deferral": [
+     {
+      "predicted_total_service_s": 1.0011627197300879,
+      "bias": 3.366941,
+      "overrun_s": 1.505285,
+      "would_miss": true
+     }
+    ]
+   }
+  },
+  "why_retired": "D206, on this script's own reasoning: overrun = (b - SAFETY_FACTOR) * service has the sign of (b - SAFETY_FACTOR) alone, so the count is 0 or N and never in between. The old 0 of 6 was an identity because q90 equalled max; N of N at the max bias is an identity of the opposite sign. Replacing the input made the QUANTILE real and did not make the COUNT informative. The column is kept and labelled so a reader can see why it was retired, not merely that it went."
+ }
+}

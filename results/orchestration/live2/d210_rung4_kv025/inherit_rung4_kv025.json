@@ -1,0 +1,591 @@
+{
+ "_what": "every counter the arm kept on one dry cell; NO DIGEST CLAIM",
+ "_register": "DRY, LOGICAL pool (--kv-scale scales test_live2_coord.GPU_KV), flash CPU. No engine and no --num-gpu-blocks-override.",
+ "arm": "covex-v6-cf-c5attr",
+ "seed": 4,
+ "n": 16,
+ "run_s": 1200.0,
+ "kv_scale": 0.25,
+ "gpu_kv_tokens": 15736,
+ "kv_capacity_enforced": false,
+ "n_decision_rows": 14445,
+ "stats_all": {
+  "cf_budget_ms": 20.0,
+  "cf_planner_decisions": 60941,
+  "cf_planner_decisions_state": 60941,
+  "deficit_feed": {
+   "gain": 2.0,
+   "gain_ruling": "D178 (2), corrected by flash addendum 12 item 2",
+   "form": "w_d = 1 + gain * (shortfall_d / target_d), floored at 1, PER DEVICE",
+   "targets": {
+    "alert": 0.25,
+    "recall": 0.9,
+    "assistance": 0.9
+   },
+   "target_source": "D178 (1), spec v6 sections 2 and 8",
+   "units": {
+    "alert": "device-episode",
+    "recall": "device",
+    "assistance": "device"
+   },
+   "currency": "on-time CLOUD answers only (D177, D178 (1)); device_on_time recorded, never added to the numerator",
+   "alert_decision_instants_per_episode": 19,
+   "n_offers": 12046,
+   "n_completions": 11096,
+   "per_device": {
+    "asst000": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 117,
+     "cloud_on_time": 117
+    },
+    "asst001": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 118,
+     "cloud_on_time": 118
+    },
+    "asst002": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 116,
+     "cloud_on_time": 116
+    },
+    "dash000": {
+     "type": "alert",
+     "shortfall": 0.004005,
+     "weight": 1.032037,
+     "episodes_closed": 115,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash001": {
+     "type": "alert",
+     "shortfall": 0.007323,
+     "weight": 1.058581,
+     "episodes_closed": 115,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash002": {
+     "type": "alert",
+     "shortfall": 0.00595,
+     "weight": 1.047597,
+     "episodes_closed": 115,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash003": {
+     "type": "alert",
+     "shortfall": 0.00686,
+     "weight": 1.054881,
+     "episodes_closed": 117,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash004": {
+     "type": "alert",
+     "shortfall": 0.007025,
+     "weight": 1.0562,
+     "episodes_closed": 118,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash005": {
+     "type": "alert",
+     "shortfall": 0.005492,
+     "weight": 1.043936,
+     "episodes_closed": 115,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "robo000": {
+     "type": "recall",
+     "shortfall": 0.478947,
+     "weight": 2.064327,
+     "episodes_closed": null,
+     "offered": 19,
+     "cloud_on_time": 8
+    },
+    "robo001": {
+     "type": "recall",
+     "shortfall": 0.709524,
+     "weight": 2.57672,
+     "episodes_closed": null,
+     "offered": 21,
+     "cloud_on_time": 4
+    },
+    "robo002": {
+     "type": "recall",
+     "shortfall": 0.4625,
+     "weight": 2.027778,
+     "episodes_closed": null,
+     "offered": 16,
+     "cloud_on_time": 7
+    },
+    "robo003": {
+     "type": "recall",
+     "shortfall": 0.766667,
+     "weight": 2.703704,
+     "episodes_closed": null,
+     "offered": 15,
+     "cloud_on_time": 2
+    },
+    "robo004": {
+     "type": "recall",
+     "shortfall": 0.49375,
+     "weight": 2.097222,
+     "episodes_closed": null,
+     "offered": 32,
+     "cloud_on_time": 13
+    },
+    "robo005": {
+     "type": "recall",
+     "shortfall": 0.361538,
+     "weight": 1.803419,
+     "episodes_closed": null,
+     "offered": 13,
+     "cloud_on_time": 7
+    },
+    "robo006": {
+     "type": "recall",
+     "shortfall": 0.614286,
+     "weight": 2.365079,
+     "episodes_closed": null,
+     "offered": 14,
+     "cloud_on_time": 4
+    }
+   },
+   "weights_by_type_over_all_devices": {
+    "alert": 1.058581,
+    "recall": 2.703704,
+    "assistance": 1.0
+   },
+   "weights_by_type_pending": null,
+   "type_shortfall_DIAGNOSTIC_ONLY": {
+    "alert": 0.006115,
+    "recall": 0.555316,
+    "assistance": 0.0
+   },
+   "n_units": {
+    "alert": 695,
+    "recall": 7,
+    "assistance": 3
+   },
+   "counts": {
+    "alert_cloud_late": 417,
+    "alert_cloud_on_time": 10227,
+    "alert_device_on_time": 10644,
+    "alert_episode_key_agree": 10644,
+    "alert_episode_key_from_record": 10644,
+    "alert_episodes_closed": 695,
+    "alert_episodes_open": 6,
+    "alert_instant_repeat": 9946,
+    "alert_instants_offered": 11565,
+    "assistance_cloud_on_time": 351,
+    "assistance_device_late": 95,
+    "assistance_device_on_time": 256,
+    "assistance_questions_offered": 351,
+    "completion_background_skipped": 154,
+    "order_key_resolved": 71805,
+    "recall_cloud_late": 56,
+    "recall_cloud_on_time": 45,
+    "recall_device_on_time": 101,
+    "recall_question_repeat": 20,
+    "recall_questions_offered": 130
+   }
+  },
+  "deficit_feed_completions": 11441,
+  "gain_HOLD_BACK_max_milli": 998,
+  "gain_HOLD_BACK_milli_sum": 1718,
+  "gain_HOLD_BACK_n": 60941,
+  "gain_TOUCH_max_milli": 1921,
+  "gain_TOUCH_milli_sum": 16169667,
+  "gain_TOUCH_n": 60941,
+  "gain_TOUCH_over_margin": 2934,
+  "gain_WARM_max_milli": 1761,
+  "gain_WARM_milli_sum": 30324,
+  "gain_WARM_n": 114,
+  "gain_WARM_over_margin": 6,
+  "harm_warm_capped": 2,
+  "harm_warm_max_milli": 998,
+  "harm_warm_milli_sum": 2589,
+  "harm_warm_no_queue": 58651,
+  "harm_warm_nonzero": 1696,
+  "harm_warm_priced": 2404,
+  "pd_decisions": 261,
+  "pd_decisions_request": 98,
+  "pd_decisions_state": 163,
+  "pd_deferred_to_guard_epochs": 1043,
+  "pd_free_kv_max": 15736,
+  "pd_free_kv_min": 0,
+  "pd_free_kv_sum": 1230553,
+  "pd_gate_defer_to_latest_safe_start": 21,
+  "pd_gate_harm_does_not_exceed_the_bar": 83,
+  "pd_gate_must_start_now_so_send_less: the whole tail of 1024 tokens carries 2.0864 on-time answers of harm against a bar of 1.3348, and a slice of 512 carries 1.0946": 1,
+  "pd_gate_must_start_now_so_send_less: the whole tail of 1024 tokens carries 2.0919 on-time answers of harm against a bar of 1.3348, and a slice of 512 carries 1.1412": 1,
+  "pd_gate_no_active_alert_episode": 52,
+  "pd_gate_rebuild_fits_without_evicting": 74,
+  "pd_gate_wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here": 29,
+  "pd_harm_gt_0": 135,
+  "pd_harm_gt_0p01": 83,
+  "pd_harm_gt_0p1": 76,
+  "pd_harm_gt_0p65824": 68,
+  "pd_harm_gt_1": 68,
+  "pd_harm_gt_2": 48,
+  "pd_harm_gt_5": 11,
+  "pd_harm_micro_max": 6182890,
+  "pd_harm_micro_sum": 187966798,
+  "pd_harm_n": 135,
+  "pd_harm_over_bar": 52,
+  "pd_kv_bound_by_belief": 261,
+  "pd_protect_unexpressible_session_busy": 1,
+  "pd_protects": 19,
+  "pd_request_crossed_bar_unexpressible": 29,
+  "pd_request_defers": 16,
+  "pd_state_chunks": 2,
+  "pd_state_defers": 5,
+  "pd_u_max": 16558,
+  "pd_u_sum": 1006750,
+  "pd_victim_found": 217,
+  "rd_decider_weight_above_floor": 11,
+  "rd_decisions": 82,
+  "rd_deferred_to_guard_epochs": 1043,
+  "rd_gate_must_start_now_no_slack": 49,
+  "rd_gate_no_active_alert_episode": 22,
+  "rd_gate_saving_does_not_exceed_margin": 11,
+  "rd_harm_now_micro_sum": 14368038,
+  "rd_harm_saved_micro_sum": 3315362,
+  "rd_net_micro_max": 1017660,
+  "rd_own_loss_micro_sum": 381440,
+  "rd_reached_harm": 11,
+  "rd_skipped_already_deferred": 20,
+  "rd_u_built_only_minus_u_sum": -81920,
+  "rd_u_built_won": 54,
+  "rd_u_cold": 28,
+  "rd_u_differs_from_built_only": 28,
+  "rd_u_not_cold": 54,
+  "state_chosen_KEEP": 58007,
+  "state_chosen_TOUCH": 2928,
+  "state_chosen_WARM": 6,
+  "state_decisions": 60941,
+  "state_decisions_with_a_rebuild": 114,
+  "state_decisions_without_a_rebuild": 60827,
+  "state_deferred_to_guard_epochs": 1043,
+  "state_delta_gt_0": 58716,
+  "state_delta_gt_0p01": 44581,
+  "state_delta_gt_0p05": 29605,
+  "state_delta_gt_0p1": 25055,
+  "state_delta_gt_0p12": 23770,
+  "state_delta_gt_0p14": 22689,
+  "state_delta_gt_0p16": 21717,
+  "state_delta_gt_0p16456": 21493,
+  "state_delta_gt_0p18": 20774,
+  "state_delta_gt_0p2": 19860,
+  "state_delta_gt_0p25": 17594,
+  "state_delta_max_milli": 1921,
+  "state_delta_milli_sum": 16171465,
+  "state_delta_n": 60941,
+  "state_delta_over_margin": 2934,
+  "state_deviations": 2934,
+  "state_skipped_no_question_estimate": 14783,
+  "state_skipped_nothing_built": 975,
+  "state_touch_emitted": 2928,
+  "submitted_monitor": 10831,
+  "submitted_piece": 158,
+  "submitted_recall": 460
+ },
+ "enforcement_proof": {
+  "asked_for": false,
+  "read_back": false,
+  "gpu_kv_tokens_on_the_state": 15736,
+  "pressure": {
+   "epochs": 12001,
+   "epochs_over_cap": 10845,
+   "host_epochs_over_cap": 0,
+   "host_peak_tokens": 0,
+   "intervals": [
+    3971,
+    6117
+   ],
+   "peak_tokens": 53071
+  }
+ },
+ "describe": {
+  "arm": "covex-v6-cf-c5attr",
+  "arm_version": "covex-v6-cf-r3-1.0",
+  "uses_h": false,
+  "h_s": null,
+  "releases_one_per_epoch": false,
+  "sends_requests": true,
+  "piece_tokens": null,
+  "reads_device_answer": false,
+  "source": "arms_v5rules2.V5Rules2Arm (covex-v6-rules) plus v5/cf_planner.plan_state for the TOUCH / KEEP decision, offload_policy per-type host retention, touch_policy state pricing, and coordinator belief-apply from engine telemetry",
+  "card": "baselines/cards/constructed.md",
+  "adapted_from": "baselines/constructed.py::B7EDFFeasibility",
+  "card_experiments": [
+   "C-mixed"
+  ],
+  "in_card_scope_for_live2": true,
+  "hybrid": {
+   "c1": true,
+   "c2": true,
+   "c3": false,
+   "c4": false,
+   "c5": true,
+   "c6": false,
+   "k_r": 1.5,
+   "k_r_frac": 0.3,
+   "m_d": 0.05,
+   "defs": "v2",
+   "reserve": false,
+   "workload": "lh_req",
+   "quality_fit": "lh_req_dev",
+   "throttle_floor": 2,
+   "c3_always": false
+  },
+  "hybrid_name": "hybrid-F-lhreq-noc3",
+  "v5_rules2": {
+   "base": "hybrid-F-lhreq-noc3",
+   "warm_ahead": true,
+   "chunk_tokens": 2048,
+   "just_in_time": true,
+   "guard": true,
+   "guard_lag_s": 2.0,
+   "guard_backlog": 100,
+   "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load",
+   "horizon": "causal EWMA of this arm's own observed inter-question intervals per device (D11 / D48)",
+   "slice_tokens": 1024,
+   "candidates": "robot sessions with an unwarmed tail at or above the chunk, or a question expected within the horizon",
+   "counterfactual": false,
+   "planner": false,
+   "margin_cf": null,
+   "engine_actions_version": "v5-engine-actions-1.0"
+  },
+  "rung": {
+   "ladder": "spec v6 section 10 (D172)",
+   "rung": 2,
+   "name": "covex-v6-state",
+   "adds_over_the_rung_below": "per-type host retention (max_offload_tokens = 0 for alert and single-shot), TOUCH chosen by plan_state, residency belief corrected from engine telemetry including host hits, state-based pricing",
+   "implemented_by": "covex-v6-state",
+   "committed_under": [],
+   "cells_are_reused_not_rerun": false,
+   "identity_proof": "live2/v6_alias_proof.py (decision digest on a dry cell)"
+  },
+  "covex_v6_state": {
+   "rules_base": "v5-rules-2",
+   "plan_state": true,
+   "per_type_host_retention": "offload_policy.RULE (alert and single-shot: max_offload_tokens = 0; robot: retained)",
+   "touch": "touch_policy.should_touch with the M6 mixed-tier guard; the CHOICE is plan_state's, the guard is the coordinator's",
+   "belief_correction": "apply (engine telemetry, including host hits)",
+   "state_priced_costs": true,
+   "offload_controls": true,
+   "touch_requests": true,
+   "belief_apply": true,
+   "d162_pricing": true,
+   "budget_charge_mode": "uncached-only",
+   "one_price_source": "D162 predicted first token, read identically by the planner's TOUCH harm and the coordinator's budget charge (user ruling, 2026-11-21)",
+   "harm_warm": "COMPUTED from the D162 model's per_queue_token coefficient per research/prereg_harm_warm_d172.md; never a declared grid value. Capped at the healthy-regime bound with harm_warm_capped counted",
+   "margin": "cf_margin.MARGIN_CF",
+   "scorable": true
+  },
+  "c5_attribution": {
+   "rule": "C5 does not halve its cap for a slow monitor whose wait overlapped a robot prefill the coordinator itself released (uncached >= 200 tokens); on suppression the cap is HELD and the recovery timer is not restarted",
+   "enabled": true,
+   "overlap_source": "coordinator._self_released_overlap, reported on live2_completed as self_released_prefill_overlap",
+   "uncached_definition": "the uncached count the COORDINATOR CHARGED at release (its own prediction), not the engine's later prompt - cached",
+   "counters": [
+    "c5_attr_suppressed_decrease",
+    "c5_attr_slow_all_self_released",
+    "c5_attr_slow_mixed",
+    "c5_attr_trip_without_slow_evidence"
+   ],
+   "status": "CANDIDATE, default off, adopted only by a user ruling"
+  },
+  "covex_v6_fair_feed": {
+   "rung": 3,
+   "rules_base": "covex-v6-state-uo-c5attr",
+   "switch": "live2_deficit_feed",
+   "switch_on": true,
+   "switch_chain": [
+    true,
+    true,
+    true
+   ],
+   "gain": 2.0,
+   "gain_declared": 2.0,
+   "gain_ruling": "D178 (2), corrected by flash addendum 12 item 2",
+   "gain_source": "user's flash addendum 9 item B1, 2026-11-22, pre-registered: at gain 2.0 a unit at HALF its target carries weight 2 and so counts double; the weight range is bounded at 1 to 3; a 3x range cannot let one unit monopolise, because D179's floors already guarantee the other types a minimum and only the FLEXIBLE pool and the ORDERING are weighted",
+   "value_reader": "REMOVED (D177 (2)); no accuracy value is read on this path",
+   "currency": "on-time CLOUD answers only (D177, D178 (1))",
+   "targets": {
+    "alert": 0.25,
+    "recall": 0.9,
+    "assistance": 0.9
+   },
+   "units": {
+    "alert": "device-episode",
+    "recall": "device",
+    "assistance": "device"
+   },
+   "alert_decision_instants_per_episode": 19,
+   "consumers": {
+    "ordering": {
+     "on": true,
+     "role": "PRIMARY (addendum 12 item 3a)",
+     "read": "hybrid/hybrid_arm.py `_deficit_order_key`, the first key at both deadline-ordering sites; overridden on the INNER HybridArm instance to return the NEGATIVE w_d",
+     "known_gap": "the committed call sites pass getattr(<frozen dataclass>, 'device_id', None) and neither EpisodicStream nor RecallQuery has that field, so every call receives None and an unresolved item takes the neutral 0.0; see order_key_unresolved_device"
+    },
+    "flexible_split": {
+     "on": true,
+     "read": "share_admission.py:162-168 via the coordinator's SA.allowed(weights_by_type=) call site",
+     "rule": "per type, the MAXIMUM w_d over that type's devices with pending work; 1.0 for a type with none",
+     "weighted": "the FLEXIBLE pool only; floors, W_max and the oversize rule are UNCHANGED (D179 intact)"
+    }
+   },
+   "consumer_wired": false
+  },
+  "covex_v6_cf": {
+   "compound": "protect and defer (spec v6 section 7, D165 (D))",
+   "decision_kinds": [
+    "request",
+    "state"
+   ],
+   "not_built": [
+    "keep-ready set",
+    "admit with protected victim",
+    "plan_sync"
+   ],
+   "base": {
+    "module": "arms_v6cfr3",
+    "cls": "V6CfRung4C5Attr",
+    "base_arm": "covex-v6-fair-c5attr",
+    "why": "rung 3 (the D178 (2) deficit feed over the c5attr rung-2 base), so the deficit weight is LIVE in both w_j and w_R",
+    "key": "fair_c5attr"
+   },
+   "contingency": "addendum 9 item A, 2026-11-22: rung 2 is EITHER covex-v6-state-shares (if it passes all three D179 (6) checks) OR covex-v6-state-uo-c5attr (if shares fails any, as a logged override of the D181 rule). The selection rule is committed in reports/study_c5_selection_rule.md and is read off the posted shares cells at cell time.",
+   "switch": {
+    "attr": "live2_cf_protect_defer",
+    "chain": [
+     {
+      "class": "V6CfRung4C5Attr",
+      "declared_on_instance": true,
+      "value": true,
+      "type": "bool"
+     },
+     {
+      "class": "V5Rules2Arm",
+      "declared_on_instance": true,
+      "value": true,
+      "type": "bool"
+     },
+     {
+      "class": "HybridArm",
+      "declared_on_instance": true,
+      "value": true,
+      "type": "bool"
+     }
+    ],
+    "arm_enables": true
+   },
+   "mechanism": "experiments/orchestration/live2/cf_protect_defer.py",
+   "margin": {
+    "value": 0.65824,
+    "source": "MARGIN_CF / A_D2_DEV = 0.16456 / 0.250 = 0.65824000000000005; D177 (3) states it as 0.6582 in on-time units. Path: cf_objective.attainment_margin (the canonical function)"
+   },
+   "bar_reading": "decider",
+   "w_source": "covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS",
+   "kappa": {
+    "kappa": 1.5775406165458339,
+    "calibrated": true,
+    "quantile": 0.9,
+    "source": "v5/cf_margin.safety_factor(cf_cost.load_residuals()); residuals results/orchestration/live2/frozen_test/runs (committed request logs), split 'fit on the non-hybrid arms, test on the hybrids'",
+    "register": "FITTED and committed: q90 of actual over predicted service, the same factor v5/cf_planner.py:357 uses. TWO CAVEATS: its split is held-out-BY-ARM ('fit on the non-hybrid arms, test on the hybrids'), not D125's words 'FIT/DEV'; and the residual summary itself carries gate_status 'FAILS: decode over-predicts by 25 to 32 percent in every held-out class and warm is confounded with arm (spec v5 section 12)'. A latest-start time quoted from it must carry both."
+   },
+   "controls": {
+    "harm_zero": false,
+    "margin_huge": false
+   },
+   "harm_distribution": {
+    "n": 135,
+    "min": 0.00024762897707009124,
+    "p25": 0.0005114338646234895,
+    "median": 1.0053093505269004,
+    "p75": 2.0919441080244057,
+    "p90": 4.112797007168307,
+    "max": 6.18289031238277,
+    "n_zero": 0,
+    "n_distinct": 118,
+    "bar_at_w1": 0.65824,
+    "n_over_bar_at_w1": 68
+   }
+  },
+  "covex_v6_rung4": {
+   "rung": 4,
+   "cumulative_over": [
+    "covex-v6-state-uo-c5attr",
+    "covex-v6-fair-c5attr"
+   ],
+   "compounds": {
+    "protect_and_defer": {
+     "on": true,
+     "switch": "live2_cf_protect_defer",
+     "spec": "spec v6 section 7, D165 (D)",
+     "aims_at": "a large non-urgent COLD REBUILD that would evict a warm history before its question"
+    },
+    "question_deferral": {
+     "on": true,
+     "switch": "live2_cf_request_defer",
+     "spec": "spec v6 section 7, D151 (3), scoped in by D191 item 2",
+     "aims_at": "a cloud-admitted recall QUESTION whose prefill delays an active alert episode's first token; no eviction gate"
+    }
+   },
+   "units": "counts of expected on-time cloud answers, per-device w_d weighted; no division by the number served (D191 item 1)",
+   "added_here": "the two legs' w_d wiring and the question-deferral decision",
+   "w_source": "covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS",
+   "planner_limb_w_source": {
+    "source": "live2/deficit_feed.DeficitFeed.weight_device, THE SAME FEED OBJECT the two counterfactual legs read (D206 item 1b)",
+    "is_declared_constant": false,
+    "gain": 2.0,
+    "reads": 63357,
+    "unresolved": 0,
+    "reads_above_the_w1_floor": 54470,
+    "feed_observations": 23539,
+    "identity_note": "the legs and this limb read ONE object, so an equality proof between them is an IDENTITY with maximum absolute difference exactly 0, not a measurement of agreement"
+   },
+   "w_wired_proof": {
+    "accessor": "make.<locals>.<lambda>",
+    "live_weight": true,
+    "probe_device": "robo000",
+    "probe_value_at_construction": 1.0,
+    "bar_at_probe": 0.65824,
+    "feed_present": true,
+    "feed_gain": 2.0,
+    "note": "1.0 at construction is CORRECT and is not a failure: no opportunity has been offered yet, so every shortfall is 0 and every weight is at the D178 (2) floor. What must be true at construction is that the ACCESSOR is the live one; that the VALUE moves is a run-time property and is measured by pd_bar_distinct_values and the bar distribution in the proofs."
+   },
+   "bar_reading": "decider",
+   "bar_at_w1": 0.65824,
+   "bar_source": "MARGIN_CF / A_D2_DEV = 0.16456 / 0.250 = 0.65824000000000005; D177 (3) states it as 0.6582 in on-time units. Path: cf_objective.attainment_margin (the canonical function)",
+   "margin_path": "cf_objective.attainment_margin (the canonical function)",
+   "gain": 2.0,
+   "gain_declared": 2.0
+  }
+ },
+ "w_wired_proof": {
+  "accessor": "make.<locals>.<lambda>",
+  "live_weight": true,
+  "probe_device": "robo000",
+  "probe_value_at_construction": 1.0,
+  "bar_at_probe": 0.65824,
+  "feed_present": true,
+  "feed_gain": 2.0,
+  "note": "1.0 at construction is CORRECT and is not a failure: no opportunity has been offered yet, so every shortfall is 0 and every weight is at the D178 (2) floor. What must be true at construction is that the ACCESSOR is the live one; that the VALUE moves is a run-time property and is measured by pd_bar_distinct_values and the bar distribution in the proofs."
+ },
+ "w_source": "covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS"
+}
