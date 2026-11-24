@@ -29,13 +29,13 @@ rq60|16|_L3_epg_rq60||RQV33
 EOF
 )
 # driver v33 parses _rq<k>; until it is the running driver the re-ask conditions wait
-pgrep -u pragya -f "study_frozen_grid_driver_v33.sh" >/dev/null && RQV33="" || RQV33="waiting on build: driver v33 (_rq<k> tag) running"
+pgrep -u pragya -f "study_frozen_grid_driver_v(3[3-9]|[4-9][0-9]).sh" >/dev/null && RQV33="" || RQV33="waiting on build: driver v33 (_rq<k> tag) running"
 armwait() {   # $1 arm, $2 condition key. Open fidelity hits per arm (D209 (2), reduced by the baseline-set ruling)
   # hit 14 card check (2026-11-23 16:50): llf (D118 laxity from committed cost curves) reads NO capacity, so it is
   # unaffected everywhere; mooncake as carded keeps gpu_warm_slots = 4 (StudyE10b), a constant, so it is unaffected at
   # 1x, and whether it should follow the GPU-KV pool at 0.5x / 0.25x is an ADAPTATION change awaiting the user.
   case "$1" in
-    simplestream) echo "waiting on hits 14, 7";;
+    simplestream) echo "";;   # hit 7 LANDED c511050; hit 14 card check: no capacity input
     mooncake) case "$2" in mem*) echo "waiting on hit 14 ruling (adaptation: gpu_warm_slots = 4 fixed by the card)";; *) echo "";; esac;;
     eco-llm) echo "waiting on hits 14, 16";;
     *) echo "";;
@@ -58,7 +58,7 @@ cat <<'EOF'
 # D212 entries
 a  | FILLER_A_CELLS  confidence-cascade 16 s4-s7 _L3_epg_rq30_rerun | ready (gated)
 b  | FILLER_C_CELLS  cascade-routing 16 s4-s7 _L3_epg_rq30 | ready (DEVWAIT_READY at 10dae57d). REPORTED, PORT-RULE FAIL: its sufficiency proxy cannot fire here (0 of 489 recall decisions are its skip-or-cascade choice; lambda 0.02 vs 2.0 moves 0), so it sits on the device-only floor by construction (census holds at every seed; s7 recount: 464 recall-path decisions, 446 declines + 18 releases, ZERO the proxy cascade choice; the 18 are RECENT sends of the only over-32k session, robo004 s000, which exists only at s7, D176); its lambda was fitted offline against a cost budget live2 lacks (D58, D174 (1)); never counted as a baseline we beat (D212 (3), D213)
-c1 | simplestream reruns on committed conditions | waiting on hits 14, 7
+c1 | FILLER_SS_CELLS simplestream 16 s4-s7 _L3_epg_rq30_rerun | ready (hit 7 landed c511050; hit-14 card check: reads no capacity)
 c2 | llf: UNAFFECTED by hit 14 (card check); mooncake: unaffected at 1x, memory conditions await the hit-14 adaptation ruling; eco-llm: waiting on hits 14, 16
 c3 | kvflow-prefetch, lmcache (hit 9), attentionstore-prefetch (hit 8) reruns | waiting on hits 9, 8
 d  | D209SAFE_CELLS covex-v6-base / covex-v6-rules at L2.5, n12, n20 | ready (gated)

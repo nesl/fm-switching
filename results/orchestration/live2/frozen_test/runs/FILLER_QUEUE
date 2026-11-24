@@ -9,7 +9,7 @@
 # D212 entries
 a  | FILLER_A_CELLS  confidence-cascade 16 s4-s7 _L3_epg_rq30_rerun | ready (gated)
 b  | FILLER_C_CELLS  cascade-routing 16 s4-s7 _L3_epg_rq30 | ready (DEVWAIT_READY at 10dae57d). REPORTED, PORT-RULE FAIL: its sufficiency proxy cannot fire here (0 of 489 recall decisions are its skip-or-cascade choice; lambda 0.02 vs 2.0 moves 0), so it sits on the device-only floor by construction (census holds at every seed; s7 recount: 464 recall-path decisions, 446 declines + 18 releases, ZERO the proxy cascade choice; the 18 are RECENT sends of the only over-32k session, robo004 s000, which exists only at s7, D176); its lambda was fitted offline against a cost budget live2 lacks (D58, D174 (1)); never counted as a baseline we beat (D212 (3), D213)
-c1 | simplestream reruns on committed conditions | waiting on hits 14, 7
+c1 | FILLER_SS_CELLS simplestream 16 s4-s7 _L3_epg_rq30_rerun | ready (hit 7 landed c511050; hit-14 card check: reads no capacity)
 c2 | llf: UNAFFECTED by hit 14 (card check); mooncake: unaffected at 1x, memory conditions await the hit-14 adaptation ruling; eco-llm: waiting on hits 14, 16
 c3 | kvflow-prefetch, lmcache (hit 9), attentionstore-prefetch (hit 8) reruns | waiting on hits 9, 8
 d  | D209SAFE_CELLS covex-v6-base / covex-v6-rules at L2.5, n12, n20 | ready (gated)
@@ -19,14 +19,14 @@ e  | FILLER_Z_CELLS  hybrid-llm 16 s4-s7 | optional, last (gated)
 mem0.5x | confidence-cascade | 16 | 4 | _kv0.5r_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 mem0.5x | covex-v6-base | 16 | 4 | _kv0.5r_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 mem0.5x | covex-v6-rules | 16 | 4 | _kv0.5r_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
-mem0.5x | simplestream | 16 | 4 | _kv0.5r_L3_epg_rq30 | waiting on hits 14, 7
+mem0.5x | simplestream | 16 | 4 | _kv0.5r_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 mem0.5x | llf | 16 | 4 | _kv0.5r_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 mem0.5x | mooncake | 16 | 4 | _kv0.5r_L3_epg_rq30 | waiting on hit 14 ruling (adaptation: gpu_warm_slots = 4 fixed by the card)
 mem0.5x | eco-llm | 16 | 4 | _kv0.5r_L3_epg_rq30 | waiting on hits 14, 16
 mem0.5x | confidence-cascade | 16 | 5 | _kv0.5r_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 mem0.5x | covex-v6-base | 16 | 5 | _kv0.5r_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 mem0.5x | covex-v6-rules | 16 | 5 | _kv0.5r_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
-mem0.5x | simplestream | 16 | 5 | _kv0.5r_L3_epg_rq30 | waiting on hits 14, 7
+mem0.5x | simplestream | 16 | 5 | _kv0.5r_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 mem0.5x | llf | 16 | 5 | _kv0.5r_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 mem0.5x | mooncake | 16 | 5 | _kv0.5r_L3_epg_rq30 | waiting on hit 14 ruling (adaptation: gpu_warm_slots = 4 fixed by the card)
 mem0.5x | eco-llm | 16 | 5 | _kv0.5r_L3_epg_rq30 | waiting on hits 14, 16
@@ -40,161 +40,161 @@ mem0.25x | eco-llm | 16 | 4 | _kv0.25_L3_epg_rq30 | SUPERSEDED (hit 14); rerun a
 mem0.25x | confidence-cascade | 16 | 5 | _kv0.25_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 mem0.25x | covex-v6-base | 16 | 5 | _kv0.25_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 mem0.25x | covex-v6-rules | 16 | 5 | _kv0.25_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
-mem0.25x | simplestream | 16 | 5 | _kv0.25_L3_epg_rq30 | waiting on hits 14, 7
+mem0.25x | simplestream | 16 | 5 | _kv0.25_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 mem0.25x | llf | 16 | 5 | _kv0.25_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 mem0.25x | mooncake | 16 | 5 | _kv0.25_L3_epg_rq30 | waiting on hit 14 ruling (adaptation: gpu_warm_slots = 4 fixed by the card)
 mem0.25x | eco-llm | 16 | 5 | _kv0.25_L3_epg_rq30 | waiting on hits 14, 16
 load8 | confidence-cascade | 8 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load8 | covex-v6-base | 8 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load8 | covex-v6-rules | 8 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
-load8 | simplestream | 8 | 4 | _L3_epg_rq30 | waiting on hits 14, 7
+load8 | simplestream | 8 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load8 | llf | 8 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load8 | mooncake | 8 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load8 | eco-llm | 8 | 4 | _L3_epg_rq30 | waiting on hits 14, 16
 load8 | confidence-cascade | 8 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load8 | covex-v6-base | 8 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load8 | covex-v6-rules | 8 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
-load8 | simplestream | 8 | 5 | _L3_epg_rq30 | waiting on hits 14, 7
+load8 | simplestream | 8 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load8 | llf | 8 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load8 | mooncake | 8 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load8 | eco-llm | 8 | 5 | _L3_epg_rq30 | waiting on hits 14, 16
 load12 | confidence-cascade | 12 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load12 | covex-v6-base | 12 | 4 | _L3_epg_rq30 | done
 load12 | covex-v6-rules | 12 | 4 | _L3_epg_rq30 | ready (gated in another list)
-load12 | simplestream | 12 | 4 | _L3_epg_rq30 | waiting on hits 14, 7
+load12 | simplestream | 12 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load12 | llf | 12 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load12 | mooncake | 12 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load12 | eco-llm | 12 | 4 | _L3_epg_rq30 | waiting on hits 14, 16
 load12 | confidence-cascade | 12 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load12 | covex-v6-base | 12 | 5 | _L3_epg_rq30 | ready (gated in another list)
 load12 | covex-v6-rules | 12 | 5 | _L3_epg_rq30 | ready (gated in another list)
-load12 | simplestream | 12 | 5 | _L3_epg_rq30 | waiting on hits 14, 7
+load12 | simplestream | 12 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load12 | llf | 12 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load12 | mooncake | 12 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load12 | eco-llm | 12 | 5 | _L3_epg_rq30 | waiting on hits 14, 16
 load20 | confidence-cascade | 20 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load20 | covex-v6-base | 20 | 4 | _L3_epg_rq30 | ready (gated in another list)
 load20 | covex-v6-rules | 20 | 4 | _L3_epg_rq30 | ready (gated in another list)
-load20 | simplestream | 20 | 4 | _L3_epg_rq30 | waiting on hits 14, 7
+load20 | simplestream | 20 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load20 | llf | 20 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load20 | mooncake | 20 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load20 | eco-llm | 20 | 4 | _L3_epg_rq30 | waiting on hits 14, 16
 load20 | confidence-cascade | 20 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load20 | covex-v6-base | 20 | 5 | _L3_epg_rq30 | ready (gated in another list)
 load20 | covex-v6-rules | 20 | 5 | _L3_epg_rq30 | ready (gated in another list)
-load20 | simplestream | 20 | 5 | _L3_epg_rq30 | waiting on hits 14, 7
+load20 | simplestream | 20 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load20 | llf | 20 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load20 | mooncake | 20 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load20 | eco-llm | 20 | 5 | _L3_epg_rq30 | waiting on hits 14, 16
 load24 | confidence-cascade | 24 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load24 | covex-v6-base | 24 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load24 | covex-v6-rules | 24 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
-load24 | simplestream | 24 | 4 | _L3_epg_rq30 | waiting on hits 14, 7
+load24 | simplestream | 24 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load24 | llf | 24 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load24 | mooncake | 24 | 4 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load24 | eco-llm | 24 | 4 | _L3_epg_rq30 | waiting on hits 14, 16
 load24 | confidence-cascade | 24 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load24 | covex-v6-base | 24 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load24 | covex-v6-rules | 24 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
-load24 | simplestream | 24 | 5 | _L3_epg_rq30 | waiting on hits 14, 7
+load24 | simplestream | 24 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load24 | llf | 24 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load24 | mooncake | 24 | 5 | _L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 load24 | eco-llm | 24 | 5 | _L3_epg_rq30 | waiting on hits 14, 16
 dl2.5 | confidence-cascade | 16 | 4 | _L2.5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl2.5 | covex-v6-base | 16 | 4 | _L2.5_epg_rq30 | done
 dl2.5 | covex-v6-rules | 16 | 4 | _L2.5_epg_rq30 | done
-dl2.5 | simplestream | 16 | 4 | _L2.5_epg_rq30 | waiting on hits 14, 7
+dl2.5 | simplestream | 16 | 4 | _L2.5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl2.5 | llf | 16 | 4 | _L2.5_epg_rq30 | done
 dl2.5 | mooncake | 16 | 4 | _L2.5_epg_rq30 | done
 dl2.5 | eco-llm | 16 | 4 | _L2.5_epg_rq30 | waiting on hits 14, 16
 dl2.5 | confidence-cascade | 16 | 5 | _L2.5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl2.5 | covex-v6-base | 16 | 5 | _L2.5_epg_rq30 | ready (gated in another list)
 dl2.5 | covex-v6-rules | 16 | 5 | _L2.5_epg_rq30 | ready (gated in another list)
-dl2.5 | simplestream | 16 | 5 | _L2.5_epg_rq30 | waiting on hits 14, 7
+dl2.5 | simplestream | 16 | 5 | _L2.5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl2.5 | llf | 16 | 5 | _L2.5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl2.5 | mooncake | 16 | 5 | _L2.5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl2.5 | eco-llm | 16 | 5 | _L2.5_epg_rq30 | waiting on hits 14, 16
 dl4 | confidence-cascade | 16 | 4 | _L4_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl4 | covex-v6-base | 16 | 4 | _L4_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl4 | covex-v6-rules | 16 | 4 | _L4_epg_rq30 | ready (MATRIX_READY_CELLS)
-dl4 | simplestream | 16 | 4 | _L4_epg_rq30 | waiting on hits 14, 7
+dl4 | simplestream | 16 | 4 | _L4_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl4 | llf | 16 | 4 | _L4_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl4 | mooncake | 16 | 4 | _L4_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl4 | eco-llm | 16 | 4 | _L4_epg_rq30 | waiting on hits 14, 16
 dl4 | confidence-cascade | 16 | 5 | _L4_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl4 | covex-v6-base | 16 | 5 | _L4_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl4 | covex-v6-rules | 16 | 5 | _L4_epg_rq30 | ready (MATRIX_READY_CELLS)
-dl4 | simplestream | 16 | 5 | _L4_epg_rq30 | waiting on hits 14, 7
+dl4 | simplestream | 16 | 5 | _L4_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl4 | llf | 16 | 5 | _L4_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl4 | mooncake | 16 | 5 | _L4_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl4 | eco-llm | 16 | 5 | _L4_epg_rq30 | waiting on hits 14, 16
 dl5 | confidence-cascade | 16 | 4 | _L5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl5 | covex-v6-base | 16 | 4 | _L5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl5 | covex-v6-rules | 16 | 4 | _L5_epg_rq30 | ready (MATRIX_READY_CELLS)
-dl5 | simplestream | 16 | 4 | _L5_epg_rq30 | waiting on hits 14, 7
+dl5 | simplestream | 16 | 4 | _L5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl5 | llf | 16 | 4 | _L5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl5 | mooncake | 16 | 4 | _L5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl5 | eco-llm | 16 | 4 | _L5_epg_rq30 | waiting on hits 14, 16
 dl5 | confidence-cascade | 16 | 5 | _L5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl5 | covex-v6-base | 16 | 5 | _L5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl5 | covex-v6-rules | 16 | 5 | _L5_epg_rq30 | ready (MATRIX_READY_CELLS)
-dl5 | simplestream | 16 | 5 | _L5_epg_rq30 | waiting on hits 14, 7
+dl5 | simplestream | 16 | 5 | _L5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl5 | llf | 16 | 5 | _L5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl5 | mooncake | 16 | 5 | _L5_epg_rq30 | ready (MATRIX_READY_CELLS)
 dl5 | eco-llm | 16 | 5 | _L5_epg_rq30 | waiting on hits 14, 16
 comp10-4-2 | confidence-cascade | 16 | 4 | _c10-4-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp10-4-2 | covex-v6-base | 16 | 4 | _c10-4-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp10-4-2 | covex-v6-rules | 16 | 4 | _c10-4-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
-comp10-4-2 | simplestream | 16 | 4 | _c10-4-2_L3_epg_rq30 | waiting on hits 14, 7
+comp10-4-2 | simplestream | 16 | 4 | _c10-4-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp10-4-2 | llf | 16 | 4 | _c10-4-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp10-4-2 | mooncake | 16 | 4 | _c10-4-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp10-4-2 | eco-llm | 16 | 4 | _c10-4-2_L3_epg_rq30 | waiting on hits 14, 16
 comp10-4-2 | confidence-cascade | 16 | 5 | _c10-4-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp10-4-2 | covex-v6-base | 16 | 5 | _c10-4-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp10-4-2 | covex-v6-rules | 16 | 5 | _c10-4-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
-comp10-4-2 | simplestream | 16 | 5 | _c10-4-2_L3_epg_rq30 | waiting on hits 14, 7
+comp10-4-2 | simplestream | 16 | 5 | _c10-4-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp10-4-2 | llf | 16 | 5 | _c10-4-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp10-4-2 | mooncake | 16 | 5 | _c10-4-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp10-4-2 | eco-llm | 16 | 5 | _c10-4-2_L3_epg_rq30 | waiting on hits 14, 16
 comp3-11-2 | confidence-cascade | 16 | 4 | _c3-11-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp3-11-2 | covex-v6-base | 16 | 4 | _c3-11-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp3-11-2 | covex-v6-rules | 16 | 4 | _c3-11-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
-comp3-11-2 | simplestream | 16 | 4 | _c3-11-2_L3_epg_rq30 | waiting on hits 14, 7
+comp3-11-2 | simplestream | 16 | 4 | _c3-11-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp3-11-2 | llf | 16 | 4 | _c3-11-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp3-11-2 | mooncake | 16 | 4 | _c3-11-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp3-11-2 | eco-llm | 16 | 4 | _c3-11-2_L3_epg_rq30 | waiting on hits 14, 16
 comp3-11-2 | confidence-cascade | 16 | 5 | _c3-11-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp3-11-2 | covex-v6-base | 16 | 5 | _c3-11-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp3-11-2 | covex-v6-rules | 16 | 5 | _c3-11-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
-comp3-11-2 | simplestream | 16 | 5 | _c3-11-2_L3_epg_rq30 | waiting on hits 14, 7
+comp3-11-2 | simplestream | 16 | 5 | _c3-11-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp3-11-2 | llf | 16 | 5 | _c3-11-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp3-11-2 | mooncake | 16 | 5 | _c3-11-2_L3_epg_rq30 | ready (MATRIX_READY_CELLS)
 comp3-11-2 | eco-llm | 16 | 5 | _c3-11-2_L3_epg_rq30 | waiting on hits 14, 16
 rq10 | confidence-cascade | 16 | 4 | _L3_epg_rq10 | ready (MATRIX_READY_CELLS)
 rq10 | covex-v6-base | 16 | 4 | _L3_epg_rq10 | ready (MATRIX_READY_CELLS)
 rq10 | covex-v6-rules | 16 | 4 | _L3_epg_rq10 | ready (MATRIX_READY_CELLS)
-rq10 | simplestream | 16 | 4 | _L3_epg_rq10 | waiting on hits 14, 7
+rq10 | simplestream | 16 | 4 | _L3_epg_rq10 | ready (MATRIX_READY_CELLS)
 rq10 | llf | 16 | 4 | _L3_epg_rq10 | ready (MATRIX_READY_CELLS)
 rq10 | mooncake | 16 | 4 | _L3_epg_rq10 | ready (MATRIX_READY_CELLS)
 rq10 | eco-llm | 16 | 4 | _L3_epg_rq10 | waiting on hits 14, 16
 rq10 | confidence-cascade | 16 | 5 | _L3_epg_rq10 | ready (MATRIX_READY_CELLS)
 rq10 | covex-v6-base | 16 | 5 | _L3_epg_rq10 | ready (MATRIX_READY_CELLS)
 rq10 | covex-v6-rules | 16 | 5 | _L3_epg_rq10 | ready (MATRIX_READY_CELLS)
-rq10 | simplestream | 16 | 5 | _L3_epg_rq10 | waiting on hits 14, 7
+rq10 | simplestream | 16 | 5 | _L3_epg_rq10 | ready (MATRIX_READY_CELLS)
 rq10 | llf | 16 | 5 | _L3_epg_rq10 | ready (MATRIX_READY_CELLS)
 rq10 | mooncake | 16 | 5 | _L3_epg_rq10 | ready (MATRIX_READY_CELLS)
 rq10 | eco-llm | 16 | 5 | _L3_epg_rq10 | waiting on hits 14, 16
 rq60 | confidence-cascade | 16 | 4 | _L3_epg_rq60 | ready (MATRIX_READY_CELLS)
 rq60 | covex-v6-base | 16 | 4 | _L3_epg_rq60 | ready (MATRIX_READY_CELLS)
 rq60 | covex-v6-rules | 16 | 4 | _L3_epg_rq60 | ready (MATRIX_READY_CELLS)
-rq60 | simplestream | 16 | 4 | _L3_epg_rq60 | waiting on hits 14, 7
+rq60 | simplestream | 16 | 4 | _L3_epg_rq60 | ready (MATRIX_READY_CELLS)
 rq60 | llf | 16 | 4 | _L3_epg_rq60 | ready (MATRIX_READY_CELLS)
 rq60 | mooncake | 16 | 4 | _L3_epg_rq60 | ready (MATRIX_READY_CELLS)
 rq60 | eco-llm | 16 | 4 | _L3_epg_rq60 | waiting on hits 14, 16
 rq60 | confidence-cascade | 16 | 5 | _L3_epg_rq60 | ready (MATRIX_READY_CELLS)
 rq60 | covex-v6-base | 16 | 5 | _L3_epg_rq60 | ready (MATRIX_READY_CELLS)
 rq60 | covex-v6-rules | 16 | 5 | _L3_epg_rq60 | ready (MATRIX_READY_CELLS)
-rq60 | simplestream | 16 | 5 | _L3_epg_rq60 | waiting on hits 14, 7
+rq60 | simplestream | 16 | 5 | _L3_epg_rq60 | ready (MATRIX_READY_CELLS)
 rq60 | llf | 16 | 5 | _L3_epg_rq60 | ready (MATRIX_READY_CELLS)
 rq60 | mooncake | 16 | 5 | _L3_epg_rq60 | ready (MATRIX_READY_CELLS)
 rq60 | eco-llm | 16 | 5 | _L3_epg_rq60 | waiting on hits 14, 16
