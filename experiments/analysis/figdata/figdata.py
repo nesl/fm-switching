@@ -49,6 +49,13 @@ NETWORK_LABEL = ("uniform 13.6 Mbit/s / 44 ms uplink: best-performing US carrier
 UPLINK_SWEEP = ("Tier-1 uplink values are the committed StudyE1 sweep: 5 / 12 / 13.6 / 25 / 88 "
                 "Mbit/s and RTT 22 / 44 / 142 ms, each with its cited uplink source; never the "
                 "Irish 5G downlink percentiles")
+# cond_network for the standard-grid cells: the committed D75 link (fleet/links.py), which the
+# emulator (fleet/emulator.py) applies to every delivered answer and frame. It is NOT in header.json;
+# it is established from the outcome timestamps (see verify_link).
+LINK_LABEL = ("uniform 13.6 Mbit/s / 44 ms RTT (best-performing US carrier's 5G median, "
+              "Ookla H2 2025)")
+LINK_DOWNLINK_S = 0.02218  # t_delivered - t_cloud_done = RTT/2 + payload/downlink, constant (D75)
+_VERIFIED = {}  # display arm -> bool, filled by verify_all() before any table is built
 
 # display -> (raw at 1x, raw at other memory, policy_version, rung, role)
 OURS = [
@@ -180,14 +187,47 @@ def policy_of(disp, raw):
     return "baseline", "-", disp
 
 
+def verify_link(path):
+    """Confirm the committed D75 link (13.6 Mbit/s, 44 ms RTT) is applied, from the OUTCOME
+    timestamps rather than header.json (which does not record it). Signature: every delivered cloud
+    answer has t_delivered - t_cloud_done = RTT/2 + payload/downlink, a constant ~0.02218 s. Returns
+    (ok, median_s, n)."""
+    outs = read_jl(path, "outcomes.jsonl")
+    dl = [float(o["t_delivered"]) - float(o["t_cloud_done"]) for o in outs
+          if o.get("t_delivered") is not None and o.get("t_cloud_done") is not None]
+    if len(dl) < 10:
+        return False, None, len(dl)
+    dl.sort()
+    med = dl[len(dl) // 2]
+    ok = abs(med - LINK_DOWNLINK_S) < 5e-4 and (dl[-1] - dl[0]) < 1e-3
+    return ok, med, len(dl)
+
+
+def verify_all(disc):
+    """One standard cell per arm: verify the link signature before relabelling that arm's rows."""
+    report = {}
+    for disp in _figure_arms(disc):
+        std = [i for i in disc.get(disp, []) if is_standard(i)]
+        if not std:
+            continue
+        ok, med, n = verify_link(std[0]["path"])
+        _VERIFIED[disp] = ok
+        report[disp] = {"ok": ok, "median_downlink_s": med, "n_answers": n,
+                        "cell": std[0]["reldir"], "seed": std[0]["seed"]}
+    return report
+
+
 def prov(disp, raw, info, status, notes=""):
     pv, rung, _ = policy_of(disp, raw)
     c = info["cond"]
+    # the standard grid and its condition cells all run the committed D75 link; label cond_network
+    # with it ONLY for arms whose link signature was verified from the outcomes (verify_all).
+    net = LINK_LABEL if _VERIFIED.get(disp) else c["network"]
     return {
         "arm": disp, "policy_version": pv, "rung": rung, "run_dir": info["reldir"],
         "run_commit": info["run_commit"], "pipeline_sha": PIPELINE_SHA, "seed": info["seed"],
         "cond_memory": c["memory"], "cond_n_devices": info["n"], "cond_deadline_s": c["deadline_s"],
-        "cond_reask_s": c["reask_s"], "cond_ratio": c["ratio"], "cond_network": c["network"],
+        "cond_reask_s": c["reask_s"], "cond_ratio": c["ratio"], "cond_network": net,
         "cond_extras": c["extras"], "status": status,
         "port_limited": disp in PORT_LIMITED, "date_scored": TODAY, "notes": notes,
     }
@@ -698,7 +738,7 @@ def condition_coverage(disc):
             "reask": sorted(reask), "network": sorted(net)}
 
 
-def write_readiness(disc, counts, dsmap):
+def write_readiness(disc, counts, dsmap, link_report=None):
     L = []
     A = L.append
     A("# Figure-data readiness (StudyFIGDATA, D214)")
@@ -738,14 +778,26 @@ def write_readiness(disc, counts, dsmap):
     A("")
     A("## Network / uplink operating point (corrected label, user 2026-11-23)")
     A("")
-    A(f"- Main operating point: {NETWORK_LABEL}. It is the BEST-PERFORMING US carrier's 5G median "
-      "(T-Mobile per Ookla H2 2025), NOT the US 5G median.")
+    A("The standard-grid cells DO apply the committed D75 link model (fleet/links.py, applied in "
+      "fleet/emulator.py: deliver_s = RTT/2 + payload/downlink on every answer; upload_s = "
+      "bytes*8/uplink + RTT/2 on every frame). header.json does not record the link, so cond_network "
+      f"is established from the OUTCOME TIMESTAMPS, not the header: every delivered cloud answer has "
+      f"t_delivered - t_cloud_done = {LINK_DOWNLINK_S:.5f} s (RTT/2 + payload at 13.6 Mbit/s), and "
+      "each dashcam frame carries 27 to 229 ms uplink (median ~60 ms = RTT/2 + JPEG bytes at 13.6 "
+      "Mbit/s).")
+    A("")
+    A(f"- cond_network for every link-verified standard-grid cell: \"{LINK_LABEL}\".")
     A(f"- {UPLINK_SWEEP}.")
-    A("- The orchestration standard grid cells are NOT bandwidth-limited (header network=none; the "
-      "uplink is modelled as a near-instant wire hop, uplink_queue_p99 ~0 s), so their provenance "
-      "carries cond_network=none, not this operating point. The 13.6 Mbit/s / 44 ms label belongs "
-      "to the StudyE1 Nexar-lead delivery study (reports/study_e1_nexar_lead.md, corrected in "
-      "place) and to any network-conditioned figure (F12) when its cells land.")
+    A("- Per-arm verification (one standard cell per arm; an arm's rows are relabelled only if its "
+      "22.2 ms downlink signature holds):")
+    A("")
+    A("| arm | cell | seed | downlink median (s) | n answers | verified |")
+    A("|---|---|---|---|---|---|")
+    for disp in sorted(link_report or {}):
+        r = link_report[disp]
+        med = f"{r['median_downlink_s']:.5f}" if r["median_downlink_s"] is not None else "n/a"
+        A(f"| {disp} | {r['cell']} | {r['seed']} | {med} | {r['n_answers']} | "
+          f"{'yes' if r['ok'] else 'NO'} |")
     A("")
     A("## Instrumentation gaps by field")
     A("")
@@ -778,6 +830,7 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     disc = discover()
     dsmap = load_dsmap()
+    link_report = verify_all(disc)  # fills _VERIFIED; must run before any prov() call
     counts = {}
     counts["F1"], counts["F1_units"] = build_F1(disc, dsmap)
     counts["F2"] = build_F2(disc, dsmap)
@@ -789,7 +842,7 @@ def main():
     counts["F13"] = build_F13(disc)
     counts["F14"] = build_F14(disc)
     counts.update(build_external())
-    write_readiness(disc, counts, dsmap)
+    write_readiness(disc, counts, dsmap, link_report)
     print("pipeline sha:", PIPELINE_SHA)
     for fig in sorted(counts, key=lambda x: (len(x), x)):
         print(f"  {fig}: {counts[fig]} rows")

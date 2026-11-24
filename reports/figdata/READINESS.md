@@ -44,9 +44,35 @@ Pipeline sha (D209 canonical scorer): `b5264100`. Generated 2026-11-23. Tables i
 
 ## Network / uplink operating point (corrected label, user 2026-11-23)
 
-- Main operating point: uniform 13.6 Mbit/s / 44 ms uplink: best-performing US carrier's 5G median (Ookla H2 2025), close to the 12 Mbit/s Bay Area 5G median (Khan et al. 2024). It is the BEST-PERFORMING US carrier's 5G median (T-Mobile per Ookla H2 2025), NOT the US 5G median.
+The standard-grid cells DO apply the committed D75 link model (fleet/links.py, applied in fleet/emulator.py: deliver_s = RTT/2 + payload/downlink on every answer; upload_s = bytes*8/uplink + RTT/2 on every frame). header.json does not record the link, so cond_network is established from the OUTCOME TIMESTAMPS, not the header: every delivered cloud answer has t_delivered - t_cloud_done = 0.02218 s (RTT/2 + payload at 13.6 Mbit/s), and each dashcam frame carries 27 to 229 ms uplink (median ~60 ms = RTT/2 + JPEG bytes at 13.6 Mbit/s).
+
+- cond_network for every link-verified standard-grid cell: "uniform 13.6 Mbit/s / 44 ms RTT (best-performing US carrier's 5G median, Ookla H2 2025)".
 - Tier-1 uplink values are the committed StudyE1 sweep: 5 / 12 / 13.6 / 25 / 88 Mbit/s and RTT 22 / 44 / 142 ms, each with its cited uplink source; never the Irish 5G downlink percentiles.
-- The orchestration standard grid cells are NOT bandwidth-limited (header network=none; the uplink is modelled as a near-instant wire hop, uplink_queue_p99 ~0 s), so their provenance carries cond_network=none, not this operating point. The 13.6 Mbit/s / 44 ms label belongs to the StudyE1 Nexar-lead delivery study (reports/study_e1_nexar_lead.md, corrected in place) and to any network-conditioned figure (F12) when its cells land.
+- Per-arm verification (one standard cell per arm; an arm's rows are relabelled only if its 22.2 ms downlink signature holds):
+
+| arm | cell | seed | downlink median (s) | n answers | verified |
+|---|---|---|---|---|---|
+| always-cloud-fcfs | results/orchestration/live2/frozen_test/runs/always-cloud-fcfs_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 8175 | yes |
+| attentionstore-prefetch | results/orchestration/live2/frozen_test/runs/attentionstore-prefetch_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 7752 | yes |
+| b7-edf-feasibility | results/orchestration/live2/frozen_test/runs/b7-edf-feasibility_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 8175 | yes |
+| base | results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 10153 | yes |
+| device-only | results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 10153 | yes |
+| eco-llm | results/orchestration/live2/frozen_test/runs/eco-llm_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 8562 | yes |
+| edf | results/orchestration/live2/frozen_test/runs/edf_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 7839 | yes |
+| fair-c5attr | results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 8844 | yes |
+| fair-c5attr-rr | results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr-rr_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 9412 | yes |
+| hybrid-F-lhreq | results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 9913 | yes |
+| kvflow-prefetch | results/orchestration/live2/frozen_test/runs/kvflow-prefetch_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 8597 | yes |
+| llf | results/orchestration/live2/frozen_test/runs/llf_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 10167 | yes |
+| lmcache | results/orchestration/live2/frozen_test/runs/lmcache_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 7460 | yes |
+| mooncake | results/orchestration/live2/frozen_test/runs/mooncake_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 8298 | yes |
+| querystream-proactive | results/orchestration/live2/frozen_test/runs/querystream-proactive_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 7429 | yes |
+| rules | results/orchestration/live2/frozen_test/runs/v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 5276 | yes |
+| simplestream | results/orchestration/live2/frozen_test/runs/simplestream_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 12247 | yes |
+| state-uo-c5attr | results/orchestration/live2/frozen_test/runs/covex-v6-state-uo-c5attr_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 9511 | yes |
+| streamscout | results/orchestration/live2/frozen_test/runs/streamscout_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 12244 | yes |
+| v5-rules | results/orchestration/live2/frozen_test/runs/v5-rules_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 3742 | yes |
+| warm-all-lru | results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 8129 | yes |
 
 ## Instrumentation gaps by field
 
