@@ -160,6 +160,58 @@ class AsyncLive2Backend:
     # quietly disagreeing with the first.
     METRICS_SCRAPE_DEFAULT = False
 
+    # D216 (2) / D222 (1) g / D227: THE WIRING, AND THE ONE DESIGN DECISION IN IT.
+    #
+    # `metrics()` now MERGES the scrape, which is what turns this from a method nobody calls into
+    # a live input: `coordinator.py:489` sets `st.metrics = be.metrics()` and `cstate.py:697`
+    # reads `st.metrics["vllm:gpu_cache_usage_perc"]` into `cloud.gpu_kv_fraction`, which is the
+    # field `arms_v6cf._pd_free_kv` prices the engine side of the KV pool from. Before this, the
+    # chain was broken at exactly one link and the field was identically 0.0 in LIVE cells too.
+    #
+    # *** THE MERGE IS AN ALLOW-LIST AND THAT IS LOAD-BEARING, NOT TIDINESS. *** An unfiltered
+    # merge would also publish `vllm:num_requests_waiting`, and `cstate.py:691` reads that key for
+    # `queued_by_class["episodic"]` WITH THE COORDINATOR'S OWN IN-FLIGHT COUNT AS ITS FALLBACK. So
+    # an unfiltered merge silently replaces a live, varying value with a different live, varying
+    # value for EVERY arm that reads the queue, which (a) breaks the byte-identity D216 (2)
+    # requires for every arm that does not read the KV gauge, and (b) publishes a key D218 (3)
+    # rules UNPUBLISHED. The filter is therefore the thing that makes E1 safe to land, and the
+    # proof runs the unfiltered variant as a POSITIVE CONTROL to show it does move decisions.
+    #
+    # THE SCRAPE IS POLLED IN THE BACKGROUND AND NEVER INLINE. `metrics()` is called on every
+    # coordinator tick; a synchronous urllib fetch with a 5 s timeout there would put HTTP inside
+    # the decision period. `adapter.HttpBackend.start_poller` already exists for this and already
+    # carries the D209 (2) pre-first-poll value (UNKNOWN AND CONSERVATIVE, never `{}`), so it is
+    # used rather than reimplemented.
+    #
+    # NO SECOND SCRAPER. `_metrics_scraper` below is the ONE scrape path, `adapter`'s, with its
+    # D209 (2) missing-value policy and its KV key aliasing. `d213_patch_asyncbackend.py` carries
+    # a refusal header recording that a duplicate implementation was added once and retracted.
+    PUBLISHED_ENGINE_KEYS = (
+        "vllm:gpu_cache_usage_perc",     # the CANONICAL name adapter republishes either spelling under
+        "vllm:num_requests_running",
+        "vllm:num_preemptions_total",
+        "vllm:prefix_cache_queries_total",
+        "vllm:prefix_cache_hits_total",
+        "vllm:external_prefix_cache_queries_total",
+        "vllm:external_prefix_cache_hits_total",
+        "vllm:kv_offload_cpu_cache_usage_perc",
+        "vllm:kv_offload_load_bytes_total",
+        "vllm:kv_offload_load_time_total",
+        "vllm:kv_offload_store_bytes_total",
+        "vllm:kv_offload_store_time_total",
+        "vllm:kv_offload_total_bytes_total",
+        # the D209 (2) marking that travels beside the gauge, so a reader can tell an observed
+        # value from a last-good one from the conservative placeholder
+        "fm_kv_state", "fm_kv_source_key", "fm_kv_age_s", "fm_kv_missing",
+        "fm_metrics_fetch_error", "fm_metrics_degraded",
+    )
+    # NOT PUBLISHED, by ruling, and named here so the omission is a decision and not an oversight.
+    WITHHELD_ENGINE_KEYS = {"vllm:num_requests_waiting": "D218 (3): stays UNPUBLISHED; cstate.py:691 "
+                                                         "reads it for queued_by_class['episodic'] "
+                                                         "and the value it would replace is live "
+                                                         "and varying"}
+    METRICS_POLL_INTERVAL_S = 0.2
+
     def _metrics_scraper(self):
         """The v1 backend used ONLY as a /metrics scraper, so its KV policy is the one policy."""
         sc = getattr(self, "_mscraper", None)
@@ -168,26 +220,89 @@ class AsyncLive2Backend:
             sc = HttpBackend.__new__(HttpBackend)
             sc.base_url = self.base_url
             sc._metrics_failures = {"n": 0, "last": None, "n_kv_key_missing": 0,
-                                    "n_served_last_good": 0, "n_served_unknown": 0}
+                                    "n_served_last_good": 0, "n_served_unknown": 0,
+                                    # D227 (E3): the attempt count, the last success and the names
+                                    # found. Declared here too because this constructor bypasses
+                                    # `HttpBackend.__init__` and the property's lazy initialiser.
+                                    "n_kv_key_aliased": 0, "kv_key_seen": None,
+                                    "n_scrapes": 0, "last_success_t": None, "names_found": []}
             self._mscraper = sc
         return sc
 
+    def _metrics_poller(self):
+        """The scraper with its background poll running. Started once, lazily, never inline."""
+        sc = self._metrics_scraper()
+        if not getattr(self, "_mpoll_started", False):
+            sc.start_poller(float(self.METRICS_POLL_INTERVAL_S))
+            # ONE SYNCHRONOUS FETCH AT SETUP, AND IT CLOSES A HOLE THAT WOULD HAVE READ AS A
+            # RESULT. `start_poller` seeds `_metrics` with the D209 (2) pre-first-poll placeholder,
+            # whose KV value is the CONSERVATIVE 1.0 and whose `fm_metrics_degraded` is 0.0
+            # because nothing has failed yet. Any decision taken in the first poll interval would
+            # therefore price the pool as FULL - which makes `_pd_free_kv` return 0 and
+            # `pd_kv_bound_by_engine_metric` increment - while `metrics_health` still said
+            # `scraped_ok`. That is a non-zero engine-metric bind produced by a placeholder, i.e.
+            # exactly the kind of number this item exists to stop reporting as a measurement. One
+            # fetch here, outside any decision period, means the first value a decision can read
+            # is an observation; and it makes `n_scrapes >= 1` before the cell starts, so `state`
+            # is never `never_scraped` on a cell that did enable the scrape.
+            sc._metrics = sc._fetch_metrics()
+            self._mpoll_started = True
+        return sc
+
     def scrape_metrics(self) -> Dict[str, Any]:
-        """One scrape under the v1 KV policy. Returns {} when the scrape is switched off, which is
-        DISTINGUISHABLE from a failed scrape: a failure yields the conservative value and a counter."""
+        """The engine's last polled /metrics under the v1 KV policy.
+
+        Returns {} when the scrape is switched off, which is DISTINGUISHABLE from a failed scrape:
+        a failure yields the conservative value and a counter.
+        """
         if not getattr(self, "metrics_scrape", self.METRICS_SCRAPE_DEFAULT):
             return {}
-        return self._metrics_scraper()._fetch_metrics()
+        return self._metrics_poller().metrics()
+
+    def published_engine_metrics(self) -> Dict[str, Any]:
+        """The allow-listed subset of the scrape, which is what reaches a decision."""
+        m = self.scrape_metrics()
+        if not m:
+            return {}
+        return {k: m[k] for k in self.PUBLISHED_ENGINE_KEYS if k in m}
 
     def metrics_health(self) -> Dict[str, Any]:
         """The hit-6 flag for `cell.json`: absent counters mean the scrape never ran, which is NOT
-        the same as a clean scrape and must not be reported as one."""
-        if not getattr(self, "metrics_scrape", self.METRICS_SCRAPE_DEFAULT):
-            return {"scrape_enabled": False, "state": "never_scraped"}
-        h = self._metrics_scraper().metrics_health()
-        return dict(h, scrape_enabled=True)
+        the same as a clean scrape and must not be reported as one (D227 / E3)."""
+        enabled = bool(getattr(self, "metrics_scrape", self.METRICS_SCRAPE_DEFAULT))
+        if not enabled:
+            # GUARDED, because this is the OFF path and it runs in EVERY cell. `adapter` is NOT
+            # already imported by a harness process (checked: `import arms` does not pull it), so
+            # an unguarded import here would add a new hard dependency to `metrics()` on the path
+            # that is supposed to change nothing. The list is not restated as a fallback: a second
+            # copy is how one list becomes two that drift.
+            try:
+                from adapter import UNTRUSTED_WHEN_SCRAPE_NOT_OK              # noqa: PLC0415
+            except Exception:                                                 # noqa: BLE001
+                UNTRUSTED_WHEN_SCRAPE_NOT_OK = ()
+            return {"state": "never_scraped", "scrape_enabled": False,
+                    "engine_metrics_trusted": False, "n_scrapes": 0, "n_failures": 0,
+                    "last_success_t": None, "metric_names_found": [],
+                    "untrusted_quantities_when_not_ok": list(UNTRUSTED_WHEN_SCRAPE_NOT_OK),
+                    "why": ("the /metrics scrape was switched off for this cell, so every "
+                            "engine-metric quantity in it is an absence and not an observation")}
+        h = self._metrics_poller().metrics_health()
+        return dict(h, scrape_enabled=True,
+                    poll_interval_s=float(self.METRICS_POLL_INTERVAL_S),
+                    published_engine_keys=list(self.PUBLISHED_ENGINE_KEYS),
+                    withheld_engine_keys=dict(self.WITHHELD_ENGINE_KEYS))
 
     def metrics(self) -> Dict[str, Any]:
+        out = dict(self._wire_metrics())
+        # D216 (2) / D222 (1) g: THE READ THAT MAKES THE SCRAPE LIVE. `metrics_health` is always
+        # present (D227), so a cell can never be silent about which of the three states it is in;
+        # the allow-listed engine keys are present only when the scrape is on, so a cell run with
+        # it off is byte-identical in everything a decision reads.
+        out["metrics_health"] = self.metrics_health()
+        out.update(self.published_engine_metrics())
+        return out
+
+    def _wire_metrics(self) -> Dict[str, Any]:
         g = sorted(self.first_gap_ms)
         def _st(v):
             v = sorted(v)

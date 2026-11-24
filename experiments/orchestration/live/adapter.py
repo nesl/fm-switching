@@ -61,6 +61,20 @@ from interface import (Action, Budget, CloudState, EpisodicStream,     # noqa: E
                        EvidenceItem, NetworkState, Observation, Policy, RecallQuery,
                        check_fairness)
 
+# D227 (E3): the quantities that are ONLY as good as the /metrics scrape behind them. A cell whose
+# scrape never ran or failed must mark these UNTRUSTED, in the cell and in any table that reads a
+# number from this list, because an untrusted zero and a legitimate zero are the same byte.
+# Declared here, beside the scrape policy that is their single source, and read by
+# `live2/metrics_trust.py` so there is one list and not one per reader.
+UNTRUSTED_WHEN_SCRAPE_NOT_OK = (
+    "cloud.gpu_kv_fraction",
+    "arm_stats.pd_kv_bound_by_engine_metric",
+    "arm_stats.pd_free_kv_min",
+    "arm_stats.pd_free_kv_max",
+    "arm_stats.pd_free_kv_sum",
+    "backend.engine_metrics",
+)
+
 DEVICE_RECALL_S = C.DEV_LAT_S          # StudyD8 arm A total p50; a RULE, not a device-recall
 RECENT_WINDOW_TOKENS = 467             # StudyF4 Part A median input size at N = 1
 EWMA = 0.3
@@ -161,6 +175,14 @@ class HttpBackend:
                 "n_kv_key_missing": 0,       # the scrape succeeded and carried no KV-usage key
                 "n_kv_key_aliased": 0,       # served from the engine's current key name
                 "kv_key_seen": None,         # which spelling this engine actually emits
+                # D227 (E3): the three facts a cell needs in order to tell "the scrape never
+                # ran" from "the scrape ran and failed" from "the scrape ran and the metric
+                # did not bind". The pre-existing `n` is the FAILURE count and keeps its name
+                # and meaning; `n_scrapes` is the ATTEMPT count, which no counter carried, and
+                # without it a zero `n` is ambiguous between no attempts and no failures.
+                "n_scrapes": 0,              # attempts, including the ones that failed
+                "last_success_t": None,      # time.time() of the last scrape that returned text
+                "names_found": [],           # which EXPECTED_METRIC_NAMES this engine emitted
             }
         return self._metrics_failures
 
@@ -206,6 +228,37 @@ class HttpBackend:
     KV_UNKNOWN_CONSERVATIVE = 1.0
     LAST_GOOD_MAX_AGE_S = 1.0
 
+    # D227 (E3): THE EXPECTED NAMES, so "which expected metric names were found" is a comparison
+    # against a declared list and not against whatever the engine happened to send. Taken from the
+    # committed raw scrape of THIS vLLM build,
+    # `results/orchestration/live2/frozen_test/engine_probe_hit26/metrics_scrape_h100.txt`, which
+    # is also where the KV spelling was established. Both KV spellings are listed because the
+    # aliasing is the point: this build emits `kv_cache_usage_perc` and the fake server emits
+    # `gpu_cache_usage_perc`, and a cell must record which one it actually saw.
+    #
+    # `vllm:num_requests_waiting` IS DELIBERATELY ABSENT FROM THIS LIST AND FROM THE PUBLISHED
+    # ALLOW-LIST. D218 (3) rules it UNPUBLISHED: the queue value it would replace is live and
+    # varying, and `live2/cstate.py` reads `vllm:num_requests_waiting` for
+    # `queued_by_class["episodic"]` with the coordinator's own in-flight count as the fallback, so
+    # publishing it would silently move that field for every arm that reads it. Keeping it out is
+    # what lets E1 be byte-identical for the arms that do not read the KV gauge.
+    EXPECTED_METRIC_NAMES = (
+        "vllm:kv_cache_usage_perc",
+        "vllm:gpu_cache_usage_perc",
+        "vllm:num_requests_running",
+        "vllm:num_preemptions_total",
+        "vllm:prefix_cache_queries_total",
+        "vllm:prefix_cache_hits_total",
+        "vllm:external_prefix_cache_queries_total",
+        "vllm:external_prefix_cache_hits_total",
+        "vllm:kv_offload_cpu_cache_usage_perc",
+        "vllm:kv_offload_load_bytes_total",
+        "vllm:kv_offload_load_time_total",
+        "vllm:kv_offload_store_bytes_total",
+        "vllm:kv_offload_store_time_total",
+        "vllm:kv_offload_total_bytes_total",
+    )
+
     def metrics(self) -> Dict[str, Any]:
         # Dict[str, Any] and not Dict[str, float] since D209 (2): the mapping now carries the
         # `fm_kv_*` MARKING beside the gauges, and `fm_kv_state` is a string. Every reader asks
@@ -218,16 +271,55 @@ class HttpBackend:
 
     def metrics_health(self) -> Dict[str, Any]:
         """The cell flag. `degraded` is true for ANY cell in which a fetch failed or a KV key was
-        absent, so no such cell can be read as clean (D209 (2) requirement 5)."""
+        absent, so no such cell can be read as clean (D209 (2) requirement 5).
+
+        D227 (E3) ADDS THE STATE, AND IT IS NOT A BOOLEAN. The ruling asks that a cell be able to
+        tell THREE things apart, and a flag can only tell two:
+
+            never_scraped        no attempt was made. The engine-metric quantities are not
+                                 evidence of anything; `gpu_kv_fraction` is 0.0 because nothing
+                                 read it. This is the state of every live2 cell before E1.
+            scraped_and_failed   attempts were made and at least one failed, or a KV key was
+                                 absent, or a decision was served a last-good or conservative
+                                 value. The quantities exist but are not the engine's.
+            scraped_ok           every attempt succeeded and the KV gauge was observed. The
+                                 engine-metric quantities ARE evidence, and a zero
+                                 `pd_kv_bound_by_engine_metric` is then a POLICY OUTCOME (the
+                                 metric never bound) rather than an instrumentation absence.
+
+        `engine_metrics_trusted` is the one field a reader needs, and it is true only in the third
+        state. That is what makes the three states distinguishable at the point of use rather than
+        only at the point of derivation.
+        """
         c = dict(self.metrics_failures)
         degraded = bool(c["n"] or c["n_kv_key_missing"] or c["n_served_last_good"]
                         or c["n_served_unknown"])
-        return {"metrics_degraded": degraded, "metrics_failures": c,
+        n_scrapes = int(c.get("n_scrapes", 0) or 0)
+        found = [n for n in self.EXPECTED_METRIC_NAMES if n in set(c.get("names_found") or ())]
+        if n_scrapes <= 0:
+            state = "never_scraped"
+        elif degraded:
+            state = "scraped_and_failed"
+        else:
+            state = "scraped_ok"
+        return {"state": state,
+                "engine_metrics_trusted": bool(state == "scraped_ok"),
+                "n_scrapes": n_scrapes,
+                "n_failures": int(c.get("n", 0) or 0),
+                "last_success_t": c.get("last_success_t"),
+                "metric_names_expected": list(self.EXPECTED_METRIC_NAMES),
+                "metric_names_found": found,
+                "metric_names_missing": [n for n in self.EXPECTED_METRIC_NAMES if n not in found],
+                "kv_key_seen": c.get("kv_key_seen"),
+                "untrusted_quantities_when_not_ok": list(UNTRUSTED_WHEN_SCRAPE_NOT_OK),
+                "metrics_degraded": degraded, "metrics_failures": c,
                 "kv_unknown_conservative_value": self.KV_UNKNOWN_CONSERVATIVE,
                 "last_good_max_age_s": self.LAST_GOOD_MAX_AGE_S,
                 "policy": ("D209 (2): a failed fetch or an absent KV key never substitutes 0.0; "
                            "the last good value at most %.1f s old, else UNKNOWN and CONSERVATIVE "
-                           "(%.1f)" % (self.LAST_GOOD_MAX_AGE_S, self.KV_UNKNOWN_CONSERVATIVE))}
+                           "(%.1f). D227: the three states above are distinguishable and "
+                           "engine_metrics_trusted is true only in scraped_ok"
+                           % (self.LAST_GOOD_MAX_AGE_S, self.KV_UNKNOWN_CONSERVATIVE))}
 
     def _kv_fraction_from(self, scraped: Dict[str, float]) -> Tuple[Optional[float], str]:
         """The KV fraction this scrape carries, under whichever name the engine uses, or None.
@@ -255,6 +347,9 @@ class HttpBackend:
         c = self.metrics_failures
         failed: Optional[str] = None
         scraped: Dict[str, float] = {}
+        # D227 (E3): the ATTEMPT is counted before it can fail, so `n_scrapes == 0` means
+        # "nothing ever tried" and can never mean "tried and nothing went wrong".
+        c["n_scrapes"] = int(c.get("n_scrapes", 0) or 0) + 1
         try:
             with urllib.request.urlopen(self.base_url + "/metrics", timeout=5) as r:
                 txt = r.read().decode()
@@ -276,6 +371,14 @@ class HttpBackend:
         out: Dict[str, Any] = dict(scraped)
         kv, seen = self._kv_fraction_from(scraped)
         now = time.time()
+        # D227 (E3): the last SUCCESSFUL scrape time, and which expected names this engine emits.
+        # "Successful" means the endpoint answered; whether the KV key was among the names is the
+        # separate fact recorded below, which is why both are kept.
+        if failed is None:
+            c["last_success_t"] = round(float(now), 6)
+            _seen = set(c.get("names_found") or ())
+            _seen |= {n for n in self.EXPECTED_METRIC_NAMES if n in scraped}
+            c["names_found"] = sorted(_seen)
         if kv is not None:
             self._kv_last_good = (float(kv), now)
             out[self.KV_CANONICAL_KEY] = float(kv)
