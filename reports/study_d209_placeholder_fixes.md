@@ -1037,3 +1037,58 @@ verify exist would be the wrong register. The s4 order to use when it is posted 
 that no dry decision moved and why, that the rung-2 dry digest is allocation-sensitive so the
 final ladder must carry the `id(obs)` fix for its bars to mean anything, and that D211 is frozen but
 unvalidatable on committed data.
+
+---
+
+## D211 host-traffic measurement, task 3's preparatory step (recorded 2026-11-24)
+
+Artefact: `results/orchestration/live2/placeholder_fixes/d211_host_traffic_measured.json`.
+
+**Register: OBSERVED**, from the committed `host_counters_d211.log` of the four
+`covex-v6-fair-final_n16_s{4,5,6,7}_1200s_h27_3t_L3_epg_rq30` cells. These are engine-reported
+**aggregate** counters, not per-request attribution. That distinction is the whole reason signal (a) has
+to infer per-request host hits at all: D211 records that they are folded into `cached_tokens`.
+
+| seed | host load (GB) | host store (GB) | load / store | cpu_cache_use max | samples |
+|---|---|---|---|---|---|
+| s4 | 487.8 | 102.5 | 4.8 | 0.223 | 118 |
+| s5 | 506.7 | 100.0 | 5.1 | 0.072 | 118 |
+| s6 | 452.0 | 109.5 | 4.1 | 0.094 | 118 |
+| s7 | 454.9 | 81.6 | 5.6 | 0.143 | 118 |
+
+**Method.** Read `vllm:kv_offload_load_bytes_total` and `vllm:kv_offload_store_bytes_total` from each
+cell's own `host_counters_d211.log`, taking the last-minus-first delta over the cell, at the log's roughly
+10 s cadence (118 samples per 1,200 s cell). No new run; nothing recomputed from a result marked INVALID.
+
+**What it shows.** The host tier carries **452 to 507 GB of reloads per 1,200 s cell, 4.1x to 5.6x more
+than it stores, and the policy cannot see any of it.** Loading four to six times what is stored means the
+same host-resident prefixes are re-read repeatedly. That is D211's premise confirmed **with a magnitude**:
+reload happens natively but is unobserved by the policy, and this is the size of the lever host-warm
+pricing would act on. Consistent across all four seeds, so it is not one cell's artefact.
+
+**Why it was measured before computing anything.** The pre-registered per-window bar asks for attributed
+host tokens within 20 percent of the aggregate delta in at least 80 percent of windows **with any host
+activity**. Had the counters been flat, that test would have had an empty denominator and any pass would
+have been **vacuous**. With 101 distinct values of `kv_offload_load_bytes_total` in s4 alone, windows with
+host activity are abundant, so the bar is not vacuous. This is a Step 0 check, done before the run rather
+than after a suspicious result.
+
+**What remains blocked, and the reason has changed.** The pre-registration recorded `signal_a_validate`
+BLOCKED for want of a committed counter series; **that blocker is gone.** The remaining blocker is the
+**join**: signal (a) needs the belief's predicted GPU-resident prefix per request, which item 3 added at
+`56a73293`, and these four cells ran before it (`d211_signal_a_available.json` records
+`gpu_tokens_by_session` empty on all 16,840 decision rows of a pre-item-3 cell). So the cells with the
+counters lack the prefix, and the cells with the prefix have not landed. **Both halves now demonstrably
+exist; they are not yet in one cell.** Signal (b)'s input likewise now exists while its condition does
+not: D211 specifies it at low concurrency and these are 16-device cells.
+
+**Not claimed.** Nothing here validates the belief, computes signal (a) or (b), or licenses switching
+host-warm pricing on. Per the pre-registration, host-warm pricing stays OFF unless a signal passes the bar
+**and** the user switches it on, and `if_neither_passes` requires keeping the belief as is and recording
+that host reload is native but unobserved, with no signal stretched to reach the bar and the bar not moved.
+
+**A near-miss recorded with the result.** The first probe reported "no `vllm:*offload*` keys found in the
+log", which was **false**: the regex required whitespace between key and value where the log uses `=`. The
+raw lines, printed first, plainly showed the keys, and that contradiction is what caught it. A broken probe
+reporting an absence is the pattern this project keeps finding, and printing the raw bytes beside the parse
+is what separates "not there" from "my reader missed it".
