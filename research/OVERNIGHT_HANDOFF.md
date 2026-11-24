@@ -89,6 +89,22 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
   md5, with NOTHING importing it and `run_live2_real.py` on origin still at ZERO occurrences of
   `figure_instrumentation`. COMMITTING A PATCH IS NOT LANDING THE WIRING, and storing it as `.patch`
   rather than `.py` is what keeps it out of an import or a glob.
+- *** NEVER ESTABLISH AN ABSENCE BY GREPPING THE SHARED WORKTREE. IT IS ABOUT 1,500 COMMITS BEHIND
+  ORIGIN. *** `/home/pragya/Desktop/FM-switching` sat at `17bdf159` while origin was at `7ca9d1e7`:
+  1,500 commits. A file committed tonight IS NOT THERE, so `grep -r` over it returns nothing for a file
+  that exists. THIS COST ME A WRONG ESCALATION: I told an agent its proof script was uncommitted and
+  "one cleanup from destruction" on the strength of `grep -rln ALL_PASS experiments/` returning empty.
+  It was committed, and `ALL_PASS` is in THIRTEEN committed files. ALWAYS use `git grep <literal-sha>`
+  or `git show <sha>:<path>`, never a filesystem grep of that tree, for any claim about what is or is
+  not in the repo. The same staleness is why files committed tonight show as `??` untracked there.
+- *** A SUMMARISER THAT PROBES FOR A KEY NAMED AFTER A VALUE PRINTS `None` FOREVER. *** A proof wrote
+  `{"verdict": "ALL_PASS", ...}` and a summary line reported `ALL_PASS: None`, which reads as an
+  unset aggregate and sent me hunting a swallowed fifth check. There was none: four `P*` keys, all
+  PASS, and the aggregate is computed as `all(... for k in out if k.startswith("P"))`, so coverage is
+  complete BY CONSTRUCTION and `None` was unreachable from that code. A reader asking for
+  `d.get("ALL_PASS")` on a dict whose KEY is `verdict` gets `None` whatever the verdict says. READ THE
+  FIELD, THEN ASSERT ITS VALUE IS THE LITERAL EXPECTED STRING; never probe for a key named after the
+  value you hope to see, and never read a `None` as a failure before checking the schema.
 - AND FOR RELAYED CLAIMS: a NEGATIVE assertion about a primary artefact is cheap to check and expensive
   to propagate. Three were relayed unverified today (a loadavg precedent that did not exist, a
   touch-price magnitude off by about 26x, and two metric names that did exist). Check a negative against
