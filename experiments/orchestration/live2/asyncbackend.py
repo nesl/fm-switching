@@ -140,6 +140,53 @@ class AsyncLive2Backend:
         self._loop.call_soon_threadsafe(self._loop.stop)
         self._thread.join(10.0)
 
+    # ---- /metrics scrape (D213 item 2, escalation E1). DEFAULT OFF until its byte-identity
+    # proof runs; D187 rules that held or unproved code defaults OFF.
+    #
+    # WHY THIS EXISTS AT ALL, because the obvious reading of hit 6 is wrong: `cloud.gpu_kv_fraction`
+    # is 0.0 in EVERY reported live2 cell, and NOT because a fetch failed and NOT because a key was
+    # renamed. `st.metrics` has exactly ONE writer, `coordinator.py:489`, which is skipped on dry
+    # cells, and in every reported live2 cell `be` is THIS class, which is not an `HttpBackend`
+    # subclass and never scraped /metrics at all. So the field was never populated by anything.
+    # Correcting the key name alone would have left the gate at 0.0 for ever AND LOOKED LIKE A PASS.
+    #
+    # THE POLICY IS NOT REIMPLEMENTED HERE. It is `adapter.HttpBackend._fetch_metrics`, which
+    # already carries the D209 (2) semantics: both key spellings accepted
+    # (`vllm:kv_cache_usage_perc` on this vLLM 0.31.0 build, `vllm:gpu_cache_usage_perc` on the
+    # older build and the fake server), republished under the older name so NO READER CHANGES, and
+    # NEVER 0.0 by default - a failed fetch or an absent key is marked missing and served the last
+    # good value at most LAST_GOOD_MAX_AGE_S old, else UNKNOWN AND CONSERVATIVE. Duplicating that
+    # would give the two paths room to drift, and the whole defect class here is a second code path
+    # quietly disagreeing with the first.
+    METRICS_SCRAPE_DEFAULT = False
+
+    def _metrics_scraper(self):
+        """The v1 backend used ONLY as a /metrics scraper, so its KV policy is the one policy."""
+        sc = getattr(self, "_mscraper", None)
+        if sc is None:
+            from adapter import HttpBackend                                   # noqa: PLC0415
+            sc = HttpBackend.__new__(HttpBackend)
+            sc.base_url = self.base_url
+            sc._metrics_failures = {"n": 0, "last": None, "n_kv_key_missing": 0,
+                                    "n_served_last_good": 0, "n_served_unknown": 0}
+            self._mscraper = sc
+        return sc
+
+    def scrape_metrics(self) -> Dict[str, Any]:
+        """One scrape under the v1 KV policy. Returns {} when the scrape is switched off, which is
+        DISTINGUISHABLE from a failed scrape: a failure yields the conservative value and a counter."""
+        if not getattr(self, "metrics_scrape", self.METRICS_SCRAPE_DEFAULT):
+            return {}
+        return self._metrics_scraper()._fetch_metrics()
+
+    def metrics_health(self) -> Dict[str, Any]:
+        """The hit-6 flag for `cell.json`: absent counters mean the scrape never ran, which is NOT
+        the same as a clean scrape and must not be reported as one."""
+        if not getattr(self, "metrics_scrape", self.METRICS_SCRAPE_DEFAULT):
+            return {"scrape_enabled": False, "state": "never_scraped"}
+        h = self._metrics_scraper().metrics_health()
+        return dict(h, scrape_enabled=True)
+
     def metrics(self) -> Dict[str, Any]:
         g = sorted(self.first_gap_ms)
         def _st(v):
