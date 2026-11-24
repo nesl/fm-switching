@@ -13,9 +13,32 @@ once produced a false "H100 idle eight hours" claim while it had committed one m
   `ops/watchdog.log` 299 lines, `ops/track.log` 1,298 lines, newest entry 06:30:01Z. **READ THEM, they
   are informative**, but they are NOT a concurrency check: watchdog.log records session liveness and
   track.log carries prior resumes' own reports. *** WHAT watchdog.log SAYS RIGHT NOW MATTERS: heartbeat
-  STALE and `RESTART 3/12: session fmsw-overnight absent` at 06:10, 06:20 and 06:30Z. THE OVERNIGHT
-  SESSION IS DYING AND BEING RESTARTED EVERY TEN MINUTES, which is why you are reading this. Expect to
-  be resumed again; leave the file fit for that.***
+  STALE and `RESTART 3/12: session fmsw-overnight absent` at 06:10, 06:20 and 06:30Z. THE CLAUDE SESSION IS
+  RESTARTED EVERY TEN MINUTES, which is why you are reading this. Expect to be resumed again; leave the
+  file fit for that.***
+
+*** THE RESTARTS ARE EXPECTED BEHAVIOUR, NOT A CRASH, AND THE OVERNIGHT WORK IS ALIVE. Established by
+process census at 22:40, so no resume needs to re-derive it. ***
+- The watchdog launches `claude -c --permission-mode auto -p '<the resume prompt>'`, which is a
+  ONE-SHOT non-interactive session: it exits when its turn ends. The watchdog then finds no session,
+  calls the heartbeat STALE and restarts it. **So "heartbeat STALE" plus "session absent" is what a
+  HEALTHY `-p` run looks like to this watchdog.** It is bounded: the log counts `RESTART n/12`, and it
+  stood at 4/12 at 22:40. DO NOT read the restarts as evidence that anything broke, and do not go
+  hunting for the crash. Each restart does cost a full session, so leave this file accurate.
+- **E1's 52-cell sweep IS RUNNING.** pid 304781 is
+  `d213_digest_driver.py --out out/digests_e1.json`, with a LIVE CHILD running
+  `cf_pd_one_cell.py --arm v5-rules-2 --seed 4 --n 16 --run-s 1200 --cutoff-off`. **DO NOT KILL IT and
+  do not start a second sweep.** The ALONE rule means a dry cell of your own must WAIT.
+- The DEVICE_ANSWERS driver `d218_da_driver.py` was restarted and is writing to `scratchpad/cells`.
+
+*** A CORRECTION TO THIS FILE'S OWN HANG-DETECTION LESSON, because I got the discriminator wrong
+earlier tonight and a future resume would kill a healthy driver with it. ***
+The catalogue below records a driver that sat 59 minutes at `00:00:00` CPU having started nothing. I
+treated **zero own CPU** as the hang signal. **THAT IS WRONG AND DANGEROUS: AN ORCHESTRATOR DRIVER
+CORRECTLY SHOWS ~0 OWN CPU, BECAUSE ITS CHILDREN DO THE WORK.** pid 304781 has consumed `00:00:00` in
+2.5 hours and is perfectly healthy. **THE REAL DISCRIMINATOR IS CHILDREN: `0 CPU` AND `ps --ppid <pid>`
+EMPTY is a hang; `0 CPU` WITH a live child burning CPU is a working orchestrator.** Check children, and
+check what the child is doing, before calling anything hung.
 - **D187 IS NOT IN THIS FILE.** It is `research/policy_design_log.md:208`. Its guardrails, which DO
   apply: every change justified by a MEASURED mechanism and PRE-REGISTERED (commit before its cells);
   each design change a NEW LABELLED version recorded as OVERNIGHT DECISION, PROVISIONAL; never change
