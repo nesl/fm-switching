@@ -132,14 +132,44 @@ d179 has no entry AND TWO records agree. The d175 value is SUPERSEDED.
 
 ## THE NEXT STEP, AND WHAT BLOCKS IT
 
-SESSION A MUST LAND, AND IT MUST ACTUALLY FLIP `TOUCH_PRICE_MODE`. As last inspected,
-`touch_policy.py:108` still read `TOUCH_PRICE_MODE = "reload-proxy"` with the comment "DEFAULT, the
-committed behaviour; nothing changes", so hit 22 was BUILT BUT DEFAULT-OFF and NO DIGEST HAD MOVED. If
-that ships, the final ladder is built on the OLD WRONG TOUCH PRICE while the before/after tables
-correctly show no change: a pass that means nothing. D187's "held or unproved code defaults OFF" is
-satisfied BY THE PROOF, not by leaving the fix unreachable, exactly as the id(obs) switch waited for
-this very rerun. EXPECTED AND RULED: the flip MOVES rung 3's and rung 4's digests (D209 (1)); a rung 3
-that does NOT move after the flip is the problem.
+*** CORRECTED 2026-11-23T16:52-0800. THE BLOCK DESCRIBED HERE IS GONE AND ONE OF ITS CLAIMS IS
+MEASURED FALSE. READ THIS BEFORE ACTING ON ANYTHING BELOW. ***
+
+WHAT THIS SECTION SAID: that Session A must land and must actually flip `TOUCH_PRICE_MODE`, that
+`touch_policy.py:108` still read `"reload-proxy"` so hit 22 was built but default-off, and that THE
+FLIP MOVES RUNG 3'S AND RUNG 4'S DIGESTS, so "a rung 3 that does NOT move after the flip is the
+problem".
+
+WHAT IS TRUE NOW, both verified at origin before this correction was written:
+  1. SESSION A HAS LANDED, at `c707610d`, confirmed an ancestor of origin/main. THE DEFAULT IS FLIPPED:
+     `touch_policy.py:126` reads `TOUCH_PRICE_MODE = "d174-uncached-only"`, and `price_for_touch` now
+     RAISES on an unknown mode instead of falling through to the proxy. So the fix is not
+     reachable-but-off; it is the default.
+  2. *** THE FLIP MOVES NEITHER RUNG 3 NOR RUNG 4. MEASURED ON BOTH TREES. *** Rung 3 is
+     `12e4f73ce0ebd865` / 13,812 on BOTH sides, equal to its committed bar, and rung 4 is identical on
+     both sides too. SO THE SENTENCE "a rung 3 that does NOT move after the flip is the problem" IS
+     BACKWARDS: a rung 3 that does not move is the measured outcome, and the four `-rr` verdicts
+     therefore DO NOT sit on superseded code because of the touch price. Anyone treating an unmoved
+     rung 3 as a defect will chase a fault that is not there.
+     WHY IT DOES NOT MOVE, which is the useful part: the touch price is UNEXERCISED at 1x. It has
+     exactly one call site, `coordinator.py:1161`, and the gate refuses 0 OF 2,267 TOUCHES AT EITHER
+     PRICE. Under CLAUDE.md Rule 2 that is UNEXERCISED, not a no-op and not a negative. The correction
+     still matters, because the cell that motivated D174 is one where the budget DID bind, and a 0.25x
+     or tighter-budget cell can bind again.
+  3. THE OVERCHARGE WAS 105.50x TO 154.50x, p50 131.49x, NOT the 3.6x to 9.8x that circulated here and
+     in several messages. That figure was against the INTERMEDIATE `d162-warm-hit` price, whose
+     intercept is 96.1 percent of it, so it understated the defect by about 26x. `d162-warm-hit` is NOT
+     the corrected mode either: its 0.070534 s intercept is 25.8x the ruled charge, which D174 (1)
+     excludes as occupancy.
+
+SO THE REAL REMAINING BLOCK IS NOT SESSION A. It is, in order:
+  a. RE-BAR `confidence-cascade` ALONE on the committed recipe from post-fix code. Its bar
+     `b9290071679f1baa` / 12,253 PREDATES its own ruled D205 fix (`8986f593` changed
+     `cascade_adapted.py`; `delivered_scores` is gone from it), so its measured move to
+     `b1ff48e40387a997` / 3,834 is the fix landing, not contention: that cell ran at loadavg 2.21, the
+     LOWEST in the sweep, while twelve arms matched bit-exactly at loads up to 24.81.
+  b. E1 (`asyncbackend.py`) MUST LAND BEFORE ANY 0.25x POLICY CELL (D216 (2)).
+  c. Session B then posts `FINAL_LADDER_CELLS`.
 
 THEN, in order: Session B re-resolves to ONE sha, rebuilds on the Session A commit, fills the measured
 numbers against the FROZEN bars, runs proofs (b), (c) and (d), and posts `FINAL_LADDER_CELLS` with the
@@ -214,3 +244,52 @@ OWNERSHIP: `results/INDEX.md` is this session's; `research/policy_design_log.md`
 guard (assert the key absent, SKIP on byte-identity, then diff the built tree against the freshly
 resolved sha and expect only your own rows). THE GUARD, NOT OWNERSHIP, is what has actually prevented
 loss: it has fired four times today across the two sessions.
+
+## WHAT LANDED AFTER THIS FILE WAS FIRST WRITTEN (read git log; these are the load-bearing ones)
+
+PROOF (a) IS COMPLETE OVER THE D213 PAPER SET: 12 MATCH, 1 MOVED-BUT-RULED (`confidence-cascade`,
+above), 0 MOVED UNEXPLAINED, 4 COVERAGE MISSING (`cascade-routing`, `kvflow-prefetch`, `lmcache`,
+`streamscout`: no d179 bar, so NOT scored and NOT reported as unchanged), 1 NOT APPLICABLE
+(`device-only`, offline by design per D79). Twelve bit-exact matches span loadavg 2.15 to 24.81 with
+ZERO movement. THE LOAD BOUNDARY RESTS ON THE MECHANISM (the cutoff is patched off, so the
+time-dependent quantity is out of play) PLUS THAT SPREAD, NEVER ON PRECEDENT: the highest load any
+committed artefact records is 9.00, and an earlier claim here of "loadavg_end up to 20.13" was FALSE and
+is withdrawn.
+
+BAR PROVENANCE IS A STANDING RULE (D213 item 4) and all 17 rows are backfilled: each carries the commit
+that produced it (`2f3824ea`), the ruled fixes it predates, which of those touched that arm, and a
+computed `_escalates_on_move`. PROOF (a) ESCALATES ONLY WHEN AN ARM MOVES ON CODE WITH NO RULED CHANGE
+SINCE ITS BAR. Arms with a ruled-but-UNLANDED fix also do not escalate (`simplestream`, `eco-llm`,
+`attentionstore-prefetch`), or the clause would fire on exactly the moves D213 ordered.
+
+THE ALONE RULE IS STANDING ON EVERY BOX (D216 (1)): any dry cell whose digest is used as a proof bar or
+a Step 2b baseline RUNS ALONE, with loadavg recorded AS A MAGNITUDE, never a boolean. AN UNFIXED RUNG-2
+DIGEST IS NEVER A VALID BAR: a COMMENT-ONLY edit moved `covex-v6-state-uo-c5attr` by 85 committed-key
+decisions and 11 rows through allocation, because `_queued_behind` keys its cache on `id(obs)`.
+OPERATIONAL CAVEAT, unresolved: with three or more sessions holding cells on flash the rule cannot be
+honoured unilaterally, and it was NOT honoured for some cells, which are labelled with their load.
+
+NETWORK (StudyNET-TIER1, `e70948e1`), and both answers are the inconvenient ones:
+  - N1: THE LINK ARITHMETIC IS LIVE BUT THE PER-DEVICE LINK IS ABSENT. Bandwidth and RTT are read and
+    do change delivered times, but NO CALLER EVER PASSES per-device values and the emulator overwrites
+    them with one fleet-wide `LinkSpec`, so EVERY live2 cell ever run used the single D75 pair. The
+    per-device mechanism is UNREACHABLE, the same shape as the `desired_tier` failure. Tier 1's
+    mixed-fleet condition cannot run without a build, so N3's definitions were deliberately NOT POSTED.
+  - N2: THE IRISH 5G PERCENTILES ARE DOWNLINK. D75's standing caveat is REFUTED, not confirmed. Had
+    they been used as uplink, every Tier 1 cell would have been wrong IN THE EASY DIRECTION, since
+    downlink runs several times uplink and the poor-link condition would have been far too generous.
+    RTT is OBSERVED and the earlier "not available" note is also wrong.
+
+E1's RESULT, built but NOT landed: live2 NEVER SCRAPED /metrics at all (`AsyncLive2Backend` is not an
+`HttpBackend` subclass and contains no `/metrics` string), so `gpu_kv_fraction` was 0.0 in every
+reported live2 cell because NOTHING READ IT, not because a key was renamed. With the scrape in,
+`obs.cloud.gpu_kv_fraction` goes 0.0 to 0.7215 and rung 4's free KV 51,944 to 17,527, the counter
+flipping from `pd_kv_bound_by_belief` to `pd_kv_bound_by_engine_metric`. Item 3's recording site is
+`coordinator.py:2126`, which COLLIDES with the H100's hit-7 claim: THE H100 GOES FIRST, then E1 rebuilds
+on its tip. `vllm:num_requests_waiting` is DELIBERATELY NOT PUBLISHED, pending a user ruling, so
+`queued_by_class` cannot move for every arm behind a one-gate fix.
+
+STILL UNRULED: the Auto-Mode Bypass warning on the seven D201/D205 commits; the `inar-vl` and
+`hybrid-llm` ZERO-DECISION absent links; whether to connect `vllm:num_requests_waiting`; owners for E3
+(one line so the cell flag reaches `cell.json`) and the two misleading doc lines at `cstate.py:17` and
+`arms_v6cf.py:283`.
