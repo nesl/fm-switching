@@ -106,6 +106,38 @@ s4 to s6 and MUST NOT be extended to s7.** The H100 found this; it is the sharpe
 **SO THE LINE BELOW SAYING "its checks 1 and 3 pass everywhere" IS SUPERSEDED: check 1 FAILS at s7.**
 
 *** THE ONLY OUTSTANDING VERDICT IS RUNG 3 AT s7, AND AS OF 23:11 PST IT IS NOT YET SCORABLE. ***
+
+*** AND IT IS ALREADY DETERMINED FROM COMMITTED DATA. RUNG 3 PASSES ALL THREE CHECKS AT s7 WHATEVER
+`covex-v6-state-final` s7 TURNS OUT TO CONTAIN. Derived 23:22 PST; positive control PASS 2 of 2 exact. ***
+REGISTER: this is a CONSTRUCTED BOUND, not an observed verdict. The formal scoring still runs when the
+cell lands; this tells you WHAT TO EXPECT and makes a surprise detectable.
+- **CHECK 1 and CHECK 3 DO NOT DEPEND ON THE MISSING CELL AT ALL** and are read straight off the
+  committed rung-4 s7 scorer run, where fair-final is the `rung2_committed` column:
+  check 1 per-episode attainment **0.648312 against base's bar 0.553811 -> PASS** (rung 3's bar IS the
+  base-referenced one); check 3 per-device minimum **0.991667 against 0.90 -> PASS**.
+- **CHECK 2 CANNOT FAIL.** The bar is `base + 0.90 x (state-final's on-time - base)` with base 19 and
+  fair-final 84 of a 105 pool, so fair-final passes **iff state-final's on-time X <= 91.2222, i.e.
+  X <= 91**. *** THE SERVABLE CEILING AT s7 IS 87 *** (105 minus the 18 D176 over-32k questions, verified
+  as the identical set from fair-final's own outcomes), and **87 <= 91**, so no admissible value of X can
+  fail the check. Retention at X = 87 is **0.955882**, and retention RISES as X falls.
+- **A SECOND, INDEPENDENT ARGUMENT TO THE SAME PLACE:** state-final's robot on-time is BELOW
+  fair-final's at every scored seed (119 vs 126 at s4, 112 vs 121 at s5, 106 vs 111 at s6), so X is
+  expected at or under 84, far below 91.
+- **THE ONE ASSUMPTION, STATED RATHER THAN BURIED:** the 87 ceiling assumes `covex-v6-state-final` also
+  declines the 18 over-32k questions as INFEASIBLE per D170, which is what `covex-v6-fair-final` is
+  VERIFIED to do. It is one of our arms and carries the same rule, but **I have not observed its s7 cell,
+  so this is an inference.** For X to fail the check it would have to reach 92 of 105, meaning it served
+  at least 5 over-limit questions AND nearly every other one, while running BELOW fair-final at all
+  three other seeds. **IF THE LANDED CELL SHOWS X > 91, DO NOT SILENTLY RESCORE: that would mean
+  state-final served over-limit questions, which contradicts D170, and it is an ESCALATE-AND-REPORT.**
+
+*** SO THE LADDER'S CONCLUSION IS ALREADY FIXED, AND THIS IS THE HEADLINE FOR THE USER: ***
+**RUNG 3 (`covex-v6-fair-final`) PASSES ALL THREE CHECKS AT ALL FOUR SEEDS**, exceeding its comparator's
+gain rather than merely retaining 0.90 of it at s5 (1.1059) and s6 (1.0769). **RUNG 4 (`covex-v6-final`)
+PASSES ALL THREE AT ONE SEED OF FOUR**, failing check 2 at s5, s6 and s7 and check 1 at s7 as well. The
+entire difference between the rungs is ROBOT RETENTION, and its cause is diagnosed and verified at code
+level. **RUNG 3 IS THE ROBUST POLICY AND RUNG 4 REGRESSES IT.**
+
 `covex-v6-state-final` s7 is **0 files on origin**; the other three s7 cells are present (`covex-v6-final`
 17, `covex-v6-fair-final` 17, `hybrid-F-lhreq-noc3` 16). It was due about 23:25. **When it lands:**
 `d179_rung2_verdict.py --runs <dir> --seeds 7 --shares-arm covex-v6-fair-final --base-arm
