@@ -774,6 +774,37 @@ INVENT WORK, DO NOT TOUCH A RUN-PATH FILE, AND DO NOT DECIDE ANY OF THE FIVE OPE
 
 ## OPEN, NEEDING A USER RULING
 
+*** EXTENDED 2026-11-24 over `results/` and `reports/` as suggested below. NO NEW UNLISTED RULING: the
+dozen-odd hits there all REFERENCE rulings already made (dated 2026-11-16, -17 and -22) or are
+historical. BUT IT TURNED UP SOMETHING BETTER - A CONSTRAINT ON STEP 4 THAT WAS A FRAMING AND IS NOW A
+NAMED READ. ***
+`d216_final_kv025/d216_digest_crosscheck_0ce3c2.json` records that **RUNG 3 DOES NOT MOVE WITH MEMORY AT
+ALL**: 1x, kv0.25, and kv0.25 with coordinator eviction ENFORCEMENT ON give **ONE digest and one row
+count, byte for byte** (`5a03c2807da3681a` / 14,539), and it is scrupulous that *"A RUNG-3 0.25x DRY CELL
+MUST NOT BE REPORTED AS A MEMORY RESULT... that flat response is UNEXERCISED, not an equivalence"*, and
+consistent with the ruled framing that rungs 2 and 3 adapt to memory **only reactively, through engine
+telemetry**, where rung 4 adapts proactively.
+*** I TRACED THAT FRAMING TO ITS READ, WHICH IS THE PART THAT WAS MISSING (CLAUDE.md Step 2). ***
+  `gpu_kv_fraction` in `arms_v6fair.py`, `arms_v6state.py`, `release_recheck.py`, `hybrid/hybrid_arm.py`,
+  `arms.py`, `arms_v6c5.py`: **ZERO in every one.** So rung 3 reads NO KV telemetry anywhere in its
+  inheritance chain - the hit-6 census was right that only rung 4 inherits it.
+  `latency_estimate_s`: **ONE occurrence, in `hybrid/hybrid_arm.py`**, which rung 3 inherits through
+  `V5Rules2Arm`. **THAT IS RUNG 3's ONLY ENGINE-TELEMETRY CHANNEL** - an EWMA of MEASURED TTFTs, not a
+  KV gauge.
+*** THE CONSEQUENCE FOR STEP 4, AND IT STRENGTHENS ITS DESIGN RATHER THAN UNDERMINING IT: *** step 4
+specifies the REAL ENGINE POOL (`--num-gpu-blocks-override 985`), and that requirement is LOAD-BEARING,
+not incidental. A dry 0.25x cell cannot move rung 3 at all, because `--kv-scale` changes the LOGICAL
+coordinator pool while the dry engine's service times come from a frozen model, so the only channel rung
+3 has sees nothing - and `self._caps` (`arms.py:82`) is a write with no read repo-wide, so the arms
+cannot see the configured pool either. **ON A REAL ENGINE AT 0.25x THE SERVER ACTUALLY SLOWS UNDER KV
+PRESSURE, WHICH IS WHAT `latency_estimate_s` CAN SEE.** So: do NOT substitute a dry cell for step 4's
+rung-3 half, and if anyone reports a flat rung 3 from a dry 0.25x cell, that is UNEXERCISED and not a
+finding.
+**WHAT IS STILL UNTESTED, STATED SO IT IS NOT READ AS MORE THAN IT IS:** that `latency_estimate_s`
+ACTUALLY responds enough to move a rung-3 decision at 0.25x is ARGUED FROM THE READ, NOT MEASURED. No
+live 0.25x rung-3 cell has ever run. **That is precisely what step 4 would establish**, which is a better
+reason to run it than the one originally given.
+
 *** THE SEARCH FOR UNLISTED DECISIONS IS DONE. DO NOT REPEAT IT; EXTEND IT INSTEAD. ***
 A resume with spare capacity kept finding that the costly errors were in THIS FILE rather than in the
 results, so the method became: grep the code for decisions it DEFERS TO THE USER, then check whether
