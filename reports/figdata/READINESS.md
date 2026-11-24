@@ -1,6 +1,6 @@
 # Figure-data readiness (StudyFIGDATA, D214)
 
-Pipeline sha (D209 canonical scorer): `b5264100`. Generated 2026-11-23. Tables in `reports/figdata/`. NO FIGURES until the user says plot.
+Pipeline sha (D209 canonical scorer): `35e3c57e`. Generated 2026-11-23. Tables in `reports/figdata/`. NO FIGURES until the user says plot.
 
 ## Arm coverage (standard grid: 1x memory, 16 devices, robot deadline 3.0 s, rq30)
 
@@ -59,7 +59,7 @@ The standard-grid cells DO apply the committed D75 link model (fleet/links.py, a
 | covex-v6-fair-final | results/orchestration/live2/frozen_test/runs/covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 9370 | yes |
 | covex-v6-state-final | results/orchestration/live2/frozen_test/runs/covex-v6-state-final_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 9317 | yes |
 | device-only | results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 10153 | yes |
-| eco-llm | results/orchestration/live2/frozen_test/runs/eco-llm_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 8562 | yes |
+| eco-llm | results/orchestration/live2/frozen_test/runs/eco-llm_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun | 4 | 0.02218 | 8705 | yes |
 | edf | results/orchestration/live2/frozen_test/runs/edf_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 7839 | yes |
 | fair-c5attr | results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 8844 | yes |
 | fair-c5attr-rr | results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr-rr_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 9412 | yes |
@@ -91,18 +91,18 @@ The standard-grid cells DO apply the committed D75 link model (fleet/links.py, a
 
 - F1: 115 rows
 - F2: 276 rows
-- F3: 1078264 rows
-- F4: 1408 rows
+- F3: 1066012 rows
+- F4: 1392 rows
 - F6: 16 rows
 - F7: 0 rows
-- F8: 38 rows
-- F9: 15 rows
+- F8: 39 rows
+- F9: 17 rows
 - F10: 8 rows
 - F11: 0 rows
 - F12: 0 rows
-- F13: 139 rows
-- F14: 139 rows
+- F13: 143 rows
+- F14: 143 rows
 - F15: 1 rows
 - F16: 1 rows
 - F17: 0 rows
-- F1_units: 43899 rows
+- F1_units: 43416 rows
