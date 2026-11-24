@@ -98,9 +98,26 @@ Each entry: the claim, the verdict, and the restart that checked it. **PICK ONE 
 - D187 at `research/policy_design_log.md:208` -> **TRUE** (restart 7).
 - the held DEVICE_ANSWERS implementation at `live2/held/d218_device_answers/` -> **TRUE** (restart 7),
   9 files on origin.
-**STILL UNVERIFIED, IN DESCENDING ORDER OF CONSEQUENCE:** that the measured device tables make the
-device-discounted harm EXACTLY zero, which is the premise under which ruling 1 dissolves ruling 4, so
-a resume that checks this one does the most good; that the two D218 pre-registrations agree on the pass
+- *** THE RULING-1 PREMISE: that the device tables make device-discounted harm EXACTLY ZERO for an
+  alert or a recall -> **TRUE AS THE CODE IS WRITTEN, WITH ONE QUALIFICATION THE USER SHOULD SEE**
+  (restart 8, 2026-11-24). *** Verified from the code, not from the note that asserts it:
+  `p_device_on_time` (`v5/cf_objective.py:393`) returns `1.0 if w <= deadline else 0.0`, and the
+  measured inputs are ROBOT 0.2503-0.3108 s over 97 LH-REQ questions against deadlines of 2.5-5 s,
+  and DASHCAM 0.2349-0.3169 s over frame positions 1-21 against a 1 s deadline. Both are inside
+  their deadlines by a wide margin at every entry, so `p_device_on_time` is 1.0 and the
+  `(1 - p_device_on_time)` multiplier is 0. **SO ruling 1 DOES dissolve ruling 4: under
+  device-discounted the DEVICE_ANSWERS 1x count becomes 0 and its stop condition would never have
+  fired.** Single-shot is the exception the note already gives: it varies, and 45.5 percent of
+  refspatial questions give `p_device_on_time` = 0, so the compound could still fire on assistance.
+  *** THE QUALIFICATION, AND IT IS A MODELLING CHOICE RATHER THAN A MEASUREMENT: *** the dashcam
+  table loaded at `cf_objective.py:167` is `_DS.dashcam_append_ttft_s()`, the APPEND curve ONLY.
+  `cf_objective.py:131` records that **THE EPISODE-START CURVE REACHES 1.88 s**, which WOULD exceed
+  the 1 s dashcam deadline and give `p_device_on_time` = 0 for that instant. That curve is NOT in
+  the lookup, so no decision can ever see it. The zero is therefore exact for the implementation and
+  rests on the assumption that a dashcam instant is always priced as an APPEND; if an episode's
+  first frame should be priced at its start cost, the discounted harm of displacing THAT alert would
+  be non-zero. **Worth knowing before ruling 1, because ruling 1 turns on this zero.**
+**STILL UNVERIFIED, IN DESCENDING ORDER OF CONSEQUENCE:** that the two D218 pre-registrations agree on the pass
 condition VERBATIM, which is what ruling 6 rests on; that `covex-v6-final-da` does not resolve on the
 normal import path, which is what gates step 4; and the r2-queue-register claim that a correct input
 costs 16 robot answers at s4, which is ruling 7.
