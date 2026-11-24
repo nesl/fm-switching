@@ -1,0 +1,1538 @@
+{
+ "_origin_main_sha": "74a7113af43848650ce4bae09d2b660829932509",
+ "_provenance": {
+  "device": "flash_cpu",
+  "git_commit": "74a7113af43848650ce4bae09d2b660829932509",
+  "local_head_not_read_from": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
+  "model": "none",
+  "n": 24,
+  "read_from": "git show at the literal sha above; the working tree was not read",
+  "script": "n5_queued_by_class_census.py",
+  "timestamp": "2026-11-23T17:34:41.108170"
+ },
+ "_register": "every per-cell number is read from a committed decision.jsonl.gz at the sha above; see the module docstring for the one declared proxy",
+ "_what": "census of cloud.queued_by_class: is it constant today, and who reads it",
+ "arms_not_measured": [
+  {
+   "arm": "attentionstore-prefetch",
+   "why": "cell(s) committed but NO decision log: attentionstore-prefetch_n16_s4_1200s_h27_3t_L3_epg_rq30, attentionstore-prefetch_n16_s5_1200s_h27_3t_L3_epg_rq30, attentionstore-prefetch_n16_s6_1200s_h27_3t_L3_epg_rq30, attentionstore-prefetch_n16_s7_1200s_h27_3t_L3_epg_rq30"
+  },
+  {
+   "arm": "lmcache",
+   "why": "cell(s) committed but NO decision log: lmcache_n16_s4_1200s_h27_3t_L3_epg_rq30, lmcache_n16_s5_1200s_h27_3t_L3_epg_rq30, lmcache_n16_s6_1200s_h27_3t_L3_epg_rq30, lmcache_n16_s7_1200s_h27_3t_L3_epg_rq30"
+  },
+  {
+   "arm": "cascade-routing",
+   "why": "no committed cell on this grid"
+  },
+  {
+   "arm": "device-only",
+   "why": "no committed cell on this grid"
+  }
+ ],
+ "cells": [
+  {
+   "arm": "always-cloud-fcfs",
+   "cell": "always-cloud-fcfs_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.9436,
+    "preble_b9_lp_at_cap_share": 0.9428,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.7815
+   },
+   "decision_kinds": {
+    "release_monitor": 9803,
+    "release_recall": 401
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 2686,
+    "min": 0,
+    "n": 6682,
+    "n_distinct": 2199,
+    "p50": 932,
+    "p90": 2351,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 10204,
+   "n_epochs_with_a_decision": 6682,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 5496,
+    "min": 0,
+    "n": 6682,
+    "n_distinct": 3106,
+    "p50": 1899,
+    "p90": 4825,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 2686,
+    "min": 0,
+    "n": 10204,
+    "n_distinct": 2214,
+    "p50": 958,
+    "p90": 2350,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 132,
+    "min": 0,
+    "n": 10204,
+    "n_distinct": 132,
+    "p50": 33,
+    "p90": 121,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "b7-edf-feasibility",
+   "cell": "b7-edf-feasibility_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.8604,
+    "preble_b9_lp_at_cap_share": 0.8565,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.4238
+   },
+   "decision_kinds": {
+    "decline": 66,
+    "defer": 14,
+    "release_monitor": 11786,
+    "release_recall": 412
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 2294,
+    "min": 0,
+    "n": 8000,
+    "n_distinct": 1760,
+    "p50": 23,
+    "p90": 1514,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 12278,
+   "n_epochs_with_a_decision": 8000,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 4671,
+    "min": 0,
+    "n": 8000,
+    "n_distinct": 2231,
+    "p50": 46,
+    "p90": 3079,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 2294,
+    "min": 0,
+    "n": 12278,
+    "n_distinct": 1763,
+    "p50": 27,
+    "p90": 1571,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 83,
+    "min": 0,
+    "n": 12278,
+    "n_distinct": 84,
+    "p50": 1,
+    "p90": 54,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "confidence-cascade",
+   "cell": "confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.924,
+    "preble_b9_lp_at_cap_share": 0.9218,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.808
+   },
+   "decision_kinds": {
+    "decline": 234,
+    "release_monitor": 11406,
+    "release_recall": 229
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 2418,
+    "min": 0,
+    "n": 7720,
+    "n_distinct": 2052,
+    "p50": 1224,
+    "p90": 2163,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 11869,
+   "n_epochs_with_a_decision": 7720,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 4877,
+    "min": 0,
+    "n": 7720,
+    "n_distinct": 3004,
+    "p50": 2468,
+    "p90": 4377,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 2418,
+    "min": 0,
+    "n": 11869,
+    "n_distinct": 2064,
+    "p50": 1259,
+    "p90": 2176,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 69,
+    "min": 0,
+    "n": 11869,
+    "n_distinct": 70,
+    "p50": 19,
+    "p90": 66,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "eco-llm",
+   "cell": "eco-llm_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.8677,
+    "preble_b9_lp_at_cap_share": 0.8639,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.4207
+   },
+   "decision_kinds": {
+    "release_monitor": 11786,
+    "release_recall": 478
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 1678,
+    "min": 0,
+    "n": 7891,
+    "n_distinct": 1356,
+    "p50": 19,
+    "p90": 1224,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 12264,
+   "n_epochs_with_a_decision": 7891,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 3422,
+    "min": 0,
+    "n": 7891,
+    "n_distinct": 1837,
+    "p50": 39,
+    "p90": 2492,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 1678,
+    "min": 0,
+    "n": 12264,
+    "n_distinct": 1353,
+    "p50": 24,
+    "p90": 1241,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 66,
+    "min": 0,
+    "n": 12264,
+    "n_distinct": 67,
+    "p50": 1,
+    "p90": 48,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "edf",
+   "cell": "edf_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.8924,
+    "preble_b9_lp_at_cap_share": 0.8736,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "defer": 7741,
+    "release_monitor": 7583,
+    "release_recall": 271,
+    "release_whole": 307
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 12,
+    "min": 0,
+    "n": 8435,
+    "n_distinct": 13,
+    "p50": 7,
+    "p90": 9,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 15902,
+   "n_epochs_with_a_decision": 8435,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 20,
+    "min": 0,
+    "n": 8435,
+    "n_distinct": 21,
+    "p50": 15,
+    "p90": 17,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 8,
+    "min": 0,
+    "n": 15902,
+    "n_distinct": 9,
+    "p50": 5,
+    "p90": 8,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 2,
+    "min": 0,
+    "n": 15902,
+    "n_distinct": 3,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "llf",
+   "cell": "llf_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.7601,
+    "preble_b9_lp_at_cap_share": 0.7394,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "decline": 111,
+    "defer": 3296,
+    "release_monitor": 10296,
+    "release_recall": 359,
+    "release_whole": 347
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 12,
+    "min": 0,
+    "n": 7819,
+    "n_distinct": 13,
+    "p50": 5,
+    "p90": 9,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 14409,
+   "n_epochs_with_a_decision": 7819,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 20,
+    "min": 0,
+    "n": 7819,
+    "n_distinct": 21,
+    "p50": 10,
+    "p90": 17,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 8,
+    "min": 0,
+    "n": 14409,
+    "n_distinct": 9,
+    "p50": 4,
+    "p90": 7,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 3,
+    "min": 0,
+    "n": 14409,
+    "n_distinct": 4,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "mooncake",
+   "cell": "mooncake_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.9702,
+    "preble_b9_lp_at_cap_share": 0.9698,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.8696
+   },
+   "decision_kinds": {
+    "decline": 76,
+    "release_monitor": 11744,
+    "release_recall": 411,
+    "state_action": 487
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 3488,
+    "min": 0,
+    "n": 8045,
+    "n_distinct": 2906,
+    "p50": 1367,
+    "p90": 2763,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 12718,
+   "n_epochs_with_a_decision": 8045,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 7091,
+    "min": 0,
+    "n": 8045,
+    "n_distinct": 4015,
+    "p50": 2784,
+    "p90": 5619,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 3488,
+    "min": 0,
+    "n": 12718,
+    "n_distinct": 2927,
+    "p50": 1320,
+    "p90": 2763,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 117,
+    "min": 0,
+    "n": 12718,
+    "n_distinct": 118,
+    "p50": 47,
+    "p90": 93,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "mooncake",
+   "cell": "mooncake_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.9729,
+    "preble_b9_lp_at_cap_share": 0.9722,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.875
+   },
+   "decision_kinds": {
+    "decline": 80,
+    "release_monitor": 11705,
+    "release_recall": 400,
+    "state_action": 480
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 2237,
+    "min": 0,
+    "n": 7959,
+    "n_distinct": 1962,
+    "p50": 921,
+    "p90": 1795,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 12665,
+   "n_epochs_with_a_decision": 7959,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 4547,
+    "min": 0,
+    "n": 7959,
+    "n_distinct": 3081,
+    "p50": 1875,
+    "p90": 3648,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 2237,
+    "min": 0,
+    "n": 12665,
+    "n_distinct": 1976,
+    "p50": 1012,
+    "p90": 1812,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 74,
+    "min": 0,
+    "n": 12665,
+    "n_distinct": 75,
+    "p50": 36,
+    "p90": 59,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "mooncake",
+   "cell": "mooncake_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.8606,
+    "preble_b9_lp_at_cap_share": 0.8569,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.4234
+   },
+   "decision_kinds": {
+    "decline": 66,
+    "release_monitor": 11786,
+    "release_recall": 412,
+    "state_action": 478
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 1727,
+    "min": 0,
+    "n": 7997,
+    "n_distinct": 1413,
+    "p50": 25,
+    "p90": 1445,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 12742,
+   "n_epochs_with_a_decision": 7997,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 3518,
+    "min": 0,
+    "n": 7997,
+    "n_distinct": 1951,
+    "p50": 50,
+    "p90": 2942,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 1727,
+    "min": 0,
+    "n": 12742,
+    "n_distinct": 1428,
+    "p50": 29,
+    "p90": 1466,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 64,
+    "min": 0,
+    "n": 12742,
+    "n_distinct": 65,
+    "p50": 1,
+    "p90": 51,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "mooncake",
+   "cell": "mooncake_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.7589,
+    "preble_b9_lp_at_cap_share": 0.7533,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0142
+   },
+   "decision_kinds": {
+    "decline": 79,
+    "release_monitor": 11779,
+    "release_recall": 385,
+    "state_action": 464
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 81,
+    "min": 0,
+    "n": 8262,
+    "n_distinct": 80,
+    "p50": 6,
+    "p90": 29,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 12707,
+   "n_epochs_with_a_decision": 8262,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 165,
+    "min": 0,
+    "n": 8262,
+    "n_distinct": 151,
+    "p50": 13,
+    "p90": 59,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 81,
+    "min": 0,
+    "n": 12707,
+    "n_distinct": 80,
+    "p50": 6,
+    "p90": 27,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 3,
+    "min": 0,
+    "n": 12707,
+    "n_distinct": 4,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "querystream-proactive",
+   "cell": "querystream-proactive_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.9469,
+    "preble_b9_lp_at_cap_share": 0.9439,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.7819
+   },
+   "decision_kinds": {
+    "defer": 394,
+    "release_monitor": 9803,
+    "release_recall": 401
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 2488,
+    "min": 0,
+    "n": 6850,
+    "n_distinct": 2062,
+    "p50": 1094,
+    "p90": 2000,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 10598,
+   "n_epochs_with_a_decision": 6850,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 5088,
+    "min": 0,
+    "n": 6850,
+    "n_distinct": 2959,
+    "p50": 2229,
+    "p90": 4100,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 2488,
+    "min": 0,
+    "n": 10598,
+    "n_distinct": 2078,
+    "p50": 1135,
+    "p90": 2004,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 113,
+    "min": 0,
+    "n": 10598,
+    "n_distinct": 114,
+    "p50": 41,
+    "p90": 101,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "simplestream",
+   "cell": "simplestream_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.7205,
+    "preble_b9_lp_at_cap_share": 0.712,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "release_monitor": 11786,
+    "release_recall": 478
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 23,
+    "min": 0,
+    "n": 8221,
+    "n_distinct": 24,
+    "p50": 5,
+    "p90": 10,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 12264,
+   "n_epochs_with_a_decision": 8221,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 47,
+    "min": 0,
+    "n": 8221,
+    "n_distinct": 43,
+    "p50": 11,
+    "p90": 20,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 23,
+    "min": 0,
+    "n": 12264,
+    "n_distinct": 23,
+    "p50": 5,
+    "p90": 9,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 3,
+    "min": 0,
+    "n": 12264,
+    "n_distinct": 4,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "streamscout",
+   "cell": "streamscout_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.7045,
+    "preble_b9_lp_at_cap_share": 0.6956,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "release_monitor": 11784,
+    "release_recall": 478
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 17,
+    "min": 0,
+    "n": 7918,
+    "n_distinct": 18,
+    "p50": 5,
+    "p90": 9,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 12262,
+   "n_epochs_with_a_decision": 7918,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 35,
+    "min": 0,
+    "n": 7918,
+    "n_distinct": 36,
+    "p50": 10,
+    "p90": 19,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 17,
+    "min": 0,
+    "n": 12262,
+    "n_distinct": 18,
+    "p50": 5,
+    "p90": 9,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 4,
+    "min": 0,
+    "n": 12262,
+    "n_distinct": 5,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "warm-all-lru",
+   "cell": "warm-all-lru_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.9696,
+    "preble_b9_lp_at_cap_share": 0.9753,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.88
+   },
+   "decision_kinds": {
+    "decline": 2,
+    "defer": 1,
+    "release_monitor": 10458,
+    "release_piece": 1721,
+    "release_recall": 424
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 4240,
+    "min": 0,
+    "n": 7656,
+    "n_distinct": 3272,
+    "p50": 1098,
+    "p90": 3318,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 12606,
+   "n_epochs_with_a_decision": 7656,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 9287,
+    "min": 0,
+    "n": 7656,
+    "n_distinct": 4469,
+    "p50": 2406,
+    "p90": 7117,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 4240,
+    "min": 0,
+    "n": 12606,
+    "n_distinct": 3303,
+    "p50": 1125,
+    "p90": 3490,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 807,
+    "min": 0,
+    "n": 12606,
+    "n_distinct": 768,
+    "p50": 181,
+    "p90": 535,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "kvflow-prefetch",
+   "cell": "kvflow-prefetch_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.9308,
+    "preble_b9_lp_at_cap_share": 0.9299,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.7938
+   },
+   "decision_kinds": {
+    "release_monitor": 8276,
+    "release_recall": 336,
+    "release_whole": 80,
+    "state_action": 8021
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": true,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 2066,
+    "min": 0,
+    "n": 10076,
+    "n_distinct": 1758,
+    "p50": 558,
+    "p90": 1624,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 16713,
+   "n_epochs_with_a_decision": 10076,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 4302,
+    "min": 0,
+    "n": 10076,
+    "n_distinct": 2575,
+    "p50": 1141,
+    "p90": 3383,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 2065,
+    "min": 0,
+    "n": 16713,
+    "n_distinct": 1764,
+    "p50": 445,
+    "p90": 1552,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 172,
+    "min": 0,
+    "n": 16713,
+    "n_distinct": 172,
+    "p50": 19,
+    "p90": 125,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "v5-rules-2",
+   "cell": "v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.3014,
+    "preble_b9_lp_at_cap_share": 0.3107,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "decline": 38,
+    "defer": 9,
+    "release_monitor": 4829,
+    "release_piece": 156,
+    "release_recall": 451
+   },
+   "decision_log": "decision.jsonl",
+   "in_paper_set": false,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 9,
+    "min": 0,
+    "n": 3106,
+    "n_distinct": 10,
+    "p50": 3,
+    "p90": 5,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 5483,
+   "n_epochs_with_a_decision": 3106,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 28,
+    "min": 0,
+    "n": 3106,
+    "n_distinct": 26,
+    "p50": 6,
+    "p90": 10,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 8,
+    "min": 0,
+    "n": 5483,
+    "n_distinct": 9,
+    "p50": 2,
+    "p90": 4,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 13,
+    "min": 0,
+    "n": 5483,
+    "n_distinct": 14,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "v5-rules-2",
+   "cell": "v5-rules-2_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.3152,
+    "preble_b9_lp_at_cap_share": 0.3291,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "decline": 56,
+    "defer": 10,
+    "release_monitor": 5182,
+    "release_piece": 175,
+    "release_recall": 427
+   },
+   "decision_log": "decision.jsonl",
+   "in_paper_set": false,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 9,
+    "min": 0,
+    "n": 3309,
+    "n_distinct": 10,
+    "p50": 3,
+    "p90": 5,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 5850,
+   "n_epochs_with_a_decision": 3309,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 22,
+    "min": 0,
+    "n": 3309,
+    "n_distinct": 23,
+    "p50": 6,
+    "p90": 11,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 8,
+    "min": 0,
+    "n": 5850,
+    "n_distinct": 9,
+    "p50": 2,
+    "p90": 4,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 10,
+    "min": 0,
+    "n": 5850,
+    "n_distinct": 11,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "v5-rules-2",
+   "cell": "v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.3518,
+    "preble_b9_lp_at_cap_share": 0.3654,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "decline": 29,
+    "defer": 3,
+    "release_monitor": 5456,
+    "release_piece": 174,
+    "release_recall": 449
+   },
+   "decision_log": "decision.jsonl",
+   "in_paper_set": false,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 9,
+    "min": 0,
+    "n": 3476,
+    "n_distinct": 10,
+    "p50": 3,
+    "p90": 5,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 6111,
+   "n_epochs_with_a_decision": 3476,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 27,
+    "min": 0,
+    "n": 3476,
+    "n_distinct": 26,
+    "p50": 6,
+    "p90": 11,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 8,
+    "min": 0,
+    "n": 6111,
+    "n_distinct": 9,
+    "p50": 3,
+    "p90": 4,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 12,
+    "min": 0,
+    "n": 6111,
+    "n_distinct": 13,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "v5-rules-2",
+   "cell": "v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.3306,
+    "preble_b9_lp_at_cap_share": 0.3361,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "decline": 63,
+    "defer": 5,
+    "release_monitor": 5306,
+    "release_piece": 180,
+    "release_recall": 401
+   },
+   "decision_log": "decision.jsonl",
+   "in_paper_set": false,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 9,
+    "min": 0,
+    "n": 3303,
+    "n_distinct": 10,
+    "p50": 3,
+    "p90": 5,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 5955,
+   "n_epochs_with_a_decision": 3303,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 25,
+    "min": 0,
+    "n": 3303,
+    "n_distinct": 26,
+    "p50": 6,
+    "p90": 12,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 8,
+    "min": 0,
+    "n": 5955,
+    "n_distinct": 9,
+    "p50": 3,
+    "p90": 4,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 9,
+    "min": 0,
+    "n": 5955,
+    "n_distinct": 10,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "hybrid-F-lhreq-noc3",
+   "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.5249,
+    "preble_b9_lp_at_cap_share": 0.5113,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "decline": 67,
+    "defer": 15,
+    "release_monitor": 9886,
+    "release_recall": 411
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": false,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 9,
+    "min": 0,
+    "n": 5729,
+    "n_distinct": 10,
+    "p50": 4,
+    "p90": 6,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 10379,
+   "n_epochs_with_a_decision": 5729,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 18,
+    "min": 0,
+    "n": 5729,
+    "n_distinct": 19,
+    "p50": 8,
+    "p90": 12,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 8,
+    "min": 0,
+    "n": 10379,
+    "n_distinct": 9,
+    "p50": 3,
+    "p90": 6,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 3,
+    "min": 0,
+    "n": 10379,
+    "n_distinct": 4,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "covex-v6-state",
+   "cell": "covex-v6-state_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.4847,
+    "preble_b9_lp_at_cap_share": 0.4847,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "decline": 37,
+    "defer": 12,
+    "release_monitor": 2104,
+    "release_piece": 41,
+    "release_recall": 90
+   },
+   "decision_log": "decision.jsonl",
+   "in_paper_set": false,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 9,
+    "min": 0,
+    "n": 1240,
+    "n_distinct": 10,
+    "p50": 3,
+    "p90": 6,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 2284,
+   "n_epochs_with_a_decision": 1240,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 23,
+    "min": 0,
+    "n": 1240,
+    "n_distinct": 22,
+    "p50": 7,
+    "p90": 13,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 8,
+    "min": 0,
+    "n": 2284,
+    "n_distinct": 9,
+    "p50": 3,
+    "p90": 6,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 7,
+    "min": 0,
+    "n": 2284,
+    "n_distinct": 8,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "covex-v6-fair-c5attr",
+   "cell": "covex-v6-fair-c5attr_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.4311,
+    "preble_b9_lp_at_cap_share": 0.4277,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "release_monitor": 8210,
+    "release_piece": 146,
+    "release_recall": 478,
+    "state_action": 408,
+    "touch": 408
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": false,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 10,
+    "min": 0,
+    "n": 5709,
+    "n_distinct": 11,
+    "p50": 3,
+    "p90": 6,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 9650,
+   "n_epochs_with_a_decision": 5709,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 23,
+    "min": 0,
+    "n": 5709,
+    "n_distinct": 24,
+    "p50": 6,
+    "p90": 12,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 8,
+    "min": 0,
+    "n": 9650,
+    "n_distinct": 9,
+    "p50": 3,
+    "p90": 5,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 7,
+    "min": 0,
+    "n": 9650,
+    "n_distinct": 8,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "covex-v6-state-uo",
+   "cell": "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.4718,
+    "preble_b9_lp_at_cap_share": 0.4662,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "release_monitor": 8689,
+    "release_piece": 148,
+    "release_recall": 478,
+    "state_action": 407,
+    "touch": 407
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": false,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 9,
+    "min": 0,
+    "n": 4996,
+    "n_distinct": 10,
+    "p50": 3,
+    "p90": 6,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 10129,
+   "n_epochs_with_a_decision": 4996,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 22,
+    "min": 0,
+    "n": 4996,
+    "n_distinct": 23,
+    "p50": 7,
+    "p90": 12,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 8,
+    "min": 0,
+    "n": 10129,
+    "n_distinct": 9,
+    "p50": 3,
+    "p90": 5,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 7,
+    "min": 0,
+    "n": 10129,
+    "n_distinct": 8,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  },
+  {
+   "arm": "covex-v6-state-shares",
+   "cell": "covex-v6-state-shares_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "crossings": {
+    "mooncake_overloaded_share": 0.4782,
+    "preble_b9_lp_at_cap_share": 0.476,
+    "register": "CONSTRUCTED: thresholds from code, inputs from a submit-time sample",
+    "v5rules2_guard_by_backlog_share": 0.0
+   },
+   "decision_kinds": {
+    "decline": 8,
+    "defer": 1,
+    "release_infeasible": 2251,
+    "release_monitor": 9569,
+    "release_piece": 105,
+    "release_recall": 417,
+    "share_hold": 1129
+   },
+   "decision_log": "decision.jsonl.gz",
+   "in_paper_set": false,
+   "mooncake_sum_queued": {
+    "constant": false,
+    "max": 9,
+    "min": 0,
+    "n": 8187,
+    "n_distinct": 10,
+    "p50": 3,
+    "p90": 6,
+    "what": "CONSTRUCTED sum(queued_by_class.values())"
+   },
+   "n_decision_rows": 13480,
+   "n_epochs_with_a_decision": 8187,
+   "preble_b9_v5r2_backlog": {
+    "constant": false,
+    "max": 18,
+    "min": 0,
+    "n": 8187,
+    "n_distinct": 19,
+    "p50": 7,
+    "p90": 12,
+    "what": "CONSTRUCTED sum(queued)+sum(running)"
+   },
+   "queued_episodic_today": {
+    "constant": false,
+    "max": 8,
+    "min": 0,
+    "n": 13480,
+    "n_distinct": 9,
+    "p50": 3,
+    "p90": 6,
+    "what": "in_flight['monitor'] == queued_by_class['episodic'] today"
+   },
+   "running_recall_today": {
+    "constant": false,
+    "max": 2,
+    "min": 0,
+    "n": 13480,
+    "n_distinct": 3,
+    "p50": 0,
+    "p90": 1,
+    "what": "in_flight[recall]+[piece]+[whole] == running_by_class['recall']"
+   }
+  }
+ ],
+ "checks": {
+  "cross_check_against_prior": {
+   "agree": "NOT A DISAGREEMENT: that pair is a two-line toy observation with no sessions and no in-flight work, so 0/0 is its correct value. It is CONSTRUCTED at a stub and is not a measurement of a live cell, so it does not bound this run.",
+   "prior": "results/orchestration/live2/d213_metrics_scrape/readsite_{before,after}.json record B_queued_by_class = {recall: 0, episodic: 0}",
+   "register": "OBSERVED (the prior file was read at this sha)",
+   "what": "CLAUDE.md check 1: prior committed value for this quantity"
+  },
+  "distribution_sanity": {
+   "n_cells": 24,
+   "n_cells_where_queued_episodic_is_constant": 0,
+   "register": "OBSERVED",
+   "what": "CLAUDE.md check 3: a constant where a distribution is expected"
+  },
+  "negative_side_of_that_control": {
+   "max_over_uncapped": 4240,
+   "n": 13,
+   "none_at_8": true,
+   "register": "OBSERVED",
+   "what": "arms with no admission cap must NOT sit at 8"
+  },
+  "positive_control_c_inflight_8": {
+   "all_max_exactly_8": true,
+   "n": 11,
+   "per_cell_max": {
+    "covex-v6-fair-c5attr_n16_s6_1200s_h27_3t_L3_epg_rq30": 8,
+    "covex-v6-state-shares_n16_s6_1200s_h27_3t_L3_epg_rq30": 8,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 8,
+    "covex-v6-state_n16_s6_1200s_h27_3t_L3_epg_rq30": 8,
+    "edf_n16_s6_1200s_h27_3t_L3_epg_rq30": 8,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 8,
+    "llf_n16_s6_1200s_h27_3t_L3_epg_rq30": 8,
+    "v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30": 8,
+    "v5-rules-2_n16_s5_1200s_h27_3t_L3_epg_rq30": 8,
+    "v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30": 8,
+    "v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30": 8
+   },
+   "register": "OBSERVED",
+   "verdict": "PASS: the declared cap is reproduced from the decision log, so the field read here is the in-flight counter and not something else",
+   "what": "arms whose admission cap is c_inflight = 8 must top out at EXACTLY 8"
+  },
+  "proxy": {
+   "actually_measures": "the same self.in_flight['monitor'] counter, sampled at submit time inside the epoch rather than at the top of observation()",
+   "not_valid_for": "an exact per-epoch value, so every threshold-crossing share is marked CONSTRUCTED and none is used as a headline",
+   "proxy": "traffic_mix['monitor'] from decision.jsonl stands for queued_by_class['episodic'] as built in cstate.observation()",
+   "register": "declared",
+   "valid_for": "the constancy question, which is the headline here",
+   "what": "CLAUDE.md check 6"
+  }
+ },
+ "grid": "1200s_h27_3t_L3_epg_rq30",
+ "metric_absence": {
+  "claim": "vllm:num_requests_waiting has never been present in live2",
+  "evidence": "st.metrics has exactly one writer, coordinator.py:489 (self.st.metrics = self.be.metrics()); in every reported live2 cell be is asyncbackend.AsyncBackend, whose metrics() (asyncbackend.py:190-210) returns wire statistics and no vllm: key. AsyncBackend.scrape_metrics exists but METRICS_SCRAPE_DEFAULT is False (asyncbackend.py:161) and its output is not merged into st.metrics.",
+  "register": "OBSERVED from code at the sha above"
+ },
+ "n_cells_measured": 24,
+ "thresholds": {
+  "mooncake_overload_queue": 4,
+  "preble_b9_lp_q": 8,
+  "v5rules2_guard_backlog": 100
+ }
+}
