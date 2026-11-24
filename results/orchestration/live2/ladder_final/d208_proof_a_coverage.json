@@ -38,17 +38,17 @@
  "_load_evidence": "bit-exact matches at loadavg 2.15, 2.84, 8.95, 10.80, 13.80, 13.83, 19.16, 20.45 and 24.81, zero movement across an order of magnitude. The boundary rests on the MECHANISM (cutoff patched off) plus this spread, never on precedent; the highest load any committed artefact records is 9.00.",
  "summary": {
   "n_scored_set": 18,
-  "match": 11,
-  "moved": 1,
-  "pending": 1,
-  "coverage_missing": 5,
+  "match": 12,
   "moved_but_classified_bar_stale": 1,
-  "moved_unexplained": 0
+  "moved_unexplained": 0,
+  "pending": 0,
+  "coverage_missing": 4,
+  "proof_a_does_not_apply": 1
  },
  "ESCALATIONS": [
-  "confidence-cascade MOVED (b1ff48e40387a997 / 3,834 against b9290071679f1baa / 12,253) at loadavg 2.21. CLASSIFIED: its d179 bar is PRE-D205-FIX and stale; the arm was fixed by 8986f593 and D205 already ruled its committed cells superseded. Recommend RE-BARRING, not stopping. NOT re-barred by me.",
-  "cascade-routing: in the D213 paper set against a COMMITTED PORT-RULE exclusion (sufficiency proxy can never fire, escalation branch UNREACHABLE, 0 escalations over 2 cells), and with no cell at the D213 recipe (_L3_epg, not _L3_epg_rq30).",
-  "device-only: in the D213 paper set with ZERO committed cells at any tag."
+  "confidence-cascade MOVED: RULED, re-bar and proceed (bar predates the D205 fix). Re-bar queued to run ALONE.",
+  "cascade-routing: RULED D212 (3), status 'REPORTED, PORT-RULE FAIL', never counted as a baseline we beat; no bar until its filler cells exist, so COVERAGE MISSING stands.",
+  "device-only: RULED D79, offline by design, proof (a) does not apply; both my and the coordinator's 'cells owed' framing withdrawn."
  ],
  "arms": {
   "always-cloud-fcfs": {
@@ -105,7 +105,8 @@
     "why_this_is_not_a_quibble": "that is CLAUDE.md's own cited motivating failure for the port rule, a port that passed both required proofs perfectly while producing ZERO decisions of its characteristic kind because its sufficiency proxy could never fire. Reporting it as a baseline reports an arm that never makes its characteristic decision, and its numbers would read as a legitimate comparison.",
     "second_independent_problem": "its only committed cells are at tag _L3_epg, NOT _L3_epg_rq30, so it has NO cell at the D213 recipe and in_this_grid is False. Cells would have to be run before it could be scored at all.",
     "disposition": "ESCALATED, NOT SCORED and NOT silently included. The user ruled it in; the port-rule exclusion is committed. One of the two has to give, and that is not mine to decide."
-   }
+   },
+   "RULING_D212_3": "STATUS IS A THIRD ONE, not either we had: 'REPORTED, PORT-RULE FAIL'. Its numbers ARE printed, ALWAYS with the reason (its card's sufficiency proxy cannot fire, the escalation branch is UNREACHABLE, it sits on the device-only floor by construction), and it is NEVER COUNTED AS A BASELINE WE BEAT. Its _L3_epg_rq30 cells come from the H100 filler queue and THERE IS NO BAR UNTIL THEY EXIST, so COVERAGE MISSING stands and it is not scored. The baseline_matrix_table.py status change is the coordinator's, not mine."
   },
   "confidence-cascade": {
    "in_D213_paper_set": true,
@@ -129,20 +130,17 @@
     "therefore": "the d179 bar b9290071679f1baa / 12,253 BELONGS TO THE PRE-FIX CODE and is STALE. This is the same shape as the rung-2 bar: a bar that is no longer a property of the current code. The right action is to RE-BAR confidence-cascade from a post-fix cell, NOT to stop the ladder.",
     "what_I_am_NOT_doing": "I am not downgrading the MOVED verdict and I am not re-barring it myself. The measurement is reported as a move; the classification is reported beside it; whether the ladder proceeds and who re-bars is not mine to decide.",
     "the_general_point": "D213 fixes a paper baseline set that includes an arm whose d179 bar is stale, so proof (a)'s escalation clause would have fired on a movement already ruled expected by D205. That is the THIRD bar in this family found stale after being quoted as current: the rung-2 bar (allocation), the pre-Session-A rung-3 claim (withdrawn), and now this one."
-   }
+   },
+   "RULING": "RE-BAR AND PROCEED. The MOVED verdict is explained by the ruled D205 fix (removal of the constant-0.0 read) and NOT by contention. Proof (a) is not blocked on it.",
+   "rebar_status": "a guarded re-bar is QUEUED: it waits for a genuinely ALONE window, runs the committed recipe on post-fix code at 5ed6287e, and RE-CHECKS that alone held for the whole cell before reporting. Output lands at ladder_final/rebar/confidence_cascade_rebar.json with digest, rows and loadavg at both start and end, for the coordinator to put in the bar table with its provenance commit."
   },
   "device-only": {
    "in_D213_paper_set": true,
    "has_d179_bar": false,
-   "verdict": "COVERAGE MISSING",
+   "verdict": "PROOF (a) DOES NOT APPLY",
    "cell_owed_for_proof_a": false,
    "why": "no entry in the committed d179 17-arm table; under the one-recipe rule this is NOT scored and NOT reported as unchanged.",
-   "ESCALATION_2_no_cells_exist": {
-    "what": "device-only is in the D213 paper set and has ZERO committed cell directories at ANY tag.",
-    "checked": "git ls-tree over results/orchestration/live2/frozen_test/runs/ returns no device-only_n16 directory.",
-    "registered": "yes, the name resolves (arms.py), so this is a missing-cells problem and not a missing-arm problem.",
-    "disposition": "COVERAGE MISSING and CELLS OWED before it can be reported. Flagged rather than quietly dropped."
-   }
+   "RULING_D79": "OFFLINE BY DESIGN: computed from recorded device answers and scored by the Orin, so it was never going to have a cell. The bar table gets 'offline, no cell by design'. My earlier 'cells OWED' framing was wrong and is withdrawn; so was the coordinator's."
   },
   "eco-llm": {
    "in_D213_paper_set": true,
@@ -152,7 +150,11 @@
     12253
    ],
    "loadavg_1min_at_cell_start": 2.26,
-   "verdict": "PENDING in the running chain"
+   "verdict": "MATCH",
+   "measured": [
+    "f32fa95c6953c64e",
+    12253
+   ]
   },
   "edf": {
    "in_D213_paper_set": true,
@@ -287,5 +289,10 @@
    ],
    "verdict": "MATCH"
   }
+ },
+ "_STANDING_RULE_BAR_PROVENANCE": {
+  "the_rule": "every bar-table row carries THE COMMIT OF THE CODE THAT PRODUCED IT and THE LIST OF RULED FIXES IT PREDATES. Proof (a) ESCALATES ONLY WHEN AN ARM MOVES ON CODE WITH NO RULED CHANGE SINCE ITS BAR. Backfill of existing rows is the coordinator's.",
+  "what_it_changes_for_this_scorer": "the escalation clause is NARROWER and better aimed. A move on an arm whose bar PREDATES a ruled fix is EXPECTED and reportable, not a stop. A move on an arm with NO ruled change since its bar is still a HARD STOP, and that is the case worth stopping for.",
+  "why_it_exists": "three bars were quoted as current and found stale in one day: the rung-2 bar (allocation-dependent through id(obs)), the pre-Session-A rung-3 claim (withdrawn), and confidence-cascade (pre-D205-fix). Without provenance the clause fires on ruled fixes, which trains a reader to ignore it, and that is worse than not having it."
  }
 }

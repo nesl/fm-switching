@@ -1,0 +1,39 @@
+{
+ "_what": "the box, OBSERVED BY ME with ps and /proc/<pid>/cwd, not reported by a guard (D216).",
+ "_why": "a guard that identifies foreign live2 processes by .py basenames or a command-line pattern is blind to any module it does not know about, so it can record alone: true truthfully while the box is occupied. My own re-bar guard matched on 'one_cell' and had exactly this blind spot.",
+ "observed_at": "2026-11-24T02:06:47Z",
+ "loadavg_1_5_15": [
+  1.09,
+  1.18,
+  1.23
+ ],
+ "n_python_processes": 3,
+ "processes": [
+  {
+   "pid": 251074,
+   "etime": "42:47",
+   "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2",
+   "args_head": "python d216_final_kv025_driver.py --out-dir /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells --seed 4 --n 16 --run",
+   "would_my_old_guard_have_seen_it": false
+  },
+  {
+   "pid": 267649,
+   "etime": "01:18",
+   "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2",
+   "args_head": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/",
+   "would_my_old_guard_have_seen_it": true
+  },
+  {
+   "pid": 268263,
+   "etime": "00:00",
+   "cwd": "/home/pragya/Desktop/FM-switching",
+   "args_head": "/home/pragya/miniconda3/envs/fmtk/bin/python -",
+   "would_my_old_guard_have_seen_it": false
+  }
+ ],
+ "verdict": "BOX NOT FREE. Proofs (b) and (c) are HELD. Note how many of these my pattern-matching guard would have MISSED: that is the hazard, demonstrated on my own tooling.",
+ "proof_cells_i_will_run_when_free": [
+  "proof (b): Step 2b per rung, counts by mechanism",
+  "proof (c): the id(obs) decision delta, reported with its ~85-decision floor AND the statement that the unfixed comparator is not a valid bar at all"
+ ]
+}

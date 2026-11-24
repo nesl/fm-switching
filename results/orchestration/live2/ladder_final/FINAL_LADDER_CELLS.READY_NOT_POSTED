@@ -1,0 +1,75 @@
+# FINAL LADDER, s4 ONLY, FAIL-FAST (D196). One cell per line: "arm n seed tag".
+# Lines starting # are NOT run.
+#
+# *** NOT YET POSTED. It goes up only after proofs (b) and (c) pass, which are HELD under the D213
+# *** ALONE rule while d216_final_kv025_driver.py and d214_byte_identity_proof.py occupy the box.
+#
+# THE ORDER OF THE THREE s4 LINES IS LOAD-BEARING. The driver stable-sorts by seed, so WITHIN seed 4
+# the written order is the run order. It is written fair, then full, then state, so the fail-fast
+# sequence is the one D208 asked for: the rung with a bar first, then the rung judged against it,
+# then the rung that has no bar of its own.
+#
+# s5 TO s7 ARE NOT IN THIS POST, deliberately. Putting them here would defeat D196 fail-fast, because
+# the stable sort would queue them behind s4 and they would run whatever s4 showed. They go in
+# SEPARATE later posts, only as the per-seed verdicts allow.
+#
+# PRE-REGISTRATION, frozen BEFORE any cell:
+#   results/orchestration/live2/ladder_final/StudyLADDER_FINAL_prereg.json
+#   sha256 d6d8b6c121d23f20f46b03832883fd6b90126f42c7b2fa8224f3d6614bc5f221
+# Every bar DEFINITION and every COMPARATOR number is inside that hash. The measured numbers go in
+# the UNFROZEN companion, StudyLADDER_FINAL_measured_COMPANION.json, so the freeze is never voided.
+#
+# THE BARS, per seed at 1x, scored by the COMMITTED d179_rung2_verdict.py, numerator
+# COMMITTED_RULE_PRIMARY. The base comparator is hybrid-F-lhreq-noc3, ALIASED covex-v6-base: ONE ARM,
+# TWO NAMES (arm_names_v6.OLD_TO_RUNG), confirmed by the digests themselves. Its 1x plain-tag cells
+# live under the OLD directory spelling; the _kv variants use the NEW one.
+#   base robot on-time            s4 35, s5 27, s6 41, s7 19
+#   base alert attainment         s4 0.44249, s5 0.396211, s6 0.465479, s7 0.553811
+#   covex-v6-fair-final   alert ABOVE base's; robot at least base + 0.90 x (covex-v6-state-final minus
+#                         base); single-shot at least 90 percent within 2 s; late alerts REPORTED
+#   covex-v6-final        alert ABOVE covex-v6-fair-final's; robot at least base + 0.90 x
+#                         (covex-v6-fair-final minus base); Gate A exposure reported beside it
+#   covex-v6-state-final  NO BAR OF ITS OWN; it is the reference rung 3's retention bar is computed
+#                         from, and its s5 to s7 run WITH covex-v6-fair-final
+#
+# A PROPERTY OF THE FROZEN BAR A READER MUST NOT MISREAD: base's alert attainment EXCEEDS committed
+# rung 2's at EVERY seed (0.44249 against 0.2288 at s4, through 0.553811 against 0.2482 at s7). So
+# "above base's" is MATERIALLY HARDER than the "above rung 3's" bar that -rr cleared. D187 forbids
+# moving a pass bar or tuning toward passing, so A MISS IS A REPORTABLE RESULT and not a reason to
+# revisit the bar. A reader who knows only that -rr beat rung 3 would otherwise read a
+# rung-3-versus-base miss as a regression, when it is a different and harder question.
+#
+# WHAT EACH RUNG ADDS, and every mechanism is shown live with a file:line and a dry counter in
+# results/orchestration/live2/ladder_final/d208_inheritance.json:
+#   covex-v6-state-final  = covex-v6-state-uo-c5attr + the D188 (2) id(obs) cache-key fix, ON. NOT new
+#                           code: the fix was built and proven under D188 (2) and left off by default
+#                           with the ruling that it stays off "until the final rung-2 arm and its
+#                           comparators are rerun TOGETHER with it ON". This ladder IS that rerun.
+#                           Read at arms_v6state.py:302 (D208 cites :236, which is stale).
+#   covex-v6-fair-final   = + the D185 per-device deficit feed (ordering consumer) + the STATE PLANNER
+#                           reading that same feed (D206 (2)) + the ALERT release re-check (D179 (4))
+#   covex-v6-final        = + protect-and-defer and question deferral, planner limb on the same feed,
+#                           so the limb and the two legs read ONE feed object and cannot disagree
+#
+# TWO MECHANISMS REPORTED AS UNEXERCISED RATHER THAN SMOOTHED, both in the inheritance file:
+#   RELOAD and any per-request host belief: host residency is observed only IN AGGREGATE on this
+#   engine (26.4 percent of prompt tokens via external_kv_transfer); per request it folds into
+#   cached_tokens and cannot be separated. UNEXERCISED FOR A STRUCTURAL REASON.
+#   gpu_kv_fraction: 0.0 in every reported live2 cell because LIVE2 NEVER SCRAPES /metrics, not merely
+#   because a key was guessed. Escalation E1 on asyncbackend.py is proved but NOT committed. Affects
+#   RUNG 4 ONLY among our arms. So FLAT rung-4 behaviour across memory conditions is a candidate
+#   UNEXERCISED CHANNEL under Rule 2, not an equivalence. E1 must land before any 0.25x POLICY cell.
+#
+# PRE-REGISTERED, IN THIS ORDER:
+#   1. PORT RULE FIRST, per rung: count the characteristic decisions live. ZERO IS AN ABSENT LINK,
+#      reported as such and NEVER as a negative about the policy.
+#   2. The bars above, per seed, by the committed scorer.
+#   3. Every result reported WHATEVER ITS DIRECTION.
+#   FAIL-FAST: a rung continues to s5 to s7 ONLY if its s4 passes its bars.
+#
+# NOTHING ABOUT HOST-WARM PRICING IS IN THESE CELLS: D211 ships it GATED OFF with the fallback as
+# default, to be validated on these first cells and switched on only if its own pre-registered bar is
+# met. No 0.25x policy cells and no ablations here (D210).
+covex-v6-fair-final 16 4 _L3_epg_rq30
+covex-v6-final 16 4 _L3_epg_rq30
+covex-v6-state-final 16 4 _L3_epg_rq30

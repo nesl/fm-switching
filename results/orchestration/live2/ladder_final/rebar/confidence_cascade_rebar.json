@@ -1,0 +1,27 @@
+{
+ "arm": "confidence-cascade",
+ "digest": "b1ff48e40387a997",
+ "rows": 3834,
+ "seed": 4,
+ "n": 16,
+ "run_s": 1200.0,
+ "cutoff_off": true,
+ "workload": "posted",
+ "loadavg_at_start": "2.04, 2.51, 3.57",
+ "loadavg_at_end": "2.08, 2.36, 3.36",
+ "alone_confirmed_before": "GUARD-ASSERTED, NOT VERIFIED. See the correction below.",
+ "other_dry_cells_seen_after": 0,
+ "alone_held_for_the_whole_cell": "GUARD-ASSERTED, NOT VERIFIED. See the correction below.",
+ "provenance_commit_of_the_code": "5ed6287e71420cd6239ce0349b7727d07dcb1f06",
+ "post_fix": "post-D205, post-8986f593 (cascade_adapted.py rewritten; delivered_scores no longer read there)",
+ "supersedes_bar": "b9290071679f1baa / 12253, which belongs to the PRE-fix code",
+ "first_independent_run_not_alone": "b1ff48e40387a997 / 3834 at loadavg 2.21",
+ "agrees_with_the_first_run": true,
+ "_ALONE_CLAIM_DOWNGRADED_my_own_guard_has_the_D216_blind_spot": {
+  "what_my_guard_did": "it counted other dry cells with `ps -C python -o args | grep -E \"one_cell\"`.",
+  "the_blind_spot": "that is a COMMAND-LINE PATTERN match, so it is blind to any live2 process whose name does not contain 'one_cell'. Two such processes are on this box right now: d216_final_kv025_driver.py (running 40 min) and d214_byte_identity_proof.py (running 23 min). Neither would ever have been counted. This is EXACTLY the hazard D216 flags, that a guard can record alone: true truthfully while the box is in fact occupied, and my guard has it.",
+  "so_what_is_the_status_of_this_measurement": "the digest and row count STAND as a measurement; the ALONE claim does NOT. I cannot certify from the guard that nothing else ran, and I did not inspect ps and /proc/<pid>/cwd myself at the time, so the honest register is 'loadavg 2.04 at start and 2.08 at end, alone NOT independently verified'.",
+  "what_makes_the_number_trustworthy_anyway_and_it_is_better_than_an_alone_claim": "TWO INDEPENDENT RUNS AGREE EXACTLY: b1ff48e40387a997 / 3,834 at loadavg 2.21 in the chain, and the same digest and row count at loadavg 2.04 in this run, minutes apart under different box occupancy. Agreement across two separate runs is direct evidence of determinism for this arm, where an alone-flag is only an argument that nothing could have disturbed it.",
+  "lesson_for_any_future_guard": "count live2 processes by what they ARE, not by a name pattern: match the interpreter plus a path under the repo or a scratchpad tree, or enumerate /proc/<pid>/cwd. A basename allowlist built from one tree's snapshot cannot see a module that tree does not contain."
+ }
+}
