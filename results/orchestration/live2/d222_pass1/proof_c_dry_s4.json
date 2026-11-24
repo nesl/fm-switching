@@ -1,0 +1,264 @@
+{
+ "arm": "covex-v6-final",
+ "recipe": {
+  "seed": 4,
+  "n": 16,
+  "run_s": 1200.0,
+  "ratio": "40:40:20"
+ },
+ "digest": "d7c437ad40b61f45",
+ "n_decision_rows": 14540,
+ "DEFERRALS": {
+  "rd_question_defers": 0,
+  "rd_decisions": 81,
+  "from_rd_log": 0,
+  "slack_used_ms_sum": 0,
+  "deferral_s_values": []
+ },
+ "GATES": {
+  "rd_gate_must_start_now_no_slack": 52,
+  "rd_gate_no_active_alert_episode": 20,
+  "rd_gate_saving_does_not_exceed_margin": 9
+ },
+ "WOULD_MISS": {
+  "at_measured_worst_bias_over_ALL_decisions": 9,
+  "at_measured_worst_bias_over_DEFERRALS_TAKEN": 0,
+  "counter_rd_defer_would_miss_at_measured_worst_bias": 0,
+  "ratio_wouldmiss_to_deferrals": null
+ },
+ "DEVICE_ANSWERS": {
+  "pd_request_device_answers": 1,
+  "pd_request_device_declined": 1,
+  "pd_request_device_no_p_self": 0,
+  "pd_request_crossed_bar_unexpressible": 1
+ },
+ "PROTECT_AND_DEFER_BY_KIND": {
+  "pd_decisions": 245,
+  "pd_decisions_request": 82,
+  "pd_decisions_state": 163,
+  "pd_request_defers": 0,
+  "pd_state_actions": {},
+  "gates": {
+   "pd_gate_device_trade_declined: the channel exists and the net -0.021968 does not exceed the bar 1.347825, so the base's admission stands": 1,
+   "pd_gate_harm_does_not_exceed_the_bar": 1,
+   "pd_gate_leave_to_the_device: the rebuild cannot wait and cannot be sliced, and it costs others 5.310194 on-time answers against this question's own 1.820640, a net 3.489555 over a bar of 1.361306": 1,
+   "pd_gate_no_active_alert_episode": 54,
+   "pd_gate_rebuild_fits_without_evicting": 188
+  }
+ },
+ "ITEM5": {
+  "rd_predictions_published": 81,
+  "rd_decisions_log_rows": 81
+ },
+ "KV": {
+  "pd_free_kv_max": 62944,
+  "pd_free_kv_min": 8759,
+  "pd_free_kv_sum": 9688928,
+  "pd_kv_bound_by_belief": 245
+ },
+ "rd_log_sample": [
+  {
+   "t": 6.9,
+   "gate": "no_active_alert_episode",
+   "action": "BASE",
+   "u": 7051,
+   "harm_now": null,
+   "harm_saved": null,
+   "harm_saved_alert": null,
+   "own_loss": null,
+   "net": null,
+   "bar": null,
+   "w_decider": null,
+   "deferral_s": null,
+   "crosses": null,
+   "n_rows_saved": null,
+   "n_rows_still_harmed": null,
+   "own_p_before": null,
+   "own_p_after": null,
+   "n_alert_pending": 0,
+   "u_detail": {
+    "u": 7051,
+    "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+    "u_built_only": 6027,
+    "readiness": "COLD",
+    "built_tokens": 1024,
+    "telemetry_cached_tokens": 0,
+    "prompt_tokens": 7051
+   },
+   "would_miss_under_measured_bias": null,
+   "chosen_candidate": "BASE",
+   "candidate_kind": "question_deferral",
+   "session_id": "robo005|s000|1649035665793396_start_0.0_end_335.392",
+   "decider_device_id": "robo005",
+   "deferral_s_before_epoch_debit": null,
+   "epoch_debit_s": null,
+   "queue_proof": {
+    "overlap_ft_tokens_passed": 0,
+    "overlap_decode_tokens_passed": 0,
+    "n_rows_summed": 0,
+    "per_row": [],
+    "units": "UNCACHED PROMPT TOKENS queued ahead, and OUTPUT TOKENS queued ahead",
+    "coefficients": {
+     "per_uncached_token_s": 0.0001824312597782467,
+     "per_queue_token_s": 0.0001535807289338535,
+     "per_queue_decode_token_s": 0.013720489893273279
+    },
+    "model_source": "results/orchestration/live2/frozen_test/cost_model_gate_d162.json",
+    "model_verdict": "PASS",
+    "superseded_model": {
+     "source": "cost_model_gate.json by_arm, which cf.model still is for every other caller",
+     "per_overlap_s_per_REQUEST": 0.038004811772727576,
+     "ratio_to_per_queue_token": 247.4582067460825,
+     "gate_status": "FAILS (spec v5 section 12)"
+    },
+    "predicted": {
+     "first_token_s": 1.35412,
+     "decode_s": 0.058066,
+     "engine_s": 1.412186,
+     "total_s": 1.456186,
+     "at_queue_zero_engine_s": 1.412186
+    }
+   }
+  },
+  {
+   "t": 34.9,
+   "gate": "must_start_now_no_slack",
+   "action": "BASE",
+   "u": 8311,
+   "harm_now": null,
+   "harm_saved": null,
+   "harm_saved_alert": null,
+   "own_loss": null,
+   "net": null,
+   "bar": null,
+   "w_decider": null,
+   "deferral_s": 0.0,
+   "crosses": null,
+   "n_rows_saved": null,
+   "n_rows_still_harmed": null,
+   "own_p_before": null,
+   "own_p_after": null,
+   "n_alert_pending": 1,
+   "u_detail": {
+    "u": 8311,
+    "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+    "u_built_only": 7287,
+    "readiness": "COLD",
+    "built_tokens": 1024,
+    "telemetry_cached_tokens": 0,
+    "prompt_tokens": 8311
+   },
+   "would_miss_under_measured_bias": null,
+   "chosen_candidate": "BASE",
+   "candidate_kind": "question_deferral",
+   "session_id": "robo005|s000|1649035665793396_start_0.0_end_335.392",
+   "decider_device_id": "robo005",
+   "deferral_s_before_epoch_debit": 0.0,
+   "epoch_debit_s": 0.1,
+   "queue_proof": {
+    "overlap_ft_tokens_passed": 374,
+    "overlap_decode_tokens_passed": 2,
+    "n_rows_summed": 1,
+    "per_row": [
+     {
+      "req_id": "opp0000187",
+      "qtype": "alert",
+      "u_tokens": 374,
+      "decode_tokens": 2
+     }
+    ],
+    "units": "UNCACHED PROMPT TOKENS queued ahead, and OUTPUT TOKENS queued ahead",
+    "coefficients": {
+     "per_uncached_token_s": 0.0001824312597782467,
+     "per_queue_token_s": 0.0001535807289338535,
+     "per_queue_decode_token_s": 0.013720489893273279
+    },
+    "model_source": "results/orchestration/live2/frozen_test/cost_model_gate_d162.json",
+    "model_verdict": "PASS",
+    "superseded_model": {
+     "source": "cost_model_gate.json by_arm, which cf.model still is for every other caller",
+     "per_overlap_s_per_REQUEST": 0.038004811772727576,
+     "ratio_to_per_queue_token": 247.4582067460825,
+     "gate_status": "FAILS (spec v5 section 12)"
+    },
+    "predicted": {
+     "first_token_s": 1.641423,
+     "decode_s": 0.085507,
+     "engine_s": 1.72693,
+     "total_s": 1.77093,
+     "at_queue_zero_engine_s": 1.64205
+    }
+   }
+  },
+  {
+   "t": 66.1,
+   "gate": "must_start_now_no_slack",
+   "action": "BASE",
+   "u": 9751,
+   "harm_now": null,
+   "harm_saved": null,
+   "harm_saved_alert": null,
+   "own_loss": null,
+   "net": null,
+   "bar": null,
+   "w_decider": null,
+   "deferral_s": 0.0,
+   "crosses": null,
+   "n_rows_saved": null,
+   "n_rows_still_harmed": null,
+   "own_p_before": null,
+   "own_p_after": null,
+   "n_alert_pending": 1,
+   "u_detail": {
+    "u": 9751,
+    "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+    "u_built_only": 8727,
+    "readiness": "COLD",
+    "built_tokens": 1024,
+    "telemetry_cached_tokens": 0,
+    "prompt_tokens": 9751
+   },
+   "would_miss_under_measured_bias": null,
+   "chosen_candidate": "BASE",
+   "candidate_kind": "question_deferral",
+   "session_id": "robo005|s000|1649035665793396_start_0.0_end_335.392",
+   "decider_device_id": "robo005",
+   "deferral_s_before_epoch_debit": 0.0,
+   "epoch_debit_s": 0.1,
+   "queue_proof": {
+    "overlap_ft_tokens_passed": 374,
+    "overlap_decode_tokens_passed": 2,
+    "n_rows_summed": 1,
+    "per_row": [
+     {
+      "req_id": "opp0000510",
+      "qtype": "alert",
+      "u_tokens": 374,
+      "decode_tokens": 2
+     }
+    ],
+    "units": "UNCACHED PROMPT TOKENS queued ahead, and OUTPUT TOKENS queued ahead",
+    "coefficients": {
+     "per_uncached_token_s": 0.0001824312597782467,
+     "per_queue_token_s": 0.0001535807289338535,
+     "per_queue_decode_token_s": 0.013720489893273279
+    },
+    "model_source": "results/orchestration/live2/frozen_test/cost_model_gate_d162.json",
+    "model_verdict": "PASS",
+    "superseded_model": {
+     "source": "cost_model_gate.json by_arm, which cf.model still is for every other caller",
+     "per_overlap_s_per_REQUEST": 0.038004811772727576,
+     "ratio_to_per_queue_token": 247.4582067460825,
+     "gate_status": "FAILS (spec v5 section 12)"
+    },
+    "predicted": {
+     "first_token_s": 1.904124,
+     "decode_s": 0.085507,
+     "engine_s": 1.989631,
+     "total_s": 2.033631,
+     "at_queue_zero_engine_s": 1.904751
+    }
+   }
+  }
+ ]
+}

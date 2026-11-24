@@ -629,6 +629,45 @@ class Live2Coordinator:
                                        if self._candidates_counter() is not None
                                        else "pending items ordered"))
 
+    def write_rd_decisions(self) -> Optional[Dict[str, Any]]:
+        """ITEM 5 (D222 (1)): commit the per-decision counterfactual log BESIDE decision.jsonl.gz.
+
+        The arm already builds it. `arms_v6cfr3._rd_record` keeps up to 4,000 rows carrying
+        `harm_now`, `harm_saved`, `own_loss`, `net`, `bar`, `w_decider`, `deferral_s`,
+        `would_miss_under_measured_bias`, the chosen candidate and its kind - and NONE of it
+        reached a cell, which is why the s5 diagnosis could answer spec item 6 (iv) only by
+        construction from the code path instead of by a grep. Only `arm_stats` aggregates were
+        committed.
+
+        WRITTEN BY THE COORDINATOR AND NOT BY THE RUNNER, on purpose: the coordinator is the object
+        that holds BOTH the arm and the run directory (`self.logs.out_dir`), and
+        `write_decision_times` above already establishes that it writes run-directory files. The
+        runner would be the other candidate and it is two files another session has claimed.
+
+        Returns a small summary for `coordinator_result.json` so a cell says how many rows it
+        wrote, and `None` when the arm keeps no such log (every arm below rung 4), in which case
+        no file is created at all.
+        """
+        rows = getattr(self.arm, "rd_decisions", None)
+        if rows is None or self.logs is None:
+            return None
+        import gzip
+        import json
+        out = Path(self.logs.out_dir) / "rd_decisions.jsonl.gz"
+        n = 0
+        with gzip.open(out, "wt") as f:
+            for r in rows:
+                f.write(json.dumps(r, default=float) + "\n")
+                n += 1
+        cap = int(getattr(self.arm, "RD_DECISIONS_CAP", 4000))
+        return {"path": out.name, "n_rows": n, "cap": cap,
+                "truncated": bool(n >= cap),
+                "arm_stats_rd_decisions": (getattr(self.arm, "stats", {}) or {}).get(
+                    "rd_decisions"),
+                "note": ("one row per question-deferral DECISION, not per deferral taken; the "
+                         "`gate` field says which. If n_rows equals cap the log is truncated and "
+                         "the aggregate counters in arm_stats are the complete census.")}
+
     def write_decision_times(self, path: Path) -> None:
         import gzip
         import json
@@ -2271,6 +2310,10 @@ class Live2Coordinator:
             return round(lat[min(int(p * len(lat)), len(lat) - 1)], 4) if lat else None
         mon = [a for a in self.answers if a["kind"] == "monitor"]
         rec = [a for a in self.answers if a["kind"] == "recall"]
+        # ITEM 5 (D222 (1)): written here so EVERY caller of `_result` gets it - the in-process
+        # runner, the split child and every one-cell wrapper - rather than at one call site that
+        # another driver would not go through. It is a no-op for every arm below rung 4.
+        rd_log = self.write_rd_decisions()
         return dict(
             arm=self.arm.name, arm_version=getattr(self.arm, "arm_version", "unversioned"),
             is_measurement=False,
@@ -2279,6 +2322,7 @@ class Live2Coordinator:
             window_s=self.window_s, n_devices=len(self.st.devices),
             n_sessions=len(self.st.sessions), n_opportunities=len(self.st.opps),
             n_requests=self.n_req, n_decisions=self.n_dec,
+            rd_decisions_log=rd_log,
             # D226 (3): positive check, asserted rather than inferred. On a logged run every submitted
             # request has exactly one request.jsonl row (completed, or abandoned at end).
             request_rows_written=int(self.counts.get("request_rows_written", 0)),

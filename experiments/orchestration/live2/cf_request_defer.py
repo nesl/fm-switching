@@ -108,7 +108,8 @@ for _p in (str(HERE), str(HERE / "v5"), str(HERE / "fleet"), str(HERE.parent / "
         sys.path.insert(0, _p)
 
 import cf_protect_defer as PD                                                  # noqa: E402
-import d190_measured_safety as MS                                              # noqa: E402
+import d222_measured_safety as MS                                              # noqa: E402
+import d190_measured_safety as MS_SUPERSEDED                                   # noqa: E402
 
 sys.path.insert(0, str(HERE / "v5"))
 import cf_cost as CC                                                           # noqa: E402
@@ -134,8 +135,14 @@ RD_VERSION = "cf-request-defer-1.1"
 # `cf_protect_defer.KAPPA` IS LEFT ALONE. Its arms have a posted cell list owned by another
 # session, so changing their safety factor would change what those cells measure. The tree holds
 # two factors on purpose and each one says which it is.
+# D222 (1) item 4, user ruling 2026-11-24. The factor is now the q90 of ENGINE COMPLETION over
+# D162 PREDICTED ENGINE service on the committed rung-3 cells, healthy windows only, network
+# OUTSIDE the factor: 1.767170 on n = 255, replacing 1.8721 on n = 5. `d190_measured_safety` is
+# imported beside it ONLY so a cell can report what was superseded and by how much; nothing
+# decides on it any more, and `MS_SUPERSEDED_FACTOR` is never used in an inequality.
 SAFETY_FACTOR: float = float(MS.SAFETY_FACTOR)
 SAFETY_FACTOR_INFO = MS.INFO
+MS_SUPERSEDED_FACTOR: float = float(MS_SUPERSEDED.SAFETY_FACTOR)
 
 # The three deadline types' own bounds are the harness's; THE RECALL DEADLINE IS 3.0 s ON THIS
 # WORKLOAD and that is what the self-inflicted-loss column is measured against. It is read from
@@ -246,13 +253,18 @@ def decide(*, decider_device_id: str, now_s: float,
     # `cf_cost.latest_safe_start` is the one definition of the quantity in the tree (the same
     # function v5/cf_planner.py:357 calls); only the FACTOR differs here, and it is the measured
     # D162 under-prediction rather than the committed service-residual kappa. Both are recorded.
-    _l = CC.latest_safe_start(float(now_s), float(deadline_abs_s), pred, SAFETY_FACTOR)
+    # NETWORK OUTSIDE THE FACTOR (the ruled form): `need = safety * engine_s + link`, not
+    # `safety * total_s`. `latest_safe_start` is left for `cf_planner` and `cf_protect_defer`.
+    _l = CC.latest_safe_start_network_outside(float(now_s), float(deadline_abs_s), pred,
+                                              SAFETY_FACTOR)
     lss = dict(_l.as_dict())
     lss["safety_factor_source"] = SAFETY_FACTOR_INFO["source"]
     lss["safety_factor_quantile"] = "%s q%g over n=%d" % (
         SAFETY_FACTOR_INFO["quantile_method"], SAFETY_FACTOR_INFO["quantile"] * 100,
         SAFETY_FACTOR_INFO["n"])
     lss["safety_factor_measured_range"] = [SAFETY_FACTOR_INFO["min"], SAFETY_FACTOR_INFO["max"]]
+    lss["safety_factor_superseded"] = MS_SUPERSEDED_FACTOR
+    lss["safety_factor_applied_as"] = "safety * engine_s + link (network outside the factor)"
     lss["committed_kappa_not_used_here"] = PD.KAPPA
     out["latest_safe_start"] = lss
     # `cf_cost.LatestSafeStart.deferral_s` IS the quantity, already floored at 0 and already
@@ -260,8 +272,18 @@ def decide(*, decider_device_id: str, now_s: float,
     # again here would be a second arithmetic for one number, which is the thing this module's
     # docstring forbids. The KeyError is deliberate - a renamed field must break loudly rather
     # than silently become a zero deferral, which would read as "the mechanism never fires".
-    defer_s = float(lss["deferral_s"])
+    # ---- ITEM 2 (D222 (1)): DEBIT ONE DECISION PERIOD -----------------------------------------
+    # The deferral is computed to land EXACTLY on the latest safe start, and the opportunity can
+    # only be re-offered at an epoch boundary, which is strictly later. `cf_request_defer` already
+    # acknowledged the grid as a FLOOR on the deferral (`MIN_DEFERRAL_S` below) and nowhere as a
+    # DEBIT against it. On a constructed shift that quantization alone accounts for 2 of the 4
+    # "deferred and late" losses at s5 and 1 of 4 at s4, every one inside 0.035 s of its deadline.
+    # One period earlier is the safe direction and costs at most 100 ms of harm saved.
+    defer_s_at_latest_start = float(lss["deferral_s"])
+    defer_s = max(defer_s_at_latest_start - PD.DECISION_PERIOD_S, 0.0)
     out["deferral_s"] = defer_s
+    out["deferral_s_before_epoch_debit"] = defer_s_at_latest_start
+    out["epoch_debit_s"] = PD.DECISION_PERIOD_S
     out["must_start_now"] = bool(lss["must_start_now"])
     out["lss_feasible"] = bool(lss["feasible"])
     if defer_s < MIN_DEFERRAL_S:
@@ -353,15 +375,26 @@ def decide(*, decider_device_id: str, now_s: float,
     # at or below the factor, which is the whole reason the factor is the q90 and not the median.
     # Reported at the measured WORST bias and at the measured MINIMUM, so the column is a range
     # and not a single reassuring number.
+    # THE REGISTER CHANGED WITH THE FACTOR AND THE COLUMN FOLLOWS IT. The factor is now a ratio
+    # of ENGINE completion to PREDICTED ENGINE service, so the bias it bounds multiplies
+    # `engine_s`, not `total_s`; and the overrun is measured against the DEBITED deferral, which is
+    # the one actually enacted. With the epoch debit the overrun is
+    # `(b - SAFETY_FACTOR) * engine_s - DECISION_PERIOD_S`, so one period of slack now sits on the
+    # safe side of every bias at or below the factor.
     total = float(getattr(pred, "total_s", 0.0) or 0.0)
+    engine = float(getattr(pred, "engine_s", 0.0) or 0.0)
     miss: Dict[str, Any] = {"recall_deadline_s_label": RECALL_DEADLINE_S_LABEL,
                             "predicted_total_service_s": total,
+                            "predicted_engine_service_s": engine,
                             "deferral_s": defer_s,
-                            "safety_factor_used": SAFETY_FACTOR}
+                            "epoch_debit_s": PD.DECISION_PERIOD_S,
+                            "safety_factor_used": SAFETY_FACTOR,
+                            "safety_factor_superseded": MS_SUPERSEDED_FACTOR}
     for tag, b in (("at_measured_worst_bias", float(SAFETY_FACTOR_INFO["max"])),
                    ("at_measured_best_bias", float(SAFETY_FACTOR_INFO["min"])),
+                   ("at_superseded_factor", MS_SUPERSEDED_FACTOR),
                    ("at_committed_kappa", float(PD.KAPPA))):
-        overrun = (float(b) - SAFETY_FACTOR) * total
+        overrun = (float(b) - SAFETY_FACTOR) * engine - PD.DECISION_PERIOD_S
         miss[tag] = {"bias": float(b), "overrun_s": overrun, "would_miss": bool(overrun > 0.0)}
     out["would_miss_deadline_under_measured_bias"] = miss
 

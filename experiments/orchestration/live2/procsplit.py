@@ -340,6 +340,10 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
                                strip_hints=bool(cfg.get("strip_hints", True)), cache=cache,
                                limit=int(cfg.get("http_limit") or 16384))
         be.scheduling_policy = cfg.get("scheduling_policy") or "fcfs"
+        # D216 (2) / D227: the same cell-scoped switch as the in-process path, set on the
+        # INSTANCE. The split path is the one the posted cells run, so a flag plumbed only into
+        # `_inprocess` would be a switch that never reaches a committed cell.
+        be.metrics_scrape = bool(cfg.get("metrics_scrape", False))
     logs = Logs(rdir).open()
     co = Live2Coordinator(arm, be, [], upload_mode=cfg["mode"],
                           window_s=float(cfg["run_s"]), drain_s=float(cfg.get("drain_s") or 10.0),

@@ -225,6 +225,12 @@ class _ProtectDeferMixin:
                 pr = CC.predict(cf.model, int(PD.ALERT_UNCACHED_TOKENS), 0, 0, 0)
                 rows.append({"req_id": str(inst.get("opportunity_id")), "device_id": str(did),
                              "session_id": None, "qtype": "alert",
+                             # D222 (1) item 1: the row's own UNCACHED PROMPT tokens, published so
+                             # the question-deferral leg can sum the queued-ahead WORK instead of
+                             # passing a literal zero. For an alert it is the measured EP-G median
+                             # (`cf_protect_defer.PROXIES`), the same number this row's engine_s is
+                             # already predicted from, so no new quantity enters here.
+                             "u_tokens": int(PD.ALERT_UNCACHED_TOKENS),
                              "engine_s": float(pr.engine_s),
                              "slack_s": (float(inst.get("deadline_abs", obs.now_s))
                                          - float(obs.now_s)),
@@ -244,6 +250,10 @@ class _ProtectDeferMixin:
                 rows.append({"req_id": str(qy.query_id),
                              "device_id": str(sdev.get(str(qy.session_id), "")),
                              "session_id": str(qy.session_id), "qtype": qtype,
+                             # D222 (1) item 1: the SAME `unc` this row's engine_s is predicted
+                             # from, published rather than recomputed, so the queued-ahead work
+                             # and the row's own price can never disagree.
+                             "u_tokens": int(unc),
                              "engine_s": float(pr.engine_s), "slack_s": slack,
                              "p_device_on_time": float(CO.p_device_on_time(
                                  max(slack, 0.0),

@@ -63,6 +63,39 @@ for _p in (str(HERE), str(REPO / "experiments/orchestration/live2"),
 GATE_JSON = REPO / "results/orchestration/live2/frozen_test/cost_model_gate.json"
 RESIDUALS_JSON = REPO / "results/orchestration/live2/v5/cf_service_residuals.json"
 
+# ---------------------------------------------------------------------------
+# THE D162 GATE, AND WHY IT IS A SECOND MODEL HERE AND NOT A REPLACEMENT (D222 (1) item 1).
+#
+# *** THE TWO MODELS' QUEUE TERMS ARE IN DIFFERENT UNITS AND THE RATIO IS 247.46x. *** This is the
+# defect item 1 exists to repair, so it is written down where both models are declared:
+#
+#   cost_model_gate.json, by_arm      first_token.per_overlap        0.038004811772727576
+#                                     SECONDS PER OVERLAPPING REQUEST. The feature is a COUNT:
+#                                     `plan_queue` fills it from `_count_overlaps`, which returns
+#                                     an int, and `cost_model_gate.py:135` fitted it that way.
+#                                     THE GATE ALSO FAILS (see GATE_STATUS below).
+#   cost_model_gate_d162.json         first_token.per_queue_token    0.0001535807289338535
+#                                     SECONDS PER UNCACHED TOKEN queued ahead. D162 REPLACED the
+#                                     count with work (`cost_model_gate_d162.py:14-15`: "what a
+#                                     queue makes you wait for is work, not requests, and the 160x
+#                                     overlap spread is what broke the linear form"), and it is
+#                                     the model that PASSED its gate (D168, held-out ratio_p50
+#                                     1.052).
+#
+# Passing a TOKEN count into `predict`'s `overlap_ft` would multiply tokens by a per-request
+# coefficient: at the 3,113 queued-ahead uncached tokens measured on one traced rung-4 deferral it
+# predicts 165.6 s of service against an observed 0.818 s, which makes every latest safe start
+# infeasible and collapses the mechanism to zero firings. So the two live side by side, each with
+# its own reader, and THE UNITS ARE IN THE ARGUMENT NAMES of `predict_d162` below.
+#
+# `predict` and `GATE_JSON` are LEFT EXACTLY AS THEY ARE. Their callers are `cf_planner`'s
+# `plan_queue`/`plan_state`/`plan_sync` and `cf_protect_defer`, whose arms have committed cells;
+# changing the model under them would change what those cells measure.
+D162_GATE_JSON = REPO / "results/orchestration/live2/frozen_test/cost_model_gate_d162.json"
+D162_GATE_STATUS = ("PASSES (D168): held-out ratio_p50 1.052, verdict PASS in the committed "
+                    "artefact. Fitted on HEALTHY windows only (first-token p50 <= 2.781 s over a "
+                    "100 s submit window), so a prediction outside that regime is extrapolation.")
+
 GATE_SPLIT = "by_arm"
 GATE_STATUS = ("FAILS (spec v5 section 12): decode over-predicts by 25 to 32 percent in every "
                "held-out class, and warm is confounded with arm, so the warm regime is "
@@ -161,6 +194,86 @@ def predict(model: Dict[str, Any], tokens: int, cached_tokens: int = 0,
     return ServicePrediction(ft, dec, ft + dec, total, ft + float(link_s),
                              dec / total if total > 0 else 0.0, unc,
                              max(int(overlap_ft), 0), max(int(overlap_decode), 0))
+
+
+def load_d162_model(path: Path = D162_GATE_JSON) -> Dict[str, Any]:
+    """The committed D162 model. RAISES if absent, for the reason `load_gate_model` raises.
+
+    The returned dict keeps D162's OWN key names (`per_queue_token`,
+    `per_queue_decode_token`), so it cannot be handed to `predict`, whose keys are
+    `per_overlap`. That incompatibility is deliberate: it makes the 247x unit error a KeyError
+    instead of a plausible number.
+    """
+    if not path.exists():
+        raise FileNotFoundError("committed D162 cost-model gate missing: %s" % path)
+    d = json.loads(path.read_text())
+    m = dict(d["model"])
+    m["_source"] = str(path.relative_to(REPO))
+    m["_gate_status"] = D162_GATE_STATUS
+    m["_verdict"] = d.get("verdict")
+    m["_n_fit"] = d["model"].get("n_fit")
+    return m
+
+
+def predict_d162(model: Dict[str, Any], tokens: int, cached_tokens: int = 0,
+                 queue_uncached_ahead_tokens: int = 0,
+                 queue_decode_ahead_tokens: int = 0,
+                 link_s: float = LINK_RTT_S) -> ServicePrediction:
+    """Predicted service under the D162 model, DECODE INCLUDED, queue priced in TOKENS.
+
+    THE ARGUMENT NAMES CARRY THEIR UNITS ON PURPOSE. `queue_uncached_ahead_tokens` is summed
+    UNCACHED PROMPT tokens of the requests whose prefill is in flight, and
+    `queue_decode_ahead_tokens` is summed OUTPUT tokens of the requests whose decode is in flight
+    - D162's own two features (`cost_model_gate_d162.features`, `queue_uncached_ahead` and
+    `queue_decode_ahead`). A caller that passes a request COUNT here is wrong by about 247x and
+    the name is the only cheap defence against it.
+
+    `cached_tokens` defaults to 0 and callers that already hold an UNCACHED count must leave it
+    there: `tokens - cached_tokens` is the uncached work, so passing an already-net count with a
+    non-zero `cached_tokens` would subtract twice.
+    """
+    f, d = model["first_token"], model["decode"]
+    unc = max(int(tokens) - int(cached_tokens), 0)
+    ft = (float(f["intercept"]) + float(f["per_uncached_token"]) * unc
+          + float(f["per_queue_token"]) * max(int(queue_uncached_ahead_tokens), 0))
+    dec = (float(d["intercept"])
+           + float(d["per_queue_decode_token"]) * max(int(queue_decode_ahead_tokens), 0))
+    ft = max(ft, 0.0)
+    dec = max(dec, 0.0)
+    total = ft + dec + float(link_s)
+    return ServicePrediction(ft, dec, ft + dec, total, ft + float(link_s),
+                             dec / total if total > 0 else 0.0, unc,
+                             max(int(queue_uncached_ahead_tokens), 0),
+                             max(int(queue_decode_ahead_tokens), 0))
+
+
+def latest_safe_start_network_outside(now_s: float, deadline_abs_s: float,
+                                      pred: ServicePrediction, safety: float,
+                                      link_s: float = LINK_RTT_S) -> LatestSafeStart:
+    """`deadline - (safety * ENGINE service + link)`: the network OUTSIDE the factor.
+
+    THE RULED FORM (user, 2026-11-24, D222 (1) item 4). The factor is fitted as a ratio of
+    engine-reported completion to the D162 model's predicted ENGINE service, with no link term on
+    either side. `latest_safe_start` multiplies the factor into `pred.total_s`, which INCLUDES the
+    link, so using it here would scale the link by the factor and put the network back inside it -
+    about a tenth of a typical predicted service, in the optimistic direction. The link is a
+    modelled constant, not a per-request measurement, so it is added and not scaled.
+
+    `latest_safe_start` is untouched: `cf_planner` and `cf_protect_defer` call it and their arms
+    have committed cells.
+    """
+    need = float(safety) * float(pred.engine_s) + float(link_s)
+    lss = float(deadline_abs_s) - need
+    need_po = float(safety) * float(pred.first_token_s) + float(link_s)
+    lss_po = float(deadline_abs_s) - need_po
+    return LatestSafeStart(
+        latest_start_s=lss, predicted_service_s=float(pred.engine_s), safety_factor=float(safety),
+        feasible=bool(lss >= now_s - 1e-9),
+        must_start_now=bool(lss <= now_s + 1e-9),
+        deferral_s=max(lss - float(now_s), 0.0),
+        decode_included=True,
+        latest_start_if_decode_omitted_s=lss_po,
+        decode_omission_error_s=lss_po - lss)
 
 
 # ---------------------------------------------------------------------------

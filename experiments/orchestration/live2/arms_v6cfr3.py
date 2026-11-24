@@ -92,6 +92,7 @@ import arms_v6cf as VCF                                                       # 
 import arms_v6fairfeed as FF                                                  # noqa: E402
 import cf_protect_defer as PD                                                  # noqa: E402
 import cf_request_defer as RD                                                  # noqa: E402
+import d222_measured_safety as MS2                                             # noqa: E402
 import deficit_gain_d178 as GAIND                                              # noqa: E402
 from interface import Action, Observation                                      # noqa: E402,F401
 
@@ -133,6 +134,11 @@ class _Rung4Mixin:
     actually produced, and it sees any request protect-and-defer has already turned into a DEFER
     (and leaves it alone, because it is no longer a CLOUD admission).
     """
+
+    # ITEM 5: ONE declaration of the cap, read by `_rd_record` below and by
+    # `coordinator.write_rd_decisions`, so the committed log can say whether it is truncated
+    # without either side holding its own copy of the number.
+    RD_DECISIONS_CAP = 4000
 
     def _rd_u(self, session_id: str, tokens: int) -> Dict[str, Any]:
         """`u`, THE UNCACHED PREFILL, BY THE D186 / r1 CORRECTION AND NOT BY built_tokens ALONE.
@@ -196,7 +202,69 @@ class _Rung4Mixin:
                 u_detail: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         cf = self._cf_engine()
         others = self._pd_others(obs, session_id)
-        pred = CC.predict(cf.model, int(u_request), 0, 0, 0)
+        # ---- D222 (1) ITEM 1: THE REAL QUEUED-AHEAD WORK, AND THE MODEL THAT PRICES IT ---------
+        #
+        # This line read `CC.predict(cf.model, int(u_request), 0, 0, 0)`. Two things were wrong
+        # with it and they compounded:
+        #
+        #   1. THE QUEUE TERM WAS A LITERAL ZERO on a gate that is only reached when other
+        #      requests ARE pending, so the deferral planned its restart as if the engine were
+        #      empty. On the traced s5 loss `opp0001513` the arm predicted 0.4156 s of engine
+        #      service against an observed 0.818 s first token.
+        #   2. `cf.model` IS THE OLD `cost_model_gate.json` by-arm split, whose GATE_STATUS says it
+        #      FAILS and whose queue feature is a COUNT OF OVERLAPPING REQUESTS at 0.0380 s each.
+        #      D162 replaced that count with WORK at 0.0001535807289338535 s per uncached token -
+        #      a 247.46x difference in units - and D162 is the model that PASSED its gate (D168).
+        #      Passing the real token count into the old model's argument would have predicted
+        #      165.6 s on that same unit and collapsed every deferral to "must start now".
+        #
+        # So this path now prices with `predict_d162`, whose argument NAMES carry their units, on
+        # the rows the arm already enumerates for the harm sum. No new observation is read: the
+        # uncached tokens are each row's own `u_tokens`, published by `_pd_others` from the very
+        # quantity that row's `engine_s` was predicted from, and the decode tokens are the measured
+        # per-type output counts in `d222_measured_safety` (every request on this workload emits
+        # exactly 2, chased to its source). The third positional argument of the old call was
+        # `cached_tokens` and was CORRECT at zero, because `u_request` is already an uncached
+        # count; `predict_d162` keeps that default and the docstring says why it must stay there.
+        qa_tokens = sum(max(int(r.get("u_tokens", 0) or 0), 0) for r in others)
+        qd_tokens = sum(MS2.DECODE_TOKENS_BY_QTYPE.get(str(r.get("qtype")),
+                                                       MS2.DECODE_TOKENS_DEFAULT)
+                        for r in others)
+        pred = CC.predict_d162(cf.model_d162, int(u_request), 0, qa_tokens, qd_tokens)
+        # THE PROOF THAT THE QUANTITY REACHING `predict` IS THE INTENDED ONE, on every decision and
+        # not in a one-off check: the arguments as passed, the rows they were summed from, and the
+        # coefficient each was multiplied by. A reader can re-add the per-row numbers by hand and
+        # can see that a TOKEN count met a PER-TOKEN coefficient.
+        queue_proof = {
+            "overlap_ft_tokens_passed": int(qa_tokens),
+            "overlap_decode_tokens_passed": int(qd_tokens),
+            "n_rows_summed": len(others),
+            "per_row": [{"req_id": str(r.get("req_id")), "qtype": str(r.get("qtype")),
+                         "u_tokens": int(r.get("u_tokens", 0) or 0),
+                         "decode_tokens": MS2.DECODE_TOKENS_BY_QTYPE.get(
+                             str(r.get("qtype")), MS2.DECODE_TOKENS_DEFAULT)}
+                        for r in others[:12]],
+            "units": "UNCACHED PROMPT TOKENS queued ahead, and OUTPUT TOKENS queued ahead",
+            "coefficients": {
+                "per_uncached_token_s": float(cf.model_d162["first_token"]["per_uncached_token"]),
+                "per_queue_token_s": float(cf.model_d162["first_token"]["per_queue_token"]),
+                "per_queue_decode_token_s": float(
+                    cf.model_d162["decode"]["per_queue_decode_token"])},
+            "model_source": cf.model_d162.get("_source"),
+            "model_verdict": cf.model_d162.get("_verdict"),
+            "superseded_model": {
+                "source": "cost_model_gate.json by_arm, which cf.model still is for every other "
+                          "caller",
+                "per_overlap_s_per_REQUEST": 0.038004811772727576,
+                "ratio_to_per_queue_token": 247.4582067460825,
+                "gate_status": "FAILS (spec v5 section 12)"},
+            "predicted": {"first_token_s": round(pred.first_token_s, 6),
+                          "decode_s": round(pred.decode_s, 6),
+                          "engine_s": round(pred.engine_s, 6),
+                          "total_s": round(pred.total_s, 6),
+                          "at_queue_zero_engine_s": round(
+                              CC.predict_d162(cf.model_d162, int(u_request), 0, 0, 0).engine_s, 6)},
+        }
         res = cf.residuals
         n_alert = sum(1 for r in others if r["qtype"] == "alert")
         d = RD.decide(decider_device_id=str(decider_device_id), now_s=float(obs.now_s),
@@ -213,6 +281,37 @@ class _Rung4Mixin:
                                     if self._pd_control_margin_huge else 1.0))
         d["session_id"] = str(session_id)
         d["u_detail"] = dict(u_detail or {})
+        d["queue_proof"] = queue_proof
+        # ---- D222 (1) ITEM 5b: FILL `decision.predicted.*`, WHICH IS NULL ON EVERY RUNG-4 ROW --
+        #
+        # `coordinator.py:858` reads `self.arm.last_predictions` ONCE per epoch and threads it into
+        # `_log_decision`, which at `:2131` does `(preds.get("by_target") or {}).get(key)`. For a
+        # recall release the key is `"rc:" + session_id` (`coordinator.py:1474`). NOTHING in the
+        # covex family published `by_target` - only `arms_policy.py:984` does - so the block was
+        # the schema default on all 15,505 rows of the committed s4 cell and all 11,641 of s5, and
+        # the s5 diagnosis had to RECONSTRUCT the arm's own prediction from the committed formula.
+        # It is published here, where the prediction is actually made, so the recorded number is
+        # the one that decided and not a re-derivation of it.
+        #
+        # COVERAGE IS PARTIAL BY CONSTRUCTION AND IS COUNTED RATHER THAN HIDDEN: this leg evaluates
+        # robot, cloud-admitted, under-limit recall questions only, so a release the leg never
+        # looked at still logs the default. `rd_predictions_published` is the numerator a cell can
+        # read against its own `release_recall` count.
+        lp = getattr(self, "last_predictions", None)
+        if not isinstance(lp, dict):
+            lp = {}
+        bt = lp.get("by_target")
+        if not isinstance(bt, dict):
+            bt = {}
+        bt["rc:" + str(session_id)] = {
+            "ttft_s": round(float(pred.first_token_s), 6),
+            "completion_s": round(float(pred.engine_s), 6),
+            "imposed_delay_s_by_request": {},
+        }
+        lp["by_target"] = bt
+        lp["cost_model_id"] = str(cf.model_d162.get("_source"))
+        self.last_predictions = lp
+        self.stats["rd_predictions_published"] += 1
         self._rd_record(d)
         return d
 
@@ -231,7 +330,7 @@ class _Rung4Mixin:
             self.rd_bars.append(float(d.get("bar_value", 0.0)))
             if float(d.get("w_decider", 1.0)) > 1.0:
                 st["rd_decider_weight_above_floor"] += 1
-        if len(self.rd_decisions) < 4000:
+        if len(self.rd_decisions) < self.RD_DECISIONS_CAP:
             self.rd_decisions.append({
                 "t": d.get("now_s"), "gate": d.get("gate"), "action": d.get("action"),
                 "u": d.get("u_request"), "harm_now": d.get("harm_now"),
@@ -245,7 +344,17 @@ class _Rung4Mixin:
                 "n_alert_pending": d.get("n_alert_pending"),
                 "u_detail": d.get("u_detail"),
                 "would_miss_under_measured_bias":
-                    d.get("would_miss_deadline_under_measured_bias")})
+                    d.get("would_miss_deadline_under_measured_bias"),
+                # D222 (1) item 5 names "the chosen candidate and its kind". The candidate is the
+                # ACTION and the kind is the leg that produced it, so both travel and a reader
+                # never has to infer which leg a row came from.
+                "chosen_candidate": d.get("action"),
+                "candidate_kind": "question_deferral",
+                "session_id": d.get("session_id"),
+                "decider_device_id": d.get("decider_device_id"),
+                "deferral_s_before_epoch_debit": d.get("deferral_s_before_epoch_debit"),
+                "epoch_debit_s": d.get("epoch_debit_s"),
+                "queue_proof": d.get("queue_proof")})
         if self.rd_trace_kept is None and str(d.get("action")) != "BASE":
             self.rd_trace_kept = d
         if self.rd_trace_crossed is None and bool(d.get("crosses_bar")):
@@ -253,6 +362,10 @@ class _Rung4Mixin:
 
     def decide(self, obs: Observation) -> Action:
         act = super().decide(obs)                                          # type: ignore[misc]
+        # ITEM 5: the prediction channel is PER EPOCH. Cleared here, filled by `_rd_one` below for
+        # every candidate it prices, and read by the coordinator later in this same epoch. A
+        # channel that accumulated would attach an old epoch's prediction to a new release.
+        self.last_predictions = {"by_target": {}}
         if not RD.arm_enables(self):
             return act
         g = self._rules.guard_state(obs)
@@ -331,6 +444,19 @@ class _Rung4Mixin:
         is being repaired for.
         """
         cf = super()._cf_engine()                                       # type: ignore[misc]
+        if getattr(cf, "model_d162", None) is None:
+            # D222 (1) item 1: the D162 model is attached HERE, in rung 4's own module, because
+            # rung 4's question-deferral is its only reader. `cf.model` is left exactly as it is -
+            # `cf_planner`'s plan_queue/plan_state/plan_sync and `cf_protect_defer` price with it
+            # and their arms have committed cells - so the tree holds two models on purpose and
+            # each caller says which it reads. The two cannot be confused by accident: their key
+            # names differ, so handing one to the other's predictor is a KeyError.
+            cf.model_d162 = CC.load_d162_model()
+            if "per_queue_token" not in cf.model_d162["first_token"]:        # pragma: no cover
+                raise WeightWiringError(
+                    "the D162 model did not take: first_token carries %r and not per_queue_token, "
+                    "so the queued-ahead term would be priced in the wrong units"
+                    % (sorted(cf.model_d162["first_token"]),))
         if not getattr(cf, "_rung4_planner_wired", False):
             src = PlannerDeficitWeights(self)
             cf.counters = src

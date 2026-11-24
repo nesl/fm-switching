@@ -1,0 +1,79 @@
+{
+ "_what": "D222 (1) item 4 under the user's ruling of 2026-11-24: the latest-safe-start SAFETY FACTOR refitted on the committed RUNG-3 cells, and the per-type DECODE token count item 1 needs for overlap_decode. READ by cf_request_defer; never retyped into policy code.",
+ "_ruling": "q90 of (ENGINE COMPLETION / D162 PREDICTED), committed rung-3 cells only, HEALTHY WINDOWS ONLY, NETWORK OUTSIDE THE FACTOR (no link term on either side). Applied as need = safety * engine_s + LINK_RTT_S, which is the only form in which 'network outside the factor' is literally true.",
+ "_why_not_tuning": "the ratios come from the RUNG-3 BASE's own committed cells, never from a rung-4 cell. Same practice as D180 to D182, which derived the D179 floors from committed covex-v6-base cells.",
+ "safety_factor": 1.76717,
+ "quantile": 0.9,
+ "quantile_method": "nearest-rank",
+ "n": 255,
+ "min": 0.36,
+ "p50": 1.2327,
+ "max": 5.3679,
+ "mean": 1.3081,
+ "fit_cells": [
+  "covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30",
+  "covex-v6-fair-final_n16_s5_1200s_h27_3t_L3_epg_rq30"
+ ],
+ "fit_sample": "255 recall requests actually SENT and completed: 132 at s4, 123 at s5",
+ "healthy_window_filter": {
+  "classifier": "cost_model_gate_d162.classify, IMPORTED not retyped",
+  "window_s": 100.0,
+  "healthy_max_s": 2.781,
+  "collapsed_min_s": 31.0,
+  "zones_by_cell": {
+   "covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30": {
+    "healthy": 132
+   },
+   "covex-v6-fair-final_n16_s5_1200s_h27_3t_L3_epg_rq30": {
+    "healthy": 123
+   }
+  },
+  "removed_nothing": true,
+  "note": "255 of 255 recall requests are in HEALTHY windows at both seeds, so the filter binds on nothing in this sample and the figures with and without it are identical. The earlier worry about collapsed rows topping out at 56x was true of the OLD GATE with no queue term, where the ratio is inflated by the missing term rather than by the regime; under the D162 model with the real queue the max here is 5.3679."
+ },
+ "superseded_value": {
+  "value": 1.8721,
+  "source": "d190_measured_safety: nearest-rank q90 of observed FIRST TOKEN over D162 predicted FIRST TOKEN, n = 5, seeds 5 and 7",
+  "why_superseded": "it is a FIRST-TOKEN ratio and the code applied it to a TOTAL that also included decode and the link, a 4.43x register mismatch at q90 measured against the predictor the code actually used; and n = 5 makes the nearest-rank q90 the sample MAXIMUM, an algebraic identity",
+  "ratio_new_over_old": 0.943951
+ },
+ "decode_tokens_by_kind": {
+  "touch": {
+   "n": 3133,
+   "min": 1,
+   "p50": 1,
+   "max": 1,
+   "constant": true
+  },
+  "monitor": {
+   "n": 17676,
+   "min": 2,
+   "p50": 2,
+   "max": 2,
+   "constant": true
+  },
+  "recall_robot": {
+   "n": 255,
+   "min": 2,
+   "p50": 2,
+   "max": 2,
+   "constant": true
+  },
+  "recall_assistance": {
+   "n": 712,
+   "min": 2,
+   "p50": 2,
+   "max": 2,
+   "constant": true
+  }
+ },
+ "_decode_register": "A CONSTANT WHERE A DISTRIBUTION WAS CHECKED FOR, chased to its source and EXPLAINED rather than trusted: every request in both cells emits exactly 2 output tokens (min = p50 = max = 2 over 255 robot recall, 712 assistance and 17,676 monitor requests; a touch emits 1). The answer is one letter plus a stop, and the committed max_tokens (bodies.SH_GEN 8, bodies.RECALL_GEN 512) is never approached. So this is not short-circuiting; it is the workload.",
+ "_provenance": {
+  "git_commit": "see _tree_state.base_sha of the proofs artefact",
+  "script": "experiments/orchestration/live2/d222_safety_refit.py",
+  "model": null,
+  "device": "flash_cpu",
+  "n": 255,
+  "timestamp": "2026-11-24T10:26:26.800307"
+ }
+}

@@ -152,6 +152,17 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--scheduling-policy", default="fcfs", choices=("fcfs", "priority"),
                     help="vllm-priority wiring: start the server with --scheduling-policy priority and "
                          "send each request's priority; default fcfs (the round-1 server)")
+    # D216 (2) / D222 (1) g / D227 (E3): the engine /metrics scrape. ON by default for a cell
+    # that has a server, because that is the whole point of E1 and a field nobody reads is the
+    # defect it repairs; a dry cell has no server and is untouched. `--no-metrics-scrape` forces
+    # it off, which is the OFF side of the byte-identity proof and the way to reproduce a pre-E1
+    # cell exactly.
+    ap.add_argument("--metrics-scrape", dest="metrics_scrape", action="store_true", default=True,
+                    help="scrape the engine's /metrics in the background and publish the "
+                         "allow-listed engine keys into the observation (D216 (2), D227)")
+    ap.add_argument("--no-metrics-scrape", dest="metrics_scrape", action="store_false",
+                    help="switch the /metrics scrape off; cell.json then records state "
+                         "never_scraped and marks the engine-metric quantities untrusted")
     ap.add_argument("--kv-capacity-enforced", action="store_true",
                     help="D133 PA-4 / overnight plan: set CoordState.kv_capacity_enforced (enforce gpu_kv_tokens as a "
                          "capacity for every arm); off by default, recorded in the header")
@@ -356,6 +367,10 @@ def run(a) -> Dict[str, Any]:
         context_limit=limit_state,          # D223 (2): every cell says what limit it ran under
         c_inflight_set_by_runner=(a.c_inflight is not None),
         kv_capacity_enforced=bool(a.kv_capacity_enforced),
+        # D227: the cell says whether it scraped, in its header as well as in its metrics_health,
+        # so provenance survives even if the backend block is lost. `and sends` because a cell with
+        # no server cannot scrape and must not claim it tried.
+        metrics_scrape=bool(a.metrics_scrape and sends),
         robot_upload=tmeta.get("robot_upload", "batch-30s"),
         robot_upload_rule=tmeta.get("robot_upload_rule"),
         dashcam_format=tmeta.get("dashcam_format", "oneframe"),
@@ -381,6 +396,7 @@ def run(a) -> Dict[str, Any]:
                cache_cap_bytes=a.cache_cap_bytes, self_tick_s=a.self_tick_s,
                forward_on_completion=bool(a.forward_on_completion),
                c_inflight=a.c_inflight, kv_capacity_enforced=bool(a.kv_capacity_enforced),
+               metrics_scrape=bool(a.metrics_scrape),
                scheduling_policy=(a.scheduling_policy if sends else None),
                forward_at_first_token=(a.forward_at == "first"),
                # D223 (2): the limit read above travels to the coordinator PROCESS, which is where
@@ -501,6 +517,12 @@ def run(a) -> Dict[str, Any]:
                       file=sys.stderr, flush=True)
     if a.score and a.calibration:
         out["score"] = _score(tdir, rdir, Path(a.calibration), a.arm)
+    # D227 (E3): EVERY cell.json carries this, a dry cell's included, because "the field is
+    # absent" is exactly the ambiguity the ruling exists to remove. `MT.cell_metrics_health`
+    # derives the three states from the backend block and names the quantities a reader may not
+    # trust; it never invents a state the counters do not support.
+    import metrics_trust as MT
+    out["metrics_health"] = MT.cell_metrics_health(res, dry_run=not bool(a.server))
     (rdir / "cell.json").write_text(json.dumps(out, indent=1, default=str) + "\n")
     return out
 
@@ -654,6 +676,9 @@ def _inprocess(a, tdir: Path, rdir: Path, cfg, htok, arm, EM):
         be = AsyncLive2Backend(a.server, model=a.model,
                                strip_hints=(a.server_kind != "fake"), cache=cache,
                                limit=a.http_limit)
+        # D216 (2): arm-scoped nowhere, CELL-scoped here. Set on the INSTANCE, so a class default
+        # can never turn the scrape on for a cell that did not ask for it.
+        be.metrics_scrape = bool(a.metrics_scrape)
     logs = Logs(rdir).open()
     co = Live2Coordinator(arm, be, [], gpu_kv_tokens=a.gpu_kv_tokens,
                           host_tier_gib=a.host_tier_gib, host_tier_tokens=htok,
