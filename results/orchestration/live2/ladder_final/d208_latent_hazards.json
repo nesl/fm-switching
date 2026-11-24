@@ -1,0 +1,26 @@
+{
+ "_what": "TWO LATENT HAZARDS IN THE FINAL LADDER, both CORRECT TODAY and both of the same shape: the code works now and would break SILENTLY if a name changed. Recorded rather than fixed, because changing either would invalidate the five proof cells of 43ad8be8 and the posted FINAL_LADDER_CELLS.",
+ "_why_recorded_now": "the second one was raised by a session that was NOT the author, reading the landed code independently, and the author had raised the first against their own build. Neither blocks the ladder. Both belong in the NEXT edit to their files.",
+ "hazard_1_off_switch_double_swap": {
+  "file": "experiments/orchestration/live2/arms_v6cfr3.py",
+  "what": "the redundant double-swap that makes the off-switch identity hold uses a DIFFERENT FLAG NAME from the one it mirrors, so the identity holds today by coincidence of two names agreeing.",
+  "status": "ACKNOWLEDGED BY THE AUTHOR, NOT FIXED in the 43ad8be8 pass, deliberately.",
+  "evidence_it_is_correct_today": "`covex-v6-final-off` equals `covex-v6-fair-final` at `5a03c2807da3681a` / 14,539 with 0 differing decisions at BOTH 1x and 0.25x, curing the committed family's 711-row contamination.",
+  "how_it_would_fail": "silently, if either flag name is renamed; the identity would simply stop holding."
+ },
+ "hazard_2_registration_enforcement_narrowed": {
+  "file": "experiments/orchestration/live2/arms_v6cfr3.py",
+  "raised_by": "a session that is not the author, reading the landed code",
+  "what": "the registration fix adds the three final rungs to `V6CFR3_ARMS` with a shadow check that raises only `if _k in V6CFR3_ARMS`, i.e. AGAINST THE RUNG-4 DICT ALONE. `arms_final_ladder.register()`'s D208 COLLISION CHECK is NOT on the normal import path: it is `register()` that raises `LadderSwitchError` if a final name would REPLACE a protected COMMITTED name, and that snapshots the protected arms' factories before and after and raises if any changed. Neither runs on `import arms`.",
+  "why_it_is_correct_today": "the three final keys are known-distinct from the nine protected committed names (`covex-v6-state-final` against `covex-v6-state`, and so on), and the author's proof measured the registry going 209 to 212 WITH ALL NINE PROTECTED NAMES STILL PRESENT and `covex-v6-base` still `af8befb9420ad86a` / 12,085.",
+  "what_actually_changed": "THE PROTECTION MOVED FROM CODE INTO A ONE-TIME PROOF PLUS A COMMENT. `register()` ENFORCES the property at every call; the landed path ASSERTS it in a comment and checks a narrower condition. The user's Option-2 naming ruling rests on that protection, and the author's own earlier name proof described it as 'a property of the code rather than a convention anyone has to remember'. It is now closer to a convention.",
+  "how_it_would_fail": "silently, if a final rung is renamed to collide with a committed name, or a FOURTH final rung is added without re-running the proof. `arms.ARMS` is a dict, so a colliding key RE-POINTS every reader of that arm's committed cells.",
+  "a_structural_note_worth_keeping": "`register()` does `import arms as A` INTERNALLY, so calling it from inside `arms.py` at module scope works only BY POSITION, through the partially initialised module in `sys.modules`. That is a real argument against the apparently obvious two-line fix and is why the lazy call-time import in `arms_v6cfr3.py` is the better structure. If the registration is ever moved into `arms.py`, this note should travel with it.",
+  "recommended_fix": "in the next edit to that file, have the registration path CALL the protected-name check rather than restate it, so the enforcement is back in the code; it need not call all of `register()`."
+ },
+ "_provenance": {
+  "recorded_at_origin": "43ad8be8440b647b0da80f11b67bd799b70f8c91",
+  "ladder_posted_at": "43ad8be8",
+  "verified_by": "flash main session, reading the landed code"
+ }
+}
