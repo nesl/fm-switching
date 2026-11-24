@@ -105,3 +105,7 @@ including the fitted window, needs no change.
 
 **Related.** QueryStream's Query-Aware Differential Pruning is blocked on the same path, and its
 Proactive Response half is not. See `querystream.md`.
+
+## Hit-7 reruns (2026-11-24): the fitted window applied, measured live
+
+SimpleStream with its fitted 1-s window (hit 7, c511050), s4-s7 rerun cells: by_deadline (device-only floor beside) s4 0.174 (0.371, BELOW), s5 0.299 (0.299, AT), s6 0.132 (0.058, above), s7 0.229 (0.295, BELOW); delivery near-perfect: robot on time 132/132, 126/127, 121/121, 105/105; SS 356/357, 356/356, 357/357, 359/359. So at s4 and s7 answering from the cloud with a 1-s window was WORSE than the device-only fallback: on-time and correct are different axes, and a latency-optimal policy can be worse than not sending. Against the superseded fixed-window cells the change is +0.030 / 0 / -0.033 / -0.057 (mean -0.015, no consistent sign), EXPECTED because hit 7 corrected FIDELITY (1 frame per robot send, as the card specifies, verified live on every send; the old cells sent 6), not performance; the supersession is justified by fidelity alone. Related, NOT the same mechanism: cascade-routing sits on the floor because it almost never sends (port-rule fail); only its 18 s7 RECENT sends of the over-32k session are the short-representation case, consistent with the measured ~11 percent correct for RECENT on long-horizon questions (D152 (1)).
