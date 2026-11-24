@@ -565,6 +565,34 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
 
 ## OPEN, NEEDING A USER RULING
 
+- *** A FIGURE'S README MISSTATES WHICH CELLS IT USED. FOUND 2026-11-24 ON THE D192 FIGURE COMMITS
+  (`c6ceb5a8`, `9346ba32`, `30f2be8d`). THE DATA IS CORRECT; THE PROSE IS WRONG. NOT FIXED BY ME,
+  BECAUSE THE USER WAS COMMITTING IN `reports/figures/` AT THE TIME. ***
+  `reports/figures/episodic_scores_README.md` says the build prefers the `_rerun` directory
+  "(which supplies always-cloud-fcfs s5, covex-v6-state s4, v5-rules s7)". **THAT PARENTHETICAL IS
+  HARDCODED PROSE** in the generator at `experiments/analysis/episodic/build_episodic.py:177-178`, NOT
+  derived from the run. The per-row truth IS computed, at `:93` as `"cell_used_rerun": rr`, and the
+  committed CSV disagrees with the prose TWO WAYS:
+    - it names `covex-v6-state s4` and `v5-rules s7` as rerun-supplied. **MEASURED: `rules` seeds 4-7
+      and every `state-*` row are `cell_used_rerun=False`.** Only FIVE rows in the whole CSV are True.
+    - **it OMITS the four rows that ARE True: `simplestream` s4, s5, s6 AND s7**, plus
+      `always-cloud-fcfs` s5 which it does name correctly.
+  *** WHY THIS MATTERS MORE THAN A TYPO: THE SIMPLESTREAM RERUNS ARE A CODE FIX, NOT A RE-RUN OF THE
+  SAME CODE. *** They are the hit-7 cells (robot frames per RECALL send 6 -> 1, confirmed live at 132 of
+  132), and the fixed-window cells they replace are SUPERSEDED in INDEX. So the README omits exactly the
+  substitution a reader most needs to know about, and names two it did not make. By contrast
+  `always-cloud-fcfs` s5's rerun is BENIGN and I verified why: the original
+  `always-cloud-fcfs_n16_s5_1200s_h27_3t_L3_epg_rq30` has **NO `cell.json` and NO `run_meta.json`**, so
+  it is an incomplete cell, and the rerun is not anomalous (that arm carries 37 / 64 / 12 / 33 errors at
+  s4-s7, all `run_valid=True`, all `is_measurement=False`).
+  **RECOMMENDED FIX, NOT APPLIED: derive that sentence from the computed `cell_used_rerun` column rather
+  than hardcoding it**, so it cannot drift again. One line in the generator. **DO NOT "fix" the CSV: the
+  CSV is right.**
+  *(The general shape, for the catalogue: A HARDCODED PROSE CLAIM SITTING BESIDE A COMPUTED COLUMN THAT
+  CONTRADICTS IT. The prose is what a reader trusts and the column is what is true, and nothing in the
+  pipeline compares them. Same family as a stale docstring, except it is regenerated on every build, so
+  it looks freshly verified.)*
+
 - **E3, one line**: `run_live2_real.py` builds `cell.json` from a fixed key list and `metrics_health`
   appears nowhere in it, so a cell with failed metrics fetches does not say so. The fix is
   `out["metrics_health"] = (res.get("backend") or {}).get("metrics_health")`. WAITS FOR A RULING.
