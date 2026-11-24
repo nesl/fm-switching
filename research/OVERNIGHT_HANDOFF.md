@@ -818,8 +818,35 @@ INVENT WORK, DO NOT TOUCH A RUN-PATH FILE, AND DO NOT DECIDE ANY OF THE FIVE OPE
 - **E3, one line**: `run_live2_real.py` builds `cell.json` from a fixed key list and `metrics_health`
   appears nowhere in it, so a cell with failed metrics fetches does not say so. The fix is
   `out["metrics_health"] = (res.get("backend") or {}).get("metrics_health")`. WAITS FOR A RULING.
-- `cstate.py:17`'s doc line still says `vllm:gpu_cache_usage_perc`. NOT corrected here because the H100
-  holds `cstate.py` for hit 7; do it after hit 7 lands.
+- *** DONE 2026-11-24, `fbd2f64b`. NOT A RULING ANY MORE, DO NOT RE-DO IT. *** `cstate.py`'s TWO stale
+  state-table doc lines are corrected and PROVED DECISION-NEUTRAL. Hit 7's landing released the file.
+  **BOTH LINES WERE WRONG IN BOTH HALVES.** `:16` said the in-flight bookkeeping is "cross-checked
+  against `/metrics`" - nothing in any live2 cell is, since `scrape_metrics()` has zero callers. `:17`
+  said "the server's `vllm:gpu_cache_usage_perc`" - the committed raw scrape
+  `frozen_test/engine_probe_hit26/metrics_scrape_h100.txt` has `vllm:kv_cache_usage_perc` THREE times
+  and that key ZERO times, and the field is identically 0.0 in every cell run to date because nothing
+  calls the scraper.
+  **PROVED, NOT ASSUMED, BECAUSE A COMMENT-ONLY EDIT HERE WAS MEASURED TO MOVE 85 DECISIONS.** A/B from
+  one literal sha, differing in exactly one file by `diff -rq` with NO CODE LINES in the diff:
+  **A = B = `57bed6ace2eb07d1` / 14,509 = THE POSTED COMMITTED VALUE.** Proof at
+  `results/orchestration/live2/frozen_test/d216_cstate_docfix_byte_identity.json`. Zero live2 processes
+  on the box, loadavg 0.22 and 0.85, recorded as magnitudes.
+  *** TWO BY-PRODUCTS WORTH MORE THAN THE FIX. *** (1) **A IS A POSITIVE CONTROL THAT CONFIRMS HIT 7 AND
+  ITEM 3 DECISION-NEUTRAL FOR RUNG 4**, since today's tree with both landed still reproduces the posted
+  s4 digest; the A/B design was chosen over the cheaper one-cell check against that digest precisely
+  because hit 7 and item 3 landed after it was posted and would otherwise have been conflated. (2) **A
+  SUSPECTED SECOND DEFECT IS DISPROVED:** `cstate.py:697` reads `vllm:gpu_cache_usage_perc`, the key the
+  engine does NOT emit, which looked like a second fault in series making the metrics-wiring ruling
+  insufficient alone. IT IS CORRECT BY DESIGN - `adapter.py:204-205` read EITHER spelling and republish
+  under the older `KV_CANONICAL_KEY` "so no reader changes", aliasing counted by `n_kv_key_aliased` - so
+  **WIRING THE LINK IS SUFFICIENT ON ITS OWN.**
+  *** AND ONE FACT FOR THE DEVICE_ANSWERS RULING THAT THE AGGREGATE COUNTS HID. *** The A cell's traced
+  s4 bar crossing reads `harm 1.638113` against `bar 1.452307` AND
+  **`harm_device_discounted: 0.0`**. So the crossing exists ONLY under the on-time-cloud harm reading and
+  vanishes ENTIRELY under the device-discounted one. **THE HARM-FORM RULING DOES NOT SCALE
+  DEVICE_ANSWERS' BENEFIT, IT DECIDES WHETHER THERE IS ANYTHING FOR IT TO DO AT ALL.** The crossing is
+  also a genuine capacity event, not a marginal one: the rebuild needed 11,946 tokens against 11,921
+  free, so it did not fit, and the gate still refused for want of a channel.
 - *** D218 (1) / DEVICE_ANSWERS: THE POSTED-CELL RULING. THE TOP OPEN ITEM. *** The 1x count is 1, so
   the stop condition fired. Adopt into `covex-v6-final` (D209 (1) supersedes the posted s4 cell and rung
   4 is rerun) or keep as a separate arm (posted cell stands)? Also: which of the two parallel
