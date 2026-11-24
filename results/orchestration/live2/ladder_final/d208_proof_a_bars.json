@@ -483,13 +483,33 @@
    "_escalates_on_move": true,
    "_ruled_fixes_PENDING_for_this_arm": "NONE IN CODE. D213 lists a confidence-cascade RERUN, but that is a rerun of CELLS on already-fixed code, not a further code change, so no future code fix is ruled against this arm.",
    "_provenance": {
-    "source_file": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
-    "source_provenance_git_commit": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
-    "source_measured_at": "2026-11-22T13:51:59-08:00",
-    "source_committed_at_sha": "2f3824ea",
-    "register": "READ from the committed file, not retyped"
+    "source_file": "results/orchestration/live2/ladder_final/rebar/rebar_record.json",
+    "source_code_sha_archived": "3fa41f519734a1f8a742fec5a8e4b0cd6b8b8b3f",
+    "source_measured_at": "2026-11-23T17:03:46-08:00",
+    "register": "READ from the committed re-bar record, not retyped",
+    "_why_replaced": "the field kept beside this one points at d179_offswitch_digest_proofs.json at sha 2f3824ea, measured 2026-11-22, which produced the SUPERSEDED bar. Leaving it as the row's provenance while the row's digest is the post-fix one would attribute the new measurement to the file that produced the old one."
    },
    "_bar_validity": {
+    "status": "BAR IS CURRENT. The re-bar D213 item 1 ordered HAS BEEN DONE.",
+    "ruled_fixes_postdating_this_bar": [],
+    "produced_by": "the guarded re-bar at code sha 3fa41f51, with 8986f593 verified an ancestor before the run",
+    "proof_a_escalates": true,
+    "_why_this_field_was_corrected": "THE FIELD KEPT BESIDE THIS ONE WAS WRITTEN BEFORE THE RE-BAR AND NOW CONTRADICTS THE ROW. It said status BAR IS STALE, proof_a_escalates FALSE and RE-BAR OWED, while the row's own _escalates_on_move already reads True. THAT CONTRADICTION IS NOT COSMETIC: a reader trusting proof_a_escalates FALSE would NOT escalate on a future move of this arm, which is exactly the mis-score the provenance rule exists to prevent, and it would do so while the digest beside it is the post-fix one. Both versions are kept because the superseded one records WHY the old bar was stale, which is still the correct history.",
+    "rebar_evidence": {
+     "new_bar": "b1ff48e40387a997 / 3,834",
+     "superseded_bar": "b9290071679f1baa / 12,253 (predated its own ruled D205 fix)",
+     "TWO_INDEPENDENT_RUNS_AGREE": "the first run, NOT formally alone, at loadavg 2.21, and the guarded run at loadavg 0.60 both give b1ff48e40387a997 / 3,834. So the determinism question this arm raised is SETTLED by agreement across a 3.7x load range, not resolved by preferring the alone run.",
+     "ALONE": "0 other cell runners before, 0 appeared DURING the cell, loadavg 0.60 at start and 1.00 at end, recorded as magnitudes",
+     "record": "results/orchestration/live2/ladder_final/rebar/rebar_record.json"
+    }
+   },
+   "_SUPERSEDED_bar": {
+    "digest": "b9290071679f1baa",
+    "rows": 12253,
+    "why": "predated its own ruled D205 fix (8986f593); kept beside the new bar rather than deleted"
+   },
+   "_escalates_on_move_why": "TRUE, and this is a CHANGE from False: the bar now sits on post-fix code with no ruled change outstanding, so any future move IS a hard escalation. Before the re-bar it was False only because the bar predated a ruled fix.",
+   "_bar_validity_SUPERSEDED_pre_rebar": {
     "status": "BAR IS STALE",
     "ruled_fixes_postdating_this_bar": [
      "D205 (seven delivered_scores readers; this arm is one of the three REPORTED and was ruled FIXED AND RERUN)"
@@ -498,12 +518,14 @@
     "detail": "delivered_scores was a literal 0.0, the MAXIMUM of a log-probability range, so every reader escalated unconditionally; removing it stops that and fewer escalations means fewer rows. MEASURED post-fix b1ff48e40387a997 / 3,834 against this bar's 12,253, a 69 percent fall, at loadavg 2.21, the LOWEST in the sweep, so contention is refuted. RE-BAR OWED from a post-fix dry cell on the committed recipe, run ALONE (user ruling 2026-11-23).",
     "proof_a_escalates": false
    },
-   "_SUPERSEDED_bar": {
-    "digest": "b9290071679f1baa",
-    "rows": 12253,
-    "why": "predated its own ruled D205 fix (8986f593); kept beside the new bar rather than deleted"
+   "_provenance_SUPERSEDED_describes_the_old_bar": {
+    "source_file": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
+    "source_provenance_git_commit": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
+    "source_measured_at": "2026-11-22T13:51:59-08:00",
+    "source_committed_at_sha": "2f3824ea",
+    "register": "READ from the committed file, not retyped"
    },
-   "_escalates_on_move_why": "TRUE, and this is a CHANGE from False: the bar now sits on post-fix code with no ruled change outstanding, so any future move IS a hard escalation. Before the re-bar it was False only because the bar predated a ruled fix."
+   "_bar_validity_CORRECTED_after_the_rebar": "2026-11-23"
   },
   "eco-llm": {
    "digest": "f32fa95c6953c64e",
