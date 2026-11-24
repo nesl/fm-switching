@@ -1040,5 +1040,18 @@
   "covex-v6-state-uo-c5attr",
   "hybrid-base",
   "hybrid-c1c2k2c5"
- ]
+ ],
+ "*** CORRECTION: CLAIMS (a) AND (b) ARE WITHDRAWN, RUNG 3 DOES ENFORCE ***": {
+  "_what": "*** CORRECTION 2026-11-24, BY THE COORDINATING SESSION. CLAIMS (a) AND (b) IN THIS FILE ARE WRONG AND ARE WITHDRAWN. RUNG 3 **DOES** ENFORCE THE CONTEXT LIMIT. ***",
+  "what_was_claimed": "that `covex-v6-fair-final` never reads the context limit to decide, that `HybridArm` is not on its path, and that `over_limit_infeasible=True` is therefore a WRITE-ONLY field whose `live2_describe` record misreports enforcement.",
+  "why_it_is_wrong": "THE CHECK WALKED THE MRO. THE LADDER COMPOSES. Rung 3's decide path delegates into the composed base and reaches the enforcement branch: `arms_v6state.py:379` `act = self._rules.decide(obs)` -> `arms_v5rules2.py:278` `act = self._base.decide(obs)` -> `HybridArm.decide` -> `hybrid_arm.py:421` `over_limit = (self.over_limit_infeasible and int(getattr(q, 'readiness_tokens', 0) or 0) > CL.limit_tokens())`, with the counter incremented at `hybrid_arm.py:428`. And `arms_v5rules2.py:111-112` sets the flag on **BOTH** `self._base` AND `self`, so the instance the branch reads has it. `HybridArm` NOT being in the MRO is TRUE AND IRRELEVANT.",
+  "_the_trap_and_it_was_documented_in_this_same_repo_hours_earlier": "the D225 conformance-matrix build recorded exactly this: `V6StateArm`'s MRO is `[V6StateArm, object]` and it COMPOSES the rung-1 arm at `self._rules`, which composes rung 0 at `_base`, which composes b7 at `_b7`; a naive MRO walk 'reports TWENTY FALSE INHERITANCE BREAKS'. The same instrument error produced this claim. **An MRO is not a call graph**, and for this ladder the call graph is the composition chain.",
+  "what_follows": {
+   "rung 3 enforces": "so it will NOT send an over-limit prompt at 0.5x, and `live2_describe`'s `on: true` is ACCURATE rather than a misreport.",
+   "no D-row contradiction": "D175 (2) - the D170 over-limit feasibility rule is ON at EVERY covex-v6 rung, base included - HOLDS. Nothing to escalate.",
+   "no user ruling needed": "claim (b) asked for a policy ruling on whether rung 3 SHOULD enforce. It already does, so the question does not arise.",
+   "what_SURVIVES_unaffected": "the byte-identity result itself (10 arms, moved empty, notrun empty, each final arm carrying its own A/A control from the two-lead seed-4 runs), the ALONE census and loadavg magnitudes, the `gpu_kv_tokens` pool-versus-limit warning, the `between = 0` table with s4 to s6 marked UNEXERCISED, and claim (c): `tok > CL.limit_tokens()` genuinely does not fire in the dry sweep, and the comparison is exercised by the unit proofs instead. (c) is a statement about the INSTRUMENT and is unaffected by (a) and (b) being wrong about the CODE."
+  },
+  "_register": "OBSERVED by the coordinating session from origin at this sha: the five delegation and assignment lines above were read with `git show <sha>:<path>`, not inferred."
+ }
 }

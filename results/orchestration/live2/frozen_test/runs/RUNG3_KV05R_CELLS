@@ -35,6 +35,15 @@
 #     TWO CONSEQUENCES, and the second is a defect to be ruled on, not a reassurance:
 #       (a) the 1x byte-identity result for this arm holds BY CONSTRUCTION, not by luck. Confirmed
 #           anyway by measurement at BOTH seeds (below).
+# *** CORRECTION 2026-11-24: NOTES (a) AND (b) BELOW ARE WITHDRAWN. RUNG 3 **DOES** ENFORCE THE
+#     CONTEXT LIMIT. The check walked the MRO; the ladder COMPOSES. arms_v6state.py:379 calls
+#     self._rules.decide -> arms_v5rules2.py:278 calls self._base.decide -> HybridArm.decide ->
+#     hybrid_arm.py:421 reads self.over_limit_infeasible AND CL.limit_tokens(), incrementing at :428;
+#     and arms_v5rules2.py:111-112 sets the flag on BOTH self._base and self. HybridArm not being in
+#     the MRO is true and irrelevant: an MRO is not a call graph. So rung 3 will NOT send an
+#     over-limit prompt at 0.5x, live2_describe's `on: true` is ACCURATE, D175 (2) holds, and no user
+#     ruling is needed. The byte-identity result, the ALONE census, the gpu_kv_tokens warning, the
+#     between=0 table and note (c) are UNAFFECTED. Verified from origin by the coordinating session.
 #       (b) `over_limit_infeasible=True` on rung 3 is a WRITE-ONLY FIELD in the CLAUDE.md sense: it
 #           is set in __init__, reported as `on: true` by live2_describe, and read by nothing that
 #           decides. A reader of that describe record would reasonably conclude rung 3 enforces the
