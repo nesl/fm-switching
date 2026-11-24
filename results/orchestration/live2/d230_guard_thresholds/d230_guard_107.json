@@ -1,0 +1,379 @@
+{
+  "study": "D230 (2) / freeze-gate row 10.7, guard thresholds, MEASURE FIRST",
+  "citations": [
+    "D230 (2)",
+    "D178 (3)",
+    "D166 (3)",
+    "D166 (4) commit rules"
+  ],
+  "read_only": true,
+  "no_cells_run": true,
+  "source_commit": "fa3e8d555a1bcc92bb659a41ec2912552b64f520",
+  "cells": [
+    "covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "covex-v6-fair-final_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "covex-v6-fair-final_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "covex-v6-fair-final_n16_s7_1200s_h27_3t_L3_epg_rq30"
+  ],
+  "cells_path": "results/orchestration/live2/frozen_test/runs/",
+  "cells_run_valid": {
+    "s4": true,
+    "s5": true,
+    "s6": true,
+    "s7": true
+  },
+  "what_the_guard_is_for": "D160 (2) saturation guard. It is an EARLY WARNING that sheds BACKGROUND WARMING (and, at rung 2+, defers state actions) while the engine is still healthy, so the policy stops adding speculative prefill work before the serving regime collapses. It is not a per-request deadline rescue: when it fires the arm returns the base action untouched and only the warming channel is suppressed. D178 (3) proposed to re-aim it at per-type deadline protection (80 percent of each type's deadline); D166 (3) adds exit hysteresis (all signals below 0.5x entry for 2 s).",
+  "read_site": {
+    "file": "experiments/orchestration/live2/arms_v5rules2.py",
+    "function": "V5Rules2Arm.guard_state",
+    "lines": "188-199 at this commit",
+    "threshold_default": "GUARD_LAG_S_DEFAULT = 2.0 (arms_v5rules2.py:81)",
+    "compared_quantity": "lag = max over DEADLINE_CLASSES of obs.cloud.latency_estimate_s[cls], with DEADLINE_CLASSES = ('episodic', 'recall'). Compared by_lag = lag >= self.guard_lag_s. It is a per-CLASS EWMA (alpha 0.3, cstate.py:55) of OBSERVED first-token latency of COMPLETED requests, not a per-request latency.",
+    "write_site": "coordinator.py:1934  self.st.ewma('episodic' if sub.kind == 'monitor' else 'recall', r.get('ttft_s'))",
+    "consumers_confirmed_live": [
+      "arms_v5rules2.py:282-290 (sheds warming; counts guard_active_epochs / guard_by_lag)",
+      "arms_v6state.py:382-386 (defers state actions; state_deferred_to_guard_epochs)",
+      "arms_v6cf.py:442-446 (suppresses the counterfactual; pd_deferred_to_guard_epochs)"
+    ],
+    "KEY_DEFECT_CONFIRMED_BEYOND_THE_MATRIX": "There are only TWO lag channels, not three. cstate.py:311 initialises lat = {'episodic': 0.0, 'recall': 0.0} and coordinator.py:1934 folds EVERY non-monitor completion into 'recall'. Assistance (single-shot) first-token lag therefore has NO signal of its own anywhere in the guard, and the 'recall' channel is a mixture of recall questions, assistance questions, warm pieces and touches. D178 (3) cannot be implemented as specified without adding a third class at the write site."
+  },
+  "method": {
+    "committed_directly": "guard firing counts (arm_stats guard_by_lag / guard_active_epochs / guard_by_backlog) and the epoch denominator (arm_stats epochs).",
+    "not_logged": "latency_estimate_s / guard_state is NOT recorded per decision period in any committed cell. decision.jsonl has no guard field; decision_time.jsonl is the decision function's own wall and cpu cost.",
+    "reconstruction": "The EWMA recurrence was REPLAYED exactly from the committed per-request log: ttft_s = t_first_token - t_submit (speed = 1.0; run_meta realtime true, run_live2_cell.py default), class = 'episodic' iff the decision kind is release_monitor, EWMA alpha 0.3 from a 0.0 seed with the same `v if lat <= 0 else 0.3v + 0.7lat` rule, applied at the first 100 ms grid step t with t_done <= t (coordinator.run calls _collect(t) before _epoch(t), so a completion harvested at step t is visible to that step's guard_state read).",
+    "modelled_step": "the harvest epoch. In a live run fut.done() depends on wall clock plus the forward latency (completion_to_forward p99 0.11 ms), so the grid step is assigned by t_done rather than observed.",
+    "POSITIVE_CONTROL": {
+      "check": "replay max(episodic, recall) >= 2.0 against the committed arm_stats guard_by_lag",
+      "s4": "70 vs 71",
+      "s5": "32 vs 34",
+      "s6": "140 vs 143",
+      "s7": "29 vs 29",
+      "verdict": "PASS, with an explained residual of 0 to 3 epochs in 12,000 (<= 0.025 pp). request.jsonl is short of arm_stats n_requests by 5 / 9 / 5 / 3 rows at s4 / s5 / s6 / s7, so the replay is missing a handful of EWMA inputs. The replay is at or below the committed count in all four seeds, which is the only direction a missing-input undercount can take. Every reported fraction is therefore a LOWER BOUND.",
+      "ordering_sensitivity": "within-step harvest order by submission instead of by t_done gives a pooled alert count of 492 instead of 497 (1.0251 pct vs 1.0355 pct); both exceed the 1 pct bar."
+    }
+  },
+  "denominators": {
+    "decision_period_s": 0.1,
+    "epochs_per_cell_committed": {
+      "4": 12000,
+      "5": 12000,
+      "6": 12000,
+      "7": 11997
+    },
+    "epochs_pooled": 47997,
+    "note_on_12000_vs_n_decisions": "arm_stats epochs (= guard evaluations) is the correct denominator. coordinator_result n_decisions (16895 at s4) counts ACTIONS, not periods.",
+    "epochs_with_a_monitor_request_in_flight": {
+      "4": 11225,
+      "5": 11256,
+      "6": 11106,
+      "7": 11364,
+      "pooled": 44951,
+      "alert_fraction_over_this_denominator_pct": 1.1056
+    },
+    "epochs_with_the_episodic_signal_live": {
+      "4": 11934,
+      "5": 11913,
+      "6": 11887,
+      "7": 11914,
+      "pooled": 47648,
+      "alert_fraction_over_this_denominator_pct": 1.0431
+    },
+    "remark": "every denominator choice puts the alert fraction above 1 pct (1.0355 pct on epochs, 1.0427 pct on signal-live epochs, 1.1056 pct on epochs with an alert request in flight)."
+  },
+  "RESULTS": {
+    "alert_lag_ge_0.8s": {
+      "s4": {
+        "count": 251,
+        "denominator": 12000,
+        "fraction_pct": 2.0917
+      },
+      "s5": {
+        "count": 106,
+        "denominator": 12000,
+        "fraction_pct": 0.8833
+      },
+      "s6": {
+        "count": 92,
+        "denominator": 12000,
+        "fraction_pct": 0.7667
+      },
+      "s7": {
+        "count": 48,
+        "denominator": 11997,
+        "fraction_pct": 0.4001
+      },
+      "pooled": {
+        "count": 497,
+        "denominator": 47997,
+        "fraction_pct": 1.0355
+      },
+      "register": "EXACT, the guard's own signal (latency_estimate_s['episodic'])",
+      "proxy": false
+    },
+    "alert_lag_ge_0.8s_submit_order_variant": {
+      "s4": {
+        "count": 246,
+        "denominator": 12000,
+        "fraction_pct": 2.05
+      },
+      "s5": {
+        "count": 106,
+        "denominator": 12000,
+        "fraction_pct": 0.8833
+      },
+      "s6": {
+        "count": 92,
+        "denominator": 12000,
+        "fraction_pct": 0.7667
+      },
+      "s7": {
+        "count": 48,
+        "denominator": 11997,
+        "fraction_pct": 0.4001
+      },
+      "pooled": {
+        "count": 492,
+        "denominator": 47997,
+        "fraction_pct": 1.0251
+      }
+    },
+    "single_shot_lag_ge_1.6s": {
+      "s4": {
+        "count": 58,
+        "denominator": 12000,
+        "fraction_pct": 0.4833
+      },
+      "s5": {
+        "count": 15,
+        "denominator": 12000,
+        "fraction_pct": 0.125
+      },
+      "s6": {
+        "count": 0,
+        "denominator": 12000,
+        "fraction_pct": 0.0
+      },
+      "s7": {
+        "count": 0,
+        "denominator": 11997,
+        "fraction_pct": 0.0
+      },
+      "pooled": {
+        "count": 73,
+        "denominator": 47997,
+        "fraction_pct": 0.1521
+      },
+      "register": "CONSTRUCTED, NOT the guard's signal",
+      "proxy": true,
+      "proxy_declaration": "The guard has no assistance channel. This is an EWMA (same alpha, same recurrence) built over asst* device completions only, i.e. the signal a per-type guard WOULD need. It measures assistance first-token lag; it is valid as a sizing estimate for the variant and INVALID as a statement about anything the committed guard read, which never saw it. Not used for any headline conclusion."
+    },
+    "recall_lag_ge_2.4s_as_built_class": {
+      "s4": {
+        "count": 3,
+        "denominator": 12000,
+        "fraction_pct": 0.025
+      },
+      "s5": {
+        "count": 9,
+        "denominator": 12000,
+        "fraction_pct": 0.075
+      },
+      "s6": {
+        "count": 37,
+        "denominator": 12000,
+        "fraction_pct": 0.3083
+      },
+      "s7": {
+        "count": 3,
+        "denominator": 11997,
+        "fraction_pct": 0.025
+      },
+      "pooled": {
+        "count": 52,
+        "denominator": 47997,
+        "fraction_pct": 0.1083
+      },
+      "register": "EXACT signal, CONTAMINATED definition",
+      "proxy": false,
+      "caveat": "latency_estimate_s['recall'] is what the guard reads, but it mixes recall questions, assistance questions, warm pieces and touches (coordinator.py:1934)."
+    },
+    "recall_lag_ge_2.4s_recall_devices_only": {
+      "s4": {
+        "count": 10,
+        "denominator": 12000,
+        "fraction_pct": 0.0833
+      },
+      "s5": {
+        "count": 0,
+        "denominator": 12000,
+        "fraction_pct": 0.0
+      },
+      "s6": {
+        "count": 150,
+        "denominator": 12000,
+        "fraction_pct": 1.25
+      },
+      "s7": {
+        "count": 103,
+        "denominator": 11997,
+        "fraction_pct": 0.8585
+      },
+      "pooled": {
+        "count": 263,
+        "denominator": 47997,
+        "fraction_pct": 0.548
+      },
+      "register": "CONSTRUCTED",
+      "proxy": true,
+      "proxy_declaration": "EWMA over robo* completions only, the clean per-type recall signal a per-type guard would need."
+    },
+    "guard_actually_fired_2.0s": {
+      "s4": {
+        "count": 71,
+        "denominator": 12000,
+        "fraction_pct": 0.5917
+      },
+      "s5": {
+        "count": 34,
+        "denominator": 12000,
+        "fraction_pct": 0.2833
+      },
+      "s6": {
+        "count": 143,
+        "denominator": 12000,
+        "fraction_pct": 1.1917
+      },
+      "s7": {
+        "count": 29,
+        "denominator": 11997,
+        "fraction_pct": 0.2417
+      },
+      "pooled": {
+        "count": 277,
+        "denominator": 47997,
+        "fraction_pct": 0.5771
+      },
+      "register": "COMMITTED COUNTER, no reconstruction",
+      "source": "arm_stats.guard_by_lag",
+      "note": "guard_by_backlog is 0 in all four cells, so every firing was by lag. guard_active_epochs == guard_by_lag == guard_shed_warming_epochs == state_deferred_to_guard_epochs in all four cells."
+    },
+    "alert_lag_ge_2.0s_the_as_built_bar_on_the_alert_channel_alone": {
+      "s4": {
+        "count": 1,
+        "denominator": 12000,
+        "fraction_pct": 0.0083
+      },
+      "s5": {
+        "count": 15,
+        "denominator": 12000,
+        "fraction_pct": 0.125
+      },
+      "s6": {
+        "count": 0,
+        "denominator": 12000,
+        "fraction_pct": 0.0
+      },
+      "s7": {
+        "count": 0,
+        "denominator": 11997,
+        "fraction_pct": 0.0
+      },
+      "pooled": {
+        "count": 16,
+        "denominator": 47997,
+        "fraction_pct": 0.0333
+      },
+      "register": "EXACT",
+      "note": "16 epochs pooled, against 497 that cross 0.8 s."
+    }
+  },
+  "RULE_APPLICATION": {
+    "pre_declared_threshold_pct": 1.0,
+    "threshold_source": "D230 (2), research/policy_design_log.md at fa3e8d555a1bcc92bb659a41ec2912552b64f520",
+    "threshold_moved": false,
+    "measured_alert_fraction_pct": 1.0355,
+    "at_or_below_1_pct": false,
+    "bar_in_epochs": 479.97,
+    "observed_epochs": 497,
+    "margin_epochs": 17.029999999999973,
+    "margin_pp": 0.0355,
+    "robustness": "the known bias is an UNDERCOUNT (missing request rows), so the true count is at least 497; the submit-order variant gives 492 (1.0251 pct), also above the bar. The verdict holds in the binding direction, on a margin of 17 epochs.",
+    "MECHANICAL_OUTCOME": "FRACTION EXCEEDS 1 PERCENT. D178 (3) is NOT amended to the single 2.0 s guard, and D166 (3)'s exit hysteresis is NOT ruled out. Per D230 (2) the per-type guard is to be BUILT on rung 3 as a labelled variant covex-v6-fair-final-ptg, default OFF in other arms, proofs as usual, with s4 posted to the H100 only AFTER the rung-4 cells. NOT BUILT IN THIS TASK (measurement only, by instruction).",
+    "DISTRIBUTION_WARNING_check_3": "The pooled verdict is carried by ONE SEED. Per-seed alert fractions are 2.0917, 0.8833, 0.7667 and 0.4001 pct: s4 alone is above 1 pct and s5, s6, s7 are all below it. Pooling 47,997 epochs is legitimate under the rule as written (it names the fraction over the committed cells s4 to s7), but a reader must see that three of four cells would have amended the clause and the fourth, at 2.09 pct, overturns them. The mixing weight is 1/4 per cell. Mean of the four per-seed fractions = 1.0355 pct (equal denominators), which agrees with the pooled figure."
+  },
+  "MATRIX_CODE_READING_VERDICT": {
+    "reading": "arms_v5rules2.py defines one GUARD_LAG_S_DEFAULT = 2.0 for all three query types where D178 (3) specifies 0.8 / 1.6 / 2.4 s; alerts have a 1.0 s deadline, so a 2.0 s threshold cannot protect them before their deadline has passed.",
+    "verdict": "BORNE OUT, AND EXERCISED, with one correction and one amplification.",
+    "evidence": [
+      "The alert channel crossed its own D178 (3) threshold of 0.8 s in 497 of 47,997 epochs but reached the as-built 2.0 s bar in only 16. In the other 481 epochs a per-type guard would have fired on the alert signal and the as-built guard did not.",
+      "At s6 and s7 the episodic EWMA never reached 2.0 s at all (maxima 1.879 s and 0.964 s), so at those two seeds the single 2.0 s guard could NOT fire on the alert channel in any period, while alert lag exceeded 0.8 s in 92 and 48 periods.",
+      "The guard's 277 pooled firings were driven almost entirely by the recall class: that channel reached 2.0 s in 257 epochs against the alert channel's 16.",
+      "AMPLIFICATION beyond the matrix: the defect is worse than one shared threshold. There are only two lag channels, so assistance has no guard signal at all and the recall channel is a mixture. The per-type guard needs a third EWMA class at coordinator.py:1934, not just three constants at arms_v5rules2.py:81.",
+      "CORRECTION to the reading's framing: the guard is a warming/state-shedding early warning, not a per-request deadline rescue, so 'cannot protect them' is about when the policy stops adding speculative work on behalf of alerts, not about rescuing an individual late frame."
+    ],
+    "never_exercised": false
+  },
+  "consistency_check": {
+    "1_cross_check_committed": [
+      {
+        "quantity": "episodic first-token p90",
+        "this_run": "0.626 to 0.661 s (s4 to s7)",
+        "prior": "0.929 s healthy-zone p90 over 680 windows and 712,902 requests in 58 committed cells (arms_v5rules2.py:68-80, v5/guard_thresholds.py)",
+        "ratio": "0.67 to 0.71x",
+        "verdict": "agree, well inside 2x"
+      },
+      {
+        "quantity": "episodic first-token p50",
+        "this_run": "0.353 to 0.367 s",
+        "prior": "0.350 s healthy-zone p50, same source",
+        "ratio": "1.01 to 1.05x",
+        "verdict": "agree"
+      },
+      {
+        "quantity": "dashcam p90 first token",
+        "this_run": "0.661 s at s5 (rung 3)",
+        "prior": "0.81 s rung 2 / 0.71 s base / 1.56 s rung 1 at s5 (D178 (5))",
+        "ratio": "0.82x vs rung 2, 0.93x vs base",
+        "verdict": "agree"
+      },
+      {
+        "quantity": "guard backlog firings",
+        "this_run": "0 in all four cells",
+        "prior": "healthy-zone backlog p99 = 71 against GUARD_BACKLOG 100 (arms_v5rules2.py:82)",
+        "ratio": "n/a",
+        "verdict": "agree; these cells are in the healthy zone the constants came from, so the backlog signal is correctly never the binder"
+      }
+    ],
+    "2_physical_plausibility": "EWMA maxima 0.96 to 4.38 s on 1,000 to 1,400-token monitor prompts. The D162 fit (D179 (2)) gives 0.0678 + 0.000182u + 0.000154 x queue_ahead, i.e. about 0.14 s unqueued at u = 376, so values of 2 to 4 s require queueing, which these pressure cells have (c5_dash_held 25,237 at s4). No reported rate is faster than any committed curve; nothing here is a cache artefact, and no latency was measured by this task (all latencies are re-read from committed logs).",
+    "3_distribution_sanity": "No constant where a distribution was expected. The alert fraction spreads 0.4001 to 2.0917 pct across the four seeds (5.2x) and the raw per-request exceedance spreads 2.75 to 3.83 pct. The EWMA exceedance (0.40 to 2.09 pct of epochs) is below the raw per-request exceedance (2.75 to 3.83 pct of requests), which is the expected direction for an alpha 0.3 smoother and is what the guard's own comment says it is for (one slow request must not shed warming on its own). The concentrated-effect case is reported explicitly under RULE_APPLICATION.DISTRIBUTION_WARNING_check_3.",
+    "4_definition_audit": {
+      "alert first-token lag": "latency_estimate_s['episodic'], an alpha 0.3 EWMA of observed ttft_s over completed sub.kind == 'monitor' requests. SAME definition as the guard's read site. NOT a per-request latency and NOT reconstructed from another clock.",
+      "single-shot / assistance first-token lag": "HAS NO COMMITTED DEFINITION in the guard. Constructed here over asst* devices and declared a proxy.",
+      "recall first-token lag": "latency_estimate_s['recall'] as built = every non-monitor completion (recall, assistance, piece, touch). Reported both as built and as a robo*-only construction, because the name carries two definitions.",
+      "decision period": "0.1 s (coordinator_result decision_period_s and tick_s; run_meta tick_s 0.01 is the emulator's tick, a different object with the same name).",
+      "deadlines": "alert 1.0 s, assistance 2.0 s, recall 3.0 s (D178 (1)); 80 pct gives 0.8 / 1.6 / 2.4 s (D178 (3)).",
+      "exceeds": "the code uses >= ; D178 (3) and D230 (2) say 'exceeds'. On continuous float EWMAs the two differ in no epoch of 47,997."
+    },
+    "5_claim_linkage": "This bears on D178 (3) (per-type guard thresholds) and D166 (3) (exit hysteresis) and on nothing else; it is an operational freeze-gate ruling, not a claim in research/CLAIMS.md. It does not touch FORMULATION.md scoping (no KV portability, no cross-tier transfer).",
+    "6_proxy_validity": "One proxy declared: the assistance channel (see RESULTS). It is NOT used for the headline, which rests on the exact episodic signal. The recall figure is given in both registers for the same reason.",
+    "7_control_validation": "The control here is the committed guard counter itself, and it was audited, not assumed: the replay reproduces guard_by_lag to within 0 to 3 epochs in 12,000 at every seed, with the residual traced to missing request.jsonl rows and its sign verified consistent in all four seeds. The positive control is the committed healthy-zone curve (consistency check 1): these cells' episodic p50/p90 land inside it, so the check is live rather than passing on a broken bar. guard_by_backlog = 0 is a correctly and consistently zero quantity and is reported as such, not as an absence of instrumentation."
+  },
+  "mechanism_verification": "NOT APPLICABLE as a gate: no cell, sweep or policy comparison was run. This is offline analysis of committed cells and is read-only. The analysis did, however, find an ABSENT LINK in the mechanism D178 (3) specifies: the assistance lag channel does not exist at the write site, so a per-type guard cannot be built from constants alone.",
+  "limitations": [
+    "The per-period guard signal is not logged in any committed cell; the headline is a validated replay of the EWMA recurrence, not a logged value. Recommendation: log guard_state lag_s and backlog per decision period in the ptg variant so the next such ruling needs no replay.",
+    "Every fraction is a lower bound by 0 to 3 epochs per cell (missing request rows).",
+    "1x cells only, as D230 (2) specifies; the kv0.5r cells at s4 to s6 were not analysed.",
+    "No seeds 1 to 3 and no HOLDOUT were read."
+  ],
+  "_provenance": {
+    "git_commit": "fa3e8d555a1bcc92bb659a41ec2912552b64f520",
+    "git_commit_register": "the origin/main sha every input was read from with git show <sha>:<path>; NOT the local working tree, which is behind",
+    "local_head_at_analysis": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
+    "script": "d230_guard_107 replay (scratchpad, read-only analysis; no experiment script added to the repo)",
+    "model": "n/a (scheduling-policy log analysis, no model inference)",
+    "device": "a6000",
+    "n": 47997,
+    "n_definition": "100 ms decision periods pooled over the four 1x cells",
+    "timestamp": "2026-11-24T11:32:49.818796"
+  }
+}
