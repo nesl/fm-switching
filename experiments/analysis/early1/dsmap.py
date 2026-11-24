@@ -98,12 +98,19 @@ def delivered_crops(arm_raw, seed, cal, dur, labels, fake, device_only=False):
     if path is None:
         return None
     tr = _trace(seed)
+    # D226 (3): a delivered cloud score counts only when its request is VERIFIED (present in the
+    # request log and not a refusal); an absent-row or refused request is unverifiable, so the
+    # instant falls back to the device score. Without this a refused/dropped monitor leaks its
+    # cloud score into the delivered-stream mAP.
+    refused, present = E.refused_and_present(path)
     cloud = {}
     for o in E.read_jsonl_gz(os.path.join(path, "outcomes.jsonl")):
         if not str(o.get("device_id", "")).startswith("dash"):
             continue
         cp = o.get("cloud_payload") or {}
-        cloud[o["opportunity_id"]] = (bool(cp.get("on_time")), cp.get("cloud_score"))
+        rid = cp.get("request_id")
+        verified = rid is not None and rid in present and rid not in refused
+        cloud[o["opportunity_id"]] = (bool(cp.get("on_time")) and verified, cp.get("cloud_score"))
     # delivered calibrated score per instant, grouped by clip
     by_clip = defaultdict(list)  # clip -> list of (clip_pts, delivered_cal)
     for oid, (clip, pts, dscore) in tr.items():

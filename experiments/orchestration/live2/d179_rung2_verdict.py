@@ -292,6 +292,20 @@ def _committed_delivery(outcomes: List[Dict[str, Any]],
             o["t_delivered"] = None
             o["cloud_payload"] = None
             o["d144_failed_request"] = True
+    # D226 (3): when the request log DROPPED rows, a refused request whose row is absent is never in
+    # `failed`, so a refusal would silently stand as a delivered cloud answer. The outcome carries no
+    # refusal signal of its own, so an absent-row delivery is UNVERIFIABLE; null it (device stands,
+    # else no answer), the one direction that cannot credit a possible refusal. Matches the FAIL-LOUD
+    # guard the committed scorer (score.py) now raises for future complete-log runs. With a complete
+    # request log this nulls nothing (every delivered answer has its row).
+    present = {r.get("request_id") for r in reqs}
+    for o in out.values():
+        cp = o.get("cloud_payload") or {}
+        rid = cp.get("request_id")
+        if o.get("t_delivered") is not None and rid is not None and rid not in present:
+            o["t_delivered"] = None
+            o["cloud_payload"] = None
+            o["d226_absent_request"] = True
     done = {r["opportunity_id"]: float(r["t_done"]) for r in reqs
             if r.get("opportunity_id") and r.get("t_done") is not None}
     for oid, o in out.items():

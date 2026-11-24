@@ -60,6 +60,13 @@ def over32k_oids(path):
     return oids
 
 
+def refused_and_present(path):
+    """D226 (3): (refused_ids, present_ids). A cloud answer whose request id is refused OR absent
+    from the present set is not a verified delivery, so single-shot on-time must fall back to the
+    device. The one canonical definition lives in episodic_lib; delegate to it."""
+    return E.refused_and_present(path)
+
+
 def robot_d176(cell, path, std_correct, std_n):
     """D176: the committed robot correct-by-deadline with the over-32k (http-400 context-refusal)
     recalls removed from BOTH numerator and denominator. Defined relative to the committed standard
@@ -119,6 +126,7 @@ def collect_units(arm_raw, seed, device_only=False):
             ok = bool(r.get("standing_correct_by_deadline"))
         units[("R", oid)] = 1 if ok else 0
     corr = E.ss2_correctness()
+    refused, present = refused_and_present(path)  # D226 (3)
     for o in E.read_jsonl_gz(os.path.join(path, "outcomes.jsonl")):
         if not str(o.get("device_id", "")).startswith("asst"):
             continue
@@ -129,7 +137,13 @@ def collect_units(arm_raw, seed, device_only=False):
         if device_only:
             ok = c.get("device")
         else:
-            on_time = bool((o.get("cloud_payload") or {}).get("on_time")) or bool(o.get("within_L"))
+            cp = o.get("cloud_payload") or {}
+            rid = cp.get("request_id")
+            # D226 (3): a cloud answer counts as on-time only if its request is VERIFIED delivered
+            # (present in the request log and not refused); an absent-row or refused request is
+            # unverifiable, so on-time falls back to the device answer.
+            verified = rid is not None and rid in present and rid not in refused
+            on_time = (bool(cp.get("on_time")) or bool(o.get("within_L"))) and verified
             ok = c.get("cloud") if on_time else c.get("device")
         units[("S", qid)] = 1 if ok else 0
     return units

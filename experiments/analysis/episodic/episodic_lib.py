@@ -112,6 +112,34 @@ def ss2_correctness():
     return _SS2_CACHE
 
 
+def refused_ids(reqs):
+    """D226 (3): request ids that are refusals, by score.py::refused_request_ids -- http_status
+    != 200, or no http_status with no prompt_tokens and no output_tokens. The single canonical
+    refusal definition used across canon, dsmap and ss_correct_in_time."""
+    out = set()
+    for r in reqs or []:
+        hs = r.get("http_status")
+        if hs is not None:
+            try:
+                if int(hs) != 200:
+                    out.add(r.get("request_id"))
+            except (TypeError, ValueError):
+                out.add(r.get("request_id"))
+            continue
+        if not r.get("prompt_tokens") and not r.get("output_tokens"):
+            out.add(r.get("request_id"))
+    return out
+
+
+def refused_and_present(path):
+    """(refused_ids, present_ids) for a cell. A cloud answer is a VERIFIED delivery only when its
+    request id is present in the request log and not refused (D226 (3)); an absent-row or refused
+    request is unverifiable and must fall back to the device answer."""
+    reqs = read_jsonl_gz(os.path.join(path, "request.jsonl")) \
+        or read_jsonl_gz(os.path.join(path, "requests.jsonl")) or []
+    return refused_ids(reqs), {r.get("request_id") for r in reqs}
+
+
 def ss_correct_in_time(path):
     """Per single-shot opportunity: correct if cloud delivered within 2 s and cloud is correct,
     else device correctness. Returns (correct_count, n, fraction, cloud_ontime_frac, n_missing_qid).
@@ -122,6 +150,10 @@ def ss_correct_in_time(path):
     n = len(rows)
     if not n:
         return None, 0, None, None, 0
+    # D226 (3): a cloud answer counts as on-time only if its request is VERIFIED delivered (present
+    # in the request log and not a refusal). An absent-row or refused request is unverifiable, so
+    # on-time falls back to the device answer.
+    refused, present = refused_and_present(path)
     k = 0
     cloud_on = 0
     missing = 0
@@ -131,7 +163,10 @@ def ss_correct_in_time(path):
         if c is None:
             missing += 1
             continue
-        on_time = bool((o.get("cloud_payload") or {}).get("on_time")) or bool(o.get("within_L"))
+        rid = (o.get("cloud_payload") or {}).get("request_id")
+        verified = rid is not None and rid in present and rid not in refused
+        on_time = (bool((o.get("cloud_payload") or {}).get("on_time"))
+                   or bool(o.get("within_L"))) and verified
         if on_time:
             cloud_on += 1
             ok = c.get("cloud")

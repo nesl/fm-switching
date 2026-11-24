@@ -547,6 +547,26 @@ def load(trace_dir: Path, run_dir: Path) -> Loaded:
                 o["t_delivered"] = None
                 o["cloud_payload"] = None
                 o["d144_failed_request"] = True
+    # D226 (3): the refusal test above reads the request log; if the request log DROPPED rows
+    # (observed in the 11-21..11-23 request.jsonl writes), a refused request whose row is absent is
+    # never caught, and a refusal then silently REPLACES a device answer. The outcome record carries
+    # no refusal signal of its own (http_status and the token fields live only in the request log),
+    # so a refusal cannot be recovered from outcomes.jsonl. The only choice that cannot silently
+    # mis-score is to FAIL LOUD: a cloud answer that still stands (t_delivered set) but whose request
+    # id is absent from the request log is UNVERIFIABLE, and the scorer refuses rather than trust it.
+    # With a complete request log this guard never fires (every delivered answer has its row).
+    present_ids = {r.get("request_id") for r in reqs}
+    unverifiable = sorted(
+        cp.get("request_id")
+        for o in out.values()
+        for cp in (o.get("cloud_payload") or {},)
+        if o.get("t_delivered") is not None and cp.get("request_id") not in present_ids)
+    if unverifiable:
+        raise ScoringRefused(
+            "D226: %d delivered cloud answer(s) in %s have request ids absent from the request "
+            "log (%d rows); their refusal status is unverifiable and keeping them risks a silent "
+            "mis-score. First few: %s" % (len(unverifiable), run_dir.name, len(reqs),
+                                          unverifiable[:5]))
     # ---- D146: COMPLETION DELIVERY, and it is the DEFAULT from 2026-11-20.
     # A robot or single-shot answer counts as delivered when generation COMPLETES, prefill plus
     # decode; a dashcam Yes/No may stay at first token. The committed `t_delivered` is first-token
