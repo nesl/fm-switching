@@ -194,6 +194,11 @@ commit_cell() {
   for i in 1 2 3; do git pull --rebase -q origin main 2>/dev/null; git push -q origin HEAD:main 2>/dev/null && break
     git add results/orchestration/live2/pilot/pilot_monitor.jsonl 2>/dev/null; git commit -q -m "logs" 2>/dev/null; done
   log "COMMITTED: $1 ($(git rev-parse --short HEAD)); origin $(git rev-parse --short origin/main)"
+  # v35 POSITIVE push check (flash 2026-11-24): success is asserted, never inferred from a silent push. HEAD must be
+  # contained in origin/main after a fresh fetch; if not, say so loudly (the watcher greps for PUSH NOT ON ORIGIN).
+  git fetch -q origin 2>/dev/null
+  if git merge-base --is-ancestor HEAD origin/main 2>/dev/null; then log "PUSH VERIFIED: $(git rev-parse --short HEAD) is on origin/main"
+  else log "PUSH NOT ON ORIGIN: $1: HEAD $(git rev-parse --short HEAD) is not contained in origin/main $(git rev-parse --short origin/main)"; fi
 }
 
 ordered_cells() {   # user order (2026-11-20, after D144): the requeued seed-6 hybrids at 16; then the BASELINE SWEEP:
