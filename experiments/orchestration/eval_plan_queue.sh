@@ -30,10 +30,13 @@ EOF
 )
 # driver v33 parses _rq<k>; until it is the running driver the re-ask conditions wait
 pgrep -u pragya -f "study_frozen_grid_driver_v33.sh" >/dev/null && RQV33="" || RQV33="waiting on build: driver v33 (_rq<k> tag) running"
-armwait() {   # open fidelity hits per arm (D209 (2), reduced by the baseline-set ruling)
+armwait() {   # $1 arm, $2 condition key. Open fidelity hits per arm (D209 (2), reduced by the baseline-set ruling)
+  # hit 14 card check (2026-11-23 16:50): llf (D118 laxity from committed cost curves) reads NO capacity, so it is
+  # unaffected everywhere; mooncake as carded keeps gpu_warm_slots = 4 (StudyE10b), a constant, so it is unaffected at
+  # 1x, and whether it should follow the GPU-KV pool at 0.5x / 0.25x is an ADAPTATION change awaiting the user.
   case "$1" in
     simplestream) echo "waiting on hits 14, 7";;
-    llf|mooncake) echo "waiting on hit 14 (card check: fix only if the card reads GPU-KV capacity)";;
+    mooncake) case "$2" in mem*) echo "waiting on hit 14 ruling (adaptation: gpu_warm_slots = 4 fixed by the card)";; *) echo "";; esac;;
     eco-llm) echo "waiting on hits 14, 16";;
     *) echo "";;
   esac
@@ -56,7 +59,7 @@ cat <<'EOF'
 a  | FILLER_A_CELLS  confidence-cascade 16 s4-s7 _L3_epg_rq30_rerun | ready (gated)
 b  | FILLER_C_CELLS  cascade-routing 16 s4-s7 _L3_epg_rq30 | ready (gated; device-only floor by construction)
 c1 | simplestream reruns on committed conditions | waiting on hits 14, 7
-c2 | llf, mooncake, eco-llm reruns on committed conditions | waiting on hit 14 (eco-llm also 16)
+c2 | llf: UNAFFECTED by hit 14 (card check); mooncake: unaffected at 1x, memory conditions await the hit-14 adaptation ruling; eco-llm: waiting on hits 14, 16
 c3 | kvflow-prefetch, lmcache (hit 9), attentionstore-prefetch (hit 8) reruns | waiting on hits 9, 8
 d  | D209SAFE_CELLS covex-v6-base / covex-v6-rules at L2.5, n12, n20 | ready (gated)
 e  | FILLER_Z_CELLS  hybrid-llm 16 s4-s7 | optional, last (gated)
@@ -71,9 +74,9 @@ echo "$CONDS" | while IFS='|' read k n tag flags build; do
     c=${a}_n${n}_s${s}_1200s_h27_3t${tag}
     if [ -f $O/$c/cell.json ]; then
       if superseded $c; then st="SUPERSEDED (hit 14); rerun after the fix"; else st="done"; fi
-      w=$(armwait $a); [ -n "$w" ] && [ "$st" = done ] && st="done (provisional: $w)"
+      w=$(armwait $a $k); [ -n "$w" ] && [ "$st" = done ] && st="done (provisional: $w)"
     else
-      w=$(armwait $a)
+      w=$(armwait $a $k)
       if [ -n "$w" ]; then st="$w"
       elif [ -n "$build" ]; then st="$build"
       elif echo "$OTHER" | grep -qxF "$a $n $s $tag"; then st="ready (gated in another list)"
