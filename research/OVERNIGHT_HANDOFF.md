@@ -774,6 +774,43 @@ INVENT WORK, DO NOT TOUCH A RUN-PATH FILE, AND DO NOT DECIDE ANY OF THE FIVE OPE
 
 ## OPEN, NEEDING A USER RULING
 
+- *** THE HARM FORM. NEW 2026-11-24, AND IT IS LOGICALLY PRIOR TO THE DEVICE_ANSWERS RULING AND TO ANY
+  READING OF RUNG 4's COUNTERFACTUAL. THE CODE ITSELF SAYS THIS IS A USER RULING AND IT HAS NEVER BEEN
+  PUT TO THE USER. ***
+  `cf_protect_defer.py`'s committed `HARM_FORM_NOTE`, verbatim at the end: *"Both are computed and
+  reported; the default is the one whose units match the bar, and **THE CHOICE IS A USER RULING, NOT THIS
+  MODULE'S**."* It is absent from the open-rulings list until now, and `device_discount` appears **ZERO
+  times** in `research/policy_design_log.md`, so it has never been ruled, recorded as open, or numbered.
+  **THE TWO READINGS.** `on-time-cloud` is D177's currency and the unit `MARGIN_CF_ON_TIME` is expressed
+  in: a displaced request loses `w_j x (p_before - p_after)` on-time CLOUD answers. `device-discounted`
+  multiplies each row by `(1 - p_device_on_time_j)`, the literal reading of D165 (B)'s "a question whose
+  device answer was already on time loses nothing when the cloud answer is late".
+  **WHY THE CHOICE IS NOT COSMETIC, FROM THE MEASURED TABLES** (`v5/cf_objective.py:120-135`, verified):
+    robot       0.2503 to 0.3108 s over 97 LH-REQ questions, INSIDE every deadline under test (2.5 to
+                5 s), so **`p_device_on_time` is 1.0 on EVERY robot decision**
+    dashcam     0.2349 to 0.3169 s over positions 1 to 21, inside a 1 s deadline at every position, so
+                1.0 there too (**the EPISODE START curve reaching 1.88 s is the exception worth noting**)
+    single_shot **HERE IT VARIES: 45.5 percent of refspatial questions give `p_device_on_time` = 0**
+  **SO UNDER `device-discounted` THE HARM OF DISPLACING AN ALERT OR A RECALL IS EXACTLY ZERO, AND THE
+  WHOLE PROTECT-AND-DEFER COMPOUND COULD ONLY EVER FIRE ON ASSISTANCE.**
+  *** WHAT IT DECIDES, WHICH IS MORE THAN DEVICE_ANSWERS: ***
+    (a) **THE DEVICE_ANSWERS 1x COUNT BECOMES 0 AND THE STOP CONDITION WOULD NEVER HAVE FIRED.** The one
+        1x denial's traced record reads `harm 5.295616144403798` with `harm_device_discounted: 0.0`
+        (independently reproduced, `d39797c0`). So settling this may DISSOLVE the adoption question
+        rather than inform it, and it should be settled FIRST.
+    (b) **THE s4 AND s7 BAR CROSSINGS BECOME 0 TOO**, so rung 4's Rule 2 class would move from
+        UNEXPRESSIBLE at those seeds to UNEXERCISED at all four. The s4 trace reads `harm 1.638113`
+        against `bar 1.452307` with `harm_device_discounted: 0.0` (`fbd2f64b`'s A cell).
+    (c) It therefore governs how the whole rung-4 counterfactual is reported, not one candidate.
+  *** AND A DISTINCTION THE CODE DRAWS THAT ANY WRITE-UP MUST KEEP: *** `cf_objective.py:122-125` says
+  `p_device_on_time` is "CONSTANT **BECAUSE THE DEVICE IS FAST**, which is a measured fact, and no longer
+  constant because the input was a flat proxy, which was an artefact. **The two look the same in the
+  output and are not the same claim.**" So the zeros under `device-discounted` are a REAL PROPERTY OF A
+  FAST DEVICE, not an instrumentation defect - which is exactly why this is a ruling and not a bug.
+  **NOTHING IS BUILT OR CHANGED PENDING IT.** Both forms are already computed and reported side by side
+  on every decision, so whichever way it goes, no code change and no rerun is implied by the ruling
+  ITSELF; what may follow is a change in which number is quoted.
+
 - *** THE D209 PROOF-LOAD TWIN FOR THE n20 CELLS IS A DIFFERENT ARM, AND ITS `twin_note` SAYS "THE SAME
   ARM". FOUND 2026-11-24 ON `3b95abd1`. THE CELL IS ALREADY `reportable: False`, SO NOTHING PUBLISHED IS
   AFFECTED - BUT THE TWIN LOGIC WILL BE REUSED FOR MORE n20 CELLS. ***
