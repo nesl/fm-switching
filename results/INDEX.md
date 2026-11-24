@@ -1252,3 +1252,34 @@ seed-7 `dsmap` pooling convention, which blanks 21 non-stub rows alongside 2 stu
 unrelated to this defect.
 
 | `results/orchestration/live2/d222_pass1/` | the three pass-1 proof scripts plus `d222_measured_safety.py` (11-24) | n/a (dry and CPU) | flash | proofs a/b 300 s n16 s4; proof c 1200 s dry s4 | **Rung-4 pass 1 PRE-REGISTERED (StudyD222-PASS1), no live cell yet.** Six non-counterfactual arms byte-identical across the change; counterfactual OFF reproduces `covex-v6-fair-final` exactly at `62b0f9a977189c78` and ON moves to `63eeaf6f7432dece`. Safety factor refitted to 1.76717 at q90 over n = 255 rung-3 recall requests in healthy windows, replacing 1.8721 over n = 5, READ from the committed artefact and never retyped into policy code. The dry s4 records zero deferrals and that is UNEXERCISED by construction, not a negative, because a dry cell prices every session cold. |
+
+### CORRECTION (D228, D166; 2026-11-24, after the H100 checked the healthy b7 cells)
+
+**`b7-edf-feasibility` HAS NO `arm_stats` IN ANY CELL, HEALTHY OR STUB. So the sentence above, "only the
+`arm_stats` instrumentation was lost", IS WRONG FOR THE SEVEN b7 ROWS IN THIS LIST.** The constructed
+`B7EDFFeasibility` arm keeps no `stats` Counter at all. Verified on origin: the healthy committed
+`b7-edf-feasibility_n16_s6_1200s_h27_3t_L3_epg_rq30` and `_s7_...` both carry **`arm_stats = None`** with
+`n_requests` 12,198 and 12,164 and `counts` present.
+
+**The classification of those seven rows still HOLDS, and the discriminator is `counts`, not `arm_stats`.**
+Checked both ways on the same pair: the stub `b7-edf-feasibility_n16_s4_1200s_h27_3t_L3_epg_rq30` has
+`counts` **absent** and `n_requests` **null**; the healthy `_s6` has `counts` **present** and `n_requests`
+**12,198**; **both have `arm_stats = None`, and both carry `wire_events_sent`.** So for b7 neither the
+absence of `arm_stats` nor the presence of the wire counters separates a stub from a healthy cell - only
+`counts` and `n_requests` do. The original signature happened to classify correctly because it required
+`counts` absent as well.
+
+**What the seven b7 stubs actually lost, and what their reruns actually recover:** `n_requests`,
+`n_errors`, `counts`, the decision-latency percentiles and `decision_time` - **not `arm_stats`, which never
+existed.** The H100's `b7-edf-feasibility_n16_s4_..._ms_rerun` confirms this from the other side: it
+recovered `n_requests` 12,177, `counts`, `n_errors` 37 and `decision_time`, and its `arm_stats` is **still
+null**, as it is in every b7 cell.
+
+**AND THE CONSEQUENCE BEYOND THIS FILE, ROUTED TO THE D225 MATRIX VERIFIER: if the conformance matrix's
+live-evidence column reads `arm_stats` for any b7 row, it reads a field that is absent in EVERY b7 cell** -
+so such a row cannot distinguish "the mechanism did not fire" from "this arm never recorded it". That is
+the project's standing trap in a new place: **an absence that is a property of the instrument rather than
+of the policy.** The stub list's own `item (e)` rerun rationale is corrected accordingly: the b7 reruns are
+worth running for `counts` and the decision-latency columns, **not** to recover `arm_stats`.
+
+**The original text above is left unedited** so the record shows what was claimed and when.
