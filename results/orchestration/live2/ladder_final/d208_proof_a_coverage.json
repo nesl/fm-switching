@@ -1,26 +1,64 @@
 {
- "_what": "proof (a) scored over the CANONICAL paper-core baseline set, not a set I chose.",
- "_the_set": "the ACTIVE (non-#) lines of results/orchestration/live2/frozen_test/runs/BASELINE_MATRIX, 'D164 BASELINE MATRIX ... the paper core, seeds 4-7'. 18 distinct arms, every active line at the single tag _L3_epg_rq30, verified by reading the committed file rather than from a relay.",
- "_scoring_rule_ONE_RECIPE_ONLY": "scored against the committed d179 17-arm table ALONE (d208_proof_a_bars.json). An arm absent from d179 may use its own record ONLY if TWO records agree. NEVER a union across records: a union would have taken covex-v6-rules as a3c000f4ae2f37f5 / 12,179 from the single older d175_digest_proofs.json against 18067c4c66bb44b8 / 11,955 in eleven records, scoring a CORRECT cell as MOVED and firing the escalation clause on a sound measurement. d175's value is recorded as SUPERSEDED.",
- "_load_boundary": "for --cutoff-off DIGEST cells load is not a comparability threat, because the planner wall-clock cutoff is patched off so the time-dependent quantity is out of play; for anything TIMING-dependent it is. This rests on TWO legs, the MECHANISM and TODAY'S OWN bit-exact matches at loadavg 10.80 and 13.80, and NOT on precedent: the highest load any committed artefact records is 9.00 (d184_r3_c5attr_proofs.json), d179 carries only a boolean with no magnitude, and the earlier 'precedent at about 20' claim was checked and withdrawn.",
- "_no_new_cells_were_needed": "every matrix arm that HAS a d179 bar is already in the running chain, so the 18-arm table needs no GPU beyond it. The 13 no-bar arms and the three hit-6 readers (preble, b9, uniscale) are NOT in the active matrix at all, so no before-digest is owed for them.",
- "summary": {
-  "n_arms": 18,
-  "match": 9,
-  "moved": 0,
-  "pending_in_the_running_chain": 4,
-  "coverage_missing": 5
+ "_what": "proof (a) scored against the D213 PAPER BASELINE SET, which supersedes the BASELINE_MATRIX 18 I scored before.",
+ "_the_set_D213": [
+  "always-cloud-fcfs",
+  "attentionstore-prefetch",
+  "b7-edf-feasibility",
+  "cascade-routing",
+  "confidence-cascade",
+  "device-only",
+  "eco-llm",
+  "edf",
+  "kvflow-prefetch",
+  "llf",
+  "lmcache",
+  "mooncake",
+  "querystream-proactive",
+  "simplestream",
+  "streamscout",
+  "warm-all-lru"
+ ],
+ "_plus_the_ladder_comparators": [
+  "covex-v6-base",
+  "covex-v6-rules"
+ ],
+ "_dropped_from_my_earlier_table": {
+  "r3-streaming": "OUT, superseded (D213)",
+  "hybrid-F-lhreq": "not in the D213 paper set",
+  "v5-rules": "not in the D213 paper set",
+  "_note": "hybrid-F-lhreq-noc3 and v5-rules-2 are the OLD SPELLINGS of covex-v6-base and covex-v6-rules, which D213 lists separately, so they are not separate baselines."
  },
+ "_not_owed": {
+  "inar-vl": "the earlier D205 statement calling it a reported arm WAS WRONG (user)",
+  "hybrid-llm": "optional filler at the bottom of the queue, not owed",
+  "pensieve, rh8, routellm, preble, b9, uniscale": "OUT with defects recorded as noted gaps, cells superseded and unreported"
+ },
+ "_scoring_rule_ONE_RECIPE_ONLY": "scored against the committed d179 17-arm table ALONE. An arm absent from d179 may use its own record only if TWO records agree; a union across records would have scored a correct cell as MOVED.",
+ "_D213_standing_ALONE_rule": "any dry cell whose digest is used as a proof bar or a Step 2b baseline runs ALONE on its machine, with loadavg recorded as a magnitude. An unfixed rung-2 digest (qcache fix off) is NEVER used as a bar.",
+ "_load_evidence": "bit-exact matches at loadavg 2.15, 2.84, 8.95, 10.80, 13.80, 13.83, 19.16, 20.45 and 24.81, zero movement across an order of magnitude. The boundary rests on the MECHANISM (cutoff patched off) plus this spread, never on precedent; the highest load any committed artefact records is 9.00.",
+ "summary": {
+  "n_scored_set": 18,
+  "match": 11,
+  "moved": 1,
+  "pending": 1,
+  "coverage_missing": 5,
+  "moved_but_classified_bar_stale": 1,
+  "moved_unexplained": 0
+ },
+ "ESCALATIONS": [
+  "confidence-cascade MOVED (b1ff48e40387a997 / 3,834 against b9290071679f1baa / 12,253) at loadavg 2.21. CLASSIFIED: its d179 bar is PRE-D205-FIX and stale; the arm was fixed by 8986f593 and D205 already ruled its committed cells superseded. Recommend RE-BARRING, not stopping. NOT re-barred by me.",
+  "cascade-routing: in the D213 paper set against a COMMITTED PORT-RULE exclusion (sufficiency proxy can never fire, escalation branch UNREACHABLE, 0 escalations over 2 cells), and with no cell at the D213 recipe (_L3_epg, not _L3_epg_rq30).",
+  "device-only: in the D213 paper set with ZERO committed cells at any tag."
+ ],
  "arms": {
   "always-cloud-fcfs": {
+   "in_D213_paper_set": true,
    "has_d179_bar": true,
    "bar": [
     "c7f86bb7755828de",
     12253
    ],
-   "loadavg_1min": 24.81,
-   "loadavg_5min": 24.37,
-   "loadavg_15min": 18.56,
+   "loadavg_1min_at_cell_start": 24.81,
    "measured": [
     "c7f86bb7755828de",
     12253
@@ -28,14 +66,13 @@
    "verdict": "MATCH"
   },
   "attentionstore-prefetch": {
+   "in_D213_paper_set": true,
    "has_d179_bar": true,
    "bar": [
     "b563cf7612fd1e02",
     46931
    ],
-   "loadavg_1min": 2.84,
-   "loadavg_5min": 7.8,
-   "loadavg_15min": 13.01,
+   "loadavg_1min_at_cell_start": 2.84,
    "measured": [
     "b563cf7612fd1e02",
     46931
@@ -43,82 +80,109 @@
    "verdict": "MATCH"
   },
   "b7-edf-feasibility": {
+   "in_D213_paper_set": true,
    "has_d179_bar": true,
    "bar": [
     "b9aadd1c3a2b26d5",
     12265
    ],
-   "loadavg_1min": 20.45,
-   "loadavg_5min": 17.82,
-   "loadavg_15min": 12.26,
+   "loadavg_1min_at_cell_start": 20.45,
    "measured": [
     "b9aadd1c3a2b26d5",
     12265
    ],
    "verdict": "MATCH"
   },
+  "cascade-routing": {
+   "in_D213_paper_set": true,
+   "has_d179_bar": false,
+   "verdict": "COVERAGE MISSING",
+   "cell_owed_for_proof_a": false,
+   "why": "no entry in the committed d179 17-arm table; under the one-recipe rule this is NOT scored and NOT reported as unchanged.",
+   "ESCALATION_1_port_rule": {
+    "what": "cascade-routing is in the D213 PAPER SET but carries a COMMITTED PORT-RULE EXCLUSION.",
+    "the_committed_record": "baseline_matrix_table.py:60 lists it in EXCLUDED_ARMS, and EXCLUSION_EVIDENCE records escalations_per_cell [0, 0], declines_per_cell '20 of 20' and '25 of 25', in_this_grid False, and why: 'its card's routing method is inexpressible in this setting: the sufficiency proxy the card specifies can never fire here, so the escalation branch is UNREACHABLE rather than merely unvisited'. The file states which step fails: THE PORT RULE, the characteristic-decision count.",
+    "why_this_is_not_a_quibble": "that is CLAUDE.md's own cited motivating failure for the port rule, a port that passed both required proofs perfectly while producing ZERO decisions of its characteristic kind because its sufficiency proxy could never fire. Reporting it as a baseline reports an arm that never makes its characteristic decision, and its numbers would read as a legitimate comparison.",
+    "second_independent_problem": "its only committed cells are at tag _L3_epg, NOT _L3_epg_rq30, so it has NO cell at the D213 recipe and in_this_grid is False. Cells would have to be run before it could be scored at all.",
+    "disposition": "ESCALATED, NOT SCORED and NOT silently included. The user ruled it in; the port-rule exclusion is committed. One of the two has to give, and that is not mine to decide."
+   }
+  },
   "confidence-cascade": {
+   "in_D213_paper_set": true,
    "has_d179_bar": true,
    "bar": [
     "b9290071679f1baa",
     12253
    ],
-   "verdict": "PENDING in the running chain"
+   "loadavg_1min_at_cell_start": 2.21,
+   "measured": [
+    "b1ff48e40387a997",
+    3834
+   ],
+   "verdict": "MOVED, AND CLASSIFIED: THE BAR IS STALE, NOT THE ARM",
+   "CLASSIFICATION": {
+    "the_measurement_stands": "measured b1ff48e40387a997 / 3,834 against the d179 bar b9290071679f1baa / 12,253. A 69 percent fall in row count is a large BEHAVIOURAL change, not a digest perturbation.",
+    "it_is_NOT_contention": "the cell started at loadavg 2.21, the LOWEST load in the whole sweep. The one arm that moved did so at the lowest load, while nine arms matched bit-exactly at loads up to 24.81. That rules out the contention explanation rather than merely arguing against it.",
+    "it_is_NOT_caused_by_my_change": "the final-ladder modules are additive registration plus a planner adapter; confidence-cascade is a baselines/ arm that imports none of them.",
+    "WHAT_IT_IS": "confidence-cascade is ONE OF D205's SEVEN delivered_scores READERS and one of its THREE REPORTED arms. D205 ruled that every committed cell of all seven is SUPERSEDED and that inar-vl, hybrid-llm and confidence-cascade are FIXED AND RERUN on every condition they were committed in. The fix landed: cascade_adapted.py was changed by 8986f593, 'D205 step 2: the three arms read what their cards specify, sliced to the episode', and delivered_scores no longer appears in that file at all.",
+    "why_the_row_count_FALLING_is_the_expected_direction": "the defect was that delivered_scores is filled with a literal 0.0, which is the MAXIMUM of a log-probability range, so every reader escalated on every instant. Fixing it stops the unconditional escalation, and fewer escalations means fewer rows. 12,253 to 3,834 is that change, in the direction the defect predicts.",
+    "therefore": "the d179 bar b9290071679f1baa / 12,253 BELONGS TO THE PRE-FIX CODE and is STALE. This is the same shape as the rung-2 bar: a bar that is no longer a property of the current code. The right action is to RE-BAR confidence-cascade from a post-fix cell, NOT to stop the ladder.",
+    "what_I_am_NOT_doing": "I am not downgrading the MOVED verdict and I am not re-barring it myself. The measurement is reported as a move; the classification is reported beside it; whether the ladder proceeds and who re-bars is not mine to decide.",
+    "the_general_point": "D213 fixes a paper baseline set that includes an arm whose d179 bar is stale, so proof (a)'s escalation clause would have fired on a movement already ruled expected by D205. That is the THIRD bar in this family found stale after being quoted as current: the rung-2 bar (allocation), the pre-Session-A rung-3 claim (withdrawn), and now this one."
+   }
+  },
+  "device-only": {
+   "in_D213_paper_set": true,
+   "has_d179_bar": false,
+   "verdict": "COVERAGE MISSING",
+   "cell_owed_for_proof_a": false,
+   "why": "no entry in the committed d179 17-arm table; under the one-recipe rule this is NOT scored and NOT reported as unchanged.",
+   "ESCALATION_2_no_cells_exist": {
+    "what": "device-only is in the D213 paper set and has ZERO committed cell directories at ANY tag.",
+    "checked": "git ls-tree over results/orchestration/live2/frozen_test/runs/ returns no device-only_n16 directory.",
+    "registered": "yes, the name resolves (arms.py), so this is a missing-cells problem and not a missing-arm problem.",
+    "disposition": "COVERAGE MISSING and CELLS OWED before it can be reported. Flagged rather than quietly dropped."
+   }
   },
   "eco-llm": {
+   "in_D213_paper_set": true,
    "has_d179_bar": true,
    "bar": [
     "f32fa95c6953c64e",
     12253
    ],
+   "loadavg_1min_at_cell_start": 2.26,
    "verdict": "PENDING in the running chain"
   },
   "edf": {
+   "in_D213_paper_set": true,
    "has_d179_bar": true,
    "bar": [
     "9db366ac8f684d45",
     16327
    ],
-   "loadavg_1min": 19.16,
-   "loadavg_5min": 19.16,
-   "loadavg_15min": 18.91,
+   "loadavg_1min_at_cell_start": 19.16,
    "measured": [
     "9db366ac8f684d45",
     16327
    ],
    "verdict": "MATCH"
   },
-  "hybrid-F-lhreq": {
+  "kvflow-prefetch": {
+   "in_D213_paper_set": true,
    "has_d179_bar": false,
    "verdict": "COVERAGE MISSING",
-   "cell_owed": false,
+   "cell_owed_for_proof_a": false,
    "why": "no entry in the committed d179 17-arm table; under the one-recipe rule this is NOT scored and NOT reported as unchanged."
   },
-  "hybrid-F-lhreq-noc3": {
-   "has_d179_bar": true,
-   "bar": [
-    "af8befb9420ad86a",
-    12085
-   ],
-   "alias": "covex-v6-base (same arm, arm_names_v6.OLD_TO_RUNG; same committed digest)",
-   "loadavg_1min": 10.8,
-   "loadavg_5min": 5.72,
-   "loadavg_15min": 4.87,
-   "measured": [
-    "af8befb9420ad86a",
-    12085
-   ],
-   "verdict": "MATCH"
-  },
   "llf": {
+   "in_D213_paper_set": true,
    "has_d179_bar": true,
    "bar": [
     "961be8fe4942d86b",
     14075
    ],
-   "loadavg_1min": 13.83,
-   "loadavg_5min": 16.34,
-   "loadavg_15min": 17.79,
+   "loadavg_1min_at_cell_start": 13.83,
    "measured": [
     "961be8fe4942d86b",
     14075
@@ -126,20 +190,20 @@
    "verdict": "MATCH"
   },
   "lmcache": {
+   "in_D213_paper_set": true,
    "has_d179_bar": false,
    "verdict": "COVERAGE MISSING",
-   "cell_owed": false,
+   "cell_owed_for_proof_a": false,
    "why": "no entry in the committed d179 17-arm table; under the one-recipe rule this is NOT scored and NOT reported as unchanged."
   },
   "mooncake": {
+   "in_D213_paper_set": true,
    "has_d179_bar": true,
    "bar": [
     "7544b3aa16433c70",
     12742
    ],
-   "loadavg_1min": 8.95,
-   "loadavg_5min": 12.11,
-   "loadavg_15min": 15.38,
+   "loadavg_1min_at_cell_start": 8.95,
    "measured": [
     "7544b3aa16433c70",
     12742
@@ -147,31 +211,27 @@
    "verdict": "MATCH"
   },
   "querystream-proactive": {
+   "in_D213_paper_set": true,
    "has_d179_bar": true,
    "bar": [
     "a0b9e14e513c621c",
     12646
    ],
-   "loadavg_1min": 2.25,
-   "loadavg_5min": 3.64,
-   "loadavg_15min": 9.15,
-   "verdict": "PENDING in the running chain"
-  },
-  "r3-streaming": {
-   "has_d179_bar": false,
-   "verdict": "COVERAGE MISSING",
-   "cell_owed": false,
-   "why": "no entry in the committed d179 17-arm table; under the one-recipe rule this is NOT scored and NOT reported as unchanged."
+   "loadavg_1min_at_cell_start": 2.25,
+   "measured": [
+    "a0b9e14e513c621c",
+    12646
+   ],
+   "verdict": "MATCH"
   },
   "simplestream": {
+   "in_D213_paper_set": true,
    "has_d179_bar": true,
    "bar": [
     "870a3c3586d1b537",
     12253
    ],
-   "loadavg_1min": 2.15,
-   "loadavg_5min": 4.82,
-   "loadavg_15min": 10.67,
+   "loadavg_1min_at_cell_start": 2.15,
    "measured": [
     "870a3c3586d1b537",
     12253
@@ -179,47 +239,53 @@
    "verdict": "MATCH"
   },
   "streamscout": {
+   "in_D213_paper_set": true,
    "has_d179_bar": false,
    "verdict": "COVERAGE MISSING",
-   "cell_owed": false,
+   "cell_owed_for_proof_a": false,
    "why": "no entry in the committed d179 17-arm table; under the one-recipe rule this is NOT scored and NOT reported as unchanged."
-  },
-  "v5-rules": {
-   "has_d179_bar": false,
-   "verdict": "COVERAGE MISSING",
-   "cell_owed": false,
-   "why": "no entry in the committed d179 17-arm table; under the one-recipe rule this is NOT scored and NOT reported as unchanged."
-  },
-  "v5-rules-2": {
-   "has_d179_bar": true,
-   "bar": [
-    "18067c4c66bb44b8",
-    11955
-   ],
-   "alias": "covex-v6-rules (same arm, arm_names_v6.OLD_TO_RUNG; same committed digest)",
-   "loadavg_1min": 13.8,
-   "loadavg_5min": 10.88,
-   "loadavg_15min": 7.57,
-   "measured": [
-    "18067c4c66bb44b8",
-    11955
-   ],
-   "verdict": "MATCH"
   },
   "warm-all-lru": {
+   "in_D213_paper_set": true,
    "has_d179_bar": true,
    "bar": [
     "751381e72502fffe",
     17205
    ],
-   "verdict": "PENDING in the running chain"
+   "loadavg_1min_at_cell_start": 2.1,
+   "measured": [
+    "751381e72502fffe",
+    17205
+   ],
+   "verdict": "MATCH"
+  },
+  "covex-v6-base": {
+   "in_D213_paper_set": false,
+   "has_d179_bar": true,
+   "bar": [
+    "af8befb9420ad86a",
+    12085
+   ],
+   "loadavg_1min_at_cell_start": 10.8,
+   "measured": [
+    "af8befb9420ad86a",
+    12085
+   ],
+   "verdict": "MATCH"
+  },
+  "covex-v6-rules": {
+   "in_D213_paper_set": false,
+   "has_d179_bar": true,
+   "bar": [
+    "18067c4c66bb44b8",
+    11955
+   ],
+   "loadavg_1min_at_cell_start": 13.8,
+   "measured": [
+    "18067c4c66bb44b8",
+    11955
+   ],
+   "verdict": "MATCH"
   }
- },
- "_two_arms_TO_BE_RE_BARRED_not_in_this_matrix_set": [
-  "covex-v6-state-noprice",
-  "covex-v6-state-uo"
- ],
- "_LOAD_FIGURE_CORRECTION": "this prose read 10.08; the authoritative value is 10.80, from the committed ladder_final/cells/chain.out line '### A_base arm=covex-v6-base load=10.80, 5.72, 4.87'. The cell JSONs carry no load field, so chain.out is the only record and there is no third value to reconcile. Transposed digits, immaterial to the conclusion since both exceed the 9.00 ceiling, but the record must not carry two values for one measurement.",
- "_LOAD_EVIDENCE_NOW_SPANS_2_15_TO_24_81": "bit-exact matches at loadavg 2.15 (simplestream), 2.84, 8.95, 10.80, 13.80, 13.83, 19.16, 20.45 and 24.81 (always-cloud-fcfs). The top of that range is 2.8x the 9.00 documented ceiling, and the spread across an order of magnitude with ZERO movement is stronger than any single point. The boundary rests on the MECHANISM (cutoff patched off, so the time-dependent quantity is out of play) plus THIS evidence, never on precedent.",
- "_SESSION_A_ANSWERS_THE_ESCALATION_QUESTION_MORE_STRONGLY": "Session A passed BYTE IDENTITY ON 29 ARMS at c707610d, including covex-v6-base, covex-v6-rules, rung 3, rung 4 and EVERY BASELINE_MATRIX arm. That is a stronger statement than this partial sweep, and it means NO escalation on a moved base or baseline. Only the two rung-2 arms moved, through the id(obs) ALLOCATION sensitivity and not through any fix."
+ }
 }
