@@ -28,6 +28,19 @@
   - TCP slow start is ignored. **JPEG accuracy was never measured**, so JPEG rows assume unchanged scores.
 - **Network values cited:**
   - 13.6 Mbit/s uplink and 44 ms latency: Ookla H2 2025 US 5G median;
+  - **CORRECTION 2026-11-23, left beside the line above rather than rewriting it.** The line calls
+    13.6 Mbit/s / 44 ms the "Ookla H2 2025 US 5G median". IT IS NOT A US MEDIAN: per Ookla H2 2025
+    those are T-MOBILE's figures, the HIGHEST CARRIER MEDIAN 5G UPLOAD (13.57 Mbit/s) and the LOWEST
+    CARRIER LATENCY (44 ms). So the main operating point is the BEST-PERFORMING US CARRIER, not a
+    typical one, which matters because it is the optimistic end of the range rather than its centre.
+    THE CORRECTED LABEL, to be used everywhere including every figure-data provenance field and
+    README: "uniform 13.6 Mbit/s / 44 ms uplink: best-performing US carrier's 5G median (Ookla H2
+    2025), close to the 12 Mbit/s Bay Area 5G median (Khan et al. 2024)". The MEASUREMENTS are
+    unaffected; only the label was wrong. Also ruled with this correction: TIER 1 UPLINK VALUES COME
+    FROM CITED UPLINK SOURCES, namely this report's own committed sweep (uplink 5 / 12 / 13.6 / 25 /
+    88 Mbit/s, RTT 22 / 44 / 142 ms), EACH WITH ITS SOURCE, and NEVER from the Irish 5G percentiles,
+    which StudyNET-TIER1 established are DOWNLINK (`DL_bitrate`) and whose `UL_bitrate` column is the
+    ACK traffic of a download workload rather than an uplink capacity.
   - 12 Mbit/s: Khan et al. 2024, Bay Area 5G median;
   - 88 Mbit/s: Oslo;
   - 22 ms median and 55–65 ms tail: the ICCCN paper.
@@ -371,4 +384,3 @@
 - **Delivery:** network delivery makes the cloud alarm later still unless frames are compressed and the uplink is fast. With raw or PNG frames at N ≥ 3, typical 5G uplinks make 32B's delivered alarm later than the device's.
 - **Escalation:** flow-gated escalation detects more events than confidence-gated escalation in several cells. But random escalation also beats confidence-gated escalation in some cells, so this does not identify a good escalation signal. It mainly shows that gating on 4B confidence correlates with 32B's own errors.
   - **No best-signal claim is made:** the delivered-time gains over confidence are the assumed signal latency (no 4B call to wait for), and the detection gains come with multiplicity (72 comparisons) and small n.
-
