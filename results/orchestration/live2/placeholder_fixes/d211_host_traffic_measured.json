@@ -1,0 +1,42 @@
+{
+ "_what": "TASK-3 (D211) PREPARATORY MEASUREMENT: how much host-tier traffic the engine actually carries in the committed rung-3 ladder cells, read from their own `host_counters_d211.log`. This does NOT compute or validate signal (a); it establishes that the VALIDATION TARGET exists, is rich, and is not vacuous, which the D211 pre-registration previously recorded as BLOCKED for want of a committed counter series.",
+ "_register": "OBSERVED from committed `host_counters_d211.log` in the four `covex-v6-fair-final_n16_s{4,5,6,7}_1200s_h27_3t_L3_epg_rq30` cells. These are ENGINE-REPORTED AGGREGATE counters, not per-request attribution: D211 records that per-request host hits are folded into `cached_tokens`, which is the whole reason signal (a) has to infer them.",
+ "measurement_per_1200s_cell": {
+  "s4": {
+   "host_load_GB": 487.8,
+   "host_store_GB": 102.5,
+   "load_over_store": 4.8,
+   "cpu_cache_use_max": 0.223,
+   "samples": 118
+  },
+  "s5": {
+   "host_load_GB": 506.7,
+   "host_store_GB": 100.0,
+   "load_over_store": 5.1,
+   "cpu_cache_use_max": 0.072,
+   "samples": 118
+  },
+  "s6": {
+   "host_load_GB": 452.0,
+   "host_store_GB": 109.5,
+   "load_over_store": 4.1,
+   "cpu_cache_use_max": 0.094,
+   "samples": 118
+  },
+  "s7": {
+   "host_load_GB": 454.9,
+   "host_store_GB": 81.6,
+   "load_over_store": 5.6,
+   "cpu_cache_use_max": 0.143,
+   "samples": 118
+  }
+ },
+ "*** WHAT THIS SHOWS ***": "THE HOST TIER CARRIES 452 to 507 GB OF RELOADS PER 1,200 s CELL, 4.1x to 5.6x MORE THAN IT STORES, AND THE POLICY CANNOT SEE ANY OF IT. Loading four to six times what is stored means the same host-resident prefixes are re-read repeatedly. That is D211's premise confirmed with a magnitude: 'reload happens natively but is unobserved by the policy', and the size of the lever host-warm pricing would act on. Consistent across all four seeds, so it is not one cell's artefact.",
+ "consequence_for_the_pre_registered_bar": "THE PER-WINDOW BAR IS NOT VACUOUS. The bar (prereg `agreement_bar`) asks for attributed host tokens within 20 percent of the aggregate delta in at least 80 percent of WINDOWS WITH ANY HOST ACTIVITY, over 10 s windows. With 118 samples per cell at about a 10 s cadence and 101 distinct values of `kv_offload_load_bytes_total` in s4 alone, windows with host activity are abundant. Had the counters been flat, the per-window test would have had an empty denominator and any 'pass' would have been vacuous - which is why this was checked BEFORE computing anything.",
+ "what_is_STILL_BLOCKED_and_why": {
+  "signal (a)": "NOT COMPUTABLE YET, and not for the reason the prereg gave. The prereg recorded `signal_a_validate` BLOCKED because no committed host-counter series existed; THAT BLOCKER IS NOW GONE. The remaining blocker is the JOIN: signal (a) needs the belief's predicted GPU-resident prefix per request, which item 3 added at `56a73293`, and these four ladder cells RAN BEFORE IT (`d211_signal_a_available.json` records `gpu_tokens_by_session` empty on all 16,840 decision rows of a pre-item-3 cell). So the cells WITH the counters lack the prefix, and the cells WITH the prefix - the `RUNG3_KV05R` kv0.5r cells started 09:51 today, on a tree where `56a73293` IS an ancestor of `a43ad7f7` - have not landed. BOTH HALVES NOW DEMONSTRABLY EXIST; they are not yet in one cell.",
+  "signal (b)": "its INPUT is now available (the counter series), which the prereg recorded as BLOCKED. But D211 specifies signal (b) as deltas of the aggregate counter around each request AT LOW CONCURRENCY, and these are 16-device cells. So the input exists and the CONDITION does not; a low-concurrency cell would be needed, and none is queued."
+ },
+ "_what_is_NOT_claimed": "nothing here validates the belief, computes signal (a) or (b), or licenses switching host-warm pricing on. Per the prereg, host-warm pricing stays OFF unless a signal passes the bar AND the user switches it on, and `if_neither_passes` requires KEEPING THE BELIEF AS IS and recording that host reload is native but unobserved, with no signal stretched to reach the bar and the bar not moved.",
+ "_my_own_near_miss_recorded": "my first probe reported 'no vllm:*offload* keys found in the log' - FALSE. The regex required whitespace between key and value where the log uses `=`. The raw lines, which I had printed first, plainly showed the keys, and that contradiction is what caught it. A broken probe reporting an absence is the pattern this project keeps finding; printing the raw bytes beside the parse is what separates 'not there' from 'my reader missed it'."
+}
