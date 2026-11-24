@@ -605,6 +605,22 @@ LOOKING FOR SOMETHING TO DO; READ THIS LIST FIRST. ***
   AT ANY POINT, and the sweep's evidence SURVIVES A DRIVER DEATH even if the result file is never
   written. *** Group the log by `arm`, require `digest` AND `rows` equal between the `A` and `B` rows, and
   escalate on any pair that differs: item 3 is LOGGING ONLY, so every pair MUST match.
+  *** THE EXPECTED ARM COUNT IS 24, NOT 20, AND THE LIST IS NOT ALPHABETICAL AT THE END. DO NOT READ AN
+  ABSENT RESULT FILE AS A DRIVER DEATH BEFORE ALL 24 ARE PAIRED. *** `d213_digest_driver.py:93` takes its
+  set as `list(RUNGS) + list(BASELINES)` when `--arms` is not given: **7 RUNGS** (`covex-v6-base`,
+  `covex-v6-rules`, `covex-v6-state-uo`, `covex-v6-state-uo-c5attr`, `covex-v6-fair-c5attr`,
+  `covex-v6-cf-c5attr`, `covex-v6-cf-pd-c5attr`) and **17 BASELINES**, whose last four are
+  **`kvflow-prefetch`, `cascade-routing`, `device-only`, `v5-rules-2`** - AFTER `warm-all-lru`.
+  **THE TRAP, WHICH I NEARLY WALKED INTO AND CHECKED INSTEAD:** the BASELINES list runs alphabetically
+  from `always-cloud-fcfs` to `warm-all-lru` and THEN STOPS BEING ALPHABETICAL, so a reader who sees
+  `warm-all-lru` logged and 20 arms seen will conclude the sweep is on its LAST arm and that a missing
+  `item3_digests.json` means the driver died at the end. **IT DOES NOT: four arms remain, roughly nine
+  cells, about 25 minutes.** Count the arms against 24 before diagnosing anything.
+  *(`cascade-routing` and `device-only` being in the sweep is correct and not a scoring question: a
+  byte-identity sweep tests NON-INTERFERENCE, and `cascade-routing`'s port-rule exclusion governs whether
+  it is SCORED, not whether item 3 may perturb it.)*
+  **MEASURED AT 02:50 PST: 43 cells, 20 arms seen, 19 fully paired, 0 MOVED, 0 errors, `warm-all-lru`
+  half-done.** Still no escalation.
   **MEASURED THIS WAY AT 2026-11-24 02:20 PST, mid-sweep: 14 arms with both sides done, 0 MOVED, 0
   errors, so no escalation up to that point.** `alone` is False on every cell (loadavg_start 0.39 to
   1.56), which is the known and recorded not-alone caveat and weakens the ALONE claim rather than the
