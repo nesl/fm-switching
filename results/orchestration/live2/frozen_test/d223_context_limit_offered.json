@@ -1,0 +1,52 @@
+{
+ "_what": "D223 (2) REPORT: robot recall questions whose FULL HISTORY exceeds each context limit, per seed, OFFERED (a property of the deterministic trace, identical for every arm). 0.5x limit = 31,472 tokens; 1x limit = 32,768.",
+ "_register": "OBSERVED. Recomputed from the committed trace generator at origin (live2/fleet/trace.py generate_trace) with the committed CELL_ARGS of d170_overlimit.py: 16 devices, ratio 40:40:20, 1200 s, mode A, lh_req, ss2, epg, per-frame upload, reask 30.0 s. The trace is deterministic in the seed, so this is exact, not sampled.",
+ "_positive_control_it_reproduces_the_committed_artefact": "my >32,768 counts and maxima match frozen_test/d170_overlimit.json EXACTLY on all four seeds: 0 / 0 / 0 / 18 over-limit and maxima 26,851 / 26,941 / 26,671 / 52,861 against its committed 'max history 26,671 to 26,941' for s4 to s6 and 18 at s7 with max 52,861. An independent recomputation agreeing with the committed value is the control on this table.",
+ "per_seed": {
+  "s4": {
+   "n": 489,
+   "over_31472": 0,
+   "over_32768": 0,
+   "between": 0,
+   "max": 26851,
+   "max_at_or_below_31472": 26851,
+   "over_25k": 14
+  },
+  "s5": {
+   "n": 483,
+   "over_31472": 0,
+   "over_32768": 0,
+   "between": 0,
+   "max": 26941,
+   "max_at_or_below_31472": 26941,
+   "over_25k": 10
+  },
+  "s6": {
+   "n": 478,
+   "over_31472": 0,
+   "over_32768": 0,
+   "between": 0,
+   "max": 26671,
+   "max_at_or_below_31472": 26671,
+   "over_25k": 6
+  },
+  "s7": {
+   "n": 464,
+   "over_31472": 18,
+   "over_32768": 18,
+   "between": 0,
+   "max": 52861,
+   "max_at_or_below_31472": 26941,
+   "over_25k": 25
+  }
+ },
+ "*** THE RESULT: THE OVER-LIMIT SET IS IDENTICAL AT 1x AND 0.5x ***": {
+  "counts": "s4 0 and 0; s5 0 and 0; s6 0 and 0; s7 18 and 18 (0.5x and 1x respectively)",
+  "questions_falling_BETWEEN_the_two_limits": "ZERO at every seed",
+  "the_gap_is_wide_not_marginal": "at s7 the largest question at or below 31,472 is 26,941 tokens, so there is a 4,531-token GAP between the biggest in-limit question and the 0.5x limit, and the 18 over-limit ones start above 32,768 (up to 52,861). The distribution is empty across the whole band between the two limits, so the identity is structural at this workload rather than a near miss.",
+  "*** CONSEQUENCE FOR THE 0.5x COMPARISON ***": "MOVING TO 0.5x INTRODUCES NO NEW ROBOT CONTEXT REJECTIONS. The over-limit set at 0.5x is the SAME 18 questions as at 1x, all at s7 in robo004 s000, which D176 already excludes from the headline for every arm identically. So the 0.5x robot comparison is NOT confounded by prompt-length rejections: the over-limit set CANCELS between arms exactly as it does at 1x. This is direct support for D223 (1)'s reason for choosing 0.5x over 0.25x.",
+  "and_why_0p25x_would_have_been_different": "the 0.25x limit is about 15,744 tokens, which sits INSIDE the bulk of the distribution, not past its tail: 14 / 10 / 6 / 25 questions per seed already exceed 25,000 tokens alone. At 0.25x the over-limit set would be large AND arm-dependent (an arm's own representation choice decides its prompt length), so it would NOT cancel between arms. Measured support for that at 0.25x: at the same kv0.25 setting and seed, committed cells record 33 errors for confidence-cascade, 14 for eco-llm and 0 for covex-v6-base."
+ },
+ "*** WHAT THIS DOES NOT SAY: THE FIX IS STILL NECESSARY ***": "that the over-limit SET does not change at 0.5x is NOT a reason to leave the hard-coded 32,768 in place. The arms must read the server's configured limit because (a) a feasibility check keyed on 32,768 while the server enforces 31,472 would admit a 31,500-token prompt the engine then rejects, turning a policy decision into an engine error, and NO question needs to be in the 31,472 to 32,768 band for a GROWING history to cross it mid-run; (b) D56 makes capacities inputs, so a hard-coded capacity is wrong independently of whether this workload exercises it; and (c) at any smaller pool the difference is large. The correct reading is that the fix is required for correctness and that its effect on THIS workload's offered robot set at 0.5x is nil.",
+ "_scope": "ROBOT RECALL questions only, which is what was asked. Dashcam episodes (EP-G, about 376 uncached tokens per instant) and single-shot prompts are far below either limit and are not at issue. Counts are OFFERED opportunities, not requests sent: what each arm did with them is a separate per-arm question and D175 governs the scoring (device answer stands)."
+}
