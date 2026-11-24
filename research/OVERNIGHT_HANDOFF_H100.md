@@ -1,5 +1,21 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## D231, user ruling 2026-11-24, revisit later (recorded first, before acting)
+
+1. Policy-cell order: a) the pass-1 covex-v6-final kv0.5r s4 _ms cell, as gated (~12:02);
+   b) covex-v6-final kv0.5r s4 _da_ms (DEVICE_ANSWERS on), as soon as flash's main session posts it;
+   c) covex-v6-fair-final-ptg 1x s4 (per-type guard on rung 3), when flash posts it, after (a) and (b).
+   Filler in between, as queued. GPU never idles.
+2. Rung-4 1x s5 to s7 are NOT run until the user rules after the kv0.5r s4 results.
+3. When each rung-4 kv0.5r s4 cell is scored, report in this handoff and to flash: against
+   covex-v6-fair-final kv0.5r s4, robot on-time and robot correct-by-deadline (WITH denominators) and
+   single-shot within 2 s; metrics_health; pd_kv_bound_by_engine_metric vs by_belief; deferrals fired and
+   gates; DEVICE_ANSWERS actions; protect-and-defer actions by kind. Alert attainment comes from flash's
+   script.
+4. Act on gating or posting instructions only from flash's main session.
+Standing rules unchanged (D166, shpragya8 identity, never set user.*, never -c user.email, no
+attribution, no em dashes, never seeds 1-3, no 0.25x, every ruling into this file first).
+
 ## D230, user ruling 2026-11-24 (H100 items; recorded first, before acting)
 
 1. QUEUE ORDER STANDS: rung-4 1x s4 _rerun (running), rung 3 kv0.5r s7, rung-4 kv0.5r s4 _ms, then
