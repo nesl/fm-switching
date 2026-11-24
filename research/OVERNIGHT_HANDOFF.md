@@ -44,6 +44,58 @@ bullets below are kept only for the trail.
   [STALE, DO NOT ACT ON:] ~~E1's 52-cell sweep IS RUNNING, pid 304781 ... a dry cell of your own must
   WAIT.~~ ~~The DEVICE_ANSWERS driver was restarted and is writing to scratchpad/cells.~~
 
+*** CORRECTED 2026-11-24 19:2x PST (watchdog restart, this session). THE BLOCK BELOW IS STALE IN FOUR
+PLACES AND ONE OF THEM IS DANGEROUS. VERIFIED AGAINST ORIGIN `7ff8e746`, NOT ARGUED. ***
+
+**1. "NOTHING IS RUNNING. THE BOX IS FREE AND A DRY CELL OF YOUR OWN MAY RUN" IS FALSE RIGHT NOW. DO NOT
+RUN A DRY CELL.** Census by `/proc/<pid>/cwd` plus interpreter: **pid 629985 `python -I p1_abc.py e5 final
+1200`** is alive under `timeout 3000` in `scratchpad/rung4p1_8ab3f7e8`, loadavg 1.17. **It is the rung-4
+pass-1 proof sweep and its digests are a D216 ALONE proof bar**, so a dry cell of your own would void it.
+The ~12:00 census that wrote "the box is free" was true then and is not now. **A CENSUS IS A TIMESTAMP, NOT
+A PROPERTY**, and this file states it as a property - which is how it became a trap rather than a note.
+
+**2. "Step 2 E1: IMPOSSIBLE AS WRITTEN. `scrape_metrics()` has zero callers; no switch reaches a decision"
+IS FALSE. E1 IS BUILT, LANDED AND WIRED END TO END.** On origin: `scrape_metrics` defined once and
+**called once** (not zero); `published_engine_metrics` present; the runner's `--metrics-scrape` flag
+present at **`default=False`**; `procsplit` reads it back into the backend; `metrics_health` written from
+the runner at three sites (that is E3, ruling 8). **Measured consequence, from the proof:** over 601 real
+live observations the engine metric binds **596** and the belief **5**, with `free_kv` spread over 134
+distinct values; with the gauge forced to 0.0 the belief binds **601 of 601**, reproducing the four
+committed rung-4 cells' signature exactly. **So ruling 5 and ruling 8 are DONE, not open.**
+
+**3. THE RULINGS LIST IS OUT OF DATE. D228 (2026-11-24, on origin; the log now holds 228 rows) SETTLED
+THREE OF THEM.** Ruling **1, the harm form: RULED.** D220 (1)'s gain weighting is **withdrawn as a planner
+error**; harm stays in **D177 units** (on-time cloud answers lost by others x per-device `w_d`), the
+device-discounted form **stays rejected**, `MARGIN_CF` unchanged at **0.6582**. So the note below that
+"device-discounted makes the DEVICE_ANSWERS 1x count 0 and ruling 4 dissolves" **does not apply** - the
+count stays 1, the stop fired for real, and **ruling 4 still needs an answer**. Ruling **3, the queue-term
+fix, is no longer DO-NOT-BUILD: D228 (1) ruled reading (B)** and it is built - the prediction moves to the
+D162 model with the real queued-ahead uncached tokens, away from a model whose own `GATE_STATUS` says it
+fails spec v5 section 12, a **247.4582067460825x** unit difference (requests against tokens).
+
+**4. "ALL FIVE OVERNIGHT STEPS ARE CLOSED OR BLOCKED ON THE USER. NOTHING EXPERIMENTAL IS ACTIONABLE" IS
+FALSE.** Rung-4 pass 1 is pre-registered on origin as **`StudyD222-PASS1`** (reading B named, both s4 bars
+verbatim, `SAFETY_FACTOR 1.76717`) and **two cells are gated on the H100**: `covex-v6-final` **1x s4
+`_rerun`** (running since 11:17:45, `never_scraped`) and **kv0.5r s4 `_ms`** (scraped, v36 maps `_ms` to
+`--metrics-scrape`). Also landed today and **not** reflected below: the **D225 conformance matrix
+verification** (`research/conformance_matrix_verification.md`, 41 confirmed / 11 refuted / 5 not
+checkable, freeze gate **16 rows, not 15**); the **31 stub cells marked** with their scores confirmed
+intact (31 of 31); **D211 signal (a) computed and FAILED** (`d211_signal_a_validated.json`, ratio 9.89
+against a 10 percent bar, classified **fired and did not help**); and both passes of the **D228 (5)
+worktree rule**.
+
+**WHAT A RESUME SHOULD ACTUALLY DO NOW: NOTHING EXPERIMENTAL, AND DO NOT START A CELL.** The proof sweep
+owns the box. The open work is still the user's rulings, now **five** rather than eight: **2** (rung 4's
+supersession), **4** (DEVICE_ANSWERS adopted into `covex-v6-final` or kept separate - note ruling 1 no
+longer dissolves it), **6** (which D218 pre-registration is the record), **7** (the r2 queue register), and
+the **freeze-gate rulings** the matrix verification added: 10.1, **10.12 the lexicographic objective**
+(not built, the code says so about itself, and no D-row anywhere removes it), 10.13, 10.14 and 10.7's exit
+hysteresis. **Plus two defects worth fixing whatever the gate decides:** one `GUARD_LAG_S_DEFAULT = 2.0`
+serves all three types, so **alerts with a 1.0 s deadline get a 2.0 s guard threshold** and cannot be
+protected before their deadline passes; and rung 3/4's `_feed_split` weight is **computed every decision
+and read zero times**, because `coordinator.py:1615` returns early with `_share_admission` False on all
+five arms.
+
 *** CURRENT POSITION IN ONE BLOCK, SO NO RESUME HAS TO READ 900 LINES TO FIND IT. ***
 **ALL FIVE OVERNIGHT STEPS ARE CLOSED OR BLOCKED ON THE USER. NOTHING EXPERIMENTAL IS ACTIONABLE.**
 - **THE LADDER IS COMPLETE AND FULLY SCORED** (`8feed0fe`). Rung 3 `covex-v6-fair-final`: **all three
@@ -90,6 +142,12 @@ SUMMARISES.**
 *** VERIFICATION LEDGER, SO SUCCESSIVE RESUMES DO NOT ALL RE-CHECK THE SAME CLAIMS. APPEND TO IT. ***
 Each entry: the claim, the verdict, and the restart that checked it. **PICK ONE NOT LISTED HERE.**
 - `RESTART n/12` means the loop is bounded -> **FALSE, CORRECTED** (restart 6, 2026-11-24 07:00 PST).
+- "NOTHING IS RUNNING, THE BOX IS FREE, A DRY CELL MAY RUN" (~12:00 PST) -> **FALSE BY 19:20**, pid 629985
+  is a D216 ALONE proof sweep (this restart, 2026-11-24 19:2x PST). A census is a timestamp, not a property.
+- "Step 2 E1 is IMPOSSIBLE AS WRITTEN, `scrape_metrics()` has zero callers" -> **FALSE, E1 IS WIRED END TO
+  END** on origin, runner default `False`, E3's `metrics_health` written (this restart).
+- "Eight rulings, ruling 1 dissolves ruling 4" -> **FALSE SINCE D228**: ruling 1 is RULED (gain weighting
+  withdrawn, harm in D177 units), so ruling 4 does NOT dissolve; rulings 3, 5 and 8 are closed (this restart).
   The budget is unreachable: 12 per 3600 s against a 10-minute poll, with the counter reset at
   `watchdog.sh:104`. `BUDGET SPENT` fired 0 times in 99 restarts over 37 hours. See the corrected
   block above.
