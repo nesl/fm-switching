@@ -1,0 +1,33 @@
+{
+ "_what": "BYTE-IDENTITY PROOF for a DOC-ONLY correction to two lines of `experiments/orchestration/live2/cstate.py`'s state-table, which is a LIVE-PATH file. Run because a COMMENT-ONLY edit on this project was already MEASURED to move an unfixed rung-2 arm by 85 decisions through `id(obs)` allocation order feeding a dict iteration, so a documentation fix to a live-path file is NOT self-evidently free.",
+ "design": "A/B on TODAY'S tree, both from `git archive` of the SAME literal sha, differing in EXACTLY one file by `diff -rq` over the whole tree, and that file's diff contains NO CODE LINES - table text only, verified by filtering the diff for lines that are not table rows. *** THE A/B DESIGN WAS CHOSEN DELIBERATELY OVER THE CHEAPER ONE-CELL CHECK: *** comparing a single fixed-tree cell against the posted digest would have conflated MY change with hit 7 (`c511050`) and item 3 (`56a73293`), both of which landed after that digest was posted.",
+ "recipe": "`cf_pd_one_cell.py --arm covex-v6-final --seed 4 --n 16 --run-s 1200 --cutoff-off`, the committed comparable recipe; one dry cell per process per D187; interpreter /home/pragya/miniconda3/envs/fmtk/bin/python",
+ "result": {
+  "A (origin unmodified)": {
+   "digest": "57bed6ace2eb07d1",
+   "rows": 14509
+  },
+  "B (both doc lines corrected)": {
+   "digest": "57bed6ace2eb07d1",
+   "rows": 14509
+  },
+  "identical": true,
+  "verdict": "THE DOC FIX IS DECISION-NEUTRAL. 0 differing decisions."
+ },
+ "*** AND A IS A POSITIVE CONTROL THAT SETTLES SOMETHING WIDER ***": "A reproduced `57bed6ace2eb07d1` / 14,509, which is EXACTLY the POSTED committed rung-4 s4 value. So TODAY'S TREE - with hit 7 and item 3 both landed - STILL REPRODUCES THE POSTED CELL, which confirms BOTH of those changes decision-neutral for rung 4 from an independent direction. An A that had failed to reproduce the posted value would have made the B comparison unreadable, which is why the control is reported before the comparison.",
+ "ALONE": "census by WHAT PROCESSES ARE, not by name: ZERO live2 python under the repo or any scratchpad before each cell; loadavg 0.22 before A and 0.85 before B. Magnitudes recorded rather than collapsed to a boolean.",
+ "what_the_two_lines_said_and_why_both_halves_were_wrong": {
+  "line_16_queued_by_class": "said the in-flight bookkeeping is 'cross-checked against `/metrics`'. IT IS NOT: `scrape_metrics()` has ZERO CALLERS and `metrics()` - the only method `coordinator.py:489` calls - does not merge it, so NOTHING in any live2 cell is cross-checked against `/metrics`.",
+  "line_17_gpu_kv_fraction": "said 'the server's `vllm:gpu_cache_usage_perc`'. BOTH HALVES MISLEADING. (a) THE ENGINE DOES NOT EMIT THAT KEY: the committed raw scrape `frozen_test/engine_probe_hit26/metrics_scrape_h100.txt` has `vllm:kv_cache_usage_perc` THREE times and `vllm:gpu_cache_usage_perc` ZERO times. (b) it is not 'the server's' in any cell run to date, because nothing calls the scraper, so the field is IDENTICALLY 0.0 live as well as dry."
+ },
+ "*** A SECOND DEFECT I SUSPECTED AND DISPROVED, recorded because reporting it would have been wrong ***": "`cstate.py:697` reads `self.metrics.get(\"vllm:gpu_cache_usage_perc\", 0.0)` - the key the engine does NOT emit - which looked like a SECOND defect in series that would make the pending metrics-wiring ruling INSUFFICIENT ON ITS OWN. IT IS NOT A DEFECT. `adapter.py:204-205` define `KV_KEYS = (\"vllm:gpu_cache_usage_perc\", \"vllm:kv_cache_usage_perc\")` with the former as `KV_CANONICAL_KEY`, aliasing counted by `n_kv_key_aliased`, and `adapter.py:18` states the gauge is read 'under whichever name the engine emits ... and republished under the older name SO NO READER CHANGES'. So `cstate.py:697` is the INTENDED CANONICAL READER, correct BY DESIGN, and **WIRING THE LINK IS SUFFICIENT ON ITS OWN**.",
+ "_what_is_NOT_changed": "DOC LINES ONLY. No code line is touched. `metrics()`, `scrape_metrics()` and `run_live2_real.py` are untouched; wiring the metrics link remains a PENDING USER RULING and under D209 would be a supersede-plus-rerun. The queue-term defect is NOT built, per the user's 'costed, NOT built' and the handoff's note that D187 (2)'s fix-without-approval is SUPERSEDED for it.",
+ "_provenance": {
+  "git_commit": "see the commit that adds this file",
+  "script": "cf_pd_one_cell.py",
+  "model": "n/a (dry simulation)",
+  "device": "flash",
+  "n": 2,
+  "timestamp": "2026-11-24"
+ }
+}
