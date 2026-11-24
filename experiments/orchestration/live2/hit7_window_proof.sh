@@ -24,7 +24,7 @@ run() {   # tree label script args...
     || echo "{\"tree\":\"$t\",\"label\":\"$lab\",\"error\":\"no json\"}" > $f
 }
 for t in before after; do run $t probe_simplestream $SP/$t/experiments/orchestration/live2/hit7_window_probe.py simplestream; done
-ARMS="simplestream mooncake llf eco-llm confidence-cascade lmcache attentionstore-prefetch kvflow-prefetch b7-edf-feasibility always-cloud-fcfs edf streamscout querystream-proactive warm-all-lru covex-v6-base covex-v6-rules"
+ARMS="${H7_ARMS:-simplestream mooncake llf eco-llm confidence-cascade lmcache attentionstore-prefetch kvflow-prefetch b7-edf-feasibility always-cloud-fcfs edf streamscout querystream-proactive warm-all-lru covex-v6-base covex-v6-rules}"
 for a in $ARMS; do for t in before after; do run $t digest_$a $SP/$t/experiments/orchestration/live2/cf_pd_one_cell.py --arm $a --seed 4 --cutoff-off; done; done
 jq -s --arg sha $SHA '
   def get(t; l): map(select(.tree == t and .label == l)) | .[0];
