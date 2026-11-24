@@ -157,5 +157,11 @@
       "missing": 0,
       "cloud_citing_outcomes": 9370
     }
-  ]
+  ],
+  "by_deadline_check": {
+    "method": "by_deadline is robot-only, so only MISSING outcomes of ROBOT devices can move it; for each cell with MISSING > 0: robot-only missing / robot_pool_n against |by_deadline - device-only floor|",
+    "result": "15 of 16 cells have ZERO robot-only missing: by_deadline and its side of the floor are UNAFFECTED. The one exception is eco-llm 1x s4: 1 robot outcome missing, exposure 1/132 = 0.008, by_deadline 0.371 EXACTLY AT its floor 0.371, so one undetected refusal could move it from at-floor to just above. That cell is already excluded as a comparator (11-22 code, 5,559 tok/s).",
+    "on_time_note": "on-time counts can be inflated by at most the per-cell MISSING (max 32 of ~8.5k cloud-citing outcomes); report beside, do not adjust (the refused subset is unknowable: the rows that would identify it are the absent rows)"
+  },
+  "read_site_dependency": "score.py refused_request_ids (:510-522, used at :542-549) reads request.jsonl, a log whose write path can drop rows and which nothing checks; the robust form keys the refusal test on outcomes, or asserts in load() that every cloud_payload.request_id resolves (a wiring change, for the user to rule on)"
 }
