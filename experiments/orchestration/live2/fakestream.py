@@ -54,6 +54,10 @@ class _State:
         self.bytes_in = 0
         self.max_concurrent = 0
         self.running = 0
+        # Test-only (H100 2026-11-24): seconds between the first content chunk and the end of the
+        # stream, so a harness proof can hold an ANSWERED request open past finish (the r10175
+        # case). 0 = the committed behaviour (both chunks back to back).
+        self.tail_s = 0.0
         self.read_s = 0.0
 
 
@@ -137,6 +141,8 @@ class Handler(BaseHTTPRequestHandler):
                                       prompt_tokens_details=dict(cached_tokens=0))
                                  if i else None))
                 self._chunk(("data: " + json.dumps(ch) + "\n\n").encode())
+                if i == 0 and st.tail_s > 0:
+                    time.sleep(st.tail_s)
             self._chunk(b"data: [DONE]\n\n")
             self._chunk(b"")
         finally:
@@ -160,7 +166,9 @@ class serve:
     """`with serve(0, ...) as url:` - the same shape as the committed stub's `serve`."""
 
     def __init__(self, port: int = 0, concurrency: int = DEFAULT_CONCURRENCY,
-                 load_pct: int = DEFAULT_LOAD_PCT, scale: float = 1.0) -> None:
+                 load_pct: int = DEFAULT_LOAD_PCT, scale: float = 1.0,
+                 tail_s: float = 0.0) -> None:
+        self.tail_s = float(tail_s)
         self.port = int(port)
         self.concurrency = int(concurrency)
         self.load_pct = int(load_pct)
@@ -171,6 +179,7 @@ class serve:
     def __enter__(self) -> str:
         global STATE
         STATE = _State(self.concurrency, self.load_pct, self.scale)
+        STATE.tail_s = self.tail_s
         self.srv = ThreadingHTTPServer(("127.0.0.1", self.port), Handler)
         self.srv.daemon_threads = True
         self.thread = threading.Thread(target=self.srv.serve_forever, daemon=True)

@@ -396,6 +396,14 @@ def run(a) -> Dict[str, Any]:
         import procsplit as PS
         if a.warm_cache and a.frames_root:
             cfg["warm_refs"] = HF.refs_in_trace(tdir)
+        # Torn-tree guard, the RUNNER-ONLY half (source_agreement.py): a runner that builds a cfg
+        # without the context limit while a server is configured refuses here, before launch. This
+        # is the half the runner/child overlap cannot see (run_live2_real.py is runner-only).
+        if cfg.get("server_url") not in (None, "none") and cfg.get("context_limit_tokens") is None:
+            raise SystemExit("PRE-FLIGHT: a server is configured but the cfg carries no "
+                             "context_limit_tokens: STOP (D223 (2), torn-tree guard)")
+        import source_agreement as SA
+        cfg["source_runner"] = SA.loaded_repo_files()   # hashed immediately before the launch
         sr = PS.SplitRun(cfg, kind=a.server_kind)
         br = sr.__enter__()
         try:
@@ -407,6 +415,19 @@ def run(a) -> Dict[str, Any]:
         finally:
             sr.__exit__()
         res = dict(br.stats())
+        # The child writes its own coordinator_result.json BEFORE sending it. If the result never
+        # arrived, say WHICH failure it was, and never overwrite the child's file with the parent's
+        # five wire counters (which is how 31 committed cells lost their counts).
+        if "n_requests" in res:
+            res["result_status"] = "received"
+        elif (rdir / "coordinator_result.json").exists():
+            res = dict(json.loads((rdir / "coordinator_result.json").read_text()), **res)
+            res["result_status"] = "parent_closed_before_result"
+        else:
+            res["result_status"] = "child_never_sent_result"
+        sa = res.get("source_agreement") or {}
+        if str(sa.get("verdict", "")).startswith("INVALID"):
+            err = err or f"TornTree: torn_lazy_import {sa.get('torn_lazy_import')}"
     else:
         res, err = _inprocess(a, tdir, rdir, cfg, htok, arm, EM)
     wall = time.time() - t0
@@ -455,20 +476,89 @@ def run(a) -> Dict[str, Any]:
     # D226 (3), fail loud: the request log is complete only if (a) it has one row per submitted
     # request and (b) every outcome's cloud_payload.request_id resolves to a row (abandoned rows
     # included). Either failing sets request_log_complete = false and flags the cell.
+    out["request_log_reconciled"] = _reconcile_delivered(rdir)
     out["request_log"] = rl = _request_log_check(rdir, res.get("n_requests"))
     if not rl["request_log_complete"]:
         out["flag"] = "REQUEST_LOG_INCOMPLETE"
         print(f"*** REQUEST_LOG_INCOMPLETE: {json.dumps(rl)}", file=sys.stderr, flush=True)
+    if a.split:
+        out["result_status"] = res.get("result_status")
+        if res.get("result_status") != "received":
+            out["flag_result"] = "COORDINATOR_RESULT_MISSING: " + str(res.get("result_status"))
+            print(f"*** {out['flag_result']}", file=sys.stderr, flush=True)
+        out["source_agreement"] = sa = res.get("source_agreement")
+        if sa:
+            # header.json records what state the cell actually ran in, so the guard's outcome goes
+            # there too (written at start, extended here).
+            hp = rdir / "header.json"
+            hd = json.loads(hp.read_text()) if hp.exists() else {}
+            hd["source_agreement"] = sa
+            hd["result_status"] = res.get("result_status")
+            hp.write_text(json.dumps(hd, indent=1, default=str) + "\n")
+            if sa.get("verdict") != "OK":
+                print(f"*** SOURCE AGREEMENT {sa.get('verdict')}: moved_after_import="
+                      f"{sa.get('moved_after_import')} torn_lazy_import={sa.get('torn_lazy_import')}",
+                      file=sys.stderr, flush=True)
     if a.score and a.calibration:
         out["score"] = _score(tdir, rdir, Path(a.calibration), a.arm)
     (rdir / "cell.json").write_text(json.dumps(out, indent=1, default=str) + "\n")
     return out
 
 
+def _reconcile_delivered(rdir: Path) -> Dict[str, Any]:
+    """User ruling 2026-11-24 (rung 3 kv0.5r s4, r10175): a request whose answer was DELIVERED must
+    never be left without a row or with an `abandoned` one. The child writes real first-token rows
+    for answers it forwarded; this is the backstop for any it could not see. For every outcome with a
+    delivered cloud answer whose request id has no row, or only an abandoned row, a row is written
+    FROM THE OUTCOME with row_source "completed_row_reconstructed": http_status 200, marked
+    http_status_inferred (a delivered answer means the stream returned 200), t_first_token from the
+    outcome's t_cloud_done, token fields None. Counted, never silent."""
+    rq, oc = rdir / "request.jsonl", rdir / "outcomes.jsonl"
+    if not rq.exists() or not oc.exists():
+        return dict(checked=False, reason="request.jsonl or outcomes.jsonl absent")
+    rows = [json.loads(l) for l in rq.read_text().splitlines() if l.strip()]
+    by_id = {r.get("request_id"): i for i, r in enumerate(rows)}
+    n_added = n_replaced = 0
+    ids = []
+    with open(oc) as fh:
+        for line in fh:
+            if not line.strip():
+                continue
+            o = json.loads(line)
+            cp = o.get("cloud_payload")
+            rid = cp.get("request_id") if isinstance(cp, dict) else None
+            if rid is None or o.get("t_delivered") is None:
+                continue
+            i = by_id.get(rid)
+            if i is not None and not rows[i].get("abandoned"):
+                continue
+            row = dict(rows[i]) if i is not None else dict(request_id=rid)
+            row.update(device_id=row.get("device_id") or o.get("device_id"),
+                       opportunity_id=row.get("opportunity_id") or o.get("opportunity_id"),
+                       session_id=row.get("session_id") or o.get("session_id"),
+                       t_first_token=o.get("t_cloud_done"), http_status=200,
+                       http_status_inferred=True, abandoned=False,
+                       row_source="completed_row_reconstructed")
+            if i is None:
+                rows.append(row)
+                by_id[rid] = len(rows) - 1
+                n_added += 1
+            else:
+                rows[i] = row
+                n_replaced += 1
+            ids.append(rid)
+    if n_added or n_replaced:
+        rq.write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in rows))
+        print(f"*** REQUEST LOG RECONSTRUCTED from outcomes: {n_added} added, {n_replaced} "
+              f"abandoned rows replaced: {ids[:10]}", file=sys.stderr, flush=True)
+    return dict(checked=True, reconstructed_added=n_added, abandoned_replaced=n_replaced,
+                reconstructed_ids_first=ids[:10])
+
+
 def _request_log_check(rdir: Path, n_requests: Any) -> Dict[str, Any]:
     """D226 (3): count request.jsonl rows (and abandoned ones) against the submitted count, and
     resolve every outcome's cloud request id against those rows. Reads only this cell's files."""
-    ids, n_rows, n_abandoned = set(), 0, 0
+    ids, n_rows, n_abandoned, abandoned_ids, sources = set(), 0, 0, set(), {}
     rq = rdir / "request.jsonl"
     if rq.exists():
         with open(rq) as fh:
@@ -478,27 +568,37 @@ def _request_log_check(rdir: Path, n_requests: Any) -> Dict[str, Any]:
                 r = json.loads(line)
                 n_rows += 1
                 n_abandoned += bool(r.get("abandoned"))
+                if r.get("abandoned"):
+                    abandoned_ids.add(r.get("request_id"))
+                k = str(r.get("row_source") or "completed")
+                sources[k] = sources.get(k, 0) + 1
                 ids.add(r.get("request_id"))
-    n_ref, unresolved = 0, []
+    n_ref, unresolved, delivered_abandoned = 0, [], []
     oc = rdir / "outcomes.jsonl"
     if oc.exists():
         with open(oc) as fh:
             for line in fh:
                 if not line.strip():
                     continue
-                cp = json.loads(line).get("cloud_payload")
+                o = json.loads(line)
+                cp = o.get("cloud_payload")
                 rid = cp.get("request_id") if isinstance(cp, dict) else None
                 if rid is None:
                     continue
                 n_ref += 1
                 if rid not in ids:
                     unresolved.append(rid)
+                elif rid in abandoned_ids and o.get("t_delivered") is not None:
+                    delivered_abandoned.append(rid)
     rows_match = n_requests is not None and n_rows == int(n_requests)
     return dict(n_requests=n_requests, request_rows=n_rows, request_rows_abandoned=n_abandoned,
                 rows_match_submitted=bool(rows_match), outcome_request_ids=n_ref,
                 outcome_request_ids_unresolved=len(unresolved),
-                unresolved_first=unresolved[:10],
-                request_log_complete=bool(rows_match and not unresolved and rq.exists()))
+                unresolved_first=unresolved[:10], row_sources=sources,
+                delivered_resolving_to_abandoned=len(delivered_abandoned),
+                delivered_abandoned_first=delivered_abandoned[:10],
+                request_log_complete=bool(rows_match and not unresolved and not delivered_abandoned
+                                          and rq.exists()))
 
 
 def _tree_state() -> Dict[str, Any]:

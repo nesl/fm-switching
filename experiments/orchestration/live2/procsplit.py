@@ -111,9 +111,14 @@ class RemoteCoordinator:
     """
 
     def __init__(self, sock: socket.socket, kind: str = "fake",
-                 drain_close_s: float = 30.0) -> None:
+                 drain_close_s: float = 180.0) -> None:
         self.sock = sock
         self.kind = kind
+        # 180 s, not the old undocumented 30 s (H100 2026-11-24): on `finish` the child may still be
+        # working through a backlog of events, then builds its result, writes decision_time, and
+        # closes the HTTP client (aclose up to 30 s + loop join 10 s). In saturated cells 30 s ran
+        # out first: the parent closed, the child never delivered its result, and 31 committed cells
+        # lost n_requests / counts / decision latency. The runner now also flags a missing result.
         self.drain_close_s = float(drain_close_s)
         self._in: "queue.Queue[Any]" = queue.Queue()
         # THE PARENT MUST NEVER BLOCK ON THE WIRE. A child that is busy taking a decision is not
@@ -285,6 +290,16 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
     import run_live2_cell as RC
     from bridge import EmulatorBridge
     from coordinator import Live2Coordinator, Logs
+    import source_agreement as SA
+
+    # Torn-tree guard, case 1 (see source_agreement.py): the files the runner loaded vs the files
+    # this child has loaded, compared where both loaded them; a mismatch raises before the cell runs.
+    # The FULL tree is hashed now so that a module first imported later still has a START hash.
+    sa_start_all = SA.all_repo_py()
+    sa_child_start = SA.loaded_repo_files()
+    sa_rec = (SA.check_start(cfg["source_runner"], sa_child_start)
+              if cfg.get("source_runner") is not None else dict(runner_map="absent from cfg"))
+    sa_rec.update(start_files_n=len(sa_start_all["files"]), start_hash_wall_s=sa_start_all["wall_s"])
 
     rdir = Path(cfg["run_dir"])
     rdir.mkdir(parents=True, exist_ok=True)
@@ -422,9 +437,17 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
         if ev is not None:
             _send_replies([ev])
 
+    # User ruling 2026-11-24 (rung 3 kv0.5r s4): a request whose answer was DELIVERED must never be
+    # written as abandoned. An answer forwarded at first token is delivered, so every such request is
+    # remembered here; if its stream is still open at finish, its row is written from these real
+    # first-token fields instead of as abandoned.
+    first_fwd: Dict[str, Dict[str, Any]] = {}
+
     def _on_first(r) -> None:
         ev = co.answer_on_first(r)
         if ev is not None:
+            first_fwd[str(r.get("request_id"))] = dict(ttft_s=r.get("ttft_s"),
+                                                      http_status=r.get("http_status"))
             _send_first([ev], r.get("t_first_content_wall"))
 
     # THE WIRE-TIME SUBMISSION STAMP (addendum, H100): the emulator's own run clock, read in this
@@ -469,6 +492,11 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
         elif op == "tick":
             replies = br.tick(float(msg["t"])) or ()
         elif op == "finish":
+            # D226 (3): the split path never calls co.run(), so its end drain never ran here and every
+            # request still in flight at finish got NO request.jsonl row. Collect what has finished,
+            # then write the rest as abandoned. No decision follows finish.
+            co._collect(_now_t())
+            co.write_abandoned_requests(first_fwd)
             res = co._result(cpu0, time.time() - t_start)
             res["bridge"] = br.describe()
             res["self_ticks"] = n_self_ticks
@@ -485,6 +513,12 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
             if be is not None:
                 be.close()
             res["memory_pressure"] = _memory_pressure(co.st, _mp_tot)
+            _sa_end_all = SA.all_repo_py()
+            sa_rec.update(SA.check_end(sa_start_all["files"], sa_child_start,
+                                       SA.loaded_repo_files(), _sa_end_all["files"]))
+            sa_rec.update(end_files_n=len(_sa_end_all["files"]), end_hash_wall_s=_sa_end_all["wall_s"],
+                          note=SA.NOTE)
+            res["source_agreement"] = sa_rec
             (rdir / "coordinator_result.json").write_text(
                 json.dumps(res, indent=1, default=str) + "\n")
             with send_lock:

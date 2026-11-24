@@ -513,24 +513,60 @@ class Live2Coordinator:
                 time.sleep(0.01)
             # D226 (3): every request the drain gives up on is WRITTEN, marked abandoned, instead of
             # vanishing. This runs after the decision loop has ended, so no decision can depend on it.
-            for fut, sub in self.futures:
-                try:
-                    fut.cancel()
-                except Exception:                                    # noqa: BLE001
-                    pass
-                self.counts["requests_abandoned_at_end"] += 1
-                if self.logs is not None:
-                    self.logs.request.write(SC.RequestRecord(
-                        request_id=sub.request_id, decision_id=sub.decision_id,
-                        device_id=sub.device_id, t_submit=round(sub.sent_s, 6),
-                        t_first_token=None, t_done=None, prompt_tokens=None, cached_tokens=None,
-                        cache_path=None, cached_fraction=None, output_tokens=None,
-                        http_status=None, cache_salt=sub.cache_salt, session_id=sub.session_id,
-                        opportunity_id=sub.opportunity_id, mm_uuids=list(sub.mm_uuids),
-                        traffic_mix=dict(sub.traffic_mix), abandoned=True))
-                    self.counts["request_rows_written"] += 1
-            self.futures = []
+            self.write_abandoned_requests()
         return self._result(cpu0, time.time() - wall0)
+
+    def write_abandoned_requests(self, first_forwarded: Optional[Dict[str, Dict[str, Any]]] = None
+                                 ) -> int:
+        """D226 (3): write one request.jsonl row for every request still in flight, and empty the
+        in-flight list. Called at the end of `run()` (in-process cells) AND by the split child's
+        `finish` handler (procsplit), which never calls `run()`: before this was a method, the split
+        path, i.e. every live cell, still dropped these rows. After the decision loop has ended in
+        both callers, so no decision can depend on it.
+
+        User ruling 2026-11-24: a request whose answer was DELIVERED is never written as abandoned.
+        `first_forwarded` maps request_id -> the real first-token fields (ttft_s, http_status) of an
+        answer already forwarded at first token; such a request gets a row with those fields,
+        `abandoned` False and `row_source` "first_token_forwarded_stream_unfinished". Only a request
+        with no delivered answer is `abandoned`. Returns the number of abandoned rows."""
+        first_forwarded = first_forwarded or {}
+        n = 0
+        for fut, sub in self.futures:
+            try:
+                fut.cancel()
+            except Exception:                                    # noqa: BLE001
+                pass
+            ft = first_forwarded.get(str(sub.request_id))
+            if ft is not None:
+                self.counts["requests_first_token_unfinished_at_end"] += 1
+                ttft = ft.get("ttft_s")
+                rec = SC.RequestRecord(
+                    request_id=sub.request_id, decision_id=sub.decision_id,
+                    device_id=sub.device_id, t_submit=round(sub.sent_s, 6),
+                    t_first_token=(round(sub.sent_s + float(ttft) * self.speed, 6)
+                                   if ttft is not None else None),
+                    t_done=None, prompt_tokens=None, cached_tokens=None,
+                    cache_path=None, cached_fraction=None, output_tokens=None,
+                    http_status=ft.get("http_status"), cache_salt=sub.cache_salt,
+                    session_id=sub.session_id, opportunity_id=sub.opportunity_id,
+                    mm_uuids=list(sub.mm_uuids), traffic_mix=dict(sub.traffic_mix),
+                    abandoned=False, row_source="first_token_forwarded_stream_unfinished")
+            else:
+                n += 1
+                self.counts["requests_abandoned_at_end"] += 1
+                rec = SC.RequestRecord(
+                    request_id=sub.request_id, decision_id=sub.decision_id,
+                    device_id=sub.device_id, t_submit=round(sub.sent_s, 6),
+                    t_first_token=None, t_done=None, prompt_tokens=None, cached_tokens=None,
+                    cache_path=None, cached_fraction=None, output_tokens=None,
+                    http_status=None, cache_salt=sub.cache_salt, session_id=sub.session_id,
+                    opportunity_id=sub.opportunity_id, mm_uuids=list(sub.mm_uuids),
+                    traffic_mix=dict(sub.traffic_mix), abandoned=True, row_source="abandoned")
+            if self.logs is not None:
+                self.logs.request.write(rec)
+                self.counts["request_rows_written"] += 1
+        self.futures = []
+        return n
 
     def _epoch(self, t: float, epoch: str) -> None:
         # D100: the hook is refreshed once per decision period, immediately before the

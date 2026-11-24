@@ -390,6 +390,13 @@ class RequestRecord:
     exc_repr: Optional[str] = None
     exc_after_s: Optional[float] = None
     conn_reused: Optional[bool] = None
+    # How a row came to exist when it was not written by normal completion (None for those):
+    # "abandoned" (in flight at finish, NO delivered answer); "first_token_forwarded_stream_unfinished"
+    # (answer delivered at first token, stream still open at finish; real first-token fields);
+    # "completed_row_reconstructed" (written by the runner from outcomes.jsonl for a delivered answer
+    # that had no row, user ruling 2026-11-24; http_status_inferred is then True).
+    row_source: Optional[str] = None
+    http_status_inferred: bool = False
 
 
 @dataclass
