@@ -1,0 +1,25 @@
+{
+ "_what": "ADJUDICATION of the H100's 10:15 STOP AND ESCALATE: `covex-v6-fair-final` s4 at kv0.5r ran VALID (0 errors, pool 31,488, limit 31,472) but the D226 (3) scorer REFUSED it on MISSING = 1, leaving a POLICY CELL UNSCORED and the rung-3 0.5x list held. *** VERDICT: SCORE THE CELL. MISSING = 1 HERE CANNOT HIDE A REFUSAL. ***",
+ "_register": "OBSERVED by A6000 from the cell's own committed `outcomes.jsonl.gz` and `request.jsonl.gz` at origin. Not re-run, not inferred from the H100's report.",
+ "the_numbers": {
+  "outcomes": 12253,
+  "request_rows": 10174,
+  "cloud_citing_outcomes": 7646,
+  "MISSING": 1
+ },
+ "the_one_missing_outcome": {
+  "request_id": "r10175",
+  "t_cloud_done": 1199.962219,
+  "t_delivered": 1199.984395,
+  "device_id": "asst001",
+  "query_type": "assistance",
+  "d144_failed_request": null,
+  "cloud_payload.answer": null
+ },
+ "*** WHY IT CANNOT BE AN UNDETECTED REFUSAL, STRUCTURALLY RATHER THAN BY JUDGEMENT ***": "A REFUSED REQUEST CANNOT HAVE `t_cloud_done` SET. `score.py`'s refusal test is a non-200 status, or no status with neither token field: in every case GENERATION NEVER COMPLETES, so no completion stamp exists. `r10175` HAS one, at 1199.962 s of a 1,200 s cell - it completed about 38 ms before cutoff and was delivered 22 ms later. **So its completion is independently evidenced in the OUTCOMES log, with no reference to `request.jsonl` at all.** The missing row is exactly the set `refused_request_ids` cannot see, and exactly the case where it does not need to see it, because another file already answers the question.",
+ "the_cause_is_a_KNOWN_defect_not_a_new_one": "the abandoned-row write lives in `Live2Coordinator.run()`'s end drain, which the SPLIT path never reaches (split mode is the default for every live cell), so a request still streaming at finish gets no row. `r10175` is precisely that. This is the writer gap the H100 itself diagnosed and is fixing in the procsplit commit, surfacing in a cell that ran on `b8001001`'s CHECK but before the WRITER FIX. **The check is working; the REFUSAL is the miscalibrated part.**",
+ "the_bound_on_this_cell": "ONE ASSISTANCE QUESTION OF 356, which moves the assistance fraction by 0.28 pp against a 90 percent bar, so it cannot flip check 3. **ROBOT AND ALERT ARE UNTOUCHED**: the missing row belongs to `asst001`, so neither the robot-retention check nor the alert-attainment check can be affected at all. Report the bound beside the number and never adjust it into the result, as ruled for the 31 instrumentation-lost cells.",
+ "THE_SCORER_REFINEMENT_THAT_ENDS_THIS_CLASS_OF_FALSE_REFUSAL": "D226 (3) permits either keying on the outcomes log OR failing loud when an outcome's request id is absent. The first is the better half: **REFUSE ONLY WHEN A MISSING OUTCOME'S DELIVERY IS NOT INDEPENDENTLY EVIDENCED - that is, when it has NO `t_cloud_done`.** An outcome WITH a completion stamp is a known-completed request whose log row did not land. An outcome WITHOUT one, counted as delivered on the strength of a payload alone, is the only case that could be hiding a refusal and deserves the hard stop. That splits one verdict into the two facts it currently merges, costs one field read, and would have scored this cell automatically.",
+ "_what_is_NOT_claimed": "this does not weaken D226 (3), reinterpret D175, or license scoring any cell with an unevidenced MISSING outcome. It adjudicates ONE cell on ONE named request, and proposes a discriminator for the general case. Whether to change the scorer mid-ladder or record a declared override for this cell is the user's call; what should not stand is a VALID policy cell left unscored over one in-flight assistance request, when the rung-3 0.5x result is what the ladder exists to produce.",
+ "_why_this_is_in_the_repo_rather_than_a_message": "the H100 session was churned away by the watchdog restart loop (`ops/watchdog.log` shows STALE-and-restart cycles every ~10 minutes) and is unreachable, as was a peer session that asked a question earlier today and restarted before it could be answered. A claim in a message dies with the session; a claim in the repo does not."
+}
