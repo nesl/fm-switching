@@ -777,6 +777,23 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
   md5, with NOTHING importing it and `run_live2_real.py` on origin still at ZERO occurrences of
   `figure_instrumentation`. COMMITTING A PATCH IS NOT LANDING THE WIRING, and storing it as `.patch`
   rather than `.py` is what keeps it out of an import or a glob.
+- *** TEXT ABOUT A PAST STATE READS AS A PRESENT STATE. THREE INSTANCES TODAY, THREE DIFFERENT
+  CARRIERS, AND THE THIRD HAD THE CORRECTION ON THE PRECEDING LINE. *** Collect them, because the
+  carrier changes and the error does not:
+  **(1) A CODE COMMENT.** `cstate.py:138` says `desired_tier` had "TWO WRITES and NO READ"; the reads
+  are twenty lines below at `:527` and `:530`. I seeded two agent briefs with the stale claim.
+  **(2) A STATUS STRING.** `v5/cf_cost.py`'s `GATE_STATUS` describes the model as FAILING spec v5
+  section 12 - true of that model, while the model that PASSED (D162, per D168) lives in a different
+  file under a different key. The string is accurate and the conclusion drawn from it was not.
+  **(3) A WITHDRAWN NOTE, WITH ITS OWN WITHDRAWAL DIRECTLY ABOVE IT.** `RUNG3_KV05R_CELLS` carries
+  "*** CORRECTION 2026-11-24: NOTES (a) AND (b) BELOW ARE WITHDRAWN. RUNG 3 **DOES** ENFORCE..." at
+  line 38, and an agent quoted notes (a) and (b) as current, concluding rung 3 does not enforce the
+  context limit and asking for a user ruling on a non-problem. The withdrawal was ONE LINE AWAY.
+  **THE RULE: when a file tells you a mechanism is absent, broken or superseded, READ UPWARD AND
+  DOWNWARD BEFORE QUOTING IT, AND PREFER THE CODE OVER THE PROSE.** A read site settles a write-only
+  claim; a passing gate settles a status string; a withdrawal settles a note. And when you WRITE a
+  withdrawal, put it where a quoter cannot miss it: strike the withdrawn text or move it below the
+  correction, because "see the correction above" is exactly what a reader skips.
 - *** A FIXED DEFECT WHOSE OLD DESCRIPTION SURVIVES IN A CODE COMMENT WILL BE RE-REPORTED FOREVER.
   I DID IT TWICE AND SEEDED TWO AGENT BRIEFS WITH IT. *** `cstate.py:138` says, in the code,
   "`desired_tier` was declared here with TWO WRITES and NO READ anywhere in live2". **THAT COMMENT IS A
