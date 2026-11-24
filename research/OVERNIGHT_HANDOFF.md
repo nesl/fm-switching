@@ -29,11 +29,11 @@ process census at 22:40, so no resume needs to re-derive it. ***
   the window elapses (`if [ $((now - first)) -gt $WINDOW_S ]; then first=$now; count=0; fi`). The poll
   fires every TEN MINUTES, so it can only ever reach **6 restarts per hour against a budget of 12**:
   **THE GUARD IS STRUCTURALLY UNREACHABLE.** Measured rather than argued: `BUDGET SPENT` has fired
-  **0 times**; the log holds **108 RESTART lines** (re-counted restart 15) spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
+  **0 times**; the log holds **109 RESTART lines** (re-counted restart 16) spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
   about 37 hours; and the counter histogram shows it reset to `1/12` **18 times**, never exceeding
   `7/12`. So a resume must NOT read `RESTART n/12` as a countdown to a stop. **IT WILL KEEP SPENDING
   ABOUT SIX SESSIONS AN HOUR, INDEFINITELY, UNTIL THE USER STOPS THE `fmsw-overnight` WATCHDOG OR
-  ANSWERS THE RULINGS.** **108 sessions have been spent so far** (re-counted restart 9, 07:40 PST; `BUDGET SPENT` still 0). Stopping it is the USER'S call and outside
+  ANSWERS THE RULINGS.** **109 sessions have been spent so far** (re-counted restart 9, 07:40 PST; `BUDGET SPENT` still 0). Stopping it is the USER'S call and outside
   what this file authorises, so do not touch it; the correct action is to say so plainly in the reply,
   which is now this file's standing instruction for every further resume. DO NOT read the restarts as evidence that anything broke, and do not go
   hunting for the crash. Each restart does cost a full session, so leave this file accurate.
@@ -168,6 +168,36 @@ Each entry: the claim, the verdict, and the restart that checked it. **PICK ONE 
   0.5455.** So on this arm family those 35 extra on-time answers bought ZERO correctness. That is the
   on-time-versus-correct distinction again, and it means the 16 answers r2 "costs" should not be assumed
   to carry 16 answers' worth of value either. Both r1 and r2 do beat the original 60 on on-time.
+*** RESTART 16: THE ELEVEN AT-FLOOR BASELINES ARE A GENUINE MEASUREMENT, NOT A DEFECT. VERIFIED
+INDEPENDENTLY FROM THE CELLS, AND THE POSITIVE CONTROL IS DECISIVE. THIS CLOSES THE BIGGEST OPEN RISK TO
+THE FIGURE DATA. ***
+The worry raised earlier was that eleven baselines sit at `by_deadline` = 0.371212 EXACTLY while their
+on-time counts VARY from 0 to 6, which the definition seemed not to allow, and that the alternative was
+the placeholder failure mode where a cloud answer never reaches the metric. **IT IS THE BENIGN
+EXPLANATION, AND IT IS NOW MEASURED PER ARM.** Using `score.robot_rows`'s `source_by_deadline` field,
+which records WHICH answer `by_deadline` actually used:
+  | arm | cloud-sourced rows | of those device-correct | cloud-correct | ***delta*** |
+  | eco-llm | 6 | 2 | 2 | **+0** |
+  | kvflow-prefetch | 6 | 2 | 2 | **+0** |
+  | always-cloud-fcfs | 5 | 2 | 2 | **+0** |
+  | mooncake | 5 | 2 | 2 | **+0** |
+  | lmcache | 3 | 0 | 0 | **+0** |
+  | warm-all-lru | 3 | 1 | 1 | **+0** |
+  | ***`covex-v6-fair-final`*** | ***126*** | 48 | ***82*** | ***+34*** |
+**EVERY AT-FLOOR ARM IS EXACTLY +0**: the cloud answers it gets on time are of IDENTICAL correctness to
+the device answers they replace, so the metric cannot move and lands on the floor. **AND THE POSITIVE
+CONTROL IS THE LOAD-BEARING HALF: `covex-v6-fair-final` is cloud-sourced on 126 of 132 rows and gains
++34 correct answers**, so the channel demonstrably CAN move `by_deadline`. The placeholder hypothesis is
+therefore RULED OUT, not merely doubted: `source_by_deadline` shows the cloud answer reaching the metric,
+and the gold comparison is live (fair-final's `cloud_letter` spans A:3 B:42 C:16 D:34 E:37 against golds
+A:21 B:36 C:25 D:11 E:39, 86 of 132 cloud-correct).
+**AND THE CAUSES ARE SEPARATED, WHICH WAS THE POINT:** `cascade-routing` and `r3-streaming` have ZERO
+on-time cloud answers, so they reach the floor for a DIFFERENT reason than the nine above. Floor-equality
+is not one finding. **SO THE ELEVEN BASELINE ROWS IN THE FIGURE DATA ARE SOUND ON THIS AXIS.** The
+remaining open question about them is the H100's own hypothesis, explicitly not a claim: timing-bound
+(few on-time answers, neutral) against representation-bound (SimpleStream: full delivery, BELOW the
+floor) failure modes. That needs per-arm causes before it is written.
+
 *** EXTENDED AT RESTART 15: ALL THREE OF `READINESS.md`'s STATED GAPS ARE STALE, AND ALL THREE
 UNDERSTATE WHAT IS AVAILABLE. CHECKED AGAINST ORIGIN, NOT AGAINST THE FILE. ***
 `reports/figdata/READINESS.md` section "Gaps until reruns land" lists three. Every one is now out of date:
