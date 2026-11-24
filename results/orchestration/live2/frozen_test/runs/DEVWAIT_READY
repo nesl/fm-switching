@@ -3,6 +3,7 @@
 r3-streaming
 streamscout
 confidence-cascade
+cascade-routing
 #
 # RELEASED because their device wait now has NO proxy anywhere: the fallback counter is 0.
 #   r3-streaming   2,890 measured lookups (dashcam 2,802, robot 5, single-shot 83), fallback 0
@@ -28,6 +29,19 @@ confidence-cascade
 #
 # Step 2b: decisions MOVE for both arms with the measured tables against the proxy, so this is a
 # rerun and not a relabel. Proofs in devwait_proofs.json; 9 non-cascade arms byte-identical.
+#
+# RELEASED 2026-11-23: cascade-routing. ITS DEVICE WAIT WAS NEVER THE BLOCKER, as the note below
+# already recorded: fallback 0 on 18,463 measured lookups, every no_measured_value counter absent.
+# What held it was hold reason (b), the PORT-RULE FAILURE, and THAT IS NOW SUPERSEDED BY D212 (3)
+# AND D213: the user has RESTORED cascade-routing to the REPORTED baseline set precisely BECAUSE
+# its card's sufficiency proxy cannot fire here, under a THIRD status, 'reported, port-rule fail'.
+# Its numbers are printed WITH that reason beside them and it is NEVER COUNTED AS A BASELINE WE
+# BEAT, so the port-rule failure is now its LABEL rather than a disqualification. Hold reason (a),
+# that its card's lambda is fitted offline against a cost budget B which live2 does not have
+# (D58, D174 (1)), likewise becomes part of the stated reason rather than a blocker. D213 orders
+# its missing seeds 4 to 7 to run as filler, so it is released for exactly those cells.
+# THE NOTE BELOW IS KEPT VERBATIM rather than edited, because its measurements are still correct
+# and only their consequence changed.
 #
 # STILL HELD, and why:
 #   cascade-routing                       fallback is 0 for it too (18,463 measured lookups on the
