@@ -1,3 +1,87 @@
+## 2026-11-24 (main flash session): the final ladder is complete, rung 3 passes 4 of 4 and rung 4 passes 1 of 4
+
+**Last updated: 2026-11-24.** StudyLADDER-FINAL complete and scored; StudyD218-DA built, proved dry and
+stopped on its pre-registered condition; the E1 metrics scrape characterised as an absent link. Five
+questions are open and all five are the user's.
+
+**THE LADDER IS COMPLETE. ALL 12 CELLS RAN ON ONE `experiments/` TREE, and every scoring run carried its
+positive control at 2 of 2 cells EXACT.** Record `results/orchestration/live2/frozen_test/d208_LADDER_FINAL_COMPLETE.json` (`8feed0fe`).
+
+| arm | s4 | s5 | s6 | s7 |
+|---|---|---|---|---|
+| rung 3 `covex-v6-fair-final` | all three PASS | all three PASS, retention 1.105882 | all three PASS, retention 1.076923 | all three PASS, retention EXACTLY 1.000000 |
+| rung 4 `covex-v6-final` | all three PASS, retention 0.945 | check 2 FAIL 0.851064 | check 2 FAIL 0.871429 | check 1 FAIL -0.019534 AND check 2 FAIL 0.892307 |
+
+**RUNG 3 IS THE ROBUST POLICY AND RUNG 4 REGRESSES IT.** Rung 3 does not merely retain 0.90 of rung 2's
+robot gain, it EXCEEDS the gain at s5 and s6 and matches it exactly at s7, while winning check 1 at every
+seed. Rung 4 passes all three checks at ONE seed of four, and the entire difference between the two rungs
+is ROBOT RETENTION: checks 1 and 3 pass for both arms at s4 to s6.
+
+**THE CAUSE IS DIAGNOSED AND VERIFIED AT CODE LEVEL**, not inferred from the scores
+(`reports/study_rung4_s5_failure.md`, `7ab3b070`; mechanism record
+`frozen_test/d208_rung4_mechanism_convergence.json`). Rung 4 adds two mechanisms to rung 3.
+- **The request-deferral leg FIRES AND LOSES.** All 14 lost robot answers at s5 were traced with
+  RESIDUAL ZERO, and 37 deferrals fired without converting a single rung-3 miss into a rung-4 hit. Root
+  cause: `arms_v6cfr3.py` calls `CC.predict(cf.model, int(u_request), 0, 0, 0)` while `v5/cf_cost.py:149`
+  is `predict(model, tokens, cached_tokens=0, overlap_ft=0, overlap_decode=0, ...)` computing
+  `ft = intercept + per_uncached*unc + per_overlap*overlap_ft`, so **D162's queueing term is IDENTICALLY
+  ZERO on a gate that is only reached when other requests are queued.** Rule 2 class: FIRED AND DID NOT
+  HELP.
+- **Protect-and-defer was NOT REACHED in any live cell examined**, and its class is **UNEXPRESSIBLE at
+  s4 and s7, UNEXERCISED at s5 and s6.** At s4 and s7 it computed a harm ABOVE its bar and WANTED TO ACT
+  (`pd_harm_over_bar = 2`, `pd_gate_wanted_to_act_but_a_request_has_no_slice_channel = 2`,
+  `pd_request_crossed_bar_unexpressible = 2`) and could not, because the only available action is to send
+  less and a recall query is one prompt. **THE GATE NAMES ITS OWN REMEDY: "The registered candidate that
+  WOULD apply is DEVICE_ANSWERS."**
+
+**THE CAVEAT THAT GOVERNS EVERY CITATION OF THE LADDER: THESE FOUR SEEDS DO NOT TEST THE RUNG-4 DESIGN.**
+They are evidence about the IMPLEMENTATION AS RUN. Whether a fixed rung 4 would beat rung 3 is UNKNOWN
+AND UNTESTED. Nor is any of it evidence about representation times timing: representation is constant
+`D2` with `representation_defaulted` TRUE on every release in the cells examined, so the pair tests
+TIMING ALONE.
+
+**A SCORING CORRECTION IS BAKED INTO THE VERDICTS AND MUST TRAVEL WITH THEM** (`5a861434`). The frozen
+pre-registration sets rung 3's check 1 as "STRICTLY ABOVE base's" and **RUNG 4's as "STRICTLY ABOVE
+`covex-v6-fair-final`'s"**. `d179_rung2_verdict.py` implements the base-referenced form, which is RUNG
+3's bar, so an earlier scoring of rung 4 with the scorer's own `check_1.pass` reported check 1 passing at
+all four seeds; that is WITHDRAWN. It stayed invisible because shares comfortably exceeds BASE at every
+seed, so **the wrong bar passed everywhere, and a wrong check that always passes is harder to see than one
+that always fails.** Two of the four check-2 thresholds were PRE-COMPUTED AND PUBLISHED BEFORE THEIR CELLS
+EXISTED (104 of 121 at s6, 78 of 105 at s7) and both held exactly, which is what makes "the bar did not
+move toward the result" checkable rather than asserted.
+
+**StudyD218-DA (DEVICE_ANSWERS) IS BUILT AND PROVED DRY, AND IT STOPPED ON ITS PRE-REGISTERED CONDITION**
+(`4f317e1f`, `reports/study_d218_device_answers.md`). The pass condition was MET at 0.25x
+(`pd_request_crossed_bar_unexpressible` 27 to 0, 15 denials). **But the 1x count is 1, not 0, so the stop
+fired and nothing was decided.** The posted arm's code did not move (byte-identical with the candidate
+off, 0 differing decisions, reproducing committed `57bed6ace2eb07d1` and `278da529349ff8c2`), yet with
+the switch ON at 1x it moves 45 decisions. Its per-denial trade saves **alerts and only alerts**, and the
+magnitude rests entirely on the 374-token median proxy: under a device-discounted harm reading it would be
+exactly zero.
+
+**THE E1 `/metrics` SCRAPE IS AN ABSENT LINK** and its off-state proof is TRUE AND CANNOT FAIL.
+`scrape_metrics` has ZERO callers, `metrics()` does not merge it, and nothing in production sets
+`metrics_scrape`. So the proof establishes that E1 is INERT, not that it is safely default-off, and those
+have different remedies. The ENGINE KV channel is absent in every cell. **The BELIEF channel, by
+contrast, DOES vary live**, measured from the committed ladder cells' own `arm_stats`: `free_kv` spans
+10,115 to 62,944 and `pd_kv_bound_by_belief` equals `pd_decisions` at every seed. An earlier claim that
+the belief side was flat live came from two short small-roster cells and is WITHDRAWN; variation is a
+property of the cell's roster and duration, not of dry versus live.
+
+**OPEN, AND ALL FIVE ARE THE USER'S:** whether rung 4 is superseded; whether to fix the queueing term and
+re-run (D209 makes an implementation correction a supersede-plus-rerun); whether to wire the
+`metrics()`/`scrape_metrics` link, which would make protect-and-defer reachable for the first time;
+whether DEVICE_ANSWERS is adopted into `covex-v6-final` (superseding the posted s4 cell) or kept as a
+separate arm; and E3, the one-line `metrics_health` field in `cell.json`. Two smaller items are also
+recorded and unapplied: the D209 proof-load twin note for the n20 cells names a different arm as "the
+same arm", and a figure README misstates which cells it used while the computed column beside it is
+correct.
+
+**A PRE-EXISTING DEFECT IN THIS FILE, OBSERVED AND DELIBERATELY NOT REPAIRED:** the 2026-11-22 section's
+`**Last updated: 2026-11-23` line is unterminated and its sentence resumes mid-clause at "to 12. NOT A
+VERDICT", so a chunk of that section's text was lost by an earlier edit. I am not reconstructing prose I
+do not have the original of; it is flagged here for whoever owns that section.
+
 ## 2026-11-22 (main flash session): shares seed 4 scored, check 2 fails, and three of my own readings corrected
 
 **Last updated: 2026-11-23
