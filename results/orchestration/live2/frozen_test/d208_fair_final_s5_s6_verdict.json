@@ -1,0 +1,664 @@
+{
+ "_what": "covex-v6-fair-final (RUNG 3) scored by the GOVERNING scorer at SEED 5 and SEED 6, each against its own pre-registered comparator covex-v6-state-final. Positive control PASS, 2 of 2 cells exact, on both runs.",
+ "_HEADLINE": "*** RUNG 3 PASSES ALL THREE CHECKS AT BOTH SEEDS, AND BEATS ITS COMPARATOR OUTRIGHT: retention 1.105882 at s5 and 1.076923 at s6, both ABOVE 1.0, against a bar of 0.90. *** So rung 3 does not merely retain 90 percent of rung 2's robot gain, it EXCEEDS the gain while also winning check 1 by +0.216424 at s5 and +0.166322 at s6.",
+ "*** THE LADDER MATRIX, GOVERNING SCORER, ALL CELLS SCORED SO FAR ***": {
+  "covex-v6-fair-final (rung 3)": {
+   "s4": "ALL THREE PASS",
+   "s5": "ALL THREE PASS, retention 1.105882",
+   "s6": "ALL THREE PASS, retention 1.076923",
+   "s7": "queued"
+  },
+  "covex-v6-final (rung 4)": {
+   "s4": "all three pass, retention 0.945",
+   "s5": "*** CHECK 2 FAIL, retention 0.851064 ***",
+   "s6": "*** CHECK 2 FAIL, retention 0.871429 ***",
+   "s7": "queued"
+  },
+  "_THE_READING": "RUNG 3 IS THE ROBUST POLICY AND RUNG 4 REGRESSES IT. Rung 4 passes check 2 at one seed of three while rung 3 passes at three of three AND exceeds its comparator at both seeds scored here. Checks 1 and 3 pass for BOTH arms at EVERY seed, so the whole difference between the two rungs is ROBOT RETENTION.",
+  "_consistent_with_the_s4_counts": "the governing-register pooled counts at s4 already showed rung 4 over rung 3 as +55 dashcam, +3 assistance and -5 ROBOT. At s5 and s6 that robot loss grows to 14 and 9 answers, which is enough to fail the bar. SO THE s4 'PASS' AND THE s5/s6 'FAILS' ARE THE SAME TRADE AT DIFFERENT SIZES, not different behaviours.",
+  "_and_the_commissioned_diagnosis_says_WHY": "reports/study_rung4_s5_failure.md (7ab3b070) traced all 14 s5 losses with residual ZERO and found the loss mechanism identical at s4 and s5 at the same rate per deferral, the verdict turning on the GAIN side: 2 gains at s4, 0 at s5. Root cause VERIFIED AT THE CODE LEVEL by me: arms_v6cfr3.py calls CC.predict(cf.model, int(u_request), 0, 0, 0), and v5/cf_cost.py:149 is predict(model, tokens, cached_tokens=0, overlap_ft=0, overlap_decode=0, link_s=...) whose body sets ft = intercept + per_uncached*unc + per_overlap*overlap_ft, SO THE QUEUEING TERM IS IDENTICALLY ZERO on a gate reached only when other requests are queued."
+ },
+ "_dashcam_all_meet_question_from_the_H100_SETTLED": "state-final s6 reads dashcam_all_meet TRUE at a pooled attainment of 0.3161, against FALSE at s4 (0.231) and s5 (0.277). THAT IS CORRECT AND NOT A SCORER FAULT. scorer/score.py:713-719 defines it PER DEVICE against the 0.25 attainment target, `meets = eligible and frac >= p_dash - 1e-12`, with all-of over ELIGIBLE devices; it is NOT a pooled measure. Verified from the cell: per-device fractions 0.310988 / 0.315843 / 0.311959 / 0.315924 / 0.326904 / 0.315223, minimum 0.310988, every device True. SO 'rung 2 meets dashcam at s6' is a true statement AGAINST THE 0.25 TARGET while its attainment 0.3161 remains far below base's 0.534 and rung 3's 0.725 - a case where 'meets' and 'is good' are different questions, and the former must never be quoted as the latter.",
+ "_also_noted": "dashcam_per_device's denominator key is `n_instants`, NOT `n`. Summing `.get('n',0)` yields a denominator of ZERO and a silent 0.0 fraction. Flagged because it is the same key-that-does-not-exist shape that produced an `ALL_PASS: None` misreading earlier tonight.",
+ "per_seed_s5": [
+  {
+   "seed": 5,
+   "cells": {
+    "base": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "rung2_committed": "covex-v6-state-final_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "shares": "covex-v6-fair-final_n16_s5_1200s_h27_3t_L3_epg_rq30"
+   },
+   "check_1_alert": {
+    "COMMITTED_RULE_PRIMARY": {
+     "mean_per_episode_attainment": {
+      "base": 0.396211,
+      "rung2_committed": 0.240675,
+      "shares": 0.612635
+     },
+     "delta_shares_minus_base": 0.216424,
+     "pass": true,
+     "fraction_of_episodes_at_or_above_0p25": {
+      "base": 0.571429,
+      "rung2_committed": 0.40056,
+      "shares": 0.837535
+     },
+     "pooled_attainment_BESIDE": {
+      "base": 0.456708,
+      "rung2_committed": 0.277424,
+      "shares": 0.706177
+     }
+    },
+    "CLOUD_FLAG_FIRST_TOKEN_BESIDE": {
+     "mean_per_episode_attainment": {
+      "base": 0.408374,
+      "rung2_committed": 0.252101,
+      "shares": 0.619858
+     },
+     "delta_shares_minus_base": 0.211484,
+     "pass": true,
+     "fraction_of_episodes_at_or_above_0p25": {
+      "base": 0.577031,
+      "rung2_committed": 0.407563,
+      "shares": 0.841737
+     },
+     "pooled_attainment_BESIDE": {
+      "base": 0.470728,
+      "rung2_committed": 0.290594,
+      "shares": 0.714504
+     }
+    },
+    "verdicts_agree_across_rules": true,
+    "_check": "1. alert per-episode target attainment AT LEAST THE BASE'S"
+   },
+   "check_2_robot_retention": {
+    "_check": "2. at least 90 percent of the committed rung-2 robot on-time GAIN OVER BASE retained",
+    "robot_pool_n": {
+     "base": 127,
+     "rung2_committed": 127,
+     "shares": 127
+    },
+    "robot_pool_n_equal_across_arms": true,
+    "STOP_unequal_pool": false,
+    "on_time_counts": {
+     "base": 27,
+     "rung2_committed": 112,
+     "shares": 121
+    },
+    "on_time_fractions": {
+     "base": 0.212598,
+     "rung2_committed": 0.88189,
+     "shares": 0.952756
+    },
+    "gain_rung2_minus_base": 0.669292,
+    "delta_shares_minus_base": 0.740158,
+    "gain_class": "NORMAL",
+    "retained_fraction": 1.105882,
+    "retained_bar": 0.9,
+    "absolute_fallback_bound": {
+     "rule": "shares' GAIN OVER BASE must be at least the RUNG-2 COMPARATOR'S gain over base (delta >= gain - GAIN_EPS)",
+     "_erratum_2026_11_23": "label corrected; see the module docstring. The governing computation is unchanged.",
+     "pass": true
+    },
+    "basis_used": "ratio",
+    "by_deadline_ACCURACY_BESIDE_NOT_THE_CHECK": {
+     "_register": "robot_headline.correct_answers_delivered_by_deadline is an ACCURACY, not an on-time rate: its own `metric` field says correct_answers_delivered_by_deadline, and its definition is the cloud's answer when delivered within the deadline, ELSE THE DEVICE'S if the device's also arrived in time, else a miss. It is NOT the quantity check 2 names, for two separate reasons, and substituting it changes the check twice over. First, an on-time wrong answer scores zero and a correct late answer scores zero, so it is not a deadline-attainment rate. Second, it ADMITS THE DEVICE SIDE, which D177 and D179 (6) exclude: the currency is on-time CLOUD answers only and device_on_time is reported beside, never added. The device floor is 0.371212 on all three arms at seed 4, identical, and the measured consequence is large: on seed 4 the on-time retention is (0.454545 - 0.265152) / (0.893939 - 0.265152) = 0.3012 while the by_deadline retention is (0.545455 - 0.469697) / (0.613636 - 0.469697) = 0.5267, because the accuracy reading compresses the numerator by 2.5x and the denominator by 4.4x. The two are reported side by side and the ON-TIME one is the check.",
+     "values": {
+      "base": 0.338583,
+      "rung2_committed": 0.433071,
+      "shares": 0.440945
+     },
+     "device_only_accuracy_FLOOR": {
+      "base": 0.299213,
+      "rung2_committed": 0.299213,
+      "shares": 0.299213
+     },
+     "gain": 0.094488,
+     "delta": 0.102362,
+     "retained_fraction_ON_AN_ACCURACY": 1.083333,
+     "IS_NOT_THE_PRE_REGISTERED_CHECK": true
+    },
+    "pass": true,
+    "_no_seed_dropped": "a seed whose denominator is near zero or negative is reported with its gain_class and scored on the absolute fallback, never dropped and never silently given a ratio"
+   },
+   "check_3_assistance": {
+    "_check": "3. assistance within 2 s AT LEAST 90 percent",
+    "deadline_s": 2.0,
+    "denominator": "the device's OFFERED assistance opportunities (D178 (1) unit = DEVICE)",
+    "per_device_PRIMARY": {
+     "base": {
+      "asst000": {
+       "n": 118,
+       "on_time": 114,
+       "fraction": 0.966102
+      },
+      "asst001": {
+       "n": 120,
+       "on_time": 114,
+       "fraction": 0.95
+      },
+      "asst002": {
+       "n": 118,
+       "on_time": 115,
+       "fraction": 0.974576
+      }
+     },
+     "rung2_committed": {
+      "asst000": {
+       "n": 118,
+       "on_time": 115,
+       "fraction": 0.974576
+      },
+      "asst001": {
+       "n": 120,
+       "on_time": 117,
+       "fraction": 0.975
+      },
+      "asst002": {
+       "n": 118,
+       "on_time": 111,
+       "fraction": 0.940678
+      }
+     },
+     "shares": {
+      "asst000": {
+       "n": 118,
+       "on_time": 118,
+       "fraction": 1.0
+      },
+      "asst001": {
+       "n": 120,
+       "on_time": 119,
+       "fraction": 0.991667
+      },
+      "asst002": {
+       "n": 118,
+       "on_time": 116,
+       "fraction": 0.983051
+      }
+     }
+    },
+    "per_device_min_fraction": {
+     "base": 0.95,
+     "rung2_committed": 0.940678,
+     "shares": 0.983051
+    },
+    "all_devices_at_or_above_0p90": {
+     "base": true,
+     "rung2_committed": true,
+     "shares": true
+    },
+    "pooled_BESIDE": {
+     "base": {
+      "on_time": 343,
+      "n": 356,
+      "fraction": 0.963483
+     },
+     "rung2_committed": {
+      "on_time": 343,
+      "n": 356,
+      "fraction": 0.963483
+     },
+     "shares": {
+      "on_time": 353,
+      "n": 356,
+      "fraction": 0.991573
+     }
+    },
+    "pass": true,
+    "pass_on_pooled_BESIDE": true
+   },
+   "all_three_pass": true,
+   "diagnostics_shares": {
+    "share_admission": {
+     "share_counters_present": false,
+     "admits": {
+      "alert": null,
+      "recall": null,
+      "assistance": null
+     },
+     "denies": {
+      "alert": null,
+      "recall": null,
+      "assistance": null
+     },
+     "hold_instants": {
+      "alert": null,
+      "recall": null,
+      "assistance": null
+     },
+     "hold_periods": {
+      "alert": null,
+      "recall": null,
+      "assistance": null
+     },
+     "reasons": {},
+     "port_rule": {
+      "_claim": "an arm must make its characteristic decision at least once; a shares arm whose gate never denies has made no share decision, whatever its proofs say",
+      "any_deny": false,
+      "pass": false
+     },
+     "w": {
+      "high_water_tokens": null,
+      "zero_returns": null,
+      "tracked_at_end": null,
+      "over_wmax_periods_TIME": null,
+      "samples_TIME": null,
+      "over_wmax_per_gate_call": null,
+      "samples_per_gate_call": null,
+      "composition_TIME": {},
+      "composition_per_gate_call": {},
+      "_register": "LIVE W is submit to FIRST TOKEN; the dry report's W is submit to SETTLE and is the larger of the two. These numbers must not be compared against the dry cell's 13.43 percent or its 3.56x"
+     },
+     "SIGNATURE_CHECK_overrun_without_recall": {
+      "_claim": "in the dry cell recall was present in ALL 18,476 overruns with no exception, because only the oversize exemption can push W past W_max; an overrun with no recall in it is NEW and no existing proof covers it",
+      "time_basis_buckets_without_recall": {},
+      "time_basis_count_without_recall": 0,
+      "gate_call_basis_buckets_without_recall": {},
+      "gate_call_basis_count_without_recall": 0,
+      "FLAG": false
+     }
+    },
+    "release_recheck": {
+     "alert": {
+      "release_infeasible": 2046
+     },
+     "recall": {
+      "release_infeasible": null
+     },
+     "assistance": {
+      "release_infeasible": null
+     },
+     "submitted_denominators_in_cell": {
+      "submitted_monitor": 8799,
+      "submitted_piece": 143,
+      "submitted_recall": 480,
+      "submitted_touch": 176
+     },
+     "_denominator_note": "the submitted_* counters are mirrored into arm_stats so a skip COUNT has an IN-CELL denominator; forming the rate from another arm's denominator is a cross-arm substitution dressed as a rate"
+    },
+    "planner_time_limit": {
+     "budget_ms": 20.0,
+     "decisions": 66474,
+     "abandoned_to_base": 0,
+     "fraction_recomputed": 0.0,
+     "fraction_as_recorded": 0.0,
+     "by_kind": {
+      "state": {
+       "decisions": 66474,
+       "abandoned_to_base": 0,
+       "fraction": 0.0
+      }
+     },
+     "over_1_percent": [],
+     "flag_recomputed": false,
+     "flag_as_recorded": false,
+     "_register": "cf_instrument.over_budget is a WALL-CLOCK limit, so this rate is a property of the host CPU as well as of the policy; a flash rate is a LOWER BOUND for an H100 cell (D115 (1), about 2.2x) and must not be quoted for one"
+    },
+    "hold_times": {
+     "n_share_hold_rows": 0,
+     "background_holds_no_request_join": 0,
+     "rows_whose_type_could_not_be_resolved": 0,
+     "per_type": {
+      "alert": {
+       "n_held_instants_with_a_submit": 0,
+       "never_submitted_RIGHT_CENSORED": 0,
+       "hold_s_p50": null,
+       "hold_s_p90": null,
+       "hold_s_min": null,
+       "hold_s_max": null,
+       "negative_holds_FLAG": 0
+      },
+      "recall": {
+       "n_held_instants_with_a_submit": 0,
+       "never_submitted_RIGHT_CENSORED": 0,
+       "hold_s_p50": null,
+       "hold_s_p90": null,
+       "hold_s_min": null,
+       "hold_s_max": null,
+       "negative_holds_FLAG": 0
+      },
+      "assistance": {
+       "n_held_instants_with_a_submit": 0,
+       "never_submitted_RIGHT_CENSORED": 0,
+       "hold_s_p50": null,
+       "hold_s_p90": null,
+       "hold_s_min": null,
+       "hold_s_max": null,
+       "negative_holds_FLAG": 0
+      }
+     },
+     "_censoring": "a held instant with no request row was never submitted, so its hold is right-censored at the end of the run; it is counted, never dropped and never scored as a zero-length hold"
+    },
+    "budget": {
+     "budget_gpu_s": 1200.0,
+     "budget_spent_gpu_s": 952.87,
+     "budget_refusal": null
+    },
+    "run_valid": true,
+    "digests_equal": true,
+    "n_errors": 0
+   }
+  }
+ ],
+ "per_seed_s6": [
+  {
+   "seed": 6,
+   "cells": {
+    "base": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "rung2_committed": "covex-v6-state-final_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "shares": "covex-v6-fair-final_n16_s6_1200s_h27_3t_L3_epg_rq30"
+   },
+   "check_1_alert": {
+    "COMMITTED_RULE_PRIMARY": {
+     "mean_per_episode_attainment": {
+      "base": 0.465479,
+      "rung2_committed": 0.275429,
+      "shares": 0.631801
+     },
+     "delta_shares_minus_base": 0.166322,
+     "pass": true,
+     "fraction_of_episodes_at_or_above_0p25": {
+      "base": 0.608146,
+      "rung2_committed": 0.391854,
+      "shares": 0.853933
+     },
+     "pooled_attainment_BESIDE": {
+      "base": 0.534278,
+      "rung2_committed": 0.316138,
+      "shares": 0.725182
+     }
+    },
+    "CLOUD_FLAG_FIRST_TOKEN_BESIDE": {
+     "mean_per_episode_attainment": {
+      "base": 0.477085,
+      "rung2_committed": 0.287182,
+      "shares": 0.636975
+     },
+     "delta_shares_minus_base": 0.15989,
+     "pass": true,
+     "fraction_of_episodes_at_or_above_0p25": {
+      "base": 0.629213,
+      "rung2_committed": 0.407303,
+      "shares": 0.859551
+     },
+     "pooled_attainment_BESIDE": {
+      "base": 0.547599,
+      "rung2_committed": 0.329628,
+      "shares": 0.731122
+     }
+    },
+    "verdicts_agree_across_rules": true,
+    "_check": "1. alert per-episode target attainment AT LEAST THE BASE'S"
+   },
+   "check_2_robot_retention": {
+    "_check": "2. at least 90 percent of the committed rung-2 robot on-time GAIN OVER BASE retained",
+    "robot_pool_n": {
+     "base": 121,
+     "rung2_committed": 121,
+     "shares": 121
+    },
+    "robot_pool_n_equal_across_arms": true,
+    "STOP_unequal_pool": false,
+    "on_time_counts": {
+     "base": 41,
+     "rung2_committed": 106,
+     "shares": 111
+    },
+    "on_time_fractions": {
+     "base": 0.338843,
+     "rung2_committed": 0.876033,
+     "shares": 0.917355
+    },
+    "gain_rung2_minus_base": 0.53719,
+    "delta_shares_minus_base": 0.578512,
+    "gain_class": "NORMAL",
+    "retained_fraction": 1.076923,
+    "retained_bar": 0.9,
+    "absolute_fallback_bound": {
+     "rule": "shares' GAIN OVER BASE must be at least the RUNG-2 COMPARATOR'S gain over base (delta >= gain - GAIN_EPS)",
+     "_erratum_2026_11_23": "label corrected; see the module docstring. The governing computation is unchanged.",
+     "pass": true
+    },
+    "basis_used": "ratio",
+    "by_deadline_ACCURACY_BESIDE_NOT_THE_CHECK": {
+     "_register": "robot_headline.correct_answers_delivered_by_deadline is an ACCURACY, not an on-time rate: its own `metric` field says correct_answers_delivered_by_deadline, and its definition is the cloud's answer when delivered within the deadline, ELSE THE DEVICE'S if the device's also arrived in time, else a miss. It is NOT the quantity check 2 names, for two separate reasons, and substituting it changes the check twice over. First, an on-time wrong answer scores zero and a correct late answer scores zero, so it is not a deadline-attainment rate. Second, it ADMITS THE DEVICE SIDE, which D177 and D179 (6) exclude: the currency is on-time CLOUD answers only and device_on_time is reported beside, never added. The device floor is 0.371212 on all three arms at seed 4, identical, and the measured consequence is large: on seed 4 the on-time retention is (0.454545 - 0.265152) / (0.893939 - 0.265152) = 0.3012 while the by_deadline retention is (0.545455 - 0.469697) / (0.613636 - 0.469697) = 0.5267, because the accuracy reading compresses the numerator by 2.5x and the denominator by 4.4x. The two are reported side by side and the ON-TIME one is the check.",
+     "values": {
+      "base": 0.247934,
+      "rung2_committed": 0.479339,
+      "shares": 0.504132
+     },
+     "device_only_accuracy_FLOOR": {
+      "base": 0.057851,
+      "rung2_committed": 0.057851,
+      "shares": 0.057851
+     },
+     "gain": 0.231405,
+     "delta": 0.256198,
+     "retained_fraction_ON_AN_ACCURACY": 1.107141,
+     "IS_NOT_THE_PRE_REGISTERED_CHECK": true
+    },
+    "pass": true,
+    "_no_seed_dropped": "a seed whose denominator is near zero or negative is reported with its gain_class and scored on the absolute fallback, never dropped and never silently given a ratio"
+   },
+   "check_3_assistance": {
+    "_check": "3. assistance within 2 s AT LEAST 90 percent",
+    "deadline_s": 2.0,
+    "denominator": "the device's OFFERED assistance opportunities (D178 (1) unit = DEVICE)",
+    "per_device_PRIMARY": {
+     "base": {
+      "asst000": {
+       "n": 119,
+       "on_time": 115,
+       "fraction": 0.966387
+      },
+      "asst001": {
+       "n": 118,
+       "on_time": 116,
+       "fraction": 0.983051
+      },
+      "asst002": {
+       "n": 120,
+       "on_time": 118,
+       "fraction": 0.983333
+      }
+     },
+     "rung2_committed": {
+      "asst000": {
+       "n": 119,
+       "on_time": 112,
+       "fraction": 0.941176
+      },
+      "asst001": {
+       "n": 118,
+       "on_time": 109,
+       "fraction": 0.923729
+      },
+      "asst002": {
+       "n": 120,
+       "on_time": 112,
+       "fraction": 0.933333
+      }
+     },
+     "shares": {
+      "asst000": {
+       "n": 119,
+       "on_time": 117,
+       "fraction": 0.983193
+      },
+      "asst001": {
+       "n": 118,
+       "on_time": 115,
+       "fraction": 0.974576
+      },
+      "asst002": {
+       "n": 120,
+       "on_time": 118,
+       "fraction": 0.983333
+      }
+     }
+    },
+    "per_device_min_fraction": {
+     "base": 0.966387,
+     "rung2_committed": 0.923729,
+     "shares": 0.974576
+    },
+    "all_devices_at_or_above_0p90": {
+     "base": true,
+     "rung2_committed": true,
+     "shares": true
+    },
+    "pooled_BESIDE": {
+     "base": {
+      "on_time": 349,
+      "n": 357,
+      "fraction": 0.977591
+     },
+     "rung2_committed": {
+      "on_time": 333,
+      "n": 357,
+      "fraction": 0.932773
+     },
+     "shares": {
+      "on_time": 350,
+      "n": 357,
+      "fraction": 0.980392
+     }
+    },
+    "pass": true,
+    "pass_on_pooled_BESIDE": true
+   },
+   "all_three_pass": true,
+   "diagnostics_shares": {
+    "share_admission": {
+     "share_counters_present": false,
+     "admits": {
+      "alert": null,
+      "recall": null,
+      "assistance": null
+     },
+     "denies": {
+      "alert": null,
+      "recall": null,
+      "assistance": null
+     },
+     "hold_instants": {
+      "alert": null,
+      "recall": null,
+      "assistance": null
+     },
+     "hold_periods": {
+      "alert": null,
+      "recall": null,
+      "assistance": null
+     },
+     "reasons": {},
+     "port_rule": {
+      "_claim": "an arm must make its characteristic decision at least once; a shares arm whose gate never denies has made no share decision, whatever its proofs say",
+      "any_deny": false,
+      "pass": false
+     },
+     "w": {
+      "high_water_tokens": null,
+      "zero_returns": null,
+      "tracked_at_end": null,
+      "over_wmax_periods_TIME": null,
+      "samples_TIME": null,
+      "over_wmax_per_gate_call": null,
+      "samples_per_gate_call": null,
+      "composition_TIME": {},
+      "composition_per_gate_call": {},
+      "_register": "LIVE W is submit to FIRST TOKEN; the dry report's W is submit to SETTLE and is the larger of the two. These numbers must not be compared against the dry cell's 13.43 percent or its 3.56x"
+     },
+     "SIGNATURE_CHECK_overrun_without_recall": {
+      "_claim": "in the dry cell recall was present in ALL 18,476 overruns with no exception, because only the oversize exemption can push W past W_max; an overrun with no recall in it is NEW and no existing proof covers it",
+      "time_basis_buckets_without_recall": {},
+      "time_basis_count_without_recall": 0,
+      "gate_call_basis_buckets_without_recall": {},
+      "gate_call_basis_count_without_recall": 0,
+      "FLAG": false
+     }
+    },
+    "release_recheck": {
+     "alert": {
+      "release_infeasible": 2073
+     },
+     "recall": {
+      "release_infeasible": null
+     },
+     "assistance": {
+      "release_infeasible": null
+     },
+     "submitted_denominators_in_cell": {
+      "submitted_monitor": 8948,
+      "submitted_piece": 147,
+      "submitted_recall": 478,
+      "submitted_touch": 415
+     },
+     "_denominator_note": "the submitted_* counters are mirrored into arm_stats so a skip COUNT has an IN-CELL denominator; forming the rate from another arm's denominator is a cross-arm substitution dressed as a rate"
+    },
+    "planner_time_limit": {
+     "budget_ms": 20.0,
+     "decisions": 60913,
+     "abandoned_to_base": 0,
+     "fraction_recomputed": 0.0,
+     "fraction_as_recorded": 0.0,
+     "by_kind": {
+      "state": {
+       "decisions": 60913,
+       "abandoned_to_base": 0,
+       "fraction": 0.0
+      }
+     },
+     "over_1_percent": [],
+     "flag_recomputed": false,
+     "flag_as_recorded": false,
+     "_register": "cf_instrument.over_budget is a WALL-CLOCK limit, so this rate is a property of the host CPU as well as of the policy; a flash rate is a LOWER BOUND for an H100 cell (D115 (1), about 2.2x) and must not be quoted for one"
+    },
+    "hold_times": {
+     "n_share_hold_rows": 0,
+     "background_holds_no_request_join": 0,
+     "rows_whose_type_could_not_be_resolved": 0,
+     "per_type": {
+      "alert": {
+       "n_held_instants_with_a_submit": 0,
+       "never_submitted_RIGHT_CENSORED": 0,
+       "hold_s_p50": null,
+       "hold_s_p90": null,
+       "hold_s_min": null,
+       "hold_s_max": null,
+       "negative_holds_FLAG": 0
+      },
+      "recall": {
+       "n_held_instants_with_a_submit": 0,
+       "never_submitted_RIGHT_CENSORED": 0,
+       "hold_s_p50": null,
+       "hold_s_p90": null,
+       "hold_s_min": null,
+       "hold_s_max": null,
+       "negative_holds_FLAG": 0
+      },
+      "assistance": {
+       "n_held_instants_with_a_submit": 0,
+       "never_submitted_RIGHT_CENSORED": 0,
+       "hold_s_p50": null,
+       "hold_s_p90": null,
+       "hold_s_min": null,
+       "hold_s_max": null,
+       "negative_holds_FLAG": 0
+      }
+     },
+     "_censoring": "a held instant with no request row was never submitted, so its hold is right-censored at the end of the run; it is counted, never dropped and never scored as a zero-length hold"
+    },
+    "budget": {
+     "budget_gpu_s": 1200.0,
+     "budget_spent_gpu_s": 957.75,
+     "budget_refusal": null
+    },
+    "run_valid": true,
+    "digests_equal": true,
+    "n_errors": 0
+   }
+  }
+ ],
+ "_what_is_NOT_decided": "these are measurements. Whether rung 4 is superseded, whether the verified queue-term defect is fixed and the ladder re-run (D209 makes an implementation correction a supersede-plus-rerun), and what the paper claims remain the USER'S CALLS, reported unresolved. s7 is queued for both arms and will be scored identically whatever its direction."
+}
