@@ -243,6 +243,23 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
   `d.get("ALL_PASS")` on a dict whose KEY is `verdict` gets `None` whatever the verdict says. READ THE
   FIELD, THEN ASSERT ITS VALUE IS THE LITERAL EXPECTED STRING; never probe for a key named after the
   value you hope to see, and never read a `None` as a failure before checking the schema.
+- *** A RECORD-ONLY COMMIT CAN REPORT SUCCESS AND CHANGE NOTHING. BOUND THE FILE COUNT FROM BELOW,
+  NOT ONLY FROM ABOVE, AND READ THE PUBLISHED BYTES BACK. *** A session staged FIVE files from a
+  correct scoped list; `diff-tree` reported FOUR. Its working copy of the fifth had been overwritten by
+  raw driver output, so the blob it pushed was byte-identical to the one already on origin. **THE PUSH
+  SUCCEEDED AND CORRECTED THE ONE FILE THAT MATTERED MOST: NOTHING** - the misleading headline stayed
+  published while a commit claiming to fix it landed on top. Its own guard asserted "at most 5 files"
+  and PASSED AT 4: **bounded from above, never from below.** So: assert the EXACT expected count, and
+  then `git show origin/main:<path>` the file and grep it for the SPECIFIC TEXT the commit exists to
+  add. A scoped list guarantees what is STAGED, never that staging CHANGED anything. This is the
+  pattern in the RECORDING layer rather than the measurement layer.
+- *** "ZERO CPU" IS NOT A HANG SIGNATURE. THE DISCRIMINATOR IS WHETHER IT HAS A WORKING DESCENDANT. ***
+  A driver at `00:00:00` CPU after 59 minutes with NO CHILDREN was genuinely hung and had started no
+  cell. The same driver later showed `00:00:00` CPU after 20 minutes and was PERFECTLY HEALTHY, because
+  it was blocked waiting on a child burning CPU (`346850` 0:00 -> child `357145`, 102 s elapsed, 1:44
+  CPU, state `Rl`). A parent blocked on a working child is the NORMAL shape of a driver. So walk the
+  tree with `ps -eo pid,ppid,time,stat` and ask whether any DESCENDANT is accumulating CPU; reporting a
+  healthy driver as hung would have had someone kill a running cell.
 - AND FOR RELAYED CLAIMS: a NEGATIVE assertion about a primary artefact is cheap to check and expensive
   to propagate. Three were relayed unverified today (a loadavg precedent that did not exist, a
   touch-price magnitude off by about 26x, and two metric names that did exist). Check a negative against
