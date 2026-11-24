@@ -1,0 +1,168 @@
+{
+ "_what": "READ-ONLY CROSS-CHECK of the committed d216 final-rung cell digests, run by A6000 [0ce3c2] (the watchdog's RESTART 4 session), which is NOT the author of that study. Every digest and row count below is read directly from the committed per-cell JSON, not from that study's manifest or its report, because the claims reached this session SECOND-HAND and one of them decides whether a rung-3 0.25x cell may be reported at all. Register: OBSERVED. No cell was run; no live-path file was touched; the shared worktree carries 113 uncommitted paths including three live-path files, so nothing here was read from it.",
+ "cells": {
+  "F0_state_uo_1x": {
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "arm": "covex-v6-state-uo"
+  },
+  "F0a_base_1x": {
+   "digest": "af8befb9420ad86a",
+   "rows": 12085,
+   "arm": "covex-v6-base"
+  },
+  "F10_r4_rqonly_kv025": {
+   "digest": "57bed6ace2eb07d1",
+   "rows": 14509,
+   "arm": "covex-v6-final-rqonly"
+  },
+  "F11_harm0_kv025": {
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "arm": "covex-v6-final-harm0"
+  },
+  "F12_marginhuge_kv025": {
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "arm": "covex-v6-final-margin-huge"
+  },
+  "F1_r3_final_1x": {
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "arm": "covex-v6-fair-final"
+  },
+  "F2_r4_final_1x": {
+   "digest": "57bed6ace2eb07d1",
+   "rows": 14509,
+   "arm": "covex-v6-final"
+  },
+  "F3_r4_off_1x": {
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "arm": "covex-v6-final-off"
+  },
+  "F4_r3_final_kv025": {
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "arm": "covex-v6-fair-final"
+  },
+  "F5_r4_final_kv025": {
+   "digest": "278da529349ff8c2",
+   "rows": 14306,
+   "arm": "covex-v6-final"
+  },
+  "F6_r4_off_kv025": {
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "arm": "covex-v6-final-off"
+  },
+  "F7_r4_final_kv025_enf": {
+   "digest": "278da529349ff8c2",
+   "rows": 14306,
+   "arm": "covex-v6-final"
+  },
+  "F8_r3_final_kv025_enf": {
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "arm": "covex-v6-fair-final"
+  },
+  "F9_r4_pdonly_kv025": {
+   "digest": "278da529349ff8c2",
+   "rows": 14306,
+   "arm": "covex-v6-final-pdonly"
+  }
+ },
+ "F1_OFF_SWITCH_IDENTITY_PASSES_ON_THE_FINAL_RUNGS": {
+  "F3_r4_off_1x": [
+   "5a03c2807da3681a",
+   14539
+  ],
+  "F1_r3_final_1x": [
+   "5a03c2807da3681a",
+   14539
+  ],
+  "verdict": "EQUAL IN BOTH DIGEST AND ROW COUNT. Rung 4 with both compounds off collapses BYTE-IDENTICALLY to rung 3. On the COMMITTED family it did NOT: covex-v6-cf-c5attr-off was 711 rows off its declared rung-3 bar because _Rung4Mixin._cf_engine swapped the state planner's deficit weight UNCONDITIONALLY, reading neither compound switch. THE FINAL LADDER CURES THAT, so the CLAUDE.md Step 4 control on rung 4 now works where in the committed family it did not. This is a property of the build and belongs in the inheritance table.",
+  "also_holds_at_0.25x": {
+   "F6_r4_off_kv025": [
+    "5a03c2807da3681a",
+    14539
+   ],
+   "note": "the off arm at 0.25x is ALSO rung 3's digest, which is what it must be: with both compounds off the arm IS rung 3, and rung 3 is flat across memory (below)."
+  }
+ },
+ "F2_RUNG_3_DOES_NOT_MOVE_WITH_MEMORY_AT_ALL": {
+  "F1_r3_final_1x": [
+   "5a03c2807da3681a",
+   14539
+  ],
+  "F4_r3_final_kv025": [
+   "5a03c2807da3681a",
+   14539
+  ],
+  "F8_r3_final_kv025_enf": [
+   "5a03c2807da3681a",
+   14539
+  ],
+  "verdict": "THREE CONDITIONS, ONE DIGEST AND ONE ROW COUNT, byte for byte: 1x, kv0.25, and kv0.25 with coordinator eviction ENFORCEMENT ON. *** A RUNG-3 0.25x DRY CELL MUST NOT BE REPORTED AS A MEMORY RESULT. *** Under CLAUDE.md Rule 2 that flat response is UNEXERCISED, not an equivalence. IT IS CONSISTENT WITH THE USER'S RULING RATHER THAN A NEW DEFECT: rungs 2 and 3 make no memory trade-offs BY DESIGN (trade-offs are rung 4's counterfactual, D151 / D163), and the ruled framing is that they adapt to memory pressure ONLY REACTIVELY, THROUGH ENGINE TELEMETRY, while rung 4 adapts proactively. A DRY CELL HAS NO ENGINE TELEMETRY, so on a dry cell rung 3 has nothing to react to and a flat digest is the EXPECTED outcome. The structural half of the same story is self._caps (arms.py:82), a write with no read repo-wide, so the arms cannot see the configured pool either."
+ },
+ "F3_RUNG_4_DOES_RESPOND_TO_MEMORY": {
+  "F2_r4_final_1x": [
+   "57bed6ace2eb07d1",
+   14509
+  ],
+  "F5_r4_final_kv025": [
+   "278da529349ff8c2",
+   14306
+  ],
+  "F7_r4_final_kv025_enf": [
+   "278da529349ff8c2",
+   14306
+  ],
+  "verdict": "1x differs from kv0.25 in digest AND rows (14,509 against 14,306), so memory reaches rung 4's decisions. Enforcement ON gives the SAME digest as enforcement off at the same memory setting, so what rung 4 responds to is the pool's DECLARED SIZE and not observed occupancy: the correct wording is THE POLICY REACTS TO A SMALLER CONFIGURED POOL, never reacts to memory pressure."
+ },
+ "F4_THE_LEGS_SWAP_AND_ARE_NOT_ADDITIVE_REPRODUCED_ON_THE_FINAL_RUNGS": {
+  "at_0.25x_full_equals_pdonly": {
+   "F5_r4_final_kv025": [
+    "278da529349ff8c2",
+    14306
+   ],
+   "F9_r4_pdonly_kv025": [
+    "278da529349ff8c2",
+    14306
+   ]
+  },
+  "at_0.25x_rqonly_equals_full_at_1x": {
+   "F10_r4_rqonly_kv025": [
+    "57bed6ace2eb07d1",
+    14509
+   ],
+   "F2_r4_final_1x": [
+    "57bed6ace2eb07d1",
+    14509
+   ]
+  },
+  "verdict": "NOT PREVIOUSLY REPORTED TO THIS SESSION AND VISIBLE ONLY IN THE FULL TABLE. At 0.25x the FULL arm equals PDONLY, and the RQONLY arm at 0.25x equals the FULL arm at 1x. So rung 4 is ONE COMPOUND AT A TIME, chosen by the memory setting, exactly as Session D found on the COMMITTED family, now REPRODUCED on the final rungs. It also explains itself: cf_request_defer's gates contain no pool read, so the request-deferral leg is capacity-INDEPENDENT by construction and its digest cannot move with memory, which is why rqonly at 0.25x is identical to the 1x arm it dominated. Whether the swap HELPS is a scoring question a dry cell cannot answer."
+ },
+ "F5_THE_STEP_4_CONTROLS_ON_RUNG_4_WORK": {
+  "F11_harm0_kv025": [
+   "5a03c2807da3681a",
+   14539
+  ],
+  "F12_marginhuge_kv025": [
+   "5a03c2807da3681a",
+   14539
+  ],
+  "rung_3_bar": [
+   "5a03c2807da3681a",
+   14539
+  ],
+  "verdict": "Both collapse EXACTLY to rung 3's digest and row count, which is what a working Step 4 control on rung 4's harm term and margin must do: disable the mechanism and the result returns to the base. So rung 4's response at 0.25x is attributable to the counterfactual rather than to anything else in the arm."
+ },
+ "_caveats": "Seed 4 only, DRY only, LOGICAL kv scaling (no engine, no --num-gpu-blocks-override), so none of this is a live result and none of it speaks to whether any trade helps. One cell in that study, F0a_base_1x, recorded alone=False with two foreign cf_pd_one_cell processes named in its own census, which is the right way to record it; the digests cross-checked here are not that cell's.",
+ "_provenance": {
+  "git_commit": "3e03ecbc3475b89a166c5c71163e4212d3e3436a",
+  "script": "inline read-only cross-check, A6000 [0ce3c2]",
+  "device": "flash (CPU only, no cell run)",
+  "n": 14
+ }
+}
