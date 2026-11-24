@@ -7,9 +7,15 @@ once produced a false "H100 idle eight hours" claim while it had committed one m
 ## READ THIS FIRST, FOR A WATCHDOG RESUME. STATE AS OF 2026-11-23 22:20 PST.
 
 *** THE RESUME PROMPT CONTAINS THREE STALE PREMISES. DO NOT WASTE CALLS ON THEM. ***
-- **`ops/watchdog.log` AND `ops/track.log` DO NOT EXIST**, not on origin and not on disk. Checked with
-  `git cat-file -e` (rc=128), repeatedly. Only `ops/watchdog.sh` is committed. **To check concurrency,
-  do the thing below instead.**
+- **`ops/watchdog.log` AND `ops/track.log` NOW EXIST ON DISK. CORRECTED 2026-11-23 22:31.** The
+  earlier entry said they did not exist anywhere; that was checked with `git cat-file -e`, WHICH ONLY
+  TESTS ORIGIN, so it could never have seen a gitignored local file. They are local-only and live:
+  `ops/watchdog.log` 299 lines, `ops/track.log` 1,298 lines, newest entry 06:30:01Z. **READ THEM, they
+  are informative**, but they are NOT a concurrency check: watchdog.log records session liveness and
+  track.log carries prior resumes' own reports. *** WHAT watchdog.log SAYS RIGHT NOW MATTERS: heartbeat
+  STALE and `RESTART 3/12: session fmsw-overnight absent` at 06:10, 06:20 and 06:30Z. THE OVERNIGHT
+  SESSION IS DYING AND BEING RESTARTED EVERY TEN MINUTES, which is why you are reading this. Expect to
+  be resumed again; leave the file fit for that.***
 - **D187 IS NOT IN THIS FILE.** It is `research/policy_design_log.md:208`. Its guardrails, which DO
   apply: every change justified by a MEASURED mechanism and PRE-REGISTERED (commit before its cells);
   each design change a NEW LABELLED version recorded as OVERNIGHT DECISION, PROVISIONAL; never change
@@ -24,16 +30,23 @@ once produced a false "H100 idle eight hours" claim while it had committed one m
 
 *** HOW TO CHECK CONCURRENCY CORRECTLY (the shared worktree lies): ***
 `/tmp/claude-1001/mapwt` is HUNDREDS of commits behind origin (1,500 earlier tonight, 670 later), so
-`git status` there reports STALENESS AS MODIFICATION and shows committed files as `??` untracked. **The
-only valid test is `git diff --stat $(git rev-parse origin/main) -- <path>`.** As of 22:20 that shows
-**LIVE UNCOMMITTED EDITS to three run-path files**: `arms.py`, `coordinator.py` and `v5/cf_objective.py`.
-Another session is mid-work on them. **A RUN-PATH FREEZE IS ALSO IN FORCE until the ladder completes**,
+`git status` there reports STALENESS AS MODIFICATION and shows committed files as `??` untracked. *** THE TEST THIS FILE PREVIOUSLY PRESCRIBED IS ALSO WRONG, AND FOR THE SAME REASON IT WARNS ABOUT.
+`git diff --stat origin/main -- <path>` IN A STALE WORKTREE REPORTS STALENESS AS DELETION: run against
+`experiments/` it prints `124 files changed, 238 insertions, 33,648 DELETIONS`, which is 680 commits of
+origin's own additions, NOT anyone's edits. A real edit and a missing file are indistinguishable in it.
+*** THE TEST THAT ACTUALLY WORKS IS AGAINST THE WORKTREE'S OWN HEAD, NOT ORIGIN: ***
+`git -C /tmp/claude-1001/mapwt diff --stat HEAD -- experiments/` plus `git status --porcelain -- <path>`.
+Anything it prints is an UNCOMMITTED WORKING-TREE EDIT, because staleness cannot appear in a diff against
+one's own HEAD. As of 22:31 that test CONFIRMS the conclusion the broken test had reached by luck:
+`M arms.py`, `M coordinator.py` (+483), `M v5/cf_objective.py` (+123), and five more under
+`experiments/`, 1,482 insertions in all. **LIVE UNCOMMITTED EDITS TO RUN-PATH FILES. Another session is
+mid-work on them.** **A RUN-PATH FREEZE IS ALSO IN FORCE until the ladder completes**,
 so TOUCH NO RUN-PATH FILE for either reason.
 
 *** WHAT IS ALREADY SCORED. DO NOT RE-SCORE. ***
 | arm | s4 | s5 | s6 | s7 |
 |---|---|---|---|---|
-| rung 3 `covex-v6-fair-final` | ALL THREE PASS | **ALL THREE PASS** (`3c644d81`) | comparator missing | cell missing |
+| rung 3 `covex-v6-fair-final` | ALL THREE PASS | **ALL THREE PASS**, retention 1.1059 (`3c644d81`) | **ALL THREE PASS**, retention 1.0769 (`f476ee96`) | cell missing |
 | rung 4 `covex-v6-final` | ALL THREE PASS | **check 2 FAIL 0.851** (`8e05580e`) | **check 2 FAIL 0.871** (`c7c92285`) | cell missing |
 
 **RUNG 4 PASSES CHECK 2 AT ONE SEED OF THREE, ON ROBOT RETENTION ALONE**; its checks 1 and 3 pass
@@ -48,7 +61,11 @@ ZERO on a gate reached only when other requests are queued.** 14 losses, 0 gains
 s4 had 2 gains and passed, so **s4's pass is the luckier draw of the same losing trade.**
 
 *** THE NEXT STEP, WHICHEVER APPLIES FIRST: ***
-1. `covex-v6-state-final` s6 lands (started 21:58) -> **score RUNG 3 at s6** (comparator state-final).
+1. ~~`covex-v6-state-final` s6 -> score RUNG 3 at s6~~ **DONE at `f476ee96`: ALL THREE PASS, robot
+   retention 1.076923, check 1 +0.166322, positive control 2 of 2 exact.** Rung 3 now passes everything
+   at s4, s5 AND s6, and EXCEEDS its comparator's gain at both s5 (1.1059) and s6 (1.0769), not merely
+   retaining 0.90 of it. **THE LADDER IS AT 9 OF 12 COMMITTED CELLS; s7 HAS NONE OF THE THREE FINAL
+   ARMS** (only `hybrid-F-lhreq-noc3` s7 exists), so as of 22:31 THERE IS NOTHING LEFT TO SCORE.
 2. s7 cells land -> score **rung 4 s7 as soon as `fair-final` s7 exists** (rung 4's comparator is
    fair-final, NOT state-final, so it does not wait for state-final s7), and rung 3 s7 once state-final
    s7 exists. Scoring recipe: extract the three cells from origin into a scratch `runs/` dir and run
