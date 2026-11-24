@@ -1,3 +1,25 @@
+"""DO NOT APPLY THIS SCRIPT. RETRACTED 2026-11-23.
+
+*** APPLYING IT CREATES A SECOND, DUPLICATE /metrics SCRAPE ON TOP OF THE ONE ALREADY LANDED. ***
+
+E1 landed as b6cbb0a9 ("asyncbackend: a /metrics scrape for live2, DEFAULT OFF pending its
+byte-identity proof"), which is an ANCESTOR of the sha this script was written against, so the base
+tree ALREADY CONTAINED a scrape. Applying this patch on top produces an INCOHERENT hybrid, not a
+redundant one: there would be TWO `metrics_health` definitions, and Python keeps the LAST, so this
+script's version is SHADOWED AND DEAD while its poller and `metrics()` merge still run. It also
+defaults the scrape ON, contradicting D187 and the landed commit's explicit gating, and it
+reimplements the KV policy that b6cbb0a9 deliberately delegates to
+`live/adapter.HttpBackend._fetch_metrics` so the two paths cannot drift.
+
+This file reached origin by being swept in with another session's commit rather than from a scoped
+file list. It is kept for provenance and is NOT a proposed change.
+
+SEPARATELY, THE LANDED SCRAPE IS ITSELF AN ABSENT LINK: `scrape_metrics` has zero callers,
+`metrics()` does not merge it, and nothing in production sets `metrics_scrape`. Wiring it is a
+pending USER RULING, not something to be done by applying this file. See
+results/orchestration/live2/frozen_test/d208_rung4_mechanism_convergence.json.
+"""
+
 import sys, re
 from pathlib import Path
 p = Path(sys.argv[1])
