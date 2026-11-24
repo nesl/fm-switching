@@ -1,25 +1,99 @@
 {
- "_what": "loadavg at the START of each proof-(a) cell, as a MAGNITUDE, because the committed record carried only a boolean with no number and that is why a false load claim could not be checked.",
- "_boundary_two_legs": "MECHANISM: the planner wall-clock cutoff is patched off on these cells, so the time-dependent quantity load could perturb is out of play, an argument from what the code does that does not weaken at higher load. EVIDENCE: today's bit-exact matches, now including b7-edf-feasibility at loadavg 20.45. NOT precedent: the highest load any committed artefact records is 9.00 and the earlier 'about 20' precedent claim was checked and withdrawn.",
+ "_what": "loadavg at the START of each proof-(a) cell, as MAGNITUDES (1, 5 and 15 minute), for ALL 18 matrix arms rather than only the ones already finished.",
+ "_why_all_18_and_why_magnitudes": "if a pending arm MOVES we must know its load before concluding anything about the arm, or a contention artefact cannot be told from a real change. That is exactly the hole the original boolean left: the committed d179 record carries only after_self_reproduces_under_load = True with no number, which is why a false load claim could not be checked.",
+ "_boundary_two_legs_not_precedent": "MECHANISM: the planner wall-clock cutoff is patched off on these cells, so the time-dependent quantity load could perturb is out of play, an argument from what the code does that does not weaken at higher load. EVIDENCE: today's bit-exact matches at 10.80, 13.80 and 20.45. NOT PRECEDENT: the highest load any committed artefact records is 9.00 (d184_r3_c5attr_proofs.json), and the earlier 'precedent at about 20' claim was checked and withdrawn, a correction that ran against its own argument.",
+ "_strongest_point_so_far": "b7-edf-feasibility b9aadd1c3a2b26d5 / 12,265 bit-exact at loadavg 20.45, which is 2.3x the 9.00 documented ceiling.",
+ "_not_yet_scored": "always-cloud-fcfs started at loadavg 24.81 and is RUNNING; its bar is c7f86bb7755828de / 12,253. If it returns bit-exact at that load it is nearly 3x the ceiling and stronger still. It is NOT scored until its digest is written.",
  "per_cell": {
   "always-cloud-fcfs": {
-   "loadavg_1min_at_start": 24.81,
-   "status": "pending"
+   "loadavg_1min": 24.81,
+   "loadavg_5min": 24.37,
+   "loadavg_15min": 18.56,
+   "source": "chain_a.out",
+   "status": "running (started at the load above, digest not yet written)"
+  },
+  "attentionstore-prefetch": {
+   "status": "cell not started yet in the running chain",
+   "loadavg_1min": null
   },
   "b7-edf-feasibility": {
-   "loadavg_1min_at_start": 20.45,
+   "loadavg_1min": 20.45,
+   "loadavg_5min": 17.82,
+   "loadavg_15min": 12.26,
+   "source": "chain_a.out",
    "digest": "b9aadd1c3a2b26d5",
-   "rows": 12265
+   "rows": 12265,
+   "status": "complete"
   },
-  "covex-v6-base": {
-   "loadavg_1min_at_start": 10.8,
+  "confidence-cascade": {
+   "status": "cell not started yet in the running chain",
+   "loadavg_1min": null
+  },
+  "eco-llm": {
+   "status": "cell not started yet in the running chain",
+   "loadavg_1min": null
+  },
+  "edf": {
+   "status": "cell not started yet in the running chain",
+   "loadavg_1min": null
+  },
+  "hybrid-F-lhreq": {
+   "status": "cell not started: no bar, so no cell is owed (COVERAGE MISSING)",
+   "loadavg_1min": null
+  },
+  "hybrid-F-lhreq-noc3": {
+   "loadavg_1min": 10.8,
+   "loadavg_5min": 5.72,
+   "loadavg_15min": 4.87,
+   "source": "chain.out",
    "digest": "af8befb9420ad86a",
-   "rows": 12085
+   "rows": 12085,
+   "status": "complete"
   },
-  "covex-v6-rules": {
-   "loadavg_1min_at_start": 13.8,
+  "llf": {
+   "status": "cell not started yet in the running chain",
+   "loadavg_1min": null
+  },
+  "lmcache": {
+   "status": "cell not started: no bar, so no cell is owed (COVERAGE MISSING)",
+   "loadavg_1min": null
+  },
+  "mooncake": {
+   "status": "cell not started yet in the running chain",
+   "loadavg_1min": null
+  },
+  "querystream-proactive": {
+   "status": "cell not started yet in the running chain",
+   "loadavg_1min": null
+  },
+  "r3-streaming": {
+   "status": "cell not started: no bar, so no cell is owed (COVERAGE MISSING)",
+   "loadavg_1min": null
+  },
+  "simplestream": {
+   "status": "cell not started yet in the running chain",
+   "loadavg_1min": null
+  },
+  "streamscout": {
+   "status": "cell not started: no bar, so no cell is owed (COVERAGE MISSING)",
+   "loadavg_1min": null
+  },
+  "v5-rules": {
+   "status": "cell not started: no bar, so no cell is owed (COVERAGE MISSING)",
+   "loadavg_1min": null
+  },
+  "v5-rules-2": {
+   "loadavg_1min": 13.8,
+   "loadavg_5min": 10.88,
+   "loadavg_15min": 7.57,
+   "source": "chain.out",
    "digest": "18067c4c66bb44b8",
-   "rows": 11955
+   "rows": 11955,
+   "status": "complete"
+  },
+  "warm-all-lru": {
+   "status": "cell not started yet in the running chain",
+   "loadavg_1min": null
   }
  }
 }
