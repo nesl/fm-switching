@@ -472,24 +472,16 @@
    }
   },
   "confidence-cascade": {
-   "digest": "b9290071679f1baa",
-   "rows": 12253,
-   "_bar_produced_by_commit": "2f3824ea",
-   "_bar_source": "the committed d179 off-switch digest proof, 2026-11-22 13:53, results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
-   "_ruled_fixes_this_bar_PREDATES": {
-    "0ca54444": "D206: one deficit weight in rung 4, constant path proved bit-identical",
-    "1b99b6af": "D205 step 2b at row level",
-    "2487e345": "D205 step 3: all-arm tests on a real trace slice, fixture scores behind a guard",
-    "29742254": "D205 step 2d: decision diff and a metrics-failure counter in the v1 adapter",
-    "8986f593": "D205 step 2: the three score-reading arms read what their cards specify, sliced to the episode",
-    "9b49801a": "D201 part 2: real device score on the wire, fail loud when absent",
-    "c707610d": "D209 (2): hits 22, 26 and 6 folded in (touch price, engine keys, metrics fallback)"
-   },
+   "digest": "b1ff48e40387a997",
+   "rows": 3834,
+   "_bar_produced_by_commit": "3fa41f519734a1f8a742fec5a8e4b0cd6b8b8b3f",
+   "_bar_source": "D213 item 1 re-bar, run ALONE on the committed recipe from post-fix code; record at results/orchestration/live2/ladder_final/rebar/rebar_record.json",
+   "_ruled_fixes_this_bar_PREDATES": {},
    "_ruled_fixes_TOUCHING_THIS_ARM": [
-    "8986f593 (cascade_adapted.py)"
+    "none outstanding: its D205 code fix (8986f593) is IN this bar"
    ],
-   "_escalates_on_move": false,
-   "_ruled_fixes_PENDING_for_this_arm": "D205 fix HAS LANDED (8986f593); re-barred by D213 item 1 from a post-fix cell",
+   "_escalates_on_move": true,
+   "_ruled_fixes_PENDING_for_this_arm": "NONE IN CODE. D213 lists a confidence-cascade RERUN, but that is a rerun of CELLS on already-fixed code, not a further code change, so no future code fix is ruled against this arm.",
    "_provenance": {
     "source_file": "results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json",
     "source_provenance_git_commit": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
@@ -505,7 +497,13 @@
     "landed_at": "8986f593",
     "detail": "delivered_scores was a literal 0.0, the MAXIMUM of a log-probability range, so every reader escalated unconditionally; removing it stops that and fewer escalations means fewer rows. MEASURED post-fix b1ff48e40387a997 / 3,834 against this bar's 12,253, a 69 percent fall, at loadavg 2.21, the LOWEST in the sweep, so contention is refuted. RE-BAR OWED from a post-fix dry cell on the committed recipe, run ALONE (user ruling 2026-11-23).",
     "proof_a_escalates": false
-   }
+   },
+   "_SUPERSEDED_bar": {
+    "digest": "b9290071679f1baa",
+    "rows": 12253,
+    "why": "predated its own ruled D205 fix (8986f593); kept beside the new bar rather than deleted"
+   },
+   "_escalates_on_move_why": "TRUE, and this is a CHANGE from False: the bar now sits on post-fix code with no ruled change outstanding, so any future move IS a hard escalation. Before the re-bar it was False only because the bar predated a ruled fix."
   },
   "eco-llm": {
    "digest": "f32fa95c6953c64e",

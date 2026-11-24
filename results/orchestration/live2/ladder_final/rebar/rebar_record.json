@@ -1,0 +1,39 @@
+{
+ "_what": "D213 item 1: RE-BAR of confidence-cascade from POST-FIX code on the committed recipe, RUN ALONE under D216 (1). Its previous bar predated its own ruled D205 fix.",
+ "arm": "confidence-cascade",
+ "new_bar_digest": "b1ff48e40387a997",
+ "new_bar_rows": 3834,
+ "superseded_bar_digest": "b9290071679f1baa",
+ "superseded_bar_rows": 12253,
+ "superseded_bar_belonged_to": "pre-8986f593 code, in which baselines/cascade_adapted.py read EpisodicStream.delivered_scores, a field both coordinator writers filled with a literal 0.0. Since the score is log P(Yes), 0.0 is the MAXIMUM of the range, so the arm escalated on every instant. Removing that read stops the unconditional escalation, and fewer escalations is fewer rows, which is the direction observed.",
+ "recipe": "committed: cf_pd_one_cell.py --arm confidence-cascade --seed 4 --n 16 --run-s 1200 --cutoff-off, on a clean git archive of one literal sha",
+ "code_sha_archived": "3fa41f519734a1f8a742fec5a8e4b0cd6b8b8b3f",
+ "post_fix_confirmed": "8986f593 verified an ancestor of the archived sha before the run",
+ "ALONE": {
+  "other_cell_runners_before": 0,
+  "other_cell_runners_appeared_during": 0,
+  "loadavg_1_5_15_at_start": "0.60 1.09 2.33",
+  "loadavg_1_5_15_at_end": "1.00 1.09 2.18",
+  "rule": "D216 (1): a dry cell whose digest is used as a proof bar runs ALONE, loadavg as a magnitude"
+ },
+ "TWO_INDEPENDENT_RUNS_AGREE": {
+  "first_run_not_formally_alone": {
+   "digest": "b1ff48e40387a997",
+   "rows": 3834,
+   "loadavg_at_start": 2.21
+  },
+  "this_guarded_run": {
+   "digest": "b1ff48e40387a997",
+   "rows": 3834,
+   "loadavg_at_start": 0.6
+  },
+  "verdict": "IDENTICAL. So the move is NOT load-dependent and this arm is deterministic across a 3.7x spread in loadavg. Had they disagreed, that would have been a finding about the arm's determinism and would have been reported rather than resolved by silently preferring the alone run."
+ },
+ "_provenance": {
+  "git_commit": "3fa41f519734a1f8a742fec5a8e4b0cd6b8b8b3f",
+  "script": "committed cf_pd_one_cell.py, unchanged",
+  "device": "flash (CPU only, dry cell)",
+  "n": 1,
+  "timestamp": "2026-11-23T17:03:46.494137"
+ }
+}
