@@ -265,6 +265,28 @@ def _pct(k: int, n: int) -> Optional[float]:
     return round(k / n, 6) if n else None
 
 
+D175_REFUSAL_SIG_S = 0.017
+
+
+def _rowless_status(o: Dict[str, Any], failed: set, present: set) -> str:
+    """D226 (3): classify a cloud answer whose request id is ROWLESS (absent from the request log)
+    as 'delivered' | 'refused' | 'undetermined', from the outcome itself. Must match
+    episodic_lib.delivery_status (transcribed, not imported, like the rest of this module)."""
+    cp = o.get("cloud_payload") or {}
+    rid = cp.get("request_id")
+    if rid is None or rid in failed or rid in present:
+        return "present"  # not rowless; handled by the failed-set pass / normal delivery
+    letter, score, p_yes = cp.get("cloud_letter"), cp.get("cloud_score"), cp.get("p_yes")
+    real_answer = (letter is not None and letter != "X") or (score is not None) or (p_yes is not None)
+    tcd, topp = o.get("t_cloud_done"), o.get("t_opportunity")
+    dt = (float(tcd) - float(topp)) if (tcd is not None and topp is not None) else None
+    if real_answer or (dt is not None and dt > D175_REFUSAL_SIG_S):
+        return "delivered"
+    if dt is not None and dt <= D175_REFUSAL_SIG_S and not real_answer:
+        return "refused"
+    return "undetermined"
+
+
 def _committed_delivery(outcomes: List[Dict[str, Any]],
                         reqs: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     """The committed scorer's two delivery passes, keyed by opportunity_id.
@@ -292,20 +314,21 @@ def _committed_delivery(outcomes: List[Dict[str, Any]],
             o["t_delivered"] = None
             o["cloud_payload"] = None
             o["d144_failed_request"] = True
-    # D226 (3): when the request log DROPPED rows, a refused request whose row is absent is never in
-    # `failed`, so a refusal would silently stand as a delivered cloud answer. The outcome carries no
-    # refusal signal of its own, so an absent-row delivery is UNVERIFIABLE; null it (device stands,
-    # else no answer), the one direction that cannot credit a possible refusal. Matches the FAIL-LOUD
-    # guard the committed scorer (score.py) now raises for future complete-log runs. With a complete
-    # request log this nulls nothing (every delivered answer has its row).
+    # D226 (3), user rule 2026-11-24: when the request log DROPPED a row, classify the ROWLESS cloud
+    # answer from the OUTCOME (a parsed A-E letter, a cloud score / p_yes, or compute time beyond the
+    # ~17 ms D175 refusal signature = DELIVERED; near-instant with no real answer = REFUSED; else
+    # UNDETERMINED). A refused or undetermined rowless answer is nulled (device stands); a delivered
+    # one (e.g. a late end-of-run answer whose row was never flushed) is KEPT. With a complete
+    # request log this nulls nothing.
     present = {r.get("request_id") for r in reqs}
     for o in out.values():
-        cp = o.get("cloud_payload") or {}
-        rid = cp.get("request_id")
-        if o.get("t_delivered") is not None and rid is not None and rid not in present:
+        if o.get("t_delivered") is None:
+            continue
+        st = _rowless_status(o, failed, present)
+        if st in ("refused", "undetermined"):
             o["t_delivered"] = None
             o["cloud_payload"] = None
-            o["d226_absent_request"] = True
+            o["d226_rowless_%s" % st] = True
     done = {r["opportunity_id"]: float(r["t_done"]) for r in reqs
             if r.get("opportunity_id") and r.get("t_done") is not None}
     for oid, o in out.items():

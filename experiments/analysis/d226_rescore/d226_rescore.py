@@ -50,6 +50,8 @@ import sys
 from collections import defaultdict
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+sys.path.insert(0, os.path.join(ROOT, "experiments/analysis/episodic"))
+import episodic_lib as E  # noqa: E402  the canonical delivery_status (D226 (3))
 RUNS = os.path.join(ROOT, "results/orchestration/live2/frozen_test/runs")
 OUT = os.path.join(ROOT, "results/orchestration/live2/d226_rescore")
 SS_L_S = 2.0  # single-shot deadline (D142 item 3); assistive_value.deadline_s confirms per cell
@@ -165,43 +167,41 @@ def rescore_cell(d):
     pool_n = {"dashcam": dash_n, "robot": sweep.get("robot_pool_n", 0),
               "ss": sweep.get("ss_pool_n", 0)}
 
-    # recompute on-time two ways + collect the outcomes to null, per type
+    # recompute on-time two ways + collect the outcomes to null, per type, via the shared
+    # delivery_status (D226 (3)): a standing cloud answer is kept iff 'delivered' (present-and-not-
+    # refused, or a rowless outcome carrying a real answer); 'refused' and 'undetermined' are nulled.
     recomp_old = defaultdict(int)
     recomp_new = defaultdict(int)
     recomp_n = defaultdict(int)
-    tonull_absent = defaultdict(int)
-    tonull_refused = defaultdict(int)
-    null_opps = {"absent": defaultdict(list), "refused": defaultdict(list)}
+    tonull_rowless = defaultdict(int)   # rowless refused/undetermined standing answers nulled
+    tonull_refused = defaultdict(int)   # present-row refusals nulled
+    null_opps = {"rowless": defaultdict(list), "refused": defaultdict(list)}
+    rowless = dict(delivered=0, refused=0, undetermined=0)
+    opp_null = {}
     for o in outs:
         t = kind_of(o)
         recomp_n[t] += 1
         cp = o.get("cloud_payload") or {}
         rid = cp.get("request_id")
         stands = within(o, L[t])
-        is_ref = rid in refused
-        is_abs = rid is not None and rid not in present
-        # recomputed_old: a complete-log scorer nulls present refusals
-        if stands and not is_ref:
+        st = E.delivery_status(o, refused, present)
+        is_rowless = rid is not None and rid not in present and rid not in refused
+        if is_rowless and rid is not None:
+            rowless[st if st in rowless else "undetermined"] += 1
+        # recomputed_old: a complete-log scorer nulls only PRESENT refusals, keeping rowless as the
+        # committed cell.json did; recomputed_new nulls anything not 'delivered'.
+        if stands and rid not in refused:
             recomp_old[t] += 1
-        # new: also null unverifiable (absent-row) standing deliveries
-        if stands and not is_ref and not is_abs:
+        if stands and st == "delivered":
             recomp_new[t] += 1
-        if stands and is_ref:
-            tonull_refused[t] += 1
-            null_opps["refused"][t].append(o.get("opportunity_id"))
-        elif stands and is_abs:
-            tonull_absent[t] += 1
-            null_opps["absent"][t].append(o.get("opportunity_id"))
-
-    # --- correct-by-deadline: robot (robot_rows) and ss (assistive_rows), exact override
-    # build opportunity -> (refused/absent) for standing cloud, from outcomes
-    opp_null = {}
-    for o in outs:
-        cp = o.get("cloud_payload") or {}
-        rid = cp.get("request_id")
-        t = kind_of(o)
-        if within(o, L[t]) and (rid in refused or (rid is not None and rid not in present)):
-            opp_null[o.get("opportunity_id")] = ("refused" if rid in refused else "absent")
+        if stands and st in ("refused", "undetermined"):
+            opp_null[o.get("opportunity_id")] = st
+            if rid in refused:
+                tonull_refused[t] += 1
+                null_opps["refused"][t].append(o.get("opportunity_id"))
+            else:
+                tonull_rowless[t] += 1
+                null_opps["rowless"][t].append(o.get("opportunity_id"))
 
     rr = sc.get("robot_rows") or []
     rob_old = sum(1 for r in rr if r.get("standing_correct_by_deadline"))
@@ -245,8 +245,9 @@ def rescore_cell(d):
         on_time={t: dict(committed=committed_on[t], recomputed_old=recomp_old[t],
                          new=recomp_new[t], pool_n=recomp_n[t],
                          pc_divergence=pc_diverge[t],
-                         null_absent=tonull_absent[t], null_refused=tonull_refused[t])
+                         null_rowless=tonull_rowless[t], null_refused=tonull_refused[t])
                  for t in ("dashcam", "robot", "ss")},
+        rowless=rowless,
         robot_cbd=dict(old_correct=rob_old, new_correct=rob_new, n=rob_n, flipped=rob_flipped),
         ss_cbd=dict(old_score=round(ss_old, 6), new_score=round(ss_new, 6), n=ss_n,
                     flipped=ss_flipped),
@@ -295,14 +296,14 @@ def main():
         w = csv.writer(f)
         w.writerow(["scorer_sha", "cell", "seed", "type", "metric", "committed",
                     "recomputed_old", "new", "pool_n", "pc_divergence",
-                    "null_absent", "null_refused", "changed"])
+                    "null_rowless", "null_refused", "changed"])
         for r in results:
             s = seed_of(r["tag"])
             for t in ("dashcam", "robot", "ss"):
                 ot = r["on_time"][t]
                 w.writerow([sha, r["tag"], s, t, "on_time", ot["committed"],
                             ot["recomputed_old"], ot["new"], ot["pool_n"],
-                            ot["pc_divergence"], ot["null_absent"], ot["null_refused"],
+                            ot["pc_divergence"], ot["null_rowless"], ot["null_refused"],
                             int(ot["new"] != ot["committed"] or ot["pc_divergence"] != 0)])
             rc = r["robot_cbd"]
             w.writerow([sha, r["tag"], s, "robot", "correct_by_deadline", rc["old_correct"],
@@ -313,11 +314,17 @@ def main():
                         sv["old_score"], sv["new_score"], sv["n"], 0, "", "",
                         int(abs(sv["new_score"] - sv["old_score"]) > 1e-9)])
 
+    rowless_tot = dict(delivered=sum(r["rowless"]["delivered"] for r in results),
+                       refused=sum(r["rowless"]["refused"] for r in results),
+                       undetermined=sum(r["rowless"]["undetermined"] for r in results))
+    rowless_cells = [(r["tag"], r["rowless"]) for r in results
+                     if any(r["rowless"].values())]
     summary = dict(
         scorer_sha=sha, n_cells=len(results), n_skipped=len(skipped),
         n_changed=len(changed), n_pc_divergent=len(pc_bad),
         n_dashcam_ap_refresh=len(ap_refresh),
         n_robot_cbd_flipped=len(rob_flip), n_ss_cbd_flipped=len(ss_flip),
+        rowless_totals=rowless_tot, rowless_by_cell=rowless_cells,
         changed_cells=[r["tag"] for r in changed],
         robot_cbd_flipped=[(r["tag"], r["robot_cbd"]["old_correct"], r["robot_cbd"]["new_correct"],
                             r["robot_cbd"]["n"], r["robot_cbd"]["flipped"]) for r in rob_flip],
@@ -337,9 +344,15 @@ def main():
     lines.append("Scorer id (content hash of score.py + this driver): `%s`\n" % sha)
     lines.append("Re-derivation (no reruns; frozen-grid traces absent on this host). Refusal rule "
                  "unified with `score.py::refused_request_ids`: http_status != 200, or no status "
-                 "with no prompt/output tokens. An outcome whose standing cloud request is absent "
-                 "from the request log is UNVERIFIABLE and nulled (device stands, else no answer).\n")
+                 "with no prompt/output tokens. A ROWLESS cloud answer (request id with no request-"
+                 "log row, D226 (3) user rule) is classified from the outcome: a real delivered "
+                 "answer (parsed A-E letter, cloud score/p_yes, or compute time beyond the ~17 ms "
+                 "D175 refusal signature) is KEPT as delivered; the refusal signature is nulled; "
+                 "undetermined stays fail-loud in score.py and is nulled-and-flagged here.\n")
     lines.append("- cells rescored: **%d**  (skipped %d: seeds 1-3 / no logs)" % (len(results), len(skipped)))
+    lines.append("- rowless cloud answers: **delivered %d, refused %d, undetermined %d** (across %d cells)"
+                 % (rowless_tot["delivered"], rowless_tot["refused"], rowless_tot["undetermined"],
+                    len(rowless_cells)))
     lines.append("- cells whose on-time or correct-by-deadline CHANGES under the rule: **%d**" % len(changed))
     lines.append("- cells where recomputed_old != committed (capture-time scorer mis-scored a "
                  "PRESENT refusal): **%d**" % len(pc_bad))
@@ -348,7 +361,7 @@ def main():
     lines.append("- dashcam cells needing an AP (mAP) refresh (monitor on-time set moved): **%d**\n" % len(ap_refresh))
 
     def fmt_rows(rs):
-        out = ["| cell | type | committed | recomputed_old | new | pool_n | null_abs | null_ref |",
+        out = ["| cell | type | committed | recomputed_old | new | pool_n | null_rowless | null_ref |",
                "|---|---|---|---|---|---|---|---|"]
         for r in rs:
             for t in ("dashcam", "robot", "ss"):
@@ -356,7 +369,7 @@ def main():
                 if ot["new"] != ot["committed"] or ot["pc_divergence"]:
                     out.append("| %s | %s | %d | %d | %d | %d | %d | %d |" % (
                         r["tag"], t, ot["committed"], ot["recomputed_old"], ot["new"],
-                        ot["pool_n"], ot["null_absent"], ot["null_refused"]))
+                        ot["pool_n"], ot["null_rowless"], ot["null_refused"]))
         return out
 
     lines.append("## On-time changes (per type)\n")

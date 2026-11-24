@@ -108,8 +108,7 @@ def delivered_crops(arm_raw, seed, cal, dur, labels, fake, device_only=False):
         if not str(o.get("device_id", "")).startswith("dash"):
             continue
         cp = o.get("cloud_payload") or {}
-        rid = cp.get("request_id")
-        verified = rid is not None and rid in present and rid not in refused
+        verified = E.delivery_status(o, refused, present) == "delivered"
         cloud[o["opportunity_id"]] = (bool(cp.get("on_time")) and verified, cp.get("cloud_score"))
     # delivered calibrated score per instant, grouped by clip
     by_clip = defaultdict(list)  # clip -> list of (clip_pts, delivered_cal)

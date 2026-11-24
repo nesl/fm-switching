@@ -138,11 +138,10 @@ def collect_units(arm_raw, seed, device_only=False):
             ok = c.get("device")
         else:
             cp = o.get("cloud_payload") or {}
-            rid = cp.get("request_id")
-            # D226 (3): a cloud answer counts as on-time only if its request is VERIFIED delivered
-            # (present in the request log and not refused); an absent-row or refused request is
-            # unverifiable, so on-time falls back to the device answer.
-            verified = rid is not None and rid in present and rid not in refused
+            # D226 (3): on-time only if delivery_status classifies the cloud answer 'delivered'
+            # (present-and-not-refused, or a rowless outcome carrying a real delivered answer); a
+            # refused or undetermined request falls back to the device answer.
+            verified = E.delivery_status(o, refused, present) == "delivered"
             on_time = (bool(cp.get("on_time")) or bool(o.get("within_L"))) and verified
             ok = c.get("cloud") if on_time else c.get("device")
         units[("S", qid)] = 1 if ok else 0

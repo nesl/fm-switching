@@ -478,7 +478,29 @@ class Loaded:
     device_answers: Dict[str, Dict[str, Any]]
     requests: List[Dict[str, Any]]
     decisions: List[Dict[str, Any]]
+    rowless_counts: Optional[Dict[str, Any]] = None  # D226 (3): rowless delivered/refused/undetermined
 
+
+# D175 refusal signature: a refused request is rejected near-instantly, so its outcome carries no
+# real answer and almost no cloud compute time (t_cloud_done - t_opportunity).
+D175_REFUSAL_SIG_S = 0.017
+
+
+def _rowless_delivery_status(o: Dict[str, Any]) -> str:
+    """D226 (3): classify a cloud answer whose request id has no request-log row, from the outcome.
+    'delivered' if it carries a real answer (cloud_letter not "X", a cloud score or p_yes, or cloud
+    compute time beyond the ~17 ms refusal signature); 'refused' if it matches the D175 signature
+    (near-instant, no real answer); otherwise 'undetermined'."""
+    cp = o.get("cloud_payload") or {}
+    letter, score, p_yes = cp.get("cloud_letter"), cp.get("cloud_score"), cp.get("p_yes")
+    real_answer = (letter is not None and letter != "X") or (score is not None) or (p_yes is not None)
+    tcd, topp = o.get("t_cloud_done"), o.get("t_opportunity")
+    dt = (float(tcd) - float(topp)) if (tcd is not None and topp is not None) else None
+    if real_answer or (dt is not None and dt > D175_REFUSAL_SIG_S):
+        return "delivered"
+    if dt is not None and dt <= D175_REFUSAL_SIG_S and not real_answer:
+        return "refused"
+    return "undetermined"
 
 
 def refused_request_ids(reqs: Sequence[Dict[str, Any]]) -> set:
@@ -547,26 +569,43 @@ def load(trace_dir: Path, run_dir: Path) -> Loaded:
                 o["t_delivered"] = None
                 o["cloud_payload"] = None
                 o["d144_failed_request"] = True
-    # D226 (3): the refusal test above reads the request log; if the request log DROPPED rows
-    # (observed in the 11-21..11-23 request.jsonl writes), a refused request whose row is absent is
-    # never caught, and a refusal then silently REPLACES a device answer. The outcome record carries
-    # no refusal signal of its own (http_status and the token fields live only in the request log),
-    # so a refusal cannot be recovered from outcomes.jsonl. The only choice that cannot silently
-    # mis-score is to FAIL LOUD: a cloud answer that still stands (t_delivered set) but whose request
-    # id is absent from the request log is UNVERIFIABLE, and the scorer refuses rather than trust it.
-    # With a complete request log this guard never fires (every delivered answer has its row).
+    # D226 (3), user rule 2026-11-24: the refusal test above reads the request log; if the request
+    # log DROPPED a row (observed in the 11-21..11-23 writes), the refused/delivered status of that
+    # ROWLESS outcome cannot come from the row. Classify it from the OUTCOME itself:
+    #   - a real delivered answer (cloud_letter not "X", a cloud score or p_yes present, or cloud
+    #     compute time beyond the ~17 ms D175 refusal signature) -> DELIVERED (kept). A late
+    #     end-of-run answer whose row was never flushed is a writer defect counted DELIVERED here.
+    #   - the D175 refusal signature (near-instant, no real answer) -> REFUSED (device stands).
+    #   - neither determinable -> keep FAIL-LOUD ScoringRefused.
+    # Counts are recorded on the Loaded object as d226_rowless_{delivered,refused,undetermined}.
     present_ids = {r.get("request_id") for r in reqs}
-    unverifiable = sorted(
-        cp.get("request_id")
-        for o in out.values()
-        for cp in (o.get("cloud_payload") or {},)
-        if o.get("t_delivered") is not None and cp.get("request_id") not in present_ids)
-    if unverifiable:
+    n_deliv = n_ref = n_undet = 0
+    undetermined = []
+    for o in out.values():
+        if o.get("t_delivered") is None:
+            continue
+        cp = o.get("cloud_payload") or {}
+        rid = cp.get("request_id")
+        if rid is None or rid in present_ids:
+            continue  # not rowless (rid in failed was already nulled above)
+        st = _rowless_delivery_status(o)
+        if st == "delivered":
+            n_deliv += 1
+            o["d226_rowless_delivered"] = True
+        elif st == "refused":
+            n_ref += 1
+            o["t_delivered"] = None
+            o["cloud_payload"] = None
+            o["d226_rowless_refused"] = True
+        else:
+            n_undet += 1
+            undetermined.append(rid)
+    if undetermined:
         raise ScoringRefused(
-            "D226: %d delivered cloud answer(s) in %s have request ids absent from the request "
-            "log (%d rows); their refusal status is unverifiable and keeping them risks a silent "
-            "mis-score. First few: %s" % (len(unverifiable), run_dir.name, len(reqs),
-                                          unverifiable[:5]))
+            "D226: %d rowless cloud answer(s) in %s are UNDETERMINED (no request-log row and no "
+            "clear delivered/refused signature in the outcome). First few: %s"
+            % (len(undetermined), run_dir.name, undetermined[:5]))
+    rowless_counts = dict(delivered=n_deliv, refused=n_ref, undetermined=n_undet)
     # ---- D146: COMPLETION DELIVERY, and it is the DEFAULT from 2026-11-20.
     # A robot or single-shot answer counts as delivered when generation COMPLETES, prefill plus
     # decode; a dashcam Yes/No may stay at first token. The committed `t_delivered` is first-token
@@ -620,7 +659,8 @@ def load(trace_dir: Path, run_dir: Path) -> Loaded:
             "run did not see the same event stream as the others; D69 fairness is broken and "
             f"this is a STOP condition (D96 (2)):\n  run   {digest_run}\n  trace {want}\n"
             f"  mode  {mode}")
-    return Loaded(trace_dir, run_dir, meta, run_meta, records, out, dev, reqs, dec)
+    return Loaded(trace_dir, run_dir, meta, run_meta, records, out, dev, reqs, dec,
+                  rowless_counts=rowless_counts)
 
 
 NON_MEASUREMENT_SERVERS = ("stub", "fake")     # live2/CONTRACT.md calls it "fake"
@@ -1359,6 +1399,8 @@ def score_run(trace_dir: Path, run_dir: Path, calibration: Path, arm: str,
                                          if k != "dashcam_per_device"},
                                       dashcam_per_device=a.dashcam_per_device))
     base = dict(arm=arm, trace_dir=str(trace_dir), run_dir=str(run_dir),
+                # D226 (3): per-cell rowless (request-row-dropped) cloud-answer classification.
+                d226_rowless=lo.rowless_counts,
                 # D146: the delivery rule this score was computed under, recorded HERE so every
                 # cell carries it. The H100 found that a driver-scored cell.json had no such
                 # string anywhere, so from the record alone a reader could not tell whether a

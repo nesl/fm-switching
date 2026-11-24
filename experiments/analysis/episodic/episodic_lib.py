@@ -132,12 +132,53 @@ def refused_ids(reqs):
 
 
 def refused_and_present(path):
-    """(refused_ids, present_ids) for a cell. A cloud answer is a VERIFIED delivery only when its
-    request id is present in the request log and not refused (D226 (3)); an absent-row or refused
-    request is unverifiable and must fall back to the device answer."""
+    """(refused_ids, present_ids) for a cell. A cloud answer whose request id is present and not
+    refused is a VERIFIED delivery; a refused or ROWLESS (absent-row) request is classified by
+    delivery_status (D226 (3))."""
     reqs = read_jsonl_gz(os.path.join(path, "request.jsonl")) \
         or read_jsonl_gz(os.path.join(path, "requests.jsonl")) or []
     return refused_ids(reqs), {r.get("request_id") for r in reqs}
+
+
+# D175 refusal signature: a refused request is rejected near-instantly, so its outcome carries no
+# real answer and almost no cloud compute time. The threshold is on t_cloud_done - t_opportunity.
+D175_REFUSAL_SIG_S = 0.017
+
+
+def delivery_status(o, refused, present):
+    """D226 (3), user rule 2026-11-24: classify an outcome's cloud answer as
+    'delivered' | 'refused' | 'undetermined' | 'none', detecting the ROWLESS case (request id with
+    no request-log row) from the OUTCOME itself rather than nulling it blindly.
+
+    - present and not refused  -> delivered (verified by the request log);
+    - refused (by request log) -> refused;
+    - ROWLESS (no request row) -> DELIVERED if it carries a real delivered answer (a parsed A-E
+      letter, or a cloud score / p_yes, or cloud compute time beyond the ~17 ms D175 refusal
+      signature); REFUSED if it matches the D175 signature (near-instant, no real answer); otherwise
+      UNDETERMINED (the caller keeps the fail-loud behaviour). A late end-of-run answer whose request
+      row was never flushed is a writer defect and is counted DELIVERED from the outcome.
+    """
+    cp = o.get("cloud_payload") or {}
+    rid = cp.get("request_id")
+    if rid is None:
+        return "none"
+    if rid in refused:
+        return "refused"
+    if rid in present:
+        return "delivered"
+    # rowless: decide from the outcome
+    letter = cp.get("cloud_letter")
+    score = cp.get("cloud_score")
+    p_yes = cp.get("p_yes")
+    real_answer = (letter is not None and letter != "X") or (score is not None) or (p_yes is not None)
+    tcd, topp = o.get("t_cloud_done"), o.get("t_opportunity")
+    dt = (float(tcd) - float(topp)) if (tcd is not None and topp is not None) else None
+    beyond_sig = dt is not None and dt > D175_REFUSAL_SIG_S
+    if real_answer or beyond_sig:
+        return "delivered"
+    if dt is not None and dt <= D175_REFUSAL_SIG_S and not real_answer:
+        return "refused"
+    return "undetermined"
 
 
 def ss_correct_in_time(path):
@@ -150,9 +191,9 @@ def ss_correct_in_time(path):
     n = len(rows)
     if not n:
         return None, 0, None, None, 0
-    # D226 (3): a cloud answer counts as on-time only if its request is VERIFIED delivered (present
-    # in the request log and not a refusal). An absent-row or refused request is unverifiable, so
-    # on-time falls back to the device answer.
+    # D226 (3): a cloud answer counts as on-time only if delivery_status classifies it 'delivered'
+    # (present-and-not-refused, or a rowless outcome that carries a real delivered answer). A refused
+    # or undetermined request falls back to the device answer.
     refused, present = refused_and_present(path)
     k = 0
     cloud_on = 0
@@ -163,8 +204,7 @@ def ss_correct_in_time(path):
         if c is None:
             missing += 1
             continue
-        rid = (o.get("cloud_payload") or {}).get("request_id")
-        verified = rid is not None and rid in present and rid not in refused
+        verified = delivery_status(o, refused, present) == "delivered"
         on_time = (bool((o.get("cloud_payload") or {}).get("on_time"))
                    or bool(o.get("within_L"))) and verified
         if on_time:
