@@ -48,6 +48,38 @@ better account of rung 4 at 1x is that it sent 675 FEWER robot requests for 121 
 
 ## HAZARDS THAT HAVE EACH COST SOMETHING TODAY
 
+### THE ONE PATTERN BEHIND MOST OF TONIGHT'S NEAR-MISSES: AN INSTRUMENT THAT RETURNS A CONFIDENT WRONG
+### ANSWER POINTING AT A HARMFUL ACTION. Four distinct instances in one evening, each caught only by
+### someone checking WHAT THE INSTRUMENT CLASSIFIED rather than WHAT IT CONCLUDED.
+
+| instrument | how it failed | what it looked like | what the wrong action would have been |
+|---|---|---|---|
+| alone-guards, THREE sessions | bounded by a name pattern, a hardcoded basename list, and a tree snapshot | `alone: true` while the box was busy | a digest recorded as alone that was not |
+| a byte-identity check | a raw line-number rule swept two function bodies into "post-run" | PASS on the real tree | shipping wiring whose in-run statements were never checked |
+| a hung driver | blocked with 00:00:00 CPU and no children for 59 minutes | indistinguishable from a long cell | waiting out an hour, then reporting a table from nothing |
+| a liveness watch | `grep -lq ... /proc/*/cmdline` exited non-zero on ERROR, not no-match, so the negation read "gone" | a false terminal state | RELAUNCHING a running sweep, putting two drivers on the box and breaking the alone rule it enforced |
+
+THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
+- READ WHAT A CHECK CLASSIFIED, NOT ITS VERDICT. An impossible success is as diagnostic as an impossible
+  failure, and arithmetic checking cannot see either.
+- A CHECK SHOULD CARRY ITS OWN NEGATIVE CONTROL AND RUN IT EVERY TIME. One session now injects four
+  decision-changing statements and requires all four to be REJECTED; the real tree passing is the
+  positive control.
+- SILENCE MUST BE DISTINGUISHABLE FROM PROGRESS. Bound every wait, and make it end on at least three
+  conditions named separately: the result appeared, the process died without writing, and the resource
+  floor was hit. A watch that reports a false terminal state is WORSE than no watch, because the wrong
+  action looks correct.
+- COUNT PROCESSES BY WHAT THEY ARE, never by a name. An interpreter plus a path under the repo or a
+  scratchpad tree, or enumerate `/proc/<pid>/cwd`. State the census's own blind spot in the record.
+- PREFER EVIDENCE OVER A FLAG. Two independent runs agreeing exactly is DIRECT evidence of determinism;
+  an alone-flag is only an argument that nothing COULD have disturbed the cell. Record the census and
+  the loadavg magnitudes BESIDE any boolean so it can be re-adjudicated later.
+- AND FOR RELAYED CLAIMS: a NEGATIVE assertion about a primary artefact is cheap to check and expensive
+  to propagate. Three were relayed unverified today (a loadavg precedent that did not exist, a
+  touch-price magnitude off by about 26x, and two metric names that did exist). Check a negative against
+  the artefact BEFORE passing it on, and send the command and its output with it.
+
+
 - ALONE GUARDS ARE UNRELIABLE. Three sessions found theirs blind to processes they had no name for, each
   bounded differently (a tree snapshot, a `"one_cell"` pattern, a hardcoded basename list). COUNT LIVE2
   PROCESSES BY WHAT THEY ARE (an interpreter plus a path under the repo or a scratchpad tree, or
