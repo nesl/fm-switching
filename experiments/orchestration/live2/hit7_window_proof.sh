@@ -18,7 +18,7 @@ run() {   # tree label script args...
   local t=$1 lab=$2; shift 2; local f=$SP/cells/${t}_${lab}.json
   [ -s $f ] && return
   local la0; la0=$(cut -d' ' -f1 /proc/loadavg)
-  bash experiments/orchestration/proof_guard.sh 420 "h7_${t}_${lab}" -- $PY -I "$@"
+  bash experiments/orchestration/proof_guard.sh 240 "h7_${t}_${lab}" -- $PY -I "$@"
   tail -1 $HOME/data/live2/proofs/h7_${t}_${lab}.out | jq -c --arg t $t --arg l $lab --arg la0 "$la0" --arg la1 "$(cut -d' ' -f1 /proc/loadavg)" \
     '. + {tree: $t, label: $l, loadavg_start: ($la0|tonumber), loadavg_end: ($la1|tonumber)}' > $f 2>/dev/null \
     || echo "{\"tree\":\"$t\",\"label\":\"$lab\",\"error\":\"no json\"}" > $f
