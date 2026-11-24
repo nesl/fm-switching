@@ -25,11 +25,37 @@ process census at 22:40, so no resume needs to re-derive it. ***
   HEALTHY `-p` run looks like to this watchdog.** It is bounded: the log counts `RESTART n/12`, and it
   stood at 4/12 at 22:40. DO NOT read the restarts as evidence that anything broke, and do not go
   hunting for the crash. Each restart does cost a full session, so leave this file accurate.
-- **E1's 52-cell sweep IS RUNNING.** pid 304781 is
-  `d213_digest_driver.py --out out/digests_e1.json`, with a LIVE CHILD running
-  `cf_pd_one_cell.py --arm v5-rules-2 --seed 4 --n 16 --run-s 1200 --cutoff-off`. **DO NOT KILL IT and
-  do not start a second sweep.** The ALONE rule means a dry cell of your own must WAIT.
-- The DEVICE_ANSWERS driver `d218_da_driver.py` was restarted and is writing to `scratchpad/cells`.
+*** SUPERSEDED 2026-11-24 ~12:00 PST: NOTHING IS RUNNING. THE BOX IS FREE AND A DRY CELL OF YOUR OWN
+MAY RUN. *** Verified by census, not assumed: ZERO live2 python under the repo or any scratchpad, loadavg
+0.16. E1's sweep and the DEVICE_ANSWERS driver both FINISHED and their sessions STOOD DOWN. The two
+bullets below are kept only for the trail.
+  [STALE, DO NOT ACT ON:] ~~E1's 52-cell sweep IS RUNNING, pid 304781 ... a dry cell of your own must
+  WAIT.~~ ~~The DEVICE_ANSWERS driver was restarted and is writing to scratchpad/cells.~~
+
+*** CURRENT POSITION IN ONE BLOCK, SO NO RESUME HAS TO READ 900 LINES TO FIND IT. ***
+**ALL FIVE OVERNIGHT STEPS ARE CLOSED OR BLOCKED ON THE USER. NOTHING EXPERIMENTAL IS ACTIONABLE.**
+- **THE LADDER IS COMPLETE AND FULLY SCORED** (`8feed0fe`). Rung 3 `covex-v6-fair-final`: **all three
+  checks pass at ALL FOUR seeds**, beating its comparator (retention 1.106 / 1.077 / 1.000 against a 0.90
+  bar). Rung 4 `covex-v6-final`: **all three pass at ONE seed of four**; check 2 fails at s5/s6/s7 and
+  check 1 ALSO fails at s7. **GOVERNING CAVEAT: these four seeds do NOT test the rung-4 DESIGN** - one
+  added limb was never reachable and the other fires with a hard-zero queueing term.
+- **Step 1 DEVICE_ANSWERS: DONE, and it STOPPED on its pre-registered condition** (1x count is 1).
+- **Step 2 E1: IMPOSSIBLE AS WRITTEN.** `scrape_metrics()` has zero callers; no switch reaches a decision.
+- **Step 3 item 3: LANDED AND WIRED** (`56a73293`, call site `coordinator.py:2138`, method `:2148`), 24 of
+  24 dry arms byte-identical. It also CLOSES the signal-(a) gap for future cells.
+- **Step 4 the 0.25x pair: GATED** on step 1's ruling AND on `covex-v6-final-da` not resolving on the
+  normal import path (it needs its own byte-identity proof first).
+- **Step 5 the doc lines: DONE AND PROVED** (`fbd2f64b`), A = B = `57bed6ace2eb07d1` / 14,509.
+- **THE RUN-PATH FREEZE HAS LAPSED, BOTH REASONS.** See the reconciliation further down; the procedure
+  that replaces it is: build from ORIGIN's content, census the box, and prove a live-path edit neutral on
+  a dry A/B from one literal sha.
+**SO THE ONLY OPEN WORK IS THE USER'S RULINGS**, listed under OPEN, NEEDING A USER RULING: rung 4's
+supersession; the queue-term fix (**DO NOT BUILD**); wiring the metrics link; whether DEVICE_ANSWERS is
+adopted into `covex-v6-final` or kept separate; which of the two agreeing D218 pre-registrations is the
+record; and E3. **A RESUME THAT FINDS NOTHING ELSE TO DO IS CORRECT: say so and stop, rather than
+inventing work or re-deriving this block.** If you have spare capacity, the useful thing is to VERIFY one
+of this file's own claims against origin and correct it, which is how the last five resumes each found a
+real stale entry.
 
 *** A CORRECTION TO THIS FILE'S OWN HANG-DETECTION LESSON, because I got the discriminator wrong
 earlier tonight and a future resume would kill a healthy driver with it. ***
