@@ -1,0 +1,493 @@
+{
+ "_what": "D211 SIGNAL (a) COMPUTED AND VALIDATED against the committed per-window aggregate host counter, on the first committed cell carrying BOTH halves of the join. This is the user's Task 3, pre-registered in d211_host_attribution_prereg.json and blocked until this cell landed.",
+ "study": "StudyD211-HOSTATTR",
+ "rulings_cited": [
+  "D211 (host attribution, user decision 2026-11-23)",
+  "D166"
+ ],
+ "_register": "MIXED AND LABELLED. The VALIDATION TARGET is an ENGINE-REPORTED AGGREGATE counter, not per-request attribution: D211 records that per-request host hits are folded into `cached_tokens`, which is the whole reason signal (a) has to INFER them. The ATTRIBUTED quantity is an INFERENCE from the belief, not a measurement, and is never presented as one. One traced window is a SINGLE TRACED UNIT, not a census; the window table is the full table.",
+ "cell": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30",
+ "read_at_rev": "da1593a0567c580b166595014e752a19629e55f2",
+ "cell_status": "UNSCORED. score.py's D226 (3) guard refused this cell at MISSING = 1 (request r10175 was delivered, was still streaming at finish, and got no request.jsonl row); the Orin is rescoring it outcome-keyed under a user ruling. The cell is NOT marked INVALID. Signal (a) does not depend on the score: it validates the residency belief against host counters on decision and request rows, so the cell is usable for this. A reader must not assume a scored cell. The sibling s5 cell has no host_counters_d211.log, so s4 is the only candidate.",
+ "host_warm_pricing": "STAYS OFF. Per the pre-registration, passing the bar would not switch it on; only a user ruling does. The result here is a FAIL, so `if_neither_passes` applies for signal (a).",
+ "bar_quoted_verbatim_from_the_prereg": {
+  "_source": "d211_host_attribution_prereg.json :: agreement_bar",
+  "_register": "THE USER'S PROPOSED DEFAULT, FROZEN EXACTLY AS PROPOSED AND NOT ALTERED.",
+  "window_s": 10,
+  "per_window": "attributed host tokens within 20 percent of the aggregate host-counter delta, in at least 80 percent of windows with any host activity",
+  "whole_run": "total attributed host tokens within 10 percent of the counter's total over the run",
+  "verdict_rule": "a signal PASSES only if both the per-window and the whole-run criterion hold"
+ },
+ "does_the_addendum_change_the_bar": "NO. d211_host_attribution_prereg_addendum.json states `the_bar_is_unchanged: true`. It constrains the EVALUATION PROCEDURE only, in three ways, all of which were respected here: (1) counters reset per cell, so no delta is taken across a cell boundary; (2) windows are about 10.0 to 10.1 s and NOT a grid, so every delta is taken between adjacent `t` stamps and never by assuming 10 s spacing (measured dt: min 10.180, median 10.233, max 10.482 s); (3) edge windows are handled explicitly and reported. The prereg also pre-registered that any verdict quoted over fewer than 30 host-active windows must be labelled underpowered: 104 host-active windows here, so that label does NOT apply.",
+ "VERDICT": "FAIL",
+ "verdict_detail": "Signal (a) FAILS both criteria, and not marginally. It over-attributes the host tier by about 10x: 24,598,410 inferred host tokens against a measured 2,486,608, and 0 of 104 host-active windows within 20 percent against a bar of 80 percent. The failure is not a near miss at any variant tried (see sensitivity and stratum below), so no reading of the data brings it near the bar. Per D187 and the prereg, nothing was stretched and the bar was not moved.",
+ "window_denominator": {
+  "_why_reported": "the artefact took this check BEFORE computing anything precisely because a flat counter series would leave the per-window test with an EMPTY DENOMINATOR, making any pass vacuous.",
+  "counter_samples": 117,
+  "total_10s_windows_adjacent_sample_pairs": 116,
+  "windows_with_any_host_activity": 104,
+  "fraction_with_activity": 0.8966,
+  "underpowered_label_applies": false,
+  "note": "NOT vacuous: 104 host-active windows, well above the prereg's 30-window underpower threshold. The denominator is real and the FAIL is informative.",
+  "edge_handling": "EDGE WINDOWS: the counter series starts 1.479 s AFTER the first request's first token and ends 7.842 s BEFORE the last request's, so no window brackets a region with no traffic and 0 windows were excluded on the prereg's edge criterion. Instead 52 of 10,174 requests (150,238 inferred host tokens, 0.6 percent) fall OUTSIDE the counter's covered span entirely and are therefore in no window; they are excluded from the per-window test and reported here."
+ },
+ "bytes_to_tokens_conversion": {
+  "_the_hazard": "kv_offload_load_bytes_total is BYTES and must not be conflated with tokens.",
+  "conversion_used": "NONE. No bytes-to-tokens conversion was performed or needed.",
+  "why": "the committed log carries a TOKEN-DENOMINATED host series directly: `vllm:prompt_tokens_by_source_total[source=external_kv_transfer]`, present on all 117 samples with 105 distinct values. The driver-v32 capture keeps the labels (the addendum records that a regex-only fix would have lost them), so the host share is recoverable as tokens. That series IS the validation target, and the units match the inferred quantity exactly.",
+  "corroborating_series": "`vllm:external_prefix_cache_hits_total` is the same quantity up to scrape skew: equal to the external_kv_transfer token series on 100 of 117 samples, max absolute difference 22,416 tokens. Run totals identical at 2,486,608.",
+  "why_the_bytes_series_is_NOT_convertible": "over the run kv_offload_load_bytes_total rises by 649.7 GB while external_kv_transfer rises by 2,486,608 tokens, an implied 261,299 bytes per token. Qwen2.5-7B KV geometry (28 layers x 2 x 4 KV heads x 128 dim x 2 bytes) gives about 57,344 bytes per token, so the implied figure is about 4.6x the model's own per-token KV size. That is consistent with the artefact's load_over_store ratio (4.1x to 5.6x there, 6.27x here): the bytes counter counts bytes MOVED, including the same host-resident prefix re-read repeatedly, whereas the token counter counts prompt tokens CREDITED once. The two cannot be interconverted without a free choice, so the bytes series is reported as corroboration of host activity only and is NOT used in the bar. This is a limitation on the bytes signal, not a license to pick a divisor.",
+  "bytes_series_coverage": "present on 113 of 117 samples; absent on samples 0 to 3, so the series is only differenceable from sample 4 onward (the metric appears lazily once the first offload load occurs)."
+ },
+ "clock_join": {
+  "_this_is_a_declared_proxy": true,
+  "problem": "NO recorded unix anchor exists on the run-relative side. request.jsonl.gz, decision.jsonl.gz, decision_time.jsonl.gz, outcomes.jsonl.gz, lateness_detail.jsonl.gz and residency.jsonl all use t=0 at run start and contain ZERO unix-epoch values (verified by grep for 17955xxxxx across every log: 0 matching lines in each). Only host_counters_d211.log and host_load.jsonl.gz carry the unix clock. The per-window test therefore REQUIRES an estimated t0.",
+  "anchor_method": "t0 estimated by minimising L1 error between the engine's cumulative `vllm:prompt_tokens_total` at each counter sample and the request log's cumulative prompt_tokens by t_first_token, over a 100 s grid at 0.05 s resolution.",
+  "why_this_does_not_fit_the_answer": "the anchoring series is 95.4 percent independent of the series under test: prompt_tokens_total is dominated by local_compute (5,039,828) plus local_cache_hit (46,921,424), against external_kv_transfer (2,486,608). The anchor is estimated from the local traffic and then applied to the host traffic.",
+  "t0_unix": 1795542771.05,
+  "residual": "L1 residual 6,464 tokens over 117 samples (mean 55 tokens per sample) against a 54,447,860-token run total.",
+  "independent_corroboration": "the request log accounts for engine traffic: engine prompt_tokens_total / request-log sum(prompt_tokens) = 54,452,865 / 54,648,861 = 0.9964, and engine prompt_tokens_cached_total / sum(cached_tokens) = 49,408,032 / 49,571,840 = 0.9967. The 0.36 percent shortfall is the 7.8 s tail after the last counter sample. So the counter and the request log describe the same population.",
+  "sensitivity": "the verdict is invariant to the anchor: shifting t0 by -3 to +3 s moves the within-20-percent count only between 0 and 1 of 104, and the whole-run ratio only between 9.858 and 9.906."
+ },
+ "result_as_ruled": {
+  "total_windows": 116,
+  "windows_with_any_host_activity": 104,
+  "fraction_of_windows_with_activity": 0.8966,
+  "within_20_percent": 0,
+  "fraction_within_20_percent": 0.0,
+  "per_window_criterion_met": false,
+  "whole_run_attributed_tokens": 24598410,
+  "whole_run_counter_tokens": 2486608,
+  "whole_run_ratio": 9.8924,
+  "whole_run_criterion_met": false,
+  "ratio_distribution": {
+   "min": 0.6656,
+   "p10": 2.3826,
+   "p25": 4.9258,
+   "p50": 10.4454,
+   "p75": 35.39,
+   "p90": 138.5299,
+   "max": 3266.6667
+  },
+  "n_distinct_ratios": 104
+ },
+ "sensitivity_bin_by_t_submit_instead_of_t_first_token": {
+  "total_windows": 116,
+  "windows_with_any_host_activity": 104,
+  "fraction_of_windows_with_activity": 0.8966,
+  "within_20_percent": 1,
+  "fraction_within_20_percent": 0.0096,
+  "per_window_criterion_met": false,
+  "whole_run_attributed_tokens": 24611425,
+  "whole_run_counter_tokens": 2486608,
+  "whole_run_ratio": 9.8976,
+  "whole_run_criterion_met": false,
+  "ratio_distribution": {
+   "min": 0.5054,
+   "p10": 2.4526,
+   "p25": 4.9258,
+   "p50": 10.7068,
+   "p75": 36.2974,
+   "p90": 144.2164,
+   "max": 3231.3333
+  },
+  "n_distinct_ratios": 104
+ },
+ "signal_a_definition_used": "host_tokens(r) = max(0, cached_tokens(r) - gpu_prefix_believed(r, t_submit)), verbatim from the prereg. gpu_prefix_believed is now READ DIRECTLY from belief.gpu_tokens_by_session on the latest decision row at or before t_submit, NOT reconstructed by accumulating piece_tokens. The reconstruction proxy the addendum worried about was therefore NOT needed.",
+ "the_join_the_artefact_said_was_the_blocker": {
+  "decision_rows": 15111,
+  "rows_with_nonempty_belief_gpu_tokens_by_session": 15100,
+  "prior_cell_for_contrast": "d211_signal_a_available.json records 0 of 16,840 rows non-empty on the pre-item-3 cell covex-v6-fair-c5attr-rr_n16_s4. The field is now populated, so the join exists.",
+  "host_counter_samples": 117,
+  "distinct_kv_offload_load_bytes_values": 104,
+  "verdict": "BOTH HALVES PRESENT IN ONE CELL, confirmed independently at the literal sha. The blocker the artefact named is gone."
+ },
+ "WHY_IT_FAILS_root_caused": {
+  "_rule": "a near-constant where a distribution is expected is a defect signal, not a result, so each was chased to its source.",
+  "constant_1_gpu_prefix_is_0_on_74_percent_of_requests": {
+   "observed": "gpu_prefix_believed has only 23 distinct values, median 0, and is 0 on 7,546 of 10,174 requests.",
+   "chased_to": "the belief's gpu_tokens_by_session names only 22 distinct sessions over the whole run, while the request log has 379 distinct session_ids. 357 request sessions NEVER appear in it. The 22 are exactly the robot sessions (robo000 to robo006 and their successors); the remaining traffic is dashcam and assistant, and 7,157 of 10,174 requests carry session_id = null, which can never match a belief key.",
+   "is_it_a_join_fault": "NO, and this was checked explicitly because a key-format mismatch would be a plumbing fault rather than a finding: all 22 sessions named in the belief DO appear in the request log (set difference = 0), so the key format matches and the join works. Absence is genuine: the belief predicts no GPU-resident prefix for those sessions, which the prereg's definition maps to 0.",
+   "explained": true
+  },
+  "constant_2_only_23_distinct_gpu_token_values": {
+   "observed": "values are 121, 1024, 1145, 2048, 2169, 3072, 3193, ... 11385.",
+   "chased_to": "the built prefix accumulates in 1024-token pieces (decision rows carry piece_tokens = 1024), on top of a 121-token or 97-token session header, capped at 11 pieces. A genuine quantised distribution, properly explained, not a short circuit.",
+   "explained": true
+  },
+  "constant_3_belief_host_tokens_by_session_is_empty_on_all_15100_snapshots": {
+   "observed": "host_tokens_by_session = {} on every snapshot that has a non-empty gpu_tokens_by_session.",
+   "chased_to": "the belief carries no host-resident prefix at all. This is D211's own premise restated from the belief side: host reload is native but unobserved by the policy.",
+   "explained": true
+  },
+  "the_mechanism_of_the_failure": "cached_tokens is the SUM of local (GPU) prefix-cache hits and external (host) KV transfer, and the engine does not separate them per request. Over this cell the engine reports 46,921,424 local_cache_hit tokens against 2,486,608 external_kv_transfer tokens, so cached_tokens is 95 percent LOCAL. Signal (a) subtracts the BELIEVED GPU prefix and calls the residue host. The believed GPU prefix totals 25,708,265 tokens against the engine's 46,921,424 actual local hits, so the belief under-predicts the engine's real GPU residency by about 1.8x, and the whole 21-million-token shortfall lands on a 2.5-million-token quantity. The signal is not measuring host reload; it is measuring the belief's own under-prediction of the local prefix cache.",
+  "stratum_beside_the_mean": {
+   "_why": "consistency check 3 requires the stratum and mixing weight beside the mean where an effect is expected to be concentrated.",
+   "robot_sessions_the_belief_actually_tracks": {
+    "n_requests": 2661,
+    "n_sessions": 22,
+    "sum_cached_tokens": 26491552,
+    "sum_gpu_prefix": 25708265,
+    "sum_attributed_host": 1668360,
+    "share_of_total_attribution": 0.0674,
+    "belief_too_optimistic_count": 2466
+   },
+   "dashcam_and_assistant_sessions_the_belief_never_names": {
+    "n_requests": 7513,
+    "n_sessions": 357,
+    "sum_cached_tokens": 23080288,
+    "sum_gpu_prefix": 0,
+    "sum_attributed_host": 23080288,
+    "share_of_total_attribution": 0.9326,
+    "belief_too_optimistic_count": 0
+   },
+   "reading": "93.3 percent of the over-attribution comes from the stratum where the belief names no session, so its gpu_prefix is 0 and signal (a) degenerates to cached_tokens.",
+   "diagnostic_only_robot_stratum_against_the_bar": {
+    "total_windows": 116,
+    "windows_with_any_host_activity": 104,
+    "fraction_of_windows_with_activity": 0.8966,
+    "within_20_percent": 16,
+    "fraction_within_20_percent": 0.1538,
+    "per_window_criterion_met": false,
+    "whole_run_attributed_tokens": 1649994,
+    "whole_run_counter_tokens": 2486608,
+    "whole_run_ratio": 0.6636,
+    "whole_run_criterion_met": false,
+    "ratio_distribution": {
+     "min": 0.0,
+     "p10": 0.0,
+     "p25": 0.3379,
+     "p50": 0.5524,
+     "p75": 0.7434,
+     "p90": 0.9695,
+     "max": 8.7865
+    },
+    "n_distinct_ratios": 80
+   },
+   "_caveat_on_that_diagnostic": "NOT the ruled quantity and NOT an alternative verdict. The counter is engine-wide, so comparing a robot-only attribution against it is invalid in the other direction (it under-counts: ratio 0.664). It is reported because the prereg demands the stratum, and it FAILS the bar too, at 16 of 104."
+  }
+ },
+ "belief_too_optimistic_diagnostic": {
+  "_why": "the prereg requires this REPORTED WHATEVER THE OUTCOME, because it is diagnostic in its own right. It is now the RULED form (believed GPU prefix > cached_tokens), not the weaker necessary-not-sufficient form the addendum left for the measurement pass, because the field is populated.",
+  "definition": "gpu_prefix_believed(r, t_submit) > cached_tokens(r): the belief claimed GPU residency the engine did not honour",
+  "n": 2466,
+  "of": 10174,
+  "fraction": 0.2424,
+  "on_the_stratum_where_the_belief_predicts_anything": {
+   "n": 2466,
+   "of": 2661,
+   "fraction": 0.9267,
+   "reading": "ON 92.7 PERCENT OF THE REQUESTS WHERE THE BELIEF PREDICTS A GPU-RESIDENT PREFIX AT ALL, IT PREDICTS MORE THAN THE ENGINE REUSED. The belief is systematically optimistic on exactly the sessions it tracks, which is a finding about the belief independent of the signal (a) verdict."
+  },
+  "by_cache_path": {
+   "WARM": {
+    "n": 9043,
+    "sum_attributed_host": 24748648,
+    "too_optimistic": 2463
+   },
+   "COLD": {
+    "n": 1131,
+    "sum_attributed_host": 0,
+    "too_optimistic": 3
+   }
+  }
+ },
+ "attributed_host_tokens_distribution": {
+  "n": 10174,
+  "min": 0,
+  "p10": 0,
+  "p25": 0,
+  "p50": 2032,
+  "p75": 4064,
+  "p90": 5760,
+  "max": 19360,
+  "mean": 2432.5,
+  "n_distinct": 258,
+  "n_zero": 3594,
+  "_note": "reported as a distribution with the zero count, never a mean alone, as the prereg requires. 258 distinct values and 104 distinct per-window ratios, so nothing here is a suspicious constant."
+ },
+ "one_traced_window": {
+  "_register": "ONE TRACED UNIT, not a census. Chosen as the MEDIAN host-counter delta among the 104 host-active windows, so it is representative rather than favourable.",
+  "counter_sample_index": 56,
+  "t_lo_unix": 1795543348.488,
+  "t_hi_unix": 1795543358.691,
+  "dt_s": 10.203,
+  "counter_series": "vllm:prompt_tokens_by_source_total[source=external_kv_transfer]",
+  "counter_lo": 907808,
+  "counter_hi": 927744,
+  "AGGREGATE_DELTA_tokens": 19936,
+  "requests_with_t_first_token_in_window": 61,
+  "first_14_rows": [
+   {
+    "request_id": "r3948",
+    "t_first_token_rel": 577.554,
+    "cached_tokens": 1552,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 1552,
+    "prompt_tokens": 6126,
+    "cache_path": "WARM"
+   },
+   {
+    "request_id": "r3949",
+    "t_first_token_rel": 577.554,
+    "cached_tokens": 4400,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 4400,
+    "prompt_tokens": 4774,
+    "cache_path": "WARM"
+   },
+   {
+    "request_id": "r3950",
+    "t_first_token_rel": 577.703,
+    "cached_tokens": 6096,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 6096,
+    "prompt_tokens": 6464,
+    "cache_path": "WARM"
+   },
+   {
+    "request_id": "r3951",
+    "t_first_token_rel": 577.704,
+    "cached_tokens": 6432,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 6432,
+    "prompt_tokens": 6802,
+    "cache_path": "WARM"
+   },
+   {
+    "request_id": "r3952",
+    "t_first_token_rel": 577.816,
+    "cached_tokens": 6768,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 6768,
+    "prompt_tokens": 7140,
+    "cache_path": "WARM"
+   },
+   {
+    "request_id": "r3953",
+    "t_first_token_rel": 578.089,
+    "cached_tokens": 0,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 0,
+    "prompt_tokens": 1056,
+    "cache_path": "COLD"
+   },
+   {
+    "request_id": "r3954",
+    "t_first_token_rel": 578.389,
+    "cached_tokens": 4736,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 4736,
+    "prompt_tokens": 6126,
+    "cache_path": "WARM"
+   },
+   {
+    "request_id": "r3955",
+    "t_first_token_rel": 578.556,
+    "cached_tokens": 1024,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 1024,
+    "prompt_tokens": 1394,
+    "cache_path": "WARM"
+   },
+   {
+    "request_id": "r3956",
+    "t_first_token_rel": 578.556,
+    "cached_tokens": 6096,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 6096,
+    "prompt_tokens": 6464,
+    "cache_path": "WARM"
+   },
+   {
+    "request_id": "r3957",
+    "t_first_token_rel": 578.88,
+    "cached_tokens": 0,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 0,
+    "prompt_tokens": 1056,
+    "cache_path": "COLD"
+   },
+   {
+    "request_id": "r3958",
+    "t_first_token_rel": 578.975,
+    "cached_tokens": 6432,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 6432,
+    "prompt_tokens": 6802,
+    "cache_path": "WARM"
+   },
+   {
+    "request_id": "r3959",
+    "t_first_token_rel": 579.046,
+    "cached_tokens": 1360,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 1360,
+    "prompt_tokens": 1732,
+    "cache_path": "WARM"
+   },
+   {
+    "request_id": "r3960",
+    "t_first_token_rel": 579.192,
+    "cached_tokens": 1024,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 1024,
+    "prompt_tokens": 1394,
+    "cache_path": "WARM"
+   },
+   {
+    "request_id": "r3961",
+    "t_first_token_rel": 579.306,
+    "cached_tokens": 6768,
+    "gpu_prefix_believed": 0,
+    "host_tokens_inferred": 6768,
+    "prompt_tokens": 7140,
+    "cache_path": "WARM"
+   }
+  ],
+  "rows_not_shown": 47,
+  "ATTRIBUTED_SUM_tokens": 208240,
+  "arithmetic": "208240 / 19936 = 10.445",
+  "RATIO": 10.445,
+  "within_20_percent": false,
+  "readable_check": "every gpu_prefix_believed in the shown rows is 0 (these are dashcam sessions the belief never names), so host_tokens_inferred equals cached_tokens exactly, and the sum of 61 requests' local prefix-cache hits is compared against a window in which the engine moved 19,936 tokens from host. The 10.4x is visible in the rows."
+ },
+ "controls_on_the_CHECKER_not_only_the_result": {
+  "_why": "consistency check 7: a broken check passes every arm, and an impossible failure and an impossible success are equally diagnostic. The checker was validated before the comparison was read.",
+  "positive_control_attribution_equals_the_counter_delta": {
+   "n_active": 104,
+   "within20": 104,
+   "frac": 1.0
+  },
+  "positive_control_expected": "104 of 104 and whole-run exact",
+  "negative_control_attribution_zero": {
+   "n_active": 104,
+   "within20": 0,
+   "frac": 0.0
+  },
+  "negative_control_expected": "0 of 104",
+  "boundary_control_1_19x_just_inside_the_band": {
+   "n_active": 104,
+   "within20": 104,
+   "frac": 1.0
+  },
+  "boundary_control_1_21x_just_outside_the_band": {
+   "n_active": 104,
+   "within20": 0,
+   "frac": 0.0
+  },
+  "outcome": "ALL FOUR BEHAVED AS REQUIRED: 104/104, 0/104, 104/104, 0/104. The checker discriminates at exactly the 20 percent boundary, so the FAIL is a property of the signal and not of the check."
+ },
+ "cross_check_against_committed_measurements": {
+  "_note": "prior values are from d211_host_traffic_measured.json, which measured the s4 cell of the EARLIER L3 ladder (no kv0.5r). Different cell, so agreement is expected to be close but not exact; the 2x rule applies.",
+  "table": [
+   {
+    "quantity": "host_load_GB",
+    "this_run": 649.7,
+    "prior_run": 487.8,
+    "source_of_prior": "d211_host_traffic_measured.json s4",
+    "ratio": 1.33,
+    "agree": "agree"
+   },
+   {
+    "quantity": "host_store_GB",
+    "this_run": 103.6,
+    "prior_run": 102.5,
+    "source_of_prior": "d211_host_traffic_measured.json s4",
+    "ratio": 1.01,
+    "agree": "agree"
+   },
+   {
+    "quantity": "load_over_store",
+    "this_run": 6.27,
+    "prior_run": 4.8,
+    "source_of_prior": "d211_host_traffic_measured.json s4",
+    "ratio": 1.31,
+    "agree": "agree"
+   },
+   {
+    "quantity": "cpu_cache_use_max",
+    "this_run": 0.1554,
+    "prior_run": 0.223,
+    "source_of_prior": "d211_host_traffic_measured.json s4",
+    "ratio": 0.7,
+    "agree": "agree"
+   },
+   {
+    "quantity": "counter samples",
+    "this_run": 117,
+    "prior_run": 118,
+    "source_of_prior": "d211_host_traffic_measured.json s4",
+    "ratio": 0.99,
+    "agree": "agree"
+   },
+   {
+    "quantity": "distinct kv_offload_load_bytes values",
+    "this_run": 104,
+    "prior_run": 101,
+    "source_of_prior": "d211_host_traffic_measured.json (101 in s4)",
+    "ratio": 1.03,
+    "agree": "agree"
+   },
+   {
+    "quantity": "decision rows with non-empty gpu_tokens_by_session",
+    "this_run": 15100,
+    "prior_run": 0,
+    "source_of_prior": "d211_signal_a_available.json (pre-item-3 cell)",
+    "ratio": "n/a",
+    "agree": "EXPECTED CHANGE: this is the unblocking itself, item 3 at 56a73293"
+   }
+  ],
+  "outcome": "no disagreement greater than 2x. The artefact premise (host tier reloads several times what it stores, and the policy cannot see any of it) reproduces on this cell at 6.27x."
+ },
+ "definition_audit": {
+  "window": "a pair of ADJACENT counter samples, not a 10 s grid. Measured dt: min 10.180 s, median 10.233 s, max 10.482 s, 116 windows over an 1187.808 s span.",
+  "host_activity": "counter delta of prompt_tokens_by_source_total[source=external_kv_transfer] strictly greater than 0 over the window.",
+  "attributed_host_tokens": "sum over requests whose t_first_token falls in the window of max(0, cached_tokens - gpu_prefix_believed(t_submit)). Binning by t_first_token because that is when the engine has finished crediting the prompt tokens; binning by t_submit instead is reported as a sensitivity and changes nothing.",
+  "gpu_prefix_believed": "belief.gpu_tokens_by_session[session_id] on the latest decision row at or before t_submit; 0 when the key is absent, per the prereg definition.",
+  "within_20_percent": "abs(attributed - delta) <= 0.20 * delta.",
+  "consistency_with_prior": "the prereg and addendum define all of these; no name is used here with a second definition."
+ },
+ "proxy_validity": {
+  "proxy_1_clock_anchor": "DECLARED. t0 is estimated, not recorded. Valid for this claim because the verdict is invariant over a +/- 3 s shift and the failure margin is 10x, not 20 percent. It would NOT be valid for a result that turned on edge placement.",
+  "proxy_2_t_first_token_as_the_moment_of_crediting": "DECLARED. Reported with the t_submit sensitivity; both fail identically.",
+  "proxy_3_the_reconstruction_the_addendum_worried_about": "NOT USED. gpu_prefix_believed is read from the recorded field, so the piece_tokens accumulation proxy was not needed."
+ },
+ "claim_linkage": {
+  "claim_under_test": "from the prereg: per-request host-cache hits can be INFERRED well enough from what the engine does report that the residency belief can carry HOST-WARM and state-based pricing can price it as host-warm rather than cold.",
+  "bears_on": "WEAKENS it, for signal (a) specifically. Signal (a) cannot infer per-request host hits at this concurrency: it over-attributes by an order of magnitude because cached_tokens is 95 percent local and the belief under-predicts the local prefix by 1.8x.",
+  "signal_b": "STILL BLOCKED, and the reason has changed from the prereg's. Its INPUT now exists (this cell carries the counter series), but D211 specifies signal (b) at low concurrency with CONC_MAX 2, and this is a 16-device three-type cell. The input exists and the CONDITION does not."
+ },
+ "null_classification": {
+  "_rule": "CLAUDE.md Rule 2: a null must be classified, and only one of the five is evidence about the policy.",
+  "classification": "FIRED AND DID NOT HELP",
+  "justification": "the mechanism was present and operated as specified. gpu_prefix_believed is non-zero and varies (23 distinct values, up to 11,385 tokens, on 2,628 of 10,174 requests); the counter series is live (105 distinct values, 104 of 116 windows active); the inferred quantity varies (258 distinct values, 104 distinct per-window ratios); and the checker was validated by positive, negative and two boundary controls. This is NOT 'unexercised' (the E36 case), NOT 'unexpressible' (the channel carried the value end to end), NOT 'cancelled by geometry' and NOT 'unscorable' (the bar sees the quantity and the controls prove it). Signal (a) was computed as ruled and disagreed with the measurement by 10x.",
+  "is_it_a_settled_negative": "YES for signal (a) as defined, with one scope limit stated plainly: it is settled that signal (a) cannot attribute host hits per request ON A 16-DEVICE THREE-TYPE CELL WHERE THE BELIEF NAMES 22 OF 379 SESSIONS. If belief.gpu_tokens_by_session were populated for dashcam and assistant sessions, 93.3 percent of the over-attribution would be removed by construction; the remaining robot stratum still fails at 16 of 104, so the author's expectation is that it would still fail, but that is an expectation and not a measurement."
+ },
+ "alternative_explanation": {
+  "claimed_mechanism": "signal (a) fails because cached_tokens cannot be decomposed per request and the belief under-predicts GPU residency.",
+  "alternative": "signal (a) fails only because the belief does not name dashcam and assistant sessions, a plumbing gap that a one-line fix would close, and the inference itself is sound.",
+  "what_distinguishes_them": "the robot-stratum diagnostic. On the 22 sessions the belief DOES name, the plumbing gap is absent by construction, and signal (a) still fails at 16 of 104 windows, with 92.7 percent of those requests showing the belief claiming MORE GPU prefix than the engine honoured. So the alternative is not sufficient on its own. It is, however, partially true and is the reason the scope limit above is stated: the two explanations are distinguished but not cleanly separated, and only populating the field for all sessions would separate them fully."
+ },
+ "what_is_NOT_claimed": "nothing here licenses switching host-warm pricing on, and the FAIL does not license switching it off either (it was already OFF). No attribution number here is a measurement of per-request host hits; the only measurement is the engine-reported aggregate. The cell's SCORE is not used, computed or implied, and the cell remains UNSCORED pending the Orin rescore.",
+ "if_neither_passes_applied": "per the prereg: the belief is KEPT AS IS and the D211 fallback statement is recorded. HOST RELOAD IS NATIVE BUT UNOBSERVED BY THE POLICY, so the RELOAD lever is unexercised for a structural reason. This cell quantifies the 'native' part at 649.7 GB loaded against 103.6 GB stored (6.27x) and 2,486,608 prompt tokens served from the host tier, and the 'unobserved' part at belief.host_tokens_by_session empty on all 15,100 snapshots. No signal was stretched to reach the bar and the bar was not moved (D187). Signal (b) remains BLOCKED on its low-concurrency condition, so 'neither passes' is the current state and this is the first half of it, measured rather than assumed.",
+ "live_work_on_the_box": "none by this analysis. Read-only parsing of committed git objects only; no live cell, no sweep, no GPU. A rung-4 pass-1 live2 build (p1_abc.py e5 final 1200) was running throughout under D216 and was not touched, delayed or contended for.",
+ "_provenance": {
+  "git_commit": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
+  "script": "d211_signal_a_validate.py",
+  "model": "qwen7b",
+  "timestamp": "2026-11-24T11:07:21.840797",
+  "device": "a6000",
+  "n": 10174,
+  "seed": 4,
+  "args": {
+   "cell": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30",
+   "read_at_rev": "da1593a0567c580b166595014e752a19629e55f2",
+   "bar": "prereg agreement_bar, unmoved",
+   "window_s": 10
+  },
+  "read_at_rev": "da1593a0567c580b166595014e752a19629e55f2",
+  "_git_commit_note": "the `git_commit` field above is the WORKING TREE HEAD (17bdf159), which is 1871 commits behind origin/main. Every byte analysed was read with `git show da1593a0...:<path>`, never from the working tree. `read_at_rev` is the authoritative source revision.",
+  "analysis_scripts": "kept in the session scratchpad, not committed: keys2.py, sig_a.py, chase2.py, final.py, ctrl.py, build.py"
+ }
+}
