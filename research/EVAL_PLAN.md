@@ -22,8 +22,8 @@ cell, fix or build lands. Ready matrix cells that no other list covers go to the
 | mem0.25x | GPU-KV 0.25x, real engine (985 blocks, 15,760 tokens) | `_kv0.25_L3_epg_rq30` (16) | ready (as KV025) |
 | load8 / 12 / 20 / 24 | devices | `_L3_epg_rq30` (8, 12, 20, 24) | ready |
 | dl2.5 / dl4 / dl5 | robot deadline | `_L2.5_`, `_L4_`, `_L5_epg_rq30` (16) | ready (driver v31+ reads `_L<s>`) |
-| comp10-4-2 | dashcam-heavy | `_c10-4-2_L3_epg_rq30` (16) | WAITING: ratio key `10:4:2` in `live2/fleet/trace.py` RATIOS_3, with a proof that 40:40:20 traces stay digest-identical |
-| comp3-11-2 | robot-heavy | `_c3-11-2_L3_epg_rq30` (16) | WAITING: as above, `3:11:2` |
+| comp10-4-2 | dashcam-heavy | `_c10-4-2_L3_epg_rq30` (16) | ready (RATIOS_3 key added with its proof, results/orchestration/live2/fleet_ratios3/ratios3_identity_proof.json) |
+| comp3-11-2 | robot-heavy | `_c3-11-2_L3_epg_rq30` (16) | ready (as above) |
 | rq10 / rq60 | re-ask mean 10 s / 60 s | `_L3_epg_rq10`, `_L3_epg_rq60` (16) | ready once driver v33 is the running driver (it parses `_rq<k>`; `_rq30` is byte-identical) |
 
 13 conditions x 7 arms x 2 seeds = **182 cells**, about 65 GPU-hours at ~21.5 min per cell.

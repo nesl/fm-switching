@@ -22,8 +22,8 @@ load24|24|_L3_epg_rq30||
 dl2.5|16|_L2.5_epg_rq30||
 dl4|16|_L4_epg_rq30||
 dl5|16|_L5_epg_rq30||
-comp10-4-2|16|_c10-4-2_L3_epg_rq30||waiting on build: ratio key 10:4:2 in live2/fleet/trace.py RATIOS_3 (with the 40:40:20 trace-digest identity proof)
-comp3-11-2|16|_c3-11-2_L3_epg_rq30||waiting on build: ratio key 3:11:2 in live2/fleet/trace.py RATIOS_3 (with the 40:40:20 trace-digest identity proof)
+comp10-4-2|16|_c10-4-2_L3_epg_rq30||
+comp3-11-2|16|_c3-11-2_L3_epg_rq30||
 rq10|16|_L3_epg_rq10||RQV33
 rq60|16|_L3_epg_rq60||RQV33
 EOF

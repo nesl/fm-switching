@@ -113,7 +113,11 @@ import data_sources as DS
 # kept EXACTLY as they were and parse to zero assistive devices, which is what makes the
 # byte-identity gate possible: "50:50" is not a new spelling of "50:50:0", it is the same key.
 RATIOS = {"50:50": (50, 50), "75:25": (75, 25), "25:75": (25, 75)}
-RATIOS_3 = {"50:50:0": (50, 50, 0), "40:40:20": (40, 40, 20)}
+RATIOS_3 = {"50:50:0": (50, 50, 0), "40:40:20": (40, 40, 20),
+            # EVAL_PLAN (user, 2026-11-23) composition conditions at 16 devices: dashcam-heavy 10:4:2 and
+            # robot-heavy 3:11:2, which round exactly at 16 (`_split_fleet3`). Added keys only; every existing
+            # key and trace is unchanged (ratios3_identity_proof.py, digest identity at one sha, two trees).
+            "10:4:2": (10, 4, 2), "3:11:2": (3, 11, 2)}
 MODES = ("A", "B")
 
 # D136: an assistive question is a SINGLE SHOT. One image, one question, NO HISTORY, so the type
