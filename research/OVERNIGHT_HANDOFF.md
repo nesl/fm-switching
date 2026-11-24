@@ -87,6 +87,24 @@ entry - INCLUDING THIS BLOCK, which listed six rulings and omitted the two newes
 its own summary against the section it summarises. **A SUMMARY GOES STALE FASTER THAN THE THING IT
 SUMMARISES.**
 
+*** VERIFICATION LEDGER, SO SUCCESSIVE RESUMES DO NOT ALL RE-CHECK THE SAME CLAIMS. APPEND TO IT. ***
+Each entry: the claim, the verdict, and the restart that checked it. **PICK ONE NOT LISTED HERE.**
+- `RESTART n/12` means the loop is bounded -> **FALSE, CORRECTED** (restart 6, 2026-11-24 07:00 PST).
+  The budget is unreachable: 12 per 3600 s against a 10-minute poll, with the counter reset at
+  `watchdog.sh:104`. `BUDGET SPENT` fired 0 times in 99 restarts over 37 hours. See the corrected
+  block above.
+- item 3's call site `coordinator.py:2138` -> **TRUE** (restart 7). `belief=` is on that line.
+- item 3's method `coordinator.py:2148` -> **TRUE** (restart 7). `def _belief_prefix_record(self)`.
+- D187 at `research/policy_design_log.md:208` -> **TRUE** (restart 7).
+- the held DEVICE_ANSWERS implementation at `live2/held/d218_device_answers/` -> **TRUE** (restart 7),
+  9 files on origin.
+**STILL UNVERIFIED, IN DESCENDING ORDER OF CONSEQUENCE:** that the measured device tables make the
+device-discounted harm EXACTLY zero, which is the premise under which ruling 1 dissolves ruling 4, so
+a resume that checks this one does the most good; that the two D218 pre-registrations agree on the pass
+condition VERBATIM, which is what ruling 6 rests on; that `covex-v6-final-da` does not resolve on the
+normal import path, which is what gates step 4; and the r2-queue-register claim that a correct input
+costs 16 robot answers at s4, which is ruling 7.
+
 *** A CORRECTION TO THIS FILE'S OWN HANG-DETECTION LESSON, because I got the discriminator wrong
 earlier tonight and a future resume would kill a healthy driver with it. ***
 The catalogue below records a driver that sat 59 minutes at `00:00:00` CPU having started nothing. I
