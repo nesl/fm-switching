@@ -1,0 +1,41 @@
+{
+ "_what": "RUN HEAD -> experiments/ TREE ID -> ORIGIN TWIN for today's ladder cells. This CLOSES a provenance gap: every H100 cell today logged a run HEAD that NEVER REACHED ORIGIN, so the tree a committed cell ran on could not be reconstructed by anyone else. It is closed not by recovering the commits but by TREE IDENTITY, which is stronger: each run's experiments/ tree is byte-identical to a tree on origin/main.",
+ "_the_cause_found_by_the_H100": "its driver commits each cell LOCALLY and records HEAD, then the push path runs `git pull --rebase`, which REWRITES those local commits. The recorded sha therefore never reaches origin and survives only as a pre-rebase object in that one clone. THIS APPLIES TO EVERY H100 CELL LOGGED TODAY, not only the ladder.",
+ "_how_this_table_was_VERIFIED_by_flash": "the H100's own run HEADs DO NOT RESOLVE in any other clone and are not fetchable, so they cannot be checked off-box. What CAN be checked, and was: for each claimed experiments/ tree id, `git rev-parse <origin-twin>:experiments` was run HERE against origin/main. ALL SIX MATCHED THE FULL 40-CHARACTER TREE ID. So the table is OBSERVED by flash on the origin side, and the run-HEAD column alone is REPORTED by the H100.",
+ "rows": [
+  {
+   "cell": "covex-v6-state-final s4 / fair-final s4 / final s4",
+   "run_head_LOCAL_ONLY": "2d722d8, 8ceb096, 93702e3",
+   "experiments_tree": "ecf903812b56c894624e855009d817be70f4be83",
+   "origin_twin": "599e2db",
+   "verified_here": true
+  },
+  {
+   "cell": "covex-v6-fair-final s5",
+   "run_head_LOCAL_ONLY": "bf1ae16",
+   "experiments_tree": "b9480cc2260c473da7e2ae078518ca93fb7c5217",
+   "origin_twin": "3dba0b2",
+   "verified_here": true
+  },
+  {
+   "cell": "covex-v6-final s5 (THE CELL THAT FAILED CHECK 2)",
+   "run_head_LOCAL_ONLY": "3283638",
+   "experiments_tree": "06563692bfaac0cf38ba70b71b5f2ffdccddebd4",
+   "origin_twin": "ad215a9",
+   "verified_here": true
+  },
+  {
+   "cell": "covex-v6-state-final s5",
+   "run_head_LOCAL_ONLY": "2d64b7b",
+   "experiments_tree": "40aa8b417d25e726f60e1033ee9efee94c6e7c11",
+   "origin_twin": "49b78f5",
+   "verified_here": true
+  }
+ ],
+ "WHAT_THIS_BOUNDS_FOR_THE_DOCSTRING_CONFOUND": {
+  "the s4-to-s5 experiments diff, verified here as 599e2db -> ad215a9": "FIVE files change: eval_plan_queue.sh, live2/arms_v6cf.py (+8 -1), d179_rung2_verdict.py, hit7_window_probe.py, hit7_window_proof.sh. *** OF THESE, ONLY arms_v6cf.py IS IMPORTED BY A LIVE CELL, AND ITS ENTIRE DIFF IS COMMENT LINES. *** d179_rung2_verdict.py is the OFFLINE scorer, the two hit7_* files are probes, and the .sh is a queue script. So the ONLY live-imported difference between rung 4's s4 tree and its s5 tree is a docstring.",
+  "_why_that_makes_the_queued_check_exactly_decisive": "with the difference bounded to one comment block, a dry covex-v6-final s4 that reproduces the posted 57bed6ace2eb07d1 / 14,509 from the s5 tree leaves NOTHING ELSE that could have moved the decisions, and a mismatch can only be the comment, through the id(obs) allocation channel already measured at 85 decisions on this project.",
+  "*** AND THE PROOF SHOULD BE ARCHIVED FROM THE ORIGIN TWIN, NOT THE LOCAL SHA ***": "the H100 proposed `git archive 3283638`, which only exists in its clone, so the proof would be unreproducible by anyone else, which is the same gap this table exists to close. `git archive ad215a9` yields a BYTE-IDENTICAL experiments/ tree (verified above) and is on origin, so ANY box can reproduce it. Use the twin."
+ },
+ "_the_driver_fix_agreed_in_principle_but_NOT_YET": "logging `git rev-parse HEAD:experiments` beside the HEAD sha is the right fix, because a tree id survives a rebase where a commit sha does not, and it is PURELY ADDITIVE. BUT THE DRIVER IS RUN-PATH AND THE LADDER IS MID-FLIGHT: changing it now would break the agreement that all twelve cells share one tree. It lands AFTER the ladder, about 23:20, together with the backfill for today's earlier cells. No force-push and no history rewrite, as proposed."
+}
