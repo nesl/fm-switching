@@ -706,6 +706,48 @@ rung-4 IMPLEMENTATION AS RUN. **Whether a fixed rung 4 would beat rung 3 is UNKN
 3. Nothing scorable -> do NOT invent work on run-path files. The handoff's five overnight steps below
    are owned by other sessions.
 
+## *** D229 / D230 (8) APPLIED ON FLASH: `ops/STANDDOWN` INSTALLED, AND THE WATCHDOG'S DUPLICATE-SESSION GUARD HAS NEVER BEEN ABLE TO FIRE. ***
+
+**Written by the watchdog-spawned session that D230 (8) rules should not exist.** It was started by
+`ops/watchdog.sh` at 19:30:01Z as `RESTART 2/12` (1/12 was 19:20:01Z), carrying the stored prompt "read the
+overnight handoff ... continue the next step". **It read D229 and D230 (8) on origin, found that it is the
+second session named A6000, did no policy work, stood the watchdog down and reported.** That is what it was
+doing, recorded as D230 (8) requires.
+
+**`ops/STANDDOWN` written**, expiry `1795579200` (20:00 local, 2026-11-25T04:00Z), reason citing D229 and
+D230 (8). **Verified by re-running the watchdog's own gate arithmetic against the file** rather than
+assuming the format: the script reads line 1 with `tr -dc '0-9'`, compares `now < exp`, and would log
+"STANDDOWN active for 508 more minutes, not starting Claude". It **self-expires**, so unattended
+resilience returns on its own overnight, which is exactly D229's "the user re-enables it for unattended
+periods" without needing anyone to remember. `ops/` is **not tracked by git**, so the flag is local and
+this handoff entry is its only audit record.
+
+**D229's "while the driver / run restarts stay" has NO flash counterpart, and that is a fact rather than a
+liberty taken.** `ops/watchdog.sh` mentions "driver" **zero** times, contains no `python` or `run_live2`
+invocation, and has exactly **one** `tmux new-session`. Its entire action is starting a Claude session. So
+standing it down disables precisely what D229 names and nothing else; flash has no run driver to preserve,
+because the H100 runs the cells.
+
+*** THE FINDING, AND IT EXPLAINS THE WHOLE RESTART HISTORY: THE DUPLICATE-SESSION GUARD AT
+`ops/watchdog.sh:95` CANNOT FIRE. *** It reads
+`ps -C claude -o args= | grep -v grep | grep -q -- "-c -p"`, and its own comment (lines 88-93) records the
+real hazard correctly: "guarding only on the tmux session NAME is not enough ... so the watchdog can start
+a SECOND session onto the same repo and the same handoff file. That happened." **But the literal substring
+`-c -p` never occurs in any claude command line on this box, including the watchdog's OWN spawn**, whose
+argv is `claude -c --permission-mode auto -p '<prompt>'` - the `-c` and the `-p` are **separated by
+`--permission-mode auto`**. Measured: `ps -C claude -o args= | grep -c -- "-c -p"` returns **0** against
+**six** live claude processes (one watchdog spawn plus five interactive `--continue` / `--resume`).
+**So the guard is blind both to interactive sessions, the hazard it was written for, AND to its own
+spawns, the thing it was meant to deduplicate. It has always passed.** Only the heartbeat gate and
+STANDDOWN have ever restrained this watchdog, which is why 20 restarts and 16 one-shot resumes happened and
+why three sessions once started in twenty minutes.
+**Same family as every other defect found today: a check that is sound in intent and pointed at the wrong
+property**, and one that **advertises safety while providing none**. Note it was also written to avoid
+`pgrep -f` self-matching, correctly - the author fixed the hazard they were looking at and introduced a
+different one in the pattern. **Fixing it means matching the interpreter and the repo path, or
+`--permission-mode`, not an adjacency of two flags.** Not fixed here: this session is standing down, not
+editing live-path files, and the flag makes it moot until the user rules.
+
 ## *** D230 IS THE FREEZE-GATE RULING SET. EVERY ITEM IS MARKED FOR REVISIT. (user, 2026-11-24) ***
 
 Recorded here because a session turnover must not lose it (D229's reason, applied on flash).
