@@ -1,0 +1,39 @@
+{
+ "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/before",
+ "fix_present": false,
+ "reader_key": "vllm:gpu_cache_usage_perc",
+ "asyncbackend_has_metrics_string": false,
+ "states": [
+  {
+   "state": "1 scrape with the engine's CURRENT key, vllm:kv_cache_usage_perc",
+   "reader_gets": null,
+   "reader_gets_with_default_0": 0.0,
+   "why": "AsyncLive2Backend.metrics() carries no vllm: key"
+  },
+  {
+   "state": "2 scrape with the OLDER key (fake_server spelling), 0.4242",
+   "reader_gets": null,
+   "reader_gets_with_default_0": 0.0,
+   "why": "AsyncLive2Backend.metrics() carries no vllm: key"
+  },
+  {
+   "state": "3 fetch RAISES, 0 s after a good value",
+   "reader_gets": null,
+   "reader_gets_with_default_0": 0.0,
+   "why": "AsyncLive2Backend.metrics() carries no vllm: key"
+  },
+  {
+   "state": "4 fetch RAISES again, >1.0 s after the last good value",
+   "reader_gets": null,
+   "reader_gets_with_default_0": 0.0,
+   "why": "AsyncLive2Backend.metrics() carries no vllm: key"
+  },
+  {
+   "state": "5 scrape SUCCEEDS carrying NEITHER key",
+   "reader_gets": null,
+   "reader_gets_with_default_0": 0.0,
+   "why": "AsyncLive2Backend.metrics() carries no vllm: key"
+  }
+ ],
+ "metrics_health": null
+}

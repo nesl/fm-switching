@@ -1,0 +1,194 @@
+{
+ "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/after",
+ "recording_site_present": true,
+ "empty_belief": {
+  "gpu_tokens_by_session": {},
+  "host_tokens_by_session": {},
+  "cold_tokens_by_session": {}
+ },
+ "P1_dry_record": {
+  "gpu_tokens_by_session": {},
+  "host_tokens_by_session": {},
+  "cold_tokens_by_session": {}
+ },
+ "P1_dry_equals_committed_empty": true,
+ "P2_live_record": {
+  "gpu_tokens_by_session": {
+   "gpu1": 11000,
+   "gpu_partial": 4096
+  },
+  "host_tokens_by_session": {
+   "host1": 8000
+  },
+  "cold_tokens_by_session": {
+   "cold1": 0
+  }
+ },
+ "P2_signal_a_example": {
+  "cached_tokens_reported_by_engine": 11000,
+  "session": "gpu_partial",
+  "believed_gpu_prefix": 4096,
+  "host_tokens": 6904
+ },
+ "P3_belief_references": [
+  {
+   "file": "experiments/orchestration/live2/coordinator.py",
+   "line": 757,
+   "text": "belief_by_session={sid: dict(s.belief or {})"
+  },
+  {
+   "file": "experiments/orchestration/live2/coordinator.py",
+   "line": 827,
+   "text": "s.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 1.0}"
+  },
+  {
+   "file": "experiments/orchestration/live2/coordinator.py",
+   "line": 1795,
+   "text": "_snap = (dict(_s.belief), _s.last_touch_s)"
+  },
+  {
+   "file": "experiments/orchestration/live2/coordinator.py",
+   "line": 1804,
+   "text": "_s.belief, _s.last_touch_s = _snap"
+  },
+  {
+   "file": "experiments/orchestration/live2/coordinator.py",
+   "line": 1915,
+   "text": "s.belief = {\"gpu\": 1.0, \"host\": 0.0, \"cold\": 0.0}"
+  },
+  {
+   "file": "experiments/orchestration/live2/coordinator.py",
+   "line": 2126,
+   "text": "belief=(preds.get(\"belief\") or self._belief_prefix_record()),"
+  },
+  {
+   "file": "experiments/orchestration/live2/coordinator.py",
+   "line": 2156,
+   "text": "`preds[\"belief\"]` still wins wherever an arm supplies one, so nothing that already fills"
+  },
+  {
+   "file": "experiments/orchestration/live2/coordinator.py",
+   "line": 2162,
+   "text": "returns a decision id, and nothing in live2 reads `DecisionRecord.belief` during a run"
+  },
+  {
+   "file": "experiments/orchestration/live2/coordinator.py",
+   "line": 2195,
+   "text": "believed_dist=dict(s.belief)))"
+  },
+  {
+   "file": "experiments/orchestration/live2/cstate.py",
+   "line": 150,
+   "text": "return max(self.belief, key=lambda k: self.belief[k])"
+  },
+  {
+   "file": "experiments/orchestration/live2/cstate.py",
+   "line": 207,
+   "text": "self.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 0.0}"
+  },
+  {
+   "file": "experiments/orchestration/live2/cstate.py",
+   "line": 208,
+   "text": "self.belief[tier] = 1.0"
+  },
+  {
+   "file": "experiments/orchestration/live2/cstate.py",
+   "line": 312,
+   "text": "s.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 1.0}"
+  },
+  {
+   "file": "experiments/orchestration/live2/cstate.py",
+   "line": 332,
+   "text": "s.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 1.0}"
+  },
+  {
+   "file": "experiments/orchestration/live2/d179_recall_skip_diagnosis.py",
+   "line": 274,
+   "text": "for (tt, tr) in ix[\"belief\"].get(sid, ()):"
+  },
+  {
+   "file": "experiments/orchestration/live2/d211_signal_a_available.py",
+   "line": 78,
+   "text": "gpu_tok_nonempty = sum(1 for r in dec if (r.get(\"belief\") or {}).get(\"gpu_tokens_by_session\"))"
+  },
+  {
+   "file": "experiments/orchestration/live2/engine_actions.py",
+   "line": 27,
+   "text": "`cached_tokens` into a correction of `SessionRec.belief`."
+  },
+  {
+   "file": "experiments/orchestration/live2/engine_actions.py",
+   "line": 387,
+   "text": "session.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 0.0}"
+  },
+  {
+   "file": "experiments/orchestration/live2/engine_actions.py",
+   "line": 388,
+   "text": "session.belief[after] = 1.0"
+  },
+  {
+   "file": "experiments/orchestration/live2/engine_actions.py",
+   "line": 507,
+   "text": "return max(self.belief, key=lambda k: self.belief[k])"
+  },
+  {
+   "file": "experiments/orchestration/live2/engine_actions.py",
+   "line": 509,
+   "text": "s.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 0.0}"
+  },
+  {
+   "file": "experiments/orchestration/live2/engine_actions.py",
+   "line": 510,
+   "text": "s.belief[tier] = 1.0"
+  },
+  {
+   "file": "experiments/orchestration/live2/touch_proofs.py",
+   "line": 82,
+   "text": "s.belief = {\"gpu\": 1.0, \"host\": 0.0, \"cold\": 0.0}"
+  },
+  {
+   "file": "experiments/orchestration/live2/touch_proofs.py",
+   "line": 111,
+   "text": "s_mix.belief = {\"gpu\": 0.6, \"host\": 0.4, \"cold\": 0.0}"
+  },
+  {
+   "file": "experiments/orchestration/policy/residency_belief.py",
+   "line": 172,
+   "text": "out = self.belief(pid, written_since_refresh=0, cap_tokens=0)"
+  },
+  {
+   "file": "experiments/orchestration/policy/residency_belief.py",
+   "line": 180,
+   "text": "out = self.belief(pid, written_since_refresh=written, cap_tokens=cap)"
+  },
+  {
+   "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+   "line": 53,
+   "text": "r = self.b.belief(\"h\", written_since_refresh=0)"
+  },
+  {
+   "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+   "line": 59,
+   "text": "r = self.b.belief(\"h\", written_since_refresh=self.cap + self.margin + 1)"
+  },
+  {
+   "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+   "line": 65,
+   "text": "r = self.b.belief(\"h\", written_since_refresh=self.cap)"
+  },
+  {
+   "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+   "line": 75,
+   "text": "ps = [self.b.belief(\"h\", written_since_refresh=x)[\"p_host\"] for x in xs]"
+  },
+  {
+   "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+   "line": 81,
+   "text": "r = ResidencyBelief(cap_gib=0).belief(\"h\", written_since_refresh=0)"
+  }
+ ],
+ "P3_n_references": 31,
+ "P4_log_decision_takes_latency_arg": true,
+ "P4_log_decision_callers": 11,
+ "git_describe_of_tree": 0
+}

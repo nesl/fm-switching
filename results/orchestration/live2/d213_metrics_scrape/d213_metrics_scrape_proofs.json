@@ -1,0 +1,703 @@
+{
+ "study": "StudyD213-METRICS-SCRAPE",
+ "rulings": [
+  "D213 item 2 (E1 of StudyPLACEHOLDER-FIX): give live2's AsyncLive2Backend a /metrics scrape with D209 (2) hit-6 fail-loud semantics",
+  "D213 item 3 (E6): record the belief's predicted GPU prefix per request so D211 signal (a) is computable"
+ ],
+ "before_tree_is": "git archive of origin/main at one literal sha, unmodified",
+ "origin_sha": "5ed6287e71420cd6239ce0349b7727d07dcb1f06",
+ "changed_files": {
+  "experiments/orchestration/live2/asyncbackend.py": "2e32194784a32ba4a2064bddbe6c35075a800a305a4cf89208045290ea82c836",
+  "experiments/orchestration/live2/coordinator.py": "185537e2601955786558f99354ddef84109778302a8fc5876e8b457061dcc5b0"
+ },
+ "item2_unit_proofs": {
+  "after": {
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/after",
+   "fix_present": true,
+   "reader_key": "vllm:gpu_cache_usage_perc",
+   "asyncbackend_has_metrics_string": true,
+   "states": [
+    {
+     "state": "1 scrape with the engine's CURRENT key, vllm:kv_cache_usage_perc",
+     "reader_gets": 0.7215447154471545,
+     "fm_kv_state": "observed",
+     "fm_kv_source_key": "vllm:kv_cache_usage_perc",
+     "fm_kv_age_s": 0.0,
+     "fm_kv_missing": null,
+     "fm_metrics_degraded": 0.0,
+     "counters": {
+      "n": 0,
+      "last": null,
+      "n_served_last_good": 0,
+      "n_served_unknown": 0,
+      "n_kv_key_missing": 0,
+      "n_kv_key_aliased": 1,
+      "kv_key_seen": "vllm:kv_cache_usage_perc",
+      "n_polls": 1
+     },
+     "host_counter_keys": [
+      "vllm:external_prefix_cache_hits_total",
+      "vllm:kv_cache_usage_perc",
+      "vllm:kv_offload_cpu_cache_usage_perc",
+      "vllm:kv_offload_total_bytes_total|transfer_type=CPU_to_GPU",
+      "vllm:kv_offload_total_bytes_total|transfer_type=GPU_to_CPU",
+      "vllm:prompt_tokens_by_source_total|source=external_kv_transfer",
+      "vllm:prompt_tokens_by_source_total|source=local_cache_hit",
+      "vllm:prompt_tokens_by_source_total|source=local_compute"
+     ],
+     "queue_key_published": false
+    },
+    {
+     "state": "2 scrape with the OLDER key (fake_server spelling), 0.4242",
+     "reader_gets": 0.4242,
+     "fm_kv_state": "observed",
+     "fm_kv_source_key": "vllm:gpu_cache_usage_perc",
+     "fm_kv_age_s": 0.0,
+     "fm_kv_missing": null,
+     "fm_metrics_degraded": 0.0,
+     "counters": {
+      "n": 0,
+      "last": null,
+      "n_served_last_good": 0,
+      "n_served_unknown": 0,
+      "n_kv_key_missing": 0,
+      "n_kv_key_aliased": 1,
+      "kv_key_seen": "vllm:gpu_cache_usage_perc",
+      "n_polls": 2
+     },
+     "host_counter_keys": [],
+     "queue_key_published": false
+    },
+    {
+     "state": "3 fetch RAISES, 0 s after a good value",
+     "reader_gets": 0.4242,
+     "fm_kv_state": "last_good",
+     "fm_kv_source_key": null,
+     "fm_kv_age_s": 0.0,
+     "fm_kv_missing": 1.0,
+     "fm_metrics_degraded": 1.0,
+     "counters": {
+      "n": 1,
+      "last": "OSError",
+      "n_served_last_good": 1,
+      "n_served_unknown": 0,
+      "n_kv_key_missing": 0,
+      "n_kv_key_aliased": 1,
+      "kv_key_seen": "vllm:gpu_cache_usage_perc",
+      "n_polls": 3
+     },
+     "host_counter_keys": [],
+     "queue_key_published": false
+    },
+    {
+     "state": "4 fetch RAISES again, >1.0 s after the last good value",
+     "reader_gets": 1.0,
+     "fm_kv_state": "unknown_conservative",
+     "fm_kv_source_key": null,
+     "fm_kv_age_s": 1.2,
+     "fm_kv_missing": 1.0,
+     "fm_metrics_degraded": 1.0,
+     "counters": {
+      "n": 2,
+      "last": "OSError",
+      "n_served_last_good": 1,
+      "n_served_unknown": 1,
+      "n_kv_key_missing": 0,
+      "n_kv_key_aliased": 1,
+      "kv_key_seen": "vllm:gpu_cache_usage_perc",
+      "n_polls": 4
+     },
+     "host_counter_keys": [],
+     "queue_key_published": false
+    },
+    {
+     "state": "5 scrape SUCCEEDS carrying NEITHER key",
+     "reader_gets": 1.0,
+     "fm_kv_state": "unknown_conservative",
+     "fm_kv_source_key": null,
+     "fm_kv_age_s": 1.2,
+     "fm_kv_missing": 1.0,
+     "fm_metrics_degraded": 1.0,
+     "counters": {
+      "n": 2,
+      "last": "OSError",
+      "n_served_last_good": 1,
+      "n_served_unknown": 2,
+      "n_kv_key_missing": 1,
+      "n_kv_key_aliased": 1,
+      "kv_key_seen": "vllm:gpu_cache_usage_perc",
+      "n_polls": 5
+     },
+     "host_counter_keys": [],
+     "queue_key_published": false
+    }
+   ],
+   "metrics_health_after_five_states": {
+    "metrics_degraded": true,
+    "metrics_failures": {
+     "n": 2,
+     "last": "OSError",
+     "n_served_last_good": 1,
+     "n_served_unknown": 2,
+     "n_kv_key_missing": 1,
+     "n_kv_key_aliased": 1,
+     "kv_key_seen": "vllm:gpu_cache_usage_perc",
+     "n_polls": 5
+    },
+    "metrics_scrape_enabled": true,
+    "kv_unknown_conservative_value": 1.0,
+    "last_good_max_age_s": 1.0,
+    "published_keys": [
+     "vllm:gpu_cache_usage_perc"
+    ],
+    "not_published": [
+     "vllm:num_requests_waiting"
+    ],
+    "policy": "D209 (2) / D213 item 2: a failed fetch or an absent KV key never substitutes 0.0; the last good value at most 1.0 s old, else UNKNOWN and CONSERVATIVE (1.0)"
+   },
+   "host_counters_after_state_1": [
+    "vllm:external_prefix_cache_hits_total",
+    "vllm:kv_cache_usage_perc",
+    "vllm:kv_offload_cpu_cache_usage_perc",
+    "vllm:kv_offload_total_bytes_total|transfer_type=CPU_to_GPU",
+    "vllm:kv_offload_total_bytes_total|transfer_type=GPU_to_CPU",
+    "vllm:prompt_tokens_by_source_total|source=external_kv_transfer",
+    "vllm:prompt_tokens_by_source_total|source=local_cache_hit",
+    "vllm:prompt_tokens_by_source_total|source=local_compute"
+   ],
+   "probe_lines_used": {
+    "vllm:kv_offload_total_bytes_total": [
+     "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"32BI\",transfer_type=\"CPU_to_GPU\"} 1.29650130944e+12",
+     "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"32BI\",transfer_type=\"GPU_to_CPU\"} 9.50735470592e+11"
+    ],
+    "vllm:kv_offload_cpu_cache_usage_perc": [
+     "vllm:kv_offload_cpu_cache_usage_perc{engine=\"0\",model_name=\"32BI\"} 0.034722222222222224"
+    ],
+    "vllm:kv_cache_usage_perc": [
+     "vllm:kv_cache_usage_perc{engine=\"0\",model_name=\"32BI\"} 0.7215447154471545"
+    ],
+    "vllm:external_prefix_cache_hits_total": [
+     "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"32BI\"} 4.94576e+06"
+    ],
+    "vllm:prompt_tokens_by_source_total": [
+     "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"32BI\",source=\"local_compute\"} 3.669175e+06",
+     "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"32BI\",source=\"local_cache_hit\"} 1.0094768e+07",
+     "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"32BI\",source=\"external_kv_transfer\"} 4.943072e+06"
+    ]
+   },
+   "off_switch_publishes": []
+  },
+  "before_control": {
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/before",
+   "fix_present": false,
+   "reader_key": "vllm:gpu_cache_usage_perc",
+   "asyncbackend_has_metrics_string": false,
+   "states": [
+    {
+     "state": "1 scrape with the engine's CURRENT key, vllm:kv_cache_usage_perc",
+     "reader_gets": null,
+     "reader_gets_with_default_0": 0.0,
+     "why": "AsyncLive2Backend.metrics() carries no vllm: key"
+    },
+    {
+     "state": "2 scrape with the OLDER key (fake_server spelling), 0.4242",
+     "reader_gets": null,
+     "reader_gets_with_default_0": 0.0,
+     "why": "AsyncLive2Backend.metrics() carries no vllm: key"
+    },
+    {
+     "state": "3 fetch RAISES, 0 s after a good value",
+     "reader_gets": null,
+     "reader_gets_with_default_0": 0.0,
+     "why": "AsyncLive2Backend.metrics() carries no vllm: key"
+    },
+    {
+     "state": "4 fetch RAISES again, >1.0 s after the last good value",
+     "reader_gets": null,
+     "reader_gets_with_default_0": 0.0,
+     "why": "AsyncLive2Backend.metrics() carries no vllm: key"
+    },
+    {
+     "state": "5 scrape SUCCEEDS carrying NEITHER key",
+     "reader_gets": null,
+     "reader_gets_with_default_0": 0.0,
+     "why": "AsyncLive2Backend.metrics() carries no vllm: key"
+    }
+   ],
+   "metrics_health": null
+  }
+ },
+ "item2_readsite_step2b": {
+  "after": {
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/after",
+   "fix_present": true,
+   "A_metrics_keys_vllm": [
+    "vllm:gpu_cache_usage_perc"
+   ],
+   "A_metrics_type": "dict",
+   "A_has_metrics_health": true,
+   "A_num_requests_waiting_published": false,
+   "A_reader_gets": 0.7215447154471545,
+   "A_reader_gets_type": "float",
+   "B_gpu_kv_fraction": 0.7215447154471545,
+   "B_gpu_kv_fraction_type": "float",
+   "B_queued_by_class": {
+    "recall": 0,
+    "episodic": 0
+   },
+   "C_free_kv_tokens": 17527.08943089431,
+   "C_pool": 62944.0,
+   "C_bound_by": {
+    "pd_kv_bound_by_engine_metric": 1,
+    "pd_kv_bound_by_belief": 0
+   }
+  },
+  "before_control": {
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/before",
+   "fix_present": false,
+   "A_metrics_keys_vllm": [],
+   "A_metrics_type": "dict",
+   "A_has_metrics_health": false,
+   "A_num_requests_waiting_published": false,
+   "A_reader_gets": 0.0,
+   "A_reader_gets_type": "float",
+   "B_gpu_kv_fraction": 0.0,
+   "B_gpu_kv_fraction_type": "float",
+   "B_queued_by_class": {
+    "recall": 0,
+    "episodic": 0
+   },
+   "C_free_kv_tokens": 51944.0,
+   "C_pool": 62944.0,
+   "C_bound_by": {
+    "pd_kv_bound_by_engine_metric": 0,
+    "pd_kv_bound_by_belief": 1
+   }
+  }
+ },
+ "item3_proofs": {
+  "after": {
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/after",
+   "recording_site_present": true,
+   "empty_belief": {
+    "gpu_tokens_by_session": {},
+    "host_tokens_by_session": {},
+    "cold_tokens_by_session": {}
+   },
+   "P1_dry_record": {
+    "gpu_tokens_by_session": {},
+    "host_tokens_by_session": {},
+    "cold_tokens_by_session": {}
+   },
+   "P1_dry_equals_committed_empty": true,
+   "P2_live_record": {
+    "gpu_tokens_by_session": {
+     "gpu1": 11000,
+     "gpu_partial": 4096
+    },
+    "host_tokens_by_session": {
+     "host1": 8000
+    },
+    "cold_tokens_by_session": {
+     "cold1": 0
+    }
+   },
+   "P2_signal_a_example": {
+    "cached_tokens_reported_by_engine": 11000,
+    "session": "gpu_partial",
+    "believed_gpu_prefix": 4096,
+    "host_tokens": 6904
+   },
+   "P3_belief_references": [
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 757,
+     "text": "belief_by_session={sid: dict(s.belief or {})"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 827,
+     "text": "s.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 1.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 1795,
+     "text": "_snap = (dict(_s.belief), _s.last_touch_s)"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 1804,
+     "text": "_s.belief, _s.last_touch_s = _snap"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 1915,
+     "text": "s.belief = {\"gpu\": 1.0, \"host\": 0.0, \"cold\": 0.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 2126,
+     "text": "belief=(preds.get(\"belief\") or self._belief_prefix_record()),"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 2156,
+     "text": "`preds[\"belief\"]` still wins wherever an arm supplies one, so nothing that already fills"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 2162,
+     "text": "returns a decision id, and nothing in live2 reads `DecisionRecord.belief` during a run"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 2195,
+     "text": "believed_dist=dict(s.belief)))"
+    },
+    {
+     "file": "experiments/orchestration/live2/cstate.py",
+     "line": 150,
+     "text": "return max(self.belief, key=lambda k: self.belief[k])"
+    },
+    {
+     "file": "experiments/orchestration/live2/cstate.py",
+     "line": 207,
+     "text": "self.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 0.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/cstate.py",
+     "line": 208,
+     "text": "self.belief[tier] = 1.0"
+    },
+    {
+     "file": "experiments/orchestration/live2/cstate.py",
+     "line": 312,
+     "text": "s.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 1.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/cstate.py",
+     "line": 332,
+     "text": "s.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 1.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/d179_recall_skip_diagnosis.py",
+     "line": 274,
+     "text": "for (tt, tr) in ix[\"belief\"].get(sid, ()):"
+    },
+    {
+     "file": "experiments/orchestration/live2/d211_signal_a_available.py",
+     "line": 78,
+     "text": "gpu_tok_nonempty = sum(1 for r in dec if (r.get(\"belief\") or {}).get(\"gpu_tokens_by_session\"))"
+    },
+    {
+     "file": "experiments/orchestration/live2/engine_actions.py",
+     "line": 27,
+     "text": "`cached_tokens` into a correction of `SessionRec.belief`."
+    },
+    {
+     "file": "experiments/orchestration/live2/engine_actions.py",
+     "line": 387,
+     "text": "session.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 0.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/engine_actions.py",
+     "line": 388,
+     "text": "session.belief[after] = 1.0"
+    },
+    {
+     "file": "experiments/orchestration/live2/engine_actions.py",
+     "line": 507,
+     "text": "return max(self.belief, key=lambda k: self.belief[k])"
+    },
+    {
+     "file": "experiments/orchestration/live2/engine_actions.py",
+     "line": 509,
+     "text": "s.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 0.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/engine_actions.py",
+     "line": 510,
+     "text": "s.belief[tier] = 1.0"
+    },
+    {
+     "file": "experiments/orchestration/live2/touch_proofs.py",
+     "line": 82,
+     "text": "s.belief = {\"gpu\": 1.0, \"host\": 0.0, \"cold\": 0.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/touch_proofs.py",
+     "line": 111,
+     "text": "s_mix.belief = {\"gpu\": 0.6, \"host\": 0.4, \"cold\": 0.0}"
+    },
+    {
+     "file": "experiments/orchestration/policy/residency_belief.py",
+     "line": 172,
+     "text": "out = self.belief(pid, written_since_refresh=0, cap_tokens=0)"
+    },
+    {
+     "file": "experiments/orchestration/policy/residency_belief.py",
+     "line": 180,
+     "text": "out = self.belief(pid, written_since_refresh=written, cap_tokens=cap)"
+    },
+    {
+     "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+     "line": 53,
+     "text": "r = self.b.belief(\"h\", written_since_refresh=0)"
+    },
+    {
+     "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+     "line": 59,
+     "text": "r = self.b.belief(\"h\", written_since_refresh=self.cap + self.margin + 1)"
+    },
+    {
+     "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+     "line": 65,
+     "text": "r = self.b.belief(\"h\", written_since_refresh=self.cap)"
+    },
+    {
+     "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+     "line": 75,
+     "text": "ps = [self.b.belief(\"h\", written_since_refresh=x)[\"p_host\"] for x in xs]"
+    },
+    {
+     "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+     "line": 81,
+     "text": "r = ResidencyBelief(cap_gib=0).belief(\"h\", written_since_refresh=0)"
+    }
+   ],
+   "P3_n_references": 31,
+   "P4_log_decision_takes_latency_arg": true,
+   "P4_log_decision_callers": 11,
+   "git_describe_of_tree": 0
+  },
+  "before_control": {
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/before",
+   "recording_site_present": false,
+   "empty_belief": {
+    "gpu_tokens_by_session": {},
+    "host_tokens_by_session": {},
+    "cold_tokens_by_session": {}
+   },
+   "P1_dry_record": null,
+   "P2_live_record": null,
+   "P3_belief_references": [
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 757,
+     "text": "belief_by_session={sid: dict(s.belief or {})"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 827,
+     "text": "s.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 1.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 1795,
+     "text": "_snap = (dict(_s.belief), _s.last_touch_s)"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 1804,
+     "text": "_s.belief, _s.last_touch_s = _snap"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 1915,
+     "text": "s.belief = {\"gpu\": 1.0, \"host\": 0.0, \"cold\": 0.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 2126,
+     "text": "belief=(preds.get(\"belief\") or SC.asdict(SC.Belief())),"
+    },
+    {
+     "file": "experiments/orchestration/live2/coordinator.py",
+     "line": 2143,
+     "text": "believed_dist=dict(s.belief)))"
+    },
+    {
+     "file": "experiments/orchestration/live2/cstate.py",
+     "line": 150,
+     "text": "return max(self.belief, key=lambda k: self.belief[k])"
+    },
+    {
+     "file": "experiments/orchestration/live2/cstate.py",
+     "line": 207,
+     "text": "self.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 0.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/cstate.py",
+     "line": 208,
+     "text": "self.belief[tier] = 1.0"
+    },
+    {
+     "file": "experiments/orchestration/live2/cstate.py",
+     "line": 312,
+     "text": "s.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 1.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/cstate.py",
+     "line": 332,
+     "text": "s.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 1.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/d179_recall_skip_diagnosis.py",
+     "line": 274,
+     "text": "for (tt, tr) in ix[\"belief\"].get(sid, ()):"
+    },
+    {
+     "file": "experiments/orchestration/live2/d211_signal_a_available.py",
+     "line": 78,
+     "text": "gpu_tok_nonempty = sum(1 for r in dec if (r.get(\"belief\") or {}).get(\"gpu_tokens_by_session\"))"
+    },
+    {
+     "file": "experiments/orchestration/live2/engine_actions.py",
+     "line": 27,
+     "text": "`cached_tokens` into a correction of `SessionRec.belief`."
+    },
+    {
+     "file": "experiments/orchestration/live2/engine_actions.py",
+     "line": 387,
+     "text": "session.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 0.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/engine_actions.py",
+     "line": 388,
+     "text": "session.belief[after] = 1.0"
+    },
+    {
+     "file": "experiments/orchestration/live2/engine_actions.py",
+     "line": 507,
+     "text": "return max(self.belief, key=lambda k: self.belief[k])"
+    },
+    {
+     "file": "experiments/orchestration/live2/engine_actions.py",
+     "line": 509,
+     "text": "s.belief = {\"gpu\": 0.0, \"host\": 0.0, \"cold\": 0.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/engine_actions.py",
+     "line": 510,
+     "text": "s.belief[tier] = 1.0"
+    },
+    {
+     "file": "experiments/orchestration/live2/touch_proofs.py",
+     "line": 82,
+     "text": "s.belief = {\"gpu\": 1.0, \"host\": 0.0, \"cold\": 0.0}"
+    },
+    {
+     "file": "experiments/orchestration/live2/touch_proofs.py",
+     "line": 111,
+     "text": "s_mix.belief = {\"gpu\": 0.6, \"host\": 0.4, \"cold\": 0.0}"
+    },
+    {
+     "file": "experiments/orchestration/policy/residency_belief.py",
+     "line": 172,
+     "text": "out = self.belief(pid, written_since_refresh=0, cap_tokens=0)"
+    },
+    {
+     "file": "experiments/orchestration/policy/residency_belief.py",
+     "line": 180,
+     "text": "out = self.belief(pid, written_since_refresh=written, cap_tokens=cap)"
+    },
+    {
+     "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+     "line": 53,
+     "text": "r = self.b.belief(\"h\", written_since_refresh=0)"
+    },
+    {
+     "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+     "line": 59,
+     "text": "r = self.b.belief(\"h\", written_since_refresh=self.cap + self.margin + 1)"
+    },
+    {
+     "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+     "line": 65,
+     "text": "r = self.b.belief(\"h\", written_since_refresh=self.cap)"
+    },
+    {
+     "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+     "line": 75,
+     "text": "ps = [self.b.belief(\"h\", written_since_refresh=x)[\"p_host\"] for x in xs]"
+    },
+    {
+     "file": "experiments/orchestration/policy/tests/test_residency_belief.py",
+     "line": 81,
+     "text": "r = ResidencyBelief(cap_gib=0).belief(\"h\", written_since_refresh=0)"
+    }
+   ],
+   "P3_n_references": 29,
+   "P4_log_decision_takes_latency_arg": true,
+   "P4_log_decision_callers": 11,
+   "git_describe_of_tree": 0
+  }
+ },
+ "dry_digest_byte_identity": {
+  "_STATUS": "PARTIAL AND SUPERSEDED BY SEQUENCING. NOT A VERDICT. NOT A BAR.",
+  "_why": "The coordinator ruled that the H100 lands D209 (2) hit 7 on coordinator.py, cstate.py and baselines/interface.py FIRST, so D213 item 3 is rebuilt on that tip and this paired sweep must be re-run there. It was stopped mid-cell 2 of 48 on that ruling, and also to free the box the D213 item 1 ALONE rule needs. No identity claim, no moved-decision count and no byte-identity table may be read off this file.",
+  "_not_alone": "NOT a formally alone run: two peer chains held cells throughout (a proof-(a) cf_pd_one_cell chain from scratchpad/ladder_flashD208 and a d210_kv025_one_cell chain from scratchpad/sessionD, both confirmed by /proc/<pid>/cwd). loadavg is recorded per cell as a MAGNITUDE, never a boolean.",
+  "_the_one_thing_this_file_does_establish": "CHECK 7, THE POSITIVE CONTROL, PASSED UNDER THOSE CONDITIONS: covex-v6-base reproduced its COMMITTED dry digest af8befb9420ad86a exactly, at loadavg 2.42, from a git archive of origin/main 5ed6287e71420cd6239ce0349b7727d07dcb1f06 with NO fix applied. A known-good committed arm passing the check at that load validates the check at that load. It says nothing about either fix, because this is the BEFORE side.",
+  "recipe": "cf_pd_one_cell.py --cutoff-off, n=16, seed=4, run_s=1200, posted knobs 40:40:20 / lh_req / ss2 / epg / per-frame / reask 30.0",
+  "origin_sha_both_sides": "5ed6287e71420cd6239ce0349b7727d07dcb1f06",
+  "blind_to": "the H100's hit-7 edit, by construction: both trees are the same pre-hit-7 sha, so SimpleStream could not move here. When the sweep is re-run on the H100's tip SimpleStream WILL move, and that movement is hit 7, not D213 items 2 or 3.",
+  "planned_arms": 24,
+  "planned_cells": 48,
+  "cells_completed": 1,
+  "completed_cells": [
+   {
+    "tree": "before",
+    "arm": "covex-v6-base",
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "error": null,
+    "wall_s": 243.6,
+    "loadavg_start": [
+     2.42,
+     2.31,
+     4.18
+    ]
+   }
+  ],
+  "rows_file_sha256": "a09b0709e99e19f14e52e6ab72aa3ee1aed658efd5252c90b9b9681fddc53944",
+  "rows_file_rows": 12085
+ },
+ "headline": {
+  "item2_reader_gets_before": 0.0,
+  "item2_reader_gets_after": 0.7215447154471545,
+  "item2_free_kv_before": 51944.0,
+  "item2_free_kv_after": 17527.08943089431,
+  "dry_digest_byte_identity": "NOT RUN TO COMPLETION. 1 of 48 cells. SUPERSEDED BY SEQUENCING (the H100 lands D209 (2) hit 7 on coordinator.py first; item 3 rebases onto its tip and the sweep is re-run there). No identity verdict and no moved-decision count exist yet.",
+  "only_sweep_result": "check 7 positive control PASSED under load: covex-v6-base BEFORE digest af8befb9420ad86a == committed, 12,085 rows, loadavg 2.42, wall 243.6 s, no fix applied",
+  "dry_regime_argument": "structural and independent of the sweep: on a dry cell `be` is None, coordinator.py:489 is skipped, `asyncbackend` is never imported, st.metrics stays {}, and item 3's record returns asdict(Belief()) byte for byte (item3_after.json P1)"
+ },
+ "ERRATUM_raised_against_this_session": {
+  "claim_withdrawn": "that this engine emits NEITHER vllm:kv_offload_load_bytes_total NOR vllm:kv_offload_store_bytes_total, and that engine_actions.HOST_RESIDENCY_AGGREGATE_KEYS:460-461 is therefore a dead lookup",
+  "it_is_wrong": "BOTH series exist on this engine. The escalation it caused has been withdrawn.",
+  "how_i_got_it_wrong": "I asserted absence from a grep whose output was truncated by `head -40`; the load/store lines are at scrape lines 112-147, past the cut.",
+  "the_command_that_settles_it": "grep -h '^vllm:kv_offload_\\\\(load\\\\|store\\\\|total\\\\)_bytes_total' results/orchestration/live2/frozen_test/engine_probe_hit26/metrics_scrape_h100.txt",
+  "its_output": [
+   "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"32BI\",transfer_type=\"CPU_to_GPU\"} 1.29650130944e+12",
+   "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"32BI\",transfer_type=\"GPU_to_CPU\"} 9.50735470592e+11",
+   "vllm:kv_offload_load_bytes_total{engine=\"0\",model_name=\"32BI\"} 1.29650130944e+12",
+   "vllm:kv_offload_store_bytes_total{engine=\"0\",model_name=\"32BI\"} 9.50735470592e+11"
+  ],
+  "scrape_sha256": "ec198bcd4951982e788a1a25924256587a44c716711c943236a1e3a672f762c3",
+  "the_unlabelled_pair_equals_the_labelled_total": "load == transfer_type=CPU_to_GPU exactly; store == transfer_type=GPU_to_CPU exactly",
+  "what_does_not_change": "fm_host_counters still publishes the LABELLED family, now for a stated reason: it carries direction IN THE SERIES, where the unlabelled pair encodes direction in the metric NAME, the shape that breaks when an engine renames or deprecates one half.",
+  "lesson_recorded": "a NEGATIVE assertion about a primary artefact must travel with the exact command and its output, and must never be made from a truncated view"
+ },
+ "independent_confirmation_from_the_same_capture": {
+  "cache_config_info": {
+   "block_size": 16,
+   "num_gpu_blocks": 985,
+   "num_gpu_blocks_override": 985,
+   "kv_cache_size_tokens": 15760
+  },
+  "check": "985 x 16 = 15760 exactly, so on the override path the pool is override x 16 with no reserved block"
+ },
+ "patch_reproducibility": {
+  "method": "experiments/orchestration/live2/d213_patch_asyncbackend.py applied to a pristine git archive of origin/main 5ed6287e reproduces the after-tree file EXACTLY (diff -q clean), so the patch script is the single source and rebases onto the H100's tip",
+  "patched_asyncbackend_sha256": "f214bc2ae716a2ecbb5d044330ed448d967f3855a8afc87697ceb7d17d4154e7"
+ }
+}

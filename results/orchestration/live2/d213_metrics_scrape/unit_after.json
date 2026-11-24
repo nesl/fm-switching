@@ -1,0 +1,176 @@
+{
+ "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/after",
+ "fix_present": true,
+ "reader_key": "vllm:gpu_cache_usage_perc",
+ "asyncbackend_has_metrics_string": true,
+ "states": [
+  {
+   "state": "1 scrape with the engine's CURRENT key, vllm:kv_cache_usage_perc",
+   "reader_gets": 0.7215447154471545,
+   "fm_kv_state": "observed",
+   "fm_kv_source_key": "vllm:kv_cache_usage_perc",
+   "fm_kv_age_s": 0.0,
+   "fm_kv_missing": null,
+   "fm_metrics_degraded": 0.0,
+   "counters": {
+    "n": 0,
+    "last": null,
+    "n_served_last_good": 0,
+    "n_served_unknown": 0,
+    "n_kv_key_missing": 0,
+    "n_kv_key_aliased": 1,
+    "kv_key_seen": "vllm:kv_cache_usage_perc",
+    "n_polls": 1
+   },
+   "host_counter_keys": [
+    "vllm:external_prefix_cache_hits_total",
+    "vllm:kv_cache_usage_perc",
+    "vllm:kv_offload_cpu_cache_usage_perc",
+    "vllm:kv_offload_total_bytes_total|transfer_type=CPU_to_GPU",
+    "vllm:kv_offload_total_bytes_total|transfer_type=GPU_to_CPU",
+    "vllm:prompt_tokens_by_source_total|source=external_kv_transfer",
+    "vllm:prompt_tokens_by_source_total|source=local_cache_hit",
+    "vllm:prompt_tokens_by_source_total|source=local_compute"
+   ],
+   "queue_key_published": false
+  },
+  {
+   "state": "2 scrape with the OLDER key (fake_server spelling), 0.4242",
+   "reader_gets": 0.4242,
+   "fm_kv_state": "observed",
+   "fm_kv_source_key": "vllm:gpu_cache_usage_perc",
+   "fm_kv_age_s": 0.0,
+   "fm_kv_missing": null,
+   "fm_metrics_degraded": 0.0,
+   "counters": {
+    "n": 0,
+    "last": null,
+    "n_served_last_good": 0,
+    "n_served_unknown": 0,
+    "n_kv_key_missing": 0,
+    "n_kv_key_aliased": 1,
+    "kv_key_seen": "vllm:gpu_cache_usage_perc",
+    "n_polls": 2
+   },
+   "host_counter_keys": [],
+   "queue_key_published": false
+  },
+  {
+   "state": "3 fetch RAISES, 0 s after a good value",
+   "reader_gets": 0.4242,
+   "fm_kv_state": "last_good",
+   "fm_kv_source_key": null,
+   "fm_kv_age_s": 0.0,
+   "fm_kv_missing": 1.0,
+   "fm_metrics_degraded": 1.0,
+   "counters": {
+    "n": 1,
+    "last": "OSError",
+    "n_served_last_good": 1,
+    "n_served_unknown": 0,
+    "n_kv_key_missing": 0,
+    "n_kv_key_aliased": 1,
+    "kv_key_seen": "vllm:gpu_cache_usage_perc",
+    "n_polls": 3
+   },
+   "host_counter_keys": [],
+   "queue_key_published": false
+  },
+  {
+   "state": "4 fetch RAISES again, >1.0 s after the last good value",
+   "reader_gets": 1.0,
+   "fm_kv_state": "unknown_conservative",
+   "fm_kv_source_key": null,
+   "fm_kv_age_s": 1.2,
+   "fm_kv_missing": 1.0,
+   "fm_metrics_degraded": 1.0,
+   "counters": {
+    "n": 2,
+    "last": "OSError",
+    "n_served_last_good": 1,
+    "n_served_unknown": 1,
+    "n_kv_key_missing": 0,
+    "n_kv_key_aliased": 1,
+    "kv_key_seen": "vllm:gpu_cache_usage_perc",
+    "n_polls": 4
+   },
+   "host_counter_keys": [],
+   "queue_key_published": false
+  },
+  {
+   "state": "5 scrape SUCCEEDS carrying NEITHER key",
+   "reader_gets": 1.0,
+   "fm_kv_state": "unknown_conservative",
+   "fm_kv_source_key": null,
+   "fm_kv_age_s": 1.2,
+   "fm_kv_missing": 1.0,
+   "fm_metrics_degraded": 1.0,
+   "counters": {
+    "n": 2,
+    "last": "OSError",
+    "n_served_last_good": 1,
+    "n_served_unknown": 2,
+    "n_kv_key_missing": 1,
+    "n_kv_key_aliased": 1,
+    "kv_key_seen": "vllm:gpu_cache_usage_perc",
+    "n_polls": 5
+   },
+   "host_counter_keys": [],
+   "queue_key_published": false
+  }
+ ],
+ "metrics_health_after_five_states": {
+  "metrics_degraded": true,
+  "metrics_failures": {
+   "n": 2,
+   "last": "OSError",
+   "n_served_last_good": 1,
+   "n_served_unknown": 2,
+   "n_kv_key_missing": 1,
+   "n_kv_key_aliased": 1,
+   "kv_key_seen": "vllm:gpu_cache_usage_perc",
+   "n_polls": 5
+  },
+  "metrics_scrape_enabled": true,
+  "kv_unknown_conservative_value": 1.0,
+  "last_good_max_age_s": 1.0,
+  "published_keys": [
+   "vllm:gpu_cache_usage_perc"
+  ],
+  "not_published": [
+   "vllm:num_requests_waiting"
+  ],
+  "policy": "D209 (2) / D213 item 2: a failed fetch or an absent KV key never substitutes 0.0; the last good value at most 1.0 s old, else UNKNOWN and CONSERVATIVE (1.0)"
+ },
+ "host_counters_after_state_1": [
+  "vllm:external_prefix_cache_hits_total",
+  "vllm:kv_cache_usage_perc",
+  "vllm:kv_offload_cpu_cache_usage_perc",
+  "vllm:kv_offload_total_bytes_total|transfer_type=CPU_to_GPU",
+  "vllm:kv_offload_total_bytes_total|transfer_type=GPU_to_CPU",
+  "vllm:prompt_tokens_by_source_total|source=external_kv_transfer",
+  "vllm:prompt_tokens_by_source_total|source=local_cache_hit",
+  "vllm:prompt_tokens_by_source_total|source=local_compute"
+ ],
+ "probe_lines_used": {
+  "vllm:kv_offload_total_bytes_total": [
+   "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"32BI\",transfer_type=\"CPU_to_GPU\"} 1.29650130944e+12",
+   "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"32BI\",transfer_type=\"GPU_to_CPU\"} 9.50735470592e+11"
+  ],
+  "vllm:kv_offload_cpu_cache_usage_perc": [
+   "vllm:kv_offload_cpu_cache_usage_perc{engine=\"0\",model_name=\"32BI\"} 0.034722222222222224"
+  ],
+  "vllm:kv_cache_usage_perc": [
+   "vllm:kv_cache_usage_perc{engine=\"0\",model_name=\"32BI\"} 0.7215447154471545"
+  ],
+  "vllm:external_prefix_cache_hits_total": [
+   "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"32BI\"} 4.94576e+06"
+  ],
+  "vllm:prompt_tokens_by_source_total": [
+   "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"32BI\",source=\"local_compute\"} 3.669175e+06",
+   "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"32BI\",source=\"local_cache_hit\"} 1.0094768e+07",
+   "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"32BI\",source=\"external_kv_transfer\"} 4.943072e+06"
+  ]
+ },
+ "off_switch_publishes": []
+}
