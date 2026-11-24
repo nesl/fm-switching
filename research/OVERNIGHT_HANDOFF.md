@@ -29,11 +29,11 @@ process census at 22:40, so no resume needs to re-derive it. ***
   the window elapses (`if [ $((now - first)) -gt $WINDOW_S ]; then first=$now; count=0; fi`). The poll
   fires every TEN MINUTES, so it can only ever reach **6 restarts per hour against a budget of 12**:
   **THE GUARD IS STRUCTURALLY UNREACHABLE.** Measured rather than argued: `BUDGET SPENT` has fired
-  **0 times**; the log holds **99 RESTART lines** spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
+  **0 times**; the log holds **102 RESTART lines** (re-counted restart 9) spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
   about 37 hours; and the counter histogram shows it reset to `1/12` **18 times**, never exceeding
   `7/12`. So a resume must NOT read `RESTART n/12` as a countdown to a stop. **IT WILL KEEP SPENDING
   ABOUT SIX SESSIONS AN HOUR, INDEFINITELY, UNTIL THE USER STOPS THE `fmsw-overnight` WATCHDOG OR
-  ANSWERS THE RULINGS.** 99 sessions have been spent so far. Stopping it is the USER'S call and outside
+  ANSWERS THE RULINGS.** **102 sessions have been spent so far** (re-counted restart 9, 07:40 PST; `BUDGET SPENT` still 0). Stopping it is the USER'S call and outside
   what this file authorises, so do not touch it; the correct action is to say so plainly in the reply,
   which is now this file's standing instruction for every further resume. DO NOT read the restarts as evidence that anything broke, and do not go
   hunting for the crash. Each restart does cost a full session, so leave this file accurate.
@@ -117,9 +117,26 @@ Each entry: the claim, the verdict, and the restart that checked it. **PICK ONE 
   rests on the assumption that a dashcam instant is always priced as an APPEND; if an episode's
   first frame should be priced at its start cost, the discounted harm of displacing THAT alert would
   be non-zero. **Worth knowing before ruling 1, because ruling 1 turns on this zero.**
-**STILL UNVERIFIED, IN DESCENDING ORDER OF CONSEQUENCE:** that the two D218 pre-registrations agree on the pass
-condition VERBATIM, which is what ruling 6 rests on; that `covex-v6-final-da` does not resolve on the
-normal import path, which is what gates step 4; and the r2-queue-register claim that a correct input
+- *** THE TWO D218 PRE-REGISTRATIONS "AGREE VERBATIM" -> **FALSE AS WORDED, TRUE IN SUBSTANCE, AND
+  THIS NARROWS RULING 6 TO A PURELY FORMAL CHOICE** (restart 9, 2026-11-24 07:40 PST). *** Compared
+  field by field from origin, BOTH files, not from either one's account of the other. **The strings are
+  NOT identical** - a direct equality test on the pass-condition text returns False:
+    MINE (`e0811790`, 19:06) splits it into `PASS_CONDITION_.../condition_1` = "pd_request_crossed_bar_
+    unexpressible FALLS against covex-v6-final's 27 on the same cell" and `condition_2` =
+    "pd_request_device_answers > 0", with the 1x treatment in a SEPARATE key.
+    PEER (`77cf269e`, 19:23) is ONE sentence: "on the 0.25x DRY s4 cell: pd_request_crossed_bar_
+    unexpressible FALLS AND pd_request_device_answers > 0. The 1x count is REPORTED WHATEVER IT IS."
+  **BUT BOTH CARRY THE SAME THREE SUBSTANTIVE POINTS**, including the one that matters most: each says
+  the 1x count carries NO PASS OR FAIL and is reported because D209 (1) needs it, and each says a
+  non-zero 1x count RAISES the supersession question rather than deciding it. Mine's key is literally
+  `the_1x_count_is_REPORTED_WHATEVER_IT_IS`. **SO NO BAR, NO THRESHOLD AND NO NUMBER DIFFERS BETWEEN
+  THEM: RULING 6 CANNOT MOVE A RESULT EITHER WAY** and is a provenance and credit question only. Worth
+  telling the user, because the way it is phrased makes it sound as though a result could turn on it.
+  **AND THE WORD "VERBATIM" WAS MINE** - relayed from the building agent's report without comparing the
+  files, and it then entered this ledger as the claim to check. The substance was right and the word was
+  not. NOTE line 549 of this file makes the same "VERBATIM" claim; it is corrected by this entry.
+**STILL UNVERIFIED, IN DESCENDING ORDER OF CONSEQUENCE:** that `covex-v6-final-da` does not resolve on
+the normal import path, which is what gates step 4; and the r2-queue-register claim that a correct input
 costs 16 robot answers at s4, which is ruling 7.
 
 *** A CORRECTION TO THIS FILE'S OWN HANG-DETECTION LESSON, because I got the discriminator wrong
