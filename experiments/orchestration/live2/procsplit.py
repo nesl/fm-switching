@@ -288,6 +288,18 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
 
     rdir = Path(cfg["run_dir"])
     rdir.mkdir(parents=True, exist_ok=True)
+    # D223 (2): THE DECISIONS ARE MADE IN THIS PROCESS, so the limit the runner read from the
+    # server's argv has to arrive HERE. It is carried in `cfg` as the already-resolved number and
+    # installed before the arm is built, because `arms_v6fair.live2_describe` reads it. A missing
+    # key STOPS: a child that quietly fell back to the model's own position limit would plan a
+    # 0.5x cell against 32,768 while its engine served 31,472, which is the defect being fixed,
+    # and in split mode (the DEFAULT) nothing in the parent's own configure would be read at all.
+    # D223 (2): THE DECISIONS ARE MADE IN THIS PROCESS, so the limit the runner read from the
+    # server's argv has to arrive HERE, and it does, in `cfg`. Installed before the arm is built
+    # because `arms_v6fair.live2_describe` reads it. The rule (declared server and no limit means
+    # STOP) lives in `context_limit.configure_from_cfg` so the proof exercises this exact call.
+    import context_limit as CL
+    CL.configure_from_cfg(cfg)
     import hybrid  # noqa: F401  (registers the hybrid-* arms; D138)
     arm = A.make_arm(cfg["arm"], **(cfg.get("arm_kwargs") or {}))
     if cfg.get("c_inflight") is not None:              # D114 sensitivity (runner flag --c-inflight)

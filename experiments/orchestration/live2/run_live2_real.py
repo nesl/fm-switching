@@ -284,6 +284,36 @@ def run(a) -> Dict[str, Any]:
                 pass
 
         atexit.register(_stop_if_still_running)
+    # D223 (2) / D56: THE CONTEXT LIMIT IS AN INPUT, READ ONCE HERE, BEFORE ANY DECISION IS MADE.
+    # Three sources in order, and the first two are the server's own statement of what it serves:
+    #
+    #   1. a server THIS PROCESS STARTED: its argv, `sinfo["command"]`. Authoritative. At the real
+    #      0.5x condition that argv carries `--max-model-len` TWICE (the pinned 32768 at index 7
+    #      and the extra-flag 31472 at index 39) and the parse takes the LAST, as argparse does.
+    #   2. a server started elsewhere and attached to with `--server`: the declared extra flags
+    #      are then the only statement of its launch, so they are read if they carry a limit.
+    #   3. no server at all (a dry cell): the model snapshot's own position limit, recorded under
+    #      its own source string so no artefact can present it as an engine's answer.
+    #
+    # It FAILS LOUD, never defaults, when a server IS configured and its limit cannot be read:
+    # a run that assumes its limit has not tested its over-limit rule.
+    import context_limit as CL
+    if sinfo is not None:
+        CL.configure_from_server_argv(sinfo.get("command"),
+                                      where="the started server's argv (header.json server.command)")
+    elif sends:
+        if CL.configure_from_extra_flags(a.server_extra_flags) is None:
+            raise SystemExit(
+                "--server was given without --start-server and --server-extra-flags carries no "
+                "--max-model-len, so this run cannot read the engine's configured context limit: "
+                "STOP (D223 (2)). Pass the limit in --server-extra-flags, or start the server "
+                "here with --start-server so its argv can be read.")
+    else:
+        CL.configure_arch_default()
+    limit_state = CL.state()
+    print("D223 (2) context limit: %d tokens, source=%s"
+          % (limit_state["context_limit_tokens"], limit_state["source"]), flush=True)
+
     conf = dict(gpu_kv_tokens=a.gpu_kv_tokens, host_tier_gib=a.host_tier_gib,
                 host_tier_tokens=htok, targets=CS.TARGETS)
     if sends:                                    # vllm-priority refuses an undeclared server mode
@@ -323,6 +353,7 @@ def run(a) -> Dict[str, Any]:
         c_inflight=getattr(arm, "c_inflight", None),
         scheduling_policy=(a.scheduling_policy if sends else None),
         server_extra_flags=(a.server_extra_flags if sends else None),
+        context_limit=limit_state,          # D223 (2): every cell says what limit it ran under
         c_inflight_set_by_runner=(a.c_inflight is not None),
         kv_capacity_enforced=bool(a.kv_capacity_enforced),
         robot_upload=tmeta.get("robot_upload", "batch-30s"),
@@ -351,7 +382,11 @@ def run(a) -> Dict[str, Any]:
                forward_on_completion=bool(a.forward_on_completion),
                c_inflight=a.c_inflight, kv_capacity_enforced=bool(a.kv_capacity_enforced),
                scheduling_policy=(a.scheduling_policy if sends else None),
-               forward_at_first_token=(a.forward_at == "first"))
+               forward_at_first_token=(a.forward_at == "first"),
+               # D223 (2): the limit read above travels to the coordinator PROCESS, which is where
+               # the decisions are made in split mode. Resolved number plus the argv it came from.
+               context_limit_tokens=int(limit_state["context_limit_tokens"]),
+               context_limit_source=str(limit_state["source"]))
 
     err = None
     em = None

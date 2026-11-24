@@ -1,0 +1,310 @@
+{
+ "crosscheck_against_committed": {
+  "_what": "CLAUDE.md check 1: this run against the committed independent recomputation in frozen_test/d223_context_limit_offered.json",
+  "source": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/sibling_offered.json",
+  "n_quantities": 20,
+  "rows": [
+   {
+    "seed": 4,
+    "quantity": "n_recall_opportunities",
+    "this_run": 489,
+    "committed": 489,
+    "agree": true
+   },
+   {
+    "seed": 4,
+    "quantity": "over_31472",
+    "this_run": 0,
+    "committed": 0,
+    "agree": true
+   },
+   {
+    "seed": 4,
+    "quantity": "over_32768",
+    "this_run": 0,
+    "committed": 0,
+    "agree": true
+   },
+   {
+    "seed": 4,
+    "quantity": "between",
+    "this_run": 0,
+    "committed": 0,
+    "agree": true
+   },
+   {
+    "seed": 4,
+    "quantity": "max_history",
+    "this_run": 26851,
+    "committed": 26851,
+    "agree": true
+   },
+   {
+    "seed": 5,
+    "quantity": "n_recall_opportunities",
+    "this_run": 483,
+    "committed": 483,
+    "agree": true
+   },
+   {
+    "seed": 5,
+    "quantity": "over_31472",
+    "this_run": 0,
+    "committed": 0,
+    "agree": true
+   },
+   {
+    "seed": 5,
+    "quantity": "over_32768",
+    "this_run": 0,
+    "committed": 0,
+    "agree": true
+   },
+   {
+    "seed": 5,
+    "quantity": "between",
+    "this_run": 0,
+    "committed": 0,
+    "agree": true
+   },
+   {
+    "seed": 5,
+    "quantity": "max_history",
+    "this_run": 26941,
+    "committed": 26941,
+    "agree": true
+   },
+   {
+    "seed": 6,
+    "quantity": "n_recall_opportunities",
+    "this_run": 478,
+    "committed": 478,
+    "agree": true
+   },
+   {
+    "seed": 6,
+    "quantity": "over_31472",
+    "this_run": 0,
+    "committed": 0,
+    "agree": true
+   },
+   {
+    "seed": 6,
+    "quantity": "over_32768",
+    "this_run": 0,
+    "committed": 0,
+    "agree": true
+   },
+   {
+    "seed": 6,
+    "quantity": "between",
+    "this_run": 0,
+    "committed": 0,
+    "agree": true
+   },
+   {
+    "seed": 6,
+    "quantity": "max_history",
+    "this_run": 26671,
+    "committed": 26671,
+    "agree": true
+   },
+   {
+    "seed": 7,
+    "quantity": "n_recall_opportunities",
+    "this_run": 464,
+    "committed": 464,
+    "agree": true
+   },
+   {
+    "seed": 7,
+    "quantity": "over_31472",
+    "this_run": 18,
+    "committed": 18,
+    "agree": true
+   },
+   {
+    "seed": 7,
+    "quantity": "over_32768",
+    "this_run": 18,
+    "committed": 18,
+    "agree": true
+   },
+   {
+    "seed": 7,
+    "quantity": "between",
+    "this_run": 0,
+    "committed": 0,
+    "agree": true
+   },
+   {
+    "seed": 7,
+    "quantity": "max_history",
+    "this_run": 52861,
+    "committed": 52861,
+    "agree": true
+   }
+  ],
+  "disagreements": [],
+  "PASS": true,
+  "VERDICT": "PASS: two independently written recomputations of this table agree on every quantity at every seed."
+ },
+ "_what": "D223 (2): robot recall questions whose FULL HISTORY exceeds the 0.5x limit (31,472) and, for reference, the 1x limit (32,768), per seed s4 to s7",
+ "_definition": "D170's, unchanged: a recall record's `history_tokens` from the trace, which is deterministic in the seed, under d170_overlimit.CELL_ARGS. Only the threshold moves. This is a property of the WORKLOAD, not of an arm.",
+ "limits": {
+  "0.5x_max_prompt": 31472,
+  "1x": 32768,
+  "0.5x_source": "D223 (1), and --max-model-len 31472 in the kv0.5r cells' argv"
+ },
+ "positive_control": {
+  "_what": "POSITIVE CONTROL on the counting method: D176 records the over-32,768 set as 18 questions, all at seed 7, on robo004 s000.",
+  "committed": {
+   "n": 18,
+   "seed": 7,
+   "device": "robo004",
+   "session": "s000"
+  },
+  "recomputed_n_over_32768_at_seed_7": 18,
+  "recomputed_total_over_32768_all_seeds": 18,
+  "recomputed_devices_over_31472_at_seed_7": [
+   "robo004"
+  ],
+  "other_seeds_have_none_over_32768": true,
+  "PASS": true,
+  "VERDICT": "PASS: the method reproduces the committed 18 at seed 7 and none elsewhere, so the 31,472 count below is produced by a method that is known to agree with a committed result."
+ },
+ "per_seed": {
+  "4": {
+   "n_recall_opportunities": 489,
+   "max_history_tokens": 26851,
+   "median_history_tokens": 1340,
+   "n_over_31472_the_0.5x_limit": 0,
+   "n_over_32768_for_reference": 0,
+   "n_NEWLY_excluded_at_0.5x_between_31472_and_32768": 0,
+   "newly_excluded": [],
+   "devices_over_31472": [],
+   "sessions_over_31472": [],
+   "all_histories_over_31472_sorted": [],
+   "top5_histories": [
+    26131,
+    26221,
+    26401,
+    26581,
+    26851
+   ],
+   "UNEXERCISED": true,
+   "unexercised_note": "no recall history at this seed reaches either limit (max 26851 tokens), so a zero here is UNEXERCISED (CLAUDE.md Rule 2) and says nothing about any arm's over-limit behaviour"
+  },
+  "5": {
+   "n_recall_opportunities": 483,
+   "max_history_tokens": 26941,
+   "median_history_tokens": 1339,
+   "n_over_31472_the_0.5x_limit": 0,
+   "n_over_32768_for_reference": 0,
+   "n_NEWLY_excluded_at_0.5x_between_31472_and_32768": 0,
+   "newly_excluded": [],
+   "devices_over_31472": [],
+   "sessions_over_31472": [],
+   "all_histories_over_31472_sorted": [],
+   "top5_histories": [
+    25681,
+    25861,
+    26401,
+    26851,
+    26941
+   ],
+   "UNEXERCISED": true,
+   "unexercised_note": "no recall history at this seed reaches either limit (max 26941 tokens), so a zero here is UNEXERCISED (CLAUDE.md Rule 2) and says nothing about any arm's over-limit behaviour"
+  },
+  "6": {
+   "n_recall_opportunities": 478,
+   "max_history_tokens": 26671,
+   "median_history_tokens": 1338,
+   "n_over_31472_the_0.5x_limit": 0,
+   "n_over_32768_for_reference": 0,
+   "n_NEWLY_excluded_at_0.5x_between_31472_and_32768": 0,
+   "newly_excluded": [],
+   "devices_over_31472": [],
+   "sessions_over_31472": [],
+   "all_histories_over_31472_sorted": [],
+   "top5_histories": [
+    25141,
+    25231,
+    25321,
+    26041,
+    26671
+   ],
+   "UNEXERCISED": true,
+   "unexercised_note": "no recall history at this seed reaches either limit (max 26671 tokens), so a zero here is UNEXERCISED (CLAUDE.md Rule 2) and says nothing about any arm's over-limit behaviour"
+  },
+  "7": {
+   "n_recall_opportunities": 464,
+   "max_history_tokens": 52861,
+   "median_history_tokens": 1338,
+   "n_over_31472_the_0.5x_limit": 18,
+   "n_over_32768_for_reference": 18,
+   "n_NEWLY_excluded_at_0.5x_between_31472_and_32768": 0,
+   "newly_excluded": [],
+   "devices_over_31472": [
+    "robo004"
+   ],
+   "sessions_over_31472": [
+    "robo004|s000|1848337166005249_start_0.0_end_1199.976"
+   ],
+   "all_histories_over_31472_sorted": [
+    34051,
+    34591,
+    35131,
+    35221,
+    38101,
+    38821,
+    39271,
+    39991,
+    40171,
+    43771,
+    46831,
+    48811,
+    50521,
+    50611,
+    51601,
+    51781,
+    52501,
+    52861
+   ],
+   "top5_histories": [
+    50611,
+    51601,
+    51781,
+    52501,
+    52861
+   ],
+   "UNEXERCISED": false,
+   "unexercised_note": null
+  }
+ },
+ "totals": {
+  "over_31472_s4_to_s7": 18,
+  "over_32768_s4_to_s7": 18,
+  "newly_excluded_at_0.5x": 0
+ },
+ "cell_args": {
+  "n_devices": 16,
+  "ratio": "40:40:20",
+  "run_s": 1200.0,
+  "mode": "A",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0
+ },
+ "_provenance": {
+  "base_sha": "400f5bae39d2788e950d4b004326008c7c9a6296",
+  "script": "d223_overlimit_counts.py",
+  "ruling": "D223 (2), and D56 for the principle that capacities are inputs",
+  "host": "flash (A6000 box); these are DRY proofs and no GPU is used",
+  "register": "PROOF, not a measurement: no latency or accuracy here is reportable",
+  "timestamp": "2026-11-24T09:24:14.981088",
+  "note": "the BEFORE tree is a private `git archive` of base_sha; the AFTER tree is that archive plus this commit's edits. See d223_assemble_proofs.py for why _provenance.stamp was not used."
+ }
+}

@@ -1,0 +1,231 @@
+{
+ "_what": "D223 (2) unit proofs for the one context-limit read",
+ "_ruling": "D223 (2): the hard-coded 32,768 is replaced by the server's configured max-model-len read at run start (D56: capacities are inputs)",
+ "values_observed": {
+  "kv0.5r_real_engine": {
+   "header": "header_kv05r.json",
+   "n_occurrences": 2,
+   "occurrences": [
+    {
+     "index": 7,
+     "value": "32768"
+    },
+    {
+     "index": 39,
+     "value": "31472"
+    }
+   ],
+   "parsed_LAST_occurrence": 31472,
+   "expected": 31472,
+   "PASS": true,
+   "what_a_FIRST_occurrence_parse_would_have_returned": 32768,
+   "first_differs_from_last": true
+  },
+  "one_x": {
+   "header": "header_1x.json",
+   "n_occurrences": 1,
+   "occurrences": [
+    {
+     "index": 7,
+     "value": "32768"
+    }
+   ],
+   "parsed_LAST_occurrence": 32768,
+   "expected": 32768,
+   "PASS": true,
+   "what_a_FIRST_occurrence_parse_would_have_returned": 32768,
+   "first_differs_from_last": false
+  },
+  "_what": "OBSERVED. (1) the real-0.5x argv parses to 31,472 and carries the flag twice, so last-occurrence is load-bearing here. (2) the 1x argv parses to 32,768 and is the POSITIVE CONTROL on the parse.",
+  "PASS": true
+ },
+ "negative_control": {
+  "_what": "THE NEGATIVE CONTROL. Five argvs from which the limit cannot be read; the parse must RAISE for every one and must never fall back to 32,768.",
+  "n_cases": 5,
+  "cases": [
+   {
+    "why": "no --max-model-len at all",
+    "RAISED": true,
+    "error": "negative control carries no --max-model-len, so the engine's configured context limit cannot be read at run start. D223 (2) requires this to STOP rather than as",
+    "VERDICT": "PASS"
+   },
+   {
+    "why": "the flag present but trailing, with no value",
+    "RAISED": true,
+    "error": "negative control carries no --max-model-len, so the engine's configured context limit cannot be read at run start. D223 (2) requires this to STOP rather than as",
+    "VERDICT": "PASS"
+   },
+   {
+    "why": "a non-integer value",
+    "RAISED": true,
+    "error": "negative control carries --max-model-len 'thirty-two-k', which is not an integer: STOP (D223 (2))",
+    "VERDICT": "PASS"
+   },
+   {
+    "why": "a non-positive value",
+    "RAISED": true,
+    "error": "negative control carries --max-model-len 0, which is not a positive token count: STOP (D223 (2))",
+    "VERDICT": "PASS"
+   },
+   {
+    "why": "an empty argv",
+    "RAISED": true,
+    "error": "negative control carries no --max-model-len, so the engine's configured context limit cannot be read at run start. D223 (2) requires this to STOP rather than as",
+    "VERDICT": "PASS"
+   }
+  ],
+  "PASS": true,
+  "VERDICT": "PASS: every unreadable argv raised, so no run can silently assume its limit."
+ },
+ "kv_pool_is_not_the_limit": {
+  "_what": "THE TRAP, MEASURED. `gpu_kv_tokens` is the harness's logical KV pool. If it had been used as the limit it would have passed the 0.5x proof and been wrong at 1x, which is why it is not the source.",
+  "rows": [
+   {
+    "condition": "one_x",
+    "max_model_len_from_argv": 32768,
+    "gpu_kv_tokens": 62944,
+    "coincides": false
+   },
+   {
+    "condition": "kv0.5r_real_engine",
+    "max_model_len_from_argv": 31472,
+    "gpu_kv_tokens": 31472,
+    "coincides": true
+   }
+  ],
+  "PASS": true,
+  "VERDICT": "PASS: gpu_kv_tokens coincides with the limit at 0.5x and DIFFERS at 1x (one_x: pool 62944 vs limit 32768), so it is demonstrably a different quantity and using it would have been wrong in every 1x cell."
+ },
+ "read_sites_follow": {
+  "_what": "OBSERVED, per read site. The limit is set to two different values and each site's own expression is evaluated. A site that does not follow is a write-only field: non-zero, varying, instrumentable and causally absent.",
+  "rows": [
+   {
+    "site": "hybrid/hybrid_arm.py",
+    "expression": "CL.limit_tokens() (was CONTEXT_LIMIT_TOKENS = 32768)",
+    "observed": {
+     "31472": 31472,
+     "12345": 12345
+    },
+    "error": null,
+    "FOLLOWS_THE_RUN_LIMIT": true,
+    "verdict": "LIVE READ"
+   },
+   {
+    "site": "arms_v6cf.py",
+    "expression": "CL.limit_tokens() (was a retyped 32768 fallback)",
+    "observed": {
+     "31472": 31472,
+     "12345": 12345
+    },
+    "error": null,
+    "FOLLOWS_THE_RUN_LIMIT": true,
+    "verdict": "LIVE READ"
+   }
+  ],
+  "PASS": true
+ },
+ "split_mode_handoff": {
+  "_what": "OBSERVED. The split-mode hand-off, on the function procsplit._serve calls, in all three branches, plus a check that procsplit CALLS it.",
+  "cases": [
+   {
+    "branch": "a real-server cfg carrying the resolved limit",
+    "limit": 31472,
+    "source": "argv",
+    "expected": 31472,
+    "PASS": true
+   },
+   {
+    "branch": "a cfg DECLARING A SERVER with no limit",
+    "RAISED": true,
+    "error": "cfg declares server_url='http://x' but carries no context_limit_tokens, so this coordinator process cannot know the engine's configured cont",
+    "PASS": true
+   },
+   {
+    "branch": "a cfg with NO server (dry cell, harness self-checks, tests)",
+    "limit": 32768,
+    "source": "arch-default-no-server-configured",
+    "expected": 32768,
+    "PASS": true
+   }
+  ],
+  "procsplit_calls_configure_from_cfg": true,
+  "procsplit_reimplements_the_branching": false,
+  "PASS": true,
+  "VERDICT": "PASS: the child's read is live, it STOPS on a server cfg with no limit, and procsplit calls this function rather than a copy of it."
+ },
+ "no_retyped_copy": {
+  "_what": "THE CENSUS. Every 32768 NUMBER TOKEN in the live2 tree, each with a verdict. Prose and comments are excluded by the tokenizer, not by a pattern. The absence claim is the EMPTY `unreviewed_code_hits` list beside this full census, not a grep read to its first page.",
+  "n_hits": 7,
+  "hits": [
+   {
+    "file": "confirm_engine_actions_32b.py",
+    "line": 134,
+    "kind": "NUMBER token",
+    "text": "MAX_MODEL_LEN = 32_768                       # round-1 server --max-model-len",
+    "verdict": "OFFLINE ANALYSIS OF THE 1x CELLS, left alone by ruling"
+   },
+   {
+    "file": "context_limit.py",
+    "line": 55,
+    "kind": "NUMBER token",
+    "text": "MODEL_ARCH_MAX_TOKENS = 32768",
+    "verdict": "THE ONE DECLARED DEFINITION: the model snapshot's own position limit, used only when no server is configured, and reported under its own source string"
+   },
+   {
+    "file": "d170_overlimit.py",
+    "line": 33,
+    "kind": "NUMBER token",
+    "text": "LIMIT = 32768",
+    "verdict": "OFFLINE ANALYSIS OF THE 1x CELLS, left alone by ruling"
+   },
+   {
+    "file": "d176_robot_headline.py",
+    "line": 104,
+    "kind": "NUMBER token",
+    "text": "LIMIT_TOKENS = 32768",
+    "verdict": "OFFLINE ANALYSIS OF THE 1x CELLS, left alone by ruling"
+   },
+   {
+    "file": "d223_context_limit_unit_proofs.py",
+    "line": 77,
+    "kind": "NUMBER token",
+    "text": "for tag, name, expect in ((\"kv0.5r_real_engine\", HALF_X, 31472), (\"one_x\", ONE_X, 32768)):",
+    "verdict": "THIS CHECK'S OWN CONSTANT: the value the 1x argv is asserted to parse to, and the comparand of this census. Not read by any decision."
+   },
+   {
+    "file": "d223_context_limit_unit_proofs.py",
+    "line": 260,
+    "kind": "NUMBER token",
+    "text": "if val != 32768:",
+    "verdict": "THIS CHECK'S OWN CONSTANT: the value the 1x argv is asserted to parse to, and the comparand of this census. Not read by any decision."
+   },
+   {
+    "file": "d223_overlimit_counts.py",
+    "line": 49,
+    "kind": "NUMBER token",
+    "text": "LIMIT_1X = 32768           # the 1x limit D170 and D176 analysed against",
+    "verdict": "OFFLINE ANALYSIS OF THE 1x CELLS, left alone by ruling"
+   }
+  ],
+  "unreviewed_code_hits": [],
+  "PASS": true
+ },
+ "ALL_PASS": true,
+ "per_proof": {
+  "values_observed": true,
+  "negative_control": true,
+  "kv_pool_is_not_the_limit": true,
+  "read_sites_follow": true,
+  "split_mode_handoff": true,
+  "no_retyped_copy": true
+ },
+ "_provenance": {
+  "base_sha": "400f5bae39d2788e950d4b004326008c7c9a6296",
+  "script": "d223_context_limit_unit_proofs.py",
+  "ruling": "D223 (2), and D56 for the principle that capacities are inputs",
+  "host": "flash (A6000 box); these are DRY proofs and no GPU is used",
+  "register": "PROOF, not a measurement: no latency or accuracy here is reportable",
+  "timestamp": "2026-11-24T09:24:14.981088",
+  "note": "the BEFORE tree is a private `git archive` of base_sha; the AFTER tree is that archive plus this commit's edits. See d223_assemble_proofs.py for why _provenance.stamp was not used."
+ }
+}

@@ -1,0 +1,320 @@
+{
+ "_what": "D223 (2) 1x byte-identity proof on the project's own deterministic dry digest (hybrid/test_hybrid.dry, realtime=False), per arm",
+ "_claim": "reading the context limit from the server's configured max-model-len at run start changes no decision at 1x, for any arm",
+ "_instrument": "hybrid/test_hybrid.dry with realtime=False and the committed STRIP set, every module taken from the tree under test. See the module docstring for why the realtime cell instrument was rejected and what this one does not reach (the procsplit hand-off).",
+ "sha_before": "400f5bae39d2788e950d4b004326008c7c9a6296",
+ "workload": {
+  "ratio": "40:40:20",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0
+ },
+ "cell": {
+  "seed": 4,
+  "n_devices": 16,
+  "run_s": 300.0
+ },
+ "control_instrument_determinism": {
+  "_what": "THE INSTRUMENT'S OWN DETERMINISM, measured before any comparison is read. Each tree is run twice on one arm. The realtime cell instrument this replaced FAILED this check, which is why it was replaced.",
+  "arm": "covex-v6-base",
+  "before": {
+   "digests": [
+    "26fa08e255cfac87",
+    "26fa08e255cfac87"
+   ],
+   "n_rows": [
+    2840,
+    2840
+   ],
+   "ok": [
+    true,
+    true
+   ],
+   "stderr_tail": [
+    null,
+    null
+   ],
+   "SELF_CONSISTENT": true,
+   "diff": null
+  },
+  "after": {
+   "digests": [
+    "26fa08e255cfac87",
+    "26fa08e255cfac87"
+   ],
+   "n_rows": [
+    2840,
+    2840
+   ],
+   "ok": [
+    true,
+    true
+   ],
+   "stderr_tail": [
+    null,
+    null
+   ],
+   "SELF_CONSISTENT": true,
+   "diff": null
+  },
+  "DETERMINISTIC": true,
+  "VERDICT": "PASS: both trees reproduce their own digest exactly, so this instrument can carry a byte-identity claim and an equal digest below means equal decisions."
+ },
+ "arms": {
+  "covex-v6-base": {
+   "why_in_the_set": "the ladder base; the control inside the covex family",
+   "RAN": true,
+   "n_rows": [
+    2840,
+    2840
+   ],
+   "digest_before": "26fa08e255cfac87",
+   "digest_after": "26fa08e255cfac87",
+   "strip_set": [
+    "arm",
+    "decision_latency_ms",
+    "decision_id"
+   ],
+   "modules_from": {
+    "before": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/before/experiments/orchestration/live2/hybrid/test_hybrid.py",
+    "after": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/after/experiments/orchestration/live2/hybrid/test_hybrid.py"
+   },
+   "comparison": {
+    "n_rows": [
+     2840,
+     2840
+    ],
+    "row_counts_equal": true,
+    "n_differing_rows": 0,
+    "differing_fields": {},
+    "first_difference": null
+   },
+   "IDENTICAL": true
+  },
+  "covex-v6-state-uo-c5attr": {
+   "why_in_the_set": "rung 2, the base the rung-4 compound is built on",
+   "RAN": true,
+   "n_rows": [
+    2877,
+    2877
+   ],
+   "digest_before": "8d901f7bc82b7f37",
+   "digest_after": "8d901f7bc82b7f37",
+   "strip_set": [
+    "arm",
+    "decision_latency_ms",
+    "decision_id"
+   ],
+   "modules_from": {
+    "before": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/before/experiments/orchestration/live2/hybrid/test_hybrid.py",
+    "after": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/after/experiments/orchestration/live2/hybrid/test_hybrid.py"
+   },
+   "comparison": {
+    "n_rows": [
+     2877,
+     2877
+    ],
+    "row_counts_equal": true,
+    "n_differing_rows": 0,
+    "differing_fields": {},
+    "first_difference": null
+   },
+   "IDENTICAL": true
+  },
+  "covex-v6-fair-c5attr": {
+   "why_in_the_set": "RUNG 3, THE ARM THE H100 IS BLOCKED ON; reads arms_v6fair",
+   "RAN": true,
+   "n_rows": [
+    2831,
+    2831
+   ],
+   "digest_before": "a135685c50999209",
+   "digest_after": "a135685c50999209",
+   "strip_set": [
+    "arm",
+    "decision_latency_ms",
+    "decision_id"
+   ],
+   "modules_from": {
+    "before": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/before/experiments/orchestration/live2/hybrid/test_hybrid.py",
+    "after": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/after/experiments/orchestration/live2/hybrid/test_hybrid.py"
+   },
+   "comparison": {
+    "n_rows": [
+     2831,
+     2831
+    ],
+    "row_counts_equal": true,
+    "n_differing_rows": 0,
+    "differing_fields": {},
+    "first_difference": null
+   },
+   "IDENTICAL": true
+  },
+  "covex-v6-cf-pd-c5attr": {
+   "why_in_the_set": "rung 4 on the rung-2 base; reads arms_v6cf's over-limit skip",
+   "RAN": true,
+   "n_rows": [
+    2877,
+    2877
+   ],
+   "digest_before": "cefc4dbb8248d1da",
+   "digest_after": "cefc4dbb8248d1da",
+   "strip_set": [
+    "arm",
+    "decision_latency_ms",
+    "decision_id"
+   ],
+   "modules_from": {
+    "before": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/before/experiments/orchestration/live2/hybrid/test_hybrid.py",
+    "after": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/after/experiments/orchestration/live2/hybrid/test_hybrid.py"
+   },
+   "comparison": {
+    "n_rows": [
+     2877,
+     2877
+    ],
+    "row_counts_equal": true,
+    "n_differing_rows": 0,
+    "differing_fields": {},
+    "first_difference": null
+   },
+   "IDENTICAL": true
+  },
+  "covex-v6-cf-c5attr": {
+   "why_in_the_set": "rung 4 on the rung-3 base; reads arms_v6cfr3's VCF.CL.limit_tokens()",
+   "RAN": true,
+   "n_rows": [
+    2831,
+    2831
+   ],
+   "digest_before": "a135685c50999209",
+   "digest_after": "a135685c50999209",
+   "strip_set": [
+    "arm",
+    "decision_latency_ms",
+    "decision_id"
+   ],
+   "modules_from": {
+    "before": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/before/experiments/orchestration/live2/hybrid/test_hybrid.py",
+    "after": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/after/experiments/orchestration/live2/hybrid/test_hybrid.py"
+   },
+   "comparison": {
+    "n_rows": [
+     2831,
+     2831
+    ],
+    "row_counts_equal": true,
+    "n_differing_rows": 0,
+    "differing_fields": {},
+    "first_difference": null
+   },
+   "IDENTICAL": true
+  },
+  "hybrid-c1c2k2c5": {
+   "why_in_the_set": "a hybrid arm: the canonical definition's own read site in hybrid_arm",
+   "RAN": true,
+   "n_rows": [
+    3028,
+    3028
+   ],
+   "digest_before": "85d20c47c79891b7",
+   "digest_after": "85d20c47c79891b7",
+   "strip_set": [
+    "arm",
+    "decision_latency_ms",
+    "decision_id"
+   ],
+   "modules_from": {
+    "before": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/before/experiments/orchestration/live2/hybrid/test_hybrid.py",
+    "after": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/after/experiments/orchestration/live2/hybrid/test_hybrid.py"
+   },
+   "comparison": {
+    "n_rows": [
+     3028,
+     3028
+    ],
+    "row_counts_equal": true,
+    "n_differing_rows": 0,
+    "differing_fields": {},
+    "first_difference": null
+   },
+   "IDENTICAL": true
+  },
+  "hybrid-base": {
+   "why_in_the_set": "the hybrid identity baseline test_hybrid's own proofs are built on",
+   "RAN": true,
+   "n_rows": [
+    2936,
+    2936
+   ],
+   "digest_before": "f6493e4c5850da0d",
+   "digest_after": "f6493e4c5850da0d",
+   "strip_set": [
+    "arm",
+    "decision_latency_ms",
+    "decision_id"
+   ],
+   "modules_from": {
+    "before": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/before/experiments/orchestration/live2/hybrid/test_hybrid.py",
+    "after": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/after/experiments/orchestration/live2/hybrid/test_hybrid.py"
+   },
+   "comparison": {
+    "n_rows": [
+     2936,
+     2936
+    ],
+    "row_counts_equal": true,
+    "n_differing_rows": 0,
+    "differing_fields": {},
+    "first_difference": null
+   },
+   "IDENTICAL": true
+  },
+  "b7-edf-feasibility": {
+   "why_in_the_set": "POSITIVE CONTROL: a committed baseline on a path this ruling does not touch. If it moves, the harness moved and not the fix",
+   "RAN": true,
+   "n_rows": [
+    2936,
+    2936
+   ],
+   "digest_before": "f6493e4c5850da0d",
+   "digest_after": "f6493e4c5850da0d",
+   "strip_set": [
+    "arm",
+    "decision_latency_ms",
+    "decision_id"
+   ],
+   "modules_from": {
+    "before": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/before/experiments/orchestration/live2/hybrid/test_hybrid.py",
+    "after": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d223x/after/experiments/orchestration/live2/hybrid/test_hybrid.py"
+   },
+   "comparison": {
+    "n_rows": [
+     2936,
+     2936
+    ],
+    "row_counts_equal": true,
+    "n_differing_rows": 0,
+    "differing_fields": {},
+    "first_difference": null
+   },
+   "IDENTICAL": true
+  }
+ },
+ "ARMS_WHOSE_DECISIONS_MOVED": [],
+ "ARMS_THAT_DID_NOT_RUN": [],
+ "ALL_IDENTICAL": true,
+ "VERDICT": "PASS: every arm's decisions are byte-identical at 1x on a deterministic instrument whose determinism was measured first.",
+ "_provenance": {
+  "base_sha": "400f5bae39d2788e950d4b004326008c7c9a6296",
+  "script": "d223_dry_digest_identity.py",
+  "ruling": "D223 (2), and D56 for the principle that capacities are inputs",
+  "host": "flash (A6000 box); these are DRY proofs and no GPU is used",
+  "register": "PROOF, not a measurement: no latency or accuracy here is reportable",
+  "timestamp": "2026-11-24T09:24:14.981088",
+  "note": "the BEFORE tree is a private `git archive` of base_sha; the AFTER tree is that archive plus this commit's edits. See d223_assemble_proofs.py for why _provenance.stamp was not used."
+ }
+}

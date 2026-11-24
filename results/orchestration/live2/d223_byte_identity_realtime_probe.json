@@ -1,0 +1,57 @@
+{
+ "_what": "D223 (2): WHY THE REALTIME DRY-CELL INSTRUMENT CANNOT CARRY A BYTE-IDENTITY CLAIM. This is a measurement of the INSTRUMENT, not of the fix. It is the reason d223_dry_digest_identity.py uses hybrid/test_hybrid.dry (realtime=False) instead.",
+ "_instrument": "run_live2_real.py with no --server (a dry cell on the real path), which drives the emulator with realtime=True, so the cell races a wall clock. The three decision.jsonl files were compared directly, field by field, with the committed STRIP set ('arm', 'decision_latency_ms', 'decision_id').",
+ "_design": "THE SAME TREE (the after tree), the SAME arm (covex-v6-base), the SAME cell, run THREE times in one sweep: positions 1, 2 and 3.",
+ "arm": "covex-v6-base",
+ "cell": {
+  "seed": 4,
+  "n_devices": 8,
+  "run_s": 60.0
+ },
+ "digests_timing_stripped": {
+  "position_1": "813728efd3ac6a4e",
+  "position_2": "cee736f4dd4c4180",
+  "position_3": "813728efd3ac6a4e"
+ },
+ "position_1_vs_position_2": {
+  "n_rows_total": [
+   204,
+   204
+  ],
+  "n_rows_differing": 169,
+  "differing_fields": {
+   "t": 169,
+   "traffic_mix": 38,
+   "opportunity_ids": 10,
+   "kind": 4,
+   "representation": 4,
+   "note": 4,
+   "representation_defaulted": 4
+  },
+  "t_abs_delta_s_max": 0.08999999999999986
+ },
+ "position_1_vs_position_3": {
+  "n_rows_total": [
+   204,
+   204
+  ],
+  "n_rows_differing": 0,
+  "differing_fields": {},
+  "t_abs_delta_s_max": null
+ },
+ "FINDING": "THE SAME TREE DISAGREES WITH ITSELF, and not only on the wall clock. Positions 1 and 3 agree exactly; position 2 differs in `t` on 169 rows AND in real decision fields: traffic_mix on 38 rows, opportunity_ids on 10, and kind, note, representation and representation_defaulted on 4 each.",
+ "WHY_IT_MATTERS": "Two of three runs agreed exactly, so a two-run before/after comparison on this instrument returns 'identical' or 'moved' depending on which positions the two cells happened to occupy. A PASS would have been as uninformative as a FAIL, and both would have looked clean. The committed STRIP set does not strip `t`, so the first comparison attempted here reported MOVED for a 10 ms timestamp shift; widening the strip set to make that pass would have hidden the real defect, which is that the instrument is load-sensitive.",
+ "NOT_A_FINDING_ABOUT_THE_FIX": "No before/after comparison on this instrument is reported as evidence about D223 (2), in either direction.",
+ "incidental_note": "the after tree reproduced the before tree's exact digest 813728efd3ac6a4e in positions 1 and 3, and that digest is also what the deterministic instrument returns for this arm; recorded as corroboration, not as the proof, which is d223_dry_digest_identity.json",
+ "_how_to_reproduce": "run the same arm and cell through run_live2_real.py three times with no --server and diff the three decision.jsonl files. No bespoke harness is needed and none is committed for this probe: the finding is a property of the realtime instrument, not of any script of ours.",
+ "_why_committed": "it is the reason d223_byte_identity_1x.json uses hybrid/test_hybrid.dry (realtime=False) instead. Without it, that choice looks arbitrary.",
+ "_provenance": {
+  "base_sha": "400f5bae39d2788e950d4b004326008c7c9a6296",
+  "script": "run_live2_real.py (three dry runs, diffed)",
+  "ruling": "D223 (2), and D56 for the principle that capacities are inputs",
+  "host": "flash (A6000 box); these are DRY proofs and no GPU is used",
+  "register": "PROOF, not a measurement: no latency or accuracy here is reportable",
+  "timestamp": "2026-11-24T09:24:14.981088",
+  "note": "the BEFORE tree is a private `git archive` of base_sha; the AFTER tree is that archive plus this commit's edits. See d223_assemble_proofs.py for why _provenance.stamp was not used."
+ }
+}

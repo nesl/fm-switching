@@ -79,11 +79,21 @@ from interface import Action, Observation, SessionAction                        
 V6CF_VERSION = "covex-v6-cf-pd-1.0"
 
 # D152 (3) / D170: the engine's context limit. A request above it is REJECTED by the base and
-# cannot be harmed by a queue delay, so it is not an `others` row. Imported, not retyped.
-try:
-    from hybrid.hybrid_arm import CONTEXT_LIMIT_TOKENS
-except Exception:                                                              # noqa: BLE001
-    CONTEXT_LIMIT_TOKENS = 32768
+# cannot be harmed by a queue delay, so it is not an `others` row.
+#
+# D223 (2): READ AT DECISION TIME, from the one module that holds the run's limit. What stood here
+# was `from hybrid.hybrid_arm import CONTEXT_LIMIT_TOKENS` behind a bare `except Exception` that
+# retyped `32768`, and it had both faults the ruling names: a VALUE bound at import, which no
+# run-start read could reach, and a silent fallback that would have made a 0.5x cell plan against
+# 32,768 while the engine served 31,472. `arms_v6cfr3.py` reads `VCF.CONTEXT_LIMIT_TOKENS`, so the
+# live module attribute is kept here too and resolves through the same one call.
+import context_limit as CL                                                     # noqa: E402
+
+
+def __getattr__(name):
+    if name == "CONTEXT_LIMIT_TOKENS":
+        return CL.limit_tokens()
+    raise AttributeError(name)
 
 # The two candidate rung-2 bases of the addendum 9 item A contingency.
 BASES: Dict[str, Dict[str, str]] = {
@@ -223,7 +233,7 @@ class _ProtectDeferMixin:
                              "p_device_on_time": 1.0})
             for qy in (obs.recall or ()):
                 tok = int(getattr(qy, "readiness_tokens", 0) or 0)
-                if tok > CONTEXT_LIMIT_TOKENS:
+                if tok > CL.limit_tokens():
                     self.stats["pd_other_skipped_over_limit"] += 1
                     continue
                 unc = max(tok - int(built.get(str(qy.session_id), 0) or 0), 0)

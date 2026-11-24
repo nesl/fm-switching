@@ -154,7 +154,18 @@ def _ss_values(tbl: Dict[str, Any]) -> Dict[str, float]:
 # that did send over-limit requests, always-cloud-fcfs at seed 7, got back no prompt_tokens, no
 # http_status and the 'X' no-letter sentinel, with one of the two recorded as delivered ON TIME
 # 17 ms after submission.
-CONTEXT_LIMIT_TOKENS = 32768
+# D223 (2): the limit is no longer a constant here. It is the SERVER'S CONFIGURED max-model-len,
+# read once at run start from the server's own argv (D56: capacities are inputs), and every read
+# below is a CALL made at decision time. The module attribute is kept as a live read through
+# PEP 562 `__getattr__`, because `d170_rule_proofs.py:50` does `LIMIT = HA.CONTEXT_LIMIT_TOKENS`
+# and that proof must keep testing the limit the run is actually enforcing, not a stale copy of it.
+import context_limit as CL                                                   # noqa: E402
+
+
+def __getattr__(name):
+    if name == "CONTEXT_LIMIT_TOKENS":
+        return CL.limit_tokens()
+    raise AttributeError(name)
 
 
 class HybridArm:
@@ -408,7 +419,7 @@ class HybridArm:
                 laxity = qs - work
                 risk = self.sw["c2"] and (laxity < self._k_r_for(q))
             over_limit = (self.over_limit_infeasible
-                          and int(getattr(q, "readiness_tokens", 0) or 0) > CONTEXT_LIMIT_TOKENS)
+                          and int(getattr(q, "readiness_tokens", 0) or 0) > CL.limit_tokens())
             if over_limit:
                 # INFEASIBLE, not deferred and not retried smaller: the engine cannot answer this
                 # prompt at any time, so the question is the device's and the arm is charged for

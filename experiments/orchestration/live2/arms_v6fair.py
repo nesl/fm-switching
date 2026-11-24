@@ -49,6 +49,7 @@ for _p in (str(_Path(__file__).resolve().parents[1] / "baselines"),
 from interface import Action, Observation                                      # noqa: E402
 
 import arms_v6state as VS                                                      # noqa: E402
+import context_limit as CL                                                     # noqa: E402
 
 V6FAIR_VERSION = "covex-v6-fair-1.0"
 V6FAIR_RULES_BASE = "covex-v6-state"
@@ -87,7 +88,11 @@ class V6FairArm(VS.V6StateArm):
                      value_reader=self.value_reader,
                      over_limit_infeasible=dict(
                          on=bool(getattr(self._rules, "over_limit_infeasible", False)),
-                         limit_tokens=32768, ruling="D170",
+                         # D223 (2): the run's limit, not a retyped copy. This field is REPORT-ONLY
+                         # and the retyped 32768 that stood here would have described a 0.5x cell
+                         # as running under 32,768 while its engine served 31,472.
+                         limit_tokens=CL.limit_tokens(), ruling="D170, D223 (2)",
+                         limit_source=CL.state()["source"],
                          counter="over_limit_infeasible, over_limit_tokens_max"),
                      on_time_rule="cloud_on_time OR device_on_time (D155 (3))",
                      feed_blind_spot=("declined opportunities never reach live2_completed, so "

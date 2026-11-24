@@ -279,7 +279,7 @@ class _Rung4Mixin:
             if did is None or str((devs.get(did) or {}).get("type")) != "robot":
                 continue
             tok = int(getattr(qy, "readiness_tokens", 0) or 0)
-            if tok > VCF.CONTEXT_LIMIT_TOKENS:
+            if tok > VCF.CL.limit_tokens():                    # D223 (2): the run's limit, read here
                 # The base REJECTS it, so it never reaches the engine and deferring it changes
                 # nothing. D175 (1): only a DELIVERED cloud answer replaces the device's.
                 self.stats["rd_skipped_over_limit"] += 1
