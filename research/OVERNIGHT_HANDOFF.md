@@ -735,6 +735,55 @@ manifest. **A content-preserving edit is not behaviour-preserving when something
 own byte-identity habit (diff the lines that matter) is exactly the check that passes here while the thing
 that actually matters fails.
 
+## *** STATE AS OF 2026-11-24 ~19:00Z. RUNG-4 PASS 1 IS COMMITTED AND ONE CELL IS REQUESTED. READ THIS BEFORE THE OLDER SECTIONS, WHICH IT SUPERSEDES. ***
+
+**PASS 1 IS ON ORIGIN: `8d883208` (code and proofs), pre-registration `StudyD222-PASS1` at `da1593a0`.**
+Items 1, 2, 4 and 5 under D228's rulings, plus **E1 part 2**, rebased onto the H100's `5155aad4`.
+**Item 3 is NOT built.** D220 (1)'s gain weighting is WITHDRAWN per D228 (2), so the harm form is unchanged
+and `MARGIN_CF` stays 0.6582.
+
+*** THE ONE THING OUTSTANDING, RECORDED HERE BECAUSE THE MESSAGE CARRYING IT MAY NOT HAVE ARRIVED. *** I
+asked the H100 to post **one** cell and the cross-session route reported delivery UNCONFIRMED and one-way.
+So, for whoever reads this next:
+
+```
+covex-v6-final 16 4 _L3_epg_rq30_rerun
+```
+
+**The `_rerun` tag is a deliberate operator choice, not a spelling accident.**
+`covex-v6-final_n16_s4_1200s_h27_3t_L3_epg_rq30` already exists as the superseded cell; never overwrite a
+valid one; and under D154 (4) the run tag carries the engine-side cache key, so **a cell priced from the
+D162 model must not share a cache entry with one priced from the failing model.** The kv0.5r s4 line follows
+once the 1x cell is gated, and it should pass `--metrics-scrape`.
+
+**THE 1x BAR, pre-registered at `da1593a0` so it cannot move afterwards:** against `covex-v6-fair-final` 1x
+s4, mean per-episode alert attainment >= rung 3's, robot on-time retention >= 0.90 of rung 3's gain over
+base, single-shot >= 90 percent within 2 s. Report beside it: deferral rescues and losses paired by
+question, the DEVICE_ANSWERS count, protect-and-defer actions by kind, and `metrics_health`.
+
+*** AND THE REGISTER WARNING THAT WILL OTHERWISE BE MISREAD. The dry s4 proof records ZERO DEFERRALS. THAT
+IS NOT A NEGATIVE. *** A dry cell has no engine telemetry and prices every session **COLD**, inflating the
+uncached token count roughly tenfold, which inflates predicted service and so inflates
+`must_start_now_no_slack` - 52 of its gate hits. `rd_u_cold` is **28 of 28 dry against 1 of 157** in the
+committed live s4. Under Rule 2 the dry cell is **UNEXERCISED BY CONSTRUCTION**, and the fail-fast decision
+belongs to the LIVE cell. **The direction was written down before the sweep ran, not after its result.**
+If the LIVE cell also shows zero deferrals, that is informative.
+
+**TWO FINDINGS WORTH CARRYING.** (1) The D191 column `rd_defer_would_miss_at_measured_worst_bias` was
+**identically false by an algebraic identity**: at n = 5 the nearest-rank q90 **is** the sample maximum, so
+`bias_max == SAFETY_FACTOR`, `overrun == 0`, and `0 > 0` never fires. Third instance of this shape after
+D203 (3) and D206 (1). The estimator and the test were each correct and their composition was vacuous, so
+under Rule 2 it is **cancelled by geometry**, and item 4's refit to n = 255 repairs the column as a side
+effect. (2) `d222_measured_safety` **RAISES rather than defaulting** when its committed artefact is absent,
+and that is how I found that `results/orchestration/live2/d222_pass1/d222_safety_refit.json` had to be
+committed with the code: without it every rung-4 arm fails at import. **An import smoke test caught what no
+patch check would have.**
+
+**CORRECTIONS TO THE SECTION BELOW, which is now stale.** E1 + E3 part 1 AND part 2 are both on origin
+(`b379ef23`, `7fdd0582`, `8d883208`), so the file-hold list no longer applies; the shared worktree `mapwt`
+has been archived and classified under D228 (5) (`8f7c1aa1`), and its uncommitted work was **5,509
+insertions across 139 files**, not the 632 the section claims - I had counted three files and generalised.
+
 ## *** LIVE FILE CLAIMS, 2026-11-24. READ THIS BEFORE YOU EDIT OR BUILD. ***
 
 A peer session asked "who holds E1 + E3?" before starting, which was exactly right, and then RESTARTED
