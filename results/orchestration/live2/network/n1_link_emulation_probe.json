@@ -511,23 +511,25 @@
       }
     }
   },
+  "injected_rate_provenance": "0.90 Mbit/s is a PROBE RATE ONLY, chosen so the injected change is large and checkable by hand. It is NOT a Tier 1 cell value: Tier 1 uplinks come from cited UPLINK sources (the StudyE1 sweep), never from the Irish 5G percentiles, which are DOWNLINK (N2).",
   "loadavg": {
     "after": {
-      "load_15m": 4.18,
-      "load_1m": 2.42,
-      "load_5m": 2.31
+      "load_15m": 1.26,
+      "load_1m": 0.41,
+      "load_5m": 0.43
     },
     "before": {
-      "load_15m": 4.18,
-      "load_1m": 2.42,
-      "load_5m": 2.31
+      "load_15m": 1.26,
+      "load_1m": 0.41,
+      "load_5m": 0.43
     },
     "between_cells": {
-      "load_15m": 4.18,
-      "load_1m": 2.42,
-      "load_5m": 2.31
+      "load_15m": 1.26,
+      "load_1m": 0.41,
+      "load_5m": 0.43
     }
   },
+  "main_operating_point_label": "uniform 13.6 Mbit/s / 44 ms uplink: best-performing US carrier's 5G median (Ookla H2 2025), close to the 12 Mbit/s Bay Area 5G median (Khan et al. 2024)",
   "measured_ratio_per_frame": 106.4163,
   "measured_ratio_per_question": 1.4387,
   "plumbing": {
@@ -557,8 +559,8 @@
       "experiments/orchestration/live2/tests/test_live2_fix2.py:354:                em = EM.FleetEmulator(tdir, EmulatorBridge(co), \"A\", realtime=False)",
       "experiments/orchestration/live2/effective_representation.py:57:    EM.FleetEmulator(tdir,br,MODE,realtime=False,drain_s=10.0).run(d/'run')",
       "experiments/orchestration/live2/epg_bodies_proof.py:248:        EM.FleetEmulator(trace_dir, br, \"A\", realtime=False, drain_s=5.0).run(Path(d) / \"r\")",
-      "experiments/orchestration/live2/n1_link_emulation_probe.py:62:    em = EM.FleetEmulator(tdir, EM.StubCoordinator(capacity_per_s=8.0, service_s=0.25), mode,",
-      "experiments/orchestration/live2/n1_link_emulation_probe.py:143:        fleetemulator_constructions=g(\"FleetEmulator(\", \"experiments/\"),",
+      "experiments/orchestration/live2/n1_link_emulation_probe.py:75:    em = EM.FleetEmulator(tdir, EM.StubCoordinator(capacity_per_s=8.0, service_s=0.25), mode,",
+      "experiments/orchestration/live2/n1_link_emulation_probe.py:167:        fleetemulator_constructions=g(\"FleetEmulator(\", \"experiments/\"),",
       "experiments/orchestration/live2/run_live2_real.py:464:    return EM.FleetEmulator(tdir, br, a.mode, realtime=True, drain_s=a.drain_s, **kw)",
       "experiments/orchestration/live2/fleet/emulator.py:681:    em = FleetEmulator(Path(a.trace), StubCoordinator(a.stub_capacity, a.stub_service_s),",
       "experiments/orchestration/live2/fleet/tests/test_scale.py:55:        em = EM.FleetEmulator(tmp / \"trace\", EM.StubCoordinator(capacity_per_s=32.0),",
@@ -569,19 +571,32 @@
     ],
     "link_by_device_mentions": [
       "experiments/orchestration/live2/n1_link_emulation_probe.py:7:second cell can only be built by passing `link_by_device` to `FleetEmulator` BY HAND, which is",
-      "experiments/orchestration/live2/n1_link_emulation_probe.py:56:    link_by_device = None",
-      "experiments/orchestration/live2/n1_link_emulation_probe.py:60:        link_by_device = {d: LK.LinkSpec(uplink_mbps=float(mbps), rtt_ms=float(rtt_ms),",
-      "experiments/orchestration/live2/n1_link_emulation_probe.py:63:                          link_by_device=link_by_device, realtime=False, drain_s=5.0)",
-      "experiments/orchestration/live2/n1_link_emulation_probe.py:142:        link_by_device_mentions=g(\"link_by_device\", \"experiments/\"),",
+      "experiments/orchestration/live2/n1_link_emulation_probe.py:69:    link_by_device = None",
+      "experiments/orchestration/live2/n1_link_emulation_probe.py:73:        link_by_device = {d: LK.LinkSpec(uplink_mbps=float(mbps), rtt_ms=float(rtt_ms),",
+      "experiments/orchestration/live2/n1_link_emulation_probe.py:76:                          link_by_device=link_by_device, realtime=False, drain_s=5.0)",
+      "experiments/orchestration/live2/n1_link_emulation_probe.py:154:    mentions = g(\"link_by_device\", \"experiments/\")",
+      "experiments/orchestration/live2/n1_link_emulation_probe.py:158:        link_by_device_mentions=mentions,",
+      "experiments/orchestration/live2/n1_link_emulation_probe.py:159:        link_by_device_production_references=prod,",
+      "experiments/orchestration/live2/n1_link_emulation_probe.py:160:        link_by_device_production_reference_count=len(prod),",
+      "experiments/orchestration/live2/n1_link_emulation_probe.py:161:        link_by_device_verdict=(",
+      "experiments/orchestration/live2/n3_tier1_cell_definitions.py:10:production entry point (`link_by_device` is declared and defaulted in `fleet/emulator.py` and",
+      "experiments/orchestration/live2/n3_tier1_cell_definitions.py:268:        why_not_posted=(\"N1: the per-device link has NO injection point. `link_by_device` is \"",
+      "experiments/orchestration/live2/n3_tier1_cell_definitions.py:320:                 detail=\"no CLI flag, no caller of link_by_device, and fleet/trace.py emits \"",
       "experiments/orchestration/live2/fleet/emulator.py:245:                 link_by_device: Optional[Dict[str, LK.LinkSpec]] = None,",
       "experiments/orchestration/live2/fleet/emulator.py:291:        self.links: Dict[str, LK.LinkSpec] = dict(link_by_device or {})"
     ],
+    "link_by_device_production_reference_count": 2,
+    "link_by_device_production_references": [
+      "experiments/orchestration/live2/fleet/emulator.py:245:                 link_by_device: Optional[Dict[str, LK.LinkSpec]] = None,",
+      "experiments/orchestration/live2/fleet/emulator.py:291:        self.links: Dict[str, LK.LinkSpec] = dict(link_by_device or {})"
+    ],
+    "link_by_device_verdict": "the ONLY production references are the parameter declaration and the one write inside FleetEmulator itself; no production caller passes it. The remaining mentions are THIS SESSION's own diagnostic probe and its definitions file, which pass it BY HAND and are the reason the 0.9 Mbit/s condition could be built at all. They are listed separately so they cannot be mistaken for a caller.",
     "link_cli_flags": []
   },
   "question": "N1 (D215): is per-device bandwidth and RTT emulation LIVE, CONSTANT or ABSENT in live2?",
   "trace": {
     "devices": 16,
-    "dir": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/n1_om/trace",
+    "dir": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/n1_om3/trace",
     "frame_bytes_source": "E10a committed median q90 (Part 2 not run)",
     "mode": "A",
     "ratio": "50:50",

@@ -9,6 +9,63 @@
     "<final rung 4>",
     "device-only"
   ],
+  "bandwidth_ruling": {
+    "recorded_at": "reports/study_e1_nexar_lead.md, correction block, commit `75d021d3`",
+    "rtt_observed_vs_cited": {
+      "cited_ms": [
+        22.0,
+        44.0,
+        142.0
+      ],
+      "disagreement": "the sweep's cited MEDIAN RTT of 22 ms is 3.6x below the observed p50 of 80 ms, which is over CLAUDE.md check 1's 2x bar. Explained by setting rather than reconciled: the 22 ms is the ICCCN paper's figure, the 80 ms is a driving trace in Ireland. Both registers are carried and every cell says which it applies.",
+      "observed_ms": {
+        "p10": 68.0,
+        "p50": 80.0,
+        "p75": 92.0,
+        "p90": 120.0,
+        "p95": 165.5,
+        "p99": 351.35
+      },
+      "observed_register": "OBSERVED, Irish 5G Download/Driving PINGAVG, 1,986 of 24,446 binned seconds populated (8.1 percent coverage)"
+    },
+    "ruled": "2026-11-23, user. Tier 1 uplink values come from CITED UPLINK SOURCES, namely the committed StudyE1 sweep (uplink 5 / 12 / 13.6 / 25 / 88 Mbit/s, RTT 22 / 44 / 142 ms), each with its source, and NEVER from the Irish 5G percentiles.",
+    "ruled_out": {
+      "irish5g_downlink_percentiles_mbit_s": {
+        "p10": 0.8954,
+        "p50": 9.5775,
+        "p90": 102.898
+      },
+      "irish5g_ul_column_mbit_s": {
+        "p10": 0.017,
+        "p50": 0.093,
+        "p90": 0.2337
+      },
+      "why_out": "DOWNLINK (`DL_bitrate`, e31_network.py:84); using them would make every poor cell far too generous as an uplink",
+      "why_ul_out": "the ACK and control traffic of a download workload, not an uplink capacity"
+    },
+    "sweep_rtt_sources": {
+      "22.0": "the ICCCN paper, 22 ms median (study_e1_nexar_lead.md 'Network values cited'; the same line gives a 55 to 65 ms tail)",
+      "44.0": "LOWEST CARRIER LATENCY per Ookla H2 2025, paired with the 13.6 Mbit/s figure. CORRECTED LABEL as above: it is not a US median latency",
+      "142.0": "NO SOURCE RECORDED IN THE SWEEP: 142 ms is in the swept RTT grid but the 'Network values cited' block gives no citation for it"
+    },
+    "sweep_uplink_sources": {
+      "5.0": "NO SOURCE RECORDED IN THE SWEEP: 5 Mbit/s is in the swept grid (study_e1_nexar_lead.md 'Sweep: uplink 5 / 12 / 13.6 / 25 / 88 Mbit/s') but the report's 'Network values cited' block gives no citation for it",
+      "12.0": "Khan et al. 2024, Bay Area 5G median (study_e1_nexar_lead.md 'Network values cited')",
+      "13.6": "best-performing US carrier's 5G median (Ookla H2 2025), close to the 12 Mbit/s Bay Area 5G median (Khan et al. 2024). CORRECTED LABEL, user ruling 2026-11-23 at `75d021d3`: these are T-Mobile's figures, the HIGHEST carrier median 5G upload (13.57 Mbit/s), NOT a US 5G median, so this is the OPTIMISTIC END of the range",
+      "25.0": "NO SOURCE RECORDED IN THE SWEEP, as for 5 Mbit/s",
+      "88.0": "Oslo (study_e1_nexar_lead.md 'Network values cited')"
+    },
+    "unsourced_in_the_sweep": {
+      "note": "SMALL ESCALATION: the sweep's own 'Network values cited' block gives a citation for 13.6, 12 and 88 Mbit/s and for 22 ms, and NONE for 5 and 25 Mbit/s or for 142 ms. They are swept values, not cited ones. The poor cell uses two of them, so they are marked rather than dressed as citations.",
+      "rtt_ms": [
+        142.0
+      ],
+      "uplink_mbps": [
+        5.0,
+        25.0
+      ]
+    }
+  },
   "blockers": [
     {
       "blocks": "all three cells",
@@ -17,8 +74,8 @@
       "what": "per-device link emulation has no injection point"
     },
     {
-      "blocks": "every bandwidth number in all three cells; needs a user ruling",
-      "detail": "e31_network.py:84 reads row['DL_bitrate']; results/INDEX.md:229 says so in words; the UL_bitrate column exists but every subset of the dataset is a DOWNLOAD workload, so its p10/p50/p90 of {'p10': 0.017, 'p50': 0.093, 'p90': 0.2337} Mbit/s is ACK traffic, not uplink capacity",
+      "blocks": "NOTHING ANY MORE",
+      "detail": "RULED AND CLOSED 2026-11-23 (`75d021d3`): Tier 1 uplinks come from the cited StudyE1 sweep, never from the Irish 5G percentiles. Kept as a row so a reader meeting a downlink figure in an older note knows it was ruled out rather than overlooked.",
       "id": "B2",
       "what": "the committed 5G percentiles are DOWNLINK"
     },
@@ -37,26 +94,48 @@
   ],
   "cells": {
     "median": {
-      "bandwidth_mbit_s_OPTION_A": 9.5775,
-      "bandwidth_register": "BLOCKED: option A reuses the DOWNLINK p50 as a symmetric-link ASSUMPTION; see blockers",
-      "definition": "every device at the p50 bandwidth and p50 RTT",
-      "rtt_ms": 80.0,
-      "rtt_register": "OBSERVED (PINGAVG p50)"
+      "bandwidth": {
+        "register": "CITED (StudyE1 sweep)",
+        "source": "Khan et al. 2024, Bay Area 5G median (study_e1_nexar_lead.md 'Network values cited')",
+        "uplink_mbps": 12.0
+      },
+      "definition": "every device at the sweep's cited MEDIAN uplink with the sweep's middle RTT",
+      "rtt": {
+        "register": "CITED (StudyE1 sweep)",
+        "rtt_ms": 44.0,
+        "source": "LOWEST CARRIER LATENCY per Ookla H2 2025, paired with the 13.6 Mbit/s figure. CORRECTED LABEL as above: it is not a US median latency"
+      },
+      "rtt_observed_beside": {
+        "p50_ms": 80.0,
+        "register": "OBSERVED (Irish 5G PINGAVG, n 1,986)"
+      },
+      "rtt_why": "12 Mbit/s is the only value in the sweep cited AS a median that is not the best-carrier figure, so it is the median cell's uplink; 13.6 is NOT used here because the ruling's own correction says it is the optimistic end. RTT 44 ms is the sweep's middle value and keeps continuity with the main operating point. THE ALTERNATIVE IS OPEN: the sweep's cited median RTT is 22 ms, which is 3.6x below this study's OBSERVED PINGAVG p50 of 80 ms, so a 'median' RTT could defensibly be 22 (cited), 44 (continuity) or 80 (observed). 44 is the default here and the choice is flagged, not hidden."
     },
     "mixed_fleet": {
-      "bandwidth_mbit_s_by_class_OPTION_A": {
-        "p10": 0.8954,
-        "p50": 9.5775,
-        "p90": 102.898
+      "bandwidth_by_class": {
+        "fast": {
+          "register": "CITED (StudyE1 sweep)",
+          "source": "Oslo (study_e1_nexar_lead.md 'Network values cited')",
+          "uplink_mbps": 88.0
+        },
+        "median": {
+          "register": "CITED (StudyE1 sweep)",
+          "source": "Khan et al. 2024, Bay Area 5G median (study_e1_nexar_lead.md 'Network values cited')",
+          "uplink_mbps": 12.0
+        },
+        "slow": {
+          "register": "CITED (StudyE1 sweep)",
+          "source": "NO SOURCE RECORDED IN THE SWEEP: 5 Mbit/s is in the swept grid (study_e1_nexar_lead.md 'Sweep: uplink 5 / 12 / 13.6 / 25 / 88 Mbit/s') but the report's 'Network values cited' block gives no citation for it",
+          "uplink_mbps": 5.0
+        }
       },
-      "bandwidth_register": "BLOCKED, as for median",
-      "definition": "a FIXED SEEDED p10 / p50 / p90 assignment, a function of (seed, sorted device roster) only, so it is IDENTICAL ACROSS ARMS",
+      "definition": "a FIXED SEEDED slow / median / fast assignment, a function of (seed, sorted device roster) only, so it is IDENTICAL ACROSS ARMS",
       "fleets": {
         "4": {
           "class_counts": {
-            "p10": 6,
-            "p50": 5,
-            "p90": 5
+            "fast": 5,
+            "median": 5,
+            "slow": 6
           },
           "device_ids": [
             "asst000",
@@ -77,22 +156,48 @@
             "robo006"
           ],
           "mixed_class_by_device": {
-            "asst000": "p10",
-            "asst001": "p90",
-            "asst002": "p10",
-            "dash000": "p50",
-            "dash001": "p90",
-            "dash002": "p90",
-            "dash003": "p90",
-            "dash004": "p50",
-            "dash005": "p10",
-            "robo000": "p90",
-            "robo001": "p50",
-            "robo002": "p50",
-            "robo003": "p50",
-            "robo004": "p10",
-            "robo005": "p10",
-            "robo006": "p10"
+            "asst000": "median",
+            "asst001": "median",
+            "asst002": "fast",
+            "dash000": "slow",
+            "dash001": "fast",
+            "dash002": "slow",
+            "dash003": "median",
+            "dash004": "slow",
+            "dash005": "median",
+            "robo000": "fast",
+            "robo001": "slow",
+            "robo002": "slow",
+            "robo003": "fast",
+            "robo004": "slow",
+            "robo005": "median",
+            "robo006": "fast"
+          },
+          "reproducibility_proof": {
+            "assignment": {
+              "asst000": "median",
+              "asst001": "median",
+              "asst002": "fast",
+              "dash000": "slow",
+              "dash001": "fast",
+              "dash002": "slow",
+              "dash003": "median",
+              "dash004": "slow",
+              "dash005": "median",
+              "robo000": "fast",
+              "robo001": "slow",
+              "robo002": "slow",
+              "robo003": "fast",
+              "robo004": "slow",
+              "robo005": "median",
+              "robo006": "fast"
+            },
+            "identical": true,
+            "pythonhashseeds": [
+              "0",
+              "1",
+              "12345"
+            ]
           },
           "roster_source": "derived from trace.py::_split_fleet3 (MissingInput: MISSING: StudySS1 vizwiz manifest (D136))",
           "types": {
@@ -116,9 +221,9 @@
         },
         "5": {
           "class_counts": {
-            "p10": 6,
-            "p50": 5,
-            "p90": 5
+            "fast": 5,
+            "median": 5,
+            "slow": 6
           },
           "device_ids": [
             "asst000",
@@ -139,22 +244,48 @@
             "robo006"
           ],
           "mixed_class_by_device": {
-            "asst000": "p90",
-            "asst001": "p10",
-            "asst002": "p90",
-            "dash000": "p50",
-            "dash001": "p10",
-            "dash002": "p50",
-            "dash003": "p90",
-            "dash004": "p10",
-            "dash005": "p10",
-            "robo000": "p50",
-            "robo001": "p50",
-            "robo002": "p90",
-            "robo003": "p10",
-            "robo004": "p10",
-            "robo005": "p50",
-            "robo006": "p90"
+            "asst000": "slow",
+            "asst001": "fast",
+            "asst002": "fast",
+            "dash000": "slow",
+            "dash001": "slow",
+            "dash002": "median",
+            "dash003": "fast",
+            "dash004": "median",
+            "dash005": "fast",
+            "robo000": "median",
+            "robo001": "slow",
+            "robo002": "median",
+            "robo003": "fast",
+            "robo004": "slow",
+            "robo005": "median",
+            "robo006": "slow"
+          },
+          "reproducibility_proof": {
+            "assignment": {
+              "asst000": "slow",
+              "asst001": "fast",
+              "asst002": "fast",
+              "dash000": "slow",
+              "dash001": "slow",
+              "dash002": "median",
+              "dash003": "fast",
+              "dash004": "median",
+              "dash005": "fast",
+              "robo000": "median",
+              "robo001": "slow",
+              "robo002": "median",
+              "robo003": "fast",
+              "robo004": "slow",
+              "robo005": "median",
+              "robo006": "slow"
+            },
+            "identical": true,
+            "pythonhashseeds": [
+              "0",
+              "1",
+              "12345"
+            ]
           },
           "roster_source": "derived from trace.py::_split_fleet3 (MissingInput: MISSING: StudySS1 vizwiz manifest (D136))",
           "types": {
@@ -177,27 +308,63 @@
           }
         }
       },
-      "rtt_ms_by_class": {
-        "p10": 120.0,
-        "p50": 80.0,
-        "p90": 80.0
+      "rtt_by_class": {
+        "fast": {
+          "register": "CITED (StudyE1 sweep)",
+          "rtt_ms": 22.0,
+          "source": "the ICCCN paper, 22 ms median (study_e1_nexar_lead.md 'Network values cited'; the same line gives a 55 to 65 ms tail)"
+        },
+        "median": {
+          "register": "CITED (StudyE1 sweep)",
+          "rtt_ms": 44.0,
+          "source": "LOWEST CARRIER LATENCY per Ookla H2 2025, paired with the 13.6 Mbit/s figure. CORRECTED LABEL as above: it is not a US median latency"
+        },
+        "slow": {
+          "register": "CITED (StudyE1 sweep)",
+          "rtt_ms": 142.0,
+          "source": "NO SOURCE RECORDED IN THE SWEEP: 142 ms is in the swept RTT grid but the 'Network values cited' block gives no citation for it"
+        }
       },
-      "rtt_register": "CONSTRUCTED: pairing the slow class with the high-percentile RTT is a modelling choice, not a measured joint distribution"
+      "rtt_observed_beside": {
+        "all_percentiles_ms": {
+          "p10": 68.0,
+          "p50": 80.0,
+          "p75": 92.0,
+          "p90": 120.0,
+          "p95": 165.5,
+          "p99": 351.35
+        },
+        "register": "OBSERVED (Irish 5G PINGAVG, n 1,986)"
+      },
+      "rtt_why": "each class takes the sweep RTT that goes with its end of the range. PAIRING A RATE WITH AN RTT IS CONSTRUCTED: the sweep is a full 5x3 grid and records no joint distribution, and the Irish dataset gives no measured bandwidth-RTT pairing for an uplink either.",
+      "sweep_values_not_used": {
+        "uplink_mbps": [
+          13.6,
+          25.0
+        ],
+        "why": "13.6 is the main operating point itself, so using it as a class would make a third of the mixed fleet identical to the uniform condition; 25 Mbit/s carries no source in the sweep's citation block and the fast class already has the cited 88 Mbit/s"
+      }
     },
     "poor": {
-      "bandwidth_mbit_s_OPTION_A": 0.8954,
-      "bandwidth_register": "BLOCKED, as for median",
-      "definition": "every device at the p10 bandwidth with the p90 RTT; p99 RTT reported beside it as D215 asks",
-      "expected_scale": "at 0.90 Mbit/s one 63,898 B dashcam JPEG serialises in 0.568 s and arrives 0.590 s after capture on an idle uplink; at 16 devices the uplink SATURATES and the measured median per-frame upload is 6.34 s (N1 probe)",
-      "rtt_ms": 120.0,
-      "rtt_p99_ms": 351.35,
-      "rtt_register": "OBSERVED (PINGAVG p90 and p99)"
+      "bandwidth": {
+        "register": "CITED (StudyE1 sweep)",
+        "source": "NO SOURCE RECORDED IN THE SWEEP: 5 Mbit/s is in the swept grid (study_e1_nexar_lead.md 'Sweep: uplink 5 / 12 / 13.6 / 25 / 88 Mbit/s') but the report's 'Network values cited' block gives no citation for it",
+        "uplink_mbps": 5.0
+      },
+      "definition": "every device at the sweep's slowest uplink with its tail RTT",
+      "expected_scale": "at 5 Mbit/s one 63,898 B dashcam JPEG serialises in 0.1022 s and arrives 0.1733 s after capture on an idle uplink (RTT 142 ms); the N1 probe measured the arithmetic at 0.9 Mbit/s, where the same frame takes 0.568 s and 16 devices SATURATE the uplink to a 6.34 s median, so saturation at 5 Mbit/s must be measured, not assumed",
+      "rtt": {
+        "register": "CITED (StudyE1 sweep)",
+        "rtt_ms": 142.0,
+        "source": "NO SOURCE RECORDED IN THE SWEEP: 142 ms is in the swept RTT grid but the 'Network values cited' block gives no citation for it"
+      },
+      "rtt_observed_beside": {
+        "p90_ms": 120.0,
+        "p99_ms": 351.35,
+        "register": "OBSERVED (Irish 5G PINGAVG, n 1,986)"
+      },
+      "rtt_why": "142 ms is the sweep's tail RTT and the poor cell is the tail condition. D215 asks for p99 beside it: this study's OBSERVED PINGAVG p90 is 120 ms and p99 is 351 ms, so the sweep's 142 ms sits between the observed p90 and p99 and is the conservative-but-not-extreme choice."
     }
-  },
-  "committed_uniform_link": {
-    "rtt_ms": 44.0,
-    "source": "D75 / StudyE4 / E9 / CTRL1c",
-    "uplink_mbps": 13.6
   },
   "fleet": {
     "mode": "A",
@@ -215,6 +382,15 @@
     "standard F1 (correct-by-deadline per type and pooled), F2 (on-time vs correctness), F3 (latency CDFs), F13 (correct answers per GPU-second, GPU busy, tokens/s)",
     "the policy's BELIEVED link per device beside the applied one, because the two are wired separately (N1 read-site 6) and a robot's belief is currently hard-coded"
   ],
+  "main_operating_point": {
+    "consequence": "a 'median' condition is therefore NOT the main operating point, and the cells below are positioned against the StudyE1 sweep's own range rather than against 13.6 Mbit/s as though it were typical",
+    "correction": "user ruling 2026-11-23, recorded at `75d021d3`. The earlier label 'Ookla H2 2025 US 5G median' was WRONG: these are T-Mobile's figures, the highest carrier median 5G upload and the lowest carrier latency, so the committed main operating point is the BEST-PERFORMING US CARRIER and sits at the optimistic end of the range rather than at its centre. The measurements are unaffected.",
+    "harness_source": "D75 / StudyE4 / E9 / CTRL1c; applied by fleet/links.py:38-39",
+    "label": "uniform 13.6 Mbit/s / 44 ms uplink: best-performing US carrier's 5G median (Ookla H2 2025), close to the 12 Mbit/s Bay Area 5G median (Khan et al. 2024)",
+    "rtt_ms": 44.0,
+    "uplink_mbps": 13.6
+  },
+  "positioning": "the cells are positioned against the StudyE1 sweep's own range, NOT against 13.6 Mbit/s as though it were typical: per the 2026-11-23 correction 13.6 / 44 is the BEST-PERFORMING US CARRIER, so the main operating point is the optimistic end of the range and a 'median' condition is a DIFFERENT, SLOWER cell than it.",
   "queue": {
     "d212": "all baseline cells are FILLER; policy cells always run first; the H100 gates posted lists in order"
   },
@@ -224,5 +400,6 @@
   ],
   "seeds_note": "seeds 4 and 5 only; never seeds 1 to 3 and never HOLDOUT",
   "status": "DEFINITIONS ONLY. NOT POSTED TO THE H100.",
+  "unchanged_by_the_bandwidth_ruling": "TIER 1 STILL CANNOT BE POSTED. The ruling fixes the VALUES; N1's finding is about REACHABILITY, and with or without correct values a Tier 1 cell would differ from the main operating point in nothing. The 10 to 15 h of plumbing is the gate.",
   "why_not_posted": "N1: the per-device link has NO injection point. `link_by_device` is declared at fleet/emulator.py:245 and written at :291 and is passed by no caller anywhere in experiments/, so every cell runs at the single process-wide LinkSpec() default (13.6 Mbit/s, 44 ms). A posted cell would differ from the main operating point in nothing, and a flat result would be UNEXERCISED under CLAUDE.md Rule 2, not a finding."
 }

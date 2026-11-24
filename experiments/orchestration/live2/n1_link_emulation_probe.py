@@ -30,8 +30,21 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "experiments/orchestration/policy/audit"))
 import _harness as H  # noqa: E402
 
-POOR_MBPS = 0.90          # D215 Tier 1 poor, Irish 5G p10
+POOR_MBPS = 0.90          # the rate this probe injects, to show the arithmetic takes effect
 QUESTION_TEXT_B = 1200    # fleet/emulator.py:73
+
+# THE CORRECTED LABEL for the committed uniform condition (user ruling 2026-11-23, recorded at
+# `75d021d3` beside the original citation in reports/study_e1_nexar_lead.md). It is NOT a US 5G
+# median: per Ookla H2 2025 these are T-Mobile's figures, the HIGHEST carrier median 5G upload
+# (13.57 Mbit/s) and the LOWEST carrier latency (44 ms), so the main operating point sits at the
+# OPTIMISTIC END of the range rather than at its centre.
+MAIN_OPERATING_POINT_LABEL = (
+    "uniform 13.6 Mbit/s / 44 ms uplink: best-performing US carrier's 5G median (Ookla H2 2025), "
+    "close to the 12 Mbit/s Bay Area 5G median (Khan et al. 2024)")
+POOR_RATE_PROVENANCE = (
+    "0.90 Mbit/s is a PROBE RATE ONLY, chosen so the injected change is large and checkable by "
+    "hand. It is NOT a Tier 1 cell value: Tier 1 uplinks come from cited UPLINK sources (the "
+    "StudyE1 sweep), never from the Irish 5G percentiles, which are DOWNLINK (N2).")
 
 
 def loadavg() -> dict:
@@ -138,8 +151,19 @@ def grep_read_sites() -> dict:
         p = subprocess.run(["grep", "-rn", "--include=*.py", pat, where],
                            capture_output=True, text=True, cwd=str(ROOT))
         return [l for l in p.stdout.splitlines() if "__pycache__" not in l]
+    mentions = g("link_by_device", "experiments/")
+    mine = ("n1_link_emulation_probe.py", "n3_tier1_cell_definitions.py")
+    prod = [l for l in mentions if not any(m in l for m in mine)]
     return dict(
-        link_by_device_mentions=g("link_by_device", "experiments/"),
+        link_by_device_mentions=mentions,
+        link_by_device_production_references=prod,
+        link_by_device_production_reference_count=len(prod),
+        link_by_device_verdict=(
+            "the ONLY production references are the parameter declaration and the one write "
+            "inside FleetEmulator itself; no production caller passes it. The remaining "
+            "mentions are THIS SESSION's own diagnostic probe and its definitions file, which "
+            "pass it BY HAND and are the reason the 0.9 Mbit/s condition could be built at all. "
+            "They are listed separately so they cannot be mistaken for a caller."),
         fleetemulator_constructions=g("FleetEmulator(", "experiments/"),
         link_cli_flags=g("--uplink", "experiments/") + g("--rtt", "experiments/")
         + g("--link", "experiments/"),
@@ -165,6 +189,8 @@ def main(argv=None) -> int:
         scratch = Path(a.scratch)
         scratch.mkdir(parents=True, exist_ok=True)
         res = dict(loadavg=loadavg(),
+                   main_operating_point_label=MAIN_OPERATING_POINT_LABEL,
+                   injected_rate_provenance=POOR_RATE_PROVENANCE,
                    belief=policy_belief_cell(scratch, a.devices, a.run_s, a.seed, a.ratio,
                                              a.mode, a.policy_belief_mbps, 44.0))
         res["loadavg_after"] = loadavg()
@@ -199,6 +225,8 @@ def main(argv=None) -> int:
     res = dict(
         question=("N1 (D215): is per-device bandwidth and RTT emulation LIVE, CONSTANT or "
                   "ABSENT in live2?"),
+        main_operating_point_label=MAIN_OPERATING_POINT_LABEL,
+        injected_rate_provenance=POOR_RATE_PROVENANCE,
         cell_role="DIAGNOSTIC (not a proof bar, not a Step 2b baseline); D216 (1) alone rule "
                   "therefore not invoked",
         loadavg=dict(before=load_before, between_cells=load_mid, after=load_after),
