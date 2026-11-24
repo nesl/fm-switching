@@ -152,12 +152,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--scheduling-policy", default="fcfs", choices=("fcfs", "priority"),
                     help="vllm-priority wiring: start the server with --scheduling-policy priority and "
                          "send each request's priority; default fcfs (the round-1 server)")
-    # D216 (2) / D222 (1) g / D227 (E3): the engine /metrics scrape. ON by default for a cell
-    # that has a server, because that is the whole point of E1 and a field nobody reads is the
-    # defect it repairs; a dry cell has no server and is untouched. `--no-metrics-scrape` forces
-    # it off, which is the OFF side of the byte-identity proof and the way to reproduce a pre-E1
-    # cell exactly.
-    ap.add_argument("--metrics-scrape", dest="metrics_scrape", action="store_true", default=True,
+    # D216 (2) / D222 (1) g / D227 (E3): the engine /metrics scrape. OFF by default, because
+    # turning it on for every cell that has a server is a DEPLOYMENT-DEFAULT change and only the
+    # user rules those (D187: held or unproved code defaults OFF; the committed StudyD222-PASS1
+    # pre-registration states "class default OFF"). A cell asks for it explicitly. The class
+    # default in asyncbackend is already False; this line is what overrode it.
+    ap.add_argument("--metrics-scrape", dest="metrics_scrape", action="store_true", default=False,
                     help="scrape the engine's /metrics in the background and publish the "
                          "allow-listed engine keys into the observation (D216 (2), D227)")
     ap.add_argument("--no-metrics-scrape", dest="metrics_scrape", action="store_false",
