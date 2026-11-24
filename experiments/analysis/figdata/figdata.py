@@ -42,6 +42,14 @@ TODAY = date(2026, 11, 23).isoformat()
 SUPERSEDED = C.SUPERSEDED  # the D205 seven
 EXCLUDED = {"r3-streaming"} | SUPERSEDED
 
+# Corrected network labelling (user, 2026-11-23). The 13.6 Mbit/s / 44 ms point is NOT the US 5G
+# median: per Ookla H2 2025 it is the best-performing US carrier's 5G median.
+NETWORK_LABEL = ("uniform 13.6 Mbit/s / 44 ms uplink: best-performing US carrier's 5G median "
+                 "(Ookla H2 2025), close to the 12 Mbit/s Bay Area 5G median (Khan et al. 2024)")
+UPLINK_SWEEP = ("Tier-1 uplink values are the committed StudyE1 sweep: 5 / 12 / 13.6 / 25 / 88 "
+                "Mbit/s and RTT 22 / 44 / 142 ms, each with its cited uplink source; never the "
+                "Irish 5G downlink percentiles")
+
 # display -> (raw at 1x, raw at other memory, policy_version, rung, role)
 OURS = [
     ("fair-c5attr-rr", "covex-v6-fair-c5attr-rr", "covex-v6-fair-c5attr-rr", "development-best", "rung3"),
@@ -723,6 +731,17 @@ def write_readiness(disc, counts, dsmap):
     A(f"- F10 deadline: present {cov['deadline'] or 'NONE beyond 3.0'} (target 2.5 s).")
     A(f"- F11 composition/reask: present {cov['reask'] or 'NONE beyond rq30 / 40:40:20'}.")
     A(f"- F12 network: present {cov['network'] or 'NONE'} (no network-condition cells exist).")
+    A("")
+    A("## Network / uplink operating point (corrected label, user 2026-11-23)")
+    A("")
+    A(f"- Main operating point: {NETWORK_LABEL}. It is the BEST-PERFORMING US carrier's 5G median "
+      "(T-Mobile per Ookla H2 2025), NOT the US 5G median.")
+    A(f"- {UPLINK_SWEEP}.")
+    A("- The orchestration standard grid cells are NOT bandwidth-limited (header network=none; the "
+      "uplink is modelled as a near-instant wire hop, uplink_queue_p99 ~0 s), so their provenance "
+      "carries cond_network=none, not this operating point. The 13.6 Mbit/s / 44 ms label belongs "
+      "to the StudyE1 Nexar-lead delivery study (reports/study_e1_nexar_lead.md, corrected in "
+      "place) and to any network-conditioned figure (F12) when its cells land.")
     A("")
     A("## Instrumentation gaps by field")
     A("")
