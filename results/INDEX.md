@@ -1339,3 +1339,4 @@ is 521 of 712 = **0.731742**, so **29 episodes are reclassified** across the 0.2
 per-episode object is NOT the committed D64 / D71 capacity gate, which `score.py::attainment` applies to
 each DEVICE's own instant fraction; on this cell all six dashcam devices are eligible and pass, with
 fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edited here.**
+| `results/orchestration/live2/kind2_retry/k2_proof_results.jsonl` | experiments/orchestration/live2/held/kind2_retry/k2_proof.py | - | h100nvl (CPU) | 3 cases x 3 configs | **Kind-2 fix PREPARED, NOT APPLIED (user ruling 2026-11-24): retry once on a fresh connection only on httpx.ReadError before any response byte; OFF identical to the base on all cases; ON fixes the pre-byte case only. Patch held at experiments/orchestration/live2/held/kind2_retry/; to be applied to all arms before the held-out seeds 1-3.** |

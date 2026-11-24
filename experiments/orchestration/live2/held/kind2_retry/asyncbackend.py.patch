@@ -1,0 +1,177 @@
+--- a/experiments/orchestration/live2/asyncbackend.py	2026-11-24 15:06:10.000000000 -0800
++++ b/experiments/orchestration/live2/asyncbackend.py	2026-11-24 15:19:20.977453944 -0800
+@@ -105,6 +105,14 @@
+         limits = httpx.Limits(max_connections=int(limit),
+                               max_keepalive_connections=int(limit))
+         self._client = httpx.AsyncClient(timeout=httpx.Timeout(timeout_s), limits=limits)
++        # Kind-2 fix, PREPARED NOT APPLIED (user ruling 2026-11-24: applied to ALL arms before the
++        # held-out seeds 1 to 3, never mid-evaluation). OFF unless kind2_retry is set True.
++        self.kind2_retry = bool(self.KIND2_RETRY_DEFAULT)
++        self._fresh_client: Any = None        # built on first use: no keep-alive, so always a NEW connection
++        self._fresh_limits = httpx.Limits(max_connections=int(limit), max_keepalive_connections=0)
++        self._timeout_s = float(timeout_s)
++        self.n_kind2_retries = 0
++        self.n_kind2_retry_ok = 0
+         self.build_s = 0.0
+         self.n_built = 0
+         # D84 presence, counted on the WIRE body (after materialize resolves deferred parts and strip_internal):
+@@ -133,6 +141,8 @@
+ 
+     def close(self) -> None:
+         try:
++            if self._fresh_client is not None:
++                asyncio.run_coroutine_threadsafe(self._fresh_client.aclose(), self._loop).result(30.0)
+             fut = asyncio.run_coroutine_threadsafe(self._client.aclose(), self._loop)
+             fut.result(30.0)
+         except Exception:                                             # noqa: BLE001
+@@ -159,6 +169,10 @@
+     # would give the two paths room to drift, and the whole defect class here is a second code path
+     # quietly disagreeing with the first.
+     METRICS_SCRAPE_DEFAULT = False
++    # Kind-2 fix (prepared, not applied; user ruling 2026-11-24): retry ONCE, on a fresh no-keep-alive
++    # connection, a request whose client raised httpx.ReadError BEFORE ANY RESPONSE BYTE (no status, no
++    # first line). Every other request takes the unchanged path. OFF until the held-out seeds.
++    KIND2_RETRY_DEFAULT = False
+ 
+     # D216 (2) / D222 (1) g / D227: THE WIRING, AND THE ONE DESIGN DECISION IN IT.
+     #
+@@ -390,53 +404,80 @@
+             elif ".send_request_headers." in name:
+                 conn["sent"] = True
+         exc_type = exc_repr = None
+-        try:
+-            async with self._client.stream(
+-                    "POST", self.base_url + "/v1/chat/completions", content=data,
+-                    headers={"Content-Type": "application/json"},
+-                    extensions={"trace": _trace}) as r:
+-                status = r.status_code
+-                if status != 200:
+-                    err = f"HTTP {status}: {(await r.aread())[:300]!r}"
+-                else:
+-                    async for line in r.aiter_lines():
+-                        if not line.strip():
+-                            continue
+-                        if ttft is None:
+-                            ttft = time.time() - t0
+-                        d = _sse(line)
+-                        if not d:
+-                            continue
+-                        u = d.get("usage")
+-                        if isinstance(u, dict):
+-                            usage = u
+-                        for ch in d.get("choices") or ():
+-                            delta = ch.get("delta") or ch.get("message") or {}
+-                            piece = (delta.get("content")
+-                                     or delta.get("reasoning_content") or "")
+-                            if piece:
+-                                text_parts.append(piece)
+-                            if ch.get("logprobs"):
+-                                chunks.append(dict(logprobs=ch["logprobs"]))
+-                        # StudyLIVE2-harness addendum, ruling Option 1: the answer leaves at its
+-                        # FIRST CONTENT TOKEN. `ttft_s` keeps its existing definition (the first
+-                        # SSE line), so the answer's t_done is unchanged; the first content
+-                        # token's own instant is recorded to show the two coincide.
+-                        if (first_wall is None and self.on_first is not None
+-                                and (text_parts or chunks)):
+-                            first_wall = time.time()
+-                            self.first_gap_ms.append(1000.0 * (first_wall - t0 - ttft))
+-                            try:
+-                                self.on_first(dict(
+-                                    request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
+-                                    ttft_s=ttft, total_s=None, http_status=status, error=None,
+-                                    usage={}, text="".join(text_parts), chunks=list(chunks),
+-                                    sub=sub, t_first_content_wall=first_wall))
+-                            except Exception as e:                    # noqa: BLE001
+-                                self.callback_errors.append(f"{type(e).__name__}: {e}")
+-        except Exception as e:                                        # noqa: BLE001
+-            err = f"{type(e).__name__}: {e}"
+-            exc_type, exc_repr = type(e).__name__, repr(e)[:300]
++        k2_retried = False
++        k2_first = None
++        client = self._client
++        for _k2_attempt in range(2):
++            try:
++                async with client.stream(
++                        "POST", self.base_url + "/v1/chat/completions", content=data,
++                        headers={"Content-Type": "application/json"},
++                        extensions={"trace": _trace}) as r:
++                    status = r.status_code
++                    if status != 200:
++                        err = f"HTTP {status}: {(await r.aread())[:300]!r}"
++                    else:
++                        async for line in r.aiter_lines():
++                            if not line.strip():
++                                continue
++                            if ttft is None:
++                                ttft = time.time() - t0
++                            d = _sse(line)
++                            if not d:
++                                continue
++                            u = d.get("usage")
++                            if isinstance(u, dict):
++                                usage = u
++                            for ch in d.get("choices") or ():
++                                delta = ch.get("delta") or ch.get("message") or {}
++                                piece = (delta.get("content")
++                                         or delta.get("reasoning_content") or "")
++                                if piece:
++                                    text_parts.append(piece)
++                                if ch.get("logprobs"):
++                                    chunks.append(dict(logprobs=ch["logprobs"]))
++                            # StudyLIVE2-harness addendum, ruling Option 1: the answer leaves at its
++                            # FIRST CONTENT TOKEN. `ttft_s` keeps its existing definition (the first
++                            # SSE line), so the answer's t_done is unchanged; the first content
++                            # token's own instant is recorded to show the two coincide.
++                            if (first_wall is None and self.on_first is not None
++                                    and (text_parts or chunks)):
++                                first_wall = time.time()
++                                self.first_gap_ms.append(1000.0 * (first_wall - t0 - ttft))
++                                try:
++                                    self.on_first(dict(
++                                        request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
++                                        ttft_s=ttft, total_s=None, http_status=status, error=None,
++                                        usage={}, text="".join(text_parts), chunks=list(chunks),
++                                        sub=sub, t_first_content_wall=first_wall))
++                                except Exception as e:                    # noqa: BLE001
++                                    self.callback_errors.append(f"{type(e).__name__}: {e}")
++            except Exception as e:                                        # noqa: BLE001
++                err = f"{type(e).__name__}: {e}"
++                exc_type, exc_repr = type(e).__name__, repr(e)[:300]
++                # Kind-2 fix, PREPARED (OFF by default): a ReadError BEFORE ANY RESPONSE BYTE (no
++                # status, no first line) is the stale-pooled-connection signature (109 of 109 on
++                # reused connections, 2026-11-24). Retry once on a fresh no-keep-alive connection.
++                # Any other failure, and every request when the switch is off, leaves the loop here.
++                import httpx                                          # noqa: PLC0415 (lazy, as in __init__)
++                if (self.kind2_retry and not k2_retried and isinstance(e, httpx.ReadError)
++                        and status is None and ttft is None):
++                    k2_retried = True
++                    self.n_kind2_retries += 1
++                    k2_first = dict(exc_type=exc_type, exc_repr=exc_repr,
++                                    after_s=round(time.time() - t0, 6),
++                                    conn_reused=(None if not conn["sent"] else (not conn["connect"])))
++                    if self._fresh_client is None:
++                        self._fresh_client = httpx.AsyncClient(
++                            timeout=httpx.Timeout(self._timeout_s), limits=self._fresh_limits)
++                    client = self._fresh_client
++                    err = None
++                    exc_type = exc_repr = None
++                    conn["connect"] = conn["sent"] = False
++                    continue
++            break
++        if k2_retried and exc_type is None:
++            self.n_kind2_retry_ok += 1
+         t_end = time.time()
+         total = t_end - t0
+         # StudyLIVE2-harness addendum (instrumentation): the wall instant the response stream
+@@ -450,7 +491,10 @@
+                    # D226 item 4: wall seconds from submit to failure, only on an exception.
+                    exc_type=exc_type, exc_repr=exc_repr,
+                    exc_after_s=(round(total, 6) if exc_type is not None else None),
+-                   conn_reused=(None if not conn["sent"] else (not conn["connect"])))
++                   conn_reused=(None if not conn["sent"] else (not conn["connect"])),
++                   # kind-2 fix (prepared): True when this request was retried once; the first
++                   # attempt's exception is kept so a retried miss and a retried success both show.
++                   kind2_retried=k2_retried, kind2_first=k2_first)
+         # StudyLIVE2-harness addendum: the completion callback runs HERE, on the I/O loop, the
+         # moment the stream ends and BEFORE the future resolves, so the decision thread never
+         # sees a finished request whose answer has not been forwarded yet.
