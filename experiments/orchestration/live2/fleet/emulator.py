@@ -429,6 +429,10 @@ class FleetEmulator:
         cpu0 = time.process_time()
         ru0 = resource.getrusage(resource.RUSAGE_SELF)
         t0 = time.monotonic()
+        # D230 (10), user 2026-11-24: the UNIX time of run t = 0, so run-relative logs (decision, request,
+        # outcomes) align with the host counters (host_counters_d211.log, host_load.jsonl), which use unix t.
+        # Read at the same instant as the monotonic origin; recorded only, never read by any decision.
+        self.t0_unix = time.time()
         next_tick = 0.0
         while self._heap:
             t, _seq, what, payload = heapq.heappop(self._heap)
@@ -588,6 +592,7 @@ class FleetEmulator:
         qp99 = sorted(s["queue_p99"] for s in up.values() if s.get("queue_p99") is not None)
         meta = dict(
             trace_dir=str(self.dir), out_dir=str(out_dir), mode=self.mode,
+            t0_unix=round(float(getattr(self, "t0_unix", 0.0)), 6),
             run_s=self.run_s, tick_s=self.tick_s, realtime=self.realtime,
             n_devices=self.meta["n_devices"], ratio=self.meta["ratio"],
             seed=self.meta["seed"],
