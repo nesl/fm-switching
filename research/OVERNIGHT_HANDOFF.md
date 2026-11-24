@@ -168,7 +168,29 @@ comparator AND dashcam 265 on-time answers lower AND 7 robot answers lost. **The
 s4 to s6 and MUST NOT be extended to s7.** The H100 found this; it is the sharpest thing about s7.
 **SO THE LINE BELOW SAYING "its checks 1 and 3 pass everywhere" IS SUPERSEDED: check 1 FAILS at s7.**
 
-*** THE ONLY OUTSTANDING VERDICT IS RUNG 3 AT s7, AND AS OF 23:11 PST IT IS NOT YET SCORABLE. ***
+*** CLOSED 2026-11-24 01:55 PST: RUNG 3 AT s7 IS SCORED, THE LADDER IS COMPLETE, AND THE WHOLE
+CLAUDE.md CLOSEOUT IS DONE. NOTHING IN THIS SECTION IS OUTSTANDING. DO NOT RE-SCORE AND DO NOT WAIT. ***
+  `covex-v6-state-final` s7 landed and was scored: **RUNG 3 PASSES ALL THREE CHECKS AT s7**, check 1
+  +0.094501 (0.648312 against base's bar 0.553811), check 2 **RETENTION EXACTLY 1.000000** (84 against
+  state-final's 84, base 19), check 3 per-device minimum 0.991667. Positive control PASS 2 of 2 EXACT.
+  *** THE CONSTRUCTED BOUND BELOW WAS BORNE OUT AND ITS ESCALATE CONDITION DID NOT FIRE. *** It said
+  check 2 cannot fail unless state-final's on-time X exceeded 91, and that X > 91 would mean state-final
+  served over-limit questions, contradicting D170, and must be ESCALATED rather than silently rescored.
+  **MEASURED X = 84, so 84 <= 91 and no escalation was needed.** Retention came in at 1.000000 against
+  the bound's predicted 0.955882 at X = 87, i.e. BETTER than the worst admissible case, as expected
+  since retention rises as X falls.
+  **CLOSEOUT, ALL FOUR CLAUDE.md AFTER-ANY-TASK STEPS NOW COMPLETE:** the complete-ladder record is
+  `frozen_test/d208_LADDER_FINAL_COMPLETE.json` (`8feed0fe`); `research/EXPERIMENTS.md`'s
+  StudyLADDER-FINAL row carries the verdict, status, consistency_check and mechanism_verification;
+  `results/INDEX.md` line 1122 carries the complete-ladder row; and `research/STATUS.md` now opens with a
+  2026-11-24 section (`5cf93024`). **SO THE 'STILL OWED: the results/INDEX.md row' ITEM FURTHER DOWN THIS
+  FILE IS STALE - THAT ROW EXISTS.**
+  **AND THE RUN-PATH FREEZE'S LADDER REASON HAS LAPSED**, because the ladder is complete. The OTHER
+  reason stands unchanged: there are live uncommitted edits to run-path files in the shared worktree
+  (1,482 insertions across 8 files under `experiments/` against its own HEAD), so still TOUCH NO
+  RUN-PATH FILE, and build any commit from ORIGIN's content as every commit has.
+
+*** THE ONLY OUTSTANDING VERDICT IS RUNG 3 AT s7, AND AS OF 23:11 PST IT IS NOT YET SCORABLE. *** [SUPERSEDED, KEPT FOR THE TRAIL]
 
 *** AND IT IS ALREADY DETERMINED FROM COMMITTED DATA. RUNG 3 PASSES ALL THREE CHECKS AT s7 WHATEVER
 `covex-v6-state-final` s7 TURNS OUT TO CONTAIN. Derived 23:22 PST; positive control PASS 2 of 2 exact. ***
@@ -211,7 +233,7 @@ gain rather than merely retaining 0.90 of it.
 
 | arm | s4 | s5 | s6 | s7 |
 |---|---|---|---|---|
-| rung 3 `covex-v6-fair-final` | ALL THREE PASS | **ALL THREE PASS**, retention 1.1059 (`3c644d81`) | **ALL THREE PASS**, retention 1.0769 (`f476ee96`) | NOT SCORABLE, state-final s7 absent |
+| rung 3 `covex-v6-fair-final` | ALL THREE PASS | **ALL THREE PASS**, retention 1.1059 (`3c644d81`) | **ALL THREE PASS**, retention 1.0769 (`f476ee96`) | **ALL THREE PASS**, retention EXACTLY 1.000000 (`8feed0fe`) |
 | rung 4 `covex-v6-final` | ALL THREE PASS | **check 2 FAIL 0.851** (`8e05580e`) | **check 2 FAIL 0.871** (`c7c92285`) | **CHECKS 1 AND 2 BOTH FAIL** (`0e7ab17d`, `5a861434`) |
 
 **RUNG 4 PASSES CHECK 2 AT ONE SEED OF THREE, ON ROBOT RETENTION ALONE**; its checks 1 and 3 pass
@@ -563,6 +585,29 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
 - A BAR IS ONLY COMPARABLE WITHIN ONE RECIPE, and every bar-table row now carries the commit that
   produced it and the ruled fixes it predates (D217 (4)).
 
+## WHAT IS ACTUALLY LEFT FOR A RESUME, 2026-11-24 01:55 PST
+
+*** EVERY STEP THAT CAN PROCEED WITHOUT A USER RULING IS EITHER DONE OR RUNNING. DO NOT START WORK
+LOOKING FOR SOMETHING TO DO; READ THIS LIST FIRST. ***
+- **Step 1 DEVICE_ANSWERS: DONE and STOPPED on its pre-registered condition** (1x count is 1). Awaiting
+  the user.
+- **Step 2 E1: IMPOSSIBLE AS WRITTEN.** The scrape has zero callers; there is no switch whose flip
+  reaches a decision. Awaiting the user on the wiring.
+- **Step 3 item 3: ITS BYTE-IDENTITY SWEEP IS RUNNING. DO NOT RE-LAUNCH AND DO NOT START A DRY CELL.**
+  Verified at 01:52 PST: pid 378337 `d213_digest_driver.py --out out/item3_digests.json`, 58 minutes
+  elapsed, `00:00:00` OWN CPU, **with a LIVE CHILD** pid 388608 running
+  `cf_pd_one_cell.py --arm attentionstore-prefetch --seed 4 --n 16 --run-s 1200 --cutoff-off` at 2:43
+  CPU. Per this file's own final discriminator that is a WORKING ORCHESTRATOR, not a hang. loadavg 1.21.
+  **THE ALONE RULE THEREFORE BINDS.**
+- **Step 4 the 0.25x pair: BLOCKED ON THE USER**, and the DA live pair additionally cannot be posted as
+  is, because `covex-v6-final-da` does not resolve on the normal import path.
+- **Step 5: DONE.**
+- **The CLAUDE.md closeout for StudyLADDER-FINAL is COMPLETE** (EXPERIMENTS row, INDEX row, STATUS
+  section). Nothing is owed there.
+*** SO IF YOU ARE A RESUME WITH NOTHING ASSIGNED: THE CORRECT ACTION IS TO VERIFY THIS FILE IS STILL
+ACCURATE, CHECK WHETHER ITEM 3's SWEEP HAS LANDED ITS RESULT, AND OTHERWISE REPORT AND STOP. DO NOT
+INVENT WORK, DO NOT TOUCH A RUN-PATH FILE, AND DO NOT DECIDE ANY OF THE FIVE OPEN RULINGS. ***
+
 ## OPEN, NEEDING A USER RULING
 
 - *** THE D209 PROOF-LOAD TWIN FOR THE n20 CELLS IS A DIFFERENT ARM, AND ITS `twin_note` SAYS "THE SAME
@@ -670,7 +715,7 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
   and is withdrawn to "not reached in any LIVE cell examined, engine channel absent in all cells".
   A detail that cuts both ways: `arms_v6cf.py:291`'s own docstring records free_kv CONSTANT over 77
   decisions on a 300 s DRY cell, so the variation is a property of the CELL'S ROSTER, not of dry vs live.
-- *** STILL OWED, NOT FORCED: the `results/INDEX.md` row for the completed ladder. *** `INDEX.md` has
+- *** DONE 2026-11-24, NOT OWED: the `results/INDEX.md` row for the completed ladder EXISTS at line 1122, and `research/STATUS.md` is updated at `5cf93024`. The text below is kept for the trail. *** `INDEX.md` has
   been DIRTY-and-differing (mid-edit by another session) at every check tonight, so appending would
   clobber that work. The row is owed, not forgotten.
 - D211 signal (a) will have NO 1x live cell to validate on, because item 3 lands after the last ladder
