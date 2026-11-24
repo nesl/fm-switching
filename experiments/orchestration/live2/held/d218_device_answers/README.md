@@ -2,8 +2,12 @@
 
 *** NOTHING HERE IS ON THE IMPORT PATH, AND NOTHING MUST BE PUT ON IT WITHOUT A USER RULING. ***
 Every file carries a `.patch` or `.held` suffix precisely so it cannot be imported or picked up by a
-glob. `covex-v6-final-da` occurs in ZERO files under `experiments/` on origin, and that is the correct
-state until the ruling below is made.
+glob. `covex-v6-final-da` occurs in ZERO files ON THE IMPORT PATH, and that is the correct
+state until the ruling below is made. (PRECISION, restart 10: the name DOES occur in 12
+places under `experiments/`, ALL of them inside THIS directory. An earlier wording here said "zero
+files under `experiments/`", which a resume grepping the name would find false and might read as the
+arm being wired. The import-path claim is the load-bearing one and it holds: every file here carries a
+`.patch` or `.held` suffix and there are ZERO plain `.py` files under `held/`.)
 
 ## WHY THIS DIRECTORY EXISTS
 

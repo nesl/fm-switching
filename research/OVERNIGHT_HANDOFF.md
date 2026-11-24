@@ -29,11 +29,11 @@ process census at 22:40, so no resume needs to re-derive it. ***
   the window elapses (`if [ $((now - first)) -gt $WINDOW_S ]; then first=$now; count=0; fi`). The poll
   fires every TEN MINUTES, so it can only ever reach **6 restarts per hour against a budget of 12**:
   **THE GUARD IS STRUCTURALLY UNREACHABLE.** Measured rather than argued: `BUDGET SPENT` has fired
-  **0 times**; the log holds **102 RESTART lines** (re-counted restart 9) spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
+  **0 times**; the log holds **103 RESTART lines** (re-counted restart 10) spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
   about 37 hours; and the counter histogram shows it reset to `1/12` **18 times**, never exceeding
   `7/12`. So a resume must NOT read `RESTART n/12` as a countdown to a stop. **IT WILL KEEP SPENDING
   ABOUT SIX SESSIONS AN HOUR, INDEFINITELY, UNTIL THE USER STOPS THE `fmsw-overnight` WATCHDOG OR
-  ANSWERS THE RULINGS.** **102 sessions have been spent so far** (re-counted restart 9, 07:40 PST; `BUDGET SPENT` still 0). Stopping it is the USER'S call and outside
+  ANSWERS THE RULINGS.** **103 sessions have been spent so far** (re-counted restart 9, 07:40 PST; `BUDGET SPENT` still 0). Stopping it is the USER'S call and outside
   what this file authorises, so do not touch it; the correct action is to say so plainly in the reply,
   which is now this file's standing instruction for every further resume. DO NOT read the restarts as evidence that anything broke, and do not go
   hunting for the crash. Each restart does cost a full session, so leave this file accurate.
@@ -135,9 +135,23 @@ Each entry: the claim, the verdict, and the restart that checked it. **PICK ONE 
   **AND THE WORD "VERBATIM" WAS MINE** - relayed from the building agent's report without comparing the
   files, and it then entered this ledger as the claim to check. The substance was right and the word was
   not. NOTE line 549 of this file makes the same "VERBATIM" claim; it is corrected by this entry.
-**STILL UNVERIFIED, IN DESCENDING ORDER OF CONSEQUENCE:** that `covex-v6-final-da` does not resolve on
-the normal import path, which is what gates step 4; and the r2-queue-register claim that a correct input
-costs 16 robot answers at s4, which is ruling 7.
+- *** `covex-v6-final-da` DOES NOT RESOLVE ON THE NORMAL IMPORT PATH -> **TRUE, AND OVER-SATISFIED, SO
+  THE STEP-4 GATE GENUINELY STANDS** (restart 10, 2026-11-24 07:50 PST). *** Verified from origin with an
+  untruncated grep whose rc was checked: the name occurs in **12 places, ALL inside
+  `live2/held/d218_device_answers/`**, and nowhere else under `experiments/`. The reason it cannot resolve
+  is STRONGER than "unregistered": **all 9 files carry a `.patch` or `.held` suffix and there are ZERO
+  plain `.py` files under `held/`**, so `arms_v6cf_device.py.held` is not an importable module and cannot
+  be caught by a `*.py` glob. **That is D187's "held code defaults OFF" enforced by FILENAME rather than
+  a flag** - the one form that cannot be switched on by accident. So step 4 does need its own
+  byte-identity proof before the pair runs, exactly as recorded.
+  **ONE PRECISION FIX MADE TO THAT README IN THE SAME COMMIT, because it would mislead the next resume
+  doing this very check:** its line 5 said the name "occurs in ZERO files under `experiments/` on
+  origin". FALSE as literally worded - it occurs in 12, all within `held/` itself - so a resume that
+  greps the name finds twelve hits and may distrust the file or conclude the arm IS wired. It now says
+  zero files ON THE IMPORT PATH, which is the true and load-bearing claim, with the old wording recorded.
+**STILL UNVERIFIED:** the r2-queue-register claim that a correct input costs 16 robot answers at s4,
+which is ruling 7. **That is the LAST item on this list**; a resume that finds it done should report the
+ledger complete rather than inventing a new claim to check.
 
 *** A CORRECTION TO THIS FILE'S OWN HANG-DETECTION LESSON, because I got the discriminator wrong
 earlier tonight and a future resume would kill a healthy driver with it. ***
