@@ -694,6 +694,22 @@ INVENT WORK, DO NOT TOUCH A RUN-PATH FILE, AND DO NOT DECIDE ANY OF THE FIVE OPE
   `always-cloud-fcfs_n16_s5_1200s_h27_3t_L3_epg_rq30` has **NO `cell.json` and NO `run_meta.json`**, so
   it is an incomplete cell, and the rerun is not anomalous (that arm carries 37 / 64 / 12 / 33 errors at
   s4-s7, all `run_valid=True`, all `is_measurement=False`).
+  *** APPLIED 2026-11-24 02:15 PST at `e248ca1d`. THIS ITEM IS CLOSED; DO NOT RE-FIND IT. *** The
+  contention that blocked it has cleared (neither file has uncommitted edits in either worktree, and
+  `build_episodic.py` has ZERO importers outside its own directory, so it is not a live-path file). The
+  sentence is now DERIVED from `rows`, which `write_readme` already receives, and the committed README
+  prose is corrected to the same derived text. **THE DERIVATION WAS VERIFIED BEFORE IT WAS INSTALLED:**
+  run against the committed `episodic_scores.csv` it yields "always-cloud-fcfs s5, simplestream s4,
+  simplestream s5, simplestream s6, simplestream s7", matching the computed column EXACTLY, and the patch
+  script refuses to install it otherwise. Re-measured at the same time: the old prose named **2 pairs that
+  are NOT reruns** (`covex-v6-state` s4, `v5-rules` s7) and **omitted 4 that ARE** (`simplestream` s4 to
+  s7); 5 of 96 rows are True. **THE CSV IS UNCHANGED and must stay so: the CSV was always right.**
+  **THE LIMIT, STATED:** the expression was checked against the committed CSV, where the column is a
+  string and is coerced, NOT by regenerating the README, because a full build would write figure outputs
+  while item 3's sweep is in flight. In process the column is a real bool, so truthiness behaves
+  identically.
+
+  [SUPERSEDED, KEPT FOR THE TRAIL:]
   **RECOMMENDED FIX, NOT APPLIED: derive that sentence from the computed `cell_used_rerun` column rather
   than hardcoding it**, so it cannot drift again. One line in the generator. **DO NOT "fix" the CSV: the
   CSV is right.**
