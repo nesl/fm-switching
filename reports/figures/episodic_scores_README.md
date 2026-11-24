@@ -1,6 +1,6 @@
 # D192 episodic scores: definitions, provenance, validation
 
-One row per (arm, seed), seeds 4 to 7, full-memory final-workload cells (<arm>_n16_s<seed>_1200s_h27_3t_L3_epg_rq30), preferring the _rerun directory when present (which supplies always-cloud-fcfs s5, covex-v6-state s4, v5-rules s7). A device-only reference row per seed uses device answers only. CPU only, read-only on every input.
+One row per (arm, seed), seeds 4 to 7, full-memory final-workload cells (<arm>_n16_s<seed>_1200s_h27_3t_L3_epg_rq30), preferring the _rerun directory when present (which supplies always-cloud-fcfs s5, simplestream s4, simplestream s5, simplestream s6, simplestream s7; DERIVED from the cell_used_rerun column rather than hardcoded). A device-only reference row per seed uses device answers only. CPU only, read-only on every input.
 
 ## Standing answer and thresholds
 

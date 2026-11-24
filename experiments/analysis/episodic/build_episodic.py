@@ -173,9 +173,15 @@ def write_readme(thr, thr_i, labels, rows, missing):
     A = L.append
     A("# D192 episodic scores: definitions, provenance, validation")
     A("")
+    # D192 fix: this list was HARDCODED PROSE beside the computed `cell_used_rerun` column and had
+    # drifted to name two cells that are not reruns and omit the four that are. Derive it, so the
+    # sentence a reader trusts cannot disagree with the column that is true.
+    _rr = sorted({(str(r.get("arm")), str(r.get("seed"))) for r in rows if r.get("cell_used_rerun")})
+    _rr_txt = ", ".join("%s s%s" % (a, sd) for a, sd in _rr) if _rr else "no cell in this build"
     A("One row per (arm, seed), seeds 4 to 7, full-memory final-workload cells "
       "(<arm>_n16_s<seed>_1200s_h27_3t_L3_epg_rq30), preferring the _rerun directory when present "
-      "(which supplies always-cloud-fcfs s5, covex-v6-state s4, v5-rules s7). A device-only "
+      "(which supplies " + _rr_txt + "; DERIVED from the cell_used_rerun column rather than "
+      "hardcoded). A device-only "
       "reference row per seed uses device answers only. CPU only, read-only on every input.")
     A("")
     A("## Standing answer and thresholds")
