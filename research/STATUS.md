@@ -1,6 +1,6 @@
 ## 2026-11-24 (main flash session): the final ladder is complete, rung 3 passes 4 of 4 and rung 4 passes 1 of 4
 
-**Last updated: 2026-11-24.** StudyLADDER-FINAL complete and scored; StudyD218-DA built, proved dry and
+**Last updated: 2026-11-24.** **D223 (2) LANDED (`a43ad7f7`, `2e4c5961`): the hard-coded 32,768 context limit is replaced by the server's configured max-model-len read at run start, fail-loud, byte-identical at 1x on 8 of 8 arms, and RUNG 3 AT 0.5x IS UNBLOCKED. Moving to 0.5x introduces no new robot context rejections (the 31,472-to-32,768 band is empty at every seed). D227 approved: E3 is built as part of the E1 wiring. Rung-4 pass 1 is STOPPED at its Step-0 gate on four user rulings, the first being whether the latest-safe-start prediction passes request COUNTS against the model the arm reads or uncached TOKENS against the D162 model, a 247x unit difference; E1 plus E3 proceeds alone. The D225 conformance matrix is built (`4a73e125`) and needs a verifying session that did not write it; its freeze gate lists 15 rows not yet built-and-live or ruled out.** StudyLADDER-FINAL complete and scored; StudyD218-DA built, proved dry and
 stopped on its pre-registered condition; the E1 metrics scrape characterised as an absent link. Five
 questions are open and all five are the user's.
 
