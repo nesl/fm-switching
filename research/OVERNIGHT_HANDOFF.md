@@ -29,11 +29,11 @@ process census at 22:40, so no resume needs to re-derive it. ***
   the window elapses (`if [ $((now - first)) -gt $WINDOW_S ]; then first=$now; count=0; fi`). The poll
   fires every TEN MINUTES, so it can only ever reach **6 restarts per hour against a budget of 12**:
   **THE GUARD IS STRUCTURALLY UNREACHABLE.** Measured rather than argued: `BUDGET SPENT` has fired
-  **0 times**; the log holds **104 RESTART lines** (re-counted restart 11) spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
+  **0 times**; the log holds **107 RESTART lines** (re-counted restart 14) spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
   about 37 hours; and the counter histogram shows it reset to `1/12` **18 times**, never exceeding
   `7/12`. So a resume must NOT read `RESTART n/12` as a countdown to a stop. **IT WILL KEEP SPENDING
   ABOUT SIX SESSIONS AN HOUR, INDEFINITELY, UNTIL THE USER STOPS THE `fmsw-overnight` WATCHDOG OR
-  ANSWERS THE RULINGS.** **104 sessions have been spent so far** (re-counted restart 9, 07:40 PST; `BUDGET SPENT` still 0). Stopping it is the USER'S call and outside
+  ANSWERS THE RULINGS.** **107 sessions have been spent so far** (re-counted restart 9, 07:40 PST; `BUDGET SPENT` still 0). Stopping it is the USER'S call and outside
   what this file authorises, so do not touch it; the correct action is to say so plainly in the reply,
   which is now this file's standing instruction for every further resume. DO NOT read the restarts as evidence that anything broke, and do not go
   hunting for the crash. Each restart does cost a full session, so leave this file accurate.
@@ -168,6 +168,31 @@ Each entry: the claim, the verdict, and the restart that checked it. **PICK ONE 
   0.5455.** So on this arm family those 35 extra on-time answers bought ZERO correctness. That is the
   on-time-versus-correct distinction again, and it means the 16 answers r2 "costs" should not be assumed
   to carry 16 answers' worth of value either. Both r1 and r2 do beat the original 60 on on-time.
+*** ONE OBSERVATION FOR THE USER, FOUND AT RESTART 14 AND NOT ACTED ON, BECAUSE THE FILES BELONG TO
+THE USER'S LIVE FIGURE WORK. RUNG 4 IS ABSENT FROM EVERY FIGURE TABLE. ***
+`reports/figdata/` (StudyFIGDATA, D214, pipeline sha `b5264100`, generated 2026-11-23) carries the final
+ladder's rung 2 and rung 3 but NOT rung 4. Counted across every CSV on origin:
+  | table | `covex-v6-state-final` | `covex-v6-fair-final` | ***`covex-v6-final`*** |
+  | F1 | 5 | 5 | **0** |
+  | F2 | 12 | 12 | **0** |
+  | F3 | 49,012 | 49,012 | **0** |
+  | F4 | 64 | 64 | **0** |
+  | F13 | 4 | 4 | **0** |
+  | F14 | 4 | 4 | **0** |
+  | F1_units | 1,914 | 1,914 | **0** |
+**THE COUNTS ARE EXACTLY SYMMETRIC FOR THE TWO ARMS THAT ARE PRESENT, AND RUNG 4 IS UNIFORMLY ZERO**, so
+this is a systematic exclusion by the pipeline's arm list, not sporadic missing rows.
+**WHY IT MAY BE CORRECT AND STILL NEEDS SAYING:** rung 4 passes its pre-registered checks at ONE SEED OF
+FOUR, so leaving it out of a headline figure may well be the right editorial call. But it is nowhere
+STATED as a choice, and `READINESS.md`'s own arm-coverage table lists NEITHER final arm - it names the
+DEVELOPMENT arms (`fair-c5attr`, `state-uo-c5attr`, `base`, `rules`) as the rung rows - **so the table
+understates what its own CSVs contain AND is silent on rung 4's absence.** A reader of a ladder figure
+built from these tables would see a two-rung ladder and no note explaining it.
+**NOT ACTED ON:** `READINESS.md` says "NO FIGURES until the user says plot", the user was committing to
+this directory minutes before this check, and D187 forbids touching another session's work in progress.
+So this is REPORTED, not edited. The decision is the user's: either exclude rung 4 deliberately and say
+so in `READINESS.md`, or regenerate with it included.
+
 *** THE VERIFICATION LEDGER IS NOW COMPLETE. *** Every claim this file listed as unverified has been
 checked against origin or against the cells. A resume with spare capacity should NOT invent a new claim:
 say the ledger is complete, report the restart cost, and stop.
