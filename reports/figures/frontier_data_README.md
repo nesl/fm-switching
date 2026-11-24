@@ -73,7 +73,7 @@ base and rules each cover two raw arm names at different memory: base = hybrid-F
 
 ## Provenance
 
-- runs dir last commit: 3829b7de
+- runs dir last commit: 6fa6697d
 - scorer score.py last commit: 35e3c57e
 - d179_rung2_verdict.py last commit: 35e3c57e
 - build time is deliberately NOT stamped here: the output is byte-deterministic given the input, so the D190 poll commits only on a real data change. The git commit of this file is the build time of record.
