@@ -41,6 +41,7 @@ base and rules each cover two raw arm names at different memory: base = hybrid-F
 - covex-v6-base_n20_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-base_n20_s5_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-base_n8_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
+- covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-rules_n12_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-rules_n12_s5_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-rules_n16_s4_1200s_h27_3t_L2.5_epg_rq30: name did not match the rq30 cell pattern
@@ -58,17 +59,19 @@ base and rules each cover two raw arm names at different memory: base = hybrid-F
 - llf_n16_s4_1200s_h27_3t_L2.5_epg_rq30: name did not match the rq30 cell pattern
 - llf_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
 - llf_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30: name did not match the rq30 cell pattern
+- llf_n8_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - mooncake_n16_s4_1200s_h27_3t_L2.5_epg_rq30: name did not match the rq30 cell pattern
 - mooncake_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
 - mooncake_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30: name did not match the rq30 cell pattern
 - simplestream_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
 - simplestream_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30: name did not match the rq30 cell pattern
+- simplestream_n8_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - v5-rules_n16_s7_1200s_h27_3t_L3_epg_rq30: preflight-only stub, absent: cell.json, outcomes.jsonl.gz
 
 ## Provenance
 
-- runs dir last commit: b0a67946
-- scorer score.py last commit: 9803dca0
-- d179_rung2_verdict.py last commit: 35b5bc85
+- runs dir last commit: b5daee5b
+- scorer score.py last commit: 35e3c57e
+- d179_rung2_verdict.py last commit: 35e3c57e
 - build time is deliberately NOT stamped here: the output is byte-deterministic given the input, so the D190 poll commits only on a real data change. The git commit of this file is the build time of record.
 - source data: results/orchestration/live2/frozen_test/runs/<cell>/cell.json and outcomes.jsonl.gz; scorers experiments/orchestration/live2/scorer/score.py and experiments/orchestration/live2/d179_rung2_verdict.py
