@@ -57,7 +57,19 @@ RUNS = "results/orchestration/live2/frozen_test/runs"
 EXPERIMENTS = "research/EXPERIMENTS.md"
 GRID_SUFFIX = "_1200s_h27_3t_L3_epg_rq30"
 SEEDS_ALLOWED = ("0", "4", "5", "6", "7")          # never 1 to 3, never HOLDOUT
-EXCLUDED_ARMS = ("cascade-routing", "r3-streaming")
+# D213 / user ruling 2026-11-23: cascade-routing moves OUT of EXCLUDED_ARMS into a THIRD STATUS.
+# It is REPORTED, with its port-rule failure printed beside its numbers, and it is NEVER COUNTED AS A
+# BASELINE WE BEAT. The port-rule evidence below is unchanged and is the reason text that must travel
+# with every number: its card's sufficiency proxy can never fire here, so the escalation branch is
+# UNREACHABLE rather than merely unvisited, and it sits on the device-only floor BY CONSTRUCTION.
+# Reporting it without that label would present an arm that never makes its characteristic decision as
+# a beaten baseline, which is the motivating failure CLAUDE.md cites for the port rule.
+# r3-streaming stays EXCLUDED: it is SUPERSEDED (D213), a different reason from a port-rule failure,
+# and the two must not be collapsed into one status.
+EXCLUDED_ARMS = ("r3-streaming",)
+REPORTED_PORT_RULE_FAIL = ("cascade-routing",)
+# Both still carry EXCLUSION_EVIDENCE, so the evidence loop iterates this, not EXCLUDED_ARMS.
+FLAGGED_ARMS = EXCLUDED_ARMS + REPORTED_PORT_RULE_FAIL
 TOL = 1e-9
 
 # The ARM UNDER TEST. This table is the BAR the D179 shares result is read against, so the shares
@@ -305,8 +317,12 @@ def read_cell(rev: str, name: str) -> Optional[Dict[str, Any]]:
         run_valid=c.get("run_valid"), digests_equal=c.get("digests_equal"),
         refused_preflight="REFUSED_preflight" in name,
         status="KEPT, not INVALID",
-        port_rule=("EXCLUDED, per the StudyPORT-EXCL user decision"
-                   if c.get("arm") in EXCLUDED_ARMS else "in scope"),
+        port_rule=("EXCLUDED, SUPERSEDED per D213"
+                   if c.get("arm") in EXCLUDED_ARMS else
+                   "REPORTED, PORT-RULE FAIL: printed with its reason, never counted as a "
+                   "baseline we beat (D212 (3), D213)"
+                   if c.get("arm") in REPORTED_PORT_RULE_FAIL else "in scope"),
+        counted_as_baseline_we_beat=(c.get("arm") not in FLAGGED_ARMS),
 
         # the robot headline, and its hits/n
         robot_by_deadline=by_deadline,
@@ -947,7 +963,7 @@ def main(argv=None) -> int:
     seeds = sorted({r["seed"] for r in all_rows})
 
     per_arm_ex = {}
-    for arm in EXCLUDED_ARMS:
+    for arm in FLAGGED_ARMS:
         ev = EXCLUSION_EVIDENCE[arm]
         per_arm_ex[arm] = dict(
             ev,
@@ -1041,7 +1057,8 @@ def main(argv=None) -> int:
         seed_coverage_by_arm={
             arm: dict(seeds=sorted(r["seed"] for r in all_rows if r["arm"] == arm),
                       n_seeds=len([r for r in all_rows if r["arm"] == arm]),
-                      scored=(arm not in EXCLUDED_ARMS))
+                      scored=(arm not in EXCLUDED_ARMS),
+                      counted_as_baseline_we_beat=(arm not in FLAGGED_ARMS))
             for arm in sorted({r["arm"] for r in all_rows})},
         seed_coverage_note=(
             "COVERAGE IS UNEVEN and is reported with its denominator rather than pooled over. An "
@@ -1051,6 +1068,7 @@ def main(argv=None) -> int:
             "averaged into a number here, but a reader who pools must pool over COMMON SUPPORT."),
         scored_arms=sorted({r["arm"] for r in matrix}),
         excluded_arms=list(EXCLUDED_ARMS),
+        reported_port_rule_fail=list(REPORTED_PORT_RULE_FAIL),
         n_cells_in_grid=len(all_rows), n_cells_scored=len(matrix),
         n_cells_excluded=len(excluded_rows),
         fields_used={
