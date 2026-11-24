@@ -1,0 +1,372 @@
+{
+ "_register": "DRY and LOGICAL. --kv-scale scales test_live2_coord.GPU_KV, the coordinator's own pool; no engine, no real KV allocator, flash CPU.",
+ "_alone_rule": "D216 (1): every cell polls until no other live2 process exists, runs, then re-checks. The driver's own child is identified by the D216_CELL_MARKER environment variable, never by a cmdline pattern.",
+ "marker": "d8c1506568224053889e275e6bd8be3a",
+ "seed": 4,
+ "n": 16,
+ "run_s": 1200.0,
+ "note": "complete",
+ "cells": [
+  {
+   "tag": "F0a_base_1x",
+   "arm": "covex-v6-base",
+   "kv_scale": 1.0,
+   "kv_capacity_enforced": false,
+   "returncode": 0,
+   "wall_s": 209.2,
+   "loadavg_at_start": [
+    1.92,
+    1.67,
+    1.48
+   ],
+   "loadavg_at_end": [
+    2.47,
+    2.07,
+    1.69
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-base --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 1.0 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F0a_base_1x.lat.json",
+   "digest": "af8befb9420ad86a",
+   "rows": 12085,
+   "gpu_kv_tokens": null,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [
+    {
+     "pid": 251675,
+     "script": "cf_pd_one_cell.py",
+     "cmdline": "timeout 1200 /home/pragya/miniconda3/envs/fmtk/bin/python -I cf_pd_one_cell.py --arm covex-v6-fair-c5attr --seed 4 --n 16 --run-s 1200 --cutoff-off --rows-out /tmp/d213_sessC/rows/after_covex-v6-fair-c5attr_s4.rows.json"
+    },
+    {
+     "pid": 251680,
+     "script": "cf_pd_one_cell.py",
+     "cmdline": "/home/pragya/miniconda3/envs/fmtk/bin/python -I cf_pd_one_cell.py --arm covex-v6-fair-c5attr --seed 4 --n 16 --run-s 1200 --cutoff-off --rows-out /tmp/d213_sessC/rows/after_covex-v6-fair-c5attr_s4.rows.json"
+    }
+   ],
+   "alone": false
+  },
+  {
+   "tag": "F0_state_uo_1x",
+   "arm": "covex-v6-state-uo",
+   "kv_scale": 1.0,
+   "kv_capacity_enforced": false,
+   "returncode": 0,
+   "wall_s": 180.6,
+   "loadavg_at_start": [
+    1.32,
+    1.54,
+    1.6
+   ],
+   "loadavg_at_end": [
+    1.16,
+    1.42,
+    1.54
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-state-uo --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 1.0 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F0_state_uo_1x.lat.json",
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "gpu_kv_tokens": null,
+   "waited_for_alone_s": 420.4,
+   "started_during_the_cell": [],
+   "alone": true
+  },
+  {
+   "tag": "F1_r3_final_1x",
+   "arm": "covex-v6-fair-final",
+   "kv_scale": 1.0,
+   "kv_capacity_enforced": false,
+   "returncode": 0,
+   "wall_s": 187.1,
+   "loadavg_at_start": [
+    1.16,
+    1.42,
+    1.54
+   ],
+   "loadavg_at_end": [
+    1.46,
+    1.37,
+    1.49
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-fair-final --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 1.0 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F1_r3_final_1x.lat.json",
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "gpu_kv_tokens": null,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [],
+   "alone": true
+  },
+  {
+   "tag": "F2_r4_final_1x",
+   "arm": "covex-v6-final",
+   "kv_scale": 1.0,
+   "kv_capacity_enforced": false,
+   "returncode": 0,
+   "wall_s": 187.3,
+   "loadavg_at_start": [
+    1.46,
+    1.37,
+    1.49
+   ],
+   "loadavg_at_end": [
+    1.08,
+    1.26,
+    1.42
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-final --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 1.0 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F2_r4_final_1x.lat.json --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F2_r4_final_1x.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F2_r4_final_1x.pd.json",
+   "digest": "57bed6ace2eb07d1",
+   "rows": 14509,
+   "gpu_kv_tokens": null,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [],
+   "alone": true
+  },
+  {
+   "tag": "F3_r4_off_1x",
+   "arm": "covex-v6-final-off",
+   "kv_scale": 1.0,
+   "kv_capacity_enforced": false,
+   "returncode": 0,
+   "wall_s": 186.5,
+   "loadavg_at_start": [
+    1.08,
+    1.26,
+    1.42
+   ],
+   "loadavg_at_end": [
+    1.07,
+    1.2,
+    1.37
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-final-off --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 1.0 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F3_r4_off_1x.lat.json",
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "gpu_kv_tokens": null,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [],
+   "alone": true
+  },
+  {
+   "tag": "F4_r3_final_kv025",
+   "arm": "covex-v6-fair-final",
+   "kv_scale": 0.25,
+   "kv_capacity_enforced": false,
+   "returncode": 0,
+   "wall_s": 183.6,
+   "loadavg_at_start": [
+    1.07,
+    1.2,
+    1.37
+   ],
+   "loadavg_at_end": [
+    1.35,
+    1.27,
+    1.36
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-fair-final --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F4_r3_final_kv025.lat.json",
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "gpu_kv_tokens": 15736,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [],
+   "alone": true
+  },
+  {
+   "tag": "F5_r4_final_kv025",
+   "arm": "covex-v6-final",
+   "kv_scale": 0.25,
+   "kv_capacity_enforced": false,
+   "returncode": 0,
+   "wall_s": 187.0,
+   "loadavg_at_start": [
+    1.35,
+    1.27,
+    1.36
+   ],
+   "loadavg_at_end": [
+    1.15,
+    1.21,
+    1.32
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-final --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F5_r4_final_kv025.lat.json --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F5_r4_final_kv025.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F5_r4_final_kv025.pd.json",
+   "digest": "278da529349ff8c2",
+   "rows": 14306,
+   "gpu_kv_tokens": 15736,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [],
+   "alone": true
+  },
+  {
+   "tag": "F6_r4_off_kv025",
+   "arm": "covex-v6-final-off",
+   "kv_scale": 0.25,
+   "kv_capacity_enforced": false,
+   "returncode": 0,
+   "wall_s": 185.7,
+   "loadavg_at_start": [
+    1.15,
+    1.21,
+    1.32
+   ],
+   "loadavg_at_end": [
+    1.08,
+    1.18,
+    1.29
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-final-off --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F6_r4_off_kv025.lat.json",
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "gpu_kv_tokens": 15736,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [],
+   "alone": true
+  },
+  {
+   "tag": "F7_r4_final_kv025_enf",
+   "arm": "covex-v6-final",
+   "kv_scale": 0.25,
+   "kv_capacity_enforced": true,
+   "returncode": 0,
+   "wall_s": 184.6,
+   "loadavg_at_start": [
+    1.08,
+    1.18,
+    1.29
+   ],
+   "loadavg_at_end": [
+    1.01,
+    1.1,
+    1.24
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-final --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F7_r4_final_kv025_enf.lat.json --enforce-kv --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F7_r4_final_kv025_enf.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F7_r4_final_kv025_enf.pd.json",
+   "digest": "278da529349ff8c2",
+   "rows": 14306,
+   "gpu_kv_tokens": 15736,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [],
+   "alone": true
+  },
+  {
+   "tag": "F8_r3_final_kv025_enf",
+   "arm": "covex-v6-fair-final",
+   "kv_scale": 0.25,
+   "kv_capacity_enforced": true,
+   "returncode": 0,
+   "wall_s": 185.7,
+   "loadavg_at_start": [
+    1.01,
+    1.1,
+    1.24
+   ],
+   "loadavg_at_end": [
+    1.22,
+    1.15,
+    1.23
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-fair-final --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F8_r3_final_kv025_enf.lat.json --enforce-kv",
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "gpu_kv_tokens": 15736,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [],
+   "alone": true
+  },
+  {
+   "tag": "F9_r4_pdonly_kv025",
+   "arm": "covex-v6-final-pdonly",
+   "kv_scale": 0.25,
+   "kv_capacity_enforced": false,
+   "returncode": 0,
+   "wall_s": 191.2,
+   "loadavg_at_start": [
+    1.22,
+    1.15,
+    1.23
+   ],
+   "loadavg_at_end": [
+    1.27,
+    1.23,
+    1.25
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-final-pdonly --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F9_r4_pdonly_kv025.lat.json --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F9_r4_pdonly_kv025.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F9_r4_pdonly_kv025.pd.json",
+   "digest": "278da529349ff8c2",
+   "rows": 14306,
+   "gpu_kv_tokens": 15736,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [],
+   "alone": true
+  },
+  {
+   "tag": "F10_r4_rqonly_kv025",
+   "arm": "covex-v6-final-rqonly",
+   "kv_scale": 0.25,
+   "kv_capacity_enforced": false,
+   "returncode": 0,
+   "wall_s": 188.8,
+   "loadavg_at_start": [
+    1.27,
+    1.23,
+    1.25
+   ],
+   "loadavg_at_end": [
+    1.33,
+    1.22,
+    1.23
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-final-rqonly --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F10_r4_rqonly_kv025.lat.json --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F10_r4_rqonly_kv025.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F10_r4_rqonly_kv025.pd.json",
+   "digest": "57bed6ace2eb07d1",
+   "rows": 14509,
+   "gpu_kv_tokens": 15736,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [],
+   "alone": true
+  },
+  {
+   "tag": "F11_harm0_kv025",
+   "arm": "covex-v6-final-harm0",
+   "kv_scale": 0.25,
+   "kv_capacity_enforced": false,
+   "returncode": 0,
+   "wall_s": 188.3,
+   "loadavg_at_start": [
+    1.33,
+    1.22,
+    1.23
+   ],
+   "loadavg_at_end": [
+    1.09,
+    1.17,
+    1.21
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-final-harm0 --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F11_harm0_kv025.lat.json --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F11_harm0_kv025.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F11_harm0_kv025.pd.json",
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "gpu_kv_tokens": 15736,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [],
+   "alone": true
+  },
+  {
+   "tag": "F12_marginhuge_kv025",
+   "arm": "covex-v6-final-margin-huge",
+   "kv_scale": 0.25,
+   "kv_capacity_enforced": false,
+   "returncode": 0,
+   "wall_s": 189.3,
+   "loadavg_at_start": [
+    1.09,
+    1.17,
+    1.21
+   ],
+   "loadavg_at_end": [
+    1.25,
+    1.2,
+    1.2
+   ],
+   "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/run87/experiments/orchestration/live2/d216_final_kv025_one_cell.py --arm covex-v6-final-margin-huge --seed 4 --n 16 --run-s 1200.0 --cutoff-off --kv-scale 0.25 --lat-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F12_marginhuge_kv025.lat.json --rd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F12_marginhuge_kv025.rd.json --pd-out /home/pragya/Desktop/FM-switching/results/orchestration/live2/d216_final_kv025/cells/F12_marginhuge_kv025.pd.json",
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "gpu_kv_tokens": 15736,
+   "waited_for_alone_s": 0.0,
+   "started_during_the_cell": [],
+   "alone": true
+  }
+ ]
+}

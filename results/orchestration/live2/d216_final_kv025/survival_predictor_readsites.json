@@ -1,0 +1,210 @@
+{
+ "_what": "StudyD216-KV025 check 2: whether the belief's PREDICTED cache state, as used in state-based pricing and in b7's feasibility check, consults the GPU-KV pool size when predicting whether a history survives",
+ "_register": "OBSERVED over the source at this checkout: signatures by `inspect`, belief writers by a line census, prices by evaluating the committed functions on literals. DRY, no engine.",
+ "ANSWER": "NO",
+ "by_signature_note": "A SIGNATURE CENSUS CANNOT SEE A READ THROUGH `self`, and one row here is exactly that case: `_pd_free_kv` shows no capacity PARAMETER and reads the declared pool off `self._pd_gpu_kv_tokens` and the occupancy off `obs.cloud`. Its entry in this table means only that the pool is not an argument; `the_one_site_that_does_read_a_pool` below is the statement about it. Every OTHER row is a module-level function whose inputs are its parameters in full, so for those the signature is the whole answer.",
+ "by_signature": [
+  {
+   "qualname": "touch_policy.predicted_tier",
+   "file_line": "touch_policy.py:39",
+   "parameters": [
+    "belief"
+   ],
+   "mentions_capacity": [],
+   "mentions_time": []
+  },
+  {
+   "qualname": "touch_policy.mixed_touch_guard",
+   "file_line": "touch_policy.py:47",
+   "parameters": [
+    "belief"
+   ],
+   "mentions_capacity": [],
+   "mentions_time": []
+  },
+  {
+   "qualname": "touch_policy.touch_price_gpu_s",
+   "file_line": "touch_policy.py:63",
+   "parameters": [
+    "prefix_tokens",
+    "belief",
+    "costs"
+   ],
+   "mentions_capacity": [],
+   "mentions_time": []
+  },
+  {
+   "qualname": "touch_policy.price_for_touch",
+   "file_line": "touch_policy.py:172",
+   "parameters": [
+    "prefix_tokens",
+    "belief",
+    "costs"
+   ],
+   "mentions_capacity": [],
+   "mentions_time": []
+  },
+  {
+   "qualname": "touch_policy.build_price_gpu_s",
+   "file_line": "touch_policy.py:210",
+   "parameters": [
+    "piece_tokens",
+    "prefix_tokens",
+    "belief",
+    "costs"
+   ],
+   "mentions_capacity": [],
+   "mentions_time": []
+  },
+  {
+   "qualname": "touch_policy.should_touch",
+   "file_line": "touch_policy.py:189",
+   "parameters": [
+    "belief",
+    "prefix_tokens",
+    "costs",
+    "budget_ok"
+   ],
+   "mentions_capacity": [],
+   "mentions_time": []
+  },
+  {
+   "qualname": "costs.recall_ttft_s",
+   "file_line": "costs.py:106",
+   "parameters": [
+    "tokens",
+    "readiness"
+   ],
+   "mentions_capacity": [],
+   "mentions_time": []
+  },
+  {
+   "qualname": "costs.recall_gpu_s",
+   "file_line": "costs.py:127",
+   "parameters": [
+    "tokens",
+    "readiness"
+   ],
+   "mentions_capacity": [],
+   "mentions_time": []
+  },
+  {
+   "qualname": "constructed.B7EDFFeasibility.decide",
+   "file_line": "constructed.py:181",
+   "parameters": [
+    "self",
+    "obs"
+   ],
+   "mentions_capacity": [],
+   "mentions_time": []
+  },
+  {
+   "qualname": "arms_v6cf._ProtectDeferMixin._pd_free_kv",
+   "file_line": "arms_v6cf.py:277",
+   "parameters": [
+    "self",
+    "obs"
+   ],
+   "mentions_capacity": [],
+   "mentions_time": []
+  }
+ ],
+ "by_value": {
+  "_what": "the same price under two token scales and both beliefs. The POOL is not an argument of any of them, which is why there is no pool to vary: the demonstration is that the only inputs are tokens and belief.",
+  "touch_price_gpu_s": {
+   "gpu_11000": 0.382,
+   "cold_11000": 2.4444444444444446,
+   "gpu_44000": 1.3734285714285714
+  },
+  "build_price_gpu_s": {
+   "gpu_piece1024_prefix11000": {
+    "total_gpu_s": 0.22755555555555557,
+    "new_tokens_gpu_s": 0.22755555555555557,
+    "prefix_gpu_s": 0.0,
+    "predicted_tier": "gpu",
+    "belief_mass": 1.0,
+    "piece_tokens": 1024,
+    "prefix_tokens": 11000,
+    "committed_charge_gpu_s": 0.22755555555555557
+   },
+   "cold_piece1024_prefix11000": {
+    "total_gpu_s": 2.672,
+    "new_tokens_gpu_s": 0.22755555555555557,
+    "prefix_gpu_s": 2.4444444444444446,
+    "predicted_tier": "cold",
+    "belief_mass": 1.0,
+    "piece_tokens": 1024,
+    "prefix_tokens": 11000,
+    "committed_charge_gpu_s": 0.22755555555555557
+   }
+  }
+ },
+ "by_belief_shape": {
+  "_what": "every writer of SessionRec.belief sets a one-hot dict, so predicted_tier's mass is always 1.0 and PURE_TIER_MIN_BELIEF = 0.95 can never refuse.",
+  "PURE_TIER_MIN_BELIEF": 0.95,
+  "writers": [
+   {
+    "site": "coordinator.py:827",
+    "literal": "\"gpu\": 0.0, \"host\": 0.0, \"cold\": 1.0",
+    "one_hot": true,
+    "form": "literal"
+   },
+   {
+    "site": "coordinator.py:1915",
+    "literal": "\"gpu\": 1.0, \"host\": 0.0, \"cold\": 0.0",
+    "one_hot": true,
+    "form": "literal"
+   },
+   {
+    "site": "cstate.py:207",
+    "literal": "\"gpu\": 0.0, \"host\": 0.0, \"cold\": 0.0",
+    "one_hot": true,
+    "form": "zeros then belief[tier]=1.0"
+   },
+   {
+    "site": "cstate.py:312",
+    "literal": "\"gpu\": 0.0, \"host\": 0.0, \"cold\": 1.0",
+    "one_hot": true,
+    "form": "literal"
+   },
+   {
+    "site": "cstate.py:332",
+    "literal": "\"gpu\": 0.0, \"host\": 0.0, \"cold\": 1.0",
+    "one_hot": true,
+    "form": "literal"
+   },
+   {
+    "site": "engine_actions.py:387",
+    "literal": "\"gpu\": 0.0, \"host\": 0.0, \"cold\": 0.0",
+    "one_hot": true,
+    "form": "zeros then belief[tier]=1.0"
+   },
+   {
+    "site": "engine_actions.py:509",
+    "literal": "\"gpu\": 0.0, \"host\": 0.0, \"cold\": 0.0",
+    "one_hot": true,
+    "form": "zeros then belief[tier]=1.0"
+   }
+  ],
+  "mass_at_each_pure_tier": {
+   "gpu": 1.0,
+   "cold": 1.0
+  },
+  "mixed_touch_guard_on_a_pure_gpu_belief": [
+   true,
+   "wholly gpu at belief 1.000"
+  ],
+  "VERDICT": "the straddling refusal is UNREACHABLE on any belief this tree can produce: the only refusal path that fires is the `cold` one"
+ },
+ "the_one_site_that_does_read_a_pool": {
+  "site": "arms_v6cf.py:277  _pd_free_kv",
+  "reads": [
+   "self._pd_gpu_kv_tokens (the DECLARED pool size)",
+   "obs.cloud.gpu_kv_fraction (vllm:gpu_cache_usage_perc; 0.0 dry, and 0.0 live too until the D216 (2) scrape lands, because nothing read it)",
+   "roster['built_tokens_by_session'] over obs.cloud.gpu_warm_sessions"
+  ],
+  "what_it_is": "a CAPACITY GATE on a rebuild inside rung 4's protect-and-defer, consumed by PD.decide(free_kv_tokens=...). It is NOT the belief's survival prediction and it is rung 4's trade-off by design (D151 / D163)."
+ },
+ "what_the_predictor_uses_instead": "the LAST OBSERVED OR ENACTED TIER, one-hot, carried forward unchanged. Not time, not a constant, not the pool: a stale observation standing in for a prediction. There is no survival model in the live path, so M5's step function is not implemented on the wrong variable - it is not implemented.",
+ "M5_the_variable_it_should_use": "StudyENG1b / ENG1c: survival is a step function of KV ALLOCATED BEFORE RESUME - full below 1.0x of the free pool, tail-first partial 1.0 to 1.25x, total above 1.25x. D150 names this model as the one the counterfactual predicts survival from; no module in live2 implements it."
+}

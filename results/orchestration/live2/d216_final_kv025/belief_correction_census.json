@@ -1,0 +1,2500 @@
+{
+ "_what": "StudyD216-KV025 check 1: the per-cell count of residency-belief corrections from engine-reported cached_tokens, and whether an eviction reaches a decision through them",
+ "_register": "OBSERVED. Every number is a counter written by coordinator.py:1799-1806 into a committed LIVE cell's coordinator_result.json, read out of the git object at the sha named below. Nothing here is constructed or predicted.",
+ "_measured_at_sha": "87ca3503",
+ "_the_gate": {
+  "default": "LIVE2_BELIEF_CORRECTION=observe (coordinator.py:141)",
+  "apply_when": "the env var is 'apply' OR the arm declares live2_belief_apply (coordinator.py:364-365). Only V6StateArm and its descendants do (arms_v6state.py:165)",
+  "observe_semantics": "the correction is computed and counted, then the belief and last_touch_s are RESTORED from a snapshot (coordinator.py:1803-1806). Nothing downstream sees it."
+ },
+ "_the_reads_that_consume_it": {
+  "rung2_and_rung3_pricing": [
+   "coordinator.py:1161  TP.should_touch(belief=...) -> refuse or price the touch",
+   "coordinator.py:1238  TP.build_price_gpu_s(..., belief) -> budget.can_spend",
+   "coordinator.py:1294  C.recall_gpu_s(tokens, s.residency_readiness())",
+   "coordinator.py:1331  the D179 (4) release re-check's uncached count",
+   "arms_v6state.py:416  host_warm from roster['belief_by_session'] (coordinator.py:757) -> gates the RELOAD candidate in plan_state"
+  ],
+  "b7_feasibility": [
+   "cstate.py:636/648    ready = s.readiness() -> RecallQuery.readiness",
+   "baselines/constructed.py:184  est = C.recall_ttft_s(q.readiness_tokens, q.readiness); est <= slack admits, <= slack + defer_s defers, else REJECT"
+  ]
+ },
+ "_host_is_unreachable_and_why": "the `host` branch (engine_actions.py:381-383) requires `external_tokens`, and D209 (4) measured that vLLM 0.31.0's per-request usage schema has no field that distinguishes a host hit from a GPU hit: 26 percent of prompt tokens came from the host tier and all of them are folded into cached_tokens. So this corrector can say gpu or cold and never host, which is D211's finding reached from the counter side.",
+ "per_cell": [
+  {
+   "cell": "always-cloud-fcfs_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "always-cloud-fcfs",
+   "path": "results/orchestration/live2/frozen_test/runs/always-cloud-fcfs_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 321,
+    "belief_corrections_changed": 25,
+    "belief_corrections_observed_only": 25,
+    "belief_to_gpu": 25
+   }
+  },
+  {
+   "cell": "always-cloud-fcfs_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "always-cloud-fcfs",
+   "path": "results/orchestration/live2/frozen_test/runs/always-cloud-fcfs_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 311,
+    "belief_corrections_changed": 24,
+    "belief_corrections_observed_only": 24,
+    "belief_to_gpu": 24
+   }
+  },
+  {
+   "cell": "always-cloud-fcfs_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun",
+   "arm": "always-cloud-fcfs",
+   "path": "results/orchestration/live2/frozen_test/runs/always-cloud-fcfs_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 313,
+    "belief_corrections_changed": 34,
+    "belief_corrections_observed_only": 34,
+    "belief_to_gpu": 34
+   }
+  },
+  {
+   "cell": "always-cloud-fcfs_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "always-cloud-fcfs",
+   "path": "results/orchestration/live2/frozen_test/runs/always-cloud-fcfs_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 306,
+    "belief_corrections_changed": 32,
+    "belief_corrections_observed_only": 32,
+    "belief_to_gpu": 32
+   }
+  },
+  {
+   "cell": "always-cloud-fcfs_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "always-cloud-fcfs",
+   "path": "results/orchestration/live2/frozen_test/runs/always-cloud-fcfs_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 325,
+    "belief_corrections_changed": 29,
+    "belief_corrections_observed_only": 29,
+    "belief_to_gpu": 29
+   }
+  },
+  {
+   "cell": "always-cloud-fcfs_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "always-cloud-fcfs",
+   "path": "results/orchestration/live2/frozen_test/runs/always-cloud-fcfs_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 341,
+    "belief_corrections_changed": 30,
+    "belief_corrections_observed_only": 30,
+    "belief_to_gpu": 30
+   }
+  },
+  {
+   "cell": "attentionstore-prefetch_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "attentionstore-prefetch",
+   "path": "results/orchestration/live2/frozen_test/runs/attentionstore-prefetch_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 628,
+    "belief_corrections_changed": 196,
+    "belief_corrections_observed_only": 196,
+    "belief_to_cold": 112,
+    "belief_to_gpu": 84
+   }
+  },
+  {
+   "cell": "attentionstore-prefetch_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "attentionstore-prefetch",
+   "path": "results/orchestration/live2/frozen_test/runs/attentionstore-prefetch_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 668,
+    "belief_corrections_changed": 211,
+    "belief_corrections_observed_only": 211,
+    "belief_to_cold": 142,
+    "belief_to_gpu": 69
+   }
+  },
+  {
+   "cell": "attentionstore-prefetch_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "attentionstore-prefetch",
+   "path": "results/orchestration/live2/frozen_test/runs/attentionstore-prefetch_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 613,
+    "belief_corrections_changed": 189,
+    "belief_corrections_observed_only": 189,
+    "belief_to_cold": 110,
+    "belief_to_gpu": 79
+   }
+  },
+  {
+   "cell": "attentionstore-prefetch_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "attentionstore-prefetch",
+   "path": "results/orchestration/live2/frozen_test/runs/attentionstore-prefetch_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 629,
+    "belief_corrections_changed": 194,
+    "belief_corrections_observed_only": 194,
+    "belief_to_cold": 122,
+    "belief_to_gpu": 72
+   }
+  },
+  {
+   "cell": "attentionstore-prefetch_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "attentionstore-prefetch",
+   "path": "results/orchestration/live2/frozen_test/runs/attentionstore-prefetch_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 629,
+    "belief_corrections_changed": 188,
+    "belief_corrections_observed_only": 188,
+    "belief_to_cold": 101,
+    "belief_to_gpu": 87
+   }
+  },
+  {
+   "cell": "attentionstore-prefetch_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "attentionstore-prefetch",
+   "path": "results/orchestration/live2/frozen_test/runs/attentionstore-prefetch_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 698,
+    "belief_corrections_changed": 192,
+    "belief_corrections_observed_only": 192,
+    "belief_to_cold": 121,
+    "belief_to_gpu": 71
+   }
+  },
+  {
+   "cell": "b7-edf-feasibility_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "b7-edf-feasibility",
+   "path": "results/orchestration/live2/frozen_test/runs/b7-edf-feasibility_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 368,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "b7-edf-feasibility_n16_s5_1200s_h27_3t_L3_epg",
+   "arm": "b7-edf-feasibility",
+   "path": "results/orchestration/live2/frozen_test/runs/b7-edf-feasibility_n16_s5_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 368,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "b7-edf-feasibility_n16_s6_1200s_h27_3t_L3_epg",
+   "arm": "b7-edf-feasibility",
+   "path": "results/orchestration/live2/frozen_test/runs/b7-edf-feasibility_n16_s6_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 367,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "b7-edf-feasibility_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "b7-edf-feasibility",
+   "path": "results/orchestration/live2/frozen_test/runs/b7-edf-feasibility_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 329,
+    "belief_corrections_changed": 17,
+    "belief_corrections_observed_only": 17,
+    "belief_to_gpu": 17
+   }
+  },
+  {
+   "cell": "b7-edf-feasibility_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "b7-edf-feasibility",
+   "path": "results/orchestration/live2/frozen_test/runs/b7-edf-feasibility_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 386,
+    "belief_corrections_changed": 9,
+    "belief_corrections_observed_only": 9,
+    "belief_to_gpu": 9
+   }
+  },
+  {
+   "cell": "cascade-routing_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "cascade-routing",
+   "path": "results/orchestration/live2/frozen_test/runs/cascade-routing_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 356,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "cascade-routing_n16_s5_1200s_h27_3t_L3_epg",
+   "arm": "cascade-routing",
+   "path": "results/orchestration/live2/frozen_test/runs/cascade-routing_n16_s5_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 356,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "confidence-cascade_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "confidence-cascade",
+   "path": "results/orchestration/live2/frozen_test/runs/confidence-cascade_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 180,
+    "belief_corrections_changed": 15,
+    "belief_corrections_observed_only": 15,
+    "belief_to_gpu": 15
+   }
+  },
+  {
+   "cell": "confidence-cascade_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+   "arm": "confidence-cascade",
+   "path": "results/orchestration/live2/frozen_test/runs/confidence-cascade_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 223,
+    "belief_corrections_changed": 28,
+    "belief_corrections_observed_only": 28,
+    "belief_to_gpu": 28
+   }
+  },
+  {
+   "cell": "confidence-cascade_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun",
+   "arm": "confidence-cascade",
+   "path": "results/orchestration/live2/frozen_test/runs/confidence-cascade_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 212,
+    "belief_corrections_changed": 18,
+    "belief_corrections_observed_only": 18,
+    "belief_to_gpu": 18
+   }
+  },
+  {
+   "cell": "confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30_rerun",
+   "arm": "confidence-cascade",
+   "path": "results/orchestration/live2/frozen_test/runs/confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30_rerun/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 237,
+    "belief_corrections_changed": 35,
+    "belief_corrections_observed_only": 35,
+    "belief_to_gpu": 35
+   }
+  },
+  {
+   "cell": "confidence-cascade_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun",
+   "arm": "confidence-cascade",
+   "path": "results/orchestration/live2/frozen_test/runs/confidence-cascade_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 224,
+    "belief_corrections_changed": 27,
+    "belief_corrections_observed_only": 27,
+    "belief_to_gpu": 27
+   }
+  },
+  {
+   "cell": "covex-v6-base_n16_s4_1200s_h27_3t_L2.5_epg_rq30",
+   "arm": "covex-v6-base",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-base_n16_s4_1200s_h27_3t_L2.5_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 386,
+    "belief_corrections_changed": 11,
+    "belief_corrections_observed_only": 11,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-base_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30",
+   "arm": "covex-v6-base",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-base_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 411,
+    "belief_corrections_changed": 23,
+    "belief_corrections_observed_only": 23,
+    "belief_to_gpu": 23
+   }
+  },
+  {
+   "cell": "covex-v6-base_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "covex-v6-base",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-base_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 411,
+    "belief_corrections_changed": 24,
+    "belief_corrections_observed_only": 24,
+    "belief_to_gpu": 24
+   }
+  },
+  {
+   "cell": "covex-v6-base_n16_s5_1200s_h27_3t_L3_epg_rq30_lpt2048",
+   "arm": "covex-v6-base",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-base_n16_s5_1200s_h27_3t_L3_epg_rq30_lpt2048/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 401,
+    "belief_corrections_changed": 17,
+    "belief_corrections_observed_only": 17,
+    "belief_to_gpu": 17
+   }
+  },
+  {
+   "cell": "covex-v6-base_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "covex-v6-base",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-base_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 401,
+    "belief_corrections_changed": 16,
+    "belief_corrections_observed_only": 16,
+    "belief_to_gpu": 16
+   }
+  },
+  {
+   "cell": "covex-v6-fair-c5attr_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-fair-c5attr",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 3119,
+    "belief_corrections_changed": 12,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 2,
+    "belief_to_gpu": 10
+   }
+  },
+  {
+   "cell": "covex-v6-fair-c5attr_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-fair-c5attr",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 799,
+    "belief_corrections_changed": 13,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 2,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-fair-c5attr_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-fair-c5attr",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 1032,
+    "belief_corrections_changed": 12,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-fair-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-fair-c5attr",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 2796,
+    "belief_corrections_changed": 11,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-fair-c5attr-gain0_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-fair-c5attr-gain0",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr-gain0_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 3065,
+    "belief_corrections_changed": 14,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 3,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-fair-c5attr-gain0_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-fair-c5attr-gain0",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr-gain0_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 624,
+    "belief_corrections_changed": 13,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 2,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-fair-c5attr-gain0_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-fair-c5attr-gain0",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr-gain0_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 1017,
+    "belief_corrections_changed": 12,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-fair-c5attr-gain0_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-fair-c5attr-gain0",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr-gain0_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 2799,
+    "belief_corrections_changed": 11,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-fair-c5attr-rr_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-fair-c5attr-rr",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr-rr_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 3298,
+    "belief_corrections_changed": 13,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 3,
+    "belief_to_gpu": 10
+   }
+  },
+  {
+   "cell": "covex-v6-fair-c5attr-rr_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-fair-c5attr-rr",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr-rr_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 800,
+    "belief_corrections_changed": 13,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 2,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-fair-c5attr-rr_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-fair-c5attr-rr",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr-rr_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 1037,
+    "belief_corrections_changed": 12,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-fair-c5attr-rr_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-fair-c5attr-rr",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr-rr_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 2811,
+    "belief_corrections_changed": 11,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-rules_n16_s4_1200s_h27_3t_L2.5_epg_rq30",
+   "arm": "covex-v6-rules",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-rules_n16_s4_1200s_h27_3t_L2.5_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 603,
+    "belief_corrections_changed": 95,
+    "belief_corrections_observed_only": 95,
+    "belief_to_cold": 84,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-rules_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "covex-v6-rules",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-rules_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 609,
+    "belief_corrections_changed": 103,
+    "belief_corrections_observed_only": 103,
+    "belief_to_cold": 73,
+    "belief_to_gpu": 30
+   }
+  },
+  {
+   "cell": "covex-v6-rules_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "covex-v6-rules",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-rules_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 595,
+    "belief_corrections_changed": 80,
+    "belief_corrections_observed_only": 80,
+    "belief_to_cold": 52,
+    "belief_to_gpu": 28
+   }
+  },
+  {
+   "cell": "covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+   "arm": "covex-v6-state",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 1723,
+    "belief_corrections_changed": 7,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 7
+   }
+  },
+  {
+   "cell": "covex-v6-state_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 802,
+    "belief_corrections_changed": 13,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 2,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-state_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 131,
+    "belief_corrections_changed": 8,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 8
+   }
+  },
+  {
+   "cell": "covex-v6-state-shares_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-shares",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-shares_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 2930,
+    "belief_corrections_changed": 9,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 9
+   }
+  },
+  {
+   "cell": "covex-v6-state-shares_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-shares",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-shares_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 541,
+    "belief_corrections_changed": 8,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 8
+   }
+  },
+  {
+   "cell": "covex-v6-state-shares_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-shares",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-shares_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 522,
+    "belief_corrections_changed": 6,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 6
+   }
+  },
+  {
+   "cell": "covex-v6-state-shares_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-shares",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-shares_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 1691,
+    "belief_corrections_changed": 8,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 8
+   }
+  },
+  {
+   "cell": "covex-v6-state-shares-r1_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-shares-r1",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-shares-r1_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 2331,
+    "belief_corrections_changed": 7,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 7
+   }
+  },
+  {
+   "cell": "covex-v6-state-shares-r1_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-shares-r1",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-shares-r1_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 584,
+    "belief_corrections_changed": 9,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 8
+   }
+  },
+  {
+   "cell": "covex-v6-state-shares-r1_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-shares-r1",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-shares-r1_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 652,
+    "belief_corrections_changed": 11,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 10
+   }
+  },
+  {
+   "cell": "covex-v6-state-shares-r1_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-shares-r1",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-shares-r1_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 757,
+    "belief_corrections_changed": 8,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 8
+   }
+  },
+  {
+   "cell": "covex-v6-state-shares-r2_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-shares-r2",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-shares-r2_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 579,
+    "belief_corrections_changed": 9,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 8
+   }
+  },
+  {
+   "cell": "covex-v6-state-shares-r2_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-shares-r2",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-shares-r2_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 645,
+    "belief_corrections_changed": 9,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 9
+   }
+  },
+  {
+   "cell": "covex-v6-state-shares-r2_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-shares-r2",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-shares-r2_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 540,
+    "belief_corrections_changed": 9,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 8
+   }
+  },
+  {
+   "cell": "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 3100,
+    "belief_corrections_changed": 13,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 3,
+    "belief_to_gpu": 10
+   }
+  },
+  {
+   "cell": "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 795,
+    "belief_corrections_changed": 14,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 2,
+    "belief_to_gpu": 12
+   }
+  },
+  {
+   "cell": "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30_lpt2048",
+   "arm": "covex-v6-state-uo",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30_lpt2048/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 800,
+    "belief_corrections_changed": 13,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 2,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 1033,
+    "belief_corrections_changed": 13,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 12
+   }
+  },
+  {
+   "cell": "covex-v6-state-uo_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-uo_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 2801,
+    "belief_corrections_changed": 11,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-state-uo-c5attr_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo-c5attr",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-uo-c5attr_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 3018,
+    "belief_corrections_changed": 14,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 3,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-state-uo-c5attr_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo-c5attr",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-uo-c5attr_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 625,
+    "belief_corrections_changed": 14,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 2,
+    "belief_to_gpu": 12
+   }
+  },
+  {
+   "cell": "covex-v6-state-uo-c5attr_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo-c5attr",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-uo-c5attr_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 1096,
+    "belief_corrections_changed": 12,
+    "belief_corrections_observed_only": 0,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "covex-v6-state-uo-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo-c5attr",
+   "path": "results/orchestration/live2/frozen_test/runs/covex-v6-state-uo-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 2780,
+    "belief_corrections_changed": 11,
+    "belief_corrections_observed_only": 0,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "eco-llm_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "eco-llm",
+   "path": "results/orchestration/live2/frozen_test/runs/eco-llm_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 376,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "eco-llm_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "eco-llm",
+   "path": "results/orchestration/live2/frozen_test/runs/eco-llm_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 338,
+    "belief_corrections_changed": 14,
+    "belief_corrections_observed_only": 14,
+    "belief_to_gpu": 14
+   }
+  },
+  {
+   "cell": "eco-llm_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30",
+   "arm": "eco-llm",
+   "path": "results/orchestration/live2/frozen_test/runs/eco-llm_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 440,
+    "belief_corrections_changed": 22,
+    "belief_corrections_observed_only": 22,
+    "belief_to_gpu": 22
+   }
+  },
+  {
+   "cell": "eco-llm_n16_s5_1200s_h27_3t_L3_epg",
+   "arm": "eco-llm",
+   "path": "results/orchestration/live2/frozen_test/runs/eco-llm_n16_s5_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 380,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "eco-llm_n16_s6_1200s_h27_3t_L3_epg",
+   "arm": "eco-llm",
+   "path": "results/orchestration/live2/frozen_test/runs/eco-llm_n16_s6_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 377,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "eco-llm_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "eco-llm",
+   "path": "results/orchestration/live2/frozen_test/runs/eco-llm_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 414,
+    "belief_corrections_changed": 19,
+    "belief_corrections_observed_only": 19,
+    "belief_to_gpu": 19
+   }
+  },
+  {
+   "cell": "eco-llm_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "eco-llm",
+   "path": "results/orchestration/live2/frozen_test/runs/eco-llm_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 464,
+    "belief_corrections_changed": 11,
+    "belief_corrections_observed_only": 11,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "edf_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "edf",
+   "path": "results/orchestration/live2/frozen_test/runs/edf_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 672,
+    "belief_corrections_changed": 96,
+    "belief_corrections_observed_only": 96,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 95
+   }
+  },
+  {
+   "cell": "edf_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "edf",
+   "path": "results/orchestration/live2/frozen_test/runs/edf_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 562,
+    "belief_corrections_changed": 79,
+    "belief_corrections_observed_only": 79,
+    "belief_to_cold": 19,
+    "belief_to_gpu": 60
+   }
+  },
+  {
+   "cell": "edf_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "edf",
+   "path": "results/orchestration/live2/frozen_test/runs/edf_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 551,
+    "belief_corrections_changed": 81,
+    "belief_corrections_observed_only": 81,
+    "belief_to_cold": 15,
+    "belief_to_gpu": 66
+   }
+  },
+  {
+   "cell": "edf_n16_s5_1200s_h27_3t_L3_epg",
+   "arm": "edf",
+   "path": "results/orchestration/live2/frozen_test/runs/edf_n16_s5_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 665,
+    "belief_corrections_changed": 108,
+    "belief_corrections_observed_only": 108,
+    "belief_to_gpu": 108
+   }
+  },
+  {
+   "cell": "edf_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "edf",
+   "path": "results/orchestration/live2/frozen_test/runs/edf_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 547,
+    "belief_corrections_changed": 73,
+    "belief_corrections_observed_only": 73,
+    "belief_to_cold": 13,
+    "belief_to_gpu": 60
+   }
+  },
+  {
+   "cell": "edf_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "edf",
+   "path": "results/orchestration/live2/frozen_test/runs/edf_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 561,
+    "belief_corrections_changed": 81,
+    "belief_corrections_observed_only": 81,
+    "belief_to_cold": 14,
+    "belief_to_gpu": 67
+   }
+  },
+  {
+   "cell": "edf_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "edf",
+   "path": "results/orchestration/live2/frozen_test/runs/edf_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 577,
+    "belief_corrections_changed": 91,
+    "belief_corrections_observed_only": 91,
+    "belief_to_cold": 11,
+    "belief_to_gpu": 80
+   }
+  },
+  {
+   "cell": "edf_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "edf",
+   "path": "results/orchestration/live2/frozen_test/runs/edf_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 619,
+    "belief_corrections_changed": 96,
+    "belief_corrections_observed_only": 96,
+    "belief_to_cold": 17,
+    "belief_to_gpu": 79
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "hybrid-F-lhreq",
+   "path": "results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 376,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "hybrid-F-lhreq",
+   "path": "results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 487,
+    "belief_corrections_changed": 25,
+    "belief_corrections_observed_only": 25,
+    "belief_to_gpu": 25
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq_n16_s5_1200s_h27_3t_L3_epg",
+   "arm": "hybrid-F-lhreq",
+   "path": "results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s5_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 380,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "hybrid-F-lhreq",
+   "path": "results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 482,
+    "belief_corrections_changed": 16,
+    "belief_corrections_observed_only": 16,
+    "belief_to_gpu": 16
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "hybrid-F-lhreq",
+   "path": "results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 478,
+    "belief_corrections_changed": 28,
+    "belief_corrections_observed_only": 28,
+    "belief_to_gpu": 28
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "hybrid-F-lhreq",
+   "path": "results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 464,
+    "belief_corrections_changed": 11,
+    "belief_corrections_observed_only": 11,
+    "belief_to_gpu": 11
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "hybrid-F-lhreq-noc3",
+   "path": "results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 368,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "hybrid-F-lhreq-noc3",
+   "path": "results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 410,
+    "belief_corrections_changed": 23,
+    "belief_corrections_observed_only": 23,
+    "belief_to_gpu": 23
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg",
+   "arm": "hybrid-F-lhreq-noc3",
+   "path": "results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 368,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "hybrid-F-lhreq-noc3",
+   "path": "results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 401,
+    "belief_corrections_changed": 17,
+    "belief_corrections_observed_only": 17,
+    "belief_to_gpu": 17
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "hybrid-F-lhreq-noc3",
+   "path": "results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 411,
+    "belief_corrections_changed": 26,
+    "belief_corrections_observed_only": 26,
+    "belief_to_gpu": 26
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "hybrid-F-lhreq-noc3",
+   "path": "results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 385,
+    "belief_corrections_changed": 8,
+    "belief_corrections_observed_only": 8,
+    "belief_to_gpu": 8
+   }
+  },
+  {
+   "cell": "kvflow-prefetch_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "kvflow-prefetch",
+   "path": "results/orchestration/live2/frozen_test/runs/kvflow-prefetch_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 426,
+    "belief_corrections_changed": 32,
+    "belief_corrections_observed_only": 32,
+    "belief_to_gpu": 32
+   }
+  },
+  {
+   "cell": "kvflow-prefetch_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "kvflow-prefetch",
+   "path": "results/orchestration/live2/frozen_test/runs/kvflow-prefetch_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 420,
+    "belief_corrections_changed": 34,
+    "belief_corrections_observed_only": 34,
+    "belief_to_gpu": 34
+   }
+  },
+  {
+   "cell": "kvflow-prefetch_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "kvflow-prefetch",
+   "path": "results/orchestration/live2/frozen_test/runs/kvflow-prefetch_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 416,
+    "belief_corrections_changed": 31,
+    "belief_corrections_observed_only": 31,
+    "belief_to_gpu": 31
+   }
+  },
+  {
+   "cell": "kvflow-prefetch_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "kvflow-prefetch",
+   "path": "results/orchestration/live2/frozen_test/runs/kvflow-prefetch_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 420,
+    "belief_corrections_changed": 24,
+    "belief_corrections_observed_only": 24,
+    "belief_to_gpu": 24
+   }
+  },
+  {
+   "cell": "llf_n16_s4_1200s_h27_3t_L2.5_epg_rq30",
+   "arm": "llf",
+   "path": "results/orchestration/live2/frozen_test/runs/llf_n16_s4_1200s_h27_3t_L2.5_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 697,
+    "belief_corrections_changed": 133,
+    "belief_corrections_observed_only": 133,
+    "belief_to_cold": 13,
+    "belief_to_gpu": 120
+   }
+  },
+  {
+   "cell": "llf_n16_s4_1200s_h27_3t_L3",
+   "arm": "llf",
+   "path": "results/orchestration/live2/frozen_test/runs/llf_n16_s4_1200s_h27_3t_L3/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 724,
+    "belief_corrections_changed": 15,
+    "belief_corrections_observed_only": 15,
+    "belief_to_cold": 2,
+    "belief_to_gpu": 13
+   }
+  },
+  {
+   "cell": "llf_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "llf",
+   "path": "results/orchestration/live2/frozen_test/runs/llf_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 717,
+    "belief_corrections_changed": 114,
+    "belief_corrections_observed_only": 114,
+    "belief_to_gpu": 114
+   }
+  },
+  {
+   "cell": "llf_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "llf",
+   "path": "results/orchestration/live2/frozen_test/runs/llf_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 688,
+    "belief_corrections_changed": 124,
+    "belief_corrections_observed_only": 124,
+    "belief_to_cold": 16,
+    "belief_to_gpu": 108
+   }
+  },
+  {
+   "cell": "llf_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30",
+   "arm": "llf",
+   "path": "results/orchestration/live2/frozen_test/runs/llf_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 583,
+    "belief_corrections_changed": 80,
+    "belief_corrections_observed_only": 80,
+    "belief_to_gpu": 80
+   }
+  },
+  {
+   "cell": "llf_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "llf",
+   "path": "results/orchestration/live2/frozen_test/runs/llf_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 686,
+    "belief_corrections_changed": 131,
+    "belief_corrections_observed_only": 131,
+    "belief_to_cold": 15,
+    "belief_to_gpu": 116
+   }
+  },
+  {
+   "cell": "llf_n16_s5_1200s_h27_3t_L3_epg",
+   "arm": "llf",
+   "path": "results/orchestration/live2/frozen_test/runs/llf_n16_s5_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 712,
+    "belief_corrections_changed": 156,
+    "belief_corrections_observed_only": 156,
+    "belief_to_gpu": 156
+   }
+  },
+  {
+   "cell": "llf_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "llf",
+   "path": "results/orchestration/live2/frozen_test/runs/llf_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 710,
+    "belief_corrections_changed": 119,
+    "belief_corrections_observed_only": 119,
+    "belief_to_cold": 4,
+    "belief_to_gpu": 115
+   }
+  },
+  {
+   "cell": "llf_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "llf",
+   "path": "results/orchestration/live2/frozen_test/runs/llf_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 720,
+    "belief_corrections_changed": 130,
+    "belief_corrections_observed_only": 130,
+    "belief_to_cold": 3,
+    "belief_to_gpu": 127
+   }
+  },
+  {
+   "cell": "llf_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "llf",
+   "path": "results/orchestration/live2/frozen_test/runs/llf_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 706,
+    "belief_corrections_changed": 118,
+    "belief_corrections_observed_only": 118,
+    "belief_to_cold": 16,
+    "belief_to_gpu": 102
+   }
+  },
+  {
+   "cell": "llf_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "llf",
+   "path": "results/orchestration/live2/frozen_test/runs/llf_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 683,
+    "belief_corrections_changed": 111,
+    "belief_corrections_observed_only": 111,
+    "belief_to_cold": 14,
+    "belief_to_gpu": 97
+   }
+  },
+  {
+   "cell": "mooncake_n16_s4_1200s_h27_3t_L2.5_epg_rq30",
+   "arm": "mooncake",
+   "path": "results/orchestration/live2/frozen_test/runs/mooncake_n16_s4_1200s_h27_3t_L2.5_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 386,
+    "belief_corrections_changed": 9,
+    "belief_corrections_observed_only": 9,
+    "belief_to_gpu": 9
+   }
+  },
+  {
+   "cell": "mooncake_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "mooncake",
+   "path": "results/orchestration/live2/frozen_test/runs/mooncake_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 368,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "mooncake_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30",
+   "arm": "mooncake",
+   "path": "results/orchestration/live2/frozen_test/runs/mooncake_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 374,
+    "belief_corrections_changed": 21,
+    "belief_corrections_observed_only": 21,
+    "belief_to_gpu": 21
+   }
+  },
+  {
+   "cell": "mooncake_n16_s5_1200s_h27_3t_L3_epg",
+   "arm": "mooncake",
+   "path": "results/orchestration/live2/frozen_test/runs/mooncake_n16_s5_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 368,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "mooncake_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "mooncake",
+   "path": "results/orchestration/live2/frozen_test/runs/mooncake_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 287,
+    "belief_corrections_changed": 13,
+    "belief_corrections_observed_only": 13,
+    "belief_to_gpu": 13
+   }
+  },
+  {
+   "cell": "mooncake_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "mooncake",
+   "path": "results/orchestration/live2/frozen_test/runs/mooncake_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 385,
+    "belief_corrections_changed": 8,
+    "belief_corrections_observed_only": 8,
+    "belief_to_gpu": 8
+   }
+  },
+  {
+   "cell": "querystream-proactive_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "querystream-proactive",
+   "path": "results/orchestration/live2/frozen_test/runs/querystream-proactive_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 294,
+    "belief_corrections_changed": 25,
+    "belief_corrections_observed_only": 25,
+    "belief_to_gpu": 25
+   }
+  },
+  {
+   "cell": "querystream-proactive_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "querystream-proactive",
+   "path": "results/orchestration/live2/frozen_test/runs/querystream-proactive_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 302,
+    "belief_corrections_changed": 25,
+    "belief_corrections_observed_only": 25,
+    "belief_to_gpu": 25
+   }
+  },
+  {
+   "cell": "querystream-proactive_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "querystream-proactive",
+   "path": "results/orchestration/live2/frozen_test/runs/querystream-proactive_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 325,
+    "belief_corrections_changed": 36,
+    "belief_corrections_observed_only": 36,
+    "belief_to_gpu": 36
+   }
+  },
+  {
+   "cell": "querystream-proactive_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "querystream-proactive",
+   "path": "results/orchestration/live2/frozen_test/runs/querystream-proactive_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 328,
+    "belief_corrections_changed": 34,
+    "belief_corrections_observed_only": 34,
+    "belief_to_gpu": 34
+   }
+  },
+  {
+   "cell": "querystream-proactive_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "querystream-proactive",
+   "path": "results/orchestration/live2/frozen_test/runs/querystream-proactive_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 315,
+    "belief_corrections_changed": 27,
+    "belief_corrections_observed_only": 27,
+    "belief_to_gpu": 27
+   }
+  },
+  {
+   "cell": "querystream-proactive_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "querystream-proactive",
+   "path": "results/orchestration/live2/frozen_test/runs/querystream-proactive_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 330,
+    "belief_corrections_changed": 29,
+    "belief_corrections_observed_only": 29,
+    "belief_to_gpu": 29
+   }
+  },
+  {
+   "cell": "simplestream_n16_s4_1200s_h27_3t_L3",
+   "arm": "simplestream",
+   "path": "results/orchestration/live2/frozen_test/runs/simplestream_n16_s4_1200s_h27_3t_L3/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 376,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "simplestream_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "simplestream",
+   "path": "results/orchestration/live2/frozen_test/runs/simplestream_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 376,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "simplestream_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "simplestream",
+   "path": "results/orchestration/live2/frozen_test/runs/simplestream_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 488,
+    "belief_corrections_changed": 5,
+    "belief_corrections_observed_only": 5,
+    "belief_to_gpu": 5
+   }
+  },
+  {
+   "cell": "simplestream_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30",
+   "arm": "simplestream",
+   "path": "results/orchestration/live2/frozen_test/runs/simplestream_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 465,
+    "belief_corrections_changed": 5,
+    "belief_corrections_observed_only": 5,
+    "belief_to_gpu": 5
+   }
+  },
+  {
+   "cell": "simplestream_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "simplestream",
+   "path": "results/orchestration/live2/frozen_test/runs/simplestream_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 488,
+    "belief_corrections_changed": 5,
+    "belief_corrections_observed_only": 5,
+    "belief_to_gpu": 5
+   }
+  },
+  {
+   "cell": "simplestream_n16_s5_1200s_h27_3t_L3_epg",
+   "arm": "simplestream",
+   "path": "results/orchestration/live2/frozen_test/runs/simplestream_n16_s5_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 380,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "simplestream_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "simplestream",
+   "path": "results/orchestration/live2/frozen_test/runs/simplestream_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 482,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "simplestream_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "simplestream",
+   "path": "results/orchestration/live2/frozen_test/runs/simplestream_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 482,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "simplestream_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "simplestream",
+   "path": "results/orchestration/live2/frozen_test/runs/simplestream_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 478,
+    "belief_corrections_changed": 5,
+    "belief_corrections_observed_only": 5,
+    "belief_to_gpu": 5
+   }
+  },
+  {
+   "cell": "simplestream_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "simplestream",
+   "path": "results/orchestration/live2/frozen_test/runs/simplestream_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 464,
+    "belief_corrections_changed": 2,
+    "belief_corrections_observed_only": 2,
+    "belief_to_gpu": 2
+   }
+  },
+  {
+   "cell": "streamscout_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "streamscout",
+   "path": "results/orchestration/live2/frozen_test/runs/streamscout_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 488,
+    "belief_corrections_changed": 5,
+    "belief_corrections_observed_only": 5,
+    "belief_to_gpu": 5
+   }
+  },
+  {
+   "cell": "streamscout_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "streamscout",
+   "path": "results/orchestration/live2/frozen_test/runs/streamscout_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 482,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "streamscout_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "streamscout",
+   "path": "results/orchestration/live2/frozen_test/runs/streamscout_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 478,
+    "belief_corrections_changed": 5,
+    "belief_corrections_observed_only": 5,
+    "belief_to_gpu": 5
+   }
+  },
+  {
+   "cell": "streamscout_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "streamscout",
+   "path": "results/orchestration/live2/frozen_test/runs/streamscout_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 446,
+    "belief_corrections_changed": 2,
+    "belief_corrections_observed_only": 2,
+    "belief_to_gpu": 2
+   }
+  },
+  {
+   "cell": "v5-rules_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "v5-rules",
+   "path": "results/orchestration/live2/frozen_test/runs/v5-rules_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 3629,
+    "belief_corrections_changed": 148,
+    "belief_corrections_observed_only": 148,
+    "belief_to_gpu": 148
+   }
+  },
+  {
+   "cell": "v5-rules_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "v5-rules",
+   "path": "results/orchestration/live2/frozen_test/runs/v5-rules_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 3494,
+    "belief_corrections_changed": 93,
+    "belief_corrections_observed_only": 93,
+    "belief_to_gpu": 93
+   }
+  },
+  {
+   "cell": "v5-rules_n16_s5_1200s_h27_3t_L3_epg",
+   "arm": "v5-rules",
+   "path": "results/orchestration/live2/frozen_test/runs/v5-rules_n16_s5_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 3240,
+    "belief_corrections_changed": 121,
+    "belief_corrections_observed_only": 121,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 120
+   }
+  },
+  {
+   "cell": "v5-rules_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "v5-rules",
+   "path": "results/orchestration/live2/frozen_test/runs/v5-rules_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 2909,
+    "belief_corrections_changed": 171,
+    "belief_corrections_observed_only": 171,
+    "belief_to_gpu": 171
+   }
+  },
+  {
+   "cell": "v5-rules_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "v5-rules",
+   "path": "results/orchestration/live2/frozen_test/runs/v5-rules_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 3562,
+    "belief_corrections_changed": 125,
+    "belief_corrections_observed_only": 125,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 124
+   }
+  },
+  {
+   "cell": "v5-rules_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun",
+   "arm": "v5-rules",
+   "path": "results/orchestration/live2/frozen_test/runs/v5-rules_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 3161,
+    "belief_corrections_changed": 141,
+    "belief_corrections_observed_only": 141,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 140
+   }
+  },
+  {
+   "cell": "v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "v5-rules-2",
+   "path": "results/orchestration/live2/frozen_test/runs/v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 605,
+    "belief_corrections_changed": 96,
+    "belief_corrections_observed_only": 96,
+    "belief_to_cold": 66,
+    "belief_to_gpu": 30
+   }
+  },
+  {
+   "cell": "v5-rules-2_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "v5-rules-2",
+   "path": "results/orchestration/live2/frozen_test/runs/v5-rules-2_n16_s5_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 601,
+    "belief_corrections_changed": 66,
+    "belief_corrections_observed_only": 66,
+    "belief_to_cold": 33,
+    "belief_to_gpu": 33
+   }
+  },
+  {
+   "cell": "v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "v5-rules-2",
+   "path": "results/orchestration/live2/frozen_test/runs/v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 623,
+    "belief_corrections_changed": 87,
+    "belief_corrections_observed_only": 87,
+    "belief_to_cold": 66,
+    "belief_to_gpu": 21
+   }
+  },
+  {
+   "cell": "v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "arm": "v5-rules-2",
+   "path": "results/orchestration/live2/frozen_test/runs/v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 581,
+    "belief_corrections_changed": 56,
+    "belief_corrections_observed_only": 56,
+    "belief_to_cold": 36,
+    "belief_to_gpu": 20
+   }
+  },
+  {
+   "cell": "warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f",
+   "arm": "warm-all-lru",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 1191,
+    "belief_corrections_changed": 91,
+    "belief_corrections_observed_only": 91,
+    "belief_to_cold": 14,
+    "belief_to_gpu": 77
+   }
+  },
+  {
+   "cell": "warm-all-lru_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "warm-all-lru",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 2744,
+    "belief_corrections_changed": 143,
+    "belief_corrections_observed_only": 143,
+    "belief_to_cold": 2,
+    "belief_to_gpu": 141
+   }
+  },
+  {
+   "cell": "warm-all-lru_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+   "arm": "warm-all-lru",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 1639,
+    "belief_corrections_changed": 265,
+    "belief_corrections_observed_only": 265,
+    "belief_to_cold": 1,
+    "belief_to_gpu": 264
+   }
+  },
+  {
+   "cell": "warm-all-lru-off_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "warm-all-lru-off",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru-off_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 368,
+    "belief_corrections_changed": 0,
+    "belief_corrections_observed_only": 0
+   }
+  },
+  {
+   "cell": "warm-all-lru-reactive_n12_s4_1200s_h27_3t_L3_epg_ls12",
+   "arm": "warm-all-lru-reactive",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n12_s4_1200s_h27_3t_L3_epg_ls12/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 523,
+    "belief_corrections_changed": 132,
+    "belief_corrections_observed_only": 132,
+    "belief_to_gpu": 132
+   }
+  },
+  {
+   "cell": "warm-all-lru-reactive_n12_s5_1200s_h27_3t_L3_epg_ls12",
+   "arm": "warm-all-lru-reactive",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n12_s5_1200s_h27_3t_L3_epg_ls12/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 525,
+    "belief_corrections_changed": 131,
+    "belief_corrections_observed_only": 131,
+    "belief_to_gpu": 131
+   }
+  },
+  {
+   "cell": "warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_cal1f",
+   "arm": "warm-all-lru-reactive",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_cal1f/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 769,
+    "belief_corrections_changed": 249,
+    "belief_corrections_observed_only": 249,
+    "belief_to_gpu": 249
+   }
+  },
+  {
+   "cell": "warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_epg",
+   "arm": "warm-all-lru-reactive",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 765,
+    "belief_corrections_changed": 248,
+    "belief_corrections_observed_only": 248,
+    "belief_to_gpu": 248
+   }
+  },
+  {
+   "cell": "warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_epg_ls16",
+   "arm": "warm-all-lru-reactive",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_epg_ls16/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 763,
+    "belief_corrections_changed": 247,
+    "belief_corrections_observed_only": 247,
+    "belief_to_gpu": 247
+   }
+  },
+  {
+   "cell": "warm-all-lru-reactive_n16_s5_1200s_h27_3t_L3_epg_ls16",
+   "arm": "warm-all-lru-reactive",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n16_s5_1200s_h27_3t_L3_epg_ls16/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 758,
+    "belief_corrections_changed": 238,
+    "belief_corrections_observed_only": 238,
+    "belief_to_gpu": 238
+   }
+  },
+  {
+   "cell": "warm-all-lru-reactive_n4_s4_1200s_h27_3t_L3_epg_ls04",
+   "arm": "warm-all-lru-reactive",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n4_s4_1200s_h27_3t_L3_epg_ls04/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 253,
+    "belief_corrections_changed": 10,
+    "belief_corrections_observed_only": 10,
+    "belief_to_gpu": 10
+   }
+  },
+  {
+   "cell": "warm-all-lru-reactive_n4_s5_1200s_h27_3t_L3_epg_ls04",
+   "arm": "warm-all-lru-reactive",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n4_s5_1200s_h27_3t_L3_epg_ls04/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 253,
+    "belief_corrections_changed": 8,
+    "belief_corrections_observed_only": 8,
+    "belief_to_gpu": 8
+   }
+  },
+  {
+   "cell": "warm-all-lru-reactive_n8_s4_1200s_h27_3t_L3_epg_ls08",
+   "arm": "warm-all-lru-reactive",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n8_s4_1200s_h27_3t_L3_epg_ls08/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 508,
+    "belief_corrections_changed": 127,
+    "belief_corrections_observed_only": 127,
+    "belief_to_gpu": 127
+   }
+  },
+  {
+   "cell": "warm-all-lru-reactive_n8_s5_1200s_h27_3t_L3_epg_ls08",
+   "arm": "warm-all-lru-reactive",
+   "path": "results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n8_s5_1200s_h27_3t_L3_epg_ls08/coordinator_result.json",
+   "counts": {
+    "belief_corrections": 517,
+    "belief_corrections_changed": 132,
+    "belief_corrections_observed_only": 132,
+    "belief_to_gpu": 132
+   }
+  }
+ ],
+ "per_arm": {
+  "always-cloud-fcfs": {
+   "cells": 6,
+   "corrections_offered": 1917,
+   "corrections_changed": 174,
+   "reverted_observe_only": 174,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 174
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "attentionstore-prefetch": {
+   "cells": 6,
+   "corrections_offered": 3865,
+   "corrections_changed": 1170,
+   "reverted_observe_only": 1170,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_cold": 708,
+    "belief_to_gpu": 462
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "b7-edf-feasibility": {
+   "cells": 5,
+   "corrections_offered": 1818,
+   "corrections_changed": 26,
+   "reverted_observe_only": 26,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 26
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "cascade-routing": {
+   "cells": 2,
+   "corrections_offered": 712,
+   "corrections_changed": 0,
+   "reverted_observe_only": 0,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {},
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: the corrector fired and never changed a belief, so nothing it produced could reach a read. Rule 2 UNEXERCISED, not a negative"
+  },
+  "confidence-cascade": {
+   "cells": 5,
+   "corrections_offered": 1076,
+   "corrections_changed": 123,
+   "reverted_observe_only": 123,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 123
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "covex-v6-base": {
+   "cells": 5,
+   "corrections_offered": 2010,
+   "corrections_changed": 91,
+   "reverted_observe_only": 91,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 91
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "covex-v6-fair-c5attr": {
+   "cells": 4,
+   "corrections_offered": 7746,
+   "corrections_changed": 48,
+   "reverted_observe_only": 0,
+   "corrections_applied_to_the_belief": 48,
+   "destinations": {
+    "belief_to_cold": 5,
+    "belief_to_gpu": 43
+   },
+   "host_reachable": false,
+   "VERDICT": "FIRES AND VARIES: applied, and reaching more than one destination"
+  },
+  "covex-v6-fair-c5attr-gain0": {
+   "cells": 4,
+   "corrections_offered": 7505,
+   "corrections_changed": 50,
+   "reverted_observe_only": 0,
+   "corrections_applied_to_the_belief": 50,
+   "destinations": {
+    "belief_to_cold": 6,
+    "belief_to_gpu": 44
+   },
+   "host_reachable": false,
+   "VERDICT": "FIRES AND VARIES: applied, and reaching more than one destination"
+  },
+  "covex-v6-fair-c5attr-rr": {
+   "cells": 4,
+   "corrections_offered": 7946,
+   "corrections_changed": 49,
+   "reverted_observe_only": 0,
+   "corrections_applied_to_the_belief": 49,
+   "destinations": {
+    "belief_to_cold": 6,
+    "belief_to_gpu": 43
+   },
+   "host_reachable": false,
+   "VERDICT": "FIRES AND VARIES: applied, and reaching more than one destination"
+  },
+  "covex-v6-rules": {
+   "cells": 3,
+   "corrections_offered": 1807,
+   "corrections_changed": 278,
+   "reverted_observe_only": 278,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_cold": 209,
+    "belief_to_gpu": 69
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "covex-v6-state": {
+   "cells": 3,
+   "corrections_offered": 2656,
+   "corrections_changed": 28,
+   "reverted_observe_only": 0,
+   "corrections_applied_to_the_belief": 28,
+   "destinations": {
+    "belief_to_cold": 2,
+    "belief_to_gpu": 26
+   },
+   "host_reachable": false,
+   "VERDICT": "FIRES AND VARIES: applied, and reaching more than one destination"
+  },
+  "covex-v6-state-shares": {
+   "cells": 4,
+   "corrections_offered": 5684,
+   "corrections_changed": 31,
+   "reverted_observe_only": 0,
+   "corrections_applied_to_the_belief": 31,
+   "destinations": {
+    "belief_to_gpu": 31
+   },
+   "host_reachable": false,
+   "VERDICT": "CONSTANT IN THE SENSE THAT MATTERS: the correction is applied but reaches only one destination (['belief_to_gpu']), so it cannot represent the state the decision turns on"
+  },
+  "covex-v6-state-shares-r1": {
+   "cells": 4,
+   "corrections_offered": 4324,
+   "corrections_changed": 35,
+   "reverted_observe_only": 0,
+   "corrections_applied_to_the_belief": 35,
+   "destinations": {
+    "belief_to_cold": 2,
+    "belief_to_gpu": 33
+   },
+   "host_reachable": false,
+   "VERDICT": "FIRES AND VARIES: applied, and reaching more than one destination"
+  },
+  "covex-v6-state-shares-r2": {
+   "cells": 3,
+   "corrections_offered": 1764,
+   "corrections_changed": 27,
+   "reverted_observe_only": 0,
+   "corrections_applied_to_the_belief": 27,
+   "destinations": {
+    "belief_to_cold": 2,
+    "belief_to_gpu": 25
+   },
+   "host_reachable": false,
+   "VERDICT": "FIRES AND VARIES: applied, and reaching more than one destination"
+  },
+  "covex-v6-state-uo": {
+   "cells": 5,
+   "corrections_offered": 8529,
+   "corrections_changed": 64,
+   "reverted_observe_only": 0,
+   "corrections_applied_to_the_belief": 64,
+   "destinations": {
+    "belief_to_cold": 8,
+    "belief_to_gpu": 56
+   },
+   "host_reachable": false,
+   "VERDICT": "FIRES AND VARIES: applied, and reaching more than one destination"
+  },
+  "covex-v6-state-uo-c5attr": {
+   "cells": 4,
+   "corrections_offered": 7519,
+   "corrections_changed": 51,
+   "reverted_observe_only": 0,
+   "corrections_applied_to_the_belief": 51,
+   "destinations": {
+    "belief_to_cold": 6,
+    "belief_to_gpu": 45
+   },
+   "host_reachable": false,
+   "VERDICT": "FIRES AND VARIES: applied, and reaching more than one destination"
+  },
+  "eco-llm": {
+   "cells": 7,
+   "corrections_offered": 2789,
+   "corrections_changed": 66,
+   "reverted_observe_only": 66,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 66
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "edf": {
+   "cells": 8,
+   "corrections_offered": 4754,
+   "corrections_changed": 705,
+   "reverted_observe_only": 705,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_cold": 90,
+    "belief_to_gpu": 615
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "hybrid-F-lhreq": {
+   "cells": 6,
+   "corrections_offered": 2667,
+   "corrections_changed": 80,
+   "reverted_observe_only": 80,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 80
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "hybrid-F-lhreq-noc3": {
+   "cells": 6,
+   "corrections_offered": 2343,
+   "corrections_changed": 74,
+   "reverted_observe_only": 74,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 74
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "kvflow-prefetch": {
+   "cells": 4,
+   "corrections_offered": 1682,
+   "corrections_changed": 121,
+   "reverted_observe_only": 121,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 121
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "llf": {
+   "cells": 11,
+   "corrections_offered": 7626,
+   "corrections_changed": 1231,
+   "reverted_observe_only": 1231,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_cold": 83,
+    "belief_to_gpu": 1148
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "mooncake": {
+   "cells": 6,
+   "corrections_offered": 2168,
+   "corrections_changed": 51,
+   "reverted_observe_only": 51,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 51
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "querystream-proactive": {
+   "cells": 6,
+   "corrections_offered": 1894,
+   "corrections_changed": 176,
+   "reverted_observe_only": 176,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 176
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "simplestream": {
+   "cells": 10,
+   "corrections_offered": 4479,
+   "corrections_changed": 22,
+   "reverted_observe_only": 22,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 22
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "streamscout": {
+   "cells": 4,
+   "corrections_offered": 1894,
+   "corrections_changed": 12,
+   "reverted_observe_only": 12,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 12
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "v5-rules": {
+   "cells": 6,
+   "corrections_offered": 19995,
+   "corrections_changed": 799,
+   "reverted_observe_only": 799,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_cold": 3,
+    "belief_to_gpu": 796
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "v5-rules-2": {
+   "cells": 4,
+   "corrections_offered": 2410,
+   "corrections_changed": 305,
+   "reverted_observe_only": 305,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_cold": 201,
+    "belief_to_gpu": 104
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "warm-all-lru": {
+   "cells": 3,
+   "corrections_offered": 5574,
+   "corrections_changed": 499,
+   "reverted_observe_only": 499,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_cold": 17,
+    "belief_to_gpu": 482
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "warm-all-lru-off": {
+   "cells": 1,
+   "corrections_offered": 368,
+   "corrections_changed": 0,
+   "reverted_observe_only": 0,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {},
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: the corrector fired and never changed a belief, so nothing it produced could reach a read. Rule 2 UNEXERCISED, not a negative"
+  },
+  "warm-all-lru-reactive": {
+   "cells": 10,
+   "corrections_offered": 5634,
+   "corrections_changed": 1522,
+   "reverted_observe_only": 1522,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 1522
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  }
+ },
+ "per_family": {
+  "arms_that_APPLY_the_correction_rungs_2_and_above": {
+   "cells": 35,
+   "corrections_offered": 53673,
+   "corrections_changed": 383,
+   "reverted_observe_only": 0,
+   "corrections_applied_to_the_belief": 383,
+   "destinations": {
+    "belief_to_cold": 37,
+    "belief_to_gpu": 346
+   },
+   "host_reachable": false,
+   "VERDICT": "FIRES AND VARIES: applied, and reaching more than one destination"
+  },
+  "arms_that_do_NOT_rung_0_rung_1_and_every_paper_baseline": {
+   "cells": 124,
+   "corrections_offered": 79482,
+   "corrections_changed": 7525,
+   "reverted_observe_only": 7525,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_cold": 1311,
+    "belief_to_gpu": 6214
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  },
+  "b7_edf_feasibility_alone": {
+   "cells": 5,
+   "corrections_offered": 1818,
+   "corrections_changed": 26,
+   "reverted_observe_only": 26,
+   "corrections_applied_to_the_belief": 0,
+   "destinations": {
+    "belief_to_gpu": 26
+   },
+   "host_reachable": false,
+   "VERDICT": "ABSENT IN THE DECISION REGISTER: every correction was computed, counted and then REVERTED by the observe-only gate (coordinator.py:1803). The belief these arms price and admit from never saw it. Rule 2 UNEXPRESSIBLE: the mechanism fires and the harness discards the channel it acts through"
+  }
+ },
+ "reduced_pool_cells": {
+  "_why_this_table_exists": "the ruling's sentence is about MEMORY PRESSURE, so the cells that matter are the ones at a reduced pool. This lists every committed live cell whose name carries a _kv suffix, with whether its arm applies the correction at all.",
+  "cells": [
+   {
+    "cell": "always-cloud-fcfs_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "always-cloud-fcfs",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 311,
+     "belief_corrections_changed": 24,
+     "belief_corrections_observed_only": 24,
+     "belief_to_gpu": 24
+    }
+   },
+   {
+    "cell": "always-cloud-fcfs_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "always-cloud-fcfs",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 306,
+     "belief_corrections_changed": 32,
+     "belief_corrections_observed_only": 32,
+     "belief_to_gpu": 32
+    }
+   },
+   {
+    "cell": "attentionstore-prefetch_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "attentionstore-prefetch",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 668,
+     "belief_corrections_changed": 211,
+     "belief_corrections_observed_only": 211,
+     "belief_to_cold": 142,
+     "belief_to_gpu": 69
+    }
+   },
+   {
+    "cell": "attentionstore-prefetch_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "attentionstore-prefetch",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 629,
+     "belief_corrections_changed": 194,
+     "belief_corrections_observed_only": 194,
+     "belief_to_cold": 122,
+     "belief_to_gpu": 72
+    }
+   },
+   {
+    "cell": "covex-v6-base_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30",
+    "arm": "covex-v6-base",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 411,
+     "belief_corrections_changed": 23,
+     "belief_corrections_observed_only": 23,
+     "belief_to_gpu": 23
+    }
+   },
+   {
+    "cell": "covex-v6-base_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "covex-v6-base",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 411,
+     "belief_corrections_changed": 24,
+     "belief_corrections_observed_only": 24,
+     "belief_to_gpu": 24
+    }
+   },
+   {
+    "cell": "covex-v6-base_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "covex-v6-base",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 401,
+     "belief_corrections_changed": 16,
+     "belief_corrections_observed_only": 16,
+     "belief_to_gpu": 16
+    }
+   },
+   {
+    "cell": "covex-v6-rules_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "covex-v6-rules",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 609,
+     "belief_corrections_changed": 103,
+     "belief_corrections_observed_only": 103,
+     "belief_to_cold": 73,
+     "belief_to_gpu": 30
+    }
+   },
+   {
+    "cell": "covex-v6-rules_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "covex-v6-rules",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 595,
+     "belief_corrections_changed": 80,
+     "belief_corrections_observed_only": 80,
+     "belief_to_cold": 52,
+     "belief_to_gpu": 28
+    }
+   },
+   {
+    "cell": "eco-llm_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30",
+    "arm": "eco-llm",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 440,
+     "belief_corrections_changed": 22,
+     "belief_corrections_observed_only": 22,
+     "belief_to_gpu": 22
+    }
+   },
+   {
+    "cell": "edf_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "edf",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 551,
+     "belief_corrections_changed": 81,
+     "belief_corrections_observed_only": 81,
+     "belief_to_cold": 15,
+     "belief_to_gpu": 66
+    }
+   },
+   {
+    "cell": "edf_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "edf",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 561,
+     "belief_corrections_changed": 81,
+     "belief_corrections_observed_only": 81,
+     "belief_to_cold": 14,
+     "belief_to_gpu": 67
+    }
+   },
+   {
+    "cell": "llf_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30",
+    "arm": "llf",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 583,
+     "belief_corrections_changed": 80,
+     "belief_corrections_observed_only": 80,
+     "belief_to_gpu": 80
+    }
+   },
+   {
+    "cell": "llf_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "llf",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 686,
+     "belief_corrections_changed": 131,
+     "belief_corrections_observed_only": 131,
+     "belief_to_cold": 15,
+     "belief_to_gpu": 116
+    }
+   },
+   {
+    "cell": "llf_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "llf",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 720,
+     "belief_corrections_changed": 130,
+     "belief_corrections_observed_only": 130,
+     "belief_to_cold": 3,
+     "belief_to_gpu": 127
+    }
+   },
+   {
+    "cell": "mooncake_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30",
+    "arm": "mooncake",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 374,
+     "belief_corrections_changed": 21,
+     "belief_corrections_observed_only": 21,
+     "belief_to_gpu": 21
+    }
+   },
+   {
+    "cell": "mooncake_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "mooncake",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 287,
+     "belief_corrections_changed": 13,
+     "belief_corrections_observed_only": 13,
+     "belief_to_gpu": 13
+    }
+   },
+   {
+    "cell": "querystream-proactive_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "querystream-proactive",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 302,
+     "belief_corrections_changed": 25,
+     "belief_corrections_observed_only": 25,
+     "belief_to_gpu": 25
+    }
+   },
+   {
+    "cell": "querystream-proactive_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "querystream-proactive",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 328,
+     "belief_corrections_changed": 34,
+     "belief_corrections_observed_only": 34,
+     "belief_to_gpu": 34
+    }
+   },
+   {
+    "cell": "simplestream_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30",
+    "arm": "simplestream",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 465,
+     "belief_corrections_changed": 5,
+     "belief_corrections_observed_only": 5,
+     "belief_to_gpu": 5
+    }
+   },
+   {
+    "cell": "simplestream_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "simplestream",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 488,
+     "belief_corrections_changed": 5,
+     "belief_corrections_observed_only": 5,
+     "belief_to_gpu": 5
+    }
+   },
+   {
+    "cell": "simplestream_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "simplestream",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 482,
+     "belief_corrections_changed": 0,
+     "belief_corrections_observed_only": 0
+    }
+   },
+   {
+    "cell": "warm-all-lru_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+    "arm": "warm-all-lru",
+    "applies": false,
+    "counts": {
+     "belief_corrections": 1639,
+     "belief_corrections_changed": 265,
+     "belief_corrections_observed_only": 265,
+     "belief_to_cold": 1,
+     "belief_to_gpu": 264
+    }
+   }
+  ]
+ }
+}
