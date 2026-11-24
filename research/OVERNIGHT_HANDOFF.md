@@ -648,6 +648,32 @@ rung-4 IMPLEMENTATION AS RUN. **Whether a fixed rung 4 would beat rung 3 is UNKN
 3. Nothing scorable -> do NOT invent work on run-path files. The handoff's five overnight steps below
    are owned by other sessions.
 
+## *** D230 IS THE FREEZE-GATE RULING SET. EVERY ITEM IS MARKED FOR REVISIT. (user, 2026-11-24) ***
+
+Recorded here because a session turnover must not lose it (D229's reason, applied on flash).
+**Closed:** 10.1, 10.6 and 10.16 by D221 and D228. **10.11** flexible split set OFF on rungs 3 and 4,
+byte-identical. **10.12** the D165 (A) lexicographic objective RULED OUT AS SUPERSEDED - D185's deficit
+weights set cross-type priority and D177 makes the within-type accuracy gap constant, so it decides
+nothing; spec v6 and `arm_names_v6.py`'s `missing` note are updated as comment/metadata only.
+**10.14** counterfactual sync is covered by D226 (1), built OFF before the freeze; **an explicit
+host-reload action is RULED OUT because the engine reloads natively and D211 signal (a) FAILED, so host
+residency is unobservable per request** - the paper states host reload as native and unobserved.
+**Measure-first, not build-first: 10.7.** The per-type guard is not built on argument. The fraction of
+100 ms decision periods whose alert first-token lag exceeds 0.8 s is measured from committed rung-3 1x
+cells s4 to s7, and **the 1 percent threshold is pre-declared**: at or below it, D178 (3) is amended to the
+single 2.0 s guard as built and D166 (3)'s exit hysteresis is ruled out; above it, a labelled rung-3
+variant is built and run at s4 first. **This is the right shape for a defect found by reading code: the
+code says alerts cannot be protected inside their deadline, and the measurement says whether that ever
+happens.**
+**10.13 is deliberately undecided**, pending the rung-4 kv0.5r s4 result: if rung 4 beats rung 3 at 0.5x
+without keep-ready set and admit-with-protected-victim, both are ruled out as a stated limitation.
+**Operations.** The metrics scrape is **ON for every new cell** with `metrics_health` always recorded
+(D230 (7)) - which **supersedes my `3b610470` default=False**, correctly: that commit fixed an
+*undeclared* deployment default, and this is the user declaring it. The 1x rung-4 cell now running stays
+unscraped; **rung-4 seeds 5 to 7 must scrape.** Only flash's main session may instruct the H100. The driver
+records each run's unix `t0` (the D211 proxy this removes). The 31 stub cells are marked only and their
+scores stand.
+
 ## *** NEVER `pkill -f` ON A SHARED BOX. A PATTERN SPECIFIC ENOUGH TO NAME YOUR OWN PROCESS IS SPECIFIC ENOUGH TO NAME A PEER'S, BECAUSE WAITING ON A SHARED FILENAME IS WHAT COORDINATION LOOKS LIKE. ***
 
 Two distinct kills today, both exit **144**, both mine.
