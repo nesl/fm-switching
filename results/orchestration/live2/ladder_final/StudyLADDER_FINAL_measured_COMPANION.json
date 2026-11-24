@@ -1,0 +1,42 @@
+{
+ "_status": "UNFROZEN COMPANION to the frozen pre-registration. The frozen document is NOT edited and its hash stays d6d8b6c121d23f20f46b03832883fd6b90126f42c7b2fa8224f3d6614bc5f221. The measured numbers go HERE, which is the only way to fill them without breaking the freeze.",
+ "_the_frozen_prereg": {"path": "results/orchestration/live2/ladder_final/StudyLADDER_FINAL_prereg.json",
+   "sha256": "d6d8b6c121d23f20f46b03832883fd6b90126f42c7b2fa8224f3d6614bc5f221",
+   "verified_intact_on": "75f1c27b46b75891ad054f71be2a07e68a0a1e78",
+   "_do_not_edit": "every bar DEFINITION and every COMPARATOR number is inside that hash. Filling numbers into it would void the freeze, which is the one thing the freeze exists to prevent."},
+ "_rebuilt_on": "75f1c27b46b75891ad054f71be2a07e68a0a1e78, which contains Session A at c707610d (verified an ancestor).",
+ "_arms_construct_on_the_post_session_A_tree": "YES, re-verified: d208_ladder_name_proof.json all_pass true on 75f1c27b, with the negative control passing and the factory identity of all nine protected committed names unchanged. Session A's changes, including price_for_touch now RAISING on an unknown mode, do not break the ladder.",
+
+ "SESSION_A_CORRECTIONS_THAT_CHANGE_WHAT_THESE_PROOFS_MEAN": {
+  "1_the_touch_price_does_NOT_move_rung_3_or_rung_4": "rung 3 is 12e4f73ce0ebd865 / 13,812 on BOTH trees, equal to its committed bar; rung 4 identical on both. So that bar is valid and the -rr verdicts do not sit on superseded code. The frozen prereg never pinned that digest (zero occurrences), so nothing in it needs revising.",
+  "2_the_overcharge_was_105_50x_to_154_50x_p50_131_49x": "not the 3.6x to 9.8x briefed, which was measured against the intermediate d162-warm-hit price. The frozen prereg carries NEITHER figure (zero occurrences of 3.6, 9.8 or d162-warm-hit), so again nothing in it needs revising. The corrected default is d174-uncached-only at touch_policy.py:126.",
+  "3_THE_ONE_THAT_CHANGES_A_PROOF": "the unfixed rung-2 dry digest is not a property of the code: a COMMENT-ONLY edit to engine_actions.py moves covex-v6-state-uo-c5attr by 85 committed-key decisions and 11 rows through ALLOCATION alone, because _queued_behind keys on id(obs). See the consequence for proof (c) below."
+ },
+
+ "PROOF_c_HAS_A_NOISE_FLOOR_EQUAL_TO_THE_DEFECT_IT_MEASURES": {
+  "the_proof_as_specified": "how many rung-2 decisions the D188 id(obs) fix changes on dry s4, against covex-v6-state-uo-c5attr.",
+  "why_it_is_not_soundly_a_single_number": "the OFF side is the allocation-sensitive one. Allocation ALONE moved 85 decisions and 11 rows on that arm, with no code change at all. So a fix-ON against fix-OFF count must be read against about 85 decisions of allocation noise, and a count of that order is NOT separable from the noise.",
+  "how_it_will_be_reported": "as a count WITH the 85-decision noise floor stated beside it, and as a range across repeated OFF runs if the host allows, never as a single clean figure. If the measured count is of the same order as the floor, the honest statement is that the fix's decision effect is NOT SEPARABLE from the cache-key nondeterminism it removes, which is itself the argument for the fix rather than a null.",
+  "what_is_NOT_affected": "rung 3 and rung 4 of the final ladder, and all three final rungs generally, because every one of them turns live2_qcache_key_fix ON and is therefore keyed on (epoch, now_s) and allocation-insensitive. The hazard is confined to the UNFIXED comparator."
+ },
+
+ "SCHEDULING_CONSTRAINT_BEFORE_ANY_LADDER_CELL": {
+  "the_ALONE_rule": "every rung-2-class dry proof cell runs ALONE. The rule exists because two sessions ran dry proof cells concurrently at loadavg up to 25.46, which is exactly the regime this digest class is sensitive to.",
+  "host_state_when_this_was_written": "loadavg 2.15 but TWO cells in flight: Session D's d210_kv025_one_cell.py on covex-v6-cf-c5attr, and the proof-(a) chain on simplestream. So the host is NOT free for an ALONE run and the ladder cells are HELD rather than started.",
+  "which_of_my_cells_actually_need_ALONE": "the UNFIXED comparator for proof (c) needs it. The three final rungs do not, being allocation-insensitive by the fix, but they will be run alone anyway so one rule covers the set."
+ },
+
+ "measured_numbers_TO_BE_FILLED": {
+  "covex-v6-state-final": {"s4": null, "s5": null, "s6": null, "s7": null},
+  "covex-v6-fair-final": {"s4": null, "s5": null, "s6": null, "s7": null},
+  "covex-v6-final": {"s4": null, "s5": null, "s6": null, "s7": null},
+  "_fields_per_seed": ["alert_mean_per_episode_attainment", "robot_on_time", "single_shot_within_2s_fraction", "late_alert_instants_with_denominator"],
+  "_scored_by": "the committed d179_rung2_verdict.py, unchanged, numerator COMMITTED_RULE_PRIMARY",
+  "_bars_come_from": "the frozen prereg, not from here"
+ },
+ "proofs": {"a": "3 of 17 measured, 3 match, 0 moved; and Session A separately passed BYTE IDENTITY ON 29 ARMS including every BASELINE_MATRIX arm, covex-v6-base, covex-v6-rules, rung 3 and rung 4, which is a stronger statement than this partial sweep and means NO escalation on a moved base or baseline.",
+            "b": "PENDING: Step 2b per rung with counts by mechanism, held on the ALONE rule",
+            "c": "PENDING, and see the noise-floor section above before reading any number",
+            "d": "DONE and unaffected: Gate A exposure 46 of 463 (9.94 percent) at safety factor 1.863404, worst overrun 1.5035x, computed from the committed rung-3 sent cells"},
+ "_provenance": {"script": "hand-written companion; arms by arms_final_ladder.py, verified by d208_ladder_name_proof.py", "device": "flash (CPU only)", "model": "n/a", "origin_main_sha_read": "75f1c27b46b75891ad054f71be2a07e68a0a1e78"}
+}

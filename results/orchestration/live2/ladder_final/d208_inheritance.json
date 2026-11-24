@@ -41,18 +41,30 @@
   "MISSING_OR_AT_RISK": [
    {
     "mechanism": "RELOAD, and any per-request HOST residency belief",
-    "status": "AT RISK OF BEING STRUCTURALLY UNEXERCISED, reported rather than papered over",
+    "status": "CONFIRMED UNEXERCISED FOR A STRUCTURAL REASON (Session A, c707610d)",
     "evidence": "cstate.py:673 _host_fraction sums est_tokens over sessions whose believed_tier() is host and divides by the host tier size, so what reaches the arm is an AGGREGATE FRACTION, not a per-request residency. A parallel real-engine probe reports host residency is observable only in aggregate on this engine. If a rung's RELOAD lever never fires, that is Rule 2 UNEXERCISED FOR A STRUCTURAL REASON and must be reported as such, not as evidence that RELOAD does not help. CONFIRMED by the H100's real-engine probe: host residency is observable only through aggregates such as vllm:prompt_tokens_by_source_total{source=\"external_kv_transfer\"}; per request it is folded into prompt_tokens_details.cached_tokens and cannot be separated, and differencing the aggregates is exact only with ONE request in flight. So this is evidence-backed, not a hedge.",
-    "action": "REPORTED, NOT ADDED. No per-request host belief is invented here."
+    "action": "REPORTED, NOT ADDED. No per-request host belief is invented here.",
+    "session_A_measurement": "host residency IS observed, but only IN AGGREGATE: external_kv_transfer accounts for 4,943,072 of 18,707,015 prompt tokens, 26.4 percent. A PER-REQUEST host belief is NOT ACHIEVABLE on this engine, because a host hit and a GPU hit both fold into cached_tokens. So the aggregate is real and the per-request signal the RELOAD lever would need does not exist.",
+    "wording_to_keep": "RELOAD is UNEXERCISED FOR A STRUCTURAL REASON, not a hedge and not a null about RELOAD."
    },
    {
     "mechanism": "gpu_kv_fraction reaching the arms (RUNG 4 ONLY among our arms)",
-    "status": "AT RISK, two independent reasons",
+    "status": "STILL AT RISK AND NOT RESOLVED BY SESSION A'S COMMIT",
     "evidence": "cstate.py:663 reads the metrics key vllm:gpu_cache_usage_perc with a silent 0.0 default, and the probe reports the engine does not emit that key, so gpu_kv_fraction is 0.0 in EVERY live cell on this build (open hit 6). Separately arms.py:82 _caps is WRITE-ONLY, so the coordinator's KV pool never reaches the arms that read it (open hit 14 shape).",
     "action": "REPORTED, and scoped to rung 4. Flat RUNG-4 behaviour across the 1x and 0.25x conditions is a candidate UNEXERCISED CHANNEL under Rule 2, not an equivalence between the conditions. Rungs 2 and 3 are safe from it.",
-    "scope_NARROWED_BY_A_VERIFIED_CENSUS": "ZERO occurrences of gpu_kv_fraction in arms_v6state.py, arms_v6fair.py, arms_v6rr.py, release_recheck.py and arms_v6c5.py, so RUNGS 2 AND 3 DO NOT INHERIT HIT 6. Rung 4 does. arms.py:82 _caps being write-only is a SEPARATE cause and another session's."
+    "scope_NARROWED_BY_A_VERIFIED_CENSUS": "ZERO occurrences of gpu_kv_fraction in arms_v6state.py, arms_v6fair.py, arms_v6rr.py, release_recheck.py and arms_v6c5.py, so RUNGS 2 AND 3 DO NOT INHERIT HIT 6. Rung 4 does. arms.py:82 _caps being write-only is a SEPARATE cause and another session's.",
+    "hit_6_is_DEEPER_than_the_key_name": "LIVE2 NEVER SCRAPES /metrics. st.metrics has ONE writer, coordinator.py:489, which is skipped on dry cells, and every reported live2 cell uses AsyncLive2Backend, which is not an HttpBackend subclass and contains no '/metrics' string. So gpu_kv_fraction is 0.0 in every reported live2 cell because NOTHING READS /metrics, not merely because a key name was guessed. FIXING THE KEY ALONE WOULD HAVE LEFT THE GATE AT 0.0 AND LOOKED LIKE A PASS, which is the dangerous shape.",
+    "open_escalation": "E1 on asyncbackend.py, which has NO OWNER yet. This row must NOT be marked resolved."
    }
-  ]
+  ],
+  "_RUNG_2_DRY_DIGEST_IS_NOT_A_PROPERTY_OF_THE_CODE": {
+   "finding": "Session A: a COMMENT-ONLY edit to engine_actions.py moves covex-v6-state-uo-c5attr's dry decision log by 85 committed-key decisions and 11 rows, purely through ALLOCATION, because arms_v6state._queued_behind keys its cache on id(obs), a memory address.",
+   "six_runs_settle_it": "five variants plus the committed bar give 9a4be873eb3c5fba / 14,218; the one outlier 639cd15ed38c9da0 / 14,207 is the single tree with the id(obs) key LIVE and no edit to perturb allocation, matching what d190_rung4_r3_proofs.py:192-197 recorded for that arm under concurrency.",
+   "consequence_for_THIS_ladder": "the unfixed rung-2 bar CANNOT serve as a byte-identity bar or a Step 2b baseline, and must not be quoted across trees that are not byte-identical in every module the arm imports. covex-v6-state-final turns live2_qcache_key_fix ON, which is what makes this ladder sound, and it is ALSO why covex-v6-state-final must NOT be compared against the UNFIXED rung-2 bar.",
+   "scope": "RUNG 4 WAS NOT PERTURBED, so the sensitivity is not universal even inside the state family.",
+   "operational_rule": "every rung-2-class dry proof cell runs ALONE. Two sessions ran dry proof cells on flash concurrently at loadavg up to 25.46, which is exactly the regime this digest class is sensitive to.",
+   "WHAT_THIS_DOES_TO_PROOF_c": "proof (c), 'how many rung-2 decisions the id(obs) fix changes', has a NOISE FLOOR EQUAL TO THE DEFECT IT MEASURES: allocation alone moved 85 decisions and 11 rows on the unfixed arm. So a fix-ON against fix-OFF count must be read against about 85 decisions of allocation noise on the OFF side, and a count of that order is NOT separable from the noise. This is reported rather than resolved, and it is a consequence of measuring a cache-key defect with the cache key still live on one side."
+  }
  },
  "rung_3_covex_v6_fair_final": {
   "built_from": "covex-v6-state-final, plus the committed covex-v6-fair-c5attr and covex-v6-fair-c5attr-rr mechanisms",
@@ -133,5 +145,12 @@
   "model": "n/a",
   "origin_main_sha_read": "62b8a7eb1088656220d08b5b624b564f44ac412c"
  },
- "_base_comparator": "hybrid-F-lhreq-noc3, aliased covex-v6-base: ONE ARM, TWO NAMES (arm_names_v6.OLD_TO_RUNG), confirmed by the digests themselves (both read af8befb9420ad86a / 12,085)."
+ "_base_comparator": "hybrid-F-lhreq-noc3, aliased covex-v6-base: ONE ARM, TWO NAMES (arm_names_v6.OLD_TO_RUNG), confirmed by the digests themselves (both read af8befb9420ad86a / 12,085).",
+ "_SESSION_A_RESULTS_CARRIED_INTO_THESE_TABLES": {
+  "commit": "c707610d, verified an ancestor of origin/main",
+  "byte_identity_PASSED_on_29_arms": "covex-v6-base, covex-v6-rules, rung 3, rung 4 and EVERY BASELINE_MATRIX arm are byte-identical, so NO escalation on a moved base or baseline. Only the two rung-2 arms moved, and by the id(obs) allocation sensitivity above rather than by any fix.",
+  "the_touch_price_does_NOT_move_rung_3_or_rung_4": "measured on both trees: rung 3 is 12e4f73ce0ebd865 / 13,812 on BOTH sides, equal to its committed bar, and rung 4 is identical on both sides. So that bar is NOT invalidated by the touch price and the -rr verdicts do NOT sit on superseded code because of it. The earlier briefing that the flip WOULD move them was wrong.",
+  "the_overcharge_was_105_50x_to_154_50x_p50_131_49x": "paired on identical inputs over 2,267 touches: before 0.288688 / 0.359809 / 0.422778, after a constant 0.00273647. The earlier 3.6x to 9.8x figure was measured against the INTERMEDIATE d162-warm-hit price, whose intercept is 96.1 percent of it, so it understated the defect by about 26x. d162-warm-hit is NOT the corrected mode: its 0.070534 s intercept is 25.8x the ruled charge, which D174 (1) rules out as occupancy. The default is now d174-uncached-only at touch_policy.py:126, and price_for_touch RAISES on an unknown mode.",
+  "hits_22_and_26_are_UNEXERCISED_under_Rule_2_not_no_ops": "the touch price refuses 0 of 2,267 touches at EITHER price, and the hit-26 corrector cannot fire on a dry cell at all. So neither is a no-op; each is a mechanism that did not reach a decision in these conditions."
+ }
 }
