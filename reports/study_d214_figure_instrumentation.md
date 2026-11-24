@@ -239,11 +239,22 @@ Three proofs, increasing in strength, and the weakest is not skipped because the
 
 **(a) Structural. Register: CONSTRUCTED.** Every added line in `run_live2_real.py` runs **after
 `em.run()` has returned**: the emulator's loop has ended, the coordinator is closed, every log file
-is written, and there is no decision left to make. The **only** statement added inside the run is
-`_EMU.append(em)` in `_emulator`, a list append of a reference to an object that already exists; it
-mutates no state any decision reads. This is an argument from reading code, so it is marked
-CONSTRUCTED and is not offered as a measurement. It is also **not a switch that is off by default**,
-which the brief asked us not to ship.
+is written, and there is no decision left to make. **Exactly two statements are added inside the
+run**, and both are list appends of a reference to an object that already exists:
+`_EMU.append(em)` in `_emulator` and `_CO.append(co)` in `_inprocess`. Neither mutates any state a
+decision reads, and neither is read until after the run. One further change is a pure rebinding:
+`_emulator`'s `return EM.FleetEmulator(...)` became `em = EM.FleetEmulator(...); _EMU.append(em);
+return em`, the same call bound to a local.
+
+**That claim is checked mechanically rather than asserted.** `diff` of the held wiring against a
+clean archive of the base sha, with comments and blank lines filtered out, enumerates every added
+executable line; the only ones not inside the post-run block or the post-run `out` dict are those
+two appends and the rebinding. The enumeration is short enough to read in full and is reproduced in
+the session handoff.
+
+This is an argument from reading code, so it is marked CONSTRUCTED and is not offered as a
+measurement. It is also **not a switch that is off by default**, which the brief asked us not to
+ship.
 
 **(b) Import closure. Register: OBSERVED.** A decision path that never imports a module cannot be
 changed by it. The proof runs one dry cell on the after-tree and prints the census of `sys.modules`
@@ -420,10 +431,28 @@ directory, which needs no change to any runner:
 python experiments/orchestration/live2/f3_latency_stamps.py --run-dir <cell dir> [--trace-dir <dir>]
 ```
 
-That path cannot emit `uplink_transfers.jsonl.gz` for a cell that has already finished (the
-emulator object is gone), so on an old cell the EMULATED upload stamps are absent and
-`f3_stamp_registers.json` counts them as absent rather than inventing them. From the first cell run
-after the wiring lands, they are present.
+That path cannot emit `uplink_transfers.jsonl.gz` for a cell that has already finished (the emulator
+object is gone), so on an old cell the EMULATED upload stamps are absent.
+
+**THAT ABSENCE IS NOW LOUD, AND THE DISTINCTION IT MAKES IS THE POINT.** A reader meeting a null
+assumes an instrumentation gap, i.e. something that could be fixed by better code. The upload
+stamps are not that: they live on `links.UplinkQueue.log`, on the emulator **object**, which exists
+only while the run is in progress. A post-hoc cell therefore **can never** have them and
+**re-running the script will never produce them**. So the output separates the two causes and says
+which it has, at three levels:
+
+| level | what it says |
+|---|---|
+| `f3_stamp_registers.json`, top-level | `uplink_transfers: "ABSENT, STRUCTURALLY, AND NOT RECOVERABLE FOR THIS CELL"`, a paragraph-length `uplink_transfers_reason`, and `emulated_upload_leg_usable_for_a_cdf: false` |
+| every row of `f3_latency_stamps.jsonl` | `frame_uploads_absent` carries **`STRUCTURAL:`** (no transfer log in this cell at all) or **`JOIN:`** (the log exists with N transfers and none matched *this* request, naming its opportunity, kind and session). The second is a real gap worth investigating; the first is not |
+| stderr of the CLI | the verdict line plus the full reason, so it cannot be missed by someone reading the console rather than the JSON |
+
+`absent_stamps` also carries a note telling a reader to read `uplink_transfers` **first**, because
+under a structural absence `frame_uploads` necessarily equals `n_rows` and says nothing about the
+join. And the reason explicitly warns against the failure mode that matters for F3: **do not plot a
+CDF from such a cell as though its upload leg were measured at zero** - the upload leg is simply not
+in that cell. Both paths are tested (transfers present, and transfers removed to simulate a finished
+cell).
 
 ---
 
@@ -474,17 +503,45 @@ repeatability. No conclusion about any policy is drawn from them.
 
 ## 7. Outstanding, named plainly
 
-1. **THE BYTE-IDENTITY PROOF HAS NOT RUN. It is armed and waiting for an ALONE window.** The host
+0. **THE PROOF CHAIN WAS STOOD DOWN ON INSTRUCTION, AND IS NO LONGER POLLING.** Three things wanted
+   the same free window: this proof, and Session B's proofs (b) and (c), which gate
+   `FINAL_LADDER_CELLS` and so the paper's critical path. **Session B goes first**, and this work
+   yields by construction: the user's own sequencing is "land these before `FINAL_LADDER_CELLS` runs
+   if they can be proven in time; otherwise from the first cells after." A poller that fires the
+   instant the box frees would beat a session that has to be resumed and then decide, so leaving it
+   armed would have been claiming priority by reflex. It was stopped cleanly rather than left
+   waiting: the chain wrapper was killed **first** so the sequence could not advance to the F14
+   sweep, then the poller. Verified afterwards by scanning `/proc` (never a `pgrep -f` on a
+   self-matching pattern) that **no Session F process remains**, that the three StudyD216-KV025
+   processes are untouched, and that **no cell of mine ever started**: both result directories are
+   empty, so there is no partial or half-written output to distrust. Re-arm is:
+   `bash <scratchpad>/d214sessF/chain.sh`, which runs the proof and then the sweep, each cell
+   waiting for its own alone window.
+
+1. **THE BYTE-IDENTITY PROOF HAS NOT RUN. It is built and stood down, not armed.** The host
    was held throughout this session by the StudyD216-KV025 chain (and, earlier, by a StudyD213
    digest chain), and running a cell alongside them would have made their digests contention-measured
    without their guards seeing it: that driver identifies foreign live2 processes by the basenames
    under its own tree snapshot, and my new files are not in it, so **my processes are invisible to
-   their alone-guard**. Waiting was the only correct option. The chain is launched, polls for a
-   window with no other live2 process, and will write
+   their alone-guard**. Waiting was the only correct option.
+
+   **THIS IS AN OPERATIONAL HAZARD, NOT A QUIRK OF MY SESSION, AND IT IS THE MOST CONSEQUENTIAL
+   THING IN THIS REPORT.** The guard enumerates foreign live2 processes by the `.py` basenames found
+   under its **own tree snapshot**, so a file it does not know about is invisible to it. A cell can
+   therefore record `alone: true` **truthfully by the guard and falsely in fact**. The guard is not
+   broken; its census is simply bounded by a tree that may be older than the processes it is trying
+   to see, which is the same register error as reading a config instead of reading the object. A
+   separate session hit this independently and also waited. The remedy that does not depend on the
+   guard being complete: check `ps` and `/proc/<pid>/cwd` directly and **record what you SAW**, not
+   what the guard said. My own guards have the same bound, which is why every cell record carries
+   the foreign-process census and the loadavg beside the boolean, so a later reader can
+   re-adjudicate `alone` from the evidence instead of trusting the flag.
+
+   When it runs it will write
    `results/orchestration/live2/d214_figures/byte_identity/d214_byte_identity.json`.
    **Consequence: the `run_live2_real.py` wiring is NOT committed.** See 5.6.
-2. **F14 at 24, 32 and 48 devices has not run**, behind the same window. The sweep is queued after
-   the proof in the same chain and will write
+2. **F14 at 24, 32 and 48 devices has not run**, behind the same window and also stood down. The
+   sweep is queued after the proof in the same chain and will write
    `results/orchestration/live2/d214_figures/f14/f14_decision_latency.json`. The n=16 rungs are in
    5.5 and both are comfortably inside the 20 ms budget; **whether p99 crosses 20 ms at 48 devices
    is open and this report does not guess.** Extrapolating from one size would be exactly the
@@ -494,11 +551,31 @@ repeatability. No conclusion about any policy is drawn from them.
    stamps only exist on a cell that talked to the real engine. The first H100 live cell run after
    the wiring lands is the test, and `f3_stamp_registers.json` is designed to make its own coverage
    legible on that first cell (`live_cell`, `absent_stamps`, `speed`).
-4. **`speed` is not in `run_meta.json` today.** F3 reads it from there and reports null when it is
-   missing, which leaves the register of `t_first_token` and `t_done` **unverified rather than
-   asserted**. It is 1.0 on a real-server cell as far as I can tell from `coordinator.py:1807-1808`,
-   but the runner does not record it and I did not add a write to a file I do not own. **This is a
-   small escalation:** one field in `run_meta.json` would close it.
+4. **`speed` is now recorded, in `run_live2_real.py`, and it ships in the same held wiring.**
+   Resolved rather than left open, but **the two paths differ in register and are not merged**:
+   - `--no-split`: the coordinator is in this process, so `co.speed` is **READ BACK OFF THE
+     INSTANCE** (`_CO.append(co)` and `type_read_back` beside the value). That is the strong
+     register, the same discipline `network_header` uses for the link.
+   - **split, which is the default**: the coordinator is in a child process and
+     `Live2Coordinator._result()` does not expose `speed`, so **no instance read is available to
+     the parent**. Closing that fully would need a field in `coordinator.py` (owned by the H100) or
+     in `procsplit.py` (unowned, but on every live cell's hot path, so editing it would widen the
+     byte-identity surface for a provenance field). Instead the record proves the weaker but
+     **checkable** statement: *this runner never passes `speed`, therefore the applied value is the
+     constructor default.* Both halves are verified, not asserted: `speed` is shown absent from the
+     `cfg` dict the parent sends (`cfg_keys_checked` lists what was inspected) and the default is
+     read out of `Live2Coordinator.__init__`'s signature by introspection. It is labelled
+     `DEFAULT, PROVED NOT OVERRIDDEN BY THIS RUNNER`, **not** as a measurement, because
+     a default read from a signature is not an instance read, and conflating the two is exactly
+     what item 3 exists to prevent.
+   - If a runner ever **does** pass `speed`, the record emits
+     `UNKNOWN: THE RUNNER PASSED speed AND THE CHILD'S VALUE IS NOT READABLE FROM HERE` with a null
+     value, i.e. it **refuses to report a number it cannot see**. Tested, along with a `WARNING`
+     that fires when the value is not 1.0 so scaled stamps can never be plotted as observed.
+
+   **Remaining limitation, named:** on the default path the value is a proved default, not an
+   observation. One field in `coordinator.py`'s `_result()` would upgrade it, and that file is not
+   mine.
 5. **The per-request upload join for recalls is a declared join, not a measurement** (section 1).
    It is correct for the committed trace shape and would need revisiting if a question ever carries
    frames; StudyNET-TIER1 N1 records that query delta upload is ABSENT today.

@@ -89,6 +89,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import json
+import sys
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
@@ -140,6 +141,77 @@ def dump_uplink_transfers(em: Any, out_dir: Path) -> Dict[str, Any]:
 
 # ------------------------------------------------------------------------------------ the join
 
+def speed_record(cfg: Optional[Dict[str, Any]] = None, co: Any = None) -> Dict[str, Any]:
+    """What `speed` ACTUALLY WAS, with the register of how we know it.
+
+    WHY THIS IS NOT JUST A NUMBER. `t_first_token` and `t_done` are `sent_s + ttft_s|total_s *
+    self.speed` (`coordinator.py:1807-1808`, `:2022-2023`, `:2064`). At speed 1.0 they are the
+    measured instants; at anything else they are SCALED measurements and calling them MEASURED in
+    an F3 CDF would be wrong. Nothing recorded the value, so F3 reported `null` and left the
+    register of those two stamps UNVERIFIED.
+
+    THE TWO PATHS DIFFER IN REGISTER AND ARE NOT MERGED.
+
+      in-process (`--no-split`)  the coordinator object is in THIS process, so `co.speed` is READ
+                                 BACK OFF THE OBJECT UNDER TEST. That is the strong register and it
+                                 is the same discipline `network_header` uses for the link.
+      split (the DEFAULT)        the coordinator lives in a CHILD process and `Live2Coordinator.
+                                 _result()` does not expose `speed`, so no instance read is
+                                 available to the parent WITHOUT editing an owned file
+                                 (`coordinator.py`, held by the H100) or `procsplit.py`, which is
+                                 on the hot path of every live cell. So the parent proves the
+                                 weaker but checkable statement instead: THE RUNNER NEVER PASSES
+                                 `speed`, therefore the applied value is the constructor default.
+                                 Both halves of that are verified here rather than asserted - the
+                                 absence of the key from the cfg this runner sends, and the default
+                                 read out of the signature by introspection.
+
+    A DEFAULT READ FROM A SIGNATURE IS NOT AN INSTANCE READ, and this function says so in the
+    record instead of emitting a bare `1.0` that reads like a measurement. That is the same
+    distinction item 3 exists to enforce: do not report what was configured as what was applied.
+    """
+    out: Dict[str, Any] = {"applies_to": ["t_first_token", "t_done"]}
+    if co is not None and hasattr(co, "speed"):
+        out.update(value=float(co.speed), register="READ BACK OFF THE COORDINATOR INSTANCE",
+                   source="co.speed in this process (--no-split)",
+                   type_read_back=type(getattr(co, "speed")).__name__)
+    else:
+        default = None
+        try:
+            import inspect                                                  # noqa: PLC0415
+            import coordinator as CO                                        # noqa: PLC0415
+            p = inspect.signature(CO.Live2Coordinator.__init__).parameters.get("speed")
+            default = (None if p is None or p.default is inspect.Parameter.empty
+                       else float(p.default))
+        except Exception as e:                                              # noqa: BLE001
+            out["introspection_error"] = f"{type(e).__name__}: {e}"
+        passed = bool(cfg is not None and "speed" in cfg)
+        out.update(value=(None if passed else default),
+                   register=("UNKNOWN: THE RUNNER PASSED speed AND THE CHILD'S VALUE IS NOT "
+                             "READABLE FROM HERE" if passed else
+                             "DEFAULT, PROVED NOT OVERRIDDEN BY THIS RUNNER"),
+                   source=("this runner PASSED `speed` in cfg, so the constructor default is not "
+                           "the applied value and the applied value is in the child process where "
+                           "this parent cannot read it. Refusing to report a number."
+                           if passed else
+                           "inspect.signature(Live2Coordinator.__init__)['speed'].default, "
+                           "together with the proof beside it that this runner does not override "
+                           "it (`speed` is absent from `cfg_keys_checked`)"),
+                   runner_passes_speed=passed,
+                   constructor_default=default,
+                   cfg_keys_checked=(sorted(cfg) if cfg is not None else None),
+                   note=("the coordinator runs in a CHILD process in split mode and _result() does "
+                         "not expose speed, so this is NOT an instance read. Closing that would "
+                         "need a field in coordinator.py (owned by the H100) or in procsplit.py "
+                         "(unowned but on every live cell's hot path)."))
+    v = out.get("value")
+    out["stamps_are_unscaled_measurements"] = (None if v is None else bool(abs(v - 1.0) < 1e-12))
+    if v is not None and abs(v - 1.0) >= 1e-12:
+        out["WARNING"] = ("speed is %r, so t_first_token and t_done are SCALED measurements and "
+                          "must not be plotted as observed instants." % v)
+    return out
+
+
 def _jsonl(p: Path) -> List[Dict[str, Any]]:
     if not p.exists():
         return []
@@ -170,9 +242,11 @@ def _gap(a: Dict[str, Any], b: Dict[str, Any]) -> Optional[float]:
     return round(float(b["t"]) - float(a["t"]), 6)
 
 
-def build(run_dir: Path, trace_dir: Optional[Path] = None) -> Dict[str, Any]:
+def build(run_dir: Path, trace_dir: Optional[Path] = None,
+          speed: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Join the existing logs into `f3_latency_stamps.jsonl` and write the register table."""
     run_dir = Path(run_dir)
+    transfers_file_present = (run_dir / TRANSFERS).exists()
     reqs = _jsonl(run_dir / "request.jsonl")
     decs = _jsonl(run_dir / "decision.jsonl")
     outs = _jsonl(run_dir / "outcomes.jsonl")
@@ -213,7 +287,45 @@ def build(run_dir: Path, trace_dir: Optional[Path] = None) -> Dict[str, Any]:
             per_opp[o] = per_opp.get(o, 0) + 1
 
     live = any(isinstance(r.get("http_status"), int) for r in reqs)
-    speed = meta.get("speed")
+    if speed is None:
+        speed = ((meta.get("figure_instrumentation") or {}).get("speed")
+                 if isinstance(meta.get("figure_instrumentation"), dict) else None)
+    if speed is None and meta.get("speed") is not None:
+        speed = {"value": meta.get("speed"), "register": "FROM run_meta.json speed",
+                 "source": "run_meta.json", "applies_to": ["t_first_token", "t_done"]}
+    if speed is None:
+        speed = {"value": None, "register": "UNVERIFIED",
+                 "applies_to": ["t_first_token", "t_done"],
+                 "absent_reason": ("nothing in this cell recorded `speed`. This cell predates the "
+                                   "`speed` record, so the register of t_first_token and t_done "
+                                   "is UNVERIFIED: they are `sent_s + ttft_s|total_s * speed` and "
+                                   "are measured instants only if speed was 1.0.")}
+
+    # ---- THE EMULATED UPLOAD STAMPS: STRUCTURAL ABSENCE vs AN INSTRUMENTATION GAP -------------
+    # These two are NOT the same thing and a reader meeting a null will assume the second. The
+    # upload stamps can only be dumped while the emulator OBJECT is alive, i.e. from inside the
+    # run. A cell processed POST HOC can never have them, however good the instrumentation is; a
+    # cell run through the wired runner always should. So the file's presence is reported as a
+    # VERDICT with the distinction spelled out, not as an absent count a reader has to interpret.
+    if transfers_file_present:
+        up_verdict = "PRESENT"
+        up_reason = ("%s was written by the live runner during the run, so the EMULATED upload "
+                     "stamps are real and complete for every transfer the emulator performed."
+                     % TRANSFERS)
+    else:
+        up_verdict = "ABSENT, STRUCTURALLY, AND NOT RECOVERABLE FOR THIS CELL"
+        up_reason = (
+            "%s is not in this run directory, so NO frame-upload offer / start / end stamp could "
+            "be joined for ANY request. THIS IS A STRUCTURAL ABSENCE, NOT AN INSTRUMENTATION GAP, "
+            "AND IT IS NOT FIXABLE AFTER THE FACT. Those three instants live on "
+            "links.UplinkQueue.log, i.e. on the emulator OBJECT, and the object exists only while "
+            "the run is in progress; once the process has exited they are gone for good. A cell "
+            "processed POST HOC (f3_latency_stamps.py --run-dir on a finished cell) therefore "
+            "CANNOT have them, and re-running this script will never produce them. They are "
+            "present on any cell run through the wired runner, which dumps them before the "
+            "process exits. DO NOT read this absence as a missing feature, and DO NOT plot an F3 "
+            "CDF from this cell as though its upload leg were measured at zero: the upload leg is "
+            "simply not in this cell." % TRANSFERS)
     absent: Dict[str, int] = {}
     n = 0
     with open(run_dir / ROWS, "w") as fh:
@@ -295,6 +407,18 @@ def build(run_dir: Path, trace_dir: Optional[Path] = None) -> Dict[str, Any]:
                                         "outcomes.jsonl t_opportunity, the trace's capture / ask "
                                         "instant on the run clock"),
                 "frame_uploads": ups,
+                # LOUD IN THE ROW, not only in the summary. An empty list reads as "this request
+                # referenced no frames", which is a statement about the workload; the two real
+                # causes are a structural absence and a failed join, and they are different facts.
+                "frame_uploads_absent": (None if ups else (
+                    ("STRUCTURAL: %s is not in this run directory, so no upload stamp exists for "
+                     "ANY request in this cell. The three instants live on the emulator object and "
+                     "cannot be recovered after the process exits. NOT an instrumentation gap and "
+                     "NOT recoverable by re-running this script." % TRANSFERS)
+                    if not transfers_file_present else
+                    ("JOIN: the upload log exists and has %d transfers, but none of them matched "
+                     "this request (opportunity %r, kind %r, session %r). This IS a join gap and "
+                     "is worth investigating." % (len(trs), opp, kind, r.get("session_id"))))),
                 "t_coordinator_receive": s_recv,
                 "t_coordinator_release": s_rel,
                 "t_engine_submit": s_sub,
@@ -358,11 +482,21 @@ def build(run_dir: Path, trace_dir: Optional[Path] = None) -> Dict[str, Any]:
         "speed": speed,
         "speed_note": ("t_first_token and t_done are sent_s + ttft_s|total_s * speed. speed 1.0 "
                        "means they are the measured instants; any other value makes them SCALED "
-                       "measurements. Read from run_meta.json; null means it was not recorded "
-                       "there and the register of those two stamps is unverified."),
+                       "measurements. `speed.register` says HOW the value is known: an instance "
+                       "read, a default proved not overridden, or UNVERIFIED."),
+        # THE HEADLINE ABOUT THE EMULATED LEG, first-class rather than inferable from a count.
+        "uplink_transfers": up_verdict,
+        "uplink_transfers_reason": up_reason,
+        "uplink_transfers_file": TRANSFERS,
+        "uplink_transfers_file_present": transfers_file_present,
+        "emulated_upload_leg_usable_for_a_cdf": transfers_file_present,
         "n_rows": n,
         "n_transfers_joined": len(trs),
         "absent_stamps": dict(sorted(absent.items())),
+        "absent_stamps_note": ("counts of rows whose stamp could not be joined. Read "
+                               "`uplink_transfers` FIRST: if it is structurally absent then "
+                               "`frame_uploads` equals n_rows by construction and says nothing "
+                               "about the join."),
         "registers": {
             "t_opportunity": EMULATED,
             "frame_uploads.t_upload_offer": EMULATED,
@@ -442,6 +576,11 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
                 td = None
     reg = build(rd, td)
     print(json.dumps(reg, indent=1, sort_keys=True))
+    # THE HEADLINE ON STDOUT TOO, because the structural absence is the thing a reader of a
+    # post-hoc run most needs to see and it must not have to be dug out of a JSON field.
+    print("\nuplink_transfers: %s" % reg.get("uplink_transfers"), file=sys.stderr)
+    if not reg.get("uplink_transfers_file_present"):
+        print(reg.get("uplink_transfers_reason"), file=sys.stderr)
     return 0
 
 

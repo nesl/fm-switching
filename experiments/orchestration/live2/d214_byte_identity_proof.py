@@ -10,11 +10,13 @@ THREE PROOFS, IN INCREASING STRENGTH, AND THE WEAKEST IS NOT SKIPPED BECAUSE THE
 
   (a) STRUCTURAL, CONSTRUCTED. Every line of the new instrumentation runs AFTER `em.run()` has
       returned: the emulator's loop has ended, the coordinator is closed, every log file is
-      written, and there is no decision left to make. The ONLY statement added inside the run is
-      `_EMU.append(em)` in `run_live2_real._emulator`, a list append of a reference to an object
-      that already exists; it mutates no state any decision reads. This is reported as CONSTRUCTED,
-      because an argument from reading code is not a measurement. It is also not a switch that
-      happens to be off by default, which the brief asks us not to ship.
+      written, and there is no decision left to make. Exactly TWO statements are added inside the
+      run, and both are list appends of a reference to an object that already exists:
+      `_EMU.append(em)` in `run_live2_real._emulator` and `_CO.append(co)` in
+      `run_live2_real._inprocess`. Neither mutates any state a decision reads, and neither is read
+      until after the run. This is reported as CONSTRUCTED, because an argument from reading code
+      is not a measurement. It is also not a switch that happens to be off by default, which the
+      brief asks us not to ship.
 
   (b) IMPORT-CLOSURE, OBSERVED. A decision path that never imports a module cannot be changed by
       it. This proof runs one dry cell and then reports whether `network_header`,
@@ -318,9 +320,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         "cell": {"arm": a.arm, "seed": a.seed, "n_devices": a.n, "run_s": a.run_s, "mode": "A"},
         "proof_a_structural": {
             "register": "CONSTRUCTED",
-            "statement": ("every added line runs after em.run() returned; the only statement added "
-                          "inside the run is `_EMU.append(em)` in run_live2_real._emulator, a list "
-                          "append of a reference to an already-existing object."),
+            "statement": ("every added line runs after em.run() returned. Exactly two statements "
+                          "are added inside the run, both list appends of a reference to an "
+                          "already-existing object: _EMU.append(em) in run_live2_real._emulator "
+                          "and _CO.append(co) in run_live2_real._inprocess. Neither mutates state "
+                          "any decision reads and neither is read until after the run."),
+            "in_run_statements_added": 2,
         },
         "proof_b_import_closure": import_closure_census(after, work),
         "proof_c_paired_cells": {
