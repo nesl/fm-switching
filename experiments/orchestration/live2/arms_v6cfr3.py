@@ -557,4 +557,53 @@ def register() -> List[str]:
     return sorted(V6CFR3_ARMS)
 
 
+# ---------------------------------------------------------------------------------------------
+# D208: THE FINAL LADDER'S NAMES, ON THE NORMAL IMPORT PATH.
+#
+# THE PROBLEM THIS SOLVES, and it is a hard one rather than a tidiness point. `arms.py` imports
+# every v6 family EXCEPT `arms_final_ladder`, and `arms_final_ladder.register()` has no production
+# caller: its only callers are per-study wrappers that each call it themselves because nothing else
+# does. So `arms.make_arm("covex-v6-fair-final")` RAISES "unknown arm" on the normal path, and
+# `run_live2_real.py:264` reaches the arm through exactly that call. A POSTED cell list would
+# therefore have died at launch on the H100, which is the same registration gap that made all
+# eleven `covex-v6-cf-pd` arms invisible to the harness.
+#
+# WHY THE FACTORIES ARE LAZY, which is the whole trick. `arms_final_ladder` imports THIS module
+# (`arms_v6cfr3 as R4`), so a module-level `import arms_final_ladder` here would be a CIRCULAR
+# import and would fail. The import therefore happens INSIDE each factory, at CALL time, when this
+# module is already fully initialised. Nothing is imported at registration time, so the cost of
+# adding these three keys to a tree that never builds them is three dict entries.
+#
+# WHY HERE AND NOT IN `arms.py`: `arms.py` belongs to another session. This module is rung 4's own,
+# it is already imported by `arms.py` (`from arms_v6cfr3 import V6CFR3_ARMS`), and the final ladder
+# is built on rung 4's machinery, so the names arrive on the normal path without reaching into a
+# file this session does not own.
+#
+# THE GUARD IS NOT BYPASSED. `arms_final_ladder.make_rung*` are the same constructors
+# `arms_final_ladder.register()` registers, and each reads its switches back and raises if one did
+# not take. The protected-name check still holds by construction: the three keys below are the only
+# ones added, and none of them is a committed arm name.
+
+
+def _final_ladder_lazy() -> Dict[str, Any]:
+    """The three final-rung factories, each importing `arms_final_ladder` at CALL time."""
+    def r2(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung2(FL.RUNG2, **kw)
+
+    def r3(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3, **kw)
+
+    def r4(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung4(FL.RUNG4, **kw)
+    return {"covex-v6-state-final": r2, "covex-v6-fair-final": r3, "covex-v6-final": r4}
+
+
+for _k, _v in _final_ladder_lazy().items():
+    if _k in V6CFR3_ARMS:                                                  # pragma: no cover
+        raise RuntimeError("the final ladder would shadow a rung-4 name: %r" % (_k,))
+    V6CFR3_ARMS[_k] = _v
+
 ARMS = V6CFR3_ARMS

@@ -1,0 +1,175 @@
+{
+ "_what": "proofs (b) Step 2b per rung and (c) the id(obs) fix, on the final ladder.",
+ "_archived_sha": "7449442135eea109e5f2b44cc2116119051d3224",
+ "_tree": "a PRIVATE git archive of that sha, NOT /tmp/claude-1001/mapwt. Verified before running: arms.py, coordinator.py and v5/cf_objective.py in the archived tree are byte-identical to origin, each checked with cmp against git show. Those three differ from origin in the shared worktree right now, and all three are in every arm's import graph, so a cell run there would have carried another session's half-finished edit into the digest.",
+ "_recipe": "cf_pd_one_cell's committed recipe via final_ladder_one_cell.py, seed 4, n 16, 1200 s, posted knobs, --cutoff-off, ONE CELL PER PROCESS",
+ "_alone": {
+  "_how_established": "I observed the box myself at the START and END of every cell, enumerating python processes and reading /proc/<pid>/cwd, and counted foreign processes by what they ARE rather than by a name pattern. I did NOT rely on a guard: my earlier guard matched on 'one_cell' and was blind to two live processes.",
+  "foreign_python_processes": "ZERO before and after EVERY one of the four cells",
+  "loadavg_1min_at_each_boundary": {
+   "R2_final": [
+    0.29,
+    1.08
+   ],
+   "R3_final": [
+    1.08,
+    1.14
+   ],
+   "R4_final": [
+    1.14,
+    1.16
+   ],
+   "R2_committed_UNFIXED": [
+    1.15,
+    1.04
+   ]
+  },
+  "_note": "the rise from 0.29 to about 1.1 is my OWN cell, which is what one dry cell on an idle box looks like."
+ },
+ "PROOF_B_step_2b_per_rung": {
+  "_claim": "each rung's decisions differ from the rung below, with counts BY MECHANISM so a reader can see which switch moved what.",
+  "rung_2_covex_v6_state_final": {
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "switches_read_back": {
+    "qcache_key_fix_D188": true,
+    "release_recheck": false
+   },
+   "planner_weight_source": "NoPlannerDeficitFeed, the DECLARED CONSTANT, which is correct for rung 2",
+   "mechanism_counts": {
+    "state_decisions": 60934,
+    "state_chosen_TOUCH": 2267,
+    "state_chosen_KEEP": 58662,
+    "state_chosen_HOLD_BACK": 1,
+    "state_chosen_WARM": 4
+   }
+  },
+  "rung_3_covex_v6_fair_final": {
+   "digest": "5a03c2807da3681a",
+   "rows": 14539,
+   "switches_read_back": {
+    "qcache_key_fix_D188": true,
+    "release_recheck": true,
+    "types": [
+     "alert"
+    ]
+   },
+   "step_2b_against_rung_2": {
+    "rows": "+321",
+    "common_decision_keys": 9128,
+    "differing_on_a_deciding_field": 8624
+   },
+   "mechanism_counts_BY_SWITCH": {
+    "the_deficit_feed": {
+     "n_offers": 12253,
+     "n_completions": 9510,
+     "gain": 2.0,
+     "per_device_weights_are_NON_CONSTANT": "recall 1.632 to 2.365, alert 1.054 to 1.124, assistance 1.0",
+     "weights_by_type": {
+      "alert": 1.124229,
+      "recall": 2.365079,
+      "assistance": 1.0
+     }
+    },
+    "the_ORDERING_consumer_D185_3a": {
+     "order_key_resolved": 71531,
+     "order_key_unresolved_device": 0
+    },
+    "the_STATE_PLANNER_on_that_same_feed_D206_2": {
+     "reads": 63234,
+     "unresolved": 0,
+     "reads_above_the_w1_floor": 53596,
+     "feed_observations": 21763,
+     "_reading": "the planner limb is LIVE and NON-CONSTANT: 53,596 of 63,234 reads returned a weight above the w = 1 floor, and 0 reads failed to resolve a device."
+    },
+    "the_ALERT_release_re_check_D179_4": {
+     "release_infeasible_alert": 1878,
+     "release_infeasible_recall": 0,
+     "release_infeasible_assistance": 0,
+     "_reading": "the mechanism FIRES 1,878 times and alert-only held for the whole cell, which is the port rule satisfied for this switch."
+    },
+    "state_decisions": {
+     "total": 60920,
+     "TOUCH": 2954,
+     "KEEP": 57960,
+     "_reading": "TOUCH rises from rung 2's 2,267 to 2,954."
+    }
+   }
+  },
+  "rung_4_covex_v6_final": {
+   "digest": "57bed6ace2eb07d1",
+   "rows": 14509,
+   "switches_read_back": {
+    "qcache_key_fix_D188": true,
+    "release_recheck": true,
+    "types": [
+     "alert"
+    ]
+   },
+   "step_2b_against_rung_3": {
+    "rows": "-30",
+    "common_decision_keys": 11244,
+    "differing_on_a_deciding_field": 4557
+   },
+   "CROSS_SESSION_AGREEMENT": "this digest and row count are EXACTLY StudyD216-KV025's independently run F5/1x rung-4 cell, 57bed6ace2eb07d1, and rung 3's 5a03c2807da3681a / 14,539 is EXACTLY its F1_r3_final_1x. Two sessions, two trees, two runs, identical digests on both rungs.",
+   "mechanism_counts_BY_SWITCH": {
+    "protect_and_defer": {
+     "pd_decisions": 249,
+     "pd_decisions_state": 163,
+     "pd_decisions_request": 86,
+     "pd_harm_gt_0": 3,
+     "gates": {
+      "rebuild_fits_without_evicting": 193,
+      "no_active_alert_episode": 53,
+      "harm_does_not_exceed_the_bar": 1,
+      "wanted_to_act_but_no_slice_channel": 2
+     },
+     "_reading": "the compound REACHES 249 decisions and is CLASSIFIED rather than reported bare: 246 of 249 stop at a gate, 3 reach a non-zero harm. At 1x this is Rule 2 UNEXERCISED IN MAGNITUDE, consistent with D198's reach-limited closure, and NOT a negative about the policy."
+    },
+    "the_planner_limb": {
+     "reads": 63258,
+     "unresolved": 0,
+     "reads_above_the_w1_floor": 53620
+    }
+   }
+  },
+  "_verdict": "PASS. Every rung's decisions differ from the rung below, and every switch's own counter is NON-ZERO: the feed (12,253 offers), ordering (71,531 resolved), the planner limb (53,620 reads above the floor), the release re-check (1,878), and protect-and-defer (249 decisions)."
+ },
+ "PROOF_C_the_id_obs_fix_and_why_it_CANNOT_be_a_single_number": {
+  "_claim_as_specified": "how many rung-2 decisions the D188 id(obs) fix changes on dry s4.",
+  "measured_in_MY_tree_both_cells_ALONE": {
+   "fix_OFF_covex_v6_state_uo_c5attr": {
+    "digest": "64de6616ac382ed0",
+    "rows": 13991
+   },
+   "fix_ON_covex_v6_state_final": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218
+   },
+   "diff": {
+    "rows": "+227",
+    "common_decision_keys": 12067,
+    "differing_on_a_deciding_field": 2570
+   }
+  },
+  "THE_FINDING_THAT_MATTERS_MORE_THAN_THE_COUNT": {
+   "the_unfixed_arm_has_now_produced_THREE_DISTINCT_DIGESTS_on_one_recipe": [
+    "9a4be873eb3c5fba / 14,218  the COMMITTED bar",
+    "639cd15ed38c9da0 / 14,207  Session A's tree with the id(obs) key live and no edit to perturb allocation",
+    "64de6616ac382ed0 / 13,991  MY tree, this cell, verified ALONE with zero foreign processes"
+   ],
+   "_so": "my run ADDS A THIRD VALUE to Session A's two, which is stronger evidence than either alone that THE UNFIXED RUNG-2 DIGEST IS NOT A PROPERTY OF THE CODE. It is a property of where allocation happened to land, because _queued_behind keyed its cache on id(obs), a memory address.",
+   "AND_THE_SHARPEST_PART": "my FIX-ON arm gives 9a4be873eb3c5fba / 14,218, which is EXACTLY the COMMITTED BAR FOR THE UNFIXED ARM. So against one unfixed run the fix 'changes nothing', and against another it 'changes 2,570 decisions'. The 2,570 is therefore NOT the fix's effect; it is dominated by the comparator's own nondeterminism."
+  },
+  "THE_HONEST_FORM_per_D216_1": "an unfixed rung-2 digest is NEVER a valid bar. So the count is reported WITH its floor and WITH the statement that the comparator is not a valid bar at all, which makes the fix's effect NOT SEPARABLE from the nondeterminism it removes. That is an argument FOR the fix: a quantity you cannot measure because your baseline will not hold still is the defect, not a null.",
+  "the_floor": "Session A measured that a COMMENT-ONLY edit moved this arm by 85 committed-key decisions and 11 rows with no code change. My own two unfixed values differ by 227 rows from the fixed one and by 216 rows from Session A's unfixed one, all well above that floor, so the noise is not small relative to the signal; it is the same order or larger.",
+  "WHAT_I_AM_NOT_CLAIMING": "that the FIXED arm is reproducible. I ran it ONCE. Five of Session A's six variants and my fix-ON run all give 14,218, which is consistent with the (epoch, now_s) key being allocation-independent, but a REPRODUCTION RUN OF THE FIXED ARM IS OWED before stability is claimed."
+ },
+ "_provenance": {
+  "script": "final_ladder_one_cell.py over cf_pd_one_cell.main()",
+  "device": "flash (CPU only)",
+  "model": "n/a",
+  "n": 4,
+  "origin_main_sha_read": "7449442135eea109e5f2b44cc2116119051d3224"
+ }
+}

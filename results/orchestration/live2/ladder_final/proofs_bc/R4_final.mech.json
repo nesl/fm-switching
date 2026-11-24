@@ -1,0 +1,1110 @@
+{
+ "arm": "covex-v6-final",
+ "arm_built": true,
+ "class": "V6Final",
+ "n_arms_built_in_this_process": 1,
+ "all_stats_nonzero": {
+  "cf_budget_ms": 20.0,
+  "cf_planner_decisions": 60920,
+  "cf_planner_decisions_state": 60920,
+  "deficit_feed": {
+   "gain": 2.0,
+   "gain_ruling": "D178 (2), corrected by flash addendum 12 item 2",
+   "form": "w_d = 1 + gain * (shortfall_d / target_d), floored at 1, PER DEVICE",
+   "targets": {
+    "alert": 0.25,
+    "recall": 0.9,
+    "assistance": 0.9
+   },
+   "target_source": "D178 (1), spec v6 sections 2 and 8",
+   "units": {
+    "alert": "device-episode",
+    "recall": "device",
+    "assistance": "device"
+   },
+   "currency": "on-time CLOUD answers only (D177, D178 (1)); device_on_time recorded, never added to the numerator",
+   "alert_decision_instants_per_episode": 19,
+   "n_offers": 12005,
+   "n_completions": 9341,
+   "per_device": {
+    "asst000": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 117,
+     "cloud_on_time": 117
+    },
+    "asst001": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 117,
+     "cloud_on_time": 117
+    },
+    "asst002": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 116,
+     "cloud_on_time": 116
+    },
+    "dash000": {
+     "type": "alert",
+     "shortfall": 0.012453,
+     "weight": 1.099624,
+     "episodes_closed": 112,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash001": {
+     "type": "alert",
+     "shortfall": 0.006701,
+     "weight": 1.053606,
+     "episodes_closed": 108,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash002": {
+     "type": "alert",
+     "shortfall": 0.006881,
+     "weight": 1.055046,
+     "episodes_closed": 109,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash003": {
+     "type": "alert",
+     "shortfall": 0.007775,
+     "weight": 1.062201,
+     "episodes_closed": 110,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash004": {
+     "type": "alert",
+     "shortfall": 0.016003,
+     "weight": 1.128023,
+     "episodes_closed": 111,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash005": {
+     "type": "alert",
+     "shortfall": 0.008691,
+     "weight": 1.069532,
+     "episodes_closed": 109,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "robo000": {
+     "type": "recall",
+     "shortfall": 0.426316,
+     "weight": 1.947368,
+     "episodes_closed": null,
+     "offered": 19,
+     "cloud_on_time": 9
+    },
+    "robo001": {
+     "type": "recall",
+     "shortfall": 0.661905,
+     "weight": 2.470899,
+     "episodes_closed": null,
+     "offered": 21,
+     "cloud_on_time": 5
+    },
+    "robo002": {
+     "type": "recall",
+     "shortfall": 0.4625,
+     "weight": 2.027778,
+     "episodes_closed": null,
+     "offered": 16,
+     "cloud_on_time": 7
+    },
+    "robo003": {
+     "type": "recall",
+     "shortfall": 0.633333,
+     "weight": 2.407407,
+     "episodes_closed": null,
+     "offered": 15,
+     "cloud_on_time": 4
+    },
+    "robo004": {
+     "type": "recall",
+     "shortfall": 0.49375,
+     "weight": 2.097222,
+     "episodes_closed": null,
+     "offered": 32,
+     "cloud_on_time": 13
+    },
+    "robo005": {
+     "type": "recall",
+     "shortfall": 0.284615,
+     "weight": 1.632479,
+     "episodes_closed": null,
+     "offered": 13,
+     "cloud_on_time": 8
+    },
+    "robo006": {
+     "type": "recall",
+     "shortfall": 0.614286,
+     "weight": 2.365079,
+     "episodes_closed": null,
+     "offered": 14,
+     "cloud_on_time": 4
+    }
+   },
+   "weights_by_type_over_all_devices": {
+    "alert": 1.128023,
+    "recall": 2.470899,
+    "assistance": 1.0
+   },
+   "weights_by_type_pending": null,
+   "type_shortfall_DIAGNOSTIC_ONLY": {
+    "alert": 0.009784,
+    "recall": 0.510958,
+    "assistance": 0.0
+   },
+   "n_units": {
+    "alert": 659,
+    "recall": 7,
+    "assistance": 3
+   },
+   "counts": {
+    "alert_cloud_late": 51,
+    "alert_cloud_on_time": 8839,
+    "alert_device_on_time": 8890,
+    "alert_episode_key_agree": 8890,
+    "alert_episode_key_from_record": 8890,
+    "alert_episodes_closed": 659,
+    "alert_episodes_open": 6,
+    "alert_instant_repeat": 7036,
+    "alert_instants_offered": 11525,
+    "assistance_cloud_on_time": 350,
+    "assistance_device_late": 95,
+    "assistance_device_on_time": 255,
+    "assistance_questions_offered": 350,
+    "completion_background_skipped": 159,
+    "order_key_resolved": 71527,
+    "recall_cloud_late": 51,
+    "recall_cloud_on_time": 50,
+    "recall_device_on_time": 101,
+    "recall_question_repeat": 8,
+    "recall_questions_offered": 130
+   }
+  },
+  "deficit_feed_completions": 9672,
+  "gain_HOLD_BACK_max_milli": 998,
+  "gain_HOLD_BACK_milli_sum": 998,
+  "gain_HOLD_BACK_n": 60920,
+  "gain_TOUCH_max_milli": 1873,
+  "gain_TOUCH_milli_sum": 15468193,
+  "gain_TOUCH_n": 60920,
+  "gain_TOUCH_over_margin": 2960,
+  "gain_WARM_max_milli": 1733,
+  "gain_WARM_milli_sum": 29116,
+  "gain_WARM_n": 114,
+  "gain_WARM_over_margin": 6,
+  "harm_warm_capped": 1,
+  "harm_warm_max_milli": 998,
+  "harm_warm_milli_sum": 1661,
+  "harm_warm_no_queue": 58696,
+  "harm_warm_nonzero": 1631,
+  "harm_warm_priced": 2338,
+  "pd_decisions": 249,
+  "pd_decisions_request": 86,
+  "pd_decisions_state": 163,
+  "pd_deferred_to_guard_epochs": 1046,
+  "pd_free_kv_max": 62944,
+  "pd_free_kv_min": 8759,
+  "pd_free_kv_sum": 9777392,
+  "pd_gate_harm_does_not_exceed_the_bar": 1,
+  "pd_gate_no_active_alert_episode": 53,
+  "pd_gate_rebuild_fits_without_evicting": 193,
+  "pd_gate_wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here": 2,
+  "pd_harm_gt_0": 3,
+  "pd_harm_gt_0p01": 3,
+  "pd_harm_gt_0p1": 3,
+  "pd_harm_gt_0p65824": 3,
+  "pd_harm_gt_1": 3,
+  "pd_harm_gt_2": 1,
+  "pd_harm_gt_5": 1,
+  "pd_harm_micro_max": 5295616,
+  "pd_harm_micro_sum": 7977614,
+  "pd_harm_n": 3,
+  "pd_harm_over_bar": 2,
+  "pd_kv_bound_by_belief": 249,
+  "pd_request_crossed_bar_unexpressible": 2,
+  "pd_u_max": 16558,
+  "pd_u_sum": 896646,
+  "pd_victim_found": 205,
+  "rd_decider_weight_above_floor": 21,
+  "rd_decisions": 86,
+  "rd_defer_slack_used_ms_sum": 2718,
+  "rd_deferred_to_guard_epochs": 1046,
+  "rd_gate_defer_to_latest_safe_start": 4,
+  "rd_gate_must_start_now_no_slack": 45,
+  "rd_gate_no_active_alert_episode": 20,
+  "rd_gate_saving_does_not_exceed_margin": 17,
+  "rd_harm_now_micro_sum": 47570774,
+  "rd_harm_saved_micro_sum": 12611053,
+  "rd_net_micro_max": 3091138,
+  "rd_own_loss_micro_sum": 584859,
+  "rd_question_defers": 4,
+  "rd_reached_harm": 21,
+  "rd_skipped_already_deferred": 4,
+  "rd_u_built_only_minus_u_sum": -81920,
+  "rd_u_built_won": 58,
+  "rd_u_cold": 28,
+  "rd_u_differs_from_built_only": 28,
+  "rd_u_not_cold": 58,
+  "release_infeasible": 1842,
+  "release_infeasible_alert": 1842,
+  "state_chosen_KEEP": 57960,
+  "state_chosen_TOUCH": 2954,
+  "state_chosen_WARM": 6,
+  "state_decisions": 60920,
+  "state_decisions_with_a_rebuild": 114,
+  "state_decisions_without_a_rebuild": 60806,
+  "state_deferred_to_guard_epochs": 1046,
+  "state_delta_gt_0": 58702,
+  "state_delta_gt_0p01": 44069,
+  "state_delta_gt_0p05": 29388,
+  "state_delta_gt_0p1": 24799,
+  "state_delta_gt_0p12": 23503,
+  "state_delta_gt_0p14": 22413,
+  "state_delta_gt_0p16": 21423,
+  "state_delta_gt_0p16456": 21197,
+  "state_delta_gt_0p18": 20474,
+  "state_delta_gt_0p2": 19534,
+  "state_delta_gt_0p25": 17250,
+  "state_delta_max_milli": 1873,
+  "state_delta_milli_sum": 15469250,
+  "state_delta_n": 60920,
+  "state_delta_over_margin": 2960,
+  "state_deviations": 2960,
+  "state_skipped_no_question_estimate": 14783,
+  "state_skipped_nothing_built": 975,
+  "state_touch_emitted": 2954,
+  "submitted_monitor": 9053,
+  "submitted_piece": 163,
+  "submitted_recall": 460
+ },
+ "pd_counters": {
+  "pd_decisions": 249,
+  "pd_decisions_request": 86,
+  "pd_decisions_state": 163,
+  "pd_deferred_to_guard_epochs": 1046,
+  "pd_free_kv_max": 62944,
+  "pd_free_kv_min": 8759,
+  "pd_free_kv_sum": 9777392,
+  "pd_gate_harm_does_not_exceed_the_bar": 1,
+  "pd_gate_no_active_alert_episode": 53,
+  "pd_gate_rebuild_fits_without_evicting": 193,
+  "pd_gate_wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here": 2,
+  "pd_harm_gt_0": 3,
+  "pd_harm_gt_0p01": 3,
+  "pd_harm_gt_0p1": 3,
+  "pd_harm_gt_0p65824": 3,
+  "pd_harm_gt_1": 3,
+  "pd_harm_gt_2": 1,
+  "pd_harm_gt_5": 1,
+  "pd_harm_micro_max": 5295616,
+  "pd_harm_micro_sum": 7977614,
+  "pd_harm_n": 3,
+  "pd_harm_over_bar": 2,
+  "pd_kv_bound_by_belief": 249,
+  "pd_request_crossed_bar_unexpressible": 2,
+  "pd_u_max": 16558,
+  "pd_u_sum": 896646,
+  "pd_victim_found": 205
+ },
+ "rd_counters": {
+  "rd_decider_weight_above_floor": 21,
+  "rd_decisions": 86,
+  "rd_defer_slack_used_ms_sum": 2718,
+  "rd_deferred_to_guard_epochs": 1046,
+  "rd_gate_defer_to_latest_safe_start": 4,
+  "rd_gate_must_start_now_no_slack": 45,
+  "rd_gate_no_active_alert_episode": 20,
+  "rd_gate_saving_does_not_exceed_margin": 17,
+  "rd_harm_now_micro_sum": 47570774,
+  "rd_harm_saved_micro_sum": 12611053,
+  "rd_net_micro_max": 3091138,
+  "rd_own_loss_micro_sum": 584859,
+  "rd_question_defers": 4,
+  "rd_reached_harm": 21,
+  "rd_skipped_already_deferred": 4,
+  "rd_u_built_only_minus_u_sum": -81920,
+  "rd_u_built_won": 58,
+  "rd_u_cold": 28,
+  "rd_u_differs_from_built_only": 28,
+  "rd_u_not_cold": 58
+ },
+ "deficit_counters": {
+  "deficit_feed": {
+   "gain": 2.0,
+   "gain_ruling": "D178 (2), corrected by flash addendum 12 item 2",
+   "form": "w_d = 1 + gain * (shortfall_d / target_d), floored at 1, PER DEVICE",
+   "targets": {
+    "alert": 0.25,
+    "recall": 0.9,
+    "assistance": 0.9
+   },
+   "target_source": "D178 (1), spec v6 sections 2 and 8",
+   "units": {
+    "alert": "device-episode",
+    "recall": "device",
+    "assistance": "device"
+   },
+   "currency": "on-time CLOUD answers only (D177, D178 (1)); device_on_time recorded, never added to the numerator",
+   "alert_decision_instants_per_episode": 19,
+   "n_offers": 12005,
+   "n_completions": 9341,
+   "per_device": {
+    "asst000": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 117,
+     "cloud_on_time": 117
+    },
+    "asst001": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 117,
+     "cloud_on_time": 117
+    },
+    "asst002": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 116,
+     "cloud_on_time": 116
+    },
+    "dash000": {
+     "type": "alert",
+     "shortfall": 0.012453,
+     "weight": 1.099624,
+     "episodes_closed": 112,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash001": {
+     "type": "alert",
+     "shortfall": 0.006701,
+     "weight": 1.053606,
+     "episodes_closed": 108,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash002": {
+     "type": "alert",
+     "shortfall": 0.006881,
+     "weight": 1.055046,
+     "episodes_closed": 109,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash003": {
+     "type": "alert",
+     "shortfall": 0.007775,
+     "weight": 1.062201,
+     "episodes_closed": 110,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash004": {
+     "type": "alert",
+     "shortfall": 0.016003,
+     "weight": 1.128023,
+     "episodes_closed": 111,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash005": {
+     "type": "alert",
+     "shortfall": 0.008691,
+     "weight": 1.069532,
+     "episodes_closed": 109,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "robo000": {
+     "type": "recall",
+     "shortfall": 0.426316,
+     "weight": 1.947368,
+     "episodes_closed": null,
+     "offered": 19,
+     "cloud_on_time": 9
+    },
+    "robo001": {
+     "type": "recall",
+     "shortfall": 0.661905,
+     "weight": 2.470899,
+     "episodes_closed": null,
+     "offered": 21,
+     "cloud_on_time": 5
+    },
+    "robo002": {
+     "type": "recall",
+     "shortfall": 0.4625,
+     "weight": 2.027778,
+     "episodes_closed": null,
+     "offered": 16,
+     "cloud_on_time": 7
+    },
+    "robo003": {
+     "type": "recall",
+     "shortfall": 0.633333,
+     "weight": 2.407407,
+     "episodes_closed": null,
+     "offered": 15,
+     "cloud_on_time": 4
+    },
+    "robo004": {
+     "type": "recall",
+     "shortfall": 0.49375,
+     "weight": 2.097222,
+     "episodes_closed": null,
+     "offered": 32,
+     "cloud_on_time": 13
+    },
+    "robo005": {
+     "type": "recall",
+     "shortfall": 0.284615,
+     "weight": 1.632479,
+     "episodes_closed": null,
+     "offered": 13,
+     "cloud_on_time": 8
+    },
+    "robo006": {
+     "type": "recall",
+     "shortfall": 0.614286,
+     "weight": 2.365079,
+     "episodes_closed": null,
+     "offered": 14,
+     "cloud_on_time": 4
+    }
+   },
+   "weights_by_type_over_all_devices": {
+    "alert": 1.128023,
+    "recall": 2.470899,
+    "assistance": 1.0
+   },
+   "weights_by_type_pending": null,
+   "type_shortfall_DIAGNOSTIC_ONLY": {
+    "alert": 0.009784,
+    "recall": 0.510958,
+    "assistance": 0.0
+   },
+   "n_units": {
+    "alert": 659,
+    "recall": 7,
+    "assistance": 3
+   },
+   "counts": {
+    "alert_cloud_late": 51,
+    "alert_cloud_on_time": 8839,
+    "alert_device_on_time": 8890,
+    "alert_episode_key_agree": 8890,
+    "alert_episode_key_from_record": 8890,
+    "alert_episodes_closed": 659,
+    "alert_episodes_open": 6,
+    "alert_instant_repeat": 7036,
+    "alert_instants_offered": 11525,
+    "assistance_cloud_on_time": 350,
+    "assistance_device_late": 95,
+    "assistance_device_on_time": 255,
+    "assistance_questions_offered": 350,
+    "completion_background_skipped": 159,
+    "order_key_resolved": 71527,
+    "recall_cloud_late": 51,
+    "recall_cloud_on_time": 50,
+    "recall_device_on_time": 101,
+    "recall_question_repeat": 8,
+    "recall_questions_offered": 130
+   }
+  },
+  "deficit_feed_completions": 9672
+ },
+ "planner_limb_w_source": {
+  "source": "live2/deficit_feed.DeficitFeed.weight_device, THE SAME FEED OBJECT the counterfactual legs read (D206 item 1b)",
+  "is_declared_constant": false,
+  "gain": 2.0,
+  "reads": 63258,
+  "unresolved": 0,
+  "reads_above_the_w1_floor": 53620,
+  "feed_observations": 21765,
+  "identity_note": "the legs and this limb read ONE object, so an equality proof between them is an IDENTITY with maximum absolute difference exactly 0, not a measurement of agreement"
+ },
+ "rd_report": {
+  "switch": {
+   "attr": "live2_cf_request_defer",
+   "on": true,
+   "chain": [
+    {
+     "class": "V6Final",
+     "declared_on_instance": true,
+     "value": true,
+     "type": "bool"
+    },
+    {
+     "class": "V5Rules2Arm",
+     "declared_on_instance": true,
+     "value": true,
+     "type": "bool"
+    },
+    {
+     "class": "HybridArm",
+     "declared_on_instance": true,
+     "value": true,
+     "type": "bool"
+    }
+   ]
+  },
+  "net_gain": {
+   "n": 21,
+   "min": -0.04509402393738593,
+   "median": -0.015342294040210806,
+   "p90": 3.0149748499598816,
+   "max": 3.0911384986530903,
+   "n_distinct": 21
+  },
+  "bar": {
+   "n": 21,
+   "min": 0.7209295238095239,
+   "median": 1.442808888888889,
+   "max": 1.97472,
+   "n_distinct": 14,
+   "at_w1": 0.65824,
+   "n_above_w1_floor": 21
+  },
+  "traced_decision": [
+   "request-deferral decision, robo003 at t = 677.4 s",
+   "  uncached prefill u          = 5354 tokens",
+   "  alert instants pending      = 3",
+   "  added first-token delay     = 0.822271 s  (0.0001535807289338535 x u)",
+   "  harm if sent now            = 3.062313 on-time answers over 3 rows",
+   "  deferral                    = 1.067657 s to the latest safe start",
+   "  harm SAVED                  = 3.062313 over 3 rows (alert 3.062313); 0 rows still harmed, 0.000000",
+   "  OWN loss                    = 0.047339  (w_R 3.0000 x (p 0.987243 -> 0.971463), slack 2.923 -> 1.855 s)",
+   "  NET                         = 3.014975  against bar 1.974720  (w_R x MARGIN_CF, robo003)",
+   "  crosses the bar             = True",
+   "  gate / action               = defer_to_latest_safe_start / DEFER_TO_LATEST_SAFE_START"
+  ],
+  "traced_decision_record": {
+   "version": "cf-request-defer-1.1",
+   "decider_device_id": "robo003",
+   "now_s": 677.4,
+   "alert_active": true,
+   "n_alert_pending": 3,
+   "u_request": 5354,
+   "w_source": "covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS",
+   "action": "DEFER_TO_LATEST_SAFE_START",
+   "gate": "defer_to_latest_safe_start",
+   "harm_scale": 1.0,
+   "margin_scale": 1.0,
+   "latest_safe_start": {
+    "latest_start_s": 678.467657,
+    "predicted_service_s": 0.991049,
+    "safety_factor": 1.8721,
+    "feasible": true,
+    "must_start_now": false,
+    "deferral_s": 1.067657,
+    "decode_included": true,
+    "latest_start_if_decode_omitted_s": 678.473457,
+    "decode_omission_error_s": 0.005801,
+    "safety_factor_source": "results/orchestration/live2/frozen_test/d190_recall_lag_diagnosis.json",
+    "safety_factor_quantile": "nearest-rank q90 over n=5",
+    "safety_factor_measured_range": [
+     1.3856,
+     1.8721
+    ],
+    "committed_kappa_not_used_here": 1.5775406165458339
+   },
+   "deferral_s": 1.067657,
+   "must_start_now": false,
+   "lss_feasible": true,
+   "harm_now": 3.06231338064495,
+   "harm_by_type_now": {
+    "alert": 3.06231338
+   },
+   "delta_first_token_s": 0.8222712227118516,
+   "per_queue_s": 0.0001535807289338535,
+   "price_source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)",
+   "n_others_considered": 3,
+   "n_others_moved": 3,
+   "harm_saved_unscaled": 3.06231338,
+   "harm_saved": 3.06231338,
+   "harm_saved_alert": 3.06231338,
+   "harm_still_inflicted": 0.0,
+   "n_rows_saved": 3,
+   "n_rows_still_harmed": 0,
+   "saved_rows_sample": [
+    {
+     "req_id": "opp0006833",
+     "qtype": "alert",
+     "slack_s": 0.32112900000004174,
+     "value_lost": 1.008777339
+    },
+    {
+     "req_id": "opp0006834",
+     "qtype": "alert",
+     "slack_s": 0.3267510000000584,
+     "value_lost": 1.014081597
+    },
+    {
+     "req_id": "opp0006836",
+     "qtype": "alert",
+     "slack_s": 0.4832930000000033,
+     "value_lost": 1.039454444
+    }
+   ],
+   "own_engine_s": 0.9470492221864373,
+   "own_slack_now_s": 2.923000000000002,
+   "own_slack_after_s": 1.855342999999948,
+   "own_p_before": 0.9872425836416057,
+   "own_p_after": 0.9714630736282329,
+   "own_loss": 0.04733853004011823,
+   "w_decider": 3.0,
+   "net_gain": 3.0149748499598816,
+   "bar": {
+    "bar": 1.97472,
+    "w_d": 3.0,
+    "bar_weight_source": "robo003",
+    "margin_scale": 1.0,
+    "reading": "decider",
+    "margin_cf_on_time": 0.65824
+   },
+   "bar_value": 1.97472,
+   "crosses_bar": true,
+   "units": "counts of expected on-time cloud answers, per-device w_d weighted; MARGIN_CF = 0.65824 on-time answers (D191 item 1)",
+   "residency_input": {
+    "kind": "RESIDENT_TOKEN_COUNT",
+    "quantity": "u_request = readiness_tokens - built_tokens_by_session[session]",
+    "is_a_tier_label": false,
+    "why_it_matters": "D190 (5) track C: the hybrid gate prices on the three-label residency_readiness(), so GPU-WARM at 44 percent resident and at 28 percent resident price identically; on one history that collapse was 8.17x optimistic (0.6506 s predicted, 5.3166 s observed)",
+    "exposure_this_module_does_inherit": "built_tokens_by_session is the coordinator's BELIEF, not engine telemetry (D44, D47), so an overstated belief understates u and puts the latest safe start too late by that much",
+    "measured_predictor_bias": "D162 under-predicts first token by 1.39x to 1.87x on the five recall questions SENT in the committed rung-3 cells (d190_recall_lag_diagnosis.json)",
+    "kappa_coverage": "kappa = 1.577541 covers 1.39x and DOES NOT cover 1.87x. Not widened: D191 item 2 fixes the safety factor to committed FIT data, and a factor fitted to the cells under diagnosis would be tuning. The consequence is reported as 'any recall made late by a deferral' and is expected to be non-zero."
+   },
+   "would_miss_deadline_under_measured_bias": {
+    "recall_deadline_s_label": 3.0,
+    "predicted_total_service_s": 0.9910492221864373,
+    "deferral_s": 1.067657,
+    "safety_factor_used": 1.8721,
+    "at_measured_worst_bias": {
+     "bias": 1.8721,
+     "overrun_s": 0.0,
+     "would_miss": false
+    },
+    "at_measured_best_bias": {
+     "bias": 1.3856,
+     "overrun_s": -0.4821454465937019,
+     "would_miss": false
+    },
+    "at_committed_kappa": {
+     "bias": 1.5775406165458339,
+     "overrun_s": -0.29192284785996797,
+     "would_miss": false
+    }
+   },
+   "session_id": "robo003|s001|3703477849945137_start_0.0_end_599.96",
+   "u_detail": {
+    "u": 5354,
+    "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+    "u_built_only": 5354,
+    "readiness": "GPU-WARM",
+    "built_tokens": 4217,
+    "telemetry_cached_tokens": 0,
+    "prompt_tokens": 9571
+   }
+  },
+  "traced_bar_crossing": [
+   "request-deferral decision, robo003 at t = 677.4 s",
+   "  uncached prefill u          = 5354 tokens",
+   "  alert instants pending      = 3",
+   "  added first-token delay     = 0.822271 s  (0.0001535807289338535 x u)",
+   "  harm if sent now            = 3.062313 on-time answers over 3 rows",
+   "  deferral                    = 1.067657 s to the latest safe start",
+   "  harm SAVED                  = 3.062313 over 3 rows (alert 3.062313); 0 rows still harmed, 0.000000",
+   "  OWN loss                    = 0.047339  (w_R 3.0000 x (p 0.987243 -> 0.971463), slack 2.923 -> 1.855 s)",
+   "  NET                         = 3.014975  against bar 1.974720  (w_R x MARGIN_CF, robo003)",
+   "  crosses the bar             = True",
+   "  gate / action               = defer_to_latest_safe_start / DEFER_TO_LATEST_SAFE_START"
+  ],
+  "traced_bar_crossing_record": {
+   "version": "cf-request-defer-1.1",
+   "decider_device_id": "robo003",
+   "now_s": 677.4,
+   "alert_active": true,
+   "n_alert_pending": 3,
+   "u_request": 5354,
+   "w_source": "covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS",
+   "action": "DEFER_TO_LATEST_SAFE_START",
+   "gate": "defer_to_latest_safe_start",
+   "harm_scale": 1.0,
+   "margin_scale": 1.0,
+   "latest_safe_start": {
+    "latest_start_s": 678.467657,
+    "predicted_service_s": 0.991049,
+    "safety_factor": 1.8721,
+    "feasible": true,
+    "must_start_now": false,
+    "deferral_s": 1.067657,
+    "decode_included": true,
+    "latest_start_if_decode_omitted_s": 678.473457,
+    "decode_omission_error_s": 0.005801,
+    "safety_factor_source": "results/orchestration/live2/frozen_test/d190_recall_lag_diagnosis.json",
+    "safety_factor_quantile": "nearest-rank q90 over n=5",
+    "safety_factor_measured_range": [
+     1.3856,
+     1.8721
+    ],
+    "committed_kappa_not_used_here": 1.5775406165458339
+   },
+   "deferral_s": 1.067657,
+   "must_start_now": false,
+   "lss_feasible": true,
+   "harm_now": 3.06231338064495,
+   "harm_by_type_now": {
+    "alert": 3.06231338
+   },
+   "delta_first_token_s": 0.8222712227118516,
+   "per_queue_s": 0.0001535807289338535,
+   "price_source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)",
+   "n_others_considered": 3,
+   "n_others_moved": 3,
+   "harm_saved_unscaled": 3.06231338,
+   "harm_saved": 3.06231338,
+   "harm_saved_alert": 3.06231338,
+   "harm_still_inflicted": 0.0,
+   "n_rows_saved": 3,
+   "n_rows_still_harmed": 0,
+   "saved_rows_sample": [
+    {
+     "req_id": "opp0006833",
+     "qtype": "alert",
+     "slack_s": 0.32112900000004174,
+     "value_lost": 1.008777339
+    },
+    {
+     "req_id": "opp0006834",
+     "qtype": "alert",
+     "slack_s": 0.3267510000000584,
+     "value_lost": 1.014081597
+    },
+    {
+     "req_id": "opp0006836",
+     "qtype": "alert",
+     "slack_s": 0.4832930000000033,
+     "value_lost": 1.039454444
+    }
+   ],
+   "own_engine_s": 0.9470492221864373,
+   "own_slack_now_s": 2.923000000000002,
+   "own_slack_after_s": 1.855342999999948,
+   "own_p_before": 0.9872425836416057,
+   "own_p_after": 0.9714630736282329,
+   "own_loss": 0.04733853004011823,
+   "w_decider": 3.0,
+   "net_gain": 3.0149748499598816,
+   "bar": {
+    "bar": 1.97472,
+    "w_d": 3.0,
+    "bar_weight_source": "robo003",
+    "margin_scale": 1.0,
+    "reading": "decider",
+    "margin_cf_on_time": 0.65824
+   },
+   "bar_value": 1.97472,
+   "crosses_bar": true,
+   "units": "counts of expected on-time cloud answers, per-device w_d weighted; MARGIN_CF = 0.65824 on-time answers (D191 item 1)",
+   "residency_input": {
+    "kind": "RESIDENT_TOKEN_COUNT",
+    "quantity": "u_request = readiness_tokens - built_tokens_by_session[session]",
+    "is_a_tier_label": false,
+    "why_it_matters": "D190 (5) track C: the hybrid gate prices on the three-label residency_readiness(), so GPU-WARM at 44 percent resident and at 28 percent resident price identically; on one history that collapse was 8.17x optimistic (0.6506 s predicted, 5.3166 s observed)",
+    "exposure_this_module_does_inherit": "built_tokens_by_session is the coordinator's BELIEF, not engine telemetry (D44, D47), so an overstated belief understates u and puts the latest safe start too late by that much",
+    "measured_predictor_bias": "D162 under-predicts first token by 1.39x to 1.87x on the five recall questions SENT in the committed rung-3 cells (d190_recall_lag_diagnosis.json)",
+    "kappa_coverage": "kappa = 1.577541 covers 1.39x and DOES NOT cover 1.87x. Not widened: D191 item 2 fixes the safety factor to committed FIT data, and a factor fitted to the cells under diagnosis would be tuning. The consequence is reported as 'any recall made late by a deferral' and is expected to be non-zero."
+   },
+   "would_miss_deadline_under_measured_bias": {
+    "recall_deadline_s_label": 3.0,
+    "predicted_total_service_s": 0.9910492221864373,
+    "deferral_s": 1.067657,
+    "safety_factor_used": 1.8721,
+    "at_measured_worst_bias": {
+     "bias": 1.8721,
+     "overrun_s": 0.0,
+     "would_miss": false
+    },
+    "at_measured_best_bias": {
+     "bias": 1.3856,
+     "overrun_s": -0.4821454465937019,
+     "would_miss": false
+    },
+    "at_committed_kappa": {
+     "bias": 1.5775406165458339,
+     "overrun_s": -0.29192284785996797,
+     "would_miss": false
+    }
+   },
+   "session_id": "robo003|s001|3703477849945137_start_0.0_end_599.96",
+   "u_detail": {
+    "u": 5354,
+    "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+    "u_built_only": 5354,
+    "readiness": "GPU-WARM",
+    "built_tokens": 4217,
+    "telemetry_cached_tokens": 0,
+    "prompt_tokens": 9571
+   }
+  }
+ },
+ "deficit_feed_report": {
+  "gain": 2.0,
+  "gain_ruling": "D178 (2), corrected by flash addendum 12 item 2",
+  "form": "w_d = 1 + gain * (shortfall_d / target_d), floored at 1, PER DEVICE",
+  "targets": {
+   "alert": 0.25,
+   "recall": 0.9,
+   "assistance": 0.9
+  },
+  "target_source": "D178 (1), spec v6 sections 2 and 8",
+  "units": {
+   "alert": "device-episode",
+   "recall": "device",
+   "assistance": "device"
+  },
+  "currency": "on-time CLOUD answers only (D177, D178 (1)); device_on_time recorded, never added to the numerator",
+  "alert_decision_instants_per_episode": 19,
+  "n_offers": 12253,
+  "n_completions": 9512,
+  "per_device": {
+   "asst000": {
+    "type": "assistance",
+    "shortfall": 0.0,
+    "weight": 1.0,
+    "episodes_closed": null,
+    "offered": 119,
+    "cloud_on_time": 119
+   },
+   "asst001": {
+    "type": "assistance",
+    "shortfall": 0.0,
+    "weight": 1.0,
+    "episodes_closed": null,
+    "offered": 120,
+    "cloud_on_time": 120
+   },
+   "asst002": {
+    "type": "assistance",
+    "shortfall": 0.0,
+    "weight": 1.0,
+    "episodes_closed": null,
+    "offered": 118,
+    "cloud_on_time": 118
+   },
+   "dash000": {
+    "type": "alert",
+    "shortfall": 0.012128,
+    "weight": 1.097025,
+    "episodes_closed": 115,
+    "offered": null,
+    "cloud_on_time": null
+   },
+   "dash001": {
+    "type": "alert",
+    "shortfall": 0.006579,
+    "weight": 1.052632,
+    "episodes_closed": 110,
+    "offered": null,
+    "cloud_on_time": null
+   },
+   "dash002": {
+    "type": "alert",
+    "shortfall": 0.006757,
+    "weight": 1.054054,
+    "episodes_closed": 111,
+    "offered": null,
+    "cloud_on_time": null
+   },
+   "dash003": {
+    "type": "alert",
+    "shortfall": 0.007636,
+    "weight": 1.06109,
+    "episodes_closed": 112,
+    "offered": null,
+    "cloud_on_time": null
+   },
+   "dash004": {
+    "type": "alert",
+    "shortfall": 0.01572,
+    "weight": 1.125757,
+    "episodes_closed": 113,
+    "offered": null,
+    "cloud_on_time": null
+   },
+   "dash005": {
+    "type": "alert",
+    "shortfall": 0.008535,
+    "weight": 1.068279,
+    "episodes_closed": 111,
+    "offered": null,
+    "cloud_on_time": null
+   },
+   "robo000": {
+    "type": "recall",
+    "shortfall": 0.45,
+    "weight": 2.0,
+    "episodes_closed": null,
+    "offered": 20,
+    "cloud_on_time": 9
+   },
+   "robo001": {
+    "type": "recall",
+    "shortfall": 0.661905,
+    "weight": 2.470899,
+    "episodes_closed": null,
+    "offered": 21,
+    "cloud_on_time": 5
+   },
+   "robo002": {
+    "type": "recall",
+    "shortfall": 0.4625,
+    "weight": 2.027778,
+    "episodes_closed": null,
+    "offered": 16,
+    "cloud_on_time": 7
+   },
+   "robo003": {
+    "type": "recall",
+    "shortfall": 0.633333,
+    "weight": 2.407407,
+    "episodes_closed": null,
+    "offered": 15,
+    "cloud_on_time": 4
+   },
+   "robo004": {
+    "type": "recall",
+    "shortfall": 0.49375,
+    "weight": 2.097222,
+    "episodes_closed": null,
+    "offered": 32,
+    "cloud_on_time": 13
+   },
+   "robo005": {
+    "type": "recall",
+    "shortfall": 0.284615,
+    "weight": 1.632479,
+    "episodes_closed": null,
+    "offered": 13,
+    "cloud_on_time": 8
+   },
+   "robo006": {
+    "type": "recall",
+    "shortfall": 0.633333,
+    "weight": 2.407407,
+    "episodes_closed": null,
+    "offered": 15,
+    "cloud_on_time": 4
+   }
+  },
+  "weights_by_type_over_all_devices": {
+   "alert": 1.125757,
+   "recall": 2.470899,
+   "assistance": 1.0
+  },
+  "weights_by_type_pending": {
+   "alert": 1.0,
+   "recall": 1.0,
+   "assistance": 1.0
+  },
+  "type_shortfall_DIAGNOSTIC_ONLY": {
+   "alert": 0.009594,
+   "recall": 0.517062,
+   "assistance": 0.0
+  },
+  "n_units": {
+   "alert": 672,
+   "recall": 7,
+   "assistance": 3
+  },
+  "counts": {
+   "alert_cloud_late": 51,
+   "alert_cloud_on_time": 9002,
+   "alert_device_on_time": 9053,
+   "alert_episode_key_agree": 9053,
+   "alert_episode_key_from_record": 9053,
+   "alert_episodes_closed": 672,
+   "alert_episodes_open": 6,
+   "alert_instant_repeat": 7191,
+   "alert_instants_offered": 11764,
+   "assistance_cloud_on_time": 357,
+   "assistance_device_late": 97,
+   "assistance_device_on_time": 260,
+   "assistance_questions_offered": 357,
+   "completion_background_skipped": 160,
+   "order_key_resolved": 72961,
+   "recall_cloud_late": 52,
+   "recall_cloud_on_time": 50,
+   "recall_device_on_time": 102,
+   "recall_question_repeat": 8,
+   "recall_questions_offered": 132
+  },
+  "switch": {
+   "name": "live2_deficit_feed",
+   "on": true,
+   "scope": "arm instance",
+   "chain": [
+    true,
+    true,
+    true
+   ]
+  },
+  "consumers": {
+   "ordering": {
+    "on": true,
+    "hook": "hybrid/hybrid_arm.py _deficit_order_key, overridden on the INNER HybridArm instance",
+    "installed_on": "HybridArm",
+    "shadowed": true
+   },
+   "flexible_split": {
+    "on": true,
+    "read": "share_admission.py:162-168 via coordinator SA.allowed(weights_by_type=)",
+    "weights_now": {
+     "alert": 1.0,
+     "recall": 1.0,
+     "assistance": 1.0
+    }
+   }
+  },
+  "base": "covex-v6-state-final",
+  "weights_have_a_reader": false
+ },
+ "W_WIRED_PROOF": {
+  "accessor": "make_rung4.<locals>.<lambda>",
+  "live_weight": true,
+  "probe_device": "robo000",
+  "probe_value_at_construction": 1.0,
+  "bar_at_probe": 0.65824,
+  "feed_present": true,
+  "feed_gain": 2.0,
+  "note": "1.0 at construction is CORRECT: no opportunity has been offered yet, so every shortfall is 0 and every weight is at the D178 (2) floor. What must be true here is that the ACCESSOR is the live one; that the VALUE moves is a run-time property."
+ },
+ "switches_read_back": {
+  "qcache_key_fix_D188": true,
+  "release_recheck_D179_4": true,
+  "release_recheck_types": [
+   "alert"
+  ]
+ }
+}

@@ -152,5 +152,39 @@
   "the_touch_price_does_NOT_move_rung_3_or_rung_4": "measured on both trees: rung 3 is 12e4f73ce0ebd865 / 13,812 on BOTH sides, equal to its committed bar, and rung 4 is identical on both sides. So that bar is NOT invalidated by the touch price and the -rr verdicts do NOT sit on superseded code because of it. The earlier briefing that the flip WOULD move them was wrong.",
   "the_overcharge_was_105_50x_to_154_50x_p50_131_49x": "paired on identical inputs over 2,267 touches: before 0.288688 / 0.359809 / 0.422778, after a constant 0.00273647. The earlier 3.6x to 9.8x figure was measured against the INTERMEDIATE d162-warm-hit price, whose intercept is 96.1 percent of it, so it understated the defect by about 26x. d162-warm-hit is NOT the corrected mode: its 0.070534 s intercept is 25.8x the ruled charge, which D174 (1) rules out as occupancy. The default is now d174-uncached-only at touch_policy.py:126, and price_for_touch RAISES on an unknown mode.",
   "hits_22_and_26_are_UNEXERCISED_under_Rule_2_not_no_ops": "the touch price refuses 0 of 2,267 touches at EITHER price, and the hit-26 corrector cannot fire on a dry cell at all. So neither is a no-op; each is a mechanism that did not reach a decision in these conditions."
+ },
+ "_D216_RESULTS_ON_THE_FINAL_RUNGS": {
+  "_register": "OBSERVED from StudyD216-KV025's committed per-cell JSONs, independently re-read and cross-checked at 239beca8 by a session that is NOT that study's author, precisely because the claims had arrived second-hand. Both earlier claims verified exactly, including the row counts the summaries did not carry.",
+  "THE_OFF_SWITCH_IDENTITY_BAR_NOW_PASSES_AND_THE_COMMITTED_FAMILY_FAILED_IT": {
+   "observed": "F3_r4_off_1x digest 5a03c2807da3681a / 14,539 rows is EXACTLY F1_r3_final_1x's 5a03c2807da3681a / 14,539, so RUNG 4 WITH BOTH COMPOUNDS OFF COLLAPSES BYTE-IDENTICALLY TO RUNG 3, digest and row count.",
+   "what_it_was_on_the_committed_family": "covex-v6-cf-c5attr-off was 711 rows off its declared rung-3 bar, because _Rung4Mixin._cf_engine swapped the planner's deficit weight UNCONDITIONALLY while reading NEITHER compound switch.",
+   "WHY_THE_FINAL_LADDER_CURES_IT_mechanism_not_luck": "the cure is a direct consequence of the D208 design choice, not of touching the swap. In the COMMITTED family the planner limb read the live feed at RUNG 4 ONLY, so rung-4-off's unconditional swap left it holding a weight source rung 3 did not have, and the two could not agree. In the FINAL ladder D206 (2) puts the planner limb on the SAME feed AT RUNG 3 TOO (arms_final_ladder._PlannerFeedMixin is in rung 3's MRO as well as rung 4's), so an unconditional swap in rung-4-off lands on exactly the source rung 3 already uses and the collapse is exact. The Step 4 control on rung 4 therefore WORKS on this build where it did not on the committed one.",
+   "corroboration_in_the_same_manifest": "F11_harm0 and F12_marginhuge BOTH equal rung 3's digest, which is what a working Step 4 control on rung 4's harm term should do.",
+   "status": "A REAL PROPERTY OF THIS BUILD, and the one open question that study's own driver posed."
+  },
+  "RUNG_3_DOES_NOT_RESPOND_TO_MEMORY_ON_A_DRY_CELL_AND_THAT_IS_EXPECTED": {
+   "observed": "the SAME digest 5a03c2807da3681a appears at F1 (rung 3, 1x), F4 (rung 3, kv0.25) AND F8 (rung 3, kv0.25 with enforcement ON). Three conditions, one digest, byte for byte.",
+   "rung_4_by_contrast_DOES_respond": "57bed6ace2eb07d1 at 1x against 278da529349ff8c2 at kv0.25, with F7 (kv0.25 enforced) also 278da529349ff8c2.",
+   "HOW_THIS_MUST_BE_REPORTED": "NOT as a memory result and NOT as an equivalence. Under Rule 2 a flat response is UNEXERCISED. A rung-3 0.25x DRY cell may not be cited as evidence about memory behaviour.",
+   "why_it_is_the_EXPECTED_outcome_rather_than_a_defect": "rungs 2 and 3 make no memory trade-offs BY DESIGN; they adapt to memory pressure ONLY REACTIVELY, THROUGH ENGINE TELEMETRY, while rung 4 adapts proactively. A DRY CELL HAS NO ENGINE TELEMETRY, so on a dry cell rung 3 has nothing to react to and a flat digest is what the design predicts. A reader meeting the three identical digests should meet them as a question with its answer attached, not as agreement between conditions.",
+   "the_structural_half_of_the_same_story": "self._caps at arms.py:82 is a WRITE WITH NO READ repo-wide, so the coordinator's KV pool never reaches the arms that would read it.",
+   "consistency_with_my_own_at_risk_row": "this is the same finding my gpu_kv_fraction row already carries from the other direction, and that row stays OPEN."
+  },
+  "THE_LEGS_SWAP_AND_ARE_NOT_ADDITIVE": {
+   "observed": "at 0.25x the FULL arm equals PDONLY (278da529349ff8c2 / 14,306), and RQONLY at 0.25x equals the FULL arm at 1x (57bed6ace2eb07d1 / 14,509). So RUNG 4 IS ONE COMPOUND AT A TIME, chosen by the memory setting, rather than two compounds adding up.",
+   "the_mechanism_which_is_why_this_is_not_a_coincidence": "cf_request_defer's gates contain NO POOL READ, so the request-deferral leg is CAPACITY-INDEPENDENT BY CONSTRUCTION and its digest CANNOT move with memory. That is exactly why rqonly at 0.25x is identical to the 1x arm it dominated.",
+   "what_this_result_IS": "A REPRODUCTION of Session D's committed-family finding ON NEW CODE, which is worth more than either observation alone, and it should be reported as a reproduction rather than as a fresh discovery.",
+   "what_must_NOT_be_claimed": "whether the swap HELPS is a SCORING question that a dry cell cannot answer. It is not characterised in either direction here."
+  },
+  "RUNG_4_RESPONDS_TO_THE_DECLARED_POOL_SIZE_NOT_TO_OBSERVED_OCCUPANCY": {
+   "observed": "enforcement ON gives the SAME digest as enforcement OFF at the same memory setting: F7 equals F5, and F8 equals F4.",
+   "REQUIRED_WORDING": "say THE POLICY REACTS TO A SMALLER CONFIGURED POOL. NEVER say it reacts to memory pressure. The two are different claims and only the first is defensible from this evidence; the second is what a reviewer would dismantle.",
+   "also_holds_on_the_committed_family": "Session D reached the same conclusion there, so this is a second reproduction."
+  },
+  "THE_ATTRIBUTION_OF_RUNG_4_s_0_25x_RESPONSE_IS_CLOSED": {
+   "observed": "F11_harm0_kv025 and F12_marginhuge_kv025 both collapse EXACTLY to rung 3's digest AND row count.",
+   "what_it_buys": "rung 4's response at 0.25x is attributable TO THE COUNTERFACTUAL rather than to anything else in the arm. That is the Step 4 control that makes the 1,051-decision response mean something instead of being a difference with no owner."
+  },
+  "_a_note_on_that_study_s_own_record_keeping_since_I_cite_its_cells": "F0a_base_1x recorded alone=False WITH its two foreign cf_pd_one_cell processes NAMED in its own census. That is the right way to record a cell that was not alone, and NONE of the cross-checked digests above is that cell's, so nothing here rests on it."
  }
 }
