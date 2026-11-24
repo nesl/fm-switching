@@ -56,6 +56,7 @@ The standard-grid cells DO apply the committed D75 link model (fleet/links.py, a
 | attentionstore-prefetch | results/orchestration/live2/frozen_test/runs/attentionstore-prefetch_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 7752 | yes |
 | b7-edf-feasibility | results/orchestration/live2/frozen_test/runs/b7-edf-feasibility_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 8175 | yes |
 | base | results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 10153 | yes |
+| covex-v6-fair-final | results/orchestration/live2/frozen_test/runs/covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 9370 | yes |
 | device-only | results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 10153 | yes |
 | eco-llm | results/orchestration/live2/frozen_test/runs/eco-llm_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 8562 | yes |
 | edf | results/orchestration/live2/frozen_test/runs/edf_n16_s4_1200s_h27_3t_L3_epg_rq30 | 4 | 0.02218 | 7839 | yes |
@@ -87,10 +88,10 @@ The standard-grid cells DO apply the committed D75 link model (fleet/links.py, a
 
 ## Table row counts
 
-- F1: 105 rows
-- F2: 252 rows
-- F3: 980240 rows
-- F4: 1280 rows
+- F1: 107 rows
+- F2: 255 rows
+- F3: 992493 rows
+- F4: 1296 rows
 - F6: 16 rows
 - F7: 0 rows
 - F8: 30 rows
@@ -98,9 +99,9 @@ The standard-grid cells DO apply the committed D75 link model (fleet/links.py, a
 - F10: 5 rows
 - F11: 0 rows
 - F12: 0 rows
-- F13: 113 rows
-- F14: 113 rows
+- F13: 114 rows
+- F14: 114 rows
 - F15: 1 rows
 - F16: 1 rows
 - F17: 0 rows
-- F1_units: 40071 rows
+- F1_units: 40560 rows
