@@ -41,7 +41,7 @@ armwait() {   # $1 arm, $2 condition key. Open fidelity hits per arm (D209 (2), 
     *) echo "";;
   esac
 }
-superseded() { grep -qxF "$1" <(printf '%s\n' llf_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30 mooncake_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30 simplestream_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30 eco-llm_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30); }
+superseded() { grep -qxF "$1" <(printf '%s\n' mooncake_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30 simplestream_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30 eco-llm_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30); }
 other_lists() { for f in $(awk '{print $1}' $O/V6_GATE_OK | grep -vx MATRIX_READY_CELLS | sort -u); do grep -v '^#' $O/$f 2>/dev/null | awk 'NF>=4 {print $1, $2, $3, $4}'; done | sort -u; }
 OTHER=$(other_lists)
 q=$O/FILLER_QUEUE; r=$O/MATRIX_READY_CELLS
