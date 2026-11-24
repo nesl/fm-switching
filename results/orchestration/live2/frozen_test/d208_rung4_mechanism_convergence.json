@@ -41,5 +41,59 @@
   "_a_detail_that_cuts_BOTH_ways_and_belongs_here": "arms_v6cf.py:291's OWN DOCSTRING already records 'free_kv_min = free_kv_max = 62,944 over 77 decisions on a 300 s dry cell'. So a DRY cell with a flat belief has also been observed. The variation is therefore a property of the CELL's roster, not of dry-versus-live, which is a sharper statement than either session made separately.",
   "*** THE FORWARD-LOOKING CONSEQUENCE, WHICH IS THE PEER'S AND IS THE IMPORTANT PART ***": "the live question is NOT only 'is the engine metric scraped'. IT IS 'DOES free_kv VARY AT ALL LIVE, THROUGH EITHER CHANNEL'. If the belief side is flat live as well, then DEVICE_ANSWERS WILL NOT FIRE LIVE EITHER, for exactly the reason protect-and-defer does not - and a null in the prepared live pair would be UNREADABLE rather than informative. That is TESTABLE, not speculative, and it should be answered BEFORE the live pair runs. This is a stronger gating condition than the one I gave the E1 session, which was about the scrape alone.",
   "_what_this_does_NOT_change": "the rung-4 ladder result is untouched: rung 3 passes 4 of 4, rung 4 passes 1 of 4, and the request-deferral half of the diagnosis (14 traced s5 losses, residual zero, hard-zero queueing term verified in code) is independent of any of this. What changes is only the scope of the protect-and-defer claim."
+ },
+ "*** SECOND CORRECTION 2026-11-24, FROM THE COMMITTED LADDER CELLS THEMSELVES. BOTH EARLIER READINGS WERE WRONG, AND THE TRUTH IS MORE INTERESTING ***": {
+  "_how_this_was_obtained": "the pd_ counters were ALREADY IN THE COMMITTED CELLS ALL ALONG, nested inside coordinator_result.json's `arm_stats` rather than at top level. An agent checked for top-level `pd_` keys, found none in 35 files, and concluded they were not committed; they are. NO NEW CODE AND NO NEW RUN WAS NEEDED. Reading a key at the wrong nesting level is the same shape as the ALL_PASS misreading earlier: the field existed, the probe did not reach it.",
+  "THE_LIVE_NUMBERS_rung_4_at_1x_all_four_ladder_cells": {
+   "s4": {
+    "pd_decisions": 302,
+    "free_kv_min": 14993,
+    "free_kv_max": 62944,
+    "bound_by_belief": 302,
+    "bound_by_engine_metric": "ABSENT",
+    "gate_no_active_alert_episode": 47,
+    "gate_rebuild_fits_without_evicting": 253,
+    "gate_wanted_to_act_but_no_slice_channel": 2,
+    "harm_over_bar": 2,
+    "request_crossed_bar_unexpressible": 2
+   },
+   "s5": {
+    "pd_decisions": 299,
+    "free_kv_min": 16017,
+    "free_kv_max": 62944,
+    "bound_by_belief": 299,
+    "bound_by_engine_metric": "ABSENT",
+    "gate_no_active_alert_episode": 39,
+    "gate_rebuild_fits_without_evicting": 260,
+    "gate_wanted_to_act_but_no_slice_channel": 0
+   },
+   "s6": {
+    "pd_decisions": 293,
+    "free_kv_min": 21258,
+    "free_kv_max": 62944,
+    "bound_by_belief": 293,
+    "bound_by_engine_metric": "ABSENT",
+    "gate_no_active_alert_episode": 35,
+    "gate_rebuild_fits_without_evicting": 258,
+    "gate_wanted_to_act_but_no_slice_channel": 0
+   },
+   "s7": {
+    "pd_decisions": 259,
+    "free_kv_min": 10115,
+    "free_kv_max": 62944,
+    "bound_by_belief": 259,
+    "bound_by_engine_metric": "ABSENT",
+    "gate_no_active_alert_episode": 35,
+    "gate_rebuild_fits_without_evicting": 222,
+    "gate_wanted_to_act_but_no_slice_channel": 2,
+    "harm_over_bar": 2,
+    "request_crossed_bar_unexpressible": 2
+   }
+  },
+  "CORRECTION_1_the_belief_side_is_NOT_FLAT_LIVE_so_my_own_chain_was_WRONG": "*** `77b9f702` CLAIMED free_kv IS 'PINNED AT THE FULL POOL' LIVE. THAT IS FALSE FOR EVERY LADDER CELL. *** free_kv VARIES: 14,993-62,944 at s4, 16,017-62,944 at s5, 21,258-62,944 at s6 and 10,115-62,944 at s7, and `pd_kv_bound_by_belief` EQUALS `pd_decisions` in all four, so the BELIEF determines free_kv on 100 percent of decisions. The constant 62,944 I generalised from was specific to ONE fake-server cell of 29 decisions, which is not representative of a 1,200 s ladder cell. I generalised a single unrepresentative cell into a property of live2 and published it. THE ONE PART THAT STANDS: `pd_kv_bound_by_engine_metric` IS ABSENT IN ALL FOUR, so the engine metric binds ZERO decisions and the E1 absent link is real - it is just not what pins free_kv.",
+  "CORRECTION_2_AND_THIS_IS_THE_REAL_FINDING_the_class_is_UNEXPRESSIBLE_not_UNEXERCISED": "*** AT s4 AND s7, PROTECT-AND-DEFER CROSSED ITS BAR AND WAS BLOCKED FOR WANT OF A CHANNEL. *** `pd_harm_over_bar = 2`, `pd_harm_gt_0p65824 = 2` (the MARGIN_CF on-time bar), and `pd_gate_wanted_to_act_but_a_request_has_no_slice_channel = 2`, with `pd_request_crossed_bar_unexpressible = 2`. So the mechanism DID FIRE: it computed a harm above the bar and WANTED TO ACT. It could not, because the only action available is to send less, and the counter's own name states why: 'the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of.' UNDER CLAUDE.md RULE 2 THAT IS **UNEXPRESSIBLE** - the mechanism fires but the harness discards the channel it acts through - AND NOT **UNEXERCISED**. s5 and s6 are genuinely unexercised (zero crossed the bar). So the four seeds split 2 UNEXPRESSIBLE and 2 UNEXERCISED, and neither is 'ran and did not help'.",
+  "*** AND THE GATE NAMES ITS OWN REMEDY, WHICH IS DEVICE_ANSWERS ***": "the counter string continues: 'The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here.' SO DEVICE_ANSWERS IS NOT A SPECULATIVE ADDITION: IT IS THE EXACT CHANNEL THE EXISTING GATE ASKS FOR BY NAME AND CANNOT FIND. *** AND THE COUNTS AGREE EXACTLY: *** the StudyD218-DA dry report measured `covex-v6-final` at 1x with `pd_request_crossed_bar_unexpressible = 2` going to 0 with 1 denial, and THE COMMITTED s4 LADDER CELL INDEPENDENTLY SHOWS 2. Two sessions, one dry and one live, on the same quantity, agreeing on the number.",
+  "_WHAT_THIS_MEANS_FOR_THE_USER_RULINGS": "(a) THE LIVE-TRANSFER CAVEAT ON DEVICE_ANSWERS IS REFUTED: the belief side varies live, so the candidate is NOT dead on arrival live, and the quantity it removes is non-zero in committed 1x cells. (b) WIRING THE METRICS LINK IS STILL WORTH DOING BUT IS NO LONGER THE BLOCKER IT APPEARED TO BE: the belief already supplies a varying free_kv, and at 1x the rebuild usually fits, so the engine metric would mainly matter where capacity binds, i.e. at 0.25x. (c) RUNG 4's REGRESSION IS STILL EXPLAINED BY THE REQUEST-DEFERRAL LEG, whose traced losses and hard-zero queueing term are untouched by any of this.",
+  "_what_I_got_wrong_and_why_it_is_worth_recording": "I corrected a correct-enough record into a wrong one by accepting a mechanism chain derived from a single 29-decision fake-server cell, without checking it against the twelve 1,200 s cells that were sitting in git with the answer in them. The agent's chain was right about the engine metric and wrong about what pins free_kv, and I propagated the wrong half because it was the more dramatic one. THE CHECK THAT WOULD HAVE CAUGHT IT COST ONE `git show`."
  }
 }
