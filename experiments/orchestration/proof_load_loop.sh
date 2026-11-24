@@ -16,6 +16,11 @@ while true; do
       # EVAL_PLAN: record each newly generated trace's digests once, and commit them
       nice -n 19 bash experiments/orchestration/trace_digests.sh >/dev/null 2>&1
       git add results/orchestration/live2/frozen_test/trace_digests.jsonl && git commit -q -m "trace digests (EVAL_PLAN)" >/dev/null 2>&1 && { timeout 60 git pull --rebase -q origin main; timeout 60 git push -q; } >/dev/null 2>&1
+      # user 2026-11-23: every confidence-cascade rerun seed's per-type numbers (it is now a real comparator)
+      case "$c" in confidence-cascade_*_rerun)
+        nice -n 19 bash experiments/orchestration/cc_rerun_pertype.sh $c >> $HOME/data/live2/proofs/annotate.log 2>&1
+        git add results/orchestration/live2/frozen_test/confidence_cascade_rerun_pertype.jsonl && git commit -q -m "confidence-cascade rerun per-type: $c" >/dev/null 2>&1 && { timeout 60 git pull --rebase -q origin main; timeout 60 git push -q; } >/dev/null 2>&1;;
+      esac
     done
     seen=$n
   fi
