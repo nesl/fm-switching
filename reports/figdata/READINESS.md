@@ -37,7 +37,7 @@ Pipeline sha (D209 canonical scorer): `b5264100`. Generated 2026-11-23. Tables i
 ## Condition coverage (F8-F12)
 
 - F8 memory: present ['0.25x', '0.5x'] (targets 0.25x, 0.5x).
-- F9 fleet: present [12, 20]; capacity (largest fleet meeting all three D178 targets) needs a fleet sweep, column left blank until it lands. Producer: flash/H100.
+- F9 fleet: present [8, 12, 20]; capacity (largest fleet meeting all three D178 targets) needs a fleet sweep, column left blank until it lands. Producer: flash/H100.
 - F10 deadline: present ['2.5'] (target 2.5 s).
 - F11 composition/reask: present NONE beyond rq30 / 40:40:20.
 - F12 network: present NONE (no network-condition cells exist).
@@ -96,12 +96,12 @@ The standard-grid cells DO apply the committed D75 link model (fleet/links.py, a
 - F6: 16 rows
 - F7: 0 rows
 - F8: 38 rows
-- F9: 12 rows
+- F9: 15 rows
 - F10: 8 rows
 - F11: 0 rows
 - F12: 0 rows
-- F13: 137 rows
-- F14: 137 rows
+- F13: 139 rows
+- F14: 139 rows
 - F15: 1 rows
 - F16: 1 rows
 - F17: 0 rows
