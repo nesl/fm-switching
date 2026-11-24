@@ -36,7 +36,7 @@ armwait() {   # $1 arm, $2 condition key. Open fidelity hits per arm (D209 (2), 
   # 1x, and whether it should follow the GPU-KV pool at 0.5x / 0.25x is an ADAPTATION change awaiting the user.
   case "$1" in
     simplestream) echo "";;   # hit 7 LANDED c511050; hit 14 card check: no capacity input
-    mooncake) case "$2" in mem*) echo "waiting on hit 14 ruling (adaptation: gpu_warm_slots = 4 fixed by the card)";; *) echo "";; esac;;
+    mooncake) echo "";;   # slots sized to the KV pool, landed with its proof (user ruling)
     eco-llm) echo "waiting on hits 14, 16";;
     *) echo "";;
   esac
