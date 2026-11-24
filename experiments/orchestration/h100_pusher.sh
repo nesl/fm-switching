@@ -5,7 +5,14 @@
 # never reset. git's stderr goes to ~/data/live2/pusher.log so a failure is diagnosable.
 cd /home/pragya/Desktop/fm-switching
 P=$HOME/data/live2/pusher.log
+G=results/orchestration/live2/frozen_test/frozen_grid.log
 while true; do
+  # 2026-11-24 09:28: a rebase here moved flash's a43ad7f into the working tree while a cell was
+  # importing its modules; the runner loaded the old file and the coordinator child the new one, and
+  # the cell died (ContextLimitUnreadable). So never rebase within 180 s of a cell's start: the run's
+  # imports happen at start-up, and the driver itself pulls before the next cell.
+  ls=$(grep -E "^\[[0-9-]+ [0-9:]+\] start " $G 2>/dev/null | tail -1 | cut -c2-20)
+  if [ -n "$ls" ] && [ $(( $(date +%s) - $(date -d "$ls" +%s) )) -lt 180 ]; then sleep 20; continue; fi
   git fetch -q origin 2>>$P
   if ! git merge-base --is-ancestor HEAD origin/main 2>/dev/null; then
     echo "[$(date '+%F %T')] HEAD $(git rev-parse --short HEAD) not on origin/main $(git rev-parse --short origin/main); pushing" >> $P
