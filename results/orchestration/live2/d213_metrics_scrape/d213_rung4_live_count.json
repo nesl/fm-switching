@@ -1,0 +1,368 @@
+{
+ "stub": "experiments/orchestration/live/fake_server.py",
+ "stub_emits": [
+  "vllm:num_requests_running",
+  "vllm:num_requests_waiting",
+  "vllm:gpu_cache_usage_perc (the OLDER spelling; the key-aliasing path is NOT exercised here, only a real vLLM 0.31.0 engine emits vllm:kv_cache_usage_perc)"
+ ],
+ "origin_sha": "35b5bc85c8092f32fe033b31bea85c3cb58a4146",
+ "recipe": {
+  "arm": "covex-v6-cf-pd-c5attr",
+  "n": 16,
+  "ratio": "40:40:20",
+  "run_s": 300.0,
+  "seed": 4,
+  "port": 8099,
+  "trees": "A1,B1",
+  "out_root": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/rung4_live",
+  "out": "out/rung4_live_count.json"
+ },
+ "register": "MECHANISM measurement on a CPU stub, not a performance measurement; no latency from this cell may be cited, and the real-engine count belongs on the H100",
+ "A": {
+  "tree": "A1",
+  "arm": "covex-v6-cf-pd-c5attr",
+  "run_dir": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/rung4_live/A1_covex-v6-cf-pd-c5attr",
+  "wall_s": 331.4,
+  "loadavg_start": [
+   1.16,
+   1.58,
+   1.7
+  ],
+  "loadavg_end": [
+   1.11,
+   1.15,
+   1.46
+  ],
+  "n_other_live2_procs_start": 6,
+  "n_other_live2_procs_end": 6,
+  "other_live2_procs_start": [
+   {
+    "pid": 346832,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "/bin/bash -c source /home/pragya/.claude/shell-snapshots/snapshot-bash-1795187825688-behm4v.sh 2>/dev/null || true && \\builtin shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'which'; \\b"
+   },
+   {
+    "pid": 346833,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "/home/pragya/miniconda3/bin/python /home/pragya/miniconda3/bin/conda run -n fmtk python d218_da_driver.py --out-dir /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f125"
+   },
+   {
+    "pid": 346850,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "python d218_da_driver.py --out-dir /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/cells --tree /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8a"
+   },
+   {
+    "pid": 350741,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2/d218_da_one_cell.py"
+   },
+   {
+    "pid": 350992,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1",
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python -I /home/pragya/Desktop/FM-switching/experiments/orchestration/live2/d213_rung4_live_count.py --arm covex-v6-cf-pd-c5attr --run-s 300 --seed 4 --n 16 --por"
+   },
+   {
+    "pid": 350996,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/A1/experiments/orchestration/live",
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python -I fake_server.py --port 8099"
+   }
+  ],
+  "other_live2_procs_end": [
+   {
+    "pid": 346832,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "/bin/bash -c source /home/pragya/.claude/shell-snapshots/snapshot-bash-1795187825688-behm4v.sh 2>/dev/null || true && \\builtin shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'which'; \\b"
+   },
+   {
+    "pid": 346833,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "/home/pragya/miniconda3/bin/python /home/pragya/miniconda3/bin/conda run -n fmtk python d218_da_driver.py --out-dir /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f125"
+   },
+   {
+    "pid": 346850,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "python d218_da_driver.py --out-dir /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/cells --tree /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8a"
+   },
+   {
+    "pid": 350992,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1",
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python -I /home/pragya/Desktop/FM-switching/experiments/orchestration/live2/d213_rung4_live_count.py --arm covex-v6-cf-pd-c5attr --run-s 300 --seed 4 --n 16 --por"
+   },
+   {
+    "pid": 350996,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/A1/experiments/orchestration/live",
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python -I fake_server.py --port 8099"
+   },
+   {
+    "pid": 352604,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2/d218_da_one_cell.py"
+   }
+  ],
+  "returncode": 0,
+  "stderr_tail": "RuntimeWarning: Enable tracemalloc to get the object allocation traceback",
+  "cell": {
+   "arm": "covex-v6-cf-pd-c5attr",
+   "n_devices": 16,
+   "mode": "A",
+   "run_s": 300.0,
+   "seed": 4,
+   "robot_upload": "per-frame",
+   "split": false,
+   "err": null,
+   "wall_s": 330.207,
+   "run_dir": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/rung4_live/A1_covex-v6-cf-pd-c5attr",
+   "trace_dir": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/rung4_live/A1_covex-v6-cf-pd-c5attr_work/traces/seed4_n16_300s_A_r40-40-20_lh_req_ss2_L3_epg_perframe_rq30",
+   "lateness": {
+    "max_ms": 6.7363,
+    "mean_ms": 0.168,
+    "n": 9109,
+    "p50_ms": 0.1447,
+    "p90_ms": 0.2156,
+    "p99_ms": 1.2467
+   },
+   "run_valid": true,
+   "digests_equal": true,
+   "n_requests": 797,
+   "n_errors": 0,
+   "server_kind": "fake",
+   "is_measurement": false
+  },
+  "backend_metrics_health": null,
+  "backend_kv_key_published": false,
+  "backend_kv_value": null,
+  "backend_fm_kv_state": null,
+  "backend_num_requests_waiting_published": false,
+  "counts": {},
+  "arm_stats_kv": {},
+  "n_decisions": 806
+ },
+ "B": {
+  "tree": "B1",
+  "arm": "covex-v6-cf-pd-c5attr",
+  "run_dir": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/rung4_live/B1_covex-v6-cf-pd-c5attr",
+  "wall_s": 331.3,
+  "loadavg_start": [
+   1.11,
+   1.15,
+   1.46
+  ],
+  "loadavg_end": [
+   1.06,
+   1.0,
+   1.28
+  ],
+  "n_other_live2_procs_start": 6,
+  "n_other_live2_procs_end": 6,
+  "other_live2_procs_start": [
+   {
+    "pid": 346832,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "/bin/bash -c source /home/pragya/.claude/shell-snapshots/snapshot-bash-1795187825688-behm4v.sh 2>/dev/null || true && \\builtin shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'which'; \\b"
+   },
+   {
+    "pid": 346833,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "/home/pragya/miniconda3/bin/python /home/pragya/miniconda3/bin/conda run -n fmtk python d218_da_driver.py --out-dir /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f125"
+   },
+   {
+    "pid": 346850,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "python d218_da_driver.py --out-dir /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/cells --tree /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8a"
+   },
+   {
+    "pid": 350992,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1",
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python -I /home/pragya/Desktop/FM-switching/experiments/orchestration/live2/d213_rung4_live_count.py --arm covex-v6-cf-pd-c5attr --run-s 300 --seed 4 --n 16 --por"
+   },
+   {
+    "pid": 350996,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/A1/experiments/orchestration/live",
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python -I fake_server.py --port 8099"
+   },
+   {
+    "pid": 352604,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2/d218_da_one_cell.py"
+   }
+  ],
+  "other_live2_procs_end": [
+   {
+    "pid": 346832,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "/bin/bash -c source /home/pragya/.claude/shell-snapshots/snapshot-bash-1795187825688-behm4v.sh 2>/dev/null || true && \\builtin shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'which'; \\b"
+   },
+   {
+    "pid": 346833,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "/home/pragya/miniconda3/bin/python /home/pragya/miniconda3/bin/conda run -n fmtk python d218_da_driver.py --out-dir /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f125"
+   },
+   {
+    "pid": 346850,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "python d218_da_driver.py --out-dir /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/cells --tree /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8a"
+   },
+   {
+    "pid": 350992,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1",
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python -I /home/pragya/Desktop/FM-switching/experiments/orchestration/live2/d213_rung4_live_count.py --arm covex-v6-cf-pd-c5attr --run-s 300 --seed 4 --n 16 --por"
+   },
+   {
+    "pid": 350996,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/A1/experiments/orchestration/live",
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python -I fake_server.py --port 8099"
+   },
+   {
+    "pid": 355423,
+    "cwd": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2",
+    "cmd": "/home/pragya/miniconda3/envs/fmtk/bin/python /tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/work/experiments/orchestration/live2/d218_da_one_cell.py"
+   }
+  ],
+  "returncode": 0,
+  "stderr_tail": "RuntimeWarning: Enable tracemalloc to get the object allocation traceback",
+  "cell": {
+   "arm": "covex-v6-cf-pd-c5attr",
+   "n_devices": 16,
+   "mode": "A",
+   "run_s": 300.0,
+   "seed": 4,
+   "robot_upload": "per-frame",
+   "split": false,
+   "err": null,
+   "wall_s": 330.2,
+   "run_dir": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/rung4_live/B1_covex-v6-cf-pd-c5attr",
+   "trace_dir": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d213_e1/rung4_live/B1_covex-v6-cf-pd-c5attr_work/traces/seed4_n16_300s_A_r40-40-20_lh_req_ss2_L3_epg_perframe_rq30",
+   "lateness": {
+    "max_ms": 5.6701,
+    "mean_ms": 0.1703,
+    "n": 8985,
+    "p50_ms": 0.1462,
+    "p90_ms": 0.2158,
+    "p99_ms": 1.2471
+   },
+   "run_valid": true,
+   "digests_equal": true,
+   "n_requests": 697,
+   "n_errors": 0,
+   "server_kind": "fake",
+   "is_measurement": false
+  },
+  "backend_metrics_health": {
+   "metrics_degraded": false,
+   "metrics_failures": {
+    "n": 0,
+    "last": null,
+    "n_kv_key_missing": 0,
+    "n_served_last_good": 0,
+    "n_served_unknown": 0
+   },
+   "kv_unknown_conservative_value": 1.0,
+   "last_good_max_age_s": 1.0,
+   "policy": "D209 (2): a failed fetch or an absent KV key never substitutes 0.0; the last good value at most 1.0 s old, else UNKNOWN and CONSERVATIVE (1.0)",
+   "scrape_enabled": true
+  },
+  "backend_kv_key_published": true,
+  "backend_kv_value": 1.0,
+  "backend_fm_kv_state": "observed",
+  "backend_num_requests_waiting_published": false,
+  "counts": {},
+  "arm_stats_kv": {},
+  "n_decisions": 706
+ },
+ "rung4_decisions_moved": {
+  "n_rows": [
+   806,
+   706
+  ],
+  "setwise": 1032,
+  "positional": 783,
+  "first_differing_index": 18,
+  "first_differing_pair": [
+   {
+    "H": null,
+    "arm_version": "covex-v6-cf-pd-1.0",
+    "belief": {
+     "cold_tokens_by_session": {},
+     "gpu_tokens_by_session": {},
+     "host_tokens_by_session": {}
+    },
+    "cost_model_id": null,
+    "defer_s": null,
+    "desired_tier": null,
+    "kind": "release_monitor",
+    "mu": null,
+    "note": null,
+    "opportunity_ids": [
+     "opp0000013"
+    ],
+    "piece_tokens": null,
+    "predicted": {
+     "completion_s": null,
+     "imposed_delay_s_by_request": {},
+     "ttft_s": null
+    },
+    "representation": null,
+    "representation_defaulted": false,
+    "t": 11.6,
+    "traffic_mix": {
+     "monitor": 1,
+     "piece": 0,
+     "recall": 0,
+     "whole": 0
+    }
+   },
+   {
+    "H": null,
+    "arm_version": "covex-v6-cf-pd-1.0",
+    "belief": {
+     "cold_tokens_by_session": {},
+     "gpu_tokens_by_session": {},
+     "host_tokens_by_session": {}
+    },
+    "cost_model_id": null,
+    "defer_s": null,
+    "desired_tier": null,
+    "kind": "release_monitor",
+    "mu": null,
+    "note": null,
+    "opportunity_ids": [
+     "opp0000013"
+    ],
+    "piece_tokens": null,
+    "predicted": {
+     "completion_s": null,
+     "imposed_delay_s_by_request": {},
+     "ttft_s": null
+    },
+    "representation": null,
+    "representation_defaulted": false,
+    "t": 11.6,
+    "traffic_mix": {
+     "monitor": 0,
+     "piece": 0,
+     "recall": 0,
+     "whole": 0
+    }
+   }
+  ],
+  "by_kind_A": {
+   "release_piece": 27,
+   "release_monitor": 655,
+   "release_recall": 115,
+   "defer": 4,
+   "decline": 5
+  },
+  "by_kind_B": {
+   "release_piece": 49,
+   "release_monitor": 533,
+   "release_recall": 115,
+   "defer": 4,
+   "decline": 5
+  }
+ },
+ "d218_3_allowlist_held": {
+  "A_num_requests_waiting_published": false,
+  "B_num_requests_waiting_published": false,
+  "requirement": "both must be false; the stub emits it and the allowlist must not publish it"
+ }
+}

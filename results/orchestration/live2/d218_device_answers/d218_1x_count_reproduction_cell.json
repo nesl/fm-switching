@@ -1,0 +1,336 @@
+{
+ "_what": "D218 (1) addendum: the PREDICTED TRADE of every denial, recorded at the denial by arms_v6cf._ProtectDeferMixin._pd_record",
+ "_rule": "deviate to the device iff (weighted harm to others MINUS this question's own weighted P(on time)) > w_d x MARGIN_CF; D191 (2) units (counts of expected on-time cloud answers, weighted per device, no division by the number served); the own term is SUBTRACTED because replacement semantics (D165 B, D177 (1)) mean leaving the question to the device forfeits this question's own expected on-time cloud answer",
+ "_sign_source": "v5/cf_planner.py:549 scores DEVICE_ANSWERS at value 0.0 (cf_objective.device_only_value) against ADMIT_NOW_D2 at w*p_self - harm, so value_cf - value_base > w_d x MARGIN_CF is harm - w*p_self > w_d x MARGIN_CF. Derived from committed code, not asserted here.",
+ "_harm_types_always_reported": [
+  "alert",
+  "recall",
+  "assistance"
+ ],
+ "arms_seen": [
+  {
+   "arm": "covex-v6-final-da",
+   "arm_version_da": "covex-v6-final-da-1.0",
+   "device_answers_enabled": true,
+   "da_wired_proof": {
+    "attr": "live2_cf_device_answers",
+    "asked_for": true,
+    "arm_enables": true,
+    "chain": [
+     {
+      "class": "V6Final",
+      "declared_on_instance": true,
+      "value": true,
+      "type": "bool"
+     },
+     {
+      "class": "V5Rules2Arm",
+      "declared_on_instance": true,
+      "value": true,
+      "type": "bool"
+     },
+     {
+      "class": "HybridArm",
+      "declared_on_instance": true,
+      "value": true,
+      "type": "bool"
+     }
+    ],
+    "ARRIVED": true,
+    "declared_on_every_object": true,
+    "type_on_every_object": [
+     "bool"
+    ]
+   },
+   "da_note": "covex-v6-final plus spec v6 section 7's THIRD request candidate, DEVICE_ANSWERS, built under D218 (1). covex-v6-final itself is UNCHANGED and keeps its posted behaviour; this is a separate version label and a separate arm.",
+   "controls": {
+    "harm_zero": false,
+    "margin_huge": false
+   },
+   "counters": {
+    "pd_request_device_answers": 1,
+    "pd_request_device_declined": 1
+   },
+   "trade_report": {
+    "_register": "PREDICTED at decision time from the committed D162 price and the committed on-time curve, NOT observed: a dry cell has no engine, so no denial's realised outcome exists to be measured.",
+    "_units": "counts of expected on-time cloud answers, each device weighted by its per-device w_d (D191 (2)); no division by the number served",
+    "n_denials": 1,
+    "totals": {
+     "own_lost_weighted_p_on_time": 1.8206395774278352,
+     "saved_on_time_answers_by_type": {
+      "alert": 5.295616144,
+      "recall": 0.0,
+      "assistance": 0.0
+     },
+     "saved_total": 5.295616144403798,
+     "net": 3.474976566975963,
+     "n_requests_moved_by_type": {
+      "alert": 5,
+      "recall": 0,
+      "assistance": 0
+     },
+     "types_outside_the_declared_three": {},
+     "types_with_zero_saved": [
+      "assistance",
+      "recall"
+     ]
+    },
+    "by_type_sum_identity": {
+     "claim": "the by-type breakdown sums to the harm term compared against the bar, because harm_by_type accumulates the same rows whose value_lost sums to the total, and harm_scale is 1.0 on every scorable path",
+     "worst_abs_residual_over_denials": 4.0379788401878614e-10,
+     "residual_cause": "cf_objective rounds each harm row's value_lost to 9 decimals while accumulating the total unrounded; the per-denial tolerance is 5e-10 x n_harm_rows and travels with each record",
+     "holds": true
+    },
+    "per_denial": [
+     {
+      "t": 1052.8,
+      "kind": "request",
+      "decider_device_id": "robo004",
+      "session_id": "robo004|s001|538469475795868_start_0.0_end_520.785",
+      "query_id": "opp0010742",
+      "u_rebuild": 10730,
+      "free_kv_tokens": 8759.0,
+      "n_alert_pending": 5,
+      "victim_session_id": "robo000|s002|1015467527231807_start_0.0_end_599.976",
+      "trade": {
+       "rule": "deviate to the device iff (weighted harm to others MINUS this question's own weighted P(on time)) > w_d x MARGIN_CF; D191 (2) units (counts of expected on-time cloud answers, weighted per device, no division by the number served); the own term is SUBTRACTED because replacement semantics (D165 B, D177 (1)) mean leaving the question to the device forfeits this question's own expected on-time cloud answer",
+       "sign_source": "v5/cf_planner.py:549 scores DEVICE_ANSWERS at value 0.0 (cf_objective.device_only_value) against ADMIT_NOW_D2 at w*p_self - harm, so value_cf - value_base > w_d x MARGIN_CF is harm - w*p_self > w_d x MARGIN_CF. Derived from committed code, not asserted here.",
+       "register": "PREDICTED at decision time from the committed D162 price and the committed on-time curve. Not an observed outcome: a dry cell has no engine.",
+       "p_self_on_time": 0.8803439204547071,
+       "w_self": 2.068100358422939,
+       "w_self_source": "w_of(decider_device_id), read explicitly and not from the bar dict",
+       "own_lost_weighted_p_on_time": 1.8206395774278352,
+       "saved_on_time_answers_by_type": {
+        "alert": 5.295616144,
+        "recall": 0.0,
+        "assistance": 0.0
+       },
+       "saved_total": 5.295616144403798,
+       "saved_total_unscaled": 5.295616144403798,
+       "harm_scale": 1.0,
+       "by_type_sum": 5.295616144,
+       "by_type_sum_residual_against_unscaled": -4.0379788401878614e-10,
+       "by_type_sum_tolerance": 2.501e-09,
+       "by_type_sum_tolerance_source": "5e-10 x n_harm_rows + 1e-12: cf_objective rounds each row's value_lost to 9 decimals while accumulating the total unrounded, so the residual is that rounding",
+       "by_type_sum_holds": true,
+       "n_harm_rows": 5,
+       "types_outside_the_declared_three": {},
+       "n_moved_by_type": {
+        "alert": 5,
+        "recall": 0,
+        "assistance": 0
+       },
+       "n_others_considered": 5,
+       "n_others_moved": 5,
+       "net": 3.474976566975963,
+       "bar": 1.3613063799283156,
+       "margin_cf_on_time": 0.65824,
+       "bar_w_d": 2.068100358422939,
+       "bar_weight_source": "robo004",
+       "bar_reading": "decider",
+       "crosses": true
+      }
+     }
+    ]
+   },
+   "traced_denial": [
+    "PROTECT-AND-DEFER DECISION  robo004  t = 1052.800 s",
+    "  inputs",
+    "    rebuild R uncached tokens        u = 10730",
+    "    free GPU KV pool                     8759.0 tokens   (rebuild fits: False)",
+    "    alert episodes active            True (5 instant(s) pending)",
+    "    victim history H                 robo000|s002|1015467527231807_start_0.0_end_599.976, next question in 0.00 s, 6265 tokens warm",
+    "  HARM: on-time cloud answers lost by others (D177, D162 queue term)",
+    "    per_queue_s (imported)           0.0001535807289 s per uncached token",
+    "    delta first token  = 0.0001535807289 x 10730 = 1.647921 s",
+    "    others considered 5, of which moved 5",
+    "      opp0010732     dash001    w = 1.0439  p 0.984647 -> 0.000000  lost 1.027833",
+    "      opp0010733     dash003    w = 1.0434  p 0.992298 -> 0.000000  lost 1.035372",
+    "      opp0010734     dash005    w = 1.0619  p 0.998241 -> 0.000000  lost 1.059988",
+    "      opp0010736     dash002    w = 1.0499  p 0.998553 -> 0.000000  lost 1.048399",
+    "      opp0010741     dash004    w = 1.1244  p 0.999665 -> 0.000000  lost 1.124025",
+    "    HARM = 5.295616 on-time cloud answers   by type {'alert': 5.295616144}",
+    "    (the same rows under the device-discounted reading: 0.000000; see HARM_FORM_NOTE)",
+    "  THE BAR: w_d x MARGIN_CF",
+    "    MARGIN_CF (on-time units)        0.65824000000000005   MARGIN_CF / A_D2_DEV = 0.16456 / 0.250 = 0.65824000000000005; D177 (3) states it as 0.6582 in on-time units. Path: cf_objective.attainment_margin (the canonical function)",
+    "    w_d = 2.068100  from device robo004 (reading 'decider')",
+    "    BAR = 2.068100 x 0.65824000000000005 = 1.361306",
+    "    w source: covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS",
+    "  TEST: harm 5.295616 > bar 1.361306",
+    "  LATEST SAFE START (D125 kappa, D151 (3))",
+    "    predicted service  1.961945 s   kappa 1.5775406165458   calibrated True",
+    "    latest start = deadline - kappa x service = 1052.614952 s  (deferral 0.000000 s, must start now True)",
+    "  THE DEVICE TRADE (D218 (1), spec v6 section 7's third request candidate)",
+    "    THIS question's own forfeit (replacement semantics, D165 B)",
+    "      P(on time) if admitted now        0.880344",
+    "      w_self = 2.068100  (w_of(decider_device_id), read explicitly and not from the bar dict)",
+    "      own lost = w_self x p_self        1.820640 on-time cloud answers",
+    "    SAVED FOR OTHERS, by the type of the devices saved (explicit zeros kept)",
+    "      alert            5.295616 on-time answers   (5 request(s) moved)",
+    "      recall           0.000000 on-time answers   (0 request(s) moved)",
+    "      assistance       0.000000 on-time answers   (0 request(s) moved)",
+    "      by-type sum 5.295616144 against the compared harm 5.295616144, residual -4.038e-10",
+    "    TEST: saved 5.295616 - own 1.820640 = net 3.474977 > bar 1.361306",
+    "  ACTION: DEVICE_ANSWERS",
+    "    reason: leave_to_the_device: the rebuild cannot wait and cannot be sliced, and it costs others 5.295616 on-time answers against this question's own 1.820640, a net 3.474977 over a bar of 1.361306"
+   ],
+   "traced_denial_record": {
+    "version": "cf-protect-defer-1.0",
+    "decider_device_id": "robo004",
+    "now_s": 1052.8,
+    "alert_active": true,
+    "n_alert_pending": 5,
+    "u_rebuild": 10730,
+    "free_kv_tokens": 8759.0,
+    "victim": {
+     "session_id": "robo000|s002|1015467527231807_start_0.0_end_599.976",
+     "device_id": "robo000",
+     "next_question_in_s": 0.0,
+     "p_question": 1.0,
+     "warm_tokens": 6265
+    },
+    "w_source": "covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS",
+    "action": "DEVICE_ANSWERS",
+    "gate": "leave_to_the_device: the rebuild cannot wait and cannot be sliced, and it costs others 5.295616 on-time answers against this question's own 1.820640, a net 3.474977 over a bar of 1.361306",
+    "device_answers_enabled": true,
+    "rebuild_fits_free_pool": false,
+    "harm": {
+     "form": "on-time-cloud",
+     "harm": 5.295616144403798,
+     "harm_unscaled": 5.295616144403798,
+     "harm_scale": 1.0,
+     "harm_device_discounted": 0.0,
+     "delta_first_token_s": 1.6479212214602479,
+     "delta_capped_at_healthy_bound": false,
+     "u_rebuild": 10730,
+     "per_queue_s": 0.0001535807289338535,
+     "price_source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)",
+     "n_others_considered": 5,
+     "n_others_moved": 5,
+     "harm_by_type": {
+      "alert": 5.295616144
+     },
+     "n_moved_by_type": {
+      "alert": 5
+     },
+     "rows": [
+      {
+       "req_id": "opp0010732",
+       "device_id": "dash001",
+       "weight": 1.04386,
+       "p_on_time_before": 0.984647,
+       "p_on_time_after": 0.0,
+       "value_lost": 1.027832773
+      },
+      {
+       "req_id": "opp0010733",
+       "device_id": "dash003",
+       "weight": 1.043407,
+       "p_on_time_before": 0.992298,
+       "p_on_time_after": 0.0,
+       "value_lost": 1.035371629
+      },
+      {
+       "req_id": "opp0010734",
+       "device_id": "dash005",
+       "weight": 1.061856,
+       "p_on_time_before": 0.998241,
+       "p_on_time_after": 0.0,
+       "value_lost": 1.059988183
+      },
+      {
+       "req_id": "opp0010736",
+       "device_id": "dash002",
+       "weight": 1.049919,
+       "p_on_time_before": 0.998553,
+       "p_on_time_after": 0.0,
+       "value_lost": 1.048398875
+      },
+      {
+       "req_id": "opp0010741",
+       "device_id": "dash004",
+       "weight": 1.124402,
+       "p_on_time_before": 0.999665,
+       "p_on_time_after": 0.0,
+       "value_lost": 1.124024684
+      }
+     ],
+     "on_time_units": true,
+     "on_time_units_source": "the flag is not in this tree; on-time units are obtained on this call by acc_cloud=1.0 and acc_device=0.0, under which the committed option_value is w * p, identical to the D177 branch"
+    },
+    "bar_detail": {
+     "bar": 1.3613063799283156,
+     "w_d": 2.068100358422939,
+     "bar_weight_source": "robo004",
+     "margin_scale": 1.0,
+     "reading": "decider",
+     "margin_cf_on_time": 0.65824
+    },
+    "harm_value": 5.295616144403798,
+    "bar_value": 1.3613063799283156,
+    "crosses_bar": true,
+    "latest_safe_start": {
+     "latest_start_s": 1052.614952,
+     "predicted_service_s": 1.961945,
+     "safety_factor": 1.577541,
+     "feasible": false,
+     "must_start_now": true,
+     "deferral_s": 0.0,
+     "decode_included": true,
+     "latest_start_if_decode_omitted_s": 1052.61984,
+     "decode_omission_error_s": 0.004888,
+     "kappa": 1.5775406165458339,
+     "kappa_calibrated": true,
+     "kappa_register": "FITTED and committed: q90 of actual over predicted service, the same factor v5/cf_planner.py:357 uses. TWO CAVEATS: its split is held-out-BY-ARM ('fit on the non-hybrid arms, test on the hybrids'), not D125's words 'FIT/DEV'; and the residual summary itself carries gate_status 'FAILS: decode over-predicts by 25 to 32 percent in every held-out class and warm is confounded with arm (spec v5 section 12)'. A latest-start time quoted from it must carry both."
+    },
+    "deferral_s": 0.0,
+    "device_answers_trade": {
+     "rule": "deviate to the device iff (weighted harm to others MINUS this question's own weighted P(on time)) > w_d x MARGIN_CF; D191 (2) units (counts of expected on-time cloud answers, weighted per device, no division by the number served); the own term is SUBTRACTED because replacement semantics (D165 B, D177 (1)) mean leaving the question to the device forfeits this question's own expected on-time cloud answer",
+     "sign_source": "v5/cf_planner.py:549 scores DEVICE_ANSWERS at value 0.0 (cf_objective.device_only_value) against ADMIT_NOW_D2 at w*p_self - harm, so value_cf - value_base > w_d x MARGIN_CF is harm - w*p_self > w_d x MARGIN_CF. Derived from committed code, not asserted here.",
+     "register": "PREDICTED at decision time from the committed D162 price and the committed on-time curve. Not an observed outcome: a dry cell has no engine.",
+     "p_self_on_time": 0.8803439204547071,
+     "w_self": 2.068100358422939,
+     "w_self_source": "w_of(decider_device_id), read explicitly and not from the bar dict",
+     "own_lost_weighted_p_on_time": 1.8206395774278352,
+     "saved_on_time_answers_by_type": {
+      "alert": 5.295616144,
+      "recall": 0.0,
+      "assistance": 0.0
+     },
+     "saved_total": 5.295616144403798,
+     "saved_total_unscaled": 5.295616144403798,
+     "harm_scale": 1.0,
+     "by_type_sum": 5.295616144,
+     "by_type_sum_residual_against_unscaled": -4.0379788401878614e-10,
+     "by_type_sum_tolerance": 2.501e-09,
+     "by_type_sum_tolerance_source": "5e-10 x n_harm_rows + 1e-12: cf_objective rounds each row's value_lost to 9 decimals while accumulating the total unrounded, so the residual is that rounding",
+     "by_type_sum_holds": true,
+     "n_harm_rows": 5,
+     "types_outside_the_declared_three": {},
+     "n_moved_by_type": {
+      "alert": 5,
+      "recall": 0,
+      "assistance": 0
+     },
+     "n_others_considered": 5,
+     "n_others_moved": 5,
+     "net": 3.474976566975963,
+     "bar": 1.3613063799283156,
+     "margin_cf_on_time": 0.65824,
+     "bar_w_d": 2.068100358422939,
+     "bar_weight_source": "robo004",
+     "bar_reading": "decider",
+     "crosses": true
+    },
+    "device_answers_net": 3.474976566975963,
+    "kind": "request",
+    "session_id": "robo004|s001|538469475795868_start_0.0_end_520.785",
+    "query_id": "opp0010742",
+    "controls": {
+     "harm_zero": false,
+     "margin_huge": false
+    }
+   }
+  }
+ ]
+}
