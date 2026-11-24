@@ -21,7 +21,7 @@ one() {   # tree arm kv
   [ -s $f ] && return
   local la0; la0=$(cut -d' ' -f1 /proc/loadavg)
   ( cd $SP/$t/experiments/orchestration/live2 && bash /home/pragya/Desktop/fm-switching/experiments/orchestration/proof_guard.sh 420 "mk_${t}_${a}_kv${k}" -- \
-      $PY -I cf_pd_one_cell.py --arm $a --seed 4 --cutoff-off --kv-scale $k )
+      $PY -I $SP/$t/experiments/orchestration/live2/cf_pd_one_cell.py --arm $a --seed 4 --cutoff-off --kv-scale $k )
   local o=$HOME/data/live2/proofs/mk_${t}_${a}_kv${k}.out
   tail -1 $o | jq -c --arg t $t --arg la0 "$la0" --arg la1 "$(cut -d' ' -f1 /proc/loadavg)" '. + {tree: $t, loadavg_start: ($la0|tonumber), loadavg_end: ($la1|tonumber)}' > $f 2>/dev/null || echo "{\"tree\":\"$t\",\"arm\":\"$a\",\"kv_scale\":$k,\"error\":\"no json; see $o\"}" > $f
 }
