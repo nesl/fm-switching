@@ -593,6 +593,35 @@ LOOKING FOR SOMETHING TO DO; READ THIS LIST FIRST. ***
   the user.
 - **Step 2 E1: IMPOSSIBLE AS WRITTEN.** The scrape has zero callers; there is no switch whose flip
   reaches a decision. Awaiting the user on the wiring.
+- *** STEP 3 item 3: THE SWEEP IS FINISHED AND IT PASSES. 24 of 24 arms IDENTICAL, 0 MOVED, both
+  prechecks identical, positive control matched the committed `af8befb9420ad86a`. Driver exited AFTER
+  writing its result, which is COMPLETION. Verdict and the raw file are committed at
+  `results/orchestration/live2/d213_metrics_scrape/item3_belief_prefix_byte_identity.json` and
+  `item3_digests_RAW.json`. THE CODE IS NOT LANDED. ***
+  **READ THE VERDICT FILE, NOT THE RAW ONE: the raw result's `fix_in_B`, `B_is` and
+  `what_this_cannot_show` ARE STALE E1 METADATA** and say the change under test was `asyncbackend.py`.
+  It was not. E1 is already on origin so BOTH trees carry it (`asyncbackend.py` byte-identical in A1 and
+  B1), and `diff -rq A1 B1` names EXACTLY ONE differing file: `coordinator.py`, +52 lines, the
+  `_belief_prefix_record()` method plus its call site at `:2138`. Verified by diffing the trees.
+  **THE REGISTER OF THE 24 OF 24 IS NARROWER THAN IT LOOKS:** the method's first statement is
+  `if self.dry_run: return SC.asdict(SC.Belief())`, so the dry VALUE is unchanged BY CONSTRUCTION. What
+  the sweep does prove, and it is not a tautology, is that adding 52 lines to `coordinator.py` perturbs
+  no dry decision of any of 24 arms THROUGH THE ALLOCATION-ORDER CHANNEL that moved an arm by 85
+  decisions on a comment-only edit earlier tonight. **IT DOES NOT PROVE THE LIVE RECORDING IS
+  DECISION-NEUTRAL**: no live cell ran, and that rests on a code-reading argument (`_log_decision` runs
+  after the action is chosen; the only reader of `DecisionRecord.belief` is the offline
+  `d211_signal_a_available.py`). ARGUED, NOT MEASURED.
+  *** AND A FINDING BIGGER THAN ITEM 3, FROM THE PATCH'S OWN DOCSTRING: D211 SIGNAL (a) WAS NEVER
+  COMPUTABLE ON ANY COMMITTED CELL. *** `belief.gpu_tokens_by_session` is logged on every decision row
+  and was **EMPTY ON ALL 16,840 ROWS of the committed rung-3 cell**, because its only producer
+  (`arms_policy.py:1067-1075`) is NEVER ENTERED BY THE LADDER. So only signal (b) could ever have been
+  validated, and this file's earlier framing that signal (a) merely "lacked a 1x live cell"
+  UNDERSTATES it: the field was STRUCTURALLY EMPTY, not just late.
+  **LANDING IT IS THE NEXT STEP AND IS THE USER'S CALL** (`coordinator.py` is run-path, the worktree's
+  live uncommitted edits stand, and the live half is argued rather than measured), together with whether
+  that argument suffices or a live cell is wanted first.
+
+  [SUPERSEDED, KEPT FOR THE TRAIL:]
 - **Step 3 item 3: ITS BYTE-IDENTITY SWEEP IS RUNNING. DO NOT RE-LAUNCH AND DO NOT START A DRY CELL.**
   Verified at 01:52 PST: pid 378337 `d213_digest_driver.py --out out/item3_digests.json`, 58 minutes
   elapsed, `00:00:00` OWN CPU, **with a LIVE CHILD** pid 388608 running

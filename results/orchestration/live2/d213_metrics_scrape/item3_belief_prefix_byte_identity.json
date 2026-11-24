@@ -1,0 +1,36 @@
+{
+ "_what": "VERDICT ON D213 ITEM 3's BYTE-IDENTITY SWEEP (the belief's predicted GPU-resident prefix, D216 (3)). The sweep PASSES. This file states WHAT IT PROVES AND WHAT IT DOES NOT, because the raw result's own metadata is MISLABELLED and would be read as proving something else.",
+ "RESULT": {
+  "precheck_passed": true,
+  "n_arms": 24,
+  "n_identical": 24,
+  "n_moved": 0,
+  "moved_arms": [],
+  "moved_arms_that_are_bars": [],
+  "dry_decisions_moved_setwise_total": 0,
+  "A_vs_A": "IDENTICAL, covex-v6-base af8befb9420ad86a / 12,085",
+  "B_vs_B": "IDENTICAL, covex-v6-base af8befb9420ad86a / 12,085",
+  "positive_control": "a_matches_committed TRUE on both prechecks against the committed af8befb9420ad86a",
+  "window": "2026-11-24T00:53:37-0800 to 03:10:04-0800",
+  "n_cells_not_alone": 24,
+  "driver": "d213_digest_driver.py, exited AFTER writing its result, which is COMPLETION not a crash"
+ },
+ "*** STALE METADATA IN THE RAW RESULT. DO NOT READ IT AS WRITTEN. ***": {
+  "the raw file says": {
+   "fix_in_B": "experiments/orchestration/live2/asyncbackend.py (D213 item 2 / E1)",
+   "B_is": "the same sha plus E1",
+   "what_this_cannot_show": "how many rung-4 decisions the scrape moves: a dry cell builds no backend, so the mechanism is ABSENT and a zero here is UNEXERCISED, not a measurement"
+  },
+  "why that is WRONG": "those three fields are LEFT OVER FROM THE E1 SWEEP CONFIG. E1 is ALREADY ON ORIGIN, so BOTH trees contain it: `asyncbackend.py` is BYTE-IDENTICAL in A1 and B1 (3 occurrences of METRICS_SCRAPE_DEFAULT in each). **A reader would conclude this re-proved E1. IT DID NOT.**",
+  "what was ACTUALLY under proof, verified by me by diffing the trees": "`diff -rq A1 B1` names EXACTLY ONE differing file, `experiments/orchestration/live2/coordinator.py` (2,297 lines in A, 2,349 in B, +52). The change is the call site at :2138, `belief=(preds.get(\"belief\") or self._belief_prefix_record())`, plus the new `_belief_prefix_record()` method. THAT IS ITEM 3, and it is what the 24 of 24 covers."
+ },
+ "*** THE REGISTER OF THE DRY IDENTITY, WHICH IS NARROWER THAN 24 OF 24 LOOKS ***": {
+  "the guard": "`_belief_prefix_record()`'s FIRST statement is `if self.dry_run: return SC.asdict(SC.Belief())`, so on a dry cell it returns the committed EMPTY Belief. **The dry identity is therefore guaranteed for the recorded VALUE by construction.**",
+  "WHAT THE SWEEP NEVERTHELESS DOES PROVE, and it is not a tautology": "that ADDING 52 LINES to `coordinator.py` and changing the fallback expression PERTURBS NO DRY DECISION OF ANY OF 24 ARMS THROUGH ANY CHANNEL, INCLUDING THE ALLOCATION-ORDER CHANNEL measured at 85 decisions earlier tonight, where a COMMENT-ONLY edit moved an arm via id(obs) feeding a dict iteration. That channel is exactly why a textual addition to this file needed a sweep at all.",
+  "WHAT IT DOES NOT PROVE": "that the LIVE recording is decision-neutral. No live cell was run. That rests on a CODE-READING ARGUMENT, which is sound but is an argument: `_log_decision` is called AFTER the action is chosen and after `latency_ms` is measured by its caller, it writes to `self.logs.decision` and returns an id, and the ONLY reader of `DecisionRecord.belief` in the tree is the OFFLINE `d211_signal_a_available.py`. **Register: ARGUED, NOT MEASURED.**"
+ },
+ "*** A SUBSTANTIVE FINDING IN THE PATCH'S OWN DOCSTRING THAT IS BIGGER THAN ITEM 3 ***": "**D211 SIGNAL (a) WAS NEVER COMPUTABLE ON ANY COMMITTED CELL, AND NOT BECAUSE ITEM 3 LANDS LATE.** Signal (a) is `host_tokens = max(0, cached_tokens - believed GPU-resident prefix)`. `cached_tokens` is recorded per request; the second input is `belief.gpu_tokens_by_session` (`schema.py:316`), which IS logged on every decision row and **was EMPTY ON ALL 16,840 ROWS OF THE COMMITTED RUNG-3 CELL**, because its only producer (`arms_policy.py:1067-1075`) IS NEVER ENTERED BY THE LADDER. **SO ONLY SIGNAL (b) COULD EVER HAVE BEEN VALIDATED**, and the handoff's earlier framing that signal (a) merely lacked a 1x live cell UNDERSTATES it: the field was structurally empty, not just late.",
+ "_why_the_recording_is_LIVE_CELL_ONLY_and_that_was_the_right_call": "the docstring states it: the digested rows ARE the decision records (`hybrid/test_hybrid.dry` reads `decision.jsonl` and strips only `arm`, `decision_latency_ms` and `decision_id`), so filling `belief` on a DRY cell WOULD move EVERY arm's dry digest INCLUDING RUNG 4, while a ladder build was in flight. That is a methodological change nobody ruled, so it was correctly scoped to live cells.",
+ "_STATUS_NOT_LANDED": "THE CODE IS NOT COMMITTED. `coordinator.py` is a RUN-PATH file, a run-path freeze is in force for the shared worktree's live uncommitted edits, and landing run-path code is not something a watchdog resume should do unilaterally on a proof whose live half is argued rather than measured. The patch, its trees and this verdict are preserved; LANDING IT IS THE NEXT STEP AND IS THE USER'S CALL, together with whether the live-half argument suffices or a live cell is wanted first.",
+ "_raw_result_preserved_alongside": "item3_digests_RAW.json, committed beside this file, stale fields and all."
+}
