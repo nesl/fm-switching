@@ -774,6 +774,35 @@ INVENT WORK, DO NOT TOUCH A RUN-PATH FILE, AND DO NOT DECIDE ANY OF THE FIVE OPE
 
 ## OPEN, NEEDING A USER RULING
 
+- *** THE r2 QUEUE REGISTER: KEEP A CORRECT INPUT THAT COSTS 16 ROBOT ANSWERS, OR KEEP r1? NEW TO THIS
+  LIST 2026-11-24. ITS OWN DIAGNOSIS DEFERS IT TO THE USER AND IT APPEARS IN **NO** OPEN LIST. ***
+  Found by the same search that surfaced the harm form: code that says "the user's call" and is nowhere
+  asked. `d187_r2_queue_register_diagnosis.py:1076`, verbatim: *"Keeping a correct input that costs 16
+  robot answers at the primary seed is a trade-off, not a cleanup. **THAT IS THE USER'S CALL and is not
+  decided here.** r1 IS THE BEST SHARES VERSION on the evidence in these cells."*
+  Mentions: handoff **0**, `policy_design_log.md` **0**, `EXPERIMENTS.md` 1 (StudyD179-SHARES, whose
+  verdict opens "No policy result yet" and whose status settles a DIFFERENT question, "c5attr IS RUNG 2").
+  **THE MEASURED TRADE**, from the committed diagnosis: r2 is the CORRECTLY computed queue term and it
+  made s4 WORSE - robot on time **95 to 79**, retention **0.7229 to 0.5301**,
+  `release_infeasible_recall` 34 to 47, `share_deny_recall` 467 to 643. s6 is UNCHANGED (92 on-time under
+  both). Its mechanism is traced, not guessed: r2 feeds a SMALLER queue term, so the re-check admits more
+  work earlier, recall-type gate calls rise 2,442 to 3,246 at s4, and the D179 (3) oversize SERIALISATION
+  rule then denies more (`oversize_wait_for_own_type` 444 to 615, which is 171 of the 176 rise).
+  *** THE TENSION THAT MAKES THIS A RULING AND NOT A DEFAULT, AND IT SHOULD BE STATED WHEN IT IS
+  DECIDED: *** D187 says **NEVER TUNE A PARAMETER TOWARD PASSING**. Preferring r1 BECAUSE IT SCORES
+  BETTER, when r2 is the more correct input, is adjacent to exactly that. It is not literally a parameter
+  tune - it is a choice between two implementations - but "keep the less correct input because the
+  numbers are kinder" is the shape D187 exists to catch, so it needs an explicit decision on the record
+  rather than a silent default. The diagnosis is scrupulous about this and says so in its own words: *"A
+  correct input and a useful lever are not the same proposition... Reporting them together as one verdict
+  is the register error this project keeps hitting in the other direction."*
+  *** SCOPE, VERIFIED, SO THIS IS NOT A CAVEAT ON THE HEADLINE: IT DOES **NOT** TOUCH THE FINAL
+  LADDER. *** `arms_final_ladder.py:210` sets `R4_BASE_KEY = "fair_final"`, used at `:222`, so rung 4's
+  base is the rung-3 arm and NOT the shares line; `state-shares` appears **ZERO** times in all four
+  committed `covex-v6-final` cells; and a reconstructed rung-4 run reports `"base_key": "fair_final"`.
+  **So the ladder result (rung 3 4-of-4, rung 4 1-of-4) stands whichever way this is ruled.** It governs
+  the SHARES line only, which has no committed policy result yet.
+
 - *** THE HARM FORM. NEW 2026-11-24, AND IT IS LOGICALLY PRIOR TO THE DEVICE_ANSWERS RULING AND TO ANY
   READING OF RUNG 4's COUNTERFACTUAL. THE CODE ITSELF SAYS THIS IS A USER RULING AND IT HAS NEVER BEEN
   PUT TO THE USER. ***
