@@ -616,6 +616,44 @@ INVENT WORK, DO NOT TOUCH A RUN-PATH FILE, AND DO NOT DECIDE ANY OF THE FIVE OPE
   `covex-v6-base_n20_s4_1200s_h27_3t_L3_epg_rq30`'s `proof_load_d209` block records
   `twin = hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30` with
   `twin_note = "the twin is the committed 16-device 3 s 1x cell of the same arm and seed"`.
+  *** THIS ITEM IS RESOLVED, 2026-11-24 02:05 PST, AND IT RESTED ON TWO FALSE CLAIMS, ONE OF THEM MINE.
+  IT SHOULD NO LONGER SIT IN THE USER'S OPEN-RULINGS LIST AS WRITTEN. ***
+  **FALSE CLAIM 1, THE PREMISE: `covex-v6-base` AND `hybrid-F-lhreq-noc3` ARE NOT DIFFERENT ARMS. THEY
+  ARE ONE ARM UNDER TWO NAMES**, so the `twin_note` saying "the same arm" was CORRECT and the objection
+  was unfounded. Verified in the registry at `experiments/orchestration/live2/arm_names_v6.py:39-41`:
+  `{"rung": 0, "name": "covex-v6-base", "implemented_by": "hybrid-F-lhreq-noc3",
+  "committed_as": ["hybrid-F-lhreq-noc3"]}`, with `OLD_TO_RUNG` at `:71` mapping
+  `"hybrid-F-lhreq-noc3": "covex-v6-base"`. Independently, `experiments/analysis/figdata/figdata.py:65`
+  pairs them in one row: `("base", "hybrid-F-lhreq-noc3", "covex-v6-base", "development", "rung0")`.
+  **FALSE CLAIM 2, ITS SUPPORT: the ladder's positive control does NOT treat them as two cells.** Read
+  from `d208_final_s7_verdict.json`: `positive_control` is PASS with `n_pass: 2` and its two control arms
+  are **`covex-v6-fair-final` and `hybrid-F-lhreq-noc3`** - the arm under test and the base, two genuinely
+  different arms. `covex-v6-base` does not appear in it.
+  **AND A CORRECTION OF MY OWN OVER-CLAIM, made while arguing the right conclusion from the wrong
+  evidence:** I told the H100 that `covex-v6-base` "OCCURS NOWHERE BUT `arm_names_v6.py`". **THAT IS
+  WRONG: it occurs in 58 other files under `experiments/`.** They are EXPECTED-DIGEST LOOKUP TABLES keyed
+  by the ladder name (`d178_deficit_feed_proofs.py:80`, `d190_rung4_r3_proofs.py:29`,
+  `d209_make_tables.py:12`, `d210_kv025_report.py:48` and others, all carrying
+  `af8befb9420ad86a` / 12,085) plus the figdata row above, and NONE registers an arm factory - so the
+  conclusion survives, but **I reached it from a grep restricted to THREE FILES and generalised to
+  "nowhere", which is the same restricted-view absence error this file warns about twice.** The
+  conclusion rests on the REGISTRY FIELDS, not on that grep.
+  **THE FIX IS ALREADY APPLIED BY THE H100, SO NOTHING IS OWED.** The newest n20 cell,
+  `covex-v6-rules_n20_s4_1200s_h27_3t_L3_epg_rq30` (landed 01:57 PST), carries
+  `twin = v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30` with
+  `twin_note = "the twin is the committed 16-device 3 s 1x cell of the same arm and seed (for
+  covex-v6-base / covex-v6-rules it is that arm under its committed name, hybrid-F-lhreq-noc3 /
+  v5-rules-2 ...)"`. So the twin logic now NAMES the two-names relationship explicitly, which is exactly
+  the remedy recommended below.
+  *** WHAT GENUINELY REMAINS, NARROWED FROM THREE CONFLATED CHANGES TO TWO: the ratio still conflates
+  FLEET SIZE (16 to 20) AND LOAD, so it still CANNOT be read as a load effect, and
+  `decision_p99_up_gt_10pct` is still not evidence of load inflation. The ARM conflation is GONE. ***
+  `reportable: False` continues to do the protective work (the new cell is also `reportable: False` at
+  `decision_p99_ratio = 2.102`). A same-arm same-FLEET twin would be needed to isolate load, and for
+  `covex-v6-base` no such n16 cell exists in this condition; that limitation is unchanged and is a
+  property of what was run, not a defect in the note.
+
+  [SUPERSEDED BELOW, KEPT FOR THE TRAIL. DO NOT ACT ON IT.]
   **THOSE ARE DIFFERENT ARMS.** `covex-v6-base` and `hybrid-F-lhreq-noc3` are scored as distinct arms all
   night (the ladder's positive control treats them as two cells).
   **THE SUBSTITUTION WAS NECESSARY, SO THIS IS NOT CARELESSNESS:** there is NO
