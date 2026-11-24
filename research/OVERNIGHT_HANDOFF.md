@@ -51,6 +51,33 @@ check what the child is doing, before calling anything hung.
   built", and the standing rule is STOP AND REPORT, DO NOT DECIDE when a pre-registered condition
   fails. **DO NOT BUILD THE QUEUE-TERM FIX.** It is diagnosed, costed and waiting on the user.
 
+*** THE CONCURRENCY TEST, CORRECTED AGAIN ON 2026-11-24. "DIRTY + DIFFERS" IS TOO COARSE AND IT BLOCKED
+REAL WORK ALL NIGHT. *** I read `dirty-vs-HEAD AND differs-from-origin` as "another session is mid-edit"
+and declined to touch four files for hours. THREE FACTS KILL THAT READING: nothing was running (no
+interpreter under the repo or a scratchpad; loadavg 0.38); the mtimes were **3h42m to 36 HOURS** old
+(`INDEX.md` 11-23 20:18, `arms.py` 11-22 22:47, `coordinator.py` 11-22 19:55, `cf_objective.py` 11-22
+11:42); and the diffs run the WRONG WAY - the worktree copies are SHORTER than origin's (782 vs 818,
+2197 vs 2297, 640 vs 911), so they are OLDER, not newer.
+*** THE TEST THAT DECIDES SAFETY: DOES THE WORKING TREE HOLD ANY LINE ORIGIN LACKS? ***
+`git show origin/main:<f> > /tmp/o; diff /tmp/o <f> | grep -c '^>'` counts WORKTREE-ONLY lines, the only
+content a commit built from origin could destroy. Measured:
+  `results/INDEX.md`     worktree-only **0**   -> PURELY STALE-OLDER, NOTHING TO LOSE, SAFE
+  `arms.py`              worktree-only **2**   -> unique content, DO NOT TOUCH
+  `coordinator.py`       worktree-only **9**   -> unique content, DO NOT TOUCH
+  `v5/cf_objective.py`   worktree-only **150** -> unique content, DO NOT TOUCH
+**SO THE INDEX ROW "BLOCKED BY CONTENTION" ALL NIGHT WAS NEVER BLOCKED** and is now committed. BUT NOTE
+WHAT IS AND IS NOT ESTABLISHED: **unique content means UNSAFE TO OVERWRITE; it does NOT mean a session is
+active.** Nothing has written those three files for 25 to 36 hours and nothing is running, so they are
+either DELIBERATELY HELD code (the D214 `run_live2_real.py` wiring was exactly that, deliberately not on
+origin, and deleting its tree would have destroyed the only copy) or an ABANDONED WIP. **WHICH ONE IS A
+USER QUESTION AND IT BLOCKS ITEM 3**, which needs `coordinator.py`. Do not resolve it by guessing.
+*** AND A FORMAT TRAP IN `results/INDEX.md` ITSELF: ITS ROWS ARE NOT ALL THE SAME WIDTH. *** Headers
+declare 7 columns (8 pipes), but the RECENT rows in the tail use **7 pipes / 6 columns**, dropping the
+trailing "old name". My first attempt at this row asserted the wrong width and the assert CAUGHT IT
+before anything was written. **Count pipe CHARACTERS (`tr -cd '|' | wc -c`) against THE ADJACENT ROW, not
+against a header or a `split()` length** - two counting methods disagreed here and that disagreement was
+the real defect.
+
 *** HOW TO CHECK CONCURRENCY CORRECTLY (the shared worktree lies): ***
 `/tmp/claude-1001/mapwt` is HUNDREDS of commits behind origin (1,500 earlier tonight, 670 later), so
 `git status` there reports STALENESS AS MODIFICATION and shows committed files as `??` untracked. *** THE TEST THIS FILE PREVIOUSLY PRESCRIBED IS ALSO WRONG, AND FOR THE SAME REASON IT WARNS ABOUT.
