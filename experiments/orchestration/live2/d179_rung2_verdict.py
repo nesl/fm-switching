@@ -112,7 +112,19 @@ CHECK 2, "robot on-time gain over base retained".
     gain >= +0.01            NORMAL. retained is the ratio; check 2 is retained >= 0.90.
     |gain| < 0.01            NO_GAIN_TO_RETAIN. The ratio is reported as null, the check is
                              VACUOUS for that seed and said to be, and the fallback bound is
-                             applied: shares must not fall more than 0.01 below the base.
+                             applied: shares' gain over base must be at least the rung-2 comparator's.
+  ERRATUM 2026-11-23, LABEL ONLY, THE GOVERNING TEST IS UNCHANGED. This field's rule text
+  previously read 'shares on-time fraction must not fall more than 0.01 below the base's'. THAT WAS
+  WRONG: the implementation below is `fallback = (delta >= gain - GAIN_EPS)`, where `delta` is shares
+  MINUS BASE and `gain` is RUNG2 MINUS BASE, so it tests whether SHARES' GAIN OVER BASE IS AT LEAST
+  THE RUNG-2 COMPARATOR'S. It has nothing to do with 0.01 and nothing to do with the base's fraction.
+  FOUND by reconciling two verdicts that looked contradictory under the SAME rule text: false on the
+  rung-4 scoring (delta 86 < gain 91) and true on the rung-3 scoring (delta 91 > gain 84). IT CHANGED
+  NO COMMITTED VERDICT, because `gain_class` was NORMAL in both and the ratio governs; it becomes the
+  DECIDING test only when the gain is vacuous or sign-inverted, AND IN EXACTLY THOSE CASES THE
+  GOVERNING TEST WAS MISLABELLED. Per the user's ruling only the label is corrected; the computation
+  and therefore every number this scorer has ever produced are untouched.
+
     gain <= -0.01            NEGATIVE_GAIN, the rung-2 arm LOST to the base on that seed. The
                              ratio is computed but marked UNINTERPRETABLE, because its sign
                              inverts and a "retention" above 0.9 would then mean shares is worse.
@@ -841,7 +853,8 @@ def verdict_for_seed(seed: int, base: Optional[Dict[str, Any]],
         "retained_fraction": retained,
         "retained_bar": RETAIN_BAR,
         "absolute_fallback_bound": {
-            "rule": "shares on-time fraction must not fall more than 0.01 below the base's",
+            "rule": "shares' GAIN OVER BASE must be at least the RUNG-2 COMPARATOR'S gain over base (delta >= gain - GAIN_EPS)",
+            "_erratum_2026_11_23": "label corrected; see the module docstring. The governing computation is unchanged.",
             "pass": fallback},
         "basis_used": basis,
         "by_deadline_ACCURACY_BESIDE_NOT_THE_CHECK": _by_deadline_beside(base, rung2, shares),
@@ -1144,7 +1157,7 @@ DEFINITIONS = {
                                   "that seed and said to be; the absolute fallback applies"),
             "NEGATIVE_GAIN": ("gain <= -0.01: the ratio is reported but marked UNINTERPRETABLE "
                               "because its sign inverts; the absolute fallback applies"),
-            "absolute_fallback": ("shares on-time fraction must not fall more than 0.01 below the "
+            "absolute_fallback": ("shares' GAIN OVER BASE must be at least the RUNG-2 "
                                   "base's"),
             "no_seed_dropped": "every seed is reported with its gain_class, never dropped",
         },

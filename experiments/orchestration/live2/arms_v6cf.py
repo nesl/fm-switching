@@ -280,7 +280,13 @@ class _ProtectDeferMixin:
 
         THIS IS NOT BELT AND BRACES, IT IS THE ONLY WAY THE GATE IS REACHABLE AT ALL, and the
         measurement that says so is in this component's own proofs. `obs.cloud.gpu_kv_fraction`
-        is `vllm:gpu_cache_usage_perc` read off the LIVE SERVER (`cstate.py:630`); in a DRY cell
+        is the engine's KV-usage gauge. CORRECTED 2026-11-23: this line previously said
+        `vllm:gpu_cache_usage_perc` READ OFF THE LIVE SERVER. BOTH HALVES WERE WRONG. This engine
+        emits `vllm:kv_cache_usage_perc` and NO `vllm:gpu_cache_usage_perc` (H100 probe,
+        frozen_test/engine_probe_hit26/); and it was NOT read off the live server either, because
+        live2 NEVER SCRAPED /metrics AT ALL - `AsyncLive2Backend` is not an `HttpBackend` subclass
+        and contains no `/metrics` string, so the field was IDENTICALLY 0.0 in LIVE cells too, not
+        only dry ones. D216 (2) adds the scrape; until its wiring lands this gate reads 0.0 live. In a DRY cell
         there is no server, `self.metrics` is empty and the field is IDENTICALLY 0.0, measured:
         free_kv_min = free_kv_max = 62,944 over 77 decisions on a 300 s dry cell. A gate whose
         input is a constant cannot test anything (CLAUDE.md Step 2), and a null from it would be
