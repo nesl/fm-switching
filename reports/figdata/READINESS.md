@@ -95,13 +95,13 @@ The standard-grid cells DO apply the committed D75 link model (fleet/links.py, a
 - F4: 1408 rows
 - F6: 16 rows
 - F7: 0 rows
-- F8: 30 rows
-- F9: 8 rows
+- F8: 37 rows
+- F9: 12 rows
 - F10: 8 rows
 - F11: 0 rows
 - F12: 0 rows
-- F13: 127 rows
-- F14: 127 rows
+- F13: 136 rows
+- F14: 136 rows
 - F15: 1 rows
 - F16: 1 rows
 - F17: 0 rows
