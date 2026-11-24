@@ -4,6 +4,59 @@ ALL TIMES ARE PST AND STATE THEIR ZONE. Derive idleness from the newest commit's
 OFFSET (`git log --date=iso-strict`), never from a bare clock time: reading PST commit times as UTC
 once produced a false "H100 idle eight hours" claim while it had committed one minute earlier.
 
+## READ THIS FIRST, FOR A WATCHDOG RESUME. STATE AS OF 2026-11-23 22:20 PST.
+
+*** THE RESUME PROMPT CONTAINS THREE STALE PREMISES. DO NOT WASTE CALLS ON THEM. ***
+- **`ops/watchdog.log` AND `ops/track.log` DO NOT EXIST**, not on origin and not on disk. Checked with
+  `git cat-file -e` (rc=128), repeatedly. Only `ops/watchdog.sh` is committed. **To check concurrency,
+  do the thing below instead.**
+- **D187 IS NOT IN THIS FILE.** It is `research/policy_design_log.md:208`. Its guardrails, which DO
+  apply: every change justified by a MEASURED mechanism and PRE-REGISTERED (commit before its cells);
+  each design change a NEW LABELLED version recorded as OVERNIGHT DECISION, PROVISIONAL; never change
+  targets, deadlines, metrics, workload, seeds (never 1-3 or HOLDOUT), baselines or pass bars; never
+  drop or exclude data; NEVER TUNE A PARAMETER TOWARD PASSING; every result reported whatever its
+  direction; held or unproved code defaults OFF; one dry cell per process; D166 commit rules; NO Claude
+  attribution lines; no em dashes.
+- *** D187 (2)'s "FIX WITHOUT WAITING FOR APPROVAL" IS SUPERSEDED FOR THE RUNG-4 DEFECT. *** The user's
+  instruction of 2026-11-23 evening commissioned the diagnosis and required the remedy be "costed, NOT
+  built", and the standing rule is STOP AND REPORT, DO NOT DECIDE when a pre-registered condition
+  fails. **DO NOT BUILD THE QUEUE-TERM FIX.** It is diagnosed, costed and waiting on the user.
+
+*** HOW TO CHECK CONCURRENCY CORRECTLY (the shared worktree lies): ***
+`/tmp/claude-1001/mapwt` is HUNDREDS of commits behind origin (1,500 earlier tonight, 670 later), so
+`git status` there reports STALENESS AS MODIFICATION and shows committed files as `??` untracked. **The
+only valid test is `git diff --stat $(git rev-parse origin/main) -- <path>`.** As of 22:20 that shows
+**LIVE UNCOMMITTED EDITS to three run-path files**: `arms.py`, `coordinator.py` and `v5/cf_objective.py`.
+Another session is mid-work on them. **A RUN-PATH FREEZE IS ALSO IN FORCE until the ladder completes**,
+so TOUCH NO RUN-PATH FILE for either reason.
+
+*** WHAT IS ALREADY SCORED. DO NOT RE-SCORE. ***
+| arm | s4 | s5 | s6 | s7 |
+|---|---|---|---|---|
+| rung 3 `covex-v6-fair-final` | ALL THREE PASS | **ALL THREE PASS** (`3c644d81`) | comparator missing | cell missing |
+| rung 4 `covex-v6-final` | ALL THREE PASS | **check 2 FAIL 0.851** (`8e05580e`) | **check 2 FAIL 0.871** (`c7c92285`) | cell missing |
+
+**RUNG 4 PASSES CHECK 2 AT ONE SEED OF THREE, ON ROBOT RETENTION ALONE**; its checks 1 and 3 pass
+everywhere and its alert attainment is slightly ABOVE rung 3's at both failing seeds, so it buys a small
+alert gain with a larger robot loss. **RUNG 3 PASSES EVERYTHING EVERYWHERE SCORED.** Rung 2 standing
+alone is WORSE THAN BASE on alerts (0.2407 vs 0.3962 at s5) and would fail check 1.
+**THE CAUSE IS DIAGNOSED AND VERIFIED AT CODE LEVEL** (`reports/study_rung4_s5_failure.md`, `7ab3b070`):
+`arms_v6cfr3.py` calls `CC.predict(cf.model, int(u_request), 0, 0, 0)` while `v5/cf_cost.py:149` is
+`predict(model, tokens, cached_tokens=0, overlap_ft=0, overlap_decode=0, link_s=...)` computing
+`ft = intercept + per_uncached*unc + per_overlap*overlap_ft`, so **D162's queueing term is IDENTICALLY
+ZERO on a gate reached only when other requests are queued.** 14 losses, 0 gains, residual ZERO at s5;
+s4 had 2 gains and passed, so **s4's pass is the luckier draw of the same losing trade.**
+
+*** THE NEXT STEP, WHICHEVER APPLIES FIRST: ***
+1. `covex-v6-state-final` s6 lands (started 21:58) -> **score RUNG 3 at s6** (comparator state-final).
+2. s7 cells land -> score **rung 4 s7 as soon as `fair-final` s7 exists** (rung 4's comparator is
+   fair-final, NOT state-final, so it does not wait for state-final s7), and rung 3 s7 once state-final
+   s7 exists. Scoring recipe: extract the three cells from origin into a scratch `runs/` dir and run
+   `d179_rung2_verdict.py --runs <dir> --seeds <n> --shares-arm <arm> --base-arm hybrid-F-lhreq-noc3
+   --rung2-arm <comparator>`. **CONFIRM `positive control: PASS` EVERY TIME before reading a verdict.**
+3. Nothing scorable -> do NOT invent work on run-path files. The handoff's five overnight steps below
+   are owned by other sessions.
+
 ## WHERE THE WORK IS
 
 RUNNING NOW (H100): nine final-ladder cells, s5 to s7 for `covex-v6-fair-final`, `covex-v6-final`,
