@@ -246,11 +246,50 @@ decision reads, and neither is read until after the run. One further change is a
 `_emulator`'s `return EM.FleetEmulator(...)` became `em = EM.FleetEmulator(...); _EMU.append(em);
 return em`, the same call bound to a local.
 
-**That claim is checked mechanically rather than asserted.** `diff` of the held wiring against a
-clean archive of the base sha, with comments and blank lines filtered out, enumerates every added
-executable line; the only ones not inside the post-run block or the post-run `out` dict are those
-two appends and the rebinding. The enumeration is short enough to read in full and is reproduced in
-the session handoff.
+**That claim is now COMPUTED BY THE PROOF SCRIPT, not asserted in this report.** A sentence naming
+the one statement added inside the run went stale the moment a second one was added, which is
+exactly what happened. So `d214_byte_identity_proof.in_run_additions` diffs the two files on every
+run, drops comments and blank lines (they execute nothing), finds each added executable line's
+**enclosing function from the AST**, and classifies it:
+
+| region | n | what |
+|---|---|---|
+| post-run (inside the marked block, or the post-run `out` dict, within `run`) | 27 | the instrumentation itself |
+| in-run | 4 | `em = EM.FleetEmulator(...)`, `_EMU.append(em)`, `return em` in `_emulator`; `_CO.append(co)` in `_inprocess` |
+| module level (import time) | 2 | `_EMU: list = []`, `_CO: list = []` |
+| **unclassified** | **0** | anything not matching a harmless shape, which **fails** the check |
+
+Every in-run and module-level addition must match one of a few harmless shapes (a list append of an
+existing reference, the rebinding, an empty-list declaration). Anything else is reported as
+`UNCLASSIFIED` and the check **FAILS**, so a future edit that slips a real statement into the run
+cannot pass by resembling the old one.
+
+### The first version of this check passed the real tree for the wrong reason
+
+Worth recording, because it is an **impossible success** and only the classification, not the
+verdict, revealed it. The first classifier used a raw line-number rule: "inside the marked block,
+or after the post-run `out = dict(` line". But **`_emulator` and `_inprocess` are defined BELOW
+`run`** in the file, so their bodies are "after the `out` dict" and were swept into POST-RUN. The
+check returned PASS while reporting the only two genuine in-run statements as post-run, and it
+would equally have passed a harmful statement added anywhere in those two functions. It was caught
+by reading *what the check had classified*, not by its verdict. Replaced with the AST-based
+enclosing-function rule above.
+
+### So the check now has its own negative control, and it runs every time
+
+`check_self_test` injects four statements that **would** change a decision, one at a time, one per
+region, and requires the classifier to reject all four:
+
+| injected | where | rejected? |
+|---|---|---|
+| `co.st.kv_capacity_enforced = True` | in `_inprocess`, mutating state a decision reads | **yes**, flagged at its line with its function |
+| `em.tick_s = 0.123` | in `_emulator`, changing the emulator cadence | **yes** |
+| `a.seed = a.seed + 1` | in `run()`, before the post-run block | **yes** |
+| `import random; random.seed(7)` | at module import | **yes** |
+
+`PASS: every injection was rejected, so proof (a)'s verdict is load-bearing.` The real tree passing
+is the positive control; these four are the negative one. **A classifier that cannot fail says
+nothing when it passes**, and the first version of this one proves that is not a hypothetical.
 
 This is an argument from reading code, so it is marked CONSTRUCTED and is not offered as a
 measurement. It is also **not a switch that is off by default**, which the brief asked us not to
@@ -276,13 +315,32 @@ does A-vs-B mean anything. If they are not, the report says so and **refuses to 
 result a byte-identity proof**. A comparison whose control is never audited is the blindness
 CLAUDE.md check 7 is about, and here the control is the harness's own repeatability.
 
-**ALONE, and loadavg as a magnitude (D216 (1)).** Every cell in section 3 and section 4 waits for a
-window with no other live2 process, re-checks that none started during it, and records
-`/proc/loadavg` at the start and the end **as the number**. A cell with `alone: false` is recorded as
-such and its digest is not reported as a bar. The guard identifies its own child by an
-**environment marker**, never by a command-line pattern: `pgrep -f` on a self-matching pattern kills
-the session shell with exit 144, and a cmdline match cannot tell this driver's cell from another
-session's anyway.
+**ALONE IS GUARD-ASSERTED, NOT A FINDING (D216 (1)).** Every cell in section 3 and section 4 waits
+for a window with no other live2 process **visible to the guard**, re-checks that none started
+during it, and records `/proc/loadavg` at the start and the end **as the number**. The guard
+identifies its own child by an **environment marker**, never by a command-line pattern: a `pgrep -f`
+on a self-matching pattern kills the session shell with exit 144, and a cmdline match cannot tell
+this driver's cell from another session's anyway.
+
+But the guard's census is **bounded** (see section 7 item 1), and mine is bounded the same way: by a
+hardcoded list of `.py` basenames, so a process whose script name is not on the list is invisible to
+it. So the records do not write a bare `true`. They write:
+
+- `alone: "GUARD-ASSERTED CLEAR"` or `"FOREIGN LIVE2 PROCESS SEEN"` - a label that says who is
+  asserting, following the convention Session B adopted when it downgraded its own re-bar cell
+  rather than leaving a true-looking flag;
+- `alone_by_guard`, the boolean, for downstream logic only;
+- `alone_guard_bound`, the sentence explaining how the guard can be clear while the box was not;
+- the **foreign-process census** at start and end, and the loadavg magnitudes, **beside** the flag,
+  so a later reader can re-adjudicate from the evidence instead of trusting the summary.
+
+**And determinism outranks the alone flag.** The A/A and B/B controls are two independent runs of
+the same cell; if they agree exactly, that is **direct evidence** that this cell is deterministic on
+this path, which is stronger than any argument that nothing disturbed it. A cell that reproduces
+under whatever contention it actually met does not need the box to have been empty. So the A-vs-B
+verdict rests on the agreement, and the alone flag is provenance beside it rather than a
+precondition of it. That is recorded in the output as
+`determinism_outranks_the_alone_flag`.
 
 **The proof cell is dry-but-real-path.** There is no server on flash, so it runs
 `run_live2_real.py` with no `--server`: the real `Live2Coordinator`, the real `EmulatorBridge`, the

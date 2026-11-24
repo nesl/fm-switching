@@ -59,9 +59,11 @@ where DIR is an `experiments/orchestration/live2` directory in each tree.
 from __future__ import annotations
 
 import argparse
+import difflib
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -78,6 +80,204 @@ LIVE2_HINTS = ("cf_pd_one_cell.py", "cfr3_one_cell.py", "c5attr_one_cell.py", "r
                "d213_digest_driver.py", "d209_digest_driver.py", "d216_final_kv025_driver.py",
                "d210_kv025_driver.py", "f14_decision_latency_driver.py", "run_live2_real.py",
                "run_live2_cell.py", "test_hybrid.py", "d214_byte_identity_proof.py")
+
+
+_POST_RUN_BEGIN = "D214 FIGURE INSTRUMENTATION (items 1 and 3). LOGGING ONLY. BEGIN"
+_POST_RUN_END = "END D214 FIGURE INSTRUMENTATION"
+_OUT_DICT = "out = dict(arm=a.arm"
+
+# An added line inside the run is acceptable ONLY if it is one of these shapes. The point is not
+# the list: it is that anything NOT matching is reported as UNCLASSIFIED and fails the check, so a
+# future edit that slips a real statement into the run cannot pass by resembling the old one.
+_SAFE_IN_RUN = (
+    re.compile(r"^\s*_[A-Z]+\.append\([A-Za-z_][A-Za-z0-9_]*\)\s*(#.*)?$"),   # list append of a local
+    re.compile(r"^\s*em = EM\.FleetEmulator\(.*\)\s*$"),                      # the pure rebinding
+    re.compile(r"^\s*return em\s*$"),                                         # ...and its return
+    re.compile(r"^\s*_EMU: list = \[\]\s*$"),                                 # module-level capture
+    re.compile(r"^\s*_CO: list = \[\]\s*$"),
+)
+
+
+def in_run_additions(before_py: Path, after_py: Path) -> Dict[str, Any]:
+    """PROOF (a), RECOMPUTED RATHER THAN RESTATED.
+
+    A sentence saying "the only statement added inside the run is X" is invalidated silently by the
+    next edit. So this enumerates, from the two files themselves, every executable line the AFTER
+    file adds, classifies each as POST-RUN or IN-RUN by where it falls relative to the marked
+    instrumentation block and the post-run `out = dict(...)`, and then requires every IN-RUN
+    addition to match one of a few harmless shapes. Anything else is UNCLASSIFIED and the check
+    FAILS.
+
+    This is still CONSTRUCTED, not measured: it is a statement about the source text, not about a
+    run. What it buys over the sentence it replaces is that it cannot go stale.
+    """
+    return classify_text(before_py.read_text(), after_py.read_text())
+
+
+# The four injections the self-test uses. Each is a statement that WOULD change a decision, placed
+# in a different region, so a check that passes them all is broken in a different way each time:
+# inside `_inprocess`, inside `_emulator`, inside `run()` before the post-run block, and at module
+# import. (anchor, harmful line to insert before it)
+_INJECTIONS = (
+    ("in _inprocess, mutating state a decision reads",
+     "    _CO.append(co)", "    co.st.kv_capacity_enforced = True"),
+    ("in _emulator, changing the emulator cadence",
+     "    _EMU.append(em)", "    em.tick_s = 0.123"),
+    ("in run(), before the post-run block, changing the seed",
+     "    sends = bool(a.server)", "    a.seed = a.seed + 1"),
+    ("at module import, reseeding the global RNG",
+     "_CO: list = []", "import random; random.seed(7)"),
+)
+
+
+def check_self_test(before_py: Path, after_py: Path) -> Dict[str, Any]:
+    """DOES THE CHECK FAIL WHEN IT SHOULD? A check that only ever passes proves nothing.
+
+    The real tree passing is the POSITIVE control. This is the negative one: four statements that
+    would genuinely change a decision are injected one at a time into four different regions, and
+    the check must REJECT every one. A pass here means the verdict in `proof_a_structural` is
+    load-bearing rather than decorative.
+
+    This is not hypothetical rigour. The FIRST version of the classifier passed the real tree while
+    sweeping `_emulator` and `_inprocess` into POST-RUN, because they are defined below `run` and
+    the rule was a raw line number. It would have passed injections 1 and 2. The bug was found by
+    reading what the check had classified, not from its verdict, so the self-test now runs every
+    time and the same mistake cannot be made silently again.
+    """
+    before_text = before_py.read_text()
+    after_text = after_py.read_text()
+    cases: List[Dict[str, Any]] = []
+    for where, anchor, harmful in _INJECTIONS:
+        if anchor not in after_text:
+            cases.append({"where": where, "RESULT": "SKIPPED: anchor %r is not in the after file, "
+                                                    "so this region could not be tested" % anchor})
+            continue
+        mutated = after_text.replace(anchor, harmful + "   # INJECTED\n" + anchor, 1)
+        r = classify_text(before_text, mutated)
+        u = r.get("unclassified_in_run_additions") or []
+        cases.append({"where": where, "injected": harmful,
+                      "check_rejected_it": (r.get("PASS") is False),
+                      "flagged": [{"line": x["line"], "in_function": x["in_function"],
+                                   "text": x["text"]} for x in u[:2]]})
+    tested = [c for c in cases if "check_rejected_it" in c]
+    ok = bool(tested) and all(c["check_rejected_it"] for c in tested)
+    return {
+        "_what": ("NEGATIVE CONTROL ON THE CHECK ITSELF. Four decision-changing statements, one "
+                  "per region, each injected alone; the classifier must reject all four."),
+        "n_tested": len(tested), "n_skipped": len(cases) - len(tested),
+        "cases": cases,
+        "PASS": ok,
+        "VERDICT": ("PASS: every injection was rejected, so proof (a)'s verdict is load-bearing."
+                    if ok else
+                    "FAIL: THE CHECK IS BROKEN, NOT THE TREE. At least one statement that would "
+                    "change a decision was classified as harmless. proof_a_structural's PASS must "
+                    "be disregarded until this is fixed."),
+    }
+
+
+def classify_text(before_text: str, after_text: str) -> Dict[str, Any]:
+    """`in_run_additions` on two strings, so the self-test can mutate the after file in memory."""
+    before = before_text.splitlines()
+    after = after_text.splitlines()
+
+    # the post-run region of the AFTER file, by its own markers
+    b = e = o = None
+    for i, ln in enumerate(after):
+        if _POST_RUN_BEGIN in ln:
+            b = i
+        elif _POST_RUN_END in ln:
+            e = i
+        elif _OUT_DICT in ln:
+            o = i
+    markers = {"block_begin_line": (None if b is None else b + 1),
+               "block_end_line": (None if e is None else e + 1),
+               "out_dict_line": (None if o is None else o + 1)}
+    if b is None or e is None or o is None:
+        return {"VERDICT": "CANNOT CLASSIFY: the post-run block markers were not found in the "
+                           "after file, so no line can be placed. Treat proof (a) as UNPROVED.",
+                "markers": markers}
+
+    sm = difflib.SequenceMatcher(None, before, after, autojunk=False)
+    added: List[tuple] = []
+    for tag, _i1, _i2, j1, j2 in sm.get_opcodes():
+        if tag in ("insert", "replace"):
+            for j in range(j1, j2):
+                added.append((j + 1, after[j]))
+
+    # WHICH FUNCTION EACH ADDED LINE IS IN, FROM THE AST. A raw line-number rule is WRONG here and
+    # the first version of this check was wrong in the dangerous direction: `_emulator` and
+    # `_inprocess` are defined BELOW `run`, so "after the post-run `out` dict" swept their bodies
+    # into POST-RUN and the check PASSED while classifying the only two genuine in-run statements
+    # as post-run. It would equally have passed a harmful statement added anywhere in those two
+    # functions. An impossible success is as diagnostic as an impossible failure, and this one was
+    # caught by reading what the check had classified rather than by its verdict.
+    import ast
+    try:
+        tree = ast.parse("\n".join(after))
+    except SyntaxError as exc:
+        return {"VERDICT": "CANNOT CLASSIFY: the after file does not parse (%s). Treat proof (a) "
+                           "as UNPROVED." % exc, "markers": markers}
+    spans = [(n.lineno, n.end_lineno or n.lineno, n.name) for n in ast.walk(tree)
+             if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+
+    def enclosing_fn(ln: int) -> Optional[str]:
+        """The INNERMOST function containing this line, or None for module level."""
+        best = None
+        for lo, hi, name in spans:
+            if lo <= ln <= hi and (best is None or (hi - lo) < best[0]):
+                best = (hi - lo, name)
+        return None if best is None else best[1]
+
+    post_run, in_run, module_level, unclassified = [], [], [], []
+    for lineno, text in added:
+        s = text.strip()
+        if not s or s.startswith("#"):
+            continue                                   # comments and blanks execute nothing
+        fn = enclosing_fn(lineno)
+        rec = {"line": lineno, "text": s, "in_function": fn}
+        if fn is None:
+            # executed at IMPORT time, before any run exists. Still has to be harmless.
+            if any(p.match(text) for p in _SAFE_IN_RUN):
+                rec["shape"] = "module level, empty-list declaration, executed at import"
+                module_level.append(rec)
+            else:
+                unclassified.append(rec)
+        elif fn == "run" and (b <= lineno - 1 <= e or lineno - 1 >= o):
+            post_run.append(rec)
+        else:
+            # inside `run` before the post-run block, or inside ANY other function: IN-RUN.
+            if any(p.match(text) for p in _SAFE_IN_RUN):
+                rec["shape"] = "harmless: a list append of an existing reference, or a rebinding"
+                in_run.append(rec)
+            else:
+                unclassified.append(rec)
+
+    ok = not unclassified
+    return {
+        "_what": ("PROOF (a), COMPUTED FROM THE TWO FILES. Every executable line the after file "
+                  "adds, classified by whether it falls inside the marked post-run block (or the "
+                  "post-run `out` dict) or inside the run. Comments and blank lines are dropped "
+                  "because they execute nothing."),
+        "register": "CONSTRUCTED: a statement about the source text, not about a run",
+        "markers": markers,
+        "n_executable_lines_added": len(post_run) + len(in_run) + len(unclassified),
+        "n_post_run": len(post_run),
+        "n_in_run": len(in_run),
+        "n_module_level": len(module_level),
+        "module_level_additions": module_level,
+        "in_run_additions": in_run,
+        "unclassified_in_run_additions": unclassified,
+        "post_run_additions": post_run,
+        "PASS": ok,
+        "VERDICT": ("PASS: every executable addition is either in the post-run block or one of the "
+                    "harmless in-run shapes (a list append of an existing reference, or a pure "
+                    "rebinding). Nothing added inside the run can change a decision."
+                    if ok else
+                    "FAIL: %d executable line(s) were added INSIDE THE RUN in a shape this check "
+                    "does not recognise as harmless. They are listed in "
+                    "`unclassified_in_run_additions` and must be reviewed before the "
+                    "instrumentation is called logging-only." % len(unclassified)),
+    }
 
 
 def _ancestors(pid: int) -> set:
@@ -189,7 +389,10 @@ def run_one(tree: Path, tag: str, work: Path, a: Any, wait_s: float) -> Dict[str
         "wall_s": round(time.time() - t0, 1),
         "loadavg_at_start": [round(x, 2) for x in l0],
         "loadavg_at_end": [round(x, 2) for x in l1],
-        "alone": bool(gate.get("alone_at_start") and not after),
+        "alone_by_guard": bool(gate.get("alone_at_start") and not after),
+        "alone": ("GUARD-ASSERTED CLEAR" if (gate.get("alone_at_start") and not after)
+                  else "FOREIGN LIVE2 PROCESS SEEN"),
+        "alone_guard_bound": 'the guard enumerates foreign live2 processes by a hardcoded list of .py BASENAMES, so a process whose script name is not in that list is INVISIBLE to it. A cell can therefore record a clear guard truthfully and still not have been alone. THE BOOLEAN IS A SUMMARY OF THE CENSUS, NEVER THE FINDING: re-adjudicate from foreign_live2_at_start / _at_end and the loadavg magnitudes beside it. Direct evidence of determinism (two independent runs agreeing exactly) outranks any alone claim.',
         "waited_for_alone_s": gate.get("waited_s"),
         "foreign_at_start": gate.get("foreign_at_give_up") or [],
         "foreign_at_end": after,
@@ -293,7 +496,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     aa = bool(d["A1_before"] is not None and d["A1_before"] == d["A2_before"])
     bb = bool(d["B1_after"] is not None and d["B1_after"] == d["B2_after"])
     ab = bool(d["A1_before"] is not None and d["A1_before"] == d["B1_after"])
-    all_alone = all(bool(recs[t].get("alone")) for t in recs)
+    all_alone = all(bool(recs[t].get("alone_by_guard")) for t in recs)
 
     if not (aa and bb):
         verdict = ("INCONCLUSIVE -- THE CONTROL FAILED, NOT THE TREATMENT. Two runs of the same "
@@ -318,15 +521,17 @@ def main(argv: Optional[List[str]] = None) -> int:
         "_register": ("DRY cell on the REAL runner path (run_live2_real.py with no server). NOT a "
                       "measurement of anything; is_measurement is false in its own header."),
         "cell": {"arm": a.arm, "seed": a.seed, "n_devices": a.n, "run_s": a.run_s, "mode": "A"},
-        "proof_a_structural": {
-            "register": "CONSTRUCTED",
-            "statement": ("every added line runs after em.run() returned. Exactly two statements "
-                          "are added inside the run, both list appends of a reference to an "
-                          "already-existing object: _EMU.append(em) in run_live2_real._emulator "
-                          "and _CO.append(co) in run_live2_real._inprocess. Neither mutates state "
-                          "any decision reads and neither is read until after the run."),
-            "in_run_statements_added": 2,
-        },
+        # PROOF (a) IS COMPUTED, NOT QUOTED. It used to be a sentence naming the one statement
+        # added inside the run; that sentence went stale the moment a second one was added. This
+        # recomputes the classification from the two files on every run, so the next edit cannot
+        # quietly invalidate it: an unrecognised in-run addition FAILS the check instead of
+        # resembling the old one.
+        "proof_a_structural": in_run_additions(
+            before / "run_live2_real.py", after / "run_live2_real.py"),
+        # ...and the negative control ON THAT CHECK, read together with it. A classifier that
+        # cannot fail says nothing when it passes.
+        "proof_a_self_test": check_self_test(
+            before / "run_live2_real.py", after / "run_live2_real.py"),
         "proof_b_import_closure": import_closure_census(after, work),
         "proof_c_paired_cells": {
             "register": "OBSERVED",
@@ -346,10 +551,20 @@ def main(argv: Optional[List[str]] = None) -> int:
                 _rows(Path(recs["B1_after"]["run_dir"]) / "decision.jsonl")),
             "strip_set": list(STRIP),
         },
-        "all_cells_ran_alone": all_alone,
+        "all_cells_guard_asserted_alone": all_alone,
         "alone_note": ("D216 (1). loadavg is recorded AS A MAGNITUDE at the start and end of every "
-                       "cell; see cells[].loadavg_at_start / _at_end. A cell with alone=false is "
-                       "reported as such and its digest is not a bar."),
+                       "cell; see cells[].loadavg_at_start / _at_end. THE FLAG IS GUARD-ASSERTED, "
+                       "NOT A FINDING: read it as a summary of the foreign-process census beside "
+                       "it (cells[].foreign_live2_at_start / _at_end) and re-adjudicate from that "
+                       "census if it matters. See cells[].alone_guard_bound for why the guard can "
+                       "be clear while the box was not."),
+        "determinism_outranks_the_alone_flag": (
+            "The A/A and B/B controls are TWO INDEPENDENT RUNS OF THE SAME CELL. If they agree "
+            "exactly, that is DIRECT EVIDENCE that this cell is deterministic on this path, which "
+            "is stronger than any argument that nothing disturbed it: a cell that reproduces under "
+            "whatever contention it actually met does not need the box to have been empty. So the "
+            "A-vs-B verdict rests on the agreement, and the alone flag is provenance beside it, "
+            "not a precondition of it."),
         "VERDICT": verdict,
         "cells": recs,
     }

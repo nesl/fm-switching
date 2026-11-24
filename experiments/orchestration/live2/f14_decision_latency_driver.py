@@ -183,10 +183,14 @@ def run_cell(tag: str, arm: str, n: int, out_dir: Path, seed: int, run_s: float,
         "foreign_live2_at_start": gate.get("foreign_at_give_up") or [],
         "foreign_live2_at_end": after,
         "waited_for_alone_s": gate.get("waited_s"),
-        "alone": bool(gate.get("alone_at_start") and not after),
-        "alone_definition": ("no OTHER live2 process at the start AND none started during the "
-                             "cell. A cell with alone=false is recorded and is NOT reported as a "
-                             "bar (D216 (1))."),
+        # GUARD-ASSERTED, not asserted. See `alone_guard_bound`.
+        "alone_by_guard": bool(gate.get("alone_at_start") and not after),
+        "alone": ("GUARD-ASSERTED CLEAR" if (gate.get("alone_at_start") and not after)
+                  else "FOREIGN LIVE2 PROCESS SEEN"),
+        "alone_definition": ("no OTHER live2 process VISIBLE TO THE GUARD at the start AND none "
+                             "started during the cell. A cell whose guard was not clear is "
+                             "recorded and is NOT reported as a bar (D216 (1))."),
+        "alone_guard_bound": 'the guard enumerates foreign live2 processes by a hardcoded list of .py BASENAMES, so a process whose script name is not in that list is INVISIBLE to it. A cell can therefore record a clear guard truthfully and still not have been alone. THE BOOLEAN IS A SUMMARY OF THE CENSUS, NEVER THE FINDING: re-adjudicate from foreign_live2_at_start / _at_end and the loadavg magnitudes beside it. Direct evidence of determinism (two independent runs agreeing exactly) outranks any alone claim.',
         "cmd": " ".join(cmd),
     }
     if rc == 0:
@@ -229,6 +233,7 @@ def assemble(out_dir: Path) -> Dict[str, Any]:
             lat = r["lat"]
             row = {"arm": arm, "n_devices": n, "status": "ok",
                    "alone": r.get("alone"),
+                   "alone_by_guard": r.get("alone_by_guard"),
                    "loadavg_at_start": r.get("loadavg_at_start"),
                    "loadavg_at_end": r.get("loadavg_at_end"),
                    "digest": (r.get("cell") or {}).get("digest"),
@@ -258,7 +263,7 @@ def assemble(out_dir: Path) -> Dict[str, Any]:
             flags.append("CONSTANT WHERE A DISTRIBUTION IS EXPECTED: %s at n=%d has %s distinct "
                          "decision latencies over %s rows. A constant advertises breakage."
                          % (row["arm"], row["n_devices"], row.get("n_distinct"), row.get("n")))
-        if row.get("alone") is False:
+        if row.get("alone_by_guard") is False:
             flags.append("NOT ALONE: %s at n=%d ran with another live2 process; its latency is "
                          "not reported as a bar (D216 (1))." % (row["arm"], row["n_devices"]))
 
@@ -323,7 +328,8 @@ def _control_row(out_dir: Path) -> Dict[str, Any]:
         "source_of_expected": CONTROL_SOURCE,
         "got_digest": got, "got_rows": rows,
         "PASS": bool(got == CONTROL_DIGEST and rows == CONTROL_ROWS),
-        "alone": r.get("alone"), "loadavg_at_start": r.get("loadavg_at_start"),
+        "alone": r.get("alone"),
+                   "alone_by_guard": r.get("alone_by_guard"), "loadavg_at_start": r.get("loadavg_at_start"),
     }
 
 
