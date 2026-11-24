@@ -13,6 +13,10 @@ while true; do
   # imports happen at start-up, and the driver itself pulls before the next cell.
   ls=$(grep -E "^\[[0-9-]+ [0-9:]+\] start " $G 2>/dev/null | tail -1 | cut -c2-20)
   if [ -n "$ls" ] && [ $(( $(date +%s) - $(date -d "$ls" +%s) )) -lt 180 ]; then sleep 20; continue; fi
+  # 2026-11-24 11:39: the pusher also raced the driver BETWEEN cells (its end-of-cell commit and pull, then the next
+  # start). So also hold while the last cell event is an "end" younger than 120 s (an idle driver cannot block forever).
+  le=$(grep -E "^\[[0-9-]+ [0-9:]+\] (start|end) " $G 2>/dev/null | tail -1)
+  case "$le" in *"] end "*) [ $(( $(date +%s) - $(date -d "$(echo "$le" | cut -c2-20)" +%s) )) -lt 120 ] && { sleep 10; continue; };; esac
   git fetch -q origin 2>>$P
   if ! git merge-base --is-ancestor HEAD origin/main 2>/dev/null; then
     echo "[$(date '+%F %T')] HEAD $(git rev-parse --short HEAD) not on origin/main $(git rev-parse --short origin/main); pushing" >> $P
