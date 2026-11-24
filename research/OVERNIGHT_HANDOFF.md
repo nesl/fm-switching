@@ -49,13 +49,31 @@ bullets below are kept only for the trail.
 - **THE RUN-PATH FREEZE HAS LAPSED, BOTH REASONS.** See the reconciliation further down; the procedure
   that replaces it is: build from ORIGIN's content, census the box, and prove a live-path edit neutral on
   a dry A/B from one literal sha.
-**SO THE ONLY OPEN WORK IS THE USER'S RULINGS**, listed under OPEN, NEEDING A USER RULING: rung 4's
-supersession; the queue-term fix (**DO NOT BUILD**); wiring the metrics link; whether DEVICE_ANSWERS is
-adopted into `covex-v6-final` or kept separate; which of the two agreeing D218 pre-registrations is the
-record; and E3. **A RESUME THAT FINDS NOTHING ELSE TO DO IS CORRECT: say so and stop, rather than
-inventing work or re-deriving this block.** If you have spare capacity, the useful thing is to VERIFY one
-of this file's own claims against origin and correct it, which is how the last five resumes each found a
-real stale entry.
+**SO THE ONLY OPEN WORK IS THE USER'S RULINGS. THERE ARE EIGHT AND THE FIRST ONE MAY DISSOLVE THE
+FOURTH, SO THE ORDER MATTERS:**
+  1. *** THE HARM FORM *** - `on-time-cloud` or `device-discounted`. The code says the choice is a user
+     ruling and nobody had asked; added 2026-11-24. **TAKE IT FIRST:** under `device-discounted` the
+     measured device tables make the harm of displacing an alert or a recall EXACTLY ZERO, so the
+     DEVICE_ANSWERS 1x count becomes 0, the stop condition would never have fired, and ruling 4 dissolves
+     rather than needing an answer. It also moves rung 4's Rule 2 class at s4 and s7.
+  2. Rung 4's supersession, now that it passes check 2 at one seed of four.
+  3. The queue-term fix - **DO NOT BUILD** (D187 (2) superseded for it; diagnosed and costed).
+  4. DEVICE_ANSWERS adopted into `covex-v6-final` (D209 (1) then supersedes the posted s4 cell) or kept
+     as a separate arm. **See ruling 1 first.** The implementation is preserved HELD at
+     `experiments/orchestration/live2/held/d218_device_answers/`; do not rebuild it.
+  5. Wiring the metrics link. Worth doing but NOT the blocker it once looked like: the belief already
+     supplies a varying `free_kv`, so the engine metric mainly matters at 0.25x where capacity binds.
+  6. Which of the two agreeing D218 pre-registrations is the record.
+  7. **THE r2 QUEUE REGISTER** - keep a CORRECT input that costs 16 robot answers at s4, or keep r1?
+     Added 2026-11-24, its own diagnosis defers it. **Does NOT affect the ladder** (rung 4's base is
+     `fair_final`, not the shares line).
+  8. E3, one line so a cell with failed metrics fetches says so.
+**A RESUME THAT FINDS NOTHING ELSE TO DO IS CORRECT: say so and stop, rather than inventing work or
+re-deriving this block.** If you have spare capacity, the useful thing is to VERIFY one of this file's own
+claims against origin and correct it, which is how every resume since 2026-11-24 09:00 found a real stale
+entry - INCLUDING THIS BLOCK, which listed six rulings and omitted the two newest until a resume checked
+its own summary against the section it summarises. **A SUMMARY GOES STALE FASTER THAN THE THING IT
+SUMMARISES.**
 
 *** A CORRECTION TO THIS FILE'S OWN HANG-DETECTION LESSON, because I got the discriminator wrong
 earlier tonight and a future resume would kill a healthy driver with it. ***
