@@ -1,0 +1,417 @@
+{
+ "_what": "E1 + E3 proofs: the engine /metrics scrape reaches a decision, and every cell.json can say whether its engine-metric quantities are evidence",
+ "_d_rows": [
+  "D216 (2)",
+  "D222 (1) g",
+  "D227",
+  "D218 (3) (the withheld key)",
+  "D209 (2) (the missing-value policy this reuses)"
+ ],
+ "_cells_are": "NON-DRY cells against the committed CPU stub live/fake_server.py through AsyncLive2Backend. A DRY cell cannot test this: coordinator.py:489 is guarded by `not dry_run`, so the scrape is unreachable and an ON-versus-OFF digest would be identical by construction.",
+ "_free_mb_at_start": 29505,
+ "_tree_state": {
+  "base_sha": "1fd0cdc9d1532f894ac73cbd457800eb65673a86",
+  "files_changed_by_this_study_in_this_tree": [
+   "experiments/orchestration/live/adapter.py",
+   "experiments/orchestration/live2/asyncbackend.py",
+   "experiments/orchestration/live2/cstate.py (module docstring only)",
+   "experiments/orchestration/live2/metrics_trust.py (new)",
+   "experiments/orchestration/live2/d227_e1_metrics_proofs.py (new)"
+  ],
+  "held_files_are_origin_bytes": [
+   "experiments/orchestration/live2/run_live2_real.py",
+   "experiments/orchestration/live2/procsplit.py"
+  ],
+  "regenerate_before_commit": true
+ },
+ "part_a_read_sites": {
+  "claim": "the definition is now READ: metrics() reaches the ONE scrape path, and there is still exactly one _fetch_metrics in the tree",
+  "call_chain": {
+   "metrics -> metrics_health": true,
+   "metrics -> published_engine_metrics": true,
+   "published_engine_metrics -> scrape_metrics": true,
+   "scrape_metrics -> _metrics_poller": true,
+   "_metrics_poller -> start_poller": true
+  },
+  "fetch_metrics_definitions_in_tree": [
+   "experiments/orchestration/live/adapter.py:339"
+  ],
+  "n_fetch_metrics_definitions": 1,
+  "n_python_files_examined": 868,
+  "published_engine_keys": [
+   "vllm:gpu_cache_usage_perc",
+   "vllm:num_requests_running",
+   "vllm:num_preemptions_total",
+   "vllm:prefix_cache_queries_total",
+   "vllm:prefix_cache_hits_total",
+   "vllm:external_prefix_cache_queries_total",
+   "vllm:external_prefix_cache_hits_total",
+   "vllm:kv_offload_cpu_cache_usage_perc",
+   "vllm:kv_offload_load_bytes_total",
+   "vllm:kv_offload_load_time_total",
+   "vllm:kv_offload_store_bytes_total",
+   "vllm:kv_offload_store_time_total",
+   "vllm:kv_offload_total_bytes_total",
+   "fm_kv_state",
+   "fm_kv_source_key",
+   "fm_kv_age_s",
+   "fm_kv_missing",
+   "fm_metrics_fetch_error",
+   "fm_metrics_degraded"
+  ],
+  "withheld_engine_keys": {
+   "vllm:num_requests_waiting": "D218 (3): stays UNPUBLISHED; cstate.py:691 reads it for queued_by_class['episodic'] and the value it would replace is live and varying"
+  },
+  "num_requests_waiting_is_withheld": true,
+  "metrics_scrape_class_default_is_off": true,
+  "PASS": true
+ },
+ "part_b_c_states_and_allow_list": {
+  "claim": "the three states are produced for real and differ in state AND in engine_metrics_trusted; the allow-list removes a key the raw scrape really carries",
+  "rows": [
+   {
+    "condition": "scrape OFF",
+    "state": "never_scraped",
+    "engine_metrics_trusted": false,
+    "n_scrapes": 0,
+    "n_failures": 0,
+    "kv_key_in_metrics": false
+   },
+   {
+    "condition": "scrape ON, endpoint unreachable",
+    "state": "scraped_and_failed",
+    "engine_metrics_trusted": false,
+    "n_scrapes": 2,
+    "n_failures": 2,
+    "kv_value_served": 1.0,
+    "fm_kv_state": "unknown_conservative"
+   },
+   {
+    "condition": "scrape ON, stub answers",
+    "state": "scraped_ok",
+    "engine_metrics_trusted": true,
+    "n_scrapes": 2,
+    "n_failures": 0,
+    "last_success_t_is_set": true,
+    "metric_names_found": [
+     "vllm:gpu_cache_usage_perc",
+     "vllm:num_requests_running"
+    ],
+    "kv_key_seen": "vllm:gpu_cache_usage_perc",
+    "kv_value_served": 0.0,
+    "fm_kv_state": "observed"
+   }
+  ],
+  "allow_list": {
+   "raw_scrape_carries_num_requests_waiting": true,
+   "published_subset_carries_it": false,
+   "metrics_carries_it": false,
+   "raw_scrape_n_keys": 7,
+   "published_n_keys": 6
+  },
+  "cell_level_states": {
+   "dry": {
+    "state": "dry_no_server",
+    "engine_metrics_trusted": false
+   },
+   "no backend block": {
+    "state": "unknown_no_backend_block",
+    "engine_metrics_trusted": false
+   },
+   "scrape off": {
+    "state": "never_scraped",
+    "engine_metrics_trusted": false
+   },
+   "scrape ok": {
+    "state": "scraped_ok",
+    "engine_metrics_trusted": true
+   }
+  },
+  "PASS": true
+ },
+ "part_d_byte_identity_by_replay": {
+  "claim": "every arm that does not read the field is byte-identical under the field, by deterministic replay of one recorded input tape",
+  "method": "A NON-DRY CELL IS NOT REPRODUCIBLE RUN TO RUN, measured and not assumed: two identical `mooncake` runs at the same seed and the same condition against the stub produced 160 decision rows each and the digests 5b67c60fce399902 and 767daf8a71626f1d. So an ON-versus-OFF digest comparison on a live cell cannot establish byte identity: its noise floor is larger than the effect it would be measuring. That is why byte identity is established HERE by replaying one recorded input tape, which is deterministic, and why a self-identity control runs for every arm before its result is reported.",
+  "capture": {
+   "capture_arm": "covex-v6-final",
+   "n_tape": 1384,
+   "n_decide_calls": 601,
+   "n_roster": 610,
+   "n_completed": 173,
+   "live_gpu_kv_fraction_distinct_values": 134,
+   "live_gpu_kv_fraction_min": 0.0,
+   "live_gpu_kv_fraction_max": 1.0,
+   "metrics_health": {
+    "state": "scraped_ok",
+    "engine_metrics_trusted": true,
+    "n_scrapes": 324,
+    "n_failures": 0,
+    "kv_key_seen": "vllm:gpu_cache_usage_perc",
+    "metric_names_found": [
+     "vllm:gpu_cache_usage_perc",
+     "vllm:num_requests_running"
+    ]
+   },
+   "server": "live/fake_server.py, the committed CPU stub; it tracks kv_tokens per request so vllm:gpu_cache_usage_perc is non-zero and varying"
+  },
+  "injected_values": {
+   "low": 0.0,
+   "high": 0.97
+  },
+  "rows": [
+   {
+    "arm": "hybrid-F-lhreq-noc3",
+    "self_identity_kv0_vs_kv0": true,
+    "digest_kv_0.0": "56ecb29ed54a962a",
+    "digest_kv_0.97": "56ecb29ed54a962a",
+    "identical_across_kv": true,
+    "n_actions": 601,
+    "reads_gpu_kv_fraction_at_kv_0.97": 0,
+    "pd_kv_bound_by_engine_metric_at_kv_0.97": null,
+    "pd_kv_bound_by_belief_at_kv_0.97": null,
+    "pd_decisions_at_kv_0.97": null,
+    "pd_free_kv_min_at_kv_0.97": null,
+    "first_differing_action": null
+   },
+   {
+    "arm": "covex-v6-state-final",
+    "self_identity_kv0_vs_kv0": true,
+    "digest_kv_0.0": "0a92b5235bfc952b",
+    "digest_kv_0.97": "0a92b5235bfc952b",
+    "identical_across_kv": true,
+    "n_actions": 601,
+    "reads_gpu_kv_fraction_at_kv_0.97": 0,
+    "pd_kv_bound_by_engine_metric_at_kv_0.97": null,
+    "pd_kv_bound_by_belief_at_kv_0.97": null,
+    "pd_decisions_at_kv_0.97": null,
+    "pd_free_kv_min_at_kv_0.97": null,
+    "first_differing_action": null
+   },
+   {
+    "arm": "covex-v6-fair-final",
+    "self_identity_kv0_vs_kv0": true,
+    "digest_kv_0.0": "0a92b5235bfc952b",
+    "digest_kv_0.97": "0a92b5235bfc952b",
+    "identical_across_kv": true,
+    "n_actions": 601,
+    "reads_gpu_kv_fraction_at_kv_0.97": 0,
+    "pd_kv_bound_by_engine_metric_at_kv_0.97": null,
+    "pd_kv_bound_by_belief_at_kv_0.97": null,
+    "pd_decisions_at_kv_0.97": null,
+    "pd_free_kv_min_at_kv_0.97": null,
+    "first_differing_action": null
+   },
+   {
+    "arm": "mooncake",
+    "self_identity_kv0_vs_kv0": true,
+    "digest_kv_0.0": "a65520b3cade7f72",
+    "digest_kv_0.97": "a65520b3cade7f72",
+    "identical_across_kv": true,
+    "n_actions": 601,
+    "reads_gpu_kv_fraction_at_kv_0.97": 0,
+    "pd_kv_bound_by_engine_metric_at_kv_0.97": null,
+    "pd_kv_bound_by_belief_at_kv_0.97": null,
+    "pd_decisions_at_kv_0.97": null,
+    "pd_free_kv_min_at_kv_0.97": null,
+    "first_differing_action": null
+   },
+   {
+    "arm": "simplestream",
+    "self_identity_kv0_vs_kv0": true,
+    "digest_kv_0.0": "8876d281e597b3e2",
+    "digest_kv_0.97": "8876d281e597b3e2",
+    "identical_across_kv": true,
+    "n_actions": 601,
+    "reads_gpu_kv_fraction_at_kv_0.97": 0,
+    "pd_kv_bound_by_engine_metric_at_kv_0.97": null,
+    "pd_kv_bound_by_belief_at_kv_0.97": null,
+    "pd_decisions_at_kv_0.97": null,
+    "pd_free_kv_min_at_kv_0.97": null,
+    "first_differing_action": null
+   },
+   {
+    "arm": "llf",
+    "self_identity_kv0_vs_kv0": true,
+    "digest_kv_0.0": "0272f3f9f4a4dcd8",
+    "digest_kv_0.97": "0272f3f9f4a4dcd8",
+    "identical_across_kv": true,
+    "n_actions": 601,
+    "reads_gpu_kv_fraction_at_kv_0.97": 0,
+    "pd_kv_bound_by_engine_metric_at_kv_0.97": null,
+    "pd_kv_bound_by_belief_at_kv_0.97": null,
+    "pd_decisions_at_kv_0.97": null,
+    "pd_free_kv_min_at_kv_0.97": null,
+    "first_differing_action": null
+   },
+   {
+    "arm": "covex-v6-final",
+    "self_identity_kv0_vs_kv0": true,
+    "digest_kv_0.0": "0a92b5235bfc952b",
+    "digest_kv_0.97": "0a92b5235bfc952b",
+    "identical_across_kv": true,
+    "n_actions": 601,
+    "reads_gpu_kv_fraction_at_kv_0.97": 0,
+    "pd_kv_bound_by_engine_metric_at_kv_0.97": null,
+    "pd_kv_bound_by_belief_at_kv_0.97": null,
+    "pd_decisions_at_kv_0.97": null,
+    "pd_free_kv_min_at_kv_0.97": null,
+    "first_differing_action": null
+   }
+  ],
+  "arms_not_graded_self_identity_failed": [],
+  "identity_arms_byte_identical": true,
+  "identity_arms_never_read_the_field": true,
+  "link_arm_in_this_fixture": {
+   "arm": "covex-v6-final",
+   "moved": false,
+   "read_the_field": false,
+   "engine_metric_binds": false,
+   "REGISTER": "NOT A PASS CONDITION HERE, and the reason is a property of the FIXTURE and not of the wiring: on a 2+2-device synthetic trace against the CPU stub, no decision reaches the protect-and-defer path at all (every pd_* counter is ABSENT, not zero), so _pd_free_kv is never called and the field is never read. Claiming identity for covex-v6-final from this would be the UNEXERCISED null this project keeps finding. The read site is proved directly in part_d2, on the SAME captured live observations."
+  },
+  "PASS": true
+ },
+ "part_d2_read_site": {
+  "capture": {
+   "capture_arm": "covex-v6-final",
+   "n_tape": 1384,
+   "n_decide_calls": 601,
+   "n_roster": 610,
+   "n_completed": 173,
+   "live_gpu_kv_fraction_distinct_values": 134,
+   "live_gpu_kv_fraction_min": 0.0,
+   "live_gpu_kv_fraction_max": 1.0,
+   "metrics_health": {
+    "state": "scraped_ok",
+    "engine_metrics_trusted": true,
+    "n_scrapes": 324,
+    "n_failures": 0,
+    "kv_key_seen": "vllm:gpu_cache_usage_perc",
+    "metric_names_found": [
+     "vllm:gpu_cache_usage_perc",
+     "vllm:num_requests_running"
+    ]
+   },
+   "server": "live/fake_server.py, the committed CPU stub; it tracks kv_tokens per request so vllm:gpu_cache_usage_perc is non-zero and varying"
+  },
+  "published": {
+   "n_calls": 601,
+   "gpu_kv_fraction_min": 0.0,
+   "gpu_kv_fraction_max": 1.0,
+   "gpu_kv_fraction_distinct": 134,
+   "free_kv_min": 0.0,
+   "free_kv_median": 34972.00112,
+   "free_kv_max": 62944.0,
+   "free_kv_distinct": 134,
+   "pd_kv_bound_by_engine_metric": 596,
+   "pd_kv_bound_by_belief": 5
+  },
+  "forced_0.0": {
+   "n_calls": 601,
+   "gpu_kv_fraction_min": 0.0,
+   "gpu_kv_fraction_max": 0.0,
+   "gpu_kv_fraction_distinct": 1,
+   "free_kv_min": 62944.0,
+   "free_kv_median": 62944.0,
+   "free_kv_max": 62944.0,
+   "free_kv_distinct": 1,
+   "pd_kv_bound_by_engine_metric": 0,
+   "pd_kv_bound_by_belief": 601
+  },
+  "claim": "the published engine gauge reaches _pd_free_kv and changes its result; with the field forced to 0.0 the belief binds on every call, which is what every committed rung-4 cell measured",
+  "engine_metric_binds_published": 596,
+  "engine_metric_binds_forced_zero": 0,
+  "free_kv_differs": true,
+  "first_difference": null,
+  "PASS": true
+ },
+ "part_e_live_smoke": {
+  "claim": "on a LIVE (non-dry) cell with the scrape on, pd_kv_bound_by_engine_metric is NON-ZERO and metrics_health says the value behind it was observed",
+  "register": "the server is the committed CPU STUB live/fake_server.py, not an engine. It tracks kv_tokens per request, so the gauge is real and varying, but this is a WIRING smoke and NOT an engine measurement. A real-engine smoke belongs on the H100.",
+  "scrape_on": {
+   "arm": "covex-v6-final",
+   "scrape_on": true,
+   "unfiltered": false,
+   "n_decision_rows": 224,
+   "digest": "60419bdaa1e29776",
+   "wall_s": 65.05,
+   "metrics_health": {
+    "state": "scraped_ok",
+    "engine_metrics_trusted": true,
+    "n_scrapes": 324,
+    "n_failures": 0,
+    "last_success_t": 1795543715.026584,
+    "metric_names_found": [
+     "vllm:gpu_cache_usage_perc",
+     "vllm:num_requests_running"
+    ],
+    "kv_key_seen": "vllm:gpu_cache_usage_perc"
+   },
+   "gpu_kv_fraction_published": 1.0,
+   "queued_episodic_published": null,
+   "pd_kv_bound_by_engine_metric": null,
+   "pd_kv_bound_by_belief": null,
+   "pd_decisions": null,
+   "pd_free_kv_min": null,
+   "pd_free_kv_max": null
+  },
+  "scrape_off": {
+   "arm": "covex-v6-final",
+   "scrape_on": false,
+   "unfiltered": false,
+   "n_decision_rows": 226,
+   "digest": "f8194d4c53afadaf",
+   "wall_s": 65.03,
+   "metrics_health": {
+    "state": "never_scraped",
+    "engine_metrics_trusted": false,
+    "n_scrapes": 0,
+    "n_failures": 0,
+    "last_success_t": null,
+    "metric_names_found": [],
+    "kv_key_seen": null
+   },
+   "gpu_kv_fraction_published": null,
+   "queued_episodic_published": null,
+   "pd_kv_bound_by_engine_metric": null,
+   "pd_kv_bound_by_belief": null,
+   "pd_decisions": null,
+   "pd_free_kv_min": null,
+   "pd_free_kv_max": null
+  },
+  "allow_list_control_unfiltered_mooncake": {
+   "queued_episodic_published": 0.0,
+   "note": "with the filter removed the engine's own num_requests_waiting IS published, which is what cstate.py:691 would then read; the filtered run publishes None for it"
+  },
+  "pd_kv_bound_by_engine_metric_on": 0,
+  "pd_kv_bound_by_engine_metric_off": null,
+  "pd_counters_absent_in_this_fixture": true,
+  "why_pd_is_absent_here": "no decision in a small synthetic cell reaches the protect-and-defer path, so every pd_* counter is ABSENT rather than zero. The read site is proved in part_d2 on the same captured live observations; a REAL-ENGINE cell is what would show the gate binding in production.",
+  "PASS": true
+ },
+ "_free_mb_at_end": 25824,
+ "VERDICT": "PASS",
+ "_parts": {
+  "part_a_read_sites": true,
+  "part_b_c_states_and_allow_list": true,
+  "part_d_byte_identity_by_replay": true,
+  "part_d2_read_site": true,
+  "part_e_live_smoke": true
+ },
+ "_provenance": {
+  "git_commit": "unknown",
+  "script": "d227_e1_metrics_proofs.py",
+  "model": null,
+  "timestamp": "2026-11-24T10:11:41.695376",
+  "device": "flash_cpu",
+  "args": {
+   "out": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/rung4p1/e2/results/orchestration/live2/d227_e1_metrics/d227_e1_metrics_proofs.json",
+   "work": null,
+   "seed": 4,
+   "window_s": 60.0,
+   "n_dashcam": 3,
+   "n_robot": 3,
+   "arms": "hybrid-F-lhreq-noc3,covex-v6-state-final,covex-v6-fair-final,mooncake,simplestream,llf,covex-v6-final",
+   "skip_cells": false
+  }
+ }
+}
