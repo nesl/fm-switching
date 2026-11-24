@@ -879,6 +879,44 @@ unscraped; **rung-4 seeds 5 to 7 must scrape.** Only flash's main session may in
 records each run's unix `t0` (the D211 proxy this removes). The 31 stub cells are marked only and their
 scores stand.
 
+## *** THE DAY'S MOST EXPENSIVE FAILURE CLASS, NAMED: A NUMBER THAT IS TRUE OF SOMETHING. NONE OF THESE WAS AN ARITHMETIC ERROR. ***
+
+**Seven instances between two sessions in one afternoon, each self-consistent, each confidently wrong.**
+Not carelessness: a property of the work. We compare against **shas, trees, arms and registers that all
+look alike in a one-line readout**, and **self-consistency is exactly what this class of error preserves**.
+
+| what was reported | what it was actually true of |
+|---|---|
+| "the class default is OFF, so nothing scrapes" | the **class attribute**; the runner assigned over it, so every cell would have scraped |
+| the `sw={...}` switch map "the cell records" | a **proof script's stdout**, not a field in any committed cell |
+| the pass-1 baseline digest `3553e47b` | a tree **with DEVICE_ANSWERS wired**, a different arm |
+| `198/251` rebuild-fits at 1x | the **D210 kv0.25 study's** 1x cell, not the scored `_rerun` cell (255/300) |
+| the attainment bar `0.441` | `covex-v6-fair-c5attr`'s cell, not `covex-v6-fair-final`'s - **same name, 1.40x apart** |
+| "12,295 of 12,295 files not on origin" | a comparison against an **EMPTY blob list**; nearly deleted 7 GB |
+| "all 12,400 files modified" / "5 commits on main" / "71 commits authored by me" | a **stale borrowed index** needing `update-index --refresh`; a range against a local `HEAD` **1,947 behind**; `--all --since`, which counts every session's pushes under one shared name |
+
+**THE TWO FAILURES POINT OPPOSITE WAYS AND HAVE ONE CAUSE.** An empty blob list reporting everything
+unique nearly caused a deletion; a stale index reporting everything modified nearly caused a clean tree to
+be called catastrophic. **An impossible result is the only thing that saves you, in both directions** - so
+when a figure comes out impossible or suspiciously extreme, **check the inputs before reporting it.**
+
+**HOW TO ASK EACH QUESTION SO THE ANSWER CANNOT BE TRUE OF SOMETHING ELSE:**
+- **"is this sha on origin"** - resolve `origin/main` ONCE to a literal sha and use it throughout. **Never
+  local `main`**, which on flash is 1,947 commits behind with 5 local-only commits and 126 dirty files.
+- **"did my file move upstream"** - **per-file blob hashes with an explicit non-zero-rc branch**, because
+  an unresolvable sha prints what a clean diff prints (rc=128, not an empty file).
+- **"did I commit anything"** - the **reflog** and an in-worktree range, never a count over `--all`.
+- **"what is in the tree"** - `diff-index` against a borrowed index needs `update-index --refresh` first.
+- **"did my commit land"** - read the **published bytes back from origin** and grep a string taken **from
+  the FILE**, never from the commit message and never the push's exit status.
+- **"is this the frozen pre-registration"** - the **content** hash against the whole-file hash and the
+  superseded ones; a stale citation of a superseded hash was already found in three bookkeeping files.
+- **"did the mechanism fire"** - a zero is `unexercised` until the branch is shown reachable; and **a
+  byte-identity result on a path where the mechanism is inert proves nothing about the mechanism.**
+
+**Enumerate the known instances wherever this checklist is used. A checklist whose failures are abstract
+gets skipped.**
+
 ## *** NEVER `pkill -f` ON A SHARED BOX. A PATTERN SPECIFIC ENOUGH TO NAME YOUR OWN PROCESS IS SPECIFIC ENOUGH TO NAME A PEER'S, BECAUSE WAITING ON A SHARED FILENAME IS WHAT COORDINATION LOOKS LIKE. ***
 
 Two distinct kills today, both exit **144**, both mine.
