@@ -599,6 +599,17 @@ LOOKING FOR SOMETHING TO DO; READ THIS LIST FIRST. ***
   `cf_pd_one_cell.py --arm attentionstore-prefetch --seed 4 --n 16 --run-s 1200 --cutoff-off` at 2:43
   CPU. Per this file's own final discriminator that is a WORKING ORCHESTRATOR, not a hang. loadavg 1.21.
   **THE ALONE RULE THEREFORE BINDS.**
+  *** AND YOU DO NOT HAVE TO WAIT FOR `out/item3_digests.json` TO CHECK THE ESCALATE CONDITION. The
+  per-cell log `out/item3_digests.log` carries one JSON object per cell with `tag` (A or B), `arm`,
+  `digest`, `rows`, `error`, `alone` and `loadavg_start`, so the A-versus-B identity is computable from it
+  AT ANY POINT, and the sweep's evidence SURVIVES A DRIVER DEATH even if the result file is never
+  written. *** Group the log by `arm`, require `digest` AND `rows` equal between the `A` and `B` rows, and
+  escalate on any pair that differs: item 3 is LOGGING ONLY, so every pair MUST match.
+  **MEASURED THIS WAY AT 2026-11-24 02:20 PST, mid-sweep: 14 arms with both sides done, 0 MOVED, 0
+  errors, so no escalation up to that point.** `alone` is False on every cell (loadavg_start 0.39 to
+  1.56), which is the known and recorded not-alone caveat and weakens the ALONE claim rather than the
+  identity conclusion, since A and B agreeing bit-exactly under varying load is direct evidence of
+  determinism.
 - **Step 4 the 0.25x pair: BLOCKED ON THE USER**, and the DA live pair additionally cannot be posted as
   is, because `covex-v6-final-da` does not resolve on the normal import path.
 - **Step 5: DONE.**
