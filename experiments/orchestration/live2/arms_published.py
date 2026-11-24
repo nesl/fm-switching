@@ -186,8 +186,36 @@ PrebleArm = _wrap("PrebleArm", _preble.PrebleAdapted, "preble", "preble.md",
                   "baselines/preble_adapted.py::PrebleAdapted")
 KVFlowArm = _wrap("KVFlowArm", _kvflow.KVFlowAdapted, "kvflow", "kvflow.md",
                   "baselines/kvflow_adapted.py::KVFlowAdapted")
-MooncakeArm = _wrap("MooncakeArm", _mooncake.MooncakeAdapted, "mooncake", "mooncake.md",
-                    "baselines/mooncake_adapted.py::MooncakeAdapted")
+_MooncakeBase = _wrap("_MooncakeBase", _mooncake.MooncakeAdapted, "mooncake", "mooncake.md",
+                      "baselines/mooncake_adapted.py::MooncakeAdapted")
+GPU_KV_1X_TOKENS = 62944        # the committed 1x engine pool (study_live2_pilot.GPU_KV)
+
+
+class MooncakeArm(_MooncakeBase):
+    """Mooncake with its GPU-warm slot count SIZED TO THE KV POOL (user ruling 2026-11-23, hit 14).
+
+    The published design sizes itself to the KV memory it has; the card's `gpu_warm_slots = 4`
+    (StudyE10b) is the 1x value. At configure time the slots scale in proportion to the pool:
+    slots = max(1, round(4 x gpu_kv_tokens / 62,944)), i.e. 4 at 1x (unchanged, so 1x is
+    byte-identical), 2 at 0.5x and 1 at 0.25x. `gpu_kv_tokens` is the harness's pool (31,472 /
+    15,736 at 0.5x / 0.25x); the real engine pools (31,488 / 15,760) round to the same counts.
+    `decide` is untouched; this reads the capacity the mixin already receives (arms.py:82).
+    """
+
+    def live2_configure(self, **kw: Any) -> None:
+        super().live2_configure(**kw)
+        base_slots = int(getattr(self, "_slots_at_1x", self.gpu_warm_slots))
+        self._slots_at_1x = base_slots
+        tok = int(self._caps["gpu_kv_tokens"])
+        self.gpu_warm_slots = max(1, int(round(base_slots * tok / float(GPU_KV_1X_TOKENS))))
+        self.capacity_read = dict(gpu_kv_tokens=tok, slots_at_1x=base_slots,
+                                  gpu_warm_slots=self.gpu_warm_slots,
+                                  rule="max(1, round(4 x gpu_kv_tokens / 62944)), user ruling 2026-11-23")
+
+    def live2_describe(self) -> Dict[str, Any]:
+        d = dict(super().live2_describe())
+        d["capacity_read"] = dict(getattr(self, "capacity_read", {}) or {})
+        return d
 AttentionStoreArm = _wrap("AttentionStoreArm", _attentionstore.AttentionStoreAdapted,
                           "attentionstore", "attentionstore.md",
                           "baselines/attentionstore_adapted.py::AttentionStoreAdapted")

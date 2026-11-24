@@ -61,3 +61,17 @@ paper's throughput results.
 The convergence is explained: their only behavioural differences are the `order` field (`MOONCAKE-REUSE-FIRST` against `EDF`) and session actions (mooncake emits KEEP_GPU_WARM, b7 emits none). The first cannot reach a decision at all, and the second did not change an outcome in these cells. A measured convergence of two distinct schedulers is a result about the regime, and it is recorded here rather than being read as duplication.
 
 `live2/coordinator.py` NEVER READS the action's `order` field: it contains zero references to it, and the two `.order` matches are `self.st.order`, a different object. Any part of this system's scheduling discipline expressed through `order` therefore CANNOT reach a decision in live2. This is a property of the live2 harness, not of the adaptation, and nothing in the adaptation was altered.
+
+## GPU-warm slots sized to the KV pool (user ruling 2026-11-23, hit 14)
+
+The published design sizes itself to the KV memory it has. `gpu_warm_slots = 4` above (StudyE10b) is
+the **1x** value; in live2 the slots now scale in proportion to the GPU-KV pool the harness gives the
+arm: `slots = max(1, round(4 x gpu_kv_tokens / 62,944))`, so **4 at 1x (unchanged), 2 at 0.5x, 1 at
+0.25x**. The real engine pools at 0.5x / 0.25x (31,488 / 15,760 tokens) round to the same counts. Only
+`live2_configure` reads the capacity (`live2/arms_published.py::MooncakeArm`); `decide` is untouched,
+and `live2_describe` reports the read as `capacity_read`.
+
+Proof (`results/orchestration/live2/mooncake_slots/mooncake_slots_proof.json`, one sha, two trees, one
+dry cell at a time): mooncake 1x IDENTICAL (7544b3aa16433c70), mooncake 0.25x MOVES (7544b3aa ->
+c89aefd5, the unpatched arm being capacity-blind), every other paper arm identical at 1x and 0.25x,
+positive control covex-v6-base af8befb9420ad86a reproduced.
