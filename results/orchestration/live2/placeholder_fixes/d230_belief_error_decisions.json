@@ -1,0 +1,1389 @@
+{
+ "_what": "D230 (11): HOW MANY DECISIONS the residency belief's errors would CHANGE, in the committed final-ladder rung-3 and rung-4 live cells. MEASURE ONLY, NO FIX. The belief's error itself is NOT re-derived here: it is carried from d211_signal_a_validated.json (committed 5544a818), which measured the belief under-predicting local GPU prefix about 1.8x overall and over-claiming on 2,466 of 2,661 (92.7 percent) named-session requests. This row converts that token-level error into a DECISION COUNT, per decision kind, per cell.",
+ "rulings_cited": [
+  "D230 (11)",
+  "D166",
+  "D211",
+  "D213 item 3",
+  "D226 (3)",
+  "D222 (1)",
+  "D174 (1)",
+  "D186/r1"
+ ],
+ "read_at_rev": "936aa37dafa2a4bfbd0b17c25441b793731a1117",
+ "_register": "EVERY count below is an UPPER BOUND on the number of decisions that would change, not a point estimate, except where the row says EXACT. Three separate reasons, stated so neither is mistaken for the other: (1) `cached_tokens` is local-GPU-prefix PLUS external-host-transfer, inseparable per request (d211_signal_a_validated.json), so it is an UPPER BOUND on the local prefix and never a ground truth for it; (2) where a predicate's other inputs are not logged per decision, the flip count is bounded by the population that reached that predicate rather than computed on it; (3) the belief and the corrected value both appear on BOTH sides of the fits predicate (`u_rebuild <= free_kv`), so the two effects partly cancel and only the bound survives without the joint distribution. Where a kind is reported ZERO BY CONSTRUCTION that is NOT a measured zero and is labelled as such (CLAUDE.md Rule 2).",
+ "how_the_local_versus_host_inseparability_WAS_HANDLED": {
+  "_the_caveat": "`cached_tokens` is the sum of local GPU prefix hits and external host KV transfer and the engine does not separate them per request. In the cell D211 measured the aggregate split was 46,921,424 local against 2,486,608 external, 95 percent local, but an aggregate share does not license a per-request split.",
+  "for_the_free_kv_bound_kind_the_caveat_IS_AVOIDED_ENTIRELY": "The quantity the free-KV read site estimates is an OCCUPANCY (tokens resident in the GPU KV pool at an instant), not a per-request flow. The engine publishes its own GPU KV occupancy gauge, `vllm:kv_cache_usage_perc`, and it IS recorded in every one of the 13 cells in `host_counters_d211.log`. That gauge is purely local by definition and is in the SAME REGISTER as `occ_belief`, so the correction for this kind uses the gauge and never touches `cached_tokens`. The 1.8x flow ratio is NOT applied to an occupancy anywhere in this row; doing so would have been a register error.",
+  "for_the_deferral_and_admission_kinds_the_caveat_BINDS_and_the_direction_is_stated": "Those two read sites consume `last_telemetry_cached_tokens`, which IS the inseparable quantity. They already combine it with the belief as `max(built_tokens, telemetry)`, so the correction is a no-op wherever telemetry already won. Treating telemetry as an UPPER BOUND means the true LOCAL prefix may be smaller, so `built > local_truth` on MORE decisions than `built > telemetry`: the belief-set counts reported for those kinds are therefore LOWER bounds on the belief-set population, and the flip counts remain upper bounds because every candidate was recomputed or bounded against its own gate.",
+  "what_is_NOT_claimed": "No per-request local/host split is asserted. No decision count is claimed as a census. The 1.8x and the 92.7 percent are cited, not re-measured."
+ },
+ "cells": {
+  "_scope": "All 13 committed final-ladder live cells at the pinned revision: rung 3 `covex-v6-fair-final` at seeds 4,5,6,7 x {1x, kv0.5r} = 8, and rung 4 `covex-v6-final` at seeds 4,5,6,7 plus the s4 `_rerun` = 5. Seeds 1 to 3 and HOLDOUT are not touched.",
+  "THERE_IS_NO_RUNG_4_kv0p5r_CELL": "The final ladder committed NO rung-4 cell at kv0.5r: kv0.5r exists only on rung 3 (4 cells), and the rung-4 reduced-memory work is the separate 0.25x line (d210_rung4_kv025 / d216_final_kv025), which is not this ladder. So every kv0.5r number below is rung 3, and the kinds that live only on rung 4 are ZERO BY CONSTRUCTION at kv0.5r for the additional reason that no such cell exists.",
+  "the_ScoringRefused_cell": "`covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30` is UNSCORED: score.py's D226 (3) guard refused it at MISSING = 1 (request r10175 delivered, still streaming at finish, no request.jsonl row) and the Orin is rescoring it outcome-keyed. It is NOT marked INVALID. This row reads NO score row from it: only its decision log, its arm counters and its engine counters, all of which are decision-level. It is therefore usable here, and this is said rather than assumed.",
+  "the_scrape_off_rung_4_cell": "`covex-v6-final_n16_s4_..._L3_epg_rq30_rerun` ran with the metrics scrape OFF, so `obs.cloud.gpu_kv_fraction` reached the arm as 0.0 and `free_kv` was belief-bound on 300 of 300 protect-and-defer decisions. MEASURED HERE AND LARGER THAN THE TASK ASSUMED: `pd_kv_bound_by_engine_metric` is ZERO in ALL FIVE rung-4 cells, not only the rerun, so the belief bound free_kv on 1,453 of 1,453 rung-4 decisions across every committed seed. This agrees exactly with CONTRACT.md's own note that the engine metric bound zero of 1,153 decisions at the four non-rerun seeds (302+299+293+259 = 1,153)."
+ },
+ "THE_FIRST_RESULT_THE_LOGGED_BELIEF_FIELD_IS_WRITE_ONLY": {
+  "_why_this_comes_first": "The quantity D211 measured the error OF is `belief.gpu_tokens_by_session` (schema.py:316). That field feeds NO decision. It is a recording added by D213 item 3 for exactly this join, and `coordinator._belief_prefix_record` (coordinator.py:2245-2295) argues the point in its own docstring at :2269 (`It feeds no decision`).",
+  "verified_at_the_pinned_rev_not_in_a_working_tree": "`git grep -n 'DecisionRecord.belief\\|_belief_prefix_record' 936aa37dafa2a4bfbd0b17c25441b793731a1117` returns, in live2, one write (coordinator.py:2235), the producer itself (:2245), a second never-entered producer (arms_policy.py:1067-1075), the schema declaration (schema.py:316-317) and NO READ. The only reader anywhere in the tree is the offline `d211_signal_a_available.py`.",
+  "consequence": "Taken literally, the 1.8x and the 92.7 percent were measured on a field with zero decision reads, so the literal answer to `how many decisions would change if THAT field were right` is 0 BY CONSTRUCTION for all five kinds. That is a true answer and a useless one, so this row does not stop there: it traces the SAME COMPOSITE (built prefix tokens filed under the believed tier) to the places where it IS read, and counts there. Every count below is against a named read site that changes a decision."
+ },
+ "read_sites_and_counts_by_decision_kind": {
+  "admission": {
+   "read_site": "experiments/orchestration/live2/coordinator.py:1428-1431",
+   "quantity": "_uncached = tokens if residency_readiness()=='COLD' else max(tokens - max(built_tokens, last_telemetry_cached_tokens), 0)",
+   "predicates_it_feeds_and_what_each_did": {
+    "RR.decide feasibility (coordinator.py:1458, tested at :1468)": "NOT REACHED for recall on these arms. `_qt` is not in `self._release_recheck_types` (coordinator.py:1452), counted as `release_recheck_out_of_scope_recall` = 81 to 132 per cell, and `release_infeasible_recall` = 0 in all 13 cells. The belief reaches no decision through this predicate: ZERO BY CONSTRUCTION on this arm family.",
+    "share admission _share_ok (coordinator.py:1492)": "ABSENT BY CONSTRUCTION. The c5attr rung-2 base carries no share admission, so `_share_ok` returns before `SA.allowed` (arms_final_ladder.py docstring, `WHAT IS NOT IN THIS LADDER`). Confirmed empirically: `share_events_total` = 0 in all 13 cells.",
+    "budget.can_spend(cost) (coordinator.py:1496)": "THE ONLY LIVE BELIEF-CONSUMING ADMISSION PREDICATE, and it refused NOTHING. `budget_refusal` and `budget_refusal_recall` are 0 in all 13 cells, against a 1200.0 GPU-s budget with 841.04 to 969.90 GPU-s spent, i.e. 230 to 359 GPU-s of unused slack. A per-request price change of the order the belief error implies cannot cross a bar with that much headroom."
+   },
+   "decisions_that_would_change": {
+    "1x": 0,
+    "kv0.5r": 0,
+    "per_cell": "0 in every one of the 13 cells",
+    "register": "EXACT for the two predicates that were never reached or never fired; the budget leg is a measured 0 with 230 to 359 GPU-s of slack",
+    "null_classification": "UNEXERCISED for the recall feasibility re-check and ABSENT/unexpressible for share admission; for the budget leg, FIRED AND DID NOT HELP is not available either, because the predicate fired on every release and refused none at any price in range. Not a real negative about the belief."
+   },
+   "a_second_admission_path_checked_and_found_belief_free": "The ALERT release re-check (coordinator.py:1102-1114) is by far the highest-volume admission predicate in these cells, refusing 1,746 to 2,553 instants per cell. Its `_uncached` comes from coordinator.py:1057, `B.epg_prompt_tokens(n_new)`, a count of NEW FRAMES not yet sent, and from `est_tokens` at :1062 on the non-EPG branch. Neither reads `built_tokens` or `last_telemetry_cached_tokens`. So those 1,746 to 2,553 decisions per cell are ZERO BY CONSTRUCTION, and this is recorded because their volume would otherwise make them look like the place a belief fix would pay."
+  },
+  "warm": {
+   "read_site": "experiments/orchestration/live2/arms_v6state.py:402 (`b = built[sid]`, gate `b <= 0` at :403), :411 (`_p_warm_cold(est, b)`, which prices warm against cold at :273-274) and :424 (`u = max(est - b, 0)`, feeding `_harm_warm` at :428); plus the belief MASSES, separately, at :416 (`host_warm = belief['host'] >= WARM_BELIEF_MIN`). A second warm-shaped read is coordinator.py:978, `if s.built_tokens < s.est_tokens and s.believed_tier() != 'gpu'`, which picks the monolithic whole-history recall over the built path.",
+   "magnitude_sensitive": true,
+   "decisions_that_would_change": {
+    "register": "BOUND, not a point estimate, and the bound is the population that reached a belief-sensitive candidate",
+    "why_not_exact": "There is NO per-state-decision log in any committed cell: `state_*` exists only as aggregate counters in `arm_stats`, and recomputing a candidate's gain needs the cf cost model and the per-device question estimate at that epoch, neither of which is logged per decision. Adding that instrumentation is a code change, which this task forbids.",
+    "bound_per_cell_1x": {
+     "covex-v6-fair-final s4": "<= 106 of 67,676 state decisions (WARM 4 + HOLD_BACK 2 actually chosen)",
+     "covex-v6-fair-final s5": "<= 96 of 66,474 (WARM 0 + HOLD_BACK 5 chosen)",
+     "covex-v6-fair-final s6": "<= 85 of 60,913 (WARM 0 + HOLD_BACK 3 chosen)",
+     "covex-v6-fair-final s7": "<= 87 of 58,704 (WARM 3 + HOLD_BACK 0 chosen)",
+     "covex-v6-final s4": "<= 99 of 67,585 (WARM 2 + HOLD_BACK 2 chosen)",
+     "covex-v6-final s4_rerun": "<= 100 of 67,619 (WARM 5 + HOLD_BACK 2 chosen)",
+     "covex-v6-final s5": "<= 97 of 66,496 (WARM 0 + HOLD_BACK 2 chosen)",
+     "covex-v6-final s6": "<= 85 of 61,088 (WARM 0 + HOLD_BACK 4 chosen)",
+     "covex-v6-final s7": "<= 87 of 58,768 (WARM 3 + HOLD_BACK 0 chosen)"
+    },
+    "bound_per_cell_kv0p5r": {
+     "covex-v6-fair-final s4 kv0.5r": "<= 106 of 65,044 (WARM 4 + HOLD_BACK 2 chosen)",
+     "covex-v6-fair-final s5 kv0.5r": "<= 100 of 65,075 (WARM 0 + HOLD_BACK 1 chosen)",
+     "covex-v6-fair-final s6 kv0.5r": "<= 88 of 60,199 (WARM 0 + HOLD_BACK 3 chosen)",
+     "covex-v6-fair-final s7 kv0.5r": "<= 88 of 57,490 (WARM 3 + HOLD_BACK 1 chosen)"
+    },
+    "how_the_bound_is_derived": "`u = est - b` is consumed only where the base already asked to MATERIALIZE this session this epoch (arms_v6state.py:423-428: `hw = self._harm_warm(...) if warming else 0.0`), which is `state_decisions_with_a_rebuild` = 85 to 106 per cell out of 57,490 to 67,676 state decisions. The remaining 99.85 percent carry `hw = 0.0`, so the belief magnitude cannot move their comparison through that term. Of the <= 106, the actions actually chosen that are not KEEP or TOUCH are WARM 0 to 5 and HOLD_BACK 0 to 5, so the realised flip count is at most single digits per cell.",
+    "the_part_of_this_bound_that_is_loose_and_said_so": "`_p_warm_cold(est, b)` at :411 is computed on ALL state decisions, not only the warming ones, and it feeds the TOUCH-versus-KEEP gain. So the belief magnitude does reach a predicate on all 57,490 to 67,676. It is not counted as a flip candidate because the chosen action on 94.7 to 99.7 percent of them is KEEP or TOUCH and TOUCH's own price is belief-independent (see the touch kind), but this row does NOT claim to have measured that; it is the one place a belief fix could in principle move more decisions than the bound above, and measuring it needs a per-state-decision log that does not exist."
+   },
+   "null_classification": "INCONCLUSIVE / not measurable from committed data (no per-decision log). NOT a negative."
+  },
+  "touch": {
+   "read_site": "experiments/orchestration/live2/coordinator.py:1256-1259 (`prefix_tokens = s.built_tokens`, handed to `touch_policy.should_touch`), predicate at touch_policy.py:195-199 (`ok = allowed and int(prefix_tokens) > 0`, then `budget_ok(price)`)",
+   "magnitude_sensitive": false,
+   "why_zero_by_construction_for_the_MAGNITUDE_error": "The touch predicate consumes the believed prefix in exactly two ways and neither carries its magnitude. (1) A SIGN TEST, `prefix_tokens > 0` (touch_policy.py:196). An error of 1.8x in a positive quantity cannot change its sign, and the over-claim direction would have to drive the engine's own honoured prefix to zero, which it is not: D172's measurement on the s4 cell is 1,246 touches, every one a WARM cache hit. (2) The MIXED-TOUCH GUARD, `mixed_touch_guard` (touch_policy.py:47-60), which reads the belief's TIER MASSES (`gpu`/`host`/`cold`), a different quantity from the token count D211 measured the error of. The PRICE leg is magnitude-independent too under the ruled D174 (1) charge: `coordinator.py:1271-1273` charges `DP.price_gpu_s(TP.TOUCH_UNCACHED_TOKENS=15, ...)`, a constant, and the cells confirm it: 3.0000 milli GPU-s per touch, IDENTICAL across all 13 cells and all 174 to 3,023 touches in each.",
+   "decisions_that_would_change": {
+    "1x": 0,
+    "kv0.5r": 0,
+    "register": "ZERO BY CONSTRUCTION for the magnitude error, not a measured zero",
+    "corroborating_measured_fact": "`touch_refused` is 0 in all 13 cells: `touch_considered` equals `touch_issued` exactly (2,674/2,674, 2,380/2,380, 176/176, 175/175, 415/415, 391/391, 2,205/2,205, 2,107/2,107, 2,004/2,004, 3,023/3,023, 174/174, 408/408, 2,212/2,212), and every touch was issued at predicted tier gpu (`touch_issued_gpu` is the only tier key present). So the predicate also never refused anything that a correction could un-refuse.",
+    "null_classification": "ZERO BY CONSTRUCTION on the magnitude channel; the surviving channel (tier masses) is a different quantity and is out of D230 (11)'s scope"
+   }
+  },
+  "deferral": {
+   "read_site": "experiments/orchestration/live2/arms_v6cfr3.py:186 (`u = max(tokens - max(built, tel), 0)` inside `_rd_u`, :143-198), consumed at cf_request_defer.py:242 (`if int(u_request) <= 0`), :258-283 (u -> pred -> latest safe start -> `defer_s`) and :289 (`if defer_s < MIN_DEFERRAL_S`), and at cf_request_defer.py:299 (`PD.harm_on_time(int(u_request), ...)`) feeding the net-versus-bar gate. RUNG 4 ONLY (`arms_final_ladder.make_rung4`, request_defer switch).",
+   "ZERO_BY_CONSTRUCTION_ON_RUNG_3": "Question deferral is added at rung 4 (arms_final_ladder.py:229-259). Rung 3 has no `_Rung4Mixin`, so this read site does not exist in any `covex-v6-fair-final` cell. Confirmed by absence of every `rd_*` counter in all 8 rung-3 cells. Therefore 0 at kv0.5r as well, since kv0.5r exists only on rung 3.",
+   "the_engine_value_is_ALREADY_READ_HERE": "`_rd_u` takes `max(built_tokens, last_telemetry_cached_tokens)`, so the engine's per-request cached tokens is already in force and the correction is a NO-OP wherever telemetry won. Committed per cell: telemetry won on 114, 117, 120, 109, 83 decisions and the BELIEF won on 42, 35, 32, 36, 23.",
+   "decisions_that_would_change": {
+    "register": "EXACT on the one cell carrying the per-decision log; BOUND on the other four",
+    "rung4_1x_per_cell": {
+     "covex-v6-final s4": {
+      "decisions": 157,
+      "belief_set_u": 42,
+      "flips": "<= 42",
+      "register": "BOUND (no rd_decisions log in this cell)"
+     },
+     "covex-v6-final s4_rerun": {
+      "decisions": 153,
+      "belief_set_u": 35,
+      "flips_certain": 0,
+      "flips_possible": 1,
+      "register": "EXACT, recomputed per decision",
+      "derivation": "Of the 35 decisions the belief set u, 4 sat at `no_active_alert_episode`, a gate reached before u is used for anything (cf_request_defer.py:245), so they cannot flip. 16 sat at `must_start_now_no_slack`; the correction REPLACES built with the smaller telemetry value and therefore INCREASES u by built-tel (min 32, median 409, max 1,417 tokens), which DECREASES `defer_s`, so those 16 stay at the same gate: 0 flips. 3 currently DEFER; recomputing `defer_s' = defer_s - safety * 1.8243e-4 * (built-tel)` at the WORST measured safety factor 1.87 gives 0.6405 -> 0.2335, 0.2574 -> 0.2107 and 0.8457 -> 0.7989 against MIN_DEFERRAL_S = PD.DECISION_PERIOD_S = 0.1, so none crosses: 0 flips. The remaining 12 sat at `saving_does_not_exceed_margin`; their gap from net to bar is 0.047313 on ONE decision (t=156.76, net 1.92741 against bar 1.97472) and 0.686922 to 2.047884 on the other 11, and `net` is NEGATIVE on 11 of the 12, so the shortfall is structural rather than marginal. Only the single t=156.76 decision is close enough that a 1,088-token change in u out of 4,339 could conceivably move it, and recomputing it exactly needs the fitted `p_on_time` residual that is not logged. Hence 0 certain, <= 1 possible."
+     },
+     "covex-v6-final s5": {
+      "decisions": 152,
+      "belief_set_u": 32,
+      "flips": "<= 32",
+      "register": "BOUND"
+     },
+     "covex-v6-final s6": {
+      "decisions": 146,
+      "belief_set_u": 36,
+      "flips": "<= 36",
+      "register": "BOUND"
+     },
+     "covex-v6-final s7": {
+      "decisions": 106,
+      "belief_set_u": 23,
+      "flips": "<= 23",
+      "register": "BOUND"
+     }
+    },
+    "rung3_1x": "0 BY CONSTRUCTION (no read site)",
+    "kv0p5r": "0 BY CONSTRUCTION (no read site on rung 3, and no rung-4 kv0.5r cell exists)",
+    "the_bound_on_the_four_cells_is_loose_and_the_tight_one_is_0_to_1": "The only cell with a per-decision log flips 0 of 35, at most 1. The four bounds of <= 42, <= 32, <= 36 and <= 23 are the belief-set POPULATION, not an estimate of flips, and the one cell where the population could be resolved resolved to 0. Reporting <= 42 as if it were 42 would be the register error this project has made before."
+   },
+   "null_classification": "FIRED AND DID NOT HELP on the resolved cell: the mechanism is live, the engine value already dominates on 117 of 153, and correcting the remaining 35 moves 0 gate outcomes certainly and at most 1 possibly."
+  },
+  "free_kv_bound": {
+   "read_site": "experiments/orchestration/live2/arms_v6cf.py:339-349. `occ_metric = gpu_kv_fraction * pool` (:339-340); `occ_belief = sum(built_tokens_by_session[s] for s in obs.cloud.gpu_warm_sessions)` (:341-344), where `gpu_warm_sessions` is `{sid : believed_tier()=='gpu'}` (cstate.py:687) and `built_tokens_by_session` is `{sid: built_tokens}` (coordinator.py:830-832); the bound taken is the LARGER, counted by `pd_kv_bound_by_belief` / `pd_kv_bound_by_engine_metric` (:345-348); and the value returned is `max(pool - max(occ_metric, occ_belief), 0)` (:349). It is passed as `free_kv_tokens` at arms_v6cf.py:369 and the PREDICATE is cf_protect_defer.py:479, `fits = float(u_rebuild) <= float(free_kv_tokens)`, GATE 3, which returns BASE at :481-483 when it is True. `u_rebuild` ALSO reads the belief: `target_tokens - built[sid]` on the state leg (arms_v6cf.py:465-466) and `readiness_tokens - built[sid]` on the request leg (:497-498), with no telemetry term on either. RUNG 4 ONLY (`arms_v6cf._ProtectDeferMixin` via `arms_final_ladder.make_rung4`).",
+   "ZERO_BY_CONSTRUCTION_ON_RUNG_3_AND_AT_kv0p5r": "Protect-and-defer is added at rung 4 only, so `_pd_free_kv` does not exist in any `covex-v6-fair-final` cell: every `pd_*` counter is absent in all 8 rung-3 cells. And the final ladder committed no rung-4 kv0.5r cell, so this kind is 0 at kv0.5r for both reasons.",
+   "THE_BELIEF_BOUND_IT_EVERY_TIME": "`pd_kv_bound_by_engine_metric` is 0 and `pd_kv_bound_by_belief` equals `pd_decisions` in ALL FIVE rung-4 cells: 302/302, 300/300, 299/299, 293/293, 259/259, i.e. 1,453 of 1,453. This is the uncorrected read site: the engine value never reached it, so `free_kv = pool - occ_belief` exactly.",
+   "the_correction_used_and_why_it_is_the_right_register": "`vllm:kv_cache_usage_perc` from `host_counters_d211.log`, present in all 13 cells with 117 to 118 samples and 70 to 95 distinct values each, times `header.gpu_kv_tokens`. Occupancy against occupancy; `cached_tokens` is not used for this kind.",
+   "the_direction_of_the_error_AT_THIS_READ_SITE_is_OVER_claiming_not_under": "On the one rung-4 cell that records the belief per decision (the rerun), the belief's GPU occupancy has median 34,276 and max 48,975 tokens while the engine's own gauge has median 13,291 and max 43,306 on a 62,944-token pool. The belief OVERSTATES resident GPU tokens by about 2.6x at the median here. That makes `free_kv` TOO SMALL, i.e. the gate is PESSIMISTIC, so correcting it makes `fits` MORE often True, not less. The 1.8x under-prediction D211 reports is a per-request FLOW over all 379 sessions including the 357 the belief never names; it does not transfer to this occupancy, and the two directions living in different strata is exactly what D230 (11) asked to be carried rather than collapsed.",
+   "decisions_that_would_change": {
+    "register": "UPPER BOUND, and the False-to-True half of it is EXACT",
+    "method": "Two directions, bounded separately. FALSE-TO-TRUE: a decision can only gain `fits` if it does not have it, so this half is bounded EXACTLY by the committed count of decisions that reached GATE 3 and did not fit. TRUE-TO-FALSE: needs `u_rebuild > pool - occ_engine` at that instant, so a NECESSARY condition is that the engine gauge leaves less room than the largest rebuild the cell ever had, `kv_usage_perc > 1 - pd_u_max/pool`. That is counted over every engine sample in the cell.",
+    "per_cell_1x": {
+     "covex-v6-final s4": {
+      "pd_decisions": 302,
+      "reached_gate3": 255,
+      "fits_true": 253,
+      "fits_false": 2,
+      "flips_false_to_true_exact_bound": 2,
+      "engine_samples_above_threshold": "0 of 118",
+      "flips_true_to_false_bound": 0,
+      "total_bound": "<= 2 of 302 (0.66 percent)"
+     },
+     "covex-v6-final s4_rerun": {
+      "pd_decisions": 300,
+      "reached_gate3": 258,
+      "fits_true": 255,
+      "fits_false": 3,
+      "flips_false_to_true_exact_bound": 3,
+      "engine_samples_above_threshold": "1 of 118",
+      "flips_true_to_false_bound": 1,
+      "total_bound": "<= 4 of 300 (1.33 percent)"
+     },
+     "covex-v6-final s5": {
+      "pd_decisions": 299,
+      "reached_gate3": 260,
+      "fits_true": 260,
+      "fits_false": 0,
+      "flips_false_to_true_exact_bound": 0,
+      "engine_samples_above_threshold": "1 of 118",
+      "flips_true_to_false_bound": 1,
+      "total_bound": "<= 1 of 299 (0.33 percent)"
+     },
+     "covex-v6-final s6": {
+      "pd_decisions": 293,
+      "reached_gate3": 258,
+      "fits_true": 258,
+      "fits_false": 0,
+      "flips_false_to_true_exact_bound": 0,
+      "engine_samples_above_threshold": "0 of 118",
+      "flips_true_to_false_bound": 0,
+      "total_bound": "0 of 293 (EXACT, both directions closed)"
+     },
+     "covex-v6-final s7": {
+      "pd_decisions": 259,
+      "reached_gate3": 224,
+      "fits_true": 222,
+      "fits_false": 2,
+      "flips_false_to_true_exact_bound": 2,
+      "engine_samples_above_threshold": "0 of 118",
+      "flips_true_to_false_bound": 0,
+      "total_bound": "<= 2 of 259 (0.77 percent)"
+     }
+    },
+    "pooled_1x": "<= 9 of 1,453 rung-4 protect-and-defer decisions, 0.62 percent, and 0 at seed 6 exactly",
+    "spread_across_cells": "0, <= 1, <= 2, <= 2, <= 4 (per CLAUDE.md consistency check 3, reported per cell and not only pooled)",
+    "kv0p5r": "0 BY CONSTRUCTION",
+    "rung3": "0 BY CONSTRUCTION",
+    "what_the_flips_would_DO": "The <= 9 are not neutral: at seeds 4, 4_rerun and 7 they are exactly the decisions that currently FAIL to fit and therefore proceed to the victim and harm computation, and they are the arm's ONLY harm evaluations in those cells (`pd_harm_n` = 3 and `pd_harm_over_bar` = 3 on the rerun). Correcting the belief would turn them into `rebuild_fits_without_evicting` and return BASE, removing the compound's entire firing population on those cells. So the fix would make protect-and-defer fire LESS, not more.",
+    "the_opposing_term_declared": "Correcting the belief DOWNWARD also INCREASES `u_rebuild` (`target_tokens - built`), which pushes `fits` the other way. The True-to-False bound above uses the committed `pd_u_max` as the stand-in for the corrected u, which understates it; that is why that half is a bound and not a count, and why the necessary-condition test was run over every engine sample rather than only the extremes."
+   },
+   "null_classification": "FIRED AND DID NOT HELP, with the mechanism verified live: `free_kv` is not a constant (13,969 to 62,944 on the rerun cell), the belief bound it on 1,453 of 1,453 decisions, and GATE 3 separated 1,253 fits from 7 non-fits. The correction moves at most 9 of 1,453."
+  }
+ },
+ "mechanism_verification_notes": {
+  "step_0_what_would_invalidate_this": [
+   "That the logged belief field feeds a decision: CHECKED at the pinned rev, it does not, and the row is built on the read sites that do.",
+   "That `gpu_warm_sessions` is not the same set as the logged field's filter: CHECKED, cstate.py:687 is `believed_tier()=='gpu'` and coordinator.py:2291 files under `believed_tier()`.",
+   "That the kv0.5r pool is the same as 1x: CHECKED, it is halved, 31,472 against 62,944 (header.gpu_kv_tokens).",
+   "That a rung-4 kv0.5r cell exists: CHECKED, it does not.",
+   "That the engine gauge is a constant: CHECKED, 70 to 95 distinct values per cell.",
+   "That the empty belief field is a join fault: CHECKED, see the chased constant below."
+  ],
+  "step_2b_analogue_each_switch_reaches_a_decision": "For every kind the PREDICATE is named by file and line, not merely the place the value is set, and for each one this row states whether that predicate ever changed an outcome in the committed cells: admission's feasibility re-check never reached recall (0 of 81 to 132), share admission never fired (0 share events), the budget never refused (0 of 13 cells), touch never refused (0 of 13 cells), GATE 3 fired both ways (1,253 fits against 7 non-fits), and question deferral fired 22 to 37 times per rung-4 cell.",
+  "the_constant_chased_to_source": {
+   "observed": "`belief.gpu_tokens_by_session` is EMPTY on every decision row of 8 of the 13 cells and populated on 5 (the four rung-3 kv0.5r cells and the rung-4 s4 rerun), where it is non-empty on 10,356 to 17,534 of 10,680 to 17,545 rows, 97.0 to 99.9 percent.",
+   "chased_to": "the cell's own `header.git_commit`. The 8 empty cells were run at bf1ae16d, d654d232, aab44e29, 6b79d069, f99f69e8, 87fad28b, 625f609c and the 1x s4 fair cell; the 5 populated ones at 9172f154, b935e41b, 342e693a, 11e533b7 and 7d9bbea7. D213 item 3, which adds the recording, landed between them. The field's absence is a RECORDING GAP BY COMMIT DATE, not a policy fact.",
+   "is_it_a_join_fault": "NO, and this was checked rather than assumed, because a key-format mismatch would be a plumbing fault and not a finding. On the 5 cells where the field exists it is populated on 97.0 to 99.9 percent of rows, and d211_signal_a_validated.json independently verified on one of those cells that all 22 session ids named in the belief DO appear in the request log, set difference 0. The empty cells are empty on 100.0 percent of rows, which is an all-or-nothing shape characteristic of a field that is not written at all, not of a key that fails to match.",
+   "consequence_for_this_row": "A per-decision measurement of the belief's own value is possible only on those 5 cells. That is why the free-KV kind is resolved exactly on the rerun cell and bounded from committed counters on the other four, and it is a limitation of the committed data, not of the method."
+  }
+ },
+ "results_consistency_check": {
+  "1_cross_check_against_committed_measurements": [
+   {
+    "quantity": "free_kv minimum, rung-4 s4 rerun",
+    "this_run": 13969,
+    "prior_run": 13969,
+    "source_of_prior": "coordinator_result.json arm_stats.pd_free_kv_min, same cell",
+    "ratio": 1.0,
+    "verdict": "agree",
+    "note": "POSITIVE CONTROL on the reconstruction: `pool - sum(belief.gpu_tokens_by_session)` reproduces the arm's own committed min and max exactly, which also confirms occ_metric was identically 0."
+   },
+   {
+    "quantity": "free_kv maximum, rung-4 s4 rerun",
+    "this_run": 62944,
+    "prior_run": 62944,
+    "source_of_prior": "arm_stats.pd_free_kv_max",
+    "ratio": 1.0,
+    "verdict": "agree"
+   },
+   {
+    "quantity": "question-deferral decisions where the belief set u, s4 rerun",
+    "this_run": 35,
+    "prior_run": 35,
+    "source_of_prior": "arm_stats.rd_u_built_won",
+    "ratio": 1.0,
+    "verdict": "agree",
+    "note": "recomputed from rd_decisions.jsonl.gz row by row"
+   },
+   {
+    "quantity": "question-deferral decisions where telemetry set u, s4 rerun",
+    "this_run": 117,
+    "prior_run": 117,
+    "source_of_prior": "arm_stats.rd_u_telemetry_won",
+    "ratio": 1.0,
+    "verdict": "agree"
+   },
+   {
+    "quantity": "rung-4 pd decisions bound by the engine metric",
+    "this_run": 0,
+    "prior_run": "0 of 1,153 at the four non-rerun seeds",
+    "source_of_prior": "experiments/orchestration/live2/cstate.py:17 (CONTRACT table, at the pinned rev)",
+    "ratio": 1.0,
+    "verdict": "agree; this run adds the rerun cell, 0 of 1,453 across all five"
+   },
+   {
+    "quantity": "GPU KV pool at 1x",
+    "this_run": 62944,
+    "prior_run": 62944,
+    "source_of_prior": "experiments/orchestration/live2/d213_readsite_proofs.py:28 GPU_KV",
+    "ratio": 1.0,
+    "verdict": "agree"
+   },
+   {
+    "quantity": "belief under-prediction of local prefix",
+    "this_run": "not re-derived, cited",
+    "prior_run": "about 1.8x (25,708,265 believed against 46,921,424 engine local_cache_hit)",
+    "source_of_prior": "results/orchestration/live2/placeholder_fixes/d211_signal_a_validated.json, committed 5544a818",
+    "ratio": "n/a",
+    "verdict": "carried, per the task's instruction not to re-derive it"
+   },
+   {
+    "quantity": "belief over-claiming on named sessions",
+    "this_run": "not re-derived, cited",
+    "prior_run": "2,466 of 2,661, 92.67 percent",
+    "source_of_prior": "same artefact",
+    "ratio": "n/a",
+    "verdict": "carried"
+   }
+  ],
+  "2_physical_plausibility": "The only rates this row asserts are occupancies. `vllm:kv_cache_usage_perc` lies in [0.0, 1.0] in every cell by construction and the derived occupancies therefore lie in [0, 62944] at 1x and [0, 31472] at kv0.5r. The belief's reconstructed occupancy on the rerun cell, 0 to 48,975, also lies inside the 1x pool. No latency or throughput is claimed, so no committed cost curve is at stake; the one arithmetic prediction made (`defer_s' = defer_s - safety * per_uncached_token_s * du`) uses the coefficient 1.8243e-4 s/token logged in the cell's own `queue_proof.coefficients` and sourced to cost_model_gate_d162.json, not a retyped constant.",
+  "3_distribution_sanity": "Every per-cell quantity is reported with its spread and never only pooled. Three constants were examined. (a) `belief.gpu_tokens_by_session` empty on 8 of 13 cells: chased to the cell git_commit and confirmed not a join fault, see `the_constant_chased_to_source`. (b) `pd_kv_bound_by_engine_metric` = 0 in all 5 rung-4 cells: chased, and it is the correct and consistent zero that CONTRACT.md already records, caused by `gpu_kv_fraction` reaching the arm as 0.0; it is a real absence of the engine read, and this row treats it as the premise of the measurement rather than as a result. (c) touch price exactly 3.0000 milli GPU-s per touch in all 13 cells and all 174 to 3,023 touches: chased to the ruled D174 (1) constant charge `per_uncached * 15`, which is a constant BY DESIGN, and that is precisely why the touch kind is zero by construction. The engine gauge is NOT a constant: 70 to 95 distinct values over 117 to 118 samples per cell.",
+  "3b_stratum_beside_the_mean": "The free-KV error is reported as a MEDIAN RATIO (belief 34,276 against engine 13,291) AND as the population it can act on (7 non-fitting decisions of 1,453), because a 2.6x occupancy error averaged over 1,453 decisions reads as large while the decisions it can move number single digits. Both are given so neither reading stands alone. Likewise the deferral error is given as the belief-set population (23 to 42 per cell) AND as the gate each of those 35 sat at on the one resolvable cell (4 pre-gate, 16 no-slack, 3 deferring, 12 margin), because the population alone would imply up to 42 flips where the resolved count is 0.",
+  "4_definition_audit": {
+   "free_kv_tokens": "max(pool - max(occ_metric, occ_belief), 0), arms_v6cf.py:349; pool = header.gpu_kv_tokens = 62,944 at 1x and 31,472 at kv0.5r",
+   "occ_belief": "sum of built_tokens over sessions whose believed_tier() == 'gpu', arms_v6cf.py:341-344 with cstate.py:687 and coordinator.py:830-832",
+   "belief_gpu_tokens_by_session": "min(built_tokens, est_tokens) for sessions with est_tokens > 0, filed under believed_tier(), coordinator.py:2287-2294. SAME COMPOSITE as occ_belief up to the min() clamp, which is why the reconstruction reproduces pd_free_kv_min exactly",
+   "u_rebuild": "target_tokens - built_tokens (state leg, arms_v6cf.py:465-466) or readiness_tokens - built_tokens (request leg, :497-498). NO telemetry term",
+   "u_request": "tokens if readiness == 'COLD' else max(tokens - max(built_tokens, last_telemetry_cached_tokens), 0), arms_v6cfr3.py:181-187. HAS a telemetry term",
+   "_uncached (admission)": "tokens if residency_readiness() == 'COLD' else max(tokens - max(built_tokens, last_telemetry_cached_tokens), 0), coordinator.py:1428-1431. HAS a telemetry term",
+   "prefix_tokens (touch)": "s.built_tokens, coordinator.py:1256. Read only as a sign test",
+   "a_decision": "one logged protect-and-defer call (pd_decisions), one logged question-deferral call (rd_decisions), one state-planner candidate evaluation (state_decisions), one touch consideration (touch_considered), or one recall release (release path). Each kind's denominator is its own and they are not pooled",
+   "name_used_with_two_definitions": "`u`. `u_rebuild` at the free-KV site subtracts built_tokens ALONE while `u_request` at the deferral site subtracts max(built, telemetry). SAME NAME, DIFFERENT DEFINITION, inside the same arm, and it is reported here rather than reconciled because this task forbids a fix: the D186/r1 telemetry correction was applied to the deferral and admission paths and NOT to the protect-and-defer path. That asymmetry is the single most actionable finding in this row."
+  },
+  "5_claim_linkage": "Bears on D166 and on FORMULATION's residency-belief claim that the coordinator's bookkeeping, corrected by engine telemetry, is an adequate stand-in for engine residency (D44, D47, D150: residency cannot be commanded). The result WEAKENS the strong form of that claim (the belief is off by about 2.6x in occupancy at the one site where telemetry was never wired in) and SUPPORTS the operational form (the error changes at most 9 of 1,453 decisions of the one kind it can reach, and 0 of every other kind). Nothing here is scoped out by FORMULATION's Scoping section: no cross-tier KV transfer is measured, and the engine gauge used is a local GPU occupancy.",
+  "6_proxy_validity": {
+   "proxy_1_vllm_kv_cache_usage_perc_as_the_true_GPU_occupancy": {
+    "what_it_actually_measures": "the engine's own fraction of its GPU KV block pool in use, over ALL traffic",
+    "valid_for_the_claim": "YES for the free-KV read site, and BETTER than cached_tokens, because it is the same register (instantaneous occupancy) and is local by definition. It is in fact the quantity the arm WANTED at arms_v6cf.py:339 and did not get. One declared imperfection, which runs AGAINST this row's bound and is therefore conservative: the gauge counts alert-episode contexts and every other tenant, which `occ_belief` does NOT count (arms_v6cf.py:330-333 says so itself). So the gauge is an upper bound on the recall sessions' own occupancy, which makes `free_kv_engine` a LOWER bound and the True-to-False flip bound a genuine upper bound.",
+    "clock_join": "The engine samples carry unix time and the decision log is run-relative with no unix anchor anywhere (d211_signal_a_validated.json verified 0 epoch-valued lines in every run-relative log). This row therefore uses NO per-epoch clock join: every free-KV number is derived from whole-cell extrema and sample counts, which are anchor-free. That is deliberate, and it is why the True-to-False half is a bound over all 118 samples rather than a count at matched epochs."
+   },
+   "proxy_2_last_telemetry_cached_tokens_as_the_local_prefix": {
+    "what_it_actually_measures": "the engine's `cached_tokens` on this session's last completed request, which is local GPU prefix hits PLUS external host transfer, inseparable",
+    "valid_for_the_claim": "QUESTIONABLE, and so it is used only for a BOUND and never for a headline. It is an UPPER bound on the local prefix, so `built > telemetry` identifies FEWER belief-set decisions than `built > local_truth` would: the 23 to 42 counts are lower bounds on that population. It is also never reset on eviction (the e9569009 guard, coordinator.py:1410-1413), which is why the code trusts it only while the session is not believed COLD. The deferral conclusion does not rest on it: the 3 deferring decisions were recomputed against MIN_DEFERRAL_S with margins of 0.11 to 0.70 s to spare, and the 12 margin decisions have negative `net` on 11 of 12, both of which hold for any correction in the direction telemetry indicates.",
+    "affected_analysis_marked": "the deferral and admission flip POPULATIONS are marked as lower bounds; the deferral flip COUNT of 0-to-1 is EXACT on the one resolvable cell"
+   }
+  },
+  "7_validate_the_control_not_only_the_result": {
+   "positive_control_1": "A known-good committed arm quantity must pass the check being applied. The reconstruction `free_kv = pool - sum(belief.gpu_tokens_by_session)` was required to reproduce the arm's OWN committed `pd_free_kv_min` and `pd_free_kv_max` on the rerun cell. It returned 13,969 and 62,944 against committed 13,969 and 62,944. An exact match on a quantity derived by a different route through a different log.",
+   "positive_control_2": "The rd_decisions log was required to reproduce the committed `rd_u_built_won` = 35 and `rd_u_telemetry_won` = 117 by re-deriving the built-versus-telemetry contest row by row. 35 and 117 exactly.",
+   "the_control_side_audited": "The comparator here is the UNCORRECTED arm as it actually ran, and its own numbers were checked before the comparison was read: its pool (header 62,944 against d213_readsite_proofs GPU_KV 62,944), its gate arithmetic (pd_decisions = pd_gate_no_active_alert_episode + pd_gate_rebuild_fits_without_evicting + the remaining gate, 42 + 255 + 3 = 300 on the rerun, closing exactly at every seed), and its budget (0 refusals with 230 to 359 GPU-s unspent, so the admission bar was not silently moved).",
+   "an_impossible_success_watched_for": "`pd_kv_bound_by_engine_metric` = 0 would be an impossible success if the scrape had been on, so it was checked against an independent source rather than accepted: CONTRACT.md at the pinned rev records the same zero over 1,153 decisions at the four non-rerun seeds, and `metrics_snapshots.log` in every cell contains no KV-usage key at all, only prefix-cache counters. The zero is a real absence of the read, not a broken counter."
+  }
+ },
+ "alternative_explanation": "The headline, that a belief fix would move at most 9 of 1,453 protect-and-defer decisions and 0 of every other kind, could also be produced by (a) the belief error genuinely being almost unactionable at these read sites [the claimed mechanism], or (b) the gates simply being unexercised in these cells for reasons unrelated to the belief, so that nothing could move them. WHAT DISTINGUISHES THEM, per kind: for the FREE-KV kind (b) is refuted, because GATE 3 is exercised both ways (1,253 fits against 7 non-fits), `free_kv` varies over 13,969 to 62,944 rather than being constant, and the belief bound it on 1,453 of 1,453, so the mechanism is live and the smallness of the flip count is a fact about the belief error's direction, not about reachability. For the DEFERRAL kind (b) is also refuted: 22 to 37 deferrals fired per cell. For the ADMISSION and TOUCH kinds (b) IS the explanation and this row says so rather than claiming (a): the budget refused nothing at any price and touch refused nothing at all, so those zeros are UNEXERCISED, not evidence that the belief error is harmless there. Anyone reading the pooled zero as (a) across all five kinds would be wrong on two of them.",
+ "ANSWER_is_a_belief_fix_worth_building_before_the_freeze": {
+  "one_line": "NO for a belief-accuracy fix, and the number that drives it is 9 of 1,453: correcting the residency belief changes at most 9 of the 1,453 rung-4 protect-and-defer decisions, 0.62 percent, and 0 decisions of all four other kinds, with three of those four zero BY CONSTRUCTION.",
+  "the_cheap_thing_that_IS_worth_doing_instead": "A one-line asymmetry, not a belief model. `arms_v6cf.py:465-466` and `:497-498` compute `u_rebuild` from `built_tokens` ALONE while `arms_v6cfr3.py:186` and `coordinator.py:1428-1431` already use `max(built_tokens, last_telemetry_cached_tokens)` for the same physical quantity. The D186/r1 correction was applied to two of the three sites and not the third. Applying it at the free-KV site is the same three lines already committed twice, and it is the only place in the five kinds where the belief reaches a decision with NO engine term at all.",
+  "the_number_that_would_change_the_answer": "If the metrics scrape were ON, `obs.cloud.gpu_kv_fraction` would carry the engine gauge and `max(occ_metric, occ_belief)` would take the engine value wherever it is larger, which the gauge says is 1 of 118 samples per cell. So even landing the scrape, which is already built (D216 (2), D222 (1) g, E3 by D227), changes the free-KV bound by at most the same single-digit count. The belief's error is not what is limiting these cells.",
+  "what_this_does_NOT_say": "It does not say the belief is accurate. It is off by about 2.6x in GPU occupancy at the one read site where no engine term corrects it. It says the decisions in the committed cells are not close enough to their thresholds for that error to move them, which is a fact about THESE cells and could change in a regime where the KV pool is the binding resource. The rung-4 0.25x-memory line (d210_rung4_kv025, d216_final_kv025) is where that regime lives, and this row does not measure it."
+ },
+ "live_work_on_the_box": "Read-only throughout. No cell was run, no sweep, no rerun, no file under results/ was modified except this one. Every byte analysed was read with `git show 936aa37d:<path>` into a session-private scratchpad, never from the working tree, which is 1,871 commits behind origin/main. Policy cells running on the H100 were not touched.",
+ "per_cell_measurements": {
+  "covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30": {
+   "rung": 3,
+   "memory": "1x",
+   "seed": 4,
+   "arm": "covex-v6-fair-final",
+   "cell_git_commit": "da24cee46402c8f039d9a958fca6bbd6c89bd2de",
+   "gpu_kv_pool_tokens": 62944,
+   "decision_rows": 16895,
+   "requests": 12193,
+   "belief_gpu_tokens_recorded_rows": 0,
+   "occ_belief_tokens": null,
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.22273073989321124,
+    "max": 0.5675057208237986,
+    "n_samples": 118
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 14020,
+    "max": 35721
+   },
+   "free_kv": {
+    "committed_min": null,
+    "committed_max": null,
+    "reconstructed_min": null,
+    "reconstructed_max": null
+   },
+   "pd": {
+    "decisions": null,
+    "reached_fits_gate": null,
+    "fits_true": null,
+    "fits_false": null,
+    "kv_bound_by_belief": null,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": null,
+    "engine_samples_leaving_less_room_than_u_max": null,
+    "free_kv_engine_min_tokens": 27223
+   },
+   "rd": {
+    "decisions": null,
+    "telemetry_won": null,
+    "belief_won": null,
+    "cold": null,
+    "gate_defer": null,
+    "gate_no_slack": null,
+    "gate_margin": null,
+    "question_defers": null,
+    "per_decision_log_present": false
+   },
+   "touch": {
+    "considered": 2674,
+    "issued": 2674,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 67676,
+    "skipped_nothing_built": 1197,
+    "with_a_rebuild": 100,
+    "chosen_KEEP": 64996,
+    "chosen_TOUCH": 2674,
+    "chosen_WARM": 4,
+    "chosen_HOLD_BACK": 2,
+    "deviations": 2680
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 969.9,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 132,
+    "release_infeasible_alert": 2028,
+    "share_events_total": 0
+   }
+  },
+  "covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30": {
+   "rung": 3,
+   "memory": "kv0.5r",
+   "seed": 4,
+   "arm": "covex-v6-fair-final",
+   "cell_git_commit": "9172f154428a868566781cc666835301604a3c1f",
+   "gpu_kv_pool_tokens": 31472,
+   "decision_rows": 15111,
+   "requests": 10178,
+   "belief_gpu_tokens_recorded_rows": 15100,
+   "occ_belief_tokens": {
+    "min": 1024,
+    "median": 33252.0,
+    "max": 49999
+   },
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.3736654804270463,
+    "max": 0.9761057447890188,
+    "n_samples": 117
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 11760,
+    "max": 30720
+   },
+   "free_kv": {
+    "committed_min": null,
+    "committed_max": null,
+    "reconstructed_min": -18527,
+    "reconstructed_max": 30448
+   },
+   "pd": {
+    "decisions": null,
+    "reached_fits_gate": null,
+    "fits_true": null,
+    "fits_false": null,
+    "kv_bound_by_belief": null,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": null,
+    "engine_samples_leaving_less_room_than_u_max": null,
+    "free_kv_engine_min_tokens": 752
+   },
+   "rd": {
+    "decisions": null,
+    "telemetry_won": null,
+    "belief_won": null,
+    "cold": null,
+    "gate_defer": null,
+    "gate_no_slack": null,
+    "gate_margin": null,
+    "question_defers": null,
+    "per_decision_log_present": false
+   },
+   "touch": {
+    "considered": 2380,
+    "issued": 2380,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 65044,
+    "skipped_nothing_built": 1215,
+    "with_a_rebuild": 106,
+    "chosen_KEEP": 62658,
+    "chosen_TOUCH": 2380,
+    "chosen_WARM": 4,
+    "chosen_HOLD_BACK": 2,
+    "deviations": 2386
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 849.12,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 132,
+    "release_infeasible_alert": 2553,
+    "share_events_total": 0
+   }
+  },
+  "covex-v6-fair-final_n16_s5_1200s_h27_3t_L3_epg_rq30": {
+   "rung": 3,
+   "memory": "1x",
+   "seed": 5,
+   "arm": "covex-v6-fair-final",
+   "cell_git_commit": "bf1ae16d9ec27b4361b2a07e24b7f26e6c1242e2",
+   "gpu_kv_pool_tokens": 62944,
+   "decision_rows": 11823,
+   "requests": 9598,
+   "belief_gpu_tokens_recorded_rows": 0,
+   "occ_belief_tokens": null,
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.17149758454106284,
+    "max": 0.45919145690312735,
+    "n_samples": 118
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 10795,
+    "max": 28903
+   },
+   "free_kv": {
+    "committed_min": null,
+    "committed_max": null,
+    "reconstructed_min": null,
+    "reconstructed_max": null
+   },
+   "pd": {
+    "decisions": null,
+    "reached_fits_gate": null,
+    "fits_true": null,
+    "fits_false": null,
+    "kv_bound_by_belief": null,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": null,
+    "engine_samples_leaving_less_room_than_u_max": null,
+    "free_kv_engine_min_tokens": 34041
+   },
+   "rd": {
+    "decisions": null,
+    "telemetry_won": null,
+    "belief_won": null,
+    "cold": null,
+    "gate_defer": null,
+    "gate_no_slack": null,
+    "gate_margin": null,
+    "question_defers": null,
+    "per_decision_log_present": false
+   },
+   "touch": {
+    "considered": 176,
+    "issued": 176,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 66474,
+    "skipped_nothing_built": 1727,
+    "with_a_rebuild": 96,
+    "chosen_KEEP": 66293,
+    "chosen_TOUCH": 176,
+    "chosen_WARM": 0,
+    "chosen_HOLD_BACK": 5,
+    "deviations": 181
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 952.87,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 124,
+    "release_infeasible_alert": 2046,
+    "share_events_total": 0
+   }
+  },
+  "covex-v6-fair-final_n16_s5_1200s_h27_3t_kv0.5r_L3_epg_rq30": {
+   "rung": 3,
+   "memory": "kv0.5r",
+   "seed": 5,
+   "arm": "covex-v6-fair-final",
+   "cell_git_commit": "b935e41b29203a830fc0bb9def9ace8574bbfe74",
+   "gpu_kv_pool_tokens": 31472,
+   "decision_rows": 10680,
+   "requests": 8110,
+   "belief_gpu_tokens_recorded_rows": 10356,
+   "occ_belief_tokens": {
+    "min": 2048,
+    "median": 30059.0,
+    "max": 47951
+   },
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.3390950686324352,
+    "max": 1.0,
+    "n_samples": 117
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 10672,
+    "max": 31472
+   },
+   "free_kv": {
+    "committed_min": null,
+    "committed_max": null,
+    "reconstructed_min": -16479,
+    "reconstructed_max": 29424
+   },
+   "pd": {
+    "decisions": null,
+    "reached_fits_gate": null,
+    "fits_true": null,
+    "fits_false": null,
+    "kv_bound_by_belief": null,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": null,
+    "engine_samples_leaving_less_room_than_u_max": null,
+    "free_kv_engine_min_tokens": 0
+   },
+   "rd": {
+    "decisions": null,
+    "telemetry_won": null,
+    "belief_won": null,
+    "cold": null,
+    "gate_defer": null,
+    "gate_no_slack": null,
+    "gate_margin": null,
+    "question_defers": null,
+    "per_decision_log_present": false
+   },
+   "touch": {
+    "considered": 175,
+    "issued": 175,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 65075,
+    "skipped_nothing_built": 1721,
+    "with_a_rebuild": 100,
+    "chosen_KEEP": 64899,
+    "chosen_TOUCH": 175,
+    "chosen_WARM": 0,
+    "chosen_HOLD_BACK": 1,
+    "deviations": 176
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 842.75,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 126,
+    "release_infeasible_alert": 2394,
+    "share_events_total": 0
+   }
+  },
+  "covex-v6-fair-final_n16_s6_1200s_h27_3t_L3_epg_rq30": {
+   "rung": 3,
+   "memory": "1x",
+   "seed": 6,
+   "arm": "covex-v6-fair-final",
+   "cell_git_commit": "d654d23239ec91040faa78fa61be1e6347f502b5",
+   "gpu_kv_pool_tokens": 62944,
+   "decision_rows": 12476,
+   "requests": 9988,
+   "belief_gpu_tokens_recorded_rows": 0,
+   "occ_belief_tokens": null,
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.19094838545639464,
+    "max": 0.772184083396898,
+    "n_samples": 118
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 12019,
+    "max": 48604
+   },
+   "free_kv": {
+    "committed_min": null,
+    "committed_max": null,
+    "reconstructed_min": null,
+    "reconstructed_max": null
+   },
+   "pd": {
+    "decisions": null,
+    "reached_fits_gate": null,
+    "fits_true": null,
+    "fits_false": null,
+    "kv_bound_by_belief": null,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": null,
+    "engine_samples_leaving_less_room_than_u_max": null,
+    "free_kv_engine_min_tokens": 14340
+   },
+   "rd": {
+    "decisions": null,
+    "telemetry_won": null,
+    "belief_won": null,
+    "cold": null,
+    "gate_defer": null,
+    "gate_no_slack": null,
+    "gate_margin": null,
+    "question_defers": null,
+    "per_decision_log_present": false
+   },
+   "touch": {
+    "considered": 415,
+    "issued": 415,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 60913,
+    "skipped_nothing_built": 1447,
+    "with_a_rebuild": 85,
+    "chosen_KEEP": 60495,
+    "chosen_TOUCH": 415,
+    "chosen_WARM": 0,
+    "chosen_HOLD_BACK": 3,
+    "deviations": 418
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 957.75,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 121,
+    "release_infeasible_alert": 2073,
+    "share_events_total": 0
+   }
+  },
+  "covex-v6-fair-final_n16_s6_1200s_h27_3t_kv0.5r_L3_epg_rq30": {
+   "rung": 3,
+   "memory": "kv0.5r",
+   "seed": 6,
+   "arm": "covex-v6-fair-final",
+   "cell_git_commit": "342e693aed8b44adc0fb06c9a0b80cbddc985806",
+   "gpu_kv_pool_tokens": 31472,
+   "decision_rows": 11553,
+   "requests": 8853,
+   "belief_gpu_tokens_recorded_rows": 11534,
+   "occ_belief_tokens": {
+    "min": 1024,
+    "median": 29398.0,
+    "max": 41686
+   },
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.31240467717336046,
+    "max": 0.9883070665988816,
+    "n_samples": 118
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 9832,
+    "max": 31104
+   },
+   "free_kv": {
+    "committed_min": null,
+    "committed_max": null,
+    "reconstructed_min": -10214,
+    "reconstructed_max": 30448
+   },
+   "pd": {
+    "decisions": null,
+    "reached_fits_gate": null,
+    "fits_true": null,
+    "fits_false": null,
+    "kv_bound_by_belief": null,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": null,
+    "engine_samples_leaving_less_room_than_u_max": null,
+    "free_kv_engine_min_tokens": 368
+   },
+   "rd": {
+    "decisions": null,
+    "telemetry_won": null,
+    "belief_won": null,
+    "cold": null,
+    "gate_defer": null,
+    "gate_no_slack": null,
+    "gate_margin": null,
+    "question_defers": null,
+    "per_decision_log_present": false
+   },
+   "touch": {
+    "considered": 391,
+    "issued": 391,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 60199,
+    "skipped_nothing_built": 1458,
+    "with_a_rebuild": 88,
+    "chosen_KEEP": 59805,
+    "chosen_TOUCH": 391,
+    "chosen_WARM": 0,
+    "chosen_HOLD_BACK": 3,
+    "deviations": 394
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 873.36,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 121,
+    "release_infeasible_alert": 2309,
+    "share_events_total": 0
+   }
+  },
+  "covex-v6-fair-final_n16_s7_1200s_h27_3t_L3_epg_rq30": {
+   "rung": 3,
+   "memory": "1x",
+   "seed": 7,
+   "arm": "covex-v6-fair-final",
+   "cell_git_commit": "aab44e29b85b29a4876fe7defb2ad4f1c4f1e980",
+   "gpu_kv_pool_tokens": 62944,
+   "decision_rows": 15974,
+   "requests": 12005,
+   "belief_gpu_tokens_recorded_rows": 0,
+   "occ_belief_tokens": null,
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.18103229087210782,
+    "max": 0.7315026697177727,
+    "n_samples": 118
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 11395,
+    "max": 46044
+   },
+   "free_kv": {
+    "committed_min": null,
+    "committed_max": null,
+    "reconstructed_min": null,
+    "reconstructed_max": null
+   },
+   "pd": {
+    "decisions": null,
+    "reached_fits_gate": null,
+    "fits_true": null,
+    "fits_false": null,
+    "kv_bound_by_belief": null,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": null,
+    "engine_samples_leaving_less_room_than_u_max": null,
+    "free_kv_engine_min_tokens": 16900
+   },
+   "rd": {
+    "decisions": null,
+    "telemetry_won": null,
+    "belief_won": null,
+    "cold": null,
+    "gate_defer": null,
+    "gate_no_slack": null,
+    "gate_margin": null,
+    "question_defers": null,
+    "per_decision_log_present": false
+   },
+   "touch": {
+    "considered": 2205,
+    "issued": 2205,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 58704,
+    "skipped_nothing_built": 1447,
+    "with_a_rebuild": 87,
+    "chosen_KEEP": 56496,
+    "chosen_TOUCH": 2205,
+    "chosen_WARM": 3,
+    "chosen_HOLD_BACK": 0,
+    "deviations": 2208
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 953.27,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 87,
+    "release_infeasible_alert": 1746,
+    "share_events_total": 0
+   }
+  },
+  "covex-v6-fair-final_n16_s7_1200s_h27_3t_kv0.5r_L3_epg_rq30": {
+   "rung": 3,
+   "memory": "kv0.5r",
+   "seed": 7,
+   "arm": "covex-v6-fair-final",
+   "cell_git_commit": "11e533b70efba757091835b048940416848d84b3",
+   "gpu_kv_pool_tokens": 31472,
+   "decision_rows": 14597,
+   "requests": 10361,
+   "belief_gpu_tokens_recorded_rows": 14268,
+   "occ_belief_tokens": {
+    "min": 6144,
+    "median": 35840.0,
+    "max": 52829
+   },
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.3113879003558719,
+    "max": 0.9039145907473309,
+    "n_samples": 118
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 9800,
+    "max": 28448
+   },
+   "free_kv": {
+    "committed_min": null,
+    "committed_max": null,
+    "reconstructed_min": -21357,
+    "reconstructed_max": 25328
+   },
+   "pd": {
+    "decisions": null,
+    "reached_fits_gate": null,
+    "fits_true": null,
+    "fits_false": null,
+    "kv_bound_by_belief": null,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": null,
+    "engine_samples_leaving_less_room_than_u_max": null,
+    "free_kv_engine_min_tokens": 3024
+   },
+   "rd": {
+    "decisions": null,
+    "telemetry_won": null,
+    "belief_won": null,
+    "cold": null,
+    "gate_defer": null,
+    "gate_no_slack": null,
+    "gate_margin": null,
+    "question_defers": null,
+    "per_decision_log_present": false
+   },
+   "touch": {
+    "considered": 2107,
+    "issued": 2107,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 57490,
+    "skipped_nothing_built": 1433,
+    "with_a_rebuild": 88,
+    "chosen_KEEP": 55379,
+    "chosen_TOUCH": 2107,
+    "chosen_WARM": 3,
+    "chosen_HOLD_BACK": 1,
+    "deviations": 2111
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 841.04,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 87,
+    "release_infeasible_alert": 2111,
+    "share_events_total": 0
+   }
+  },
+  "covex-v6-final_n16_s4_1200s_h27_3t_L3_epg_rq30": {
+   "rung": 4,
+   "memory": "1x",
+   "seed": 4,
+   "arm": "covex-v6-final",
+   "cell_git_commit": "6b79d0695a6e232dc805aabe1350068e15488741",
+   "gpu_kv_pool_tokens": 62944,
+   "decision_rows": 15505,
+   "requests": 11499,
+   "belief_gpu_tokens_recorded_rows": 0,
+   "occ_belief_tokens": null,
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.22362064581744218,
+    "max": 0.51767098906687,
+    "n_samples": 118
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 14076,
+    "max": 32584
+   },
+   "free_kv": {
+    "committed_min": 14993,
+    "committed_max": 62944,
+    "reconstructed_min": null,
+    "reconstructed_max": null
+   },
+   "pd": {
+    "decisions": 302,
+    "reached_fits_gate": 255,
+    "fits_true": 253,
+    "fits_false": 2,
+    "kv_bound_by_belief": 302,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": 20707,
+    "engine_samples_leaving_less_room_than_u_max": 0,
+    "free_kv_engine_min_tokens": 30360
+   },
+   "rd": {
+    "decisions": 157,
+    "telemetry_won": 114,
+    "belief_won": 42,
+    "cold": 1,
+    "gate_defer": 29,
+    "gate_no_slack": 32,
+    "gate_margin": 69,
+    "question_defers": 29,
+    "per_decision_log_present": false
+   },
+   "touch": {
+    "considered": 2004,
+    "issued": 2004,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 67585,
+    "skipped_nothing_built": 1228,
+    "with_a_rebuild": 99,
+    "chosen_KEEP": 65577,
+    "chosen_TOUCH": 2004,
+    "chosen_WARM": 2,
+    "chosen_HOLD_BACK": 2,
+    "deviations": 2008
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 964.4,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 129,
+    "release_infeasible_alert": 1968,
+    "share_events_total": 0
+   }
+  },
+  "covex-v6-final_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun": {
+   "rung": 4,
+   "memory": "1x",
+   "seed": 4,
+   "arm": "covex-v6-final",
+   "cell_git_commit": "7d9bbea70a091e57e0494b38b4ba57d89519e785",
+   "gpu_kv_pool_tokens": 62944,
+   "decision_rows": 17545,
+   "requests": 12456,
+   "belief_gpu_tokens_recorded_rows": 17534,
+   "occ_belief_tokens": {
+    "min": 1024,
+    "median": 34276.0,
+    "max": 48975
+   },
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.21116196287820999,
+    "max": 0.688278667683702,
+    "n_samples": 118
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 13291,
+    "max": 43323
+   },
+   "free_kv": {
+    "committed_min": 13969,
+    "committed_max": 62944,
+    "reconstructed_min": 13969,
+    "reconstructed_max": 61920
+   },
+   "pd": {
+    "decisions": 300,
+    "reached_fits_gate": 258,
+    "fits_true": 255,
+    "fits_false": 3,
+    "kv_bound_by_belief": 300,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": 20707,
+    "engine_samples_leaving_less_room_than_u_max": 1,
+    "free_kv_engine_min_tokens": 19621
+   },
+   "rd": {
+    "decisions": 153,
+    "telemetry_won": 117,
+    "belief_won": 35,
+    "cold": 1,
+    "gate_defer": 22,
+    "gate_no_slack": 36,
+    "gate_margin": 76,
+    "question_defers": 22,
+    "per_decision_log_present": true
+   },
+   "touch": {
+    "considered": 3023,
+    "issued": 3023,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 67619,
+    "skipped_nothing_built": 1193,
+    "with_a_rebuild": 100,
+    "chosen_KEEP": 64589,
+    "chosen_TOUCH": 3023,
+    "chosen_WARM": 5,
+    "chosen_HOLD_BACK": 2,
+    "deviations": 3030
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 959.41,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 132,
+    "release_infeasible_alert": 2044,
+    "share_events_total": 0
+   }
+  },
+  "covex-v6-final_n16_s5_1200s_h27_3t_L3_epg_rq30": {
+   "rung": 4,
+   "memory": "1x",
+   "seed": 5,
+   "arm": "covex-v6-final",
+   "cell_git_commit": "f99f69e8e3753e66c33010dccc8c05389a5f4b8f",
+   "gpu_kv_pool_tokens": 62944,
+   "decision_rows": 11641,
+   "requests": 9510,
+   "belief_gpu_tokens_recorded_rows": 0,
+   "occ_belief_tokens": null,
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.17505720823798626,
+    "max": 0.7096364098652428,
+    "n_samples": 118
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 11019,
+    "max": 44667
+   },
+   "free_kv": {
+    "committed_min": 16017,
+    "committed_max": 62944,
+    "reconstructed_min": null,
+    "reconstructed_max": null
+   },
+   "pd": {
+    "decisions": 299,
+    "reached_fits_gate": 260,
+    "fits_true": 260,
+    "fits_false": 0,
+    "kv_bound_by_belief": 299,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": 18538,
+    "engine_samples_leaving_less_room_than_u_max": 1,
+    "free_kv_engine_min_tokens": 18277
+   },
+   "rd": {
+    "decisions": 152,
+    "telemetry_won": 120,
+    "belief_won": 32,
+    "cold": null,
+    "gate_defer": 37,
+    "gate_no_slack": 31,
+    "gate_margin": 69,
+    "question_defers": 37,
+    "per_decision_log_present": false
+   },
+   "touch": {
+    "considered": 174,
+    "issued": 174,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 66496,
+    "skipped_nothing_built": 1717,
+    "with_a_rebuild": 97,
+    "chosen_KEEP": 66320,
+    "chosen_TOUCH": 174,
+    "chosen_WARM": 0,
+    "chosen_HOLD_BACK": 2,
+    "deviations": 176
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 936.57,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 116,
+    "release_infeasible_alert": 1907,
+    "share_events_total": 0
+   }
+  },
+  "covex-v6-final_n16_s6_1200s_h27_3t_L3_epg_rq30": {
+   "rung": 4,
+   "memory": "1x",
+   "seed": 6,
+   "arm": "covex-v6-final",
+   "cell_git_commit": "87fad28befeee455b7e480455c9f5cb4f8a60228",
+   "gpu_kv_pool_tokens": 62944,
+   "decision_rows": 12308,
+   "requests": 10037,
+   "belief_gpu_tokens_recorded_rows": 0,
+   "occ_belief_tokens": null,
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.19501652682430715,
+    "max": 0.5669972031528095,
+    "n_samples": 118
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 12275,
+    "max": 35689
+   },
+   "free_kv": {
+    "committed_min": 21258,
+    "committed_max": 62944,
+    "reconstructed_min": null,
+    "reconstructed_max": null
+   },
+   "pd": {
+    "decisions": 293,
+    "reached_fits_gate": 258,
+    "fits_true": 258,
+    "fits_false": 0,
+    "kv_bound_by_belief": 293,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": 18224,
+    "engine_samples_leaving_less_room_than_u_max": 0,
+    "free_kv_engine_min_tokens": 27255
+   },
+   "rd": {
+    "decisions": 146,
+    "telemetry_won": 109,
+    "belief_won": 36,
+    "cold": 1,
+    "gate_defer": 29,
+    "gate_no_slack": 34,
+    "gate_margin": 68,
+    "question_defers": 29,
+    "per_decision_log_present": false
+   },
+   "touch": {
+    "considered": 408,
+    "issued": 408,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 61088,
+    "skipped_nothing_built": 1453,
+    "with_a_rebuild": 85,
+    "chosen_KEEP": 60676,
+    "chosen_TOUCH": 408,
+    "chosen_WARM": 0,
+    "chosen_HOLD_BACK": 4,
+    "deviations": 412
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 955.4,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 118,
+    "release_infeasible_alert": 1830,
+    "share_events_total": 0
+   }
+  },
+  "covex-v6-final_n16_s7_1200s_h27_3t_L3_epg_rq30": {
+   "rung": 4,
+   "memory": "1x",
+   "seed": 7,
+   "arm": "covex-v6-final",
+   "cell_git_commit": "625f609c9c5ea0868ee1e86f886d0f95c713cae8",
+   "gpu_kv_pool_tokens": 62944,
+   "decision_rows": 15845,
+   "requests": 11722,
+   "belief_gpu_tokens_recorded_rows": 0,
+   "occ_belief_tokens": null,
+   "engine_kv_usage_perc": {
+    "min": 0.0,
+    "median": 0.15255530129672007,
+    "max": 0.5903890160183066,
+    "n_samples": 118
+   },
+   "occ_engine_tokens": {
+    "min": 0,
+    "median": 9602,
+    "max": 37161
+   },
+   "free_kv": {
+    "committed_min": 10115,
+    "committed_max": 62944,
+    "reconstructed_min": null,
+    "reconstructed_max": null
+   },
+   "pd": {
+    "decisions": 259,
+    "reached_fits_gate": 224,
+    "fits_true": 222,
+    "fits_false": 2,
+    "kv_bound_by_belief": 259,
+    "kv_bound_by_engine_metric": 0,
+    "u_rebuild_max": 20437,
+    "engine_samples_leaving_less_room_than_u_max": 0,
+    "free_kv_engine_min_tokens": 25783
+   },
+   "rd": {
+    "decisions": 106,
+    "telemetry_won": 83,
+    "belief_won": 23,
+    "cold": null,
+    "gate_defer": 25,
+    "gate_no_slack": 20,
+    "gate_margin": 48,
+    "question_defers": 25,
+    "per_decision_log_present": false
+   },
+   "touch": {
+    "considered": 2212,
+    "issued": 2212,
+    "refused": 0,
+    "price_milli_gpu_s_per_touch": 3.0
+   },
+   "state": {
+    "decisions": 58768,
+    "skipped_nothing_built": 1460,
+    "with_a_rebuild": 87,
+    "chosen_KEEP": 56553,
+    "chosen_TOUCH": 2212,
+    "chosen_WARM": 3,
+    "chosen_HOLD_BACK": 0,
+    "deviations": 2215
+   },
+   "admission": {
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 931.48,
+    "budget_refusal": 0,
+    "budget_refusal_recall": 0,
+    "release_infeasible_recall": 0,
+    "release_recheck_out_of_scope_recall": 81,
+    "release_infeasible_alert": 1861,
+    "share_events_total": 0
+   }
+  }
+ },
+ "_provenance": {
+  "git_commit": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
+  "script": "d230_belief_error_decisions (session scratchpad: an1.py, an2.py, an3.py, an4.py, an5.py, build.py, final.py)",
+  "model": "qwen7b",
+  "device": "a6000",
+  "n": 13,
+  "seed": "4,5,6,7 (seeds 1 to 3 and HOLDOUT not touched)",
+  "timestamp": "2026-11-24T12:21:23.121130",
+  "read_at_rev": "936aa37dafa2a4bfbd0b17c25441b793731a1117",
+  "args": {
+   "cells": 13,
+   "rungs": [
+    3,
+    4
+   ],
+   "memory": [
+    "1x",
+    "kv0.5r"
+   ],
+   "kinds": [
+    "admission",
+    "warm",
+    "touch",
+    "deferral",
+    "free_kv bound"
+   ],
+   "mode": "measure only, no fix"
+  },
+  "_git_commit_note": "the `git_commit` field is the WORKING TREE HEAD (17bdf159), which is 1,871 commits behind origin/main. `read_at_rev` (936aa37d) is the authoritative source revision and every input was read at it.",
+  "analysis_scripts": "kept in the session scratchpad, not committed"
+ }
+}
