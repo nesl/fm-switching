@@ -364,5 +364,81 @@ every `delete` row in the uncommitted-code class, against origin and against thi
 record the result here. The uncommitted-code delete rows are the `DIVERGENT_FROM_ORIGIN` and
 `NOVEL` rows listed per file above: 60 and 75 respectively.
 
-_Not yet performed._
+**Performed 2026-11-24** by a session that did not do the classification (it was given the D206 (3)
+guard test and this spot-check, nothing else). Checked against origin at
+`b79708066fad1a3a49f31f59b0df91f214548241`, with the classification base
+`8d29e86b9a33eeba1df81f7c16cf72b09de2a8a5` and the rescue commit
+`72032bb240608e90cfeea0c246672b78af62f226` both confirmed as ancestors of it.
+
+**Coverage: 135 of 135 judgment rows**, which is every row in the per-file tables above (60
+`DIVERGENT_FROM_ORIGIN` and 75 `NOVEL`, across `n206` 47, `d213_e1` 83, `sessA_cs` 2, `sessA_ver`
+3). The user's addendum widened clause (c)'s floor of 20 to the full 60 + 75 set, and the full set
+was covered, so no sampling was done.
+
+**What this check could and could not look at.** The files themselves were deleted after this
+manifest landed, which was the order clause (d) requires, so **no file content was inspected**.
+What was checked is the recorded blob shas, the recorded paths and the manifest's own reasoning
+against origin's git objects. Statements below about content are statements about blob identity,
+not about bytes read off disk.
+
+| check | result |
+|---|---|
+| rows parsed from the per-file tables | 135, matching the 60 + 75 stated above |
+| class verdict reproduced from the manifest's own stated rule | **135 of 135 agree**; zero disagreements |
+| rows whose reason claims the blob "is still reachable from origin/main" | 54; **54 of 54 verified reachable** from `origin/main`, zero exceptions |
+| `NOVEL` rows whose blob is nevertheless present in the classification base tree (which would make them `CONTENT_ON_ORIGIN`) | **0** |
+| action tallies against the counts table | archive 31, commit 2, abandoned 1, delete 101; consistent |
+| per-class breakdown table against the action table | sums exactly for all four trees (19,634 / 8,926 / 3 / 3); it is a breakdown **of the deletions only**, which is what the sentence above it says, and its `DIVERGENT`/`NOVEL` cells match the delete-action subset of the per-file rows exactly (17, 35, 43, 2, 2, 2) |
+
+The reachability index used for the 54 rows was validated before it was trusted, rather than after:
+all 282 distinct historical blobs of `research/EXPERIMENTS.md` were enumerated independently and
+**282 of 282** were found in the index, so an absence reported by it is an absence and not an empty
+index. The index was built with `git rev-list --objects` against a resolved literal sha, never with
+a filesystem grep.
+
+**The limit of the check, stated rather than implied.** Of the 135 recorded blob shas, **63 resolve
+in the object store and 72 do not**. The 72 are not an error: the content was uncommitted and the
+files are now deleted, so those shas are unverifiable by anyone, now or later. They break down as
+66 `NOVEL` rows (28 raw D213 CPU-stub cell outputs, 14 claimed byte-identical after `.gz`
+decompression, 10 ephemeral session markers, 5 used commit messages, 3 one-shot commit drivers, 2
+intra-tree duplicates, 2 oversized s4 row files, 1 superseded cell list, 1 earlier partial version)
+and 6 `DIVERGENT_FROM_ORIGIN` rows. For those 6 the manifest does **not** claim blob reachability;
+it claims the weaker and correct thing, that the work landed on origin in a later form. For the 14
+`.gz` rows in particular, the decompression claim cannot be re-verified from here and is recorded
+as resting on the classifying session's `cmp`.
+
+**Four reasoning claims checked directly against origin, all four hold.**
+
+1. The pre-D223 premise used to archive rather than commit the D206 guard test. Origin's
+   `arms_v6fair.py` carries `limit_tokens=CL.limit_tokens()` with an explicit `D170, D223 (2)`
+   ruling and a comment naming the retyped 32768 that used to stand there, so the landed form is as
+   described. (The test itself has since been run against current origin and passes 18 of 18; see
+   the D206 (3) commit. That is new information about the test, not a fault in this manifest: the
+   manifest's stated ground was that it was *unverified*, which it was.)
+2. The archived guard test's recorded blob `1582b9ff2944` matches `git hash-object` of the archived
+   file, and the file is byte-identical to what has now been committed.
+3. The two rescued results are on origin at the stated paths and the stated sizes (15,639 and
+   15,967 bytes), the commit `72032bb2` touches **exactly two paths**, and **neither file contains
+   `_provenance`**. The missing stamp is therefore real and is **correctly recorded above as a
+   declared gap** with its reason (byte-identity and digest claims reference them), not left as an
+   oversight.
+4. The `abandoned` row's `V6CFR3_KV025_CELLS` matches no path anywhere in origin's tree, consistent
+   with D223 (1) removing 0.25x before that cell list was ever committed.
+
+Independently confirmed: `git worktree list` on this repo reports exactly the two checkouts this
+manifest names, so the statement that none of the four classified trees is a git worktree stands.
+
+**Disagreements: none that change an action.** One label would be sharpened. Six `delete` rows
+carry blobs that are absent from the classification base tree but **are** reachable from
+`origin/main`'s history, so their content is recoverable from origin and not merely an
+uncommitted draft: `n206/ops/STANDDOWN`, and `d213_e1`'s `out/digests_e1.json`,
+`out/digests_PARTIAL_SUPERSEDED.json`, `coord_published.py`, `coord_at_tip.py` and
+`patch_async.py`. `NOVEL` is correct as the manifest defines it, which is a comparison against the
+tip tree; the note is only that these six are better justified than the label alone suggests. The
+remaining three history-reachable `NOVEL` rows are reachable for a known reason: the two rescued
+results were committed in `72032bb2`, and the guard test was committed under D206 (3) by this
+session.
+
+**Verdict: the classification is sound on every row it was possible to check, and the two
+`_provenance` omissions are recorded as the declared gap they are.** No row's action is disputed.
 
