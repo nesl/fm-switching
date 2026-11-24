@@ -8,7 +8,7 @@
 #
 # D212 entries
 a  | FILLER_A_CELLS  confidence-cascade 16 s4-s7 _L3_epg_rq30_rerun | ready (gated)
-b  | FILLER_C_CELLS  cascade-routing 16 s4-s7 _L3_epg_rq30 | ready (gated; device-only floor by construction)
+b  | FILLER_C_CELLS  cascade-routing 16 s4-s7 _L3_epg_rq30 | gated but HELD by the driver: device-waiting arm not in runs/DEVWAIT_READY (user ruling 2026-11-21 ~14:45); waits on flash listing it
 c1 | simplestream reruns on committed conditions | waiting on hits 14, 7
 c2 | llf: UNAFFECTED by hit 14 (card check); mooncake: unaffected at 1x, memory conditions await the hit-14 adaptation ruling; eco-llm: waiting on hits 14, 16
 c3 | kvflow-prefetch, lmcache (hit 9), attentionstore-prefetch (hit 8) reruns | waiting on hits 9, 8
