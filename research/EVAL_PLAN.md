@@ -18,7 +18,7 @@ cell, fix or build lands. Ready matrix cells that no other list covers go to the
 
 | key | varied | tag (n) | build status |
 |---|---|---|---|
-| mem0.5x | GPU-KV 0.5x, REAL engine pool | `_kv0.5r_L3_epg_rq30` (16) | WAITING: a real-engine 0.5x launcher entry and a server-start pool check (the committed `_kv0.5` cells are logical-only and do not count) |
+| mem0.5x | GPU-KV 0.5x, REAL engine pool (`--num-gpu-blocks-override 1968 --max-model-len 31472`, flash 25938c65; expected pool 31,488, a PREDICTION confirmed at the first cell by the launcher check) | `_kv0.5r_L3_epg_rq30` (16) | ready (the committed `_kv0.5` cells are logical-only and do not count) |
 | mem0.25x | GPU-KV 0.25x, real engine (985 blocks, 15,760 tokens) | `_kv0.25_L3_epg_rq30` (16) | ready (as KV025) |
 | load8 / 12 / 20 / 24 | devices | `_L3_epg_rq30` (8, 12, 20, 24) | ready |
 | dl2.5 / dl4 / dl5 | robot deadline | `_L2.5_`, `_L4_`, `_L5_epg_rq30` (16) | ready (driver v31+ reads `_L<s>`) |

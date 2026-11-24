@@ -13,7 +13,7 @@ ARMS="confidence-cascade covex-v6-base covex-v6-rules simplestream llf mooncake 
 SEEDS="4 5"
 # condition key | n | tag | server flags | build status ("" = ready)
 CONDS=$(cat <<'EOF'
-mem0.5x|16|_kv0.5r_L3_epg_rq30||waiting on build: real-engine 0.5x launcher entry and server-start pool check
+mem0.5x|16|_kv0.5r_L3_epg_rq30|--num-gpu-blocks-override 1968 --max-model-len 31472|
 mem0.25x|16|_kv0.25_L3_epg_rq30|--num-gpu-blocks-override 985 --max-model-len 15744|
 load8|8|_L3_epg_rq30||
 load12|12|_L3_epg_rq30||
