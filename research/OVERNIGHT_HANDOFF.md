@@ -29,11 +29,11 @@ process census at 22:40, so no resume needs to re-derive it. ***
   the window elapses (`if [ $((now - first)) -gt $WINDOW_S ]; then first=$now; count=0; fi`). The poll
   fires every TEN MINUTES, so it can only ever reach **6 restarts per hour against a budget of 12**:
   **THE GUARD IS STRUCTURALLY UNREACHABLE.** Measured rather than argued: `BUDGET SPENT` has fired
-  **0 times**; the log holds **103 RESTART lines** (re-counted restart 10) spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
+  **0 times**; the log holds **104 RESTART lines** (re-counted restart 11) spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
   about 37 hours; and the counter histogram shows it reset to `1/12` **18 times**, never exceeding
   `7/12`. So a resume must NOT read `RESTART n/12` as a countdown to a stop. **IT WILL KEEP SPENDING
   ABOUT SIX SESSIONS AN HOUR, INDEFINITELY, UNTIL THE USER STOPS THE `fmsw-overnight` WATCHDOG OR
-  ANSWERS THE RULINGS.** **103 sessions have been spent so far** (re-counted restart 9, 07:40 PST; `BUDGET SPENT` still 0). Stopping it is the USER'S call and outside
+  ANSWERS THE RULINGS.** **104 sessions have been spent so far** (re-counted restart 9, 07:40 PST; `BUDGET SPENT` still 0). Stopping it is the USER'S call and outside
   what this file authorises, so do not touch it; the correct action is to say so plainly in the reply,
   which is now this file's standing instruction for every further resume. DO NOT read the restarts as evidence that anything broke, and do not go
   hunting for the crash. Each restart does cost a full session, so leave this file accurate.
@@ -149,9 +149,28 @@ Each entry: the claim, the verdict, and the restart that checked it. **PICK ONE 
   origin". FALSE as literally worded - it occurs in 12, all within `held/` itself - so a resume that
   greps the name finds twelve hits and may distrust the file or conclude the arm IS wired. It now says
   zero files ON THE IMPORT PATH, which is the true and load-bearing claim, with the old wording recorded.
-**STILL UNVERIFIED:** the r2-queue-register claim that a correct input costs 16 robot answers at s4,
-which is ruling 7. **That is the LAST item on this list**; a resume that finds it done should report the
-ledger complete rather than inventing a new claim to check.
+- *** THE r2-QUEUE-REGISTER CLAIM, "a correct input costs 16 robot answers at s4" -> **TRUE, VERIFIED
+  FROM THE CELLS THEMSELVES, AND RULING 7 IS SHARPER THAN ITS OWN FRAMING** (restart 11, 2026-11-24
+  07:55 PST). *** Read from each arm's OWN committed score block, not from the diagnosis's account of
+  itself:
+    `covex-v6-state-shares-r1`  robot on time **95** of 132, `by_deadline` **0.5455**
+    `covex-v6-state-shares-r2`  robot on time **79** of 132, `by_deadline` **0.5227**
+    `covex-v6-state-shares`     robot on time **60** of 132, `by_deadline` **0.5455**
+  95 minus 79 is exactly the 16 claimed, so the number is right.
+  *** BUT THE WORD "TRADE-OFF" IS NOT: r1 DOMINATES r2 ON BOTH MEASURED AXES. *** r2 is lower on on-time
+  (79 against 95) AND lower on correctness-by-deadline (0.5227 against 0.5455). **So nothing measured is
+  being traded FOR anything measured** - the only thing r2 has in its favour is that its input is
+  correct. Ruling 7 is therefore "keep a correct input that is worse on both measured axes, or keep r1",
+  which is a cleaner question than "a trade-off", and the diagnosis's own sentence that "a correct input
+  and a useful lever are not the same proposition" is exactly right.
+  *** ONE THING THE SAME READ TURNED UP, worth seeing before ruling 7: *** r1 delivers **35 MORE on-time
+  robot answers than the unsuffixed `shares` arm (95 against 60) at an IDENTICAL `by_deadline` of
+  0.5455.** So on this arm family those 35 extra on-time answers bought ZERO correctness. That is the
+  on-time-versus-correct distinction again, and it means the 16 answers r2 "costs" should not be assumed
+  to carry 16 answers' worth of value either. Both r1 and r2 do beat the original 60 on on-time.
+*** THE VERIFICATION LEDGER IS NOW COMPLETE. *** Every claim this file listed as unverified has been
+checked against origin or against the cells. A resume with spare capacity should NOT invent a new claim:
+say the ledger is complete, report the restart cost, and stop.
 
 *** A CORRECTION TO THIS FILE'S OWN HANG-DETECTION LESSON, because I got the discriminator wrong
 earlier tonight and a future resume would kill a healthy driver with it. ***
