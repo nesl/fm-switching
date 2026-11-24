@@ -23,7 +23,19 @@ process census at 22:40, so no resume needs to re-derive it. ***
   ONE-SHOT non-interactive session: it exits when its turn ends. The watchdog then finds no session,
   calls the heartbeat STALE and restarts it. **So "heartbeat STALE" plus "session absent" is what a
   HEALTHY `-p` run looks like to this watchdog.** It is bounded: the log counts `RESTART n/12`, and it
-  stood at 4/12 at 22:40. DO NOT read the restarts as evidence that anything broke, and do not go
+  stood at 4/12 at 22:40. *** CORRECTED 2026-11-24 07:00 PST: "BOUNDED" IS TRUE PER WINDOW
+  AND FALSE OVER TIME. THE BUDGET CAN NEVER BE SPENT, SO THIS LOOP IS EFFECTIVELY PERPETUAL. ***
+  `ops/watchdog.sh` sets `MAX_RESTARTS=12` and `WINDOW_S=3600`, and line 104 RESETS the counter whenever
+  the window elapses (`if [ $((now - first)) -gt $WINDOW_S ]; then first=$now; count=0; fi`). The poll
+  fires every TEN MINUTES, so it can only ever reach **6 restarts per hour against a budget of 12**:
+  **THE GUARD IS STRUCTURALLY UNREACHABLE.** Measured rather than argued: `BUDGET SPENT` has fired
+  **0 times**; the log holds **99 RESTART lines** spanning 2026-11-23T02:12:39Z to 2026-11-24T15:00:01Z,
+  about 37 hours; and the counter histogram shows it reset to `1/12` **18 times**, never exceeding
+  `7/12`. So a resume must NOT read `RESTART n/12` as a countdown to a stop. **IT WILL KEEP SPENDING
+  ABOUT SIX SESSIONS AN HOUR, INDEFINITELY, UNTIL THE USER STOPS THE `fmsw-overnight` WATCHDOG OR
+  ANSWERS THE RULINGS.** 99 sessions have been spent so far. Stopping it is the USER'S call and outside
+  what this file authorises, so do not touch it; the correct action is to say so plainly in the reply,
+  which is now this file's standing instruction for every further resume. DO NOT read the restarts as evidence that anything broke, and do not go
   hunting for the crash. Each restart does cost a full session, so leave this file accurate.
 *** SUPERSEDED 2026-11-24 ~12:00 PST: NOTHING IS RUNNING. THE BOX IS FREE AND A DRY CELL OF YOUR OWN
 MAY RUN. *** Verified by census, not assumed: ZERO live2 python under the repo or any scratchpad, loadavg
