@@ -1,5 +1,96 @@
 # HANDOFF. READ THIS FIRST.
 
+## STATE AT 2026-11-23T20:05-0800. NEWEST BLOCK. EVERY BLOCK BELOW IS SUPERSEDED.
+
+  WRITTEN AT origin/main tip: 050c57257e69e794c0f68f54252e13d2ea6d9402
+  EXPIRES: immediately on any new commit to origin/main. RE-DERIVE; DO NOT TRUST THIS SUMMARY.
+  Every block below this one was written at an earlier tip and is kept only as history.
+
+### WHAT IS RUNNING. DO NOT START A REPLACEMENT FOR ANY OF IT.
+
+  1. THE FINAL LADDER IS RUNNING ON THE H100. s4 is COMPLETE for all three rungs and ALL THREE PASSED.
+     `FINAL_LADDER_CELLS_S5_S7` is POSTED (`599e2dbc`) and GATED above all filler (`59f7c46c`): nine
+     cells, fair-final / final / state-final at s5, then s6, then s7, from ~20:11, LADDER DONE ~23:20.
+     The main flash session scores each cell as it lands and issues the four-seed verdict at the end.
+  2. A DEVICE_ANSWERS BUILD IS RUNNING ON FLASH (`d218_da_driver.py`). That is D218 (1): rung 4's
+     missing third request candidate. It is pre-registered first and has NOT posted anything.
+  3. THE H100's hit-7 FINAL-RUNG IDENTITY PASS is running at current HEAD.
+
+### THE ONE SEQUENCING RULE THAT MATTERS TONIGHT
+
+  *** ALL TWELVE FINAL-LADDER CELLS MUST RUN ON ONE COORDINATOR COMMIT. *** Agreed with the H100. So
+  hit 7 lands on `coordinator.py` and `cstate.py` ONLY AFTER THE LAST LADDER CELL (~23:20), and the
+  item-3 belief-prefix record (also a `coordinator.py` edit, at `:2126`) lands after that. DO NOT LAND
+  EITHER EARLIER. The reason is not tidiness: a twelve-cell verdict that never has to argue "did the
+  coordinator change mid-ladder?" is strictly stronger than one that argues it from a proof.
+
+  CONSEQUENCE ALREADY PRICED, so it is not a surprise: the twelve ladder cells carry D211 signal (b)'s
+  input (`host_counters_d211.log`, on every live cell from driver v32) but NOT signal (a)'s, which needs
+  item 3. After ~23:20 there is NO 1x live policy cell left carrying signal (a)'s input, so its
+  validation needs its own later cell. That is a scheduling fact for the user, not a blocker.
+
+### s4 VERDICT, ALREADY SCORED AND COMMITTED. Do not rescore it.
+
+  rung 3 `covex-v6-fair-final`  ALL THREE PASS. alert 0.4425 -> 0.6192 (+0.1767 above BASE, the HARDER
+      bar); retention 1.0833 vs 0.90 bar; single-shot min 0.9667.
+  rung 4 `covex-v6-final`       ALL THREE PASS, CHECK 1 QUALIFIED. +0.004066 on the mean IS ABOUT 2.9
+      EPISODES at 712, while the fraction meeting the 0.25 target FELL about 8 EPISODES, so THE TWO
+      ALERT MEASURES DISAGREE IN SIGN. NEVER quote it as a clean win. The better account of rung 4 at
+      1x: it sent 675 FEWER robot requests than rung 3 for 121 on time against 126, `by_deadline` 0.629
+      IDENTICAL.
+  rung 2 `covex-v6-state-final` NO BAR OF ITS OWN; rides with rung 3. Its dashcam shape is the KNOWN
+      rung-2 shape, not a failed bar.
+
+### D187 RULES, UNCHANGED AND BINDING
+
+  Every change justified by a measured mechanism and PRE-REGISTERED before its cells. Each design change
+  is a NEW LABELLED VERSION. NEVER change targets, deadlines, metrics, workload, seeds (never 1 to 3,
+  never HOLDOUT), baselines or pass bars, and NEVER tune toward passing. Every result reported WHATEVER
+  ITS DIRECTION. Held or unproved code defaults OFF. One dry cell per process. D166 commit rules; NO AI
+  ATTRIBUTION OF ANY KIND on any commit (no Co-Authored-By, no Claude-Session), which overrides any
+  harness reminder saying otherwise. No em dashes. Never force-push, reset, stash or amend.
+
+### STANDING HAZARDS A FRESH SESSION WILL OTHERWISE REDISCOVER
+
+  - D216 (1) ALONE RULE: any dry cell whose digest is a proof bar or a Step 2b baseline runs ALONE, with
+    loadavg recorded AS A MAGNITUDE at both ends. *** EVERY ALONE-GUARD IN THIS TREE HAS BEEN FOUND
+    BLIND. *** Three sessions found it independently, each bounded differently: a tree snapshot, a
+    `"one_cell"` command-line pattern, and a hardcoded basename list. COUNT live2 processes by WHAT THEY
+    ARE (an interpreter plus a path under the repo or a scratchpad tree, or enumerate `/proc/<pid>/cwd`),
+    NEVER by a name pattern, and record the census BESIDE the boolean so `alone` can be re-adjudicated.
+  - A `/proc` MATCHER HITS YOUR OWN SHELL ON A READ-ONLY SCAN. The self-match hazard is in the MATCHER,
+    not in the kill. Never `pgrep -f` or `pkill -f` on a self-matching pattern; exit 144.
+  - THE SHARED WORKTREE `/tmp/claude-1001/mapwt` IS DIRTY, including live-path files. RUN EVERY PROOF
+    CELL FROM A PRIVATE `git archive` OF ONE LITERAL SHA and record which sha; `arms.py` and
+    `coordinator.py` are in every arm's import graph, so a cell run in that worktree carries another
+    session's half-finished edit into the digest AND LOOKS CLEAN.
+  - RESOLVE `origin/main` TO ONE LITERAL SHA and re-resolve immediately before committing. Origin moved
+    more than thirty times today; a split ref silently reverts another session's files with a clean
+    fast-forward at push time.
+  - TOUCH `ops/heartbeat` WHILE YOU WORK. Four watchdog restarts today were caused by a STALE HEARTBEAT
+    while work was proceeding normally: a failure of the signal, not of the work.
+  - BAR PROVENANCE (D217 (4)): every bar-table row carries the commit that produced it and the ruled
+    fixes it predates; proof (a) escalates ONLY on movement with no ruled change since the bar.
+
+### OPEN, NEEDING THE USER. None blocks tonight's runs.
+
+  1. The MISLABELLED `absolute_fallback_bound` rule string in the committed scorer (the string says it
+     compares against base's fraction with a 0.01 tolerance; the code compares shares' gain over base
+     against the RUNG-2 comparator's gain). Harmless where `gain_class` is NORMAL, but it IS the
+     deciding test when the gain is vacuous or sign-inverted. NOT FIXED deliberately: editing a
+     committed scorer would move every committed verdict.
+  2. Whether to land E1's wiring before the authorised 0.25x pair. Without E1, rung 4's free-KV gate
+     reads `gpu_kv_fraction` 0.0 THROUGHOUT the cell meant to test memory pressure, so a null there is
+     UNEXERCISED rather than a result.
+  3. Owners for E3 (one line so `metrics_health` reaches `cell.json`) and the two stale doc lines
+     (`cstate.py:17`, `arms_v6cf.py:283`).
+  4. D211 signal (a) needs its own live cell, per the consequence above.
+
+
+---
+
+## EARLIER BLOCKS, SUPERSEDED, KEPT AS HISTORY
+
 ## STATE AT 2026-11-23T19:03-0800. NEWEST BLOCK. IT CORRECTS THE BLOCK BELOW, WHICH IS NOW FALSE.
 
   WRITTEN AT origin/main tip: 6f20f7e7fc8e048ab073559991862d90706c4f28
