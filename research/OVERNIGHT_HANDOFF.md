@@ -59,6 +59,20 @@ interpreter under the repo or a scratchpad; loadavg 0.38); the mtimes were **3h4
 11:42); and the diffs run the WRONG WAY - the worktree copies are SHORTER than origin's (782 vs 818,
 2197 vs 2297, 640 vs 911), so they are OLDER, not newer.
 *** THE TEST THAT DECIDES SAFETY: DOES THE WORKING TREE HOLD ANY LINE ORIGIN LACKS? ***
+*** THIRD CORRECTION, 2026-11-24: COUNTING WORKTREE-ONLY LINES GIVES FALSE POSITIVES, AND IT GAVE TWO
+TODAY. *** The count cannot tell NEW CONTENT from AN OLDER VERSION OF A LINE THAT WAS LATER EDITED,
+because an edited line yields one `>` AND one `<`. Measured this morning: `arms.py` showed **6**
+worktree-only lines and `research/EXPERIMENTS.md` showed **1**, and BOTH WERE STALE, NOT NEW.
+`arms.py`'s worktree copy has `C_INFLIGHT_DEFAULT = 4` where origin has `8` with its D128 note, and it
+LACKS origin's D131 piece-serialisation block entirely; its mtime is 2026-11-18 17:11. The
+`EXPERIMENTS.md` line was an OLD version of a `StudySH-EP` row, and `StudySH-EP` is on origin in SEVEN
+rows across 284 files with all four `sh_ep_*.py` scripts committed, so nothing was at risk.
+*** SO USE THREE CHECKS TOGETHER, NOT THE COUNT ALONE: *** (1) is anything RUNNING (an interpreter
+under the repo or a scratchpad); (2) MTIME - a copy hours or days old is stale, not mid-edit; (3) READ
+THE DIFF AND ASK WHICH SIDE IS NEWER - if the worktree lacks content origin has, or its lines are
+superseded versions of origin's, it is OLDER and safe to overwrite. **AND FOR ANY ROW OR SYMBOL THAT
+LOOKS LIKE LOST WORK, GREP ORIGIN FOR IT BY NAME BEFORE RESCUING IT**: both of today's candidates were
+already committed, and 'rescuing' them would have reverted newer work.
 `git show origin/main:<f> > /tmp/o; diff /tmp/o <f> | grep -c '^>'` counts WORKTREE-ONLY lines, the only
 content a commit built from origin could destroy. Measured:
   `results/INDEX.md`     worktree-only **0**   -> PURELY STALE-OLDER, NOTHING TO LOSE, SAFE
@@ -432,6 +446,14 @@ complete and committed.
    (a) is computable. Site is `coordinator.py:2126`, so IT WAITS FOR HIT 7.
    *** UPDATED 2026-11-24 09:15 PST: HIT 7 HAS LANDED AND ITEM 3 IS NOT BLOCKED. ITS BYTE-IDENTITY
    SWEEP IS RUNNING RIGHT NOW. DO NOT START A CELL AND DO NOT RE-LAUNCH IT. ***
+     *** SUPERSEDED 2026-11-24 later: ITEM 3 HAS LANDED AND NOTHING IS RUNNING. The sweep finished,
+     landed as `56a73293` (verified an ANCESTOR of origin/main), 24 of 24 arms BYTE-IDENTICAL with 0
+     decisions moved setwise, both committed positive controls matched, and the owning session has
+     STOOD DOWN. Verified just now: NO live2 process of any kind under the repo or a scratchpad, and
+     loadavg 0.33. **SO THE ALONE RULE DOES NOT BIND ON THIS ACCOUNT AND A DRY CELL MAY RUN** - census
+     the box yourself before you do. A stale 'DO NOT START A CELL' is exactly the kind of note this
+     file elsewhere complains about for having blocked real work all night, so it is corrected rather
+     than left to be re-derived. ***
      pid 378337 = `d213_digest_driver.py --out out/item3_digests.json`, with a LIVE CHILD (pid 381059,
      1:19 CPU) running a `cf_pd_one_cell.py` cell. The orchestrator itself shows `00:00:00` own CPU,
      which per this file's own corrected rule is a HEALTHY ORCHESTRATOR, not a hang: the discriminator
