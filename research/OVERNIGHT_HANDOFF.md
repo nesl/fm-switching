@@ -607,8 +607,8 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
   not in the repo. The same staleness is why files committed tonight show as `??` untracked there.
 - *** THE STALE-TREE HAZARD, NOW QUANTIFIED, AND IT HAS BITTEN TWO SESSIONS. A FILESYSTEM PROBE OF
   THAT TREE SEES 8.6 PERCENT OF THE DATA AND REPORTS A CONFIDENT ZERO. *** Measured:
-  `/home/pragya/Desktop/FM-switching` holds **35** `coordinator_result.json`; origin holds **408**; the
-  tree is **1,678 commits behind**. A peer's census reported "zero committed cells carry `pd_` stats, 35
+  `/home/pragya/Desktop/FM-switching` holds **35** `coordinator_result.json`; origin holds **418**; the
+  tree is **1,678 commits behind**. *** THE 408 I FIRST WROTE HERE WAS ITSELF MEASURED AGAINST A TEMPORARILY STALE ORIGIN, WHICH IS THIS HAZARD RECURSING ONE LEVEL UP. *** The H100 reported an availability incident: from about 03:00 to 06:43 on 2026-11-24 its drivers' pushes never landed, because every driver since v28 used a BARE `git pull --rebase`, which fails on that clone with "Cannot rebase onto multiple branches", and a run-watch auto-push had been silently covering it until it expired. I measured the origin-side count at 03:16, INSIDE that window, so origin was missing about ten files at that moment and my denominator was low. The fraction is **8.4 percent**, not 8.6. **THE QUALITATIVE POINT IS UNCHANGED AND SLIGHTLY STRONGER**, and the lesson gains a second edge: a measurement OF a staleness hazard can itself be stale, so date any origin-side count and say when it was taken. A peer's census reported "zero committed cells carry `pd_` stats, 35
   checked" - **and the number 35 made it SOUND LIKE A CENSUS while being 8.6 percent of the
   population.** The counters were there all along, in 408 files. My own instance earlier the same night
   was a `grep -rln` for `ALL_PASS` that returned empty while the string sat in 13 committed files.
