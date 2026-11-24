@@ -1183,5 +1183,38 @@
  },
  "_RUNG4_CHECK_1_MARGIN_IS_ABOUT_THREE_EPISODES": "The bar is the MEAN and rung 4 clears it (+0.004066). AT 712 EPISODES THAT IS WORTH ABOUT 2.9 EPISODES, while the FRACTION of episodes meeting the 0.25 target FELL 0.845506 to 0.834270, ABOUT 8 FEWER EPISODES. THE TWO ALERT MEASURES DISAGREE IN SIGN, so this is a REDISTRIBUTION rather than an improvement and must never be quoted as a clean win. Flagged because the same error was made earlier today in the other direction: a +0.0056 bar-fraction difference on 712 episodes was read as redistribution when it was four episodes.",
  "_THE_BETTER_FRAMING_OF_RUNG_4_AT_1x": "Rung 4 sent 2,275 robot requests against rung 3's 2,950, i.e. 675 FEWER, and still delivered 121 on time against 126, with by_deadline 0.629 IDENTICAL to rung 3's. Level on the correctness headline for materially less robot traffic. That is the request-deferral leg doing what it exists to do, and a better account of rung 4's contribution at 1x than the alert mean.",
- "_SCORER_FIELD_MISLABELLED_absolute_fallback_bound": "ITS STATED RULE IS WRONG AND THE FIELD MUST NOT BE CITED AS WRITTEN. The text reads 'shares on-time fraction must not fall more than 0.01 below the base's'. THE IMPLEMENTATION at d179_rung2_verdict.py:825 is fallback = (delta >= gain - GAIN_EPS), where delta is shares MINUS BASE and gain is RUNG2 MINUS BASE. So it actually tests whether SHARES' GAIN OVER BASE IS AT LEAST AS LARGE AS THE RUNG-2 COMPARATOR'S, which has nothing to do with 0.01 and nothing to do with the base's fraction. That reconciles two observations that otherwise look contradictory: on the rung-4 scoring it is FALSE (121 against rung 3's 126, delta 86 < gain 91) and on the rung-3 scoring it is TRUE (126 against state-final's 119, delta 91 > gain 84), with the SAME rule text in both. IT AFFECTS NO VERDICT HERE, because gain_class is NORMAL in both and the ratio governs; it becomes the DECIDING test only when the gain is vacuous or sign-inverted, AND IN EXACTLY THOSE CASES THE GOVERNING TEST IS MISLABELLED. NOT FIXED: the scorer is committed and used for every verdict, so changing it would move every committed verdict. Recorded for a ruling."
+ "_SCORER_FIELD_MISLABELLED_absolute_fallback_bound": "ITS STATED RULE IS WRONG AND THE FIELD MUST NOT BE CITED AS WRITTEN. The text reads 'shares on-time fraction must not fall more than 0.01 below the base's'. THE IMPLEMENTATION at d179_rung2_verdict.py:825 is fallback = (delta >= gain - GAIN_EPS), where delta is shares MINUS BASE and gain is RUNG2 MINUS BASE. So it actually tests whether SHARES' GAIN OVER BASE IS AT LEAST AS LARGE AS THE RUNG-2 COMPARATOR'S, which has nothing to do with 0.01 and nothing to do with the base's fraction. That reconciles two observations that otherwise look contradictory: on the rung-4 scoring it is FALSE (121 against rung 3's 126, delta 86 < gain 91) and on the rung-3 scoring it is TRUE (126 against state-final's 119, delta 91 > gain 84), with the SAME rule text in both. IT AFFECTS NO VERDICT HERE, because gain_class is NORMAL in both and the ratio governs; it becomes the DECIDING test only when the gain is vacuous or sign-inverted, AND IN EXACTLY THOSE CASES THE GOVERNING TEST IS MISLABELLED. NOT FIXED: the scorer is committed and used for every verdict, so changing it would move every committed verdict. Recorded for a ruling.",
+ "_S4_LADDER_IN_THE_GOVERNING_REGISTER": {
+  "_what": "THE WHOLE s4 LADDER IN THE GOVERNING REGISTER, as POOLED ON-TIME COUNTS per query type. Added because the per-episode fractions the checks use are correct but nearly unreadable: '+0.004066' and '+55 dashcam answers against -5 robot answers' are the same fact and only the second one tells a reader what the policy did.",
+  "_register": "OBSERVED. Committed delivery rule (D146: delivery at COMPLETION, prefill plus decode; a dashcam Yes/No stays at first token). Source is each cell's OWN committed score block, cell.json score.score.sweep[0].*_per_device, summed. NOT the coordinator first-token flag, which runs 98 to 165 answers higher on dashcam. Reproduced independently by the H100 from the same source and by me via the scorer's recompute on s5; both agreed exactly.",
+  "pooled_on_time_counts_s4": {
+   "hybrid-F-lhreq-noc3 (base)": {
+    "dashcam": 5986,
+    "robot": 35,
+    "assistance": 337
+   },
+   "covex-v6-state-final (rung 2)": {
+    "dashcam": 2721,
+    "robot": 119,
+    "assistance": 339
+   },
+   "covex-v6-fair-final (rung 3)": {
+    "dashcam": 8377,
+    "robot": 126,
+    "assistance": 351
+   },
+   "covex-v6-final (rung 4)": {
+    "dashcam": 8432,
+    "robot": 121,
+    "assistance": 354
+   }
+  },
+  "WHAT_THIS_SHOWS_THAT_THE_FRACTIONS_HID": {
+   "rung 2 buys robot at a BRUTAL dashcam price": "robot 35 to 119, +84, while dashcam FALLS 5,986 to 2,721, -3,265. So rung 2 alone is NOT a policy anyone would ship; it is the rung that establishes the robot gain the retention check is measured against, and the committed base-to-rung2 gains (+0.629 / +0.693 / +0.545 / +0.610 on seeds 4 to 7) are bought this way.",
+   "rung 3 IS THE RESULT, and it DOMINATES ON ALL THREE TYPES": "dashcam 8,377 (+2,391 over base AND +5,656 over rung 2), robot 126 (+91 over base and +7 over rung 2), assistance 351 (+14 over base). It keeps the whole robot gain and recovers the dashcam rung 2 gave up, which is the ladder's point.",
+   "rung 4 OVER RUNG 3 IS A TRADE, NOT A WIN, AND HERE IS ITS SHAPE": "dashcam +55, assistance +3, and *** ROBOT -5, from 126 down to 121. *** Relative: +0.47 percent of 11,764 dashcam against -3.9 percent of 127 robot. ROBOT ANSWERS ARE THE SCARCE HIGH-VALUE ONES, 127 against 11,764, so a reader must see the -5 beside the +55. This is the concrete form of the caveat already in this file that rung 4's +0.004066 must never be quoted as a clean win, and it CORROBORATES it from an independent register: the per-episode mean said about 2.9 episodes, the pooled count says +55 dashcam and -5 robot. Both say the same thing, which is that rung 4's margin over rung 3 is thin and mixed in sign ACROSS QUERY TYPES as well as across alert measures."
+  },
+  "_consistency_check_3_stratum_note": "the pooled dashcam delta +55 of 11,764 is +0.00467, against the per-episode mean +0.004066 the check uses. They agree to within 0.0006, so there is no stratum where the effect concentrates differently from the population, and the averaged-out-effect hazard does not apply to this comparison.",
+  "_what_is_NOT_claimed": "this block is s4 ONLY and is POOLED, so it is not a per-seed verdict and cannot rescue or overturn one; the governing checks remain per seed with no pooled rescue. s5 is unscored while covex-v6-state-final s5 is absent. No claim is made about rung 4 at 0.25x, where DEVICE_ANSWERS and E1 are both still pending."
+ }
 }
