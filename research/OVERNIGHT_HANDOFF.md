@@ -648,6 +648,30 @@ rung-4 IMPLEMENTATION AS RUN. **Whether a fixed rung 4 would beat rung 3 is UNKN
 3. Nothing scorable -> do NOT invent work on run-path files. The handoff's five overnight steps below
    are owned by other sessions.
 
+## *** A SCRATCH PATH MUST CARRY THE SESSION ID. A TASK-NAMED PATH IS NOT EXCLUSIVE, AND MINE WAS NOT. ***
+
+I briefed a session to claim `scratchpad/matrix_verify_d225`. **Another session was already writing into it**
+- files appeared under `matrix_verify_d225/cells/` with a different umask (`rw-rw-r--` against its
+`rw-r--r--`) and mtimes 71 seconds before its own writes. It moved to
+`matrix_verify_d225_8ab3f7e8`, re-derived every cell read itself, and discarded everything it had not
+written. The values agreed where they overlapped, so nothing was contaminated **this time**; earlier today
+the same collision on `scratchpad/d223x/a3` had one session delete another's tree under a running 1,200 s
+sweep.
+**THE RULE: `scratchpad/<task>_<session-id>`, always.** A task name alone collides precisely when two
+sessions are given the same task, which is exactly when it is most expensive. Detect a collision by
+**umask and mtime, not by content** - agreeing values prove nothing about who wrote them.
+
+## *** A UNIQUE ANCHOR IS NOT THE SAME AS THE INTENDED ANCHOR. ***
+
+A `count == 1` assertion on an edit anchor **passed and put the key in the wrong dict**: the text
+`c_inflight=a.c_inflight, kv_capacity_enforced=...` matched once, but in the `cfg` block rather than the
+`header` block, because the rewrite had a differently-indented twin. `cfg["metrics_scrape"]` would have
+been right and `header.json` **silently empty**, and uniqueness would have certified it.
+**THE RULE: assert the anchor's BLOCK, by line number against the block boundaries or by a two-line
+anchor, not merely that it occurs once.** Same family as the `&&`-swallowed assert below and as the D191
+identity: **a check that is sound and pointed at the wrong property.** That family is this project's most
+expensive failure mode and none of its members is an arithmetic error.
+
 ## *** EVERY ASSERT IS A HARD STOP. AN ASSERT THAT PRINTS AND CONTINUES IS A DEFECT, NOT A WARNING. (standing rule, D228 addendum item 4, from my own failure) ***
 
 **What happened.** I pushed a commit that landed E1 part 1's bookkeeping and DROPPED the three files that
