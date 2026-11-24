@@ -128,6 +128,48 @@ s4 had 2 gains and passed, so **s4's pass is the luckier draw of the same losing
   different statements. **And the dashcam denominator key is `n_instants`, NOT `n`:** summing `n` gives
   a ZERO denominator and a silent 0.0 fraction.
 
+*** STATE AS OF 2026-11-24 07:00Z = 2026-11-23 23:00 PST. WATCHDOG AT RESTART 6/12, SO SIX LEFT. ***
+*** NOTHING IS SCORABLE RIGHT NOW. I CHECKED; DO NOT SPEND A RESTART RE-CHECKING THE SAME THING. ***
+s7 on origin: `hybrid-F-lhreq-noc3` 16 files, `covex-v6-fair-final` 17 files, **`covex-v6-final` ZERO,
+`covex-v6-state-final` ZERO.** So RUNG 4 s7 cannot be scored because ITS OWN CELL IS ABSENT (not because
+of its comparator, which is present), and RUNG 3 s7 cannot be scored because state-final s7 is absent.
+Rung 4 s7 started 22:41:30 and state-final s7 was due about 23:25, so both are still in flight. The
+run-path freeze still holds: `git diff --stat HEAD -- experiments/` in the stale worktree shows 8 files
+and 1,482 insertions uncommitted, including `coordinator.py` and `v5/cf_objective.py`.
+
+*** CORRECTION THAT WOULD OTHERWISE COST A WHOLE RESTART: OVERNIGHT STEP 2 (E1) CANNOT BE DONE AT ALL,
+AND THE LIST BELOW STILL TELLS YOU TO DO IT. ***
+**THE LANDED E1 SCRAPE IS AN ABSENT LINK: IT IS A SCRAPER THAT NOTHING CALLS.** Verified on origin with
+full untruncated output, by two sessions independently:
+- `scrape_metrics` has **EXACTLY TWO OCCURRENCES IN THE WHOLE TREE** - its own definition at
+  `asyncbackend.py:175` and a PROSE COMMENT at `n5_queued_by_class_census.py:291`. **ZERO CALLERS.**
+- `AsyncBackend.metrics()` (`:190-210`) returns wire statistics only and **NO `vllm:` KEY**, and does
+  NOT call `scrape_metrics`. `coordinator.py:489` is the only writer of `st.metrics`.
+- **NOTHING IN PRODUCTION SETS `metrics_scrape`** (only asyncbackend's own `getattr` defaults at `:178`
+  and `:185`); `run_live2_real.py`, `procsplit.py`, `coordinator.py` and `cstate.py` never mention it.
+**SO FLIPPING `METRICS_SCRAPE_DEFAULT` WOULD CHANGE NOTHING, AND A STEP 2b DIFF WOULD SHOW IDENTICAL
+LOGS - WHICH CLAUDE.md CALLS AN ABSENT LINK, NEVER A NEGATIVE.** Do NOT run that sweep; one session was
+authorised to and correctly refused on this ground. **The committed `digests_e1.json` 24-of-24 identical
+result is a valid NON-INTERFERENCE result and PROOF OF THE WRONG THING**: `covex-v6-final` is not among
+its 24 arms, and the code it compares is unreachable, so an empty commit would produce the same table. It
+shows E1 is INERT, not that E1 is safely default-off. Corrections are committed at `77b9f702`,
+`20ac7c63` and `dd35ca54`.
+**AND THIS CHANGES THE RUNG-4 STORY, so do not repeat the older sentence.** No `vllm:` key means
+`gpu_kv_fraction` 0.0, means `free_kv` pinned at the full pool (OBSERVED: `pd_free_kv_min` =
+`pd_free_kv_max` = 62944, constant, with `pd_kv_bound_by_engine_metric` ABSENT), means
+`rebuild_fits_without_evicting` fires and **PROTECT-AND-DEFER IS NEVER REACHABLE.** Three independent
+agreements: a live fake-server cell (29 decisions, 0 `PROTECT_AND_DEFER`), the s5 diagnosis (299
+decisions, same two gates, 0 `PROTECT_AND_DEFER`), and a dry digest collision
+(`covex-v6-cf-pd-c5attr` = `covex-v6-state-uo` at `9a4be873eb3c5fba` / 14,218). **The defensible
+sentence is "rung 4 adds one mechanism that HAS NEVER BEEN REACHABLE and one that fires and loses", NOT
+"one that does not help".** Rule 2 class is UNEXERCISED with a DEFECT as the cause, so the remedy is a
+FIX, not a finding, and **"protect-and-defer does not help at 1x" IS NOT SUPPORTED and must not be
+written.** Whether rung 4 would beat rung 3 with the metric plumbed is UNKNOWN AND UNTESTED.
+**THE WIRING FIX IS A PENDING USER RULING, NOT YOURS**: it changes landed behaviour, D209 makes an
+implementation correction a supersede-plus-rerun which would invalidate committed cells, and
+`run_live2_real.py` is under the freeze. `d213_patch_asyncbackend.py` on origin now carries a REFUSAL
+HEADER because applying it creates a duplicate scrape; do not apply it.
+
 *** THE NEXT STEP, WHICHEVER APPLIES FIRST: ***
 1. ~~`covex-v6-state-final` s6 -> score RUNG 3 at s6~~ **DONE at `f476ee96`: ALL THREE PASS, robot
    retention 1.076923, check 1 +0.166322, positive control 2 of 2 exact.** Rung 3 now passes everything
@@ -160,8 +202,10 @@ complete and committed.
    PREDICTED TRADE PER DENIAL (this question's lost weighted P(on time) against on-time answers saved
    BY TYPE, alert / recall / assistance). **THE 1x COUNT DECIDES WHETHER THE POSTED `covex-v6-final` s4
    IS SUPERSEDED: IF NON-ZERO, STOP AND REPORT, DO NOT DECIDE.**
-2. **E1**: enable the `/metrics` scrape for `covex-v6-final`'s GATE ONLY; prove EVERY other arm
-   byte-identical; report HOW MANY RUNG-4 DECISIONS MOVE. MUST LAND BEFORE ANY 0.25x POLICY CELL
+2. **E1 - SEE THE CORRECTION ABOVE: THIS STEP IS IMPOSSIBLE AS WRITTEN, THE SCRAPE IS AN
+   ABSENT LINK WITH ZERO CALLERS, AND THE WIRING FIX IS A PENDING USER RULING. DO NOT RUN IT.**
+   ~~enable the `/metrics` scrape for `covex-v6-final`'s GATE ONLY; prove EVERY other arm
+   byte-identical; report HOW MANY RUNG-4 DECISIONS MOVE.~~ MUST LAND BEFORE ANY 0.25x POLICY CELL
    (D216 (2)). `asyncbackend.py` is uncontested, so this can proceed independently of hit 7.
 3. **ITEM 3 (D216 (3))**: record the belief's predicted GPU-resident prefix per request so D211 signal
    (a) is computable. Site is `coordinator.py:2126`, so IT WAITS FOR HIT 7.
