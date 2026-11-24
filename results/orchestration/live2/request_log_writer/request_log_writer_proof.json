@@ -1,0 +1,49 @@
+{
+  "_provenance": {
+    "git_commit": "496277fe",
+    "script": "live2/cf_pd_one_cell.py (test_hybrid.dry, realtime=False) --seed 4 --cutoff-off, under proof_guard",
+    "device": "cpu (h100nvl host, CUDA_VISIBLE_DEVICES empty)",
+    "timestamp": "2026-11-24T10:03:05-08:00"
+  },
+  "ruling": "D226 (3) and (4), user 2026-11-24: request-log writer (abandoned rows + end-of-cell completeness check) and kind-2 client logging, LOGGING ONLY",
+  "method": "one base sha, two trees (before = origin at base, after = base + patch), decision-log digest per arm",
+  "cells": [
+    {
+      "tree": "after",
+      "arm": "covex-v6-base",
+      "digest": "af8befb9420ad86a",
+      "rows": 12085
+    },
+    {
+      "tree": "after",
+      "arm": "eco-llm",
+      "digest": "f32fa95c6953c64e",
+      "rows": 12253
+    },
+    {
+      "tree": "before",
+      "arm": "covex-v6-base",
+      "digest": "af8befb9420ad86a",
+      "rows": 12085
+    },
+    {
+      "tree": "before",
+      "arm": "eco-llm",
+      "digest": "f32fa95c6953c64e",
+      "rows": 12253
+    }
+  ],
+  "verdict": "PASS: decisions byte-identical for both arms",
+  "register": "dry proof: shows the edits move no decision; it cannot exercise the live end-of-run drain or the HTTP client, which are confirmed on the first live cell after landing",
+  "negative_control": {
+    "cell": "always-cloud-fcfs_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30 (committed)",
+    "result": {
+      "n_requests": 10138,
+      "request_rows": 7881,
+      "outcome_request_ids": 7884,
+      "unresolved": 3,
+      "request_log_complete": false
+    },
+    "meaning": "the check fails on a known-incomplete log"
+  }
+}

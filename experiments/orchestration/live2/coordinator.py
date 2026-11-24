@@ -511,6 +511,25 @@ class Live2Coordinator:
             while self.futures and time.time() < deadline:
                 self._collect(self.window_s + self.drain_s)
                 time.sleep(0.01)
+            # D226 (3): every request the drain gives up on is WRITTEN, marked abandoned, instead of
+            # vanishing. This runs after the decision loop has ended, so no decision can depend on it.
+            for fut, sub in self.futures:
+                try:
+                    fut.cancel()
+                except Exception:                                    # noqa: BLE001
+                    pass
+                self.counts["requests_abandoned_at_end"] += 1
+                if self.logs is not None:
+                    self.logs.request.write(SC.RequestRecord(
+                        request_id=sub.request_id, decision_id=sub.decision_id,
+                        device_id=sub.device_id, t_submit=round(sub.sent_s, 6),
+                        t_first_token=None, t_done=None, prompt_tokens=None, cached_tokens=None,
+                        cache_path=None, cached_fraction=None, output_tokens=None,
+                        http_status=None, cache_salt=sub.cache_salt, session_id=sub.session_id,
+                        opportunity_id=sub.opportunity_id, mm_uuids=list(sub.mm_uuids),
+                        traffic_mix=dict(sub.traffic_mix), abandoned=True))
+                    self.counts["request_rows_written"] += 1
+            self.futures = []
         return self._result(cpu0, time.time() - wall0)
 
     def _epoch(self, t: float, epoch: str) -> None:
@@ -1833,7 +1852,10 @@ class Live2Coordinator:
                     output_tokens=output_tokens_of(usage), http_status=r.get("http_status"),
                     cache_salt=sub.cache_salt, session_id=sub.session_id,
                     opportunity_id=sub.opportunity_id, mm_uuids=list(sub.mm_uuids),
-                    traffic_mix=dict(sub.traffic_mix)))
+                    traffic_mix=dict(sub.traffic_mix),
+                    exc_type=r.get("exc_type"), exc_repr=r.get("exc_repr"),
+                    exc_after_s=r.get("exc_after_s"), conn_reused=r.get("conn_reused")))
+                self.counts["request_rows_written"] += 1
             self.st.ewma("episodic" if sub.kind == "monitor" else "recall", r.get("ttft_s"))
             if hasattr(self.arm, "live2_completed"):
                 # An arm that keeps its own model of what the engine is running must be told
@@ -2221,6 +2243,11 @@ class Live2Coordinator:
             window_s=self.window_s, n_devices=len(self.st.devices),
             n_sessions=len(self.st.sessions), n_opportunities=len(self.st.opps),
             n_requests=self.n_req, n_decisions=self.n_dec,
+            # D226 (3): positive check, asserted rather than inferred. On a logged run every submitted
+            # request has exactly one request.jsonl row (completed, or abandoned at end).
+            request_rows_written=int(self.counts.get("request_rows_written", 0)),
+            request_log_complete=(None if self.logs is None
+                                  else int(self.counts.get("request_rows_written", 0)) == int(self.n_req)),
             counts=dict(sorted(self.counts.items())),
             n_monitor_answers=len(mon), n_recall_answers=len(rec),
             n_on_time=sum(1 for a in self.answers if a.get("on_time")),

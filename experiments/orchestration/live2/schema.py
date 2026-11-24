@@ -379,6 +379,17 @@ class RequestRecord:
     opportunity_id: Optional[str] = None
     mm_uuids: List[str] = field(default_factory=list)
     traffic_mix: Dict[str, int] = field(default_factory=dict)
+    # D226 (3): a request still unfinished when the end-of-run drain gives up. Before this field
+    # such a request was dropped with NO row at all (e.g. 2,257 of 10,138 in always-cloud-fcfs kv0.5 s4; a contiguous
+    # late block of request ids); now it is written, marked, with no status and no tokens.
+    abandoned: bool = False
+    # D226 item 4 (logging only): on a request whose client raised, the exception type and repr and
+    # the wall seconds from submit to failure; on every live request, whether its connection was
+    # reused from the pool (None when the transport emitted no trace event).
+    exc_type: Optional[str] = None
+    exc_repr: Optional[str] = None
+    exc_after_s: Optional[float] = None
+    conn_reused: Optional[bool] = None
 
 
 @dataclass

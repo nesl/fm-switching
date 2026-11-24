@@ -452,10 +452,53 @@ def run(a) -> Dict[str, Any]:
                digests_equal=rm.get("digests_equal"),
                n_requests=res.get("n_requests"), n_errors=res.get("n_errors"),
                server_kind=a.server_kind, is_measurement=False)
+    # D226 (3), fail loud: the request log is complete only if (a) it has one row per submitted
+    # request and (b) every outcome's cloud_payload.request_id resolves to a row (abandoned rows
+    # included). Either failing sets request_log_complete = false and flags the cell.
+    out["request_log"] = rl = _request_log_check(rdir, res.get("n_requests"))
+    if not rl["request_log_complete"]:
+        out["flag"] = "REQUEST_LOG_INCOMPLETE"
+        print(f"*** REQUEST_LOG_INCOMPLETE: {json.dumps(rl)}", file=sys.stderr, flush=True)
     if a.score and a.calibration:
         out["score"] = _score(tdir, rdir, Path(a.calibration), a.arm)
     (rdir / "cell.json").write_text(json.dumps(out, indent=1, default=str) + "\n")
     return out
+
+
+def _request_log_check(rdir: Path, n_requests: Any) -> Dict[str, Any]:
+    """D226 (3): count request.jsonl rows (and abandoned ones) against the submitted count, and
+    resolve every outcome's cloud request id against those rows. Reads only this cell's files."""
+    ids, n_rows, n_abandoned = set(), 0, 0
+    rq = rdir / "request.jsonl"
+    if rq.exists():
+        with open(rq) as fh:
+            for line in fh:
+                if not line.strip():
+                    continue
+                r = json.loads(line)
+                n_rows += 1
+                n_abandoned += bool(r.get("abandoned"))
+                ids.add(r.get("request_id"))
+    n_ref, unresolved = 0, []
+    oc = rdir / "outcomes.jsonl"
+    if oc.exists():
+        with open(oc) as fh:
+            for line in fh:
+                if not line.strip():
+                    continue
+                cp = json.loads(line).get("cloud_payload")
+                rid = cp.get("request_id") if isinstance(cp, dict) else None
+                if rid is None:
+                    continue
+                n_ref += 1
+                if rid not in ids:
+                    unresolved.append(rid)
+    rows_match = n_requests is not None and n_rows == int(n_requests)
+    return dict(n_requests=n_requests, request_rows=n_rows, request_rows_abandoned=n_abandoned,
+                rows_match_submitted=bool(rows_match), outcome_request_ids=n_ref,
+                outcome_request_ids_unresolved=len(unresolved),
+                unresolved_first=unresolved[:10],
+                request_log_complete=bool(rows_match and not unresolved and rq.exists()))
 
 
 def _tree_state() -> Dict[str, Any]:

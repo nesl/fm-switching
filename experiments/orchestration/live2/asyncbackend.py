@@ -263,10 +263,23 @@ class AsyncLive2Backend:
         chunks: List[Dict[str, Any]] = []
         text_parts: List[str] = []
         first_wall: Optional[float] = None
+        # D226 item 4 (logging only, no transport change): whether this request opened a NEW TCP
+        # connection or was sent on one REUSED from the pool, from httpcore's own trace events. A
+        # request that sees no connect_tcp event before its headers went out was sent on a reused
+        # connection. None means no trace event arrived at all (e.g. a mock transport).
+        conn = {"connect": False, "sent": False}
+
+        async def _trace(name: str, info: Dict[str, Any]) -> None:
+            if name.startswith("connection.connect_tcp"):
+                conn["connect"] = True
+            elif ".send_request_headers." in name:
+                conn["sent"] = True
+        exc_type = exc_repr = None
         try:
             async with self._client.stream(
                     "POST", self.base_url + "/v1/chat/completions", content=data,
-                    headers={"Content-Type": "application/json"}) as r:
+                    headers={"Content-Type": "application/json"},
+                    extensions={"trace": _trace}) as r:
                 status = r.status_code
                 if status != 200:
                     err = f"HTTP {status}: {(await r.aread())[:300]!r}"
@@ -308,6 +321,7 @@ class AsyncLive2Backend:
                                 self.callback_errors.append(f"{type(e).__name__}: {e}")
         except Exception as e:                                        # noqa: BLE001
             err = f"{type(e).__name__}: {e}"
+            exc_type, exc_repr = type(e).__name__, repr(e)[:300]
         t_end = time.time()
         total = t_end - t0
         # StudyLIVE2-harness addendum (instrumentation): the wall instant the response stream
@@ -317,7 +331,11 @@ class AsyncLive2Backend:
         res = dict(request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
                    ttft_s=ttft, total_s=total, http_status=status, error=err,
                    usage=usage, text="".join(text_parts), chunks=chunks, sub=sub,
-                   t_end_wall=t_end)
+                   t_end_wall=t_end,
+                   # D226 item 4: wall seconds from submit to failure, only on an exception.
+                   exc_type=exc_type, exc_repr=exc_repr,
+                   exc_after_s=(round(total, 6) if exc_type is not None else None),
+                   conn_reused=(None if not conn["sent"] else (not conn["connect"])))
         # StudyLIVE2-harness addendum: the completion callback runs HERE, on the I/O loop, the
         # moment the stream ends and BEFORE the future resolves, so the decision thread never
         # sees a finished request whose answer has not been forwarded yet.
