@@ -309,6 +309,22 @@ complete and committed.
    PREDICTED TRADE PER DENIAL (this question's lost weighted P(on time) against on-time answers saved
    BY TYPE, alert / recall / assistance). **THE 1x COUNT DECIDES WHETHER THE POSTED `covex-v6-final` s4
    IS SUPERSEDED: IF NON-ZERO, STOP AND REPORT, DO NOT DECIDE.**
+   *** DONE, AND THE STOP CONDITION IS MET. THE 1x COUNT IS 1, NOT 0. *** Committed `4f317e1f`,
+   `reports/study_d218_device_answers.md` section 2. The pre-registered pass condition PASSED
+   (`pd_request_crossed_bar_unexpressible` 27 -> 0, `pd_request_device_answers` 15 on the dry 0.25x
+   cell). **THE SESSION CORRECTLY STOPPED RATHER THAN DECIDING, AND SO DID I.** Two facts point
+   opposite ways and only one is the user's question: (a) the POSTED ARM DID NOT MOVE - `covex-v6-final`
+   is byte-identical with the candidate off at both settings, 0 differing decisions,
+   `57bed6ace2eb07d1` / 14,509 at 1x and `278da529349ff8c2` / 14,306 at 0.25x, **both values
+   independently known from committed cells**; (b) but with the switch ON at 1x it gives
+   `3cddb4b7c7322a25` / 14,510, **45 differing decisions**, so under D209 (1) the posted s4 cell is
+   SUPERSEDED IF the candidate is adopted into `covex-v6-final`. **THE RULING IS WHETHER DEVICE_ANSWERS
+   IS A CORRECTION OF AN OMISSION THE SPEC ALREADY CONTAINED (adopt -> supersede -> rerun rung 4) OR A
+   SEPARATE ARM `covex-v6-final-da` (posted cell stands).** DO NOT DECIDE IT.
+   NOTE ALSO: two sessions built D218 (1) in parallel and produced TWO pre-registrations which AGREE ON
+   THE PASS CONDITION VERBATIM, so no bar differs; which is the record is also the user's call. And
+   `77cf269e` IS A GIT COMMIT SHA, NOT A DOCUMENT sha256 - I relayed it as a "frozen prereg hash" and
+   that conflation would make a pre-registration unverifiable by hash.
 2. **E1 - SEE THE CORRECTION ABOVE: THIS STEP IS IMPOSSIBLE AS WRITTEN, THE SCRAPE IS AN
    ABSENT LINK WITH ZERO CALLERS, AND THE WIRING FIX IS A PENDING USER RULING. DO NOT RUN IT.**
    ~~enable the `/metrics` scrape for `covex-v6-final`'s GATE ONLY; prove EVERY other arm
@@ -441,5 +457,24 @@ THE OPERATIONAL RULES THAT FALL OUT, AND THEY ARE CHEAP:
   `out["metrics_health"] = (res.get("backend") or {}).get("metrics_health")`. WAITS FOR A RULING.
 - `cstate.py:17`'s doc line still says `vllm:gpu_cache_usage_perc`. NOT corrected here because the H100
   holds `cstate.py` for hit 7; do it after hit 7 lands.
+- *** D218 (1) / DEVICE_ANSWERS: THE POSTED-CELL RULING. THE TOP OPEN ITEM. *** The 1x count is 1, so
+  the stop condition fired. Adopt into `covex-v6-final` (D209 (1) supersedes the posted s4 cell and rung
+  4 is rerun) or keep as a separate arm (posted cell stands)? Also: which of the two parallel
+  pre-registrations is the record. See step 1 above.
+- *** BEFORE THE PREPARED LIVE PAIR RUNS: DOES `free_kv` VARY AT ALL LIVE, THROUGH EITHER CHANNEL? ***
+  `arms_v6cf.py:322` is `max(pool - max(occ_metric, occ_belief), 0)`, so free_kv has TWO channels. The
+  ENGINE channel is absent everywhere (`scrape_metrics` has zero callers). The BELIEF channel was ALSO
+  flat in both live cells examined (`occ_belief` summed to 0, free_kv pinned at 62,944) but VARIES in
+  the D218 dry cells (8,759 to 62,944 at 1x; 0 to 15,736 at 0.25x, 188 of 260 decisions passing the
+  gate). **SO IF THE BELIEF SIDE IS FLAT LIVE TOO, DEVICE_ANSWERS WILL NOT FIRE LIVE EITHER, for the
+  same reason protect-and-defer does not, AND A NULL IN THE LIVE PAIR WOULD BE UNREADABLE.** This is
+  TESTABLE, not speculative, and is a STRONGER gate than "is the metric scraped". Correction committed
+  at `678db118`; my earlier "never reachable in any cell ever run" over-generalised from the live cells
+  and is withdrawn to "not reached in any LIVE cell examined, engine channel absent in all cells".
+  A detail that cuts both ways: `arms_v6cf.py:291`'s own docstring records free_kv CONSTANT over 77
+  decisions on a 300 s DRY cell, so the variation is a property of the CELL'S ROSTER, not of dry vs live.
+- *** STILL OWED, NOT FORCED: the `results/INDEX.md` row for the completed ladder. *** `INDEX.md` has
+  been DIRTY-and-differing (mid-edit by another session) at every check tonight, so appending would
+  clobber that work. The row is owed, not forgotten.
 - D211 signal (a) will have NO 1x live cell to validate on, because item 3 lands after the last ladder
   cell. Its validation now needs the 0.25x pair or a dedicated later cell.
