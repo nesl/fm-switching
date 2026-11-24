@@ -1215,5 +1215,17 @@
   },
   "*** AN UNINTENDED STRENGTH WORTH MORE THAN THE WEAKNESSES COST ***": "THE MATCH WAS OBTAINED AT loadavg 29.61 / 33.26 / 34.97, mostly FOREIGN load. Every prior reproduction of a live2 digest on this project spans loadavg 0.19 to 2.42, with the proof-(a) bit-exact matches at 10.80 and 13.80. A BIT-EXACT MATCH AT loadavg ~35 AGAINST A VALUE COMMITTED ON A QUIET BOX IS STRONGER EVIDENCE OF DETERMINISM THAN ANY QUIET-BOX MATCH, and it extends the proven-deterministic load range of this recipe by about 14x. That is a real result about the harness, not just about this docstring, and it is the best available answer to the standing worry that our alone-guards are unreliable: if the digest is invariant at loadavg 35, a foreign process the guard missed is much less likely to have mattered.",
   "_status_of_the_s5_FAIL_now": "STANDS AS A MEASUREMENT OF covex-v6-final's OWN BEHAVIOUR. check 2 FAIL at retained 0.851064 against the 0.90 bar, gain_class NORMAL, absolute fallback also failing. What to DO about it - whether rung 4 is superseded, whether the posted s4 cell stands, what the paper claims - remains the user's call and is still reported to them unresolved."
+ },
+ "*** CHECK 1 CORRECTED 2026-11-23: THE GOVERNING BAR FOR RUNG 4 IS THE COMPARATOR'S, NOT THE BASE'S ***": {
+  "the_frozen_prereg_field": "THE_BARS/covex-v6-final/check_1_alert, VERBATIM from the FROZEN results/orchestration/live2/ladder_final/StudyLADDER_FINAL_prereg.json: \"mean per-episode alert attainment STRICTLY ABOVE covex-v6-fair-final's at that seed\"",
+  "_what_was_wrong": "the `check_1_alert` block ABOVE in this file comes from d179_rung2_verdict.py, whose check 1 is `delta_shares_minus_base` and whose own label is '1. alert per-episode target attainment AT LEAST THE BASE'S'. *** THAT IS THE RUNG-3 BAR. *** The frozen prereg sets rung 3's check 1 as 'STRICTLY ABOVE base's' and RUNG 4's as 'STRICTLY ABOVE covex-v6-fair-final's'. THE SCORER IS NAMED d179_RUNG2_verdict.py AND IMPLEMENTS THE RUNG-2/3 CHECK 1; applying it unchanged to rung 4 evaluates the WRONG REFERENCE ARM. I asserted the base-referenced reading to the H100 and it was WRONG; the H100 refused to accept it against my own earlier statements and asked for the frozen field to be quoted, which is what settled it.",
+  "the_correct_comparison_at_this_seed": {
+   "covex-v6-final mean per-episode attainment": 0.612929,
+   "covex-v6-fair-final's (THE BAR)": 0.612635,
+   "delta (must be STRICTLY > 0)": 0.000294,
+   "verdict_on_the_CORRECT_bar": "PASS"
+  },
+  "_note_on_the_margin": "PASSES, BUT BY +0.000294, which on this seed's episode count is a HAIR. The pass is correct on the frozen bar and must never be quoted as a comfortable one.",
+  "_the_base_referenced_number_is_kept_as_CONTEXT": "shares comfortably exceeds BASE at every seed, which is why the wrong bar passed everywhere. That is real but it is RUNG 3's test, not rung 4's, and the prereg itself warns that 'above base's is a materially harder alert bar than above rung 2's' - the asymmetry runs the other way for rung 4, where the comparator is the STRONGER arm."
  }
 }
