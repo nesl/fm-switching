@@ -748,6 +748,37 @@ different one in the pattern. **Fixing it means matching the interpreter and the
 `--permission-mode`, not an adjacency of two flags.** Not fixed here: this session is standing down, not
 editing live-path files, and the flag makes it moot until the user rules.
 
+## *** D231: THE RUNG-4 1x s4 RESULT, AND A BUILD MISS I SHOULD HAVE CAUGHT. (user, 2026-11-24, revisit later) ***
+
+**The result.** `covex-v6-final` `_rerun` 1x s4: robot on time **127/132** against rung 3's 126 and base's
+35, so retention **1.011** PASSES the 0.90 bar; single-shot **98.6 percent** PASSES; alert attainment is
+still owed by flash. **22 live question deferrals fired**, against 0 in the dry proof, and **none would
+miss at either the committed or the new safety factor** - which is what the refit was for: under the old
+n=5 factor that column was identically false by an algebraic identity, and it now reports real exposure.
+
+*** THE BUILD MISS, AND WHY IT IS THE PART TO LEARN FROM. DEVICE_ANSWERS WAS NOT BUILT INTO PASS 1, against
+D221 and D228 (3), and the cell said so itself: THREE DECISIONS WANTED IT and were refused with the gate
+message "not built here". *** The harm and trade code was on origin; **the action wiring was still under
+`held/d218_device_answers/`**, so the switch had no reader on the live path. **Every surface sign said pass 1
+was complete**: the pre-registration was committed before the cell, all three proofs passed, and the
+proofs were run on a tree where DEVICE_ANSWERS *was* present - so the dry proof legitimately showed the
+mechanism firing in both directions while the pushed code could not. **The pre-registration itself omitted
+the item**, which is how a reader would have discovered it only from the gate string.
+**THE RULE THE USER HAS ADDED, AND IT IS THE DURABLE FIX: every pre-registration lists EVERY item of the
+prompt it implements, each one marked built or explicitly deferred.** An omission then shows up as a
+missing line in a committed row rather than as a counter nobody reads. **This is the same family as the
+commit that landed bookkeeping and dropped the mechanism: the paperwork and the capability have to be
+checked against each other, in both directions.**
+
+**What follows.** DEVICE_ANSWERS is switched on in `covex-v6-final` from the held implementation
+`f097f5d3`, the pre-registration is amended **before** the cell, and the H100 runs
+`covex-v6-final` kv0.5r s4 with it on, tagged **`_da_ms`**, as the next policy cell **after** the pass-1
+`_ms` cell, which **runs as planned and is not held**. Same 0.5x bar. The per-type guard is built as
+`covex-v6-fair-final-ptg` because D230 (2) measured **1.0355 percent** against its own 1 percent rule, and
+runs at s4 after both rung-4 cells. **Rung-4 1x s5 to s7 wait for the user.** And flash must determine
+whether `robot correct-by-deadline` at **0.628788**, identical across three arms with different on-time
+counts, is a genuine tie or a stuck value - because half the 0.5x bar rests on it.
+
 ## *** D230 IS THE FREEZE-GATE RULING SET. EVERY ITEM IS MARKED FOR REVISIT. (user, 2026-11-24) ***
 
 Recorded here because a session turnover must not lose it (D229's reason, applied on flash).
