@@ -918,6 +918,31 @@ INVENT WORK, DO NOT TOUCH A RUN-PATH FILE, AND DO NOT DECIDE ANY OF THE FIVE OPE
   the stop condition fired. Adopt into `covex-v6-final` (D209 (1) supersedes the posted s4 cell and rung
   4 is rerun) or keep as a separate arm (posted cell stands)? Also: which of the two parallel
   pre-registrations is the record. See step 1 above.
+  *** THE IMPLEMENTATION IS NOW PRESERVED IN GIT, HELD AND NOT APPLIED, AT
+  `experiments/orchestration/live2/held/d218_device_answers/` (`f097f5d3`). DO NOT REBUILD IT. *** It had
+  NEVER BEEN COMMITTED: its session stood down without committing code, so only the report and the
+  pre-registrations were in (`4f317e1f`) and **the implementation existed solely in a scratchpad the
+  environment warns a cleanup can clear** - on the night it was written the disk hit 100 percent and a
+  7 GB cleanup came within one deletion of destroying another session's only held wiring. Nine files,
+  120 KB: three `.patch` files against the committed tree (`arms_v6cf.py` +137 lines,
+  `cf_protect_defer.py` +260, `coordinator.py` +2), **each VERIFIED to reproduce the author's working
+  tree byte for byte**, and five `.held` files (the DA arm module `arms_v6cf_device.py`, the driver, the
+  one-cell runner, the mechanism tests, the author's patch script), plus a README.
+  **NOTHING IS ON THE IMPORT PATH AND THE RULING IS NOT PRE-EMPTED:** every file carries a `.patch` or
+  `.held` suffix so it cannot be imported or caught by a glob (the D214 precedent), and
+  `covex-v6-final-da` still has **ZERO references** in `arms.py` and `arms_v6cf.py` on origin.
+  **PRESERVING CODE IS RECORDING; ADOPTING IT IS THE DECISION.**
+  Two cautions carried in the README: **DO NOT FORCE A PATCH WHOSE TARGET HAS MOVED** - re-derive it,
+  because forcing would silently revert whatever moved it; and the later, larger set from the author's
+  WORKING TREE was taken, not the earlier drafts in `scratchpad/d218/`
+  (`arms_v6cf_device.py` 10,075 bytes, not the 7,743-byte draft).
+  *** AND THE PREREQUISITE THE AGGREGATE COUNTS HID, WHICH SHOULD BE SETTLED BEFORE THE ADOPTION
+  QUESTION: *** the traced s4 bar crossing reads `harm 1.638113` against `bar 1.452307` AND
+  **`harm_device_discounted: 0.0`** (A-cell trace, `fbd2f64b`'s proof run). The crossing exists ONLY
+  under the on-time-cloud harm reading and vanishes ENTIRELY under the device-discounted one, so **THE
+  HARM-FORM RULING DECIDES WHETHER THERE IS ANYTHING FOR DEVICE_ANSWERS TO DO AT ALL**, not merely how
+  much it gains. It is also a genuine capacity event, not a marginal one: the rebuild needed 11,946
+  tokens against 11,921 free, so it did not fit, and the gate still refused for want of a channel.
 - *** ANSWERED 2026-11-24 FROM THE COMMITTED LADDER CELLS. THE BELIEF CHANNEL *DOES* VARY LIVE, SO THIS
   GATE IS CLEARED AND NO LIVE CELL IS NEEDED TO CLEAR IT. *** The item below is kept for its reasoning
   but its premise is superseded; do NOT spend a cell re-deriving it.
