@@ -80,13 +80,23 @@ For each cloud-eligible opportunity q on the trace:
   VERIFICATION, recorded in the output: for every opportunity where a request-log row exists, the
   trace-derived W_q must be <= the logged uncached tokens (prompt_tokens - cached_tokens) + decode;
   any opportunity violating this is reported, not silently clamped.
-- capacity T = the GPU's measured peak uncached-token throughput = 1 / 0.000182431 = 5481.6 uncached
-  tokens/s, the inverse of the committed per-uncached-token GPU-second cost
-  GPU_S_PER_UNCACHED_TOK = 0.000182431 (D174), source
-  `experiments/analysis/episodic/episodic_lib.py:19` (the same slope as the D162 first-token model's
-  per-uncached coefficient 0.000182), measured on host h100nvl serving Qwen3-VL-32B. The GPU does at
-  most T uncached tokens per second. The exact value, source file and host are echoed in every
-  output file.
+- capacity T = the HIGHEST MEASURED uncached-token throughput at the memory level (D230 (12)), NOT
+  D174's work-charge slope 1/0.000182431 = 5481.6 tok/s (that is the per-token COST, and an
+  understated T would let the LP fall below a real schedule). T = max of
+  (a) the cost-profiling saturated peak, 5,600 tok/s (StudyD7 / D7b, 32B saturated prefill,
+      `experiments/orchestration/baselines/costs.py:41` PREFILL_TOK_S["32BI"]=5600.0), and
+  (b) the highest per-second uncached rate in a committed healthy-regime rq30 cell at that level,
+      each request's uncached tokens distributed uniformly across its measured prefill span
+      [t_submit, t_first_token] and summed into 1 s windows (the physical batched-prefill rate; the
+      alternative completion-time binning gives ~250k tok/s but that is a queue-release burst, not a
+      sustained rate, so it is recorded and rejected).
+  Measured on h100nvl serving Qwen3-VL-32B:
+      T(1x)   = 17,945.2 tok/s  (b7-edf-feasibility_n16_s4, 1 s window @ 219 s)
+      T(0.5x) = 15,569.8 tok/s  (mooncake_n16_s4_kv0.5, 1 s window @ 229 s)
+  both above (a). Decode is charged at this same T. The oracle is reported at T AND at 1.10 x T
+  (the sensitivity that covers any residual understatement); the exact value, source cell/window and
+  host are echoed in every output file. If any arm's share exceeds 1 at 1.10 x T the bound is not a
+  bound -> STOP and report.
 - DECODE AT THE PREFILL RATE (fix 3): decode (output) tokens are charged at this same peak prefill
   rate T; real decode is slower than prefill per token, so charging decode at the prefill rate
   understates decode time and therefore keeps the bound an upper bound.
