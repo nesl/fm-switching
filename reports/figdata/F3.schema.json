@@ -1,0 +1,37 @@
+{
+ "figure": "F3",
+ "describes": "per request (standard 1x/16-device condition): type, standing-answer latency, cloud latency, deadline, and the latency stamps that exist (queue+prefill = t_first_token - t_submit; decode = t_done - t_first_token). STAMPS ABSENT in request.jsonl: upload, coordinator hold, engine queue (separate), and return hop are not individually recorded, so only the two composite stamps exist per cell.",
+ "unit": "per-request",
+ "compressed": true,
+ "n_rows": 980240,
+ "pipeline_sha": "b5264100",
+ "date": "2026-11-23",
+ "provenance_columns": [
+  "arm",
+  "policy_version",
+  "rung",
+  "run_dir",
+  "run_commit",
+  "pipeline_sha",
+  "seed",
+  "cond_memory",
+  "cond_n_devices",
+  "cond_deadline_s",
+  "cond_reask_s",
+  "cond_ratio",
+  "cond_network",
+  "cond_extras",
+  "status",
+  "port_limited",
+  "date_scored",
+  "notes"
+ ],
+ "data_columns": [
+  "type",
+  "deadline_s",
+  "standing_latency_s",
+  "cloud_latency_s",
+  "stamp_queue_prefill_s",
+  "stamp_decode_s"
+ ]
+}
