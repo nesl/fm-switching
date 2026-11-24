@@ -1,5 +1,5 @@
 {
- "_HEADLINE": "THE LANDED E1 SCRAPE IS AN ABSENT LINK. It is a scraper that NOTHING CALLS, so cloud.gpu_kv_fraction is STILL 0.0 in every live2 cell on origin today, and flipping METRICS_SCRAPE_DEFAULT to True would change NOTHING. CONFIRMED LIVE: on a landed-code cell with a real /metrics endpoint, be.metrics() carried no vllm: key, free_kv was CONSTANT at the full 62,944-token pool across all 29 rung-4 decisions, the engine metric bound the gate ZERO times, and PROTECT_AND_DEFER fired ZERO times.",
+ "_HEADLINE": "THE LANDED E1 SCRAPE IS AN ABSENT LINK: a scraper NOTHING CALLS, so cloud.gpu_kv_fraction is 0.0 in every live2 cell and the engine metric binds ZERO of 1,153 rung-4 decisions across the four committed ladder seeds. SEE CORRECTION_free_kv_is_NOT_pinned_live: the claim that free_kv is PINNED at the full pool is TRUE ONLY of the fake-server cell cited here. On the committed cells the BELIEF varies (10,115 to 62,944) and determines free_kv on 100 percent of decisions.",
  "_STOPPING_CONDITION": "CLAUDE.md Step 2: 'A quantity that is written and never read is ABSENT, and is a stopping condition exactly as a zero or a constant is.' The authorised enabled-state proof therefore CANNOT BE RUN as specified: there is no switch whose flip reaches a decision, Step 2b would produce identical logs, and that is an ABSENT LINK, never a negative. NOT RUN.",
  "sha_audited": "origin/main 1479d3245acd0aa44d2e67be14b405e6fbdba45d",
  "blob_audited": "experiments/orchestration/live2/asyncbackend.py = ff183c503cd36ac1faba924a036b292930a8a7c1",
@@ -71,5 +71,47 @@
   },
   "AND_THIS_IS_THE_PART_THAT_MATTERS_BEYOND_E1": "the gate that kills protect-and-defer is CAUSED BY the absent scrape. Because free_kv is pinned at the full pool, `rebuild_fits_without_evicting` fires on 23 of 29 decisions. So rung 4's null is NOT 'protect-and-defer ran and did not help'; it is 'protect-and-defer was never reachable', and the reason is one unread method. Under Rule 2 this is UNEXERCISED, not a real negative.",
   "independent_agreement_three_ways": "(1) this live cell: 29 pd_decisions, 0 PROTECT_AND_DEFER, free_kv constant at the pool; (2) the user-commissioned s5 diagnosis: 299 pd_decisions, all stopped at the same TWO gates, 0 PROTECT_AND_DEFER; (3) the dry byte-identity table: covex-v6-cf-pd-c5attr shares digest 9a4be873eb3c5fba / 14,218 with its rung-2 base covex-v6-state-uo. Different harnesses, different scales, dry and live, same conclusion."
+ },
+ "CORRECTION_free_kv_is_NOT_pinned_live": {
+  "_READ_THIS_BEFORE_THE_BLOCKS_BELOW": "APPENDED, NOTHING DELETED. One half of this file's mechanism chain is WRONG and is corrected here. The claim that free_kv is PINNED at the full 62,944-token pool holds for the 29-decision fake-server cell this file cites and NOT for the committed ladder cells. On real cells THE BELIEF SIDE VARIES, and it determines free_kv on 100 percent of decisions.",
+  "the_committed_ladder_cells_covex_v6_final": {
+   "s4": {
+    "pd_free_kv_min": 14993,
+    "pd_free_kv_max": 62944,
+    "pd_kv_bound_by_belief": 302,
+    "pd_kv_bound_by_engine_metric": "ABSENT",
+    "pd_decisions": 302,
+    "pd_harm_over_bar": 2,
+    "pd_request_crossed_bar_unexpressible": 2
+   },
+   "s5": {
+    "pd_free_kv_min": 16017,
+    "pd_free_kv_max": 62944,
+    "pd_kv_bound_by_belief": 299,
+    "pd_kv_bound_by_engine_metric": "ABSENT",
+    "pd_decisions": 299
+   },
+   "s6": {
+    "pd_free_kv_min": 21258,
+    "pd_free_kv_max": 62944,
+    "pd_kv_bound_by_belief": 293,
+    "pd_kv_bound_by_engine_metric": "ABSENT",
+    "pd_decisions": 293
+   },
+   "s7": {
+    "pd_free_kv_min": 10115,
+    "pd_free_kv_max": 62944,
+    "pd_kv_bound_by_belief": 259,
+    "pd_kv_bound_by_engine_metric": "ABSENT",
+    "pd_decisions": 259,
+    "pd_harm_over_bar": 2,
+    "pd_request_crossed_bar_unexpressible": 2
+   }
+  },
+  "WHAT_STANDS_and_it_is_the_important_half": "pd_kv_bound_by_engine_metric is ABSENT in all four seeds, so the engine metric binds ZERO of 1,153 rung-4 decisions. The absent-link finding in this file is REAL: metrics() does not call scrape_metrics(), scrape_metrics() has no caller, nothing sets metrics_scrape, and cloud.gpu_kv_fraction is 0.0 in every live2 cell. What is wrong is only the downstream attribution: the absent scrape is NOT what pins free_kv, because the belief supplies a varying free_kv on its own.",
+  "WHAT_FALLS": "this file's sentence that the gate killing protect-and-defer is CAUSED BY the absent scrape. On the committed cells free_kv is not pinned, so rebuild_fits_without_evicting is not forced by a constant. The 23-of-29 figure is a property of the fake-server cell, not of live2.",
+  "AND_THE_RULE_2_CLASSIFICATION_CHANGES": "At s4 and s7 protect-and-defer CROSSED ITS BAR and was blocked for want of a channel: pd_harm_over_bar 2, pd_request_crossed_bar_unexpressible 2, and the gate's own counter names pd_gate_wanted_to_act_but_a_request_has_no_slice_channel. The only action is to send less and a recall query is one prompt. So those seeds are UNEXPRESSIBLE, not UNEXERCISED; s5 and s6 are genuinely unexercised, nothing crossing the bar. The gate's counter string names the remedy, DEVICE_ANSWERS, and StudyD218-DA measured that same unexpressible count going 2 to 0. Recorded at c701f83a. 'Protect-and-defer does not help at 1x' remains unsupported, for a different and better reason than this file originally gave.",
+  "WHERE_THE_pd_STATS_LIVE_and_why_I_said_twice_that_they_were_not_committed": "They ARE committed, nested inside coordinator_result.json's `arm_stats`, not at top level, in the four covex-v6-final ladder cells. My probe reported zero TWICE. The nesting was only the second cause; THE FIRST AND WORSE ONE is that it walked the FILESYSTEM of a working tree still at HEAD 17bdf159, about 1,200 commits behind origin, which holds 35 such files against 407 on origin. I have been committing through a temporary index without ever checking the tree out, so every filesystem probe I ran was against a stale sample while every git-based probe was correct. A census must name the tree it walked, and on this repo it must read git and not the disk.",
+  "what_it_cost": "the coordinator propagated the wrong half and corrected its own committed record twice. The check that would have prevented it was one `git show` against twelve cells already in git. This is the ALL_PASS shape in my own hands: the field existed, the probe did not reach it, and a zero was read as an absence."
  }
 }
