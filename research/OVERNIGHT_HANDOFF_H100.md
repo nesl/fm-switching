@@ -89,6 +89,38 @@ counts that let either reading be computed later. That is D251 working as intend
 the headline at plotting time.**
 **Item 4 means the push no longer needs a user decision. It needs the D265 proof to pass and your window.**
 
+## *** USER RULINGS: D250 PASSED AT s4, SO s5 TO s7 RUN. 21 CELLS, AND THEY ARE THE THIRD ITEM IN THE QUEUE. ***
+
+**D250 PASSED at s4: cbd 72 against 61, cloud-correct +24, dashcam +811 against `covex-v6-base`.**
+**Per D252, run s5 to s7: `covex-v6-fair-final` PLUS THE SIX BASELINES at `_kv0.5r_h0.5_L3_epg_rq30`, RUNG 3
+FIRST AT EACH SEED, with the SAME pass rule and the SAME report format as s4 (D264 and D273).**
+```
+THE QUEUE AS NOW RULED, priced at 1,295 s per cell
+  D249 -q gate cell                      1 cell    0.36 h
+  -q s5 to s7, ONLY IF IT PASSES         3 cells   1.08 h
+  D250 s5 to s7, 7 arms x 3 seeds       21 cells   7.55 h   <-- NEW, and the largest single block
+  D257 n20 baselines                     4 cells   1.44 h
+  D262 regime, s4 gate plus s5 confirm   6 cells   2.16 h
+  StudyD266-NESTOUT scope A              8 cells   2.88 h
+  D244 s4 remainder                      3 cells   1.08 h
+  D258 deadline gate                     2 cells   0.72 h
+                                        48 cells  17.3 h of accelerator time ahead
+```
+*** AND THE THING THAT MAKES D250 s5 TO s7 READABLE AT ALL, WHICH IS WORTH SEEING: s4 RAN PRE-PUSH AND
+s5 TO s7 RUN POST-PUSH WITH `-q` OFF. SO D250's OWN SEED SWEEP STRADDLES THE PUSH, AND THE ONLY THING MAKING
+THE NEW SEEDS COMPARABLE TO s4 IS THE D265 BYTE-IDENTITY PROOF, WHICH CAME BACK 0 POSITIONAL AND 0 SETWISE
+FOR RUNG 3 **AND** ALL SIX BASELINES AT THE FULL POSTED CELL. THE PROOF IS NO LONGER JUST ABOUT ENABLING
+`-q`; IT IS NOW LOAD-BEARING FOR D250's OWN RESULT. Record every s5 to s7 cell as POST-PUSH, as you did the
+filler as PRE-PUSH. ***
+
+## USER RULING: NESTOUT SCOPE A RUNS AS PRE-REGISTERED, WITH ONE THING REPORTED FIRST
+
+**Scope A runs as pre-registered at `34e10587`, KNOWING it can read only an effect of at least 5 of 7
+matched questions.** *** REPORT THE READABLE n FROM THE FIRST TWO CELLS BEFORE ANY COMPARISON. A question
+never answered in either cell contributes no discordant pair, so `n_matched_questions_readable` and NOT the
+nominal 7 is the denominator, and if it comes back below 7 the readout cannot separate arms at any price on
+this axis. *** **NO SEED EXPANSION UNTIL THE USER HAS SEEN SCOPE A.**
+
 ## *** USER RULING D273 (2): THE D250 DASHCAM CLAUSE, CLARIFIED. THIS IS AN INTENT CLARIFICATION, NOT A CHANGE. APPLY IT BEFORE mooncake AND eco-llm ARE SCORED. ***
 
 *** RUNG 3's DASHCAM ON-TIME IS COMPARED AGAINST **THE SAME BASELINE ITS ROBOT cbd IS COMPARED AGAINST**,
