@@ -160,6 +160,56 @@ folded into a weighted objective. Handoff latency on a mobility event is the
 binding term: materialize-from-stored at the target if provisioned, transfer
 + materialize if not.
 
+## D249 DRAFT: QUEUE AND HARM VISIBILITY IN THE STATE PLANNER
+
+*** STATUS: A DRAFT, WRITTEN ON USER RULING D249 (2026-11-25 09:29, PROVISIONAL), WHICH THE USER MAY
+REVISIT. It is recorded here because this document is the authority the project's mechanism-verification
+Step 1 requires, and until now it was SILENT on queueing: a case-insensitive search of the previous 271
+lines returned ZERO hits for `queue`, `queued`, `contention`, `backlog`, `interference` and `in-flight`,
+which is why the D245 estimate reported that Step 1 could not be written. THIS SECTION CLOSES THAT GAP. ***
+
+**CURRENCY.** Per **D177**: **deficit-weighted on-time cloud answers.** Not accuracy, because at runtime
+there is no ground truth.
+
+**VALUE OF A STATE ACTION.** A state action (warm, touch, catch-up) is worth
+```
+value  =  w_d  x  P(question soon)  x  ( P(on time | warm)  -  P(on time | cold) )
+```
+where `w_d` is the device's deficit weight.
+
+**HARM OF A STATE ACTION.** Summed over the queued or running requests the action would delay:
+```
+harm  =  SUM over delayed requests of   w_type  x  ( P(on time now)  -  P(on time | + queued-ahead tokens) )
+```
+**The delay comes from the D162 model at 0.000154 s per queued-ahead token** (committed as
+`per_queue_token = 0.0001535807289338535`), **and is measured against EACH REQUEST'S OWN DEADLINE SLACK**,
+not against a single global budget.
+
+**DECISION RULE.** **Deviate from KEEP only if `value - harm > margin`.**
+
+*** A NAMING DISCREPANCY TO BE RESOLVED BEFORE THE MARGIN IS USED, FLAGGED RATHER THAN SILENTLY PICKED.
+The ruling writes "MARGIN_CF (0.6582)". IN THE COMMITTED CODE THOSE ARE TWO DIFFERENT CONSTANTS: ***
+```
+MARGIN_CF_ON_TIME  = 0.6582     (cf_protect_defer.py:277 asserts it; cf_pd_tests.py:86 checks it)
+MARGIN_CF          = 0.16456    (test_cf_objective_d177.py:153)
+and the planner's bar is recorded as MARGIN_CF / A_D2_DEV = 0.65824
+```
+**So 0.6582 is the value of `MARGIN_CF_ON_TIME`, which equals `MARGIN_CF / A_D2_DEV`, and NOT the value of
+`MARGIN_CF`.** **This draft takes the ruling's NUMBER (0.6582) as authoritative and reads the symbol as
+`MARGIN_CF_ON_TIME`, because that is the constant the number belongs to. If the user meant the other
+constant, the bar is four times tighter and the build must be told.** **This is recorded as an open item,
+not a decision.**
+
+**RECALIBRATION.** The margin **is recalibrated after the build**, and **the recalibration method is
+reported BEFORE it is applied**, not after.
+
+**WHAT THIS SECTION DOES AND DOES NOT LICENCE.** It makes the causal chain for a queue-aware state planner
+writable against this document, which is what Step 1 demands. **It does NOT by itself establish that the
+mechanism is reachable: the D245 estimate measured the existing row source (`obs.recall`, the
+arrived-and-undecided set, re-evaluated every 0.1 s) as structurally unable to hold two items, with the
+queue term zero in 10,606 of 10,606 cache refills. So the D249 build's FIRST obligation is a reachability
+check, and if no decision can change the build stops and reports rather than proceeding.**
+
 ## Boundary condition: where this problem exists
 
 With sufficient bandwidth and capacity, continuous replication of ready state
