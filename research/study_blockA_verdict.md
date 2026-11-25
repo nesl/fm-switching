@@ -167,6 +167,29 @@ cells show the correlation and nothing here shows the direction of causation or 
 anything.** **It is worth chasing because the state channel is the ablation that costs the most, and a
 mechanism for that cost has not otherwise been identified.**
 
+## A LIMITATION ON THE s7 COMPARISON, found after this verdict was first written: AN END-OF-WINDOW STALL AFFECTS ALL THREE s7 CELLS
+
+**A census of all ELEVEN s7 kv0.5r cells found that SIX have ZERO completions between about 1,196.3 s and
+about 1,199.5 s, against five that complete normally through it:**
+```
+STALLED      confidence-cascade 16 submitted / 0 completed   fair-final ORIGINAL 10 / 0
+             fair-final _rep2    8 / 0    notouch 5 / 0    stateoff 4 / 0    covex-v6-rules 4 / 0
+NOT STALLED  covex-v6-base 32 / 30   eco-llm 35 / 34   llf 36 / 27   mooncake 34 / 30   simplestream 35 / 31
+```
+*** ALL THREE BLOCK-A s7 CELLS ARE IN THE STALLED GROUP, so the s7 deltas in this verdict are between cells
+that SHARE the event rather than between one affected and one clean cell. *** **The per-cell loss is at
+most the 8, 5 and 4 requests submitted into that window, against about 11,764 dashcam instants and 105
+robot opportunities per cell, and the spread between arms is 4 requests. NO FIGURE IN THIS VERDICT MOVES**,
+and the `-notouch` 0.99x reading at s7 is unaffected at this magnitude.
+**It is recorded because it is a shared property of the compared cells that was not known when the
+comparison was made, not because it changes a number.**
+**CAUSE NOT DIAGNOSED, NEEDS ENGINE TIMING: bounded and declined, not missed.** **The discriminating
+question is well posed and worth one look later: what do `confidence-cascade` and five covex-v6 arms share
+that `covex-v6-base` does not?** **It is NOT builds** (cascade builds nothing and stalls; base builds
+nothing and does not), **NOT code state** (the original `fair-final` s7 is a different code state from
+`_rep2` and both stall), and **NOT the piece-size pattern** (fair-final emits only {121, 1024} and
+`-stateoff` emits remainders; both stall).
+
 ## What this does NOT establish
 
 - **No settled finding for either arm.** `-stateoff` clears the bar at two of three seeds and declines into
