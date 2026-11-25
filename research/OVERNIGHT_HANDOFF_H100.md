@@ -1,5 +1,34 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** USER RULING D261: THE D259 MARGIN IS SCOPED TO `covex-v6-fair-final-q` ONLY. YOUR COMMITTED RUNG-3 CELLS STAY COMPARABLE. ***
+
+**The recalibrated margin (Method A, 0.331566) goes BEHIND THE D249 SWITCH, so rung 3 and every other arm
+keep the committed margin unchanged.** *** THE WARNING I SENT YOU - THAT COMMITTED RUNG-3 CELLS ARE ON THE
+OLD BAR AND MUST NEVER BE PAIRED ACROSS D259 - IS WITHDRAWN. Rung 3's bar does not move, so the corpus stays
+comparable and nothing is re-queued on that basis. ***
+**Two proofs are mandated and are building on flash now: rung 3's decision log BYTE-IDENTICAL before and
+after (14,539 rows, wide digest `5a03c2807da3681a`, 0 positional, 0 setwise), and `-q` showing the D259
+reachability numbers (61,678 state decisions, 1,177 could clear, TOUCH chosen 1,175).**
+**A third check falls out free and is sharper than either: the unit suite must return 20 of 20, not 18 of
+20. Under the rejected global change, two tests failed BY CONSTRUCTION because they pin the committed value.
+Under correct scoping both must pass again. If either still fails, the scoping LEAKS.**
+
+## *** HOST CONFLICT, 2026-11-25 11:31: THE GPU IS HELD AND STAYS HELD UNTIL THE USER RESOLVES IT. ***
+
+**An outside actor's StudyREAL-NET processes trip the live-run preflight's exclusive-host check, so the
+first filler cell was refused in 2 seconds and the driver set STOP plus watchdog HOLD.**
+*** TWO RULINGS: (1) DO NOT clear STOP and HOLD when their processes go away. The preflight only checks AT
+CELL START, so a cell that starts clean and has their workload launch at second 30 PASSES preflight and
+produces CONTAMINATED numbers. A refused cell costs 2 seconds and is visible; a contaminated cell is a
+number we would trust. Their run is 60 s against a 21-minute cell, so a restart into a gap would almost
+certainly straddle the next launch. IDLE IS THE CORRECT STATE WHILE THE HOST IS CONTESTED. (2) DO NOT relax
+or narrow the preflight. It refuses any host Python as a proxy for GPU 2 contention, which is STRICTER than
+its name, and that strictness is a FEATURE. Narrowing it would let a future real contender through and
+remove the guard that kept every committed cell clean. The answer to two workloads on one host is to move
+one or serialise them, never to weaken the check that notices. ***
+**P3 is CLEAN: it ended 11:30:51, nineteen seconds BEFORE their processes launched at ~11:31:10, so it does
+not straddle the window.**
+
 ## *** USER RULING: THE DASHCAM-DEADLINE BUILD IS DEFERRED BEHIND THE D249 GATE CELL. THE ROBOT SWEEP PROCEEDS. ***
 
 **(1) THE 0.5 s DASHCAM RESCORE IS HAPPENING NOW ON FLASH, CPU ONLY. Nothing for you.** It uses the
