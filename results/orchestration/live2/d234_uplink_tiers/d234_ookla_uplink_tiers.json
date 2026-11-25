@@ -1,0 +1,382 @@
+{
+  "study": "D234 (5) uplink and RTT tiers for the mixed-fleet network condition",
+  "ruling": {
+    "date": "2026-11-24",
+    "verbatim": "UPLINK SOURCE for the per-device link tiers. The committed Irish 5G percentiles are DL_bitrate and are NOT used as uplink. Instead: Source: Ookla Open Data, mobile performance tiles (public), latest available quarter. Compute the test-weighted p10 / p50 / p90 of avg_u_kbps over US tiles, and of avg_lat_ms for RTT. Record the exact file, quarter, filter, weighting and resulting values, with the citation. These become the poor / median / good uplink tiers for the mixed-fleet network condition. The uniform 13.6 Mbit/s / 44 ms default stays as is. If the data cannot be fetched from flash's network, say so and stop. Do not substitute downlink figures.",
+    "related": [
+      "D234 (5)",
+      "D166",
+      "D215 Tier 1 (n3_tier1_cell_definitions.py)",
+      "D75 (committed uniform default)"
+    ],
+    "fetch_stop_condition": "NOT TRIGGERED: the object was fetched from flash with plain HTTPS, md5 equal to the S3 ETag."
+  },
+  "source": {
+    "dataset": "Ookla Open Data, mobile network performance tiles",
+    "bucket": "s3://ookla-open-data (public, anonymous HTTPS, no credentials)",
+    "object_key": "parquet/performance/type=mobile/year=2026/quarter=3/2026-07-01_performance_mobile_tiles.parquet",
+    "url": "https://ookla-open-data.s3.amazonaws.com/parquet/performance/type=mobile/year=2026/quarter=3/2026-07-01_performance_mobile_tiles.parquet",
+    "quarter": "2026 Q3 (measurement window 2026-07-01 to 2026-09-30)",
+    "quarter_selection": "chosen by listing ?list-type=2&prefix=parquet/performance/type=mobile/ and taking the newest key, not by assuming a quarter; the listing was NOT truncated and 2026 Q3 is the newest present",
+    "s3_last_modified": "2026-10-09T16:19:02Z",
+    "file_size_bytes": 189644612,
+    "file_size_mb": 189.6,
+    "etag_md5": "f22f98824d61cd039c2cd57d3dea69b8",
+    "local_md5_verified": "f22f98824d61cd039c2cd57d3dea69b8",
+    "row_count_total": 3477926,
+    "columns_read": [
+      "quadkey",
+      "tile_x",
+      "tile_y",
+      "avg_u_kbps",
+      "avg_lat_ms",
+      "tests"
+    ],
+    "columns_pruned": "yes, pyarrow column projection; tile (WKT polygon) and avg_d_kbps were never read",
+    "citation": "Ookla. Speedtest by Ookla Global Fixed and Mobile Network Performance Maps. https://registry.opendata.aws/speedtest-global-performance/ ; https://github.com/teamookla/ookla-open-data . Accessed 2026-11-24, 2026 Q3 mobile tiles. Based on analysis by Ookla of Speedtest Intelligence data for 2026 Q3. Ookla trademarks used under licence and reprinted with permission.",
+    "licence": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0), as stated by the teamookla/ookla-open-data repository and the AWS Open Data registry entry. NON-COMMERCIAL and SHARE-ALIKE: attribution as cited above is required, and the NC clause must be honoured by any downstream use of these derived tiers.",
+    "local_copy": "DELETED after analysis; nothing from the download is committed"
+  },
+  "filter": {
+    "problem": "the tile file has NO country column, so 'US tiles' requires a proxy",
+    "proxy_declared": "PROXY: a latitude/longitude bounding-box union on the tile CENTROID stands in for 'the United States'. What it actually measures: membership of a tile centroid in three rectangles. It is NOT a US boundary test.",
+    "committed_boundary_available": "NO. A repo-wide search found no shapefile, .shp, GeoJSON or US boundary asset. No shapefile was downloaded.",
+    "geocoding": "tile centroid lon/lat decoded from the zoom-16 quadkey (Web Mercator) independently, then cross-checked against the file's own tile_x / tile_y columns: max abs difference 4.99e-05 deg lon and 5.00e-05 deg lat, i.e. the two agree",
+    "bbox_union_degrees": {
+      "conus": {
+        "lon": [
+          -124.8,
+          -66.9
+        ],
+        "lat": [
+          24.4,
+          49.4
+        ]
+      },
+      "alaska": {
+        "lon": [
+          -168.2,
+          -129.9
+        ],
+        "lat": [
+          51.2,
+          71.5
+        ]
+      },
+      "hawaii": {
+        "lon": [
+          -160.3,
+          -154.8
+        ],
+        "lat": [
+          18.9,
+          22.3
+        ]
+      }
+    },
+    "wrongly_includes": "populated non-US territory inside the CONUS rectangle: southern Canada (Toronto, Hamilton, Windsor, London/Kitchener, Niagara, Montreal, Ottawa, Quebec City, Vancouver/Victoria, Winnipeg), northern Mexico (Tijuana/Mexicali, Ciudad Juarez, Nuevo Laredo/Reynosa/Matamoros, Monterrey/Saltillo, Chihuahua/Hermosillo), and the northwestern Bahamas; plus ocean and Gulf tiles, which carry few tests",
+    "wrongly_excludes": "Puerto Rico, the US Virgin Islands, Guam, the Northern Mariana Islands, American Samoa, the Aleutians west of -168.2 deg and across the antimeridian, and the far-northern Alaska and southern-Florida-Keys fringes outside the rectangles",
+    "selectivity": {
+      "tiles_before": 3477926,
+      "tests_before": 21003048,
+      "tiles_after": 488100,
+      "tests_after": 1700781,
+      "tile_fraction_kept": 0.14034,
+      "test_fraction_kept": 0.08098,
+      "tiles_by_part": {
+        "conus": 484659,
+        "alaska": 1885,
+        "hawaii": 1556
+      },
+      "tests_by_part": {
+        "conus": 1687967,
+        "alaska": 5351,
+        "hawaii": 7463
+      },
+      "note": "the filter keeps 14.0 percent of tiles and 8.1 percent of tests, so it is doing real work and is not a no-op"
+    },
+    "contamination_bound": {
+      "method": "LOWER bound only: crude rectangles around the named non-US metros listed above were subtracted and the tiers recomputed. This bounds the contamination the bbox admits; it does not remove all of it, since rural Canada and Mexico inside the rectangle are not covered.",
+      "tiles": 35011,
+      "tests": 155290,
+      "pct_of_filtered_tests": 9.13,
+      "sensitivity_uplink_kbps": {
+        "with_contamination": {
+          "p10": 2219.0,
+          "p50": 18416.0,
+          "p90": 60860.0
+        },
+        "contam_metros_removed": {
+          "p10": 2150.0,
+          "p50": 18377.0,
+          "p90": 62720.0
+        }
+      },
+      "sensitivity_latency_ms": {
+        "with_contamination": {
+          "p10": 17.0,
+          "p50": 27.0,
+          "p90": 56.0
+        },
+        "contam_metros_removed": {
+          "p10": 17.0,
+          "p50": 27.0,
+          "p90": 54.0
+        }
+      },
+      "verdict": "the tiers are ROBUST to the bbox's main defect: removing at least 9.1 percent of the filtered tests moves uplink p10 by -3.1 percent, p50 by -0.2 percent and p90 by +3.1 percent, and latency p10/p50 by 0 ms and p90 by -2 ms. The proxy is therefore VALID AT THIS PRECISION for the claim (tier magnitudes), and would not be valid for any per-country claim."
+    }
+  },
+  "weighting": {
+    "declared": "test-weighted: each tile contributes its `tests` count as weight, so a 10,000-test tile counts 10,000x a 1-test tile",
+    "percentile_algorithm": "lower / inverted-CDF weighted percentile: sort tiles by the value ascending (stable mergesort), cumulate the weights, and take the value of the first tile whose cumulative weight reaches p * total_weight. No interpolation between tiles.",
+    "unweighted_comparison": "the unweighted percentiles use the IDENTICAL algorithm with every weight set to 1, so the only difference is the weighting. They are NOT bit-identical to the weighted ones (uplink p50 10,957 vs 18,416 kbps), which confirms the weighting is being applied.",
+    "exclusions": "tiles with a non-positive or null value in the column being summarised, or non-positive `tests`, are dropped from that column's percentiles: 0 of 488,100 for avg_u_kbps and 9 of 488,100 for avg_lat_ms. No percentile came out at zero."
+  },
+  "uplink_tiers": {
+    "column": "avg_u_kbps",
+    "definition": "per-tile MEAN upload throughput in kilobits per second over the quarter's tests in that tile",
+    "test_weighted": {
+      "poor_p10": {
+        "kbps": 2219.0,
+        "mbit_s": 2.219
+      },
+      "median_p50": {
+        "kbps": 18416.0,
+        "mbit_s": 18.416
+      },
+      "good_p90": {
+        "kbps": 60860.0,
+        "mbit_s": 60.86
+      }
+    },
+    "unweighted": {
+      "poor_p10": {
+        "kbps": 934.0,
+        "mbit_s": 0.934
+      },
+      "median_p50": {
+        "kbps": 10957.0,
+        "mbit_s": 10.957
+      },
+      "good_p90": {
+        "kbps": 53138.0,
+        "mbit_s": 53.138
+      }
+    },
+    "spread": {
+      "min_kbps": 1.0,
+      "max_kbps": 2858520.0,
+      "weighted_mean_kbps": 26788.6,
+      "unweighted_mean_kbps": 20762.7,
+      "n_tiles": 488100,
+      "tests": 1700781
+    },
+    "weighted_vs_unweighted": "the weighted p50 is 1.68x the unweighted p50 and the weighted p10 is 2.38x the unweighted p10. Direction: tests concentrate in urban tiles, which have faster uplink, so test-weighting raises the low and middle percentiles sharply and the top percentile only slightly."
+  },
+  "rtt_tiers": {
+    "column": "avg_lat_ms",
+    "definition": "per-tile MEAN latency in milliseconds (Ookla's idle/ping latency, one value per tile, not a loaded or multiserver latency)",
+    "test_weighted": {
+      "p10": 17.0,
+      "p50": 27.0,
+      "p90": 56.0
+    },
+    "unweighted": {
+      "p10": 15.0,
+      "p50": 27.0,
+      "p90": 59.0
+    },
+    "spread": {
+      "min_ms": 1.0,
+      "max_ms": 2241.0,
+      "weighted_mean_ms": 34.07,
+      "unweighted_mean_ms": 35.85,
+      "n_tiles": 488091,
+      "tests": 1700772
+    },
+    "orientation_warning": "for latency, HIGH is BAD, so the p90 (56 ms) is the POOR end and the p10 (17 ms) is the GOOD end. This is the opposite orientation to uplink and must not be read as poor=p10 / good=p90."
+  },
+  "pairing": {
+    "what_was_done": "INDEPENDENTLY. The uplink percentiles and the latency percentiles were each computed as marginals over the same filtered tile set. The p10-uplink tiles and the p90-latency tiles are NOT the same tiles.",
+    "what_the_ruling_implies": "the ruling's wording - 'the test-weighted p10 / p50 / p90 of avg_u_kbps ... and of avg_lat_ms for RTT' - asks for two INDEPENDENT marginal distributions, which is what is reported above as the primary result. It does not ask for a joint distribution.",
+    "if_you_pair_them": "ANY poor/median/good triple that puts one uplink value next to one latency value is a CONSTRUCTION, not an observed joint distribution. Two constructions are given below; neither is a measured pair.",
+    "construction_a_worst_with_worst": {
+      "poor": {
+        "uplink_mbit_s": 2.219,
+        "rtt_ms": 56.0
+      },
+      "median": {
+        "uplink_mbit_s": 18.416,
+        "rtt_ms": 27.0
+      },
+      "good": {
+        "uplink_mbit_s": 60.86,
+        "rtt_ms": 17.0
+      },
+      "status": "CONSTRUCTION. Pessimistic: it assumes the worst uplink tile is also the worst latency tile."
+    },
+    "construction_b_observed_conditional": {
+      "method": "test-weighted median avg_lat_ms WITHIN the uplink decile the tier sits in (decile 1, 5, 10)",
+      "poor": {
+        "uplink_mbit_s": 2.219,
+        "rtt_ms": 38.0
+      },
+      "median": {
+        "uplink_mbit_s": 18.416,
+        "rtt_ms": 27.0
+      },
+      "good": {
+        "uplink_mbit_s": 60.86,
+        "rtt_ms": 20.0
+      },
+      "status": "still a construction, but each RTT is conditioned on the matching uplink stratum rather than taken from the opposite tail. RECOMMENDED if a paired triple is needed."
+    },
+    "joint_evidence": {
+      "spearman_uplink_vs_latency": -0.3233,
+      "reading": "-0.323: lower uplink does go with higher latency, but only weakly-to-moderately, so the marginal tails are far from co-located. The poorest uplink decile has a test-weighted median latency of 38 ms, well BELOW the 56 ms marginal p90, so worst-with-worst pairing overstates the observed joint.",
+      "latency_by_uplink_decile": [
+        {
+          "decile": 1,
+          "tiles": 90600,
+          "tests": 170051,
+          "uplink_median_kbps": 1045.0,
+          "latency_median_ms": 38.0
+        },
+        {
+          "decile": 2,
+          "tiles": 63101,
+          "tests": 170044,
+          "uplink_median_kbps": 3494.0,
+          "latency_median_ms": 31.0
+        },
+        {
+          "decile": 3,
+          "tiles": 58133,
+          "tests": 170128,
+          "uplink_median_kbps": 6515.0,
+          "latency_median_ms": 29.0
+        },
+        {
+          "decile": 4,
+          "tiles": 53761,
+          "tests": 170053,
+          "uplink_median_kbps": 10563.0,
+          "latency_median_ms": 27.0
+        },
+        {
+          "decile": 5,
+          "tiles": 45570,
+          "tests": 170068,
+          "uplink_median_kbps": 15556.0,
+          "latency_median_ms": 27.0
+        },
+        {
+          "decile": 6,
+          "tiles": 37578,
+          "tests": 170103,
+          "uplink_median_kbps": 21715.0,
+          "latency_median_ms": 25.0
+        },
+        {
+          "decile": 7,
+          "tiles": 38376,
+          "tests": 170085,
+          "uplink_median_kbps": 28338.0,
+          "latency_median_ms": 26.0
+        },
+        {
+          "decile": 8,
+          "tiles": 31822,
+          "tests": 170063,
+          "uplink_median_kbps": 38123.0,
+          "latency_median_ms": 25.0
+        },
+        {
+          "decile": 9,
+          "tiles": 31864,
+          "tests": 170098,
+          "uplink_median_kbps": 50925.0,
+          "latency_median_ms": 23.0
+        },
+        {
+          "decile": 10,
+          "tiles": 37286,
+          "tests": 170079,
+          "uplink_median_kbps": 80740.0,
+          "latency_median_ms": 20.0
+        }
+      ]
+    }
+  },
+  "cross_check_against_committed": {
+    "table": [
+      {
+        "quantity": "uplink median",
+        "this_run": "18.416 Mbit/s weighted / 10.957 unweighted",
+        "prior": "13.6 Mbit/s uniform default",
+        "source_of_prior": "D75; experiments/orchestration/live2/traces.py:41, fleet/links.py:38",
+        "ratio": "1.35x weighted, 0.81x unweighted",
+        "agree": "AGREE (both within 1.4x, well inside the 2x bar)"
+      },
+      {
+        "quantity": "uplink median",
+        "this_run": "18.416 Mbit/s weighted",
+        "prior": "13.57 Mbit/s = T-Mobile median 5G upload, Ookla H2 2025, the HIGHEST carrier median",
+        "source_of_prior": "n3_tier1_cell_definitions.py E1_UPLINK_MBIT_S[13.6], corrected label under the 2026-11-23 ruling at 75d021d3",
+        "ratio": "1.36x",
+        "agree": "FLAGGED, see mean_vs_median_caveat: an all-technology all-carrier figure should sit BELOW the best carrier's 5G-only median, not above it"
+      },
+      {
+        "quantity": "RTT median",
+        "this_run": "27 ms weighted and unweighted",
+        "prior": "44 ms uniform default, labelled the LOWEST CARRIER LATENCY per Ookla H2 2025",
+        "source_of_prior": "D75; n3_tier1_cell_definitions.py E1_RTT_MS[44.0]",
+        "ratio": "0.61x",
+        "agree": "AGREE (within 2x). 44 ms sits between this run's p50 (27 ms) and p90 (56 ms)."
+      },
+      {
+        "quantity": "Irish 5G percentiles",
+        "this_run": "NOT USED",
+        "prior": "p10 0.90 / p50 9.58 / p90 102.9 Mbit/s",
+        "source_of_prior": "results/INDEX.md line 229, results/cost/e31_network/bandwidth_series.csv",
+        "ratio": "n/a",
+        "agree": "CORRECTLY EXCLUDED: those are DL_bitrate (downlink). Per the ruling and N2 they are not uplink and were not substituted."
+      }
+    ],
+    "physical_plausibility": "all values sit inside plausible mobile ranges: uplink 2.2 to 60.9 Mbit/s and RTT 17 to 56 ms. The RTT p50 of 27 ms matches Ookla's published US mobile IDLE latency far better than its multiserver latency, which confirms avg_lat_ms is the idle/ping measure. No value implies a rate faster than any committed cost curve, and no percentile is zero.",
+    "distribution_sanity": "no constant-where-a-distribution-is-expected: uplink spans 1 to 2,858,520 kbps over 488,100 tiles and latency 1 to 2,241 ms over 488,091, and the weighted and unweighted percentiles differ, so neither the weighting nor the percentile is short-circuited. The 2.86 Gbit/s uplink maximum is a thin-sample 5G tile, which is why the headline numbers are percentiles, not means.",
+    "mean_vs_median_caveat": "THE MAIN LIMITATION, and the reason the median exceeds the best carrier's 5G median. avg_u_kbps is a per-tile ARITHMETIC MEAN over that tile's tests. Throughput within a tile is right-skewed, so each tile's mean exceeds that tile's own median. A test-weighted percentile of tile MEANS therefore sits ABOVE the corresponding percentile of individual TESTS. These tiers are percentiles of test-weighted per-tile mean uplink, NOT percentiles of per-test uplink, and they are biased UPWARD (optimistic) as a model of what one device sees. The file carries no median column, so the bias cannot be removed from this source. Treat the poor tier as the least affected of the three, since thin rural tiles have the least within-tile averaging.",
+    "where_the_median_sits_vs_13p6": "ABOVE it, not far below it. The test-weighted median uplink of 18.42 Mbit/s is 1.35x the committed 13.6 Mbit/s uniform default; the unweighted tile median of 10.96 Mbit/s is 0.81x it. So 13.6 lies between the two medians and is NOT optimistic as a measure of central tendency, even though D215 labels it the optimistic end of the E1 range. Allowing for the mean-vs-median bias above, the true test-level median is likely at or below 13.6, so the default is best described as CLOSE TO THE MEDIAN. THE FINDING IS THE SPREAD, NOT THE CENTRE: the poor tier of 2.22 Mbit/s is 6.1x BELOW the default and the good tier of 60.86 Mbit/s is 4.5x above it, a 27.4x span across the fleet. A uniform 13.6 Mbit/s default is therefore not optimistic on average but erases the poor tail entirely, which is the tail that drives reconstruction-transfer cost under Context Inertia. The same holds for RTT: the uniform 44 ms is pessimistic at the median (27 ms) and optimistic against the 56 ms p90.",
+    "claim_linkage": "these tiers are an INPUT to the mixed-fleet network condition, not a result about any policy. They bear on the physical component of Context Inertia (transfer latency growing with context length) by setting the per-device uplink and RTT. They do NOT speak to the semantic component, and they are NOT evidence for or against any policy comparison. Per N1 and n3_tier1_cell_definitions.py, `link_by_device` still has no injection point in any production entry point, so a Tier 1 cell posted with these values would be UNEXERCISED under CLAUDE.md Rule 2 until that plumbing exists. No mechanism verification is recorded here because this task measures no causal claim."
+  },
+  "scope_notes": [
+    "NOT a US boundary test; a three-rectangle centroid bbox, with the inclusions and exclusions listed above.",
+    "NOT percentiles over tests; percentiles over test-weighted per-tile means, biased upward.",
+    "NOT a joint uplink-RTT distribution; two independent marginals, with two labelled constructions if a triple is needed.",
+    "avg_lat_ms is idle/ping latency, not a loaded RTT and not the application-level RTT the emulator charges.",
+    "The uniform 13.6 Mbit/s / 44 ms default STAYS AS IS per the ruling; nothing here changes it.",
+    "No EXPERIMENTS.md E-id row exists for D234 (5); this file was written under the user ruling of 2026-11-24 and the user restricted the commit to this file alone, so EXPERIMENTS.md, results/INDEX.md and research/STATUS.md were deliberately NOT updated and remain owed."
+  ],
+  "_script_digests": {
+    "tiers.py_sha256": "b76c29d16539d84b9eed084ac558c9c36a0b0153c57ce412fba717ac33a21dd1",
+    "contam.py_sha256": "62881ec1e2a404a75d3c0315f00080d7bb2d086f947b8df8985f8be5476fdc70",
+    "build.py_sha256": null,
+    "note": "the three analysis scripts ran from a scratch directory, with the untrusted parquet in a separate directory, paths passed as arguments and python run with -I. They are NOT committed, because the user restricted this commit to the result JSON. Scratch is ephemeral."
+  },
+  "_provenance": {
+    "git_commit": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
+    "script": "ookla_uplink_tiers (scratch; see _script_digests)",
+    "model": "none",
+    "timestamp": "2026-11-24T16:39:23.447956",
+    "device": "flash_cpu",
+    "n": 488100,
+    "args": {
+      "object_key": "parquet/performance/type=mobile/year=2026/quarter=3/2026-07-01_performance_mobile_tiles.parquet",
+      "quarter": "2026Q3",
+      "filter": "bbox union conus+alaska+hawaii on tile centroid",
+      "weighting": "tests",
+      "percentile": "lower/inverted-CDF weighted"
+    }
+  }
+}
