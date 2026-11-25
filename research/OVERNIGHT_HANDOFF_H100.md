@@ -1,5 +1,38 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** AMENDMENT TO THE CLOSURE BELOW (user ruling, provisional). THIS SUPERSEDES THE TABLE THAT FOLLOWS WHERE THEY DISAGREE. FIVE ITEMS ARE OPEN, NOT THREE. ***
+
+*** 1. ITEM 6 IS REOPENED. IT IS NOT MOOT. *** **DEVICE FALLBACK CREDIT INSIDE ROBOT CORRECT-BY-DEADLINE IS
+OPEN AND IT IS THE USER'S.** The closure below marked it moot on the grounds that rung 4 and
+`DEVICE_ANSWERS` are out of the candidate under D232 and D234. **That reasoning covered DELIBERATE device
+answers. It does not cover the FALLBACK credit that `correct_by_deadline` grants automatically**, and the
+D250 gate cell has made that decisive rather than decorative: **23 of its 72 are device answers, from a
+source 54 pct as accurate as the cloud, and cloud-only correct-by-deadline falls 25 pp where the composite
+falls 10 (recorded at `559c0b8c`).**
+**THE D250 PASS RULE AT `0aba48bd` STANDS EXACTLY AS RULED and is not reopened by this. REPORT
+cloud-correct, device-standing and device-correct BESIDE EVERY ROW, without exception.**
+
+**2. ITEM 3's design is D262, NOT D253.** The flag raised below is resolved in favour of **D262**: fixed
+window, victims nested by keying placement on `(seed, window)` and not on k, 1x only. **No re-run of the
+D244 k5 cells.**
+
+**3. THREE MORE CLOSED:**
+| item | disposition |
+|---|---|
+| D258 dashcam build scope | **CLOSED: deferred behind the D249 gate, per D258** |
+| D259 margin scope | **CLOSED: Method A, scoped to the `-q` arm ONLY, per D259 and D261** |
+| the demand-to-shedding finding | **CLOSED: recorded under D253 and D262. NO RULING NEEDED** |
+
+### *** THE FIVE GENUINELY OPEN ITEMS. LIST THESE AND NOTHING ELSE. ***
+
+| # | item | whose | note |
+|---|---|---|---|
+| 1 | **D244 seed 5** | the user's | after the s4 results |
+| 11 | **mirror permission** | the user's | low priority |
+| **6** | *** DEVICE FALLBACK CREDIT in robot correct-by-deadline *** | **the user's** | **REOPENED. D250 is where it decides.** |
+| new | **the `experiments/` code push for `covex-v6-fair-final-q`** | the user's | **DECIDING NOW. DO NOT PUSH CODE.** Until it lands the D249 gate cell cannot run: 4 new and 7 modified live2 files, and the arm is in `live2 a7eac4ee7c8c` nowhere |
+| new | **the leftover worktree and `/tmp/realnet_*`** | the user's | *** LEAVE THEM IN PLACE until the user confirms the other session is done. DO NOT REMOVE, DO NOT TIDY. *** |
+
 ## *** THE "WAITING ON YOU" LIST IS CLOSED TO THREE ITEMS. TWELVE OF THE FOURTEEN ARE RESOLVED. STOP LISTING THEM. ***
 
 **User ruling (provisional, 2026-11-25). From now on list ONLY items that are genuinely open.**
