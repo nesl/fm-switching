@@ -89,6 +89,21 @@ counts that let either reading be computed later. That is D251 working as intend
 the headline at plotting time.**
 **Item 4 means the push no longer needs a user decision. It needs the D265 proof to pass and your window.**
 
+## QUEUE RE-PRIORITISED (user ruling, 2026-11-25T23:46:42Z). SUPERSEDES THE ORDER BELOW WHERE THEY DISAGREE.
+
+**Principle: by day run what could force reruns or needs the user (policy changes, outage design); seed replicates and sensitivity sweeps run overnight.**
+```
+NOW      D275 -q pressure gates (a) then (b), running
+DAY 1    true-outage NESTOUT build pushed at the next cell boundary, window protocol as D265,
+         switch-OFF byte-identity proof first (flash is proving it; the window opens only after it passes)
+DAY 2    D262 s5 rung-3 confirm cell, ONE cell only
+DAY 3    NESTOUT scope A (8 cells) per prereg 34e10587; report readable n from the first two cells BEFORE any comparison
+JUMP     any -q2 gate cell goes first the moment it is proven
+OVERNIGHT, in order: D250 s5-s7 remainder (rung 3 first at s6 and s7; s5 rung 3 done), D257,
+         rest of D262, D244 s4 remainder (6 cells), D258, then filler
+```
+**Open for the user, found while preparing the lines:** prereg scope A is 2 arms x k{3,5} x s{4,5} = 8 cells, but its census needs the k=1 control for 2 of the 7 matched questions. Without k=1 only 5 are matched. Four k=1 lines (2 arms x s4,s5) will be sent as `#PENDING-USER`.
+
 ## *** CORRECTION TO MY OWN PRICE TABLE BELOW: THE D244 s4 REMAINDER IS **SIX** CELLS, NOT THREE. THE THREE WAS MINE AND WAS NOT A RULING. ***
 
 **The accelerator box enumerated it: `mooncake k3`, `simplestream k3`, `stateoff k5`, `llf k5`,
