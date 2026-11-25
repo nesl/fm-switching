@@ -1544,3 +1544,12 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | model/device | none; CPU on `jetson_orin`; read-only; pooled across arms |
 | headline | FAIR conditioned on CONTEXT SENT (prompt_tokens), not cache: recall cloud WITH_HISTORY (prompt>=2000) acc 0.5688 (n12660), recall cloud WITHOUT_HISTORY (<2000) acc 0.2122 (n3011), recall device 0.2577 (n970), ss cloud 0.6219 (n1042), ss device 0.5480. prompt_tokens bimodal: low mode <1000 (n3011), empty valley [1000,5000), high mode 5-40k (n12660); threshold 2000 in the valley. KEY: stateless cloud recall 0.212 is BELOW device 0.258, so FAIR credits stateless serving below the device floor (simplestream). Cache-hit split (cached/prompt>=0.8: WARM 0.557, COLD 0.434) reported for reference only. dashcam on score_cell model pending in the share re-run. |
 | old name | corrects 5b69d4ec cache-state split |
+
+## StudyORACLE stages 5-6 D268-corrected: context-sent FAIR + instant-threshold dashcam (no bound), 2026-11-25, Orin)
+
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/oracle_shares_v2.json`; module `experiments/analysis/oracle/oracle_bootstrap.py` |
+| model/device | none; CPU on `jetson_orin`; read-only; D240 separate; NOT the bound (control does not pass) |
+| headline | FAIR conditioned on context sent; dashcam on instant-threshold score_cell model (v_dev matches committed exactly). dashcam tier acc: device TPR 0.247 / cloud TPR 0.377 (cloud detects more crashes), device TNR 0.741 / cloud TNR 0.676 (cloud false-alarms more). Recall/ss shares all in [0,1]; rung3 recall FAIR 0.80-0.95 HIND 0.55-0.83, ss FAIR ~0.99 HIND ~0.36. DASHCAM: every fixed arm share<0 on both valuations (cloud no-crash false-alarm cost > crash-detection gain on episode-correctness); only the selective oracle beats device. rung3 pooled FAIR 0.53-0.62 HIND 0.06-0.26; best baseline state-uo pooled FAIR 0.58-0.65 (edges rung3 because rung3 over-serves dashcam cloud). CONTROL FAILS: dashcam share<0 (real, not a bug) + per-seed HIND oracle < pooled FAIR oracle on low-n seeds. No bound. |
+| old name | D268 corrected (context sent), supersedes cache-state and episode-threshold dashcam |
