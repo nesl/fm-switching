@@ -1053,6 +1053,45 @@ another session's work**: `mapwt` HEAD is **1,258 commits behind origin**, and a
 `arms_v6state.py` byte-identical. **Measuring that worktree against its own HEAD would have read a stale
 checkout as pending edits, which is the trap this file already records.**
 
+## *** "ALERT" IS THE DASHCAM CHANNEL. `PREFIX_TO_TYPE = {"dash": "alert", "robo": "recall", "asst": "assistance"}`. ALERT ATTAINMENT AND DASHCAM ON-TIME ARE ONE QUANTITY IN PER-EPISODE AND POOLED FORM. ***
+
+`d179_rung2_verdict.py:216-217`, with `DEADLINE_S["alert"] = 1.0`. So `mons`, the input to
+`_alert_episode_block`, is exactly the `dash*` device rows at the same deadline the scorer's dashcam sweep
+row uses. **Not similar: identical.** The pooled alert on-time figures **8,377 / 8,323** (1x pair) and
+**6,244 / 6,246** (kv0.5r pair) are the dashcam sweep values for those same cells, number for number.
+**It was caught by the H100 asking why the alert `n_instants` and the dashcam instant total both read
+11,764 at s4**, and the two move together to 11,769 at s5.
+**TWO THINGS THIS CORRECTS, in opposite directions.** I ruled that a kind-2 `ReadError` on `dash004` "could
+not enter the alert numerator or denominator at all" - **wrong, since `dash004` is a `dash` device and so
+IS an alert device.** The conclusion survives on a different argument: the denominators are **11,764 on
+both sides with 0 episodes differing in size**, so nothing was lost, and at most one numerator outcome
+moved, inside a net +2 against 3,216 instants of churn. **And I reported dashcam on-time as UNFLOORED
+because the floor file contains neither "dashcam" nor "shot" - but the file's "alert attainment" IS
+dashcam, so the certified in-condition pair floors it directly at 2 pooled instants.** `-notouch`'s **+383
+is therefore its STRONGEST-floored improvement at 128x, not its weakest.** **Single-shot is genuinely a
+separate channel** (`asst`, 2.0 s) and still rests on one observation.
+
+## *** A FIGURE CARRIED ACROSS A BOUNDARY WITHOUT BEING RE-READ. THREE INSTANCES IN ONE HOUR, BETWEEN TWO SESSIONS BOTH WATCHING FOR IT. ***
+
+1. **The H100 quoted single-shot "336 of 357" for a seed-5 cell.** The s5 denominator is **356**; the 357
+   came from s4 unread.
+2. **I asserted the attainment block read a channel that excluded `dash` devices**, from the label "alert"
+   rather than from `PREFIX_TO_TYPE`.
+3. *** I wrote pair 2's single-shot observation as "4 of 356" IN THE SAME MESSAGE IN WHICH I WARNED THAT
+   DENOMINATORS MOVE WITH SEED. Pair 2 is seed 4, so it is 4 of 357: I carried the s5 denominator BACK onto
+   an s4 figure while explaining that one must not. ***
+*** ALL THREE DENOMINATORS MOVE WITH SEED, measured from each cell's own sweep row rather than assumed:
+robot pool 132 at s4 and 127 at s5; single-shot 357 and 356; dashcam instants 11,764 and 11,769. Within a
+seed they are identical across kv setting and replicate. ***
+**THE RULE: quote no count without the denominator read FROM THAT CELL, and no channel without the mapping
+read FROM THE CODE.** A label is not a definition and a neighbouring cell's denominator is not this cell's.
+**And the replicate floor of "one opportunity" transfers as an absolute COUNT but NOT as a fraction**: 1 of
+132 is 0.0076 and 1 of 127 is 0.0079, so pooling across seeds must use fractions or stay within seed.
+**Why this one is worth a rule rather than three corrections: it is not a knowledge failure. Both sessions
+knew the denominators move - one of us was mid-sentence saying so. It is a reflex failure, and the only
+defence that works is mechanical: re-read the number at the point of use, every time, including inside the
+sentence that warns about it.**
+
 ## *** THE PAIRING RULE, SETTLED: SAME-CODE iff the orchestration subtree, the lib subtree AND three blobs all match. The whole-`experiments/` tree is REPORTED BESIDE, never INSTEAD. ***
 
 **Why the whole tree is the wrong key.** The driver pulls origin before every cell, so any session's commit
