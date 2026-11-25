@@ -162,6 +162,40 @@ For a new file `runs/<LIST>` on origin:
 - Handover v27 to v28 done 18:25:52; first half-memory cell covex-v6-base s4 `_kv0.5` started 18:25:55 with `--gpu-kv-tokens 31472` verified in the live harness argv.
 - Not exercised live: the orphan kill (needs a real orphan) and a real restart (needs the driver gone).
 
+## PENDING FOR THE USER (maintained by flash's main session; states below are the user's, 2026-11-24 ~19:20)
+
+Five items. **This list does not change the queue.** Each cites where its original discussion lives in this
+file so a reader can find the evidence rather than only the state.
+
+1. **DEVICE_ANSWERS robot on-time credit: MOOT for the freeze candidate.** Rung 4 and DEVICE_ANSWERS are
+   out per D232 and D234, so the question does not bear on what is being frozen. **Reopen only if rung 4
+   returns.** The measurement fact stands on its own and is worth keeping whatever happens to rung 4,
+   recorded at the 12:40 DEVICE_ANSWERS entry: **robot on-time cannot credit a declined row BY
+   CONSTRUCTION**, because `robot_value` counts `source == "cloud"` and a decline is never submitted, so it
+   has no `t_delivered`; all 57 declined rows had `device_on_time` True at 0.2503 to 0.3065 s against the
+   then 5.0 s deadline and scored 0. That is a property of the metric, not of the arm.
+2. **Freeze blocks network cells: STANDING PER D226, NO RULING NEEDED NOW.** No action for the H100 and
+   nothing is waiting on the user here.
+3. **Orin scorer check-1 change: THE ORIN WRITES IT UP FIRST, AND UNTIL THE USER RULES THE SCORER IS
+   UNCHANGED.** One paragraph, in `research/`, linked from this file, covering exactly four things: what
+   check 1 does now; the proposed change; **which committed numbers would move**; and **a positive
+   control**. *Why this one needs a write-up rather than a patch:* check 1 is currently base-referenced
+   ("at least the base's") while the frozen pre-registration
+   (`StudyLADDER_FINAL_prereg.json THE_BARS.covex-v6-final.check_1_alert`) says **strictly above
+   `covex-v6-fair-final`'s at that seed**, so the two readings disagree and the disagreement has already
+   flipped verdicts: per the prereg, rung 4 s7 check 1 FAILS at 0.6288 against fair-final's 0.6483 where
+   the base-referenced reading passes it, and s5 and s6 were left pending rescore. **And a cell measured
+   today shows the base-referenced rule is not merely imprecise but can mislead: the five-factor state
+   ablation at 1x scores 0.448403 against the base's 0.442490, so check 1 PASSES it, while against its
+   same-code comparator it is a 0.170831 regression, 6.16x the measured noise floor.** A check that passes
+   an arm which lost 28 percent of its attainment is the case that makes the write-up worth the delay.
+   Changing a verdict-producing file is the user's call, and the Orin owns the file.
+4. **E-id for the D233 and D234 ablations: DONE.** `StudyD233-STATEOFF` per D237, opened at `77f33760`
+   together with `StudyD234-NOISEFLOOR`, `StudyD235-UPLINK-TIERS` and `StudyD233-KR-ESTIMATE`, plus nine
+   `results/INDEX.md` rows and two result files. Nothing further is needed from the user on this item.
+5. **Mirror permission: OPEN, and it belongs to the user.** Unchanged from the 16:28 answer. Not an H100
+   action and not flash's to decide.
+
 ## Incidents and INVALID cells (append below, newest last)
 
 - 17:44 to 17:47: a stray `python3 -` from an operator typo waited on stdin during eco-llm s6, after its preflight;
