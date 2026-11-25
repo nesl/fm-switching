@@ -288,3 +288,24 @@ Expect **`metrics_health` = `never_scraped` with `engine_metrics_trusted` = fals
 ## 8. One line for the record
 
 `memory_pressure.pressure.peak_tokens` and `memory_pressure.enact_placement_totals.evicted` repeat across the covex-v6 kv0.5r cells because the first is a pre-enforcement max truncated to just above a fixed cap and quantised to the arm's own 1024-token build slice, and the second is an arithmetic shadow of `epochs_over_cap`. The computation is correct, runs per cell, and is reporting-only; it is simply too coarse to discriminate arms that share a build slice, and it should not be cited as if it could.
+
+## CORRECTION, 2026-11-25: THE TWO-PIECE-SIZE PREMISE IS SCOPED TO TWO ARMS AND DOES NOT HOLD FOR `-stateoff` OR `covex-v6-state-final`
+
+**This file's verdict rests in part on "covex-v6 uses only two piece sizes", and that premise is MEASURED
+for some arms of the family and FALSE for others.** `piece_tokens` read from committed decision logs:
+```
+covex-v6-fair-final, covex-v6-fair-final-notouch   {121, 1024} only, 3 seeds each, 6 cells
+covex-v6-fair-final-stateoff                       {121, 301, 481, 1024}  remainders at all 3 seeds
+covex-v6-state-final                               {121, 301, 391, 481, 751, 1024}  remainders
+```
+**So the correct scope is "measured on `covex-v6-fair-final` and `-notouch`; DOES NOT HOLD for `-stateoff`
+or `covex-v6-state-final`", and NOT "the covex-v6 family".** **An off-lattice `peak_tokens` is therefore
+NOT an anomaly for an arm that emits remainders, and the lattice test must not be applied outside the two
+arms it was measured on.** *(This was found when the off-lattice stop fired on `covex-v6-state-final`
+kv0.5r s4 at `peak_tokens` 32,498, which the remainders fully explain.)*
+*** THE FILE'S CENTRAL CONCLUSION IS UNAFFECTED. The ceiling-not-short-circuit verdict rests on
+`host_peak_tokens` varying, on `peak_tokens` varying by arm and by seed, and on the 1x control's 83
+distinct values across 233 cells. Only the quantization ARGUMENT is scoped; the conclusion is not. ***
+**And one observation this correction surfaced, recorded as a hypothesis: remainder emission tracks the
+STATE CHANNEL rather than the arm family, since `-stateoff` emits remainders and `-notouch`, which keeps
+the state channel, does not.**

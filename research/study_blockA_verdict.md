@@ -133,6 +133,40 @@ tonight were real and differently composed while a fourth was a broken probe, **
 rather than assumed coincidental.** It does not affect any verdict above, since both deltas are computed
 from their own seeds' denominators.
 
+## CORRECTION, 2026-11-25 03:3x: the lattice sentences hold for two arms and NOT for `-stateoff`
+
+**`piece_tokens` was read from all NINE block-A decision logs, one per cell rather than one per arm,
+because one per arm is the error this correction exists to fix:**
+```
+fair-final _rep2   s5 {121 x13, 1024 x138}   s6 {121 x13, 1024 x134}   s7 {121 x11, 1024 x142}
+notouch            s5 {121 x13, 1024 x139}   s6 {121 x13, 1024 x136}   s7 {121 x11, 1024 x143}
+stateoff           s5 {121, 301, 1024}       s6 {121, 301, 481, 1024}  s7 {121, 481, 1024}
+```
+**So `fair-final` and `-notouch` emit only {121, 1024} at every seed and their decompositions STAND**
+(32,470 = 31x1024 + 6x121; 32,107 = (31, 3); 32,228 = (31, 4)).
+*** `-stateoff` EMITS REMAINDER PIECES AT ALL THREE SEEDS. Its peaks 33,010, 32,889 and 32,768 happen to
+land on the lattice, but WITH REMAINDERS IN THE BUILD PATH THAT LANDING IS NOT EVIDENCE, so those three
+decompositions are withdrawn from any "confirmed on-lattice" claim. ***
+**The ceiling verdict on `peak_tokens` is UNAFFECTED: it rests on `host_peak_tokens` varying by seed, on
+`peak_tokens` varying by arm and seed, and on the 1x control's 83 distinct values across 233 cells, none of
+which is a lattice argument.**
+
+## A MECHANISTIC LEAD NOBODY WAS LOOKING FOR: THE STATE CHANNEL APPEARS TO SUPPRESS REMAINDER PIECES
+
+**`-stateoff` IS `fair-final` with the state channel off, and it emits remainders where `fair-final` does
+not. `-notouch` has the state channel ON (only `touch_requests` is off) and emits NO remainders.**
+```
+state channel ON   -> no remainders   2 arms x 3 seeds = 6 cells
+state channel OFF  -> remainders      1 arm  x 3 seeds = 3 cells
+```
+**So remainder emission tracks the state channel exactly across nine cells, and it is not a property of the
+arm family.** *** THAT IS A CANDIDATE MECHANISM FOR WHAT THE STATE CHANNEL DOES, and it is the first one
+tonight that is about the BUILD PATH rather than about scheduling: with the channel on, builds complete in
+full slices; with it off, they leave partial remainders. *** **Labelled a HYPOTHESIS, not a finding: nine
+cells show the correlation and nothing here shows the direction of causation or that remainders cost
+anything.** **It is worth chasing because the state channel is the ablation that costs the most, and a
+mechanism for that cost has not otherwise been identified.**
+
 ## What this does NOT establish
 
 - **No settled finding for either arm.** `-stateoff` clears the bar at two of three seeds and declines into
