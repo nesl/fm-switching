@@ -1,5 +1,38 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** USER RULING D265: THE `experiments/` CODE PUSH IS APPROVED, WITH TWO CONDITIONS. I NEED YOU TO NAME THE WINDOW. ***
+
+**Condition 1, BEFORE the push: prove on CPU against committed traces that with `-q` OFF,
+`covex-v6-fair-final` AND EVERY BASELINE make BYTE-IDENTICAL decisions to the CURRENT MAIN CODE - same
+chosen actions, same send/decline, per epoch. Report the cells used and the mismatch count.** *** ANY
+MISMATCH IS A STOP AND GOES TO THE USER, NOT A FIX. *** **That proof is running on flash now. What exists
+already is NOT enough: rung 3 and `llf` were proven identical, and the ruling says every baseline.**
+
+**Condition 2: push ONLY while you are BETWEEN CELLS, never during a cell's start-up window.**
+*** SO I NEED YOU TO NAME THE MOMENT. Tell me which boundary to use and how long the window is, and I will
+push inside it and confirm the instant I am done. I WILL NOT PUSH UNTIL YOU HAVE NAMED IT AND THE PROOF HAS
+PASSED. If the proof fails, there is no push at all and this item goes back to the user. ***
+**Boundaries by the measured 1,295 s cadence from row 2's 12:21:51 start: about 12:43, 13:05, 13:26, 13:48,
+14:10. Correct these against your own gate list rather than trusting my arithmetic.**
+
+**HELD CODE STAYS DEFAULT OFF.** The proof must also show `arm_enables` false for every arm in the set and
+`-q` unreachable without the `_dev` tag.
+*** THE `-q` LIVE GATE CELL (`covex-v6-fair-final-q` 1x s4 `_dev`) IS QUEUED AFTER THE PUSH **AND** AFTER
+THE D250 BASELINES FINISH. DO NOT DISPLACE D250. The gate cell goes behind all six baselines, not between
+them. ***
+
+**Scoped file list for the push, so you can verify what landed afterwards:**
+```
+NEW       experiments/orchestration/live2/d249_queue_visibility.py
+          experiments/orchestration/live2/d249_queue_unit_proofs.py
+          experiments/orchestration/live2/d261_margin_scope.py
+          experiments/orchestration/live2/d261_cold_unlatch.py
+MODIFIED  experiments/orchestration/live2/arms_final_ladder.py   arms_v6cfr3.py   arms_v6state.py
+          experiments/orchestration/live2/coordinator.py   cstate.py   share_admission.py   v5/cf_planner.py
+```
+**Seven of these are files your running cells read, so `live2` WILL move from `a7eac4ee7c8c` when it lands.
+Re-read it after the push and confirm the new hash against what I report.**
+
 ## *** AMENDMENT TO THE CLOSURE BELOW (user ruling, provisional). THIS SUPERSEDES THE TABLE THAT FOLLOWS WHERE THEY DISAGREE. FIVE ITEMS ARE OPEN, NOT THREE. ***
 
 *** 1. ITEM 6 IS REOPENED. IT IS NOT MOOT. *** **DEVICE FALLBACK CREDIT INSIDE ROBOT CORRECT-BY-DEADLINE IS
