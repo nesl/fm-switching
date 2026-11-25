@@ -914,6 +914,39 @@ unscraped; **rung-4 seeds 5 to 7 must scrape.** Only flash's main session may in
 records each run's unix `t0` (the D211 proxy this removes). The 31 stub cells are marked only and their
 scores stand.
 
+## *** THE PROOFS WERE CERTIFIED BY AN INSTRUMENT THAT WAS NEVER COMMITTED. `tree_guard.py` HAD NO PATH, NO BLOB AND NO STRING ANYWHERE ON ORIGIN. ***
+
+`research/EXPERIMENTS.md`'s `StudyD222-PASS1-NQD` row certifies **"EVERY TREE-GUARD CALL EXITED 0 ... per
+D232 (6)"**, and the four-proof set for both rung-4 arms rests on that guard. **The guard itself existed
+only inside a scratchpad directory that was hours from `rm -rf`.** Found while archiving that tree: of the
+ten build artefacts checked by path AND by blob, nine had landed; `tree_guard.py` was the one that had not,
+and it is the one every other proof depends on. Now committed at **`4e9fd427`** (the later root copy, 5,428
+bytes with split FATAL/ADVISORY severity, not handoff's earlier 3,590-byte one).
+**The class, which is not the same as an uncommitted result:** a result that fails to land is visibly
+missing - someone looks for it. **An instrument that fails to land leaves its verdicts behind**, and the
+verdicts are in a committed row, phrased as a certification. **Nobody rereads a passing check's
+implementation.** The remedy is cheap and should be habitual: **when a proof's verdict is written into a
+committed row, the thing that produced the verdict goes in the same commit.**
+*The sentence this cost us, preserved from an archived draft because it never reached origin:* **"A proof
+that passes on a tree that was not pushed is not a proof of the cell, and 'the proofs passed' is exactly
+the sentence that hid it."** The ruling and the remedy landed; that generalisation did not, so it is
+recorded here.
+
+**THE CONTAMINATION ITSELF IS ARCHIVED, NOT EXPLAINED.** `/home/pragya/fm_archive/2026-11-24/rung4p1_contaminated_e2`,
+6,588 files, tree sha256 `3371b70b...`, verified by per-file `cmp` (0 mismatches) **and** a content-plus-size
+tree hash, both **before** the source was touched, and e2's digest **re-derived from the archive after**
+deletion. The subtree was identified by six independent points rather than by the approximate file list it
+was given - **there was no `e4` or `e5`** - and **the whole tree was archived rather than the diff, because
+selecting the known divergences would presuppose where the contamination entered.** The decisive point: that
+tree's own guard run recorded **0 stray markers over 6,319 files examined** at the time the pass-1 proofs
+ran, and the tree now holds 6,320 files with `DEVICE_ANSWERS_SWITCH_ATTR` in `arms_final_ladder.py` - the
+one file the guard names as **"DELIBERATELY ABSENT ... a marker there is a FATAL finding"**. **So the marker
+arrived after the proofs passed, and the cause remains unestablished. Archiving does not close it.**
+
+**And one more false zero, the eleventh today:** a relative `find -newermt` **failed** under `bfs` and
+printed `count=0` **from the error, not from an absence**. Redone with an absolute timestamp. **Same shape
+as the rest: a probe that cannot fire reports the reassuring answer.**
+
 ## *** DISK GUARD (standing rule, user 2026-11-24): EVERY BUILD OR PROOF CHECKS FREE DISK BEFORE STARTING AND REFUSES BELOW 15 GB. AND ANY "No space left" IN A LOG MARKS EVERY RESULT OF THAT RUN **INVALID**, NEVER ABSENT AND NEVER ZERO. ***
 
 **Why the second half is the important half.** The volume reached **2 GB free** and killed four dry cells.
