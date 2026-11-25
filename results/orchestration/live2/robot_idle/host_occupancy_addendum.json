@@ -1,0 +1,295 @@
+{
+ "_what": "Host-tier occupancy addendum (item 2 / D241): engine vs policy host channels, does the host fill under rung 3, can an idle history be evicted, do store bytes count re-stores. D240: 1x and kv0.5r separate.",
+ "constants": {
+  "host_capacity_tokens": 110592,
+  "host_capacity_bytes": 28991029248,
+  "bytes_per_token": 262144,
+  "host_tier_gib": 27
+ },
+ "per_cell": {
+  "1x": {
+   "covex-v6-fair-final_s4": {
+    "arm": "covex-v6-fair-final",
+    "seed": 4,
+    "agreement": "ABSENT",
+    "engine_store_rate_tokens_s": 342.577,
+    "engine_store_max_bytes": 105407053824.0,
+    "engine_store_max_over_capacity": 3.64,
+    "engine_usage_perc_max": 0.2229,
+    "engine_host_fills_ever": false,
+    "engine_burstiness": {
+     "bin_mean_tokens_s": 323.96,
+     "bin_max_tokens_s": 710.3,
+     "max_over_mean": 2.19,
+     "n_bins": 21,
+     "bursty": true
+    },
+    "policy_host_peak_tokens": 0,
+    "policy_peak_tokens": 48975,
+    "policy_gpu_kv_tokens": 62944,
+    "policy_epochs_over_cap": 0,
+    "policy_host_epochs_over_cap": 0,
+    "policy_offloaded": 0,
+    "policy_evicted": 0,
+    "policy_kept_warm": 4300,
+    "policy_resident": 22
+   },
+   "covex-v6-fair-final_s5": {
+    "arm": "covex-v6-fair-final",
+    "seed": 5,
+    "agreement": "ABSENT",
+    "engine_store_rate_tokens_s": 348.601,
+    "engine_store_max_bytes": 101305024512.0,
+    "engine_store_max_over_capacity": 3.49,
+    "engine_usage_perc_max": 0.0723,
+    "engine_host_fills_ever": false,
+    "engine_burstiness": {
+     "bin_mean_tokens_s": 308.92,
+     "bin_max_tokens_s": 694.53,
+     "max_over_mean": 2.25,
+     "n_bins": 21,
+     "bursty": true
+    },
+    "policy_host_peak_tokens": 0,
+    "policy_peak_tokens": 44758,
+    "policy_gpu_kv_tokens": 62944,
+    "policy_epochs_over_cap": 0,
+    "policy_host_epochs_over_cap": 0,
+    "policy_offloaded": 0,
+    "policy_evicted": 0,
+    "policy_kept_warm": 175,
+    "policy_resident": 21
+   },
+   "covex-v6-fair-final_s6": {
+    "arm": "covex-v6-fair-final",
+    "seed": 6,
+    "agreement": "ABSENT",
+    "engine_store_rate_tokens_s": 407.346,
+    "engine_store_max_bytes": 111270690816.0,
+    "engine_store_max_over_capacity": 3.84,
+    "engine_usage_perc_max": 0.0942,
+    "engine_host_fills_ever": false,
+    "engine_burstiness": {
+     "bin_mean_tokens_s": 358.84,
+     "bin_max_tokens_s": 676.47,
+     "max_over_mean": 1.89,
+     "n_bins": 21,
+     "bursty": false
+    },
+    "policy_host_peak_tokens": 0,
+    "policy_peak_tokens": 40662,
+    "policy_gpu_kv_tokens": 62944,
+    "policy_epochs_over_cap": 0,
+    "policy_host_epochs_over_cap": 0,
+    "policy_offloaded": 0,
+    "policy_evicted": 0,
+    "policy_kept_warm": 1835,
+    "policy_resident": 22
+   },
+   "covex-v6-fair-final_s7": {
+    "arm": "covex-v6-fair-final",
+    "seed": 7,
+    "agreement": "ABSENT",
+    "engine_store_rate_tokens_s": 240.796,
+    "engine_store_max_bytes": 83378569216.0,
+    "engine_store_max_over_capacity": 2.88,
+    "engine_usage_perc_max": 0.1432,
+    "engine_host_fills_ever": false,
+    "engine_burstiness": {
+     "bin_mean_tokens_s": 297.22,
+     "bin_max_tokens_s": 1219.44,
+     "max_over_mean": 4.1,
+     "n_bins": 21,
+     "bursty": true
+    },
+    "policy_host_peak_tokens": 0,
+    "policy_peak_tokens": 52829,
+    "policy_gpu_kv_tokens": 62944,
+    "policy_epochs_over_cap": 0,
+    "policy_host_epochs_over_cap": 0,
+    "policy_offloaded": 0,
+    "policy_evicted": 0,
+    "policy_kept_warm": 2434,
+    "policy_resident": 20
+   }
+  },
+  "kv0.5r": {
+   "covex-v6-fair-final_s4": {
+    "arm": "covex-v6-fair-final",
+    "seed": 4,
+    "agreement": "ABSENT",
+    "engine_store_rate_tokens_s": 343.362,
+    "engine_store_max_bytes": 104865988608.0,
+    "engine_store_max_over_capacity": 3.62,
+    "engine_usage_perc_max": 0.1554,
+    "engine_host_fills_ever": false,
+    "engine_burstiness": {
+     "bin_mean_tokens_s": 344.06,
+     "bin_max_tokens_s": 667.06,
+     "max_over_mean": 1.94,
+     "n_bins": 21,
+     "bursty": false
+    },
+    "policy_host_peak_tokens": 25963,
+    "policy_peak_tokens": 32470,
+    "policy_gpu_kv_tokens": 31472,
+    "policy_epochs_over_cap": 5,
+    "policy_host_epochs_over_cap": 0,
+    "policy_offloaded": 0,
+    "policy_evicted": 6,
+    "policy_kept_warm": 3653,
+    "policy_resident": 22
+   },
+   "covex-v6-fair-final_s5": {
+    "arm": "covex-v6-fair-final",
+    "seed": 5,
+    "agreement": "ABSENT",
+    "engine_store_rate_tokens_s": 357.316,
+    "engine_store_max_bytes": 102735282176.0,
+    "engine_store_max_over_capacity": 3.54,
+    "engine_usage_perc_max": 0.218,
+    "engine_host_fills_ever": false,
+    "engine_burstiness": {
+     "bin_mean_tokens_s": 324.63,
+     "bin_max_tokens_s": 789.11,
+     "max_over_mean": 2.43,
+     "n_bins": 20,
+     "bursty": true
+    },
+    "policy_host_peak_tokens": 18674,
+    "policy_peak_tokens": 32470,
+    "policy_gpu_kv_tokens": 31472,
+    "policy_epochs_over_cap": 6,
+    "policy_host_epochs_over_cap": 0,
+    "policy_offloaded": 0,
+    "policy_evicted": 6,
+    "policy_kept_warm": 0,
+    "policy_resident": 21
+   },
+   "covex-v6-fair-final_s6": {
+    "arm": "covex-v6-fair-final",
+    "seed": 6,
+    "agreement": "WARNING moved_after_import",
+    "engine_store_rate_tokens_s": 405.988,
+    "engine_store_max_bytes": 111060975616.0,
+    "engine_store_max_over_capacity": 3.83,
+    "engine_usage_perc_max": 0.0741,
+    "engine_host_fills_ever": false,
+    "engine_burstiness": {
+     "bin_mean_tokens_s": 343.88,
+     "bin_max_tokens_s": 777.04,
+     "max_over_mean": 2.26,
+     "n_bins": 21,
+     "bursty": true
+    },
+    "policy_host_peak_tokens": 21625,
+    "policy_peak_tokens": 32470,
+    "policy_gpu_kv_tokens": 31472,
+    "policy_epochs_over_cap": 6,
+    "policy_host_epochs_over_cap": 0,
+    "policy_offloaded": 0,
+    "policy_evicted": 6,
+    "policy_kept_warm": 1830,
+    "policy_resident": 22
+   },
+   "covex-v6-fair-final_s7": {
+    "arm": "covex-v6-fair-final",
+    "seed": 7,
+    "agreement": "OK",
+    "engine_store_rate_tokens_s": 240.554,
+    "engine_store_max_bytes": 83638616064.0,
+    "engine_store_max_over_capacity": 2.88,
+    "engine_usage_perc_max": 0.1832,
+    "engine_host_fills_ever": false,
+    "engine_burstiness": {
+     "bin_mean_tokens_s": 275.3,
+     "bin_max_tokens_s": 839.61,
+     "max_over_mean": 3.05,
+     "n_bins": 21,
+     "bursty": true
+    },
+    "policy_host_peak_tokens": 24697,
+    "policy_peak_tokens": 32768,
+    "policy_gpu_kv_tokens": 31472,
+    "policy_epochs_over_cap": 5,
+    "policy_host_epochs_over_cap": 0,
+    "policy_offloaded": 0,
+    "policy_evicted": 6,
+    "policy_kept_warm": 1830,
+    "policy_resident": 20
+   },
+   "llf_s4": {
+    "arm": "llf",
+    "seed": 4,
+    "agreement": "ABSENT",
+    "engine_store_rate_tokens_s": 4510.179,
+    "engine_store_max_bytes": 1394069209088.0,
+    "engine_store_max_over_capacity": 48.09,
+    "engine_usage_perc_max": 0.1481,
+    "engine_host_fills_ever": false,
+    "engine_burstiness": {
+     "bin_mean_tokens_s": 4485.78,
+     "bin_max_tokens_s": 4896.18,
+     "max_over_mean": 1.09,
+     "n_bins": 20,
+     "bursty": false
+    },
+    "policy_host_peak_tokens": 8311,
+    "policy_peak_tokens": 33784,
+    "policy_gpu_kv_tokens": 31472,
+    "policy_epochs_over_cap": 2,
+    "policy_host_epochs_over_cap": 0,
+    "policy_offloaded": 0,
+    "policy_evicted": 2,
+    "policy_kept_warm": 0,
+    "policy_resident": 250
+   }
+  }
+ },
+ "conclusions": {
+  "1x": {
+   "engine_host_fills_ever": false,
+   "engine_max_usage_perc": 0.2229,
+   "engine_store_counts_restores": true,
+   "engine_max_store_over_capacity": 3.84,
+   "policy_max_host_peak_tokens": 0,
+   "policy_total_offloaded": 0,
+   "policy_total_evicted": 0,
+   "idle_history_evictable_from_host": "NO: policy host_peak_tokens is 0 and offloaded/evicted are 0 (nothing on the policy host tier to evict); engine host tier peaks well below full"
+  },
+  "kv0.5r": {
+   "engine_host_fills_ever": false,
+   "engine_max_usage_perc": 0.218,
+   "engine_store_counts_restores": true,
+   "engine_max_store_over_capacity": 3.83,
+   "policy_max_host_peak_tokens": 25963,
+   "policy_total_offloaded": 0,
+   "policy_total_evicted": 24,
+   "idle_history_evictable_from_host": "see per-cell"
+  }
+ },
+ "a6000_crosscheck_kv0.5r": {
+  "policy_peak_tokens": {
+   "covex-v6-fair-final_s4": 32470,
+   "covex-v6-fair-final_s5": 32470,
+   "covex-v6-fair-final_s6": 32470,
+   "covex-v6-fair-final_s7": 32768,
+   "llf_s4": 33784
+  },
+  "policy_evicted": {
+   "covex-v6-fair-final_s4": 6,
+   "covex-v6-fair-final_s5": 6,
+   "covex-v6-fair-final_s6": 6,
+   "covex-v6-fair-final_s7": 6,
+   "llf_s4": 2
+  }
+ },
+ "_provenance": {
+  "git_commit": "9c4b1eae863f72613ac843d24bbf379fbf2e1221",
+  "script": "host_occupancy_addendum.py",
+  "model": "qwen3vl32b",
+  "timestamp": "2026-11-24T19:52:55.410663",
+  "device": "jetson_orin",
+  "n": 9
+ }
+}
