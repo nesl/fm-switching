@@ -1,0 +1,157 @@
+{
+ "_what": "D242 correlated multi-robot outage screen (rung-3 1x). MODEL-BASED SCREEN, NOT A MEASUREMENT (D162 prediction, engine not run). 1x only.",
+ "model": {
+  "d162": "0.0678 + 0.000182*uncached + 0.000154*queued_ahead",
+  "deadline_s": 3.0,
+  "gpu_pool_tokens": 62944,
+  "context_limit": 32768,
+  "tok_per_frame": 90.0,
+  "backlog": "(D/2)*90",
+  "non_robot_working_set": "sum of last prompt_tokens of live dashcam/ss sessions at reconnect (estimate from request log)",
+  "reload_assumption": "external-KV transfer path exists (external_kv_transfer ~1.8e6 tokens/run) and would be cheaper, but a history that does not fit is charged as full uncached re-prefill (worst case), so reload/evict P(within 3s) is a LOWER bound",
+  "queued_ahead": "uncached catch-up of robots served earlier in the order",
+  "orderings": {
+   "a": "FIFO by reconnect (robot-id)",
+   "b": "earliest next question (oracle bound)",
+   "c": "largest deficit first",
+   "d": "all evicted"
+  }
+ },
+ "n_windows_per_cell": 20,
+ "seeds": [
+  4,
+  5,
+  6,
+  7
+ ],
+ "results": {
+  "k1_D60": {
+   "a_fifo": 1.0,
+   "b_earliest_next_oracle": 1.0,
+   "c_largest_deficit": 1.0,
+   "d_all_evicted": 0.746835,
+   "b_minus_a_gap": 0.0,
+   "n_robot_windows": 79,
+   "frac_ctx_exceeded": 0.0,
+   "mean_device_only_questions_in_window": 0.863
+  },
+  "k1_D120": {
+   "a_fifo": 1.0,
+   "b_earliest_next_oracle": 1.0,
+   "c_largest_deficit": 1.0,
+   "d_all_evicted": 0.620253,
+   "b_minus_a_gap": 0.0,
+   "n_robot_windows": 79,
+   "frac_ctx_exceeded": 0.0,
+   "mean_device_only_questions_in_window": 1.663
+  },
+  "k1_D180": {
+   "a_fifo": 1.0,
+   "b_earliest_next_oracle": 1.0,
+   "c_largest_deficit": 1.0,
+   "d_all_evicted": 0.512821,
+   "b_minus_a_gap": 0.0,
+   "n_robot_windows": 78,
+   "frac_ctx_exceeded": 0.025641,
+   "mean_device_only_questions_in_window": 2.475
+  },
+  "k3_D60": {
+   "a_fifo": 1.0,
+   "b_earliest_next_oracle": 1.0,
+   "c_largest_deficit": 1.0,
+   "d_all_evicted": 0.404348,
+   "b_minus_a_gap": 0.0,
+   "n_robot_windows": 230,
+   "frac_ctx_exceeded": 0.0,
+   "mean_device_only_questions_in_window": 2.812
+  },
+  "k3_D120": {
+   "a_fifo": 1.0,
+   "b_earliest_next_oracle": 1.0,
+   "c_largest_deficit": 1.0,
+   "d_all_evicted": 0.283105,
+   "b_minus_a_gap": 0.0,
+   "n_robot_windows": 219,
+   "frac_ctx_exceeded": 0.0,
+   "mean_device_only_questions_in_window": 5.438
+  },
+  "k3_D180": {
+   "a_fifo": 0.747619,
+   "b_earliest_next_oracle": 0.747619,
+   "c_largest_deficit": 0.747619,
+   "d_all_evicted": 0.204762,
+   "b_minus_a_gap": 0.0,
+   "n_robot_windows": 210,
+   "frac_ctx_exceeded": 0.02381,
+   "mean_device_only_questions_in_window": 8.05
+  },
+  "k5_D60": {
+   "a_fifo": 0.964384,
+   "b_earliest_next_oracle": 0.969863,
+   "c_largest_deficit": 0.969863,
+   "d_all_evicted": 0.254795,
+   "b_minus_a_gap": 0.005479,
+   "n_robot_windows": 365,
+   "frac_ctx_exceeded": 0.0,
+   "mean_device_only_questions_in_window": 4.412
+  },
+  "k5_D120": {
+   "a_fifo": 0.66087,
+   "b_earliest_next_oracle": 0.66087,
+   "c_largest_deficit": 0.66087,
+   "d_all_evicted": 0.17971,
+   "b_minus_a_gap": 0.0,
+   "n_robot_windows": 345,
+   "frac_ctx_exceeded": 0.0,
+   "mean_device_only_questions_in_window": 8.9
+  },
+  "k5_D180": {
+   "a_fifo": 0.489231,
+   "b_earliest_next_oracle": 0.489231,
+   "c_largest_deficit": 0.489231,
+   "d_all_evicted": 0.132308,
+   "b_minus_a_gap": 0.0,
+   "n_robot_windows": 325,
+   "frac_ctx_exceeded": 0.027692,
+   "mean_device_only_questions_in_window": 13.213
+  },
+  "k7_D60": {
+   "a_fifo": 0.78835,
+   "b_earliest_next_oracle": 0.792233,
+   "c_largest_deficit": 0.786408,
+   "d_all_evicted": 0.180583,
+   "b_minus_a_gap": 0.003883,
+   "n_robot_windows": 515,
+   "frac_ctx_exceeded": 0.0,
+   "mean_device_only_questions_in_window": 6.95
+  },
+  "k7_D120": {
+   "a_fifo": 0.486815,
+   "b_earliest_next_oracle": 0.486815,
+   "c_largest_deficit": 0.486815,
+   "d_all_evicted": 0.125761,
+   "b_minus_a_gap": 0.0,
+   "n_robot_windows": 493,
+   "frac_ctx_exceeded": 0.0,
+   "mean_device_only_questions_in_window": 13.7
+  },
+  "k7_D180": {
+   "a_fifo": 0.344086,
+   "b_earliest_next_oracle": 0.344086,
+   "c_largest_deficit": 0.344086,
+   "d_all_evicted": 0.092473,
+   "b_minus_a_gap": 0.0,
+   "n_robot_windows": 465,
+   "frac_ctx_exceeded": 0.021505,
+   "mean_device_only_questions_in_window": 20.363
+  }
+ },
+ "_provenance": {
+  "git_commit": "2e0e69a1948ec00e6d14b917280a74e592ac0872",
+  "script": "d242_correlated_outage.py",
+  "model": "qwen3vl32b",
+  "timestamp": "2026-11-24T21:32:57.314804",
+  "device": "jetson_orin",
+  "n": 13612
+ }
+}
