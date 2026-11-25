@@ -178,8 +178,8 @@ NOT STALLED  covex-v6-base 32 / 30   eco-llm 35 / 34   llf 36 / 27   mooncake 34
 ```
 *** ALL THREE BLOCK-A s7 CELLS ARE IN THE STALLED GROUP, so the s7 deltas in this verdict are between cells
 that SHARE the event rather than between one affected and one clean cell. *** **The per-cell loss is at
-most the 8, 5 and 4 requests submitted into that window, against about 11,764 dashcam instants and 105
-robot opportunities per cell, and the spread between arms is 4 requests. NO FIGURE IN THIS VERDICT MOVES**,
+most the 8, 5 and 4 requests submitted into that window, against the s7 dashcam denominator of 11,779 instants and 105
+robot opportunities per cell, and the spread between arms is 4 requests. *(This sentence first read 11,764, which is **s4's** denominator carried onto an s7 statement; the verdict's own table gives s5 / s6 / s7 as 11,769 / 11,786 / 11,779. Numerically immaterial, and the wrong figure for the seed.)* NO FIGURE IN THIS VERDICT MOVES**,
 and the `-notouch` 0.99x reading at s7 is unaffected at this magnitude.
 **It is recorded because it is a shared property of the compared cells that was not known when the
 comparison was made, not because it changes a number.**
