@@ -1535,3 +1535,12 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | model/device | none; CPU on `jetson_orin`; read-only; pooled across arms (never per-arm) |
 | headline | FAIR now conditioned on serving state (D268). Table (type,location,state)->acc,n: recall cloud WARM 0.5569 (n8442), recall cloud COLD 0.4342 (n7229), recall device 0.2577 (n970), single_shot cloud COLD 0.6219 (n1042), single_shot device 0.5480 (n1042). State: WARM iff cached_tokens/prompt_tokens>=0.8 (request.jsonl.gz); single-shot always COLD (stateless). Fixes simplestream: stateless cold answers credited 0.434 not 0.557. dashcam portion + oracle rebuild on score_cell model pending in the same effort. |
 | old name | amends D263 flat per-type acc_cloud |
+
+## StudyORACLE D268 corrected: FAIR table conditioned on CONTEXT SENT (not cache state), 2026-11-25, Orin)
+
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/oracle_fair_table.json`; module `experiments/analysis/oracle/oracle_fair_table.py` |
+| model/device | none; CPU on `jetson_orin`; read-only; pooled across arms |
+| headline | FAIR conditioned on CONTEXT SENT (prompt_tokens), not cache: recall cloud WITH_HISTORY (prompt>=2000) acc 0.5688 (n12660), recall cloud WITHOUT_HISTORY (<2000) acc 0.2122 (n3011), recall device 0.2577 (n970), ss cloud 0.6219 (n1042), ss device 0.5480. prompt_tokens bimodal: low mode <1000 (n3011), empty valley [1000,5000), high mode 5-40k (n12660); threshold 2000 in the valley. KEY: stateless cloud recall 0.212 is BELOW device 0.258, so FAIR credits stateless serving below the device floor (simplestream). Cache-hit split (cached/prompt>=0.8: WARM 0.557, COLD 0.434) reported for reference only. dashcam on score_cell model pending in the share re-run. |
+| old name | corrects 5b69d4ec cache-state split |
