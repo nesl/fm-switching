@@ -1,5 +1,36 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## D241, USER RULING 2026-11-24, PROVISIONAL: NO GPU TIME FOR StudyOUTAGE-PROBE TONIGHT. BLOCK B TAKES ITS SLOT.
+
+*** THE PROBE IS OFF THE QUEUE FOR TONIGHT, INCLUDING the 8-minute design (iii) preliminary I had
+recommended. No GPU minutes are spent on it. ***
+**BLOCK B TAKES THE PROBE'S SLOT**, so the order after `ptg` is simply **BLOCK B, then C, then D**, with no
+slot held and no boundary kept free. **Do not insert the probe at any boundary tonight even if flash sends
+a cell line; there is no cell line to send.**
+
+**What replaces the GPU measurement.** The **1x host write rate and host occupancy will be read on CPU by
+the Orin, from the committed 1x `host_counters_d211.log` files**, which exist in the 1x cell directories
+already. **The probe is re-estimated only after that lands.**
+*Why this is the better order, recorded because it reverses my own recommendation:* my 1x pre-registration
+(`1c536fbe`) priced the probe at about **157 GPU minutes** against the user's 90-minute stop threshold, and
+the dominant cost was a **lead-in of about 316 s** derived from the **kv0.5r** write rate, because a host
+tier that is not full cannot evict and the mechanism under test would be unreachable. **I proposed buying
+the 1x write rate with 8 GPU minutes. The user's route gets the same number from committed logs for zero
+accelerator time.** A quantity already recorded in committed artefacts should not be re-measured on a
+shared accelerator, and I should have looked for `host_counters_d211.log` before pricing a run to produce
+it.
+
+**MORNING REPORT ADDITION (flash's, not the H100's): a CODE READ of why `memory_pressure` reads `evicted`
+= 6 and `peak_tokens` = 32,470 identically across six kv0.5r cells spanning three arms and four seeds,
+while `epochs_over_cap`, `host_peak_tokens` and the cache counters all vary.** What sets each field,
+whether it is trace-determined or policy-determined, and how a peak of 32,470 can exceed an enforced cap of
+31,472 by 998 tokens. **REPORT ONLY. NO FIX TONIGHT.**
+**This does not change what the H100 reports per cell:** still `evicted`, `peak_tokens`,
+`epochs_over_cap` and `host_peak_tokens` for every block-A cell, flagged immediately and **before any block
+verdict** if all nine sit at exactly 6 and 32,470. **Block A's nine cells are the discriminating test and
+they land before anyone reads the code read, which is why the per-cell reporting matters more than the
+analysis.**
+
 ## D240, USER RULING 2026-11-24 19:38, PROVISIONAL, revisit later: MEMORY AND NETWORK ARE NEVER STACKED, AND THE FULL OVERNIGHT ORDER
 
 *** D238 IS CONFIRMED AS THE USER'S OWN RULING. *** It was relayed and recorded earlier; it is now the
