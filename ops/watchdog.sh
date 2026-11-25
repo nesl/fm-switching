@@ -99,7 +99,15 @@ if [ -f "$STANDDOWN" ]; then
   if [ -n "$exp" ] && [ "$now" -lt "$exp" ]; then
     log "STANDDOWN active for $(( (exp - now) / 60 )) more minutes, not starting Claude. \
 Delete ops/STANDDOWN to resume immediately. Reason: $(sed -n 2p "$STANDDOWN")"
-    exit 0
+    # ORDERING, 2026-11-25 (user ruling, provisional): this exit is CONDITIONAL. It used to be
+    # unconditional, which made `--classify` print NOTHING whenever ops/STANDDOWN existed
+    # (stdout=[] rc=0, verified twice on this file), because CLASSIFY_ONLY is set at line 37 and
+    # honoured only at the classify exit further down. A standdown must stop a session being
+    # STARTED; it must not stop the gate being ASKED what it would do. Under --classify we fall
+    # through to the lease gate and that classify exit, which is read-only and sits ABOVE the
+    # alone-guard, the budget write and the tmux launch, so no session can start on that path.
+    # Without --classify the behaviour is unchanged: log the line above and exit 0.
+    [ "$CLASSIFY_ONLY" = 1 ] || exit 0
   fi
   if [ -n "$exp" ]; then
     log "STANDDOWN EXPIRED, resuming normal watchdog behaviour"
