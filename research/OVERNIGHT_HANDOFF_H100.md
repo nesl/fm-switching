@@ -1,5 +1,42 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## D240, USER RULING 2026-11-24 19:38, PROVISIONAL, revisit later: MEMORY AND NETWORK ARE NEVER STACKED, AND THE FULL OVERNIGHT ORDER
+
+*** D238 IS CONFIRMED AS THE USER'S OWN RULING. *** It was relayed and recorded earlier; it is now the
+user's directly.
+
+*** D240: MEMORY AND NETWORK EXPERIMENTS ARE SEPARATE AND NEVER STACKED IN ONE CELL. Reduced memory
+(`kv0.5r`) and outages NEVER appear together. ALL NETWORK AND OUTAGE WORK RUNS AT 1x MEMORY ONLY. ***
+*Consequence to act on tonight, and it supersedes my own earlier pre-registration:* the outage probe was
+pre-registered at `kv0.5r` at `a5515060`. **That is now wrong and is superseded: the probe is a 1x
+experiment.** A replacement pre-registration is being written. **No stacked cell is to be run even if
+someone posts one.**
+
+**THE ORDER.**
+1. **The current replicates, unchanged:** `kv0.5r s4 _rep2`, `kv0.5r s4 _rep3`, `1x s4 _rep2`.
+2. **BLOCK A exactly as recorded in D238, unchanged.** 9 cells, `kv0.5r_L3_epg_rq30`, seeds 5/6/7,
+   interleaved by seed.
+3. **`covex-v6-fair-final-ptg` at 1x s4 if proof-ready; otherwise SKIP AND REPORT.** It IS proof-ready and
+   gated as `D238_PTG_CELLS`.
+4. **StudyOUTAGE-PROBE, ONE SLOT, ONLY IF ITS PROOFS PASS. If it is not ready, RUN BLOCK B and insert the
+   probe at the NEXT CELL BOUNDARY once it is.** The probe must never hold the GPU idle waiting on flash.
+5. **BLOCK B, then BLOCK C, then BLOCK D, as recorded in D238. BLOCK D MAY RUN PAST 07:00; it is
+   INTERRUPTIBLE FILLER.**
+
+**RULES, unchanged from D238 and restated because they bind every session:** no pushes to `experiments/`
+until **block A** finishes; **same-code by tree AND blob hash only**, never by construction; a
+`source_agreement` verdict and a `metrics_health` reading on **every** cell; **INVALID cells excluded and
+rerun ONCE at the end of their own block**; no 0.25x cells; **never seeds 1 to 3**; refuse any build or
+proof **below 15 GB** free; **never `pkill -f`**; **GPU 2 exclusive**.
+
+**TWO OPERATIONAL NOTES CARRIED FORWARD, so they are not rediscovered.** `never_scraped` is **EXPECTED on
+all 29 D238 cells**, because v37 scrapes only `_ms`-tagged cells and none of them carries one; record it
+per cell and say so in the morning report rather than flagging it as a fault. And **`peak_tokens` 32,470
+is now identical in SIX 0.5x cells while `epochs_over_cap`, `host_peak_tokens` and the cache counters all
+move**, so the open question is narrowed to that one field: report `evicted`, `peak_tokens`,
+`epochs_over_cap` and `host_peak_tokens` per cell as block A lands, and flag immediately, **before any
+block verdict**, if all nine sit at exactly `evicted` 6 and `peak_tokens` 32,470.
+
 ## D238, USER RULING 2026-11-24, PROVISIONAL, revisit later (recorded first, before relaying): THE OVERNIGHT POLICY BLOCK, 28 CELLS
 
 **Order, AFTER the three replicates now running (kv0.5r s4 `_rep2`, kv0.5r s4 `_rep3`, 1x s4 `_rep2`).**
