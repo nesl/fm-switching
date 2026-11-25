@@ -1,5 +1,43 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** THE "WAITING ON YOU" LIST IS CLOSED DOWN TO TWO ITEMS. STOP LISTING THE OTHER TWELVE. ***
+
+**User ruling 2026-11-25. From now on list ONLY items that are genuinely open.**
+
+### THE TWO THAT STAY OPEN
+| # | item | status |
+|---|---|---|
+| **1** | **D244 SEED 5** | **OPEN. The user decides AFTER the s4 results.** The 9 lines stay `#HELD-S5`, not deleted. |
+| **11** | **MIRROR PERMISSION** | **OPEN, and it is the USER'S, not yours or mine. LOW PRIORITY.** |
+
+### THE TWELVE THAT ARE CLOSED. DO NOT RAISE THEM AGAIN.
+| # | item | disposition |
+|---|---|---|
+| 2 | metric conflict | **RESOLVED by D251: RECORD ALL METRICS, CHOOSE THE HEADLINE AT PLOTTING TIME** |
+| 3 | re-key outage placement | **RESOLVED for the NEXT design (D253: fixed window, nested victims). *** NO RE-RUN OF THE D244 k5 CELLS. *** ** |
+| 4 | drivers v39 and v40 | **ENDORSED by the user** (approvals 2026-11-25 07:08 and 09:27) |
+| 5, 14 | ptg comparator and its D-row | **RESOLVED by D254: the PRE-REGISTERED reading governs, so it is a FAIL, and PLAIN RUNG 3 STAYS** |
+| 6 | crediting deliberate device answers | **MOOT: rung 4 and `DEVICE_ANSWERS` are OUT of the candidate (D232 / D234)** |
+| 7 | freeze | **RESOLVED by D248: NO FREEZE YET** |
+| 8 | Orin check 1 | **RESOLVED by D251: PER-SEED verdicts with the POOLED FRACTION BESIDE them; tolerance = the NAMED SAME-CODE DIFFERENCE; SCORER UNCHANGED** |
+| 9 | E-id for the ablations | **DONE: `StudyD233-STATEOFF`, D237** |
+| 10 | overnight relaunch | **SUPERSEDED by the D243 / D255 watchdog** |
+| 12 | comparators with no code-agreement verdict | **RESOLVED by the `_rep2` reruns. *** FROM NOW ON, SAME-CODE COMPARATORS ARE REQUIRED. *** ** |
+| 13 | pooling `-notouch` | **RESOLVED: PER SEED WITH DOSE BESIDE EACH FIGURE, NEVER POOLED** |
+
+*** FOUR OF THOSE CLOSURES CARRY A STANDING OBLIGATION, AND THAT MATTERS MORE THAN THE CLOSURE. APPLY THEM
+FROM THE NEXT CELL ONWARD: ***
+- **(2) RECORD ALL FOUR METRICS PER CELL AND DO NOT RANK THEM.** The headline is chosen at plotting time,
+  so **a cell report that quotes one metric as primary is now WRONG.** Report robot cloud on-time,
+  correct-by-deadline, dashcam on-time and single-shot together, every time, plus the per-robot
+  history-cached observable on outage cells.
+- **(8) PER-SEED VERDICTS, with the pooled fraction BESIDE them, never instead of them.** **The tolerance is
+  the NAMED SAME-CODE DIFFERENCE, not a floor derived from another condition. The scorer does not change.**
+- **(12) SAME-CODE COMPARATORS ARE REQUIRED.** *** So a stratum-B pair is no longer a caveat to note; it is
+  a comparison that MAY NOT BE MADE. If a condition has no same-code comparator, say so and STOP rather
+  than pairing across code states. ***
+- **(13) PER SEED, WITH THE DOSE BESIDE EACH FIGURE.** Never a pooled figure for an ablation.
+
 ## *** USER RULING 2026-11-25 09:50, PROVISIONAL: THE QUEUE IS REORDERED. THIS SUPERSEDES D252's ORDER BELOW. ***
 
 *** DO NOT STOP THE RUNNING CELL. The reorder takes effect at the END of the current D244 cell. ***

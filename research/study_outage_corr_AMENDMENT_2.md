@@ -25,6 +25,20 @@ beforehand.**
 **Per-robot reporting, as ruled and additional to the attainment metrics: history cached at the FIRST
 POST-RECONNECT QUESTION, and the number of DEVICE-ONLY QUESTIONS during the window.**
 
+## *** CONFLICT 1 IS RESOLVED BY D251, AND THIS AMENDMENT'S RECOMMENDATION IS WITHDRAWN ***
+
+**D251 (2026-11-25): RECORD ALL METRICS AND CHOOSE THE HEADLINE AT PLOTTING TIME.** *** SO "WHICH ROBOT
+METRIC IS PRIMARY" IS NOT DECIDED AT RUN TIME AT ALL, AND THIS AMENDMENT'S RECOMMENDATION THAT THE
+HISTORY-CACHED OBSERVABLE BE MADE PRIMARY IS WITHDRAWN. *** **Every cell records robot cloud on-time,
+correct-by-deadline, dashcam on-time, single-shot AND the per-robot history-cached observable, and none is
+ranked above another while the cells run.**
+**WHAT SURVIVES, because it is a measurement fact and not a ranking: the device-only questions have NO cloud
+payload and NO request rows, BOTH robot metrics are blind to them in OPPOSITE directions, and `t_local` is
+null on every robot row. So they are UNMEASURABLE and must be reported as a COUNT whichever metric is later
+chosen as the headline.**
+
+## THE SUPERSEDED CONFLICT, KEPT FOR THE RECORD
+
 ## *** CONFLICT 1, AND IT IS THE ONE THAT MATTERS: THE RULING'S PRIMARY METRIC IS THE ONE THE PRE-REGISTRATION SAYS CANNOT WORK ***
 
 **The standing prereg's metrics section is titled "Metrics, and the one that cannot work", and it says:**
@@ -125,6 +139,11 @@ five arms at a given k share the same seed, the same victims and the same window
 gate cell, whose victims and window reproduce the dry run's to six decimals across five arms. **The
 prediction under test is "rung 3 keeps offline histories, baselines and `-stateoff` lose them", which is an
 arm contrast within a k. That contrast is unharmed.**
+*** RESOLVED FORWARD BY D253, WITHOUT DISTURBING THIS GRID: THE NEXT DESIGN USES A FIXED WINDOW WITH
+NESTED VICTIMS, SO A k-EFFECT WILL BE READABLE THERE. THE D244 k5 CELLS ARE **NOT** RE-RUN. *** **So the bar
+above is PERMANENT for THIS grid and FIXED for the next one, which is the cheapest available resolution: no
+accelerator time is spent correcting a design whose cells already exist.**
+
 **A FIX EXISTS IF THE USER WANTS A k-EFFECT: drop k from the placement key so the window is shared and the
 victim sets nest. It is a code change plus a re-run of the k = 5 cells, and it is the user's call, not
 mine.**
