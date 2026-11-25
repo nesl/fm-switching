@@ -614,3 +614,35 @@ _stateoff_lazy._is_stateoff_factory = True                                 # typ
 if "covex-v6-fair-final-stateoff" in V6STATE_ARMS:                         # pragma: no cover
     raise RuntimeError("covex-v6-fair-final-stateoff is already registered in V6STATE_ARMS")
 V6STATE_ARMS["covex-v6-fair-final-stateoff"] = _stateoff_lazy
+
+
+# ---------------------------------------------------------------------------------------------
+# D234 (2): `covex-v6-fair-final-notouch` ON THE NORMAL IMPORT PATH.
+#
+# The SAME two-file pattern the `-stateoff` append above uses, and for the same reason:
+# `run_live2_real.py` reaches an arm through `arms.make_arm`, and `arms.py` does
+# `ARMS.update(V6STATE_ARMS)` at import, so a key added to this dict exists in the harness's
+# process and a posted cell list resolves at launch. A name registered only in the new module's
+# own `register()` would NOT, which is the registration gap that made eleven `covex-v6-cf-pd`
+# arms invisible and that D208 and D232 (2) each had to fix after the fact. The two ablations
+# live together here, in the file that owns `plan_state` and `touch_requests`.
+#
+# THE FACTORY IS LAZY. `arms_v6notouch` imports `arms_final_ladder`, which imports THIS module,
+# so a module-level import here would be a circular import and would fail. The import happens
+# inside the factory at CALL time. Nothing is imported at registration time, so the cost of this
+# key in a tree that never builds it is one dict entry.
+#
+# NOTHING ABOVE THIS LINE CHANGED, INCLUDING THE `-stateoff` APPEND. The eleven rung-2 keys,
+# their factories, every byte of `V6StateArm` and `_stateoff_lazy` are untouched, so no committed
+# digest can move. This is a NEW module-level function and a NEW module-level statement; no
+# pre-existing block is extended.
+def _notouch_lazy(**kw: Any) -> Any:
+    import arms_v6notouch as NT                                            # noqa: PLC0415
+    return NT.make_notouch(NT.NOTOUCH, **kw)
+
+
+_notouch_lazy._is_notouch_factory = True                                   # type: ignore[attr-defined]
+
+if "covex-v6-fair-final-notouch" in V6STATE_ARMS:                          # pragma: no cover
+    raise RuntimeError("covex-v6-fair-final-notouch is already registered in V6STATE_ARMS")
+V6STATE_ARMS["covex-v6-fair-final-notouch"] = _notouch_lazy
