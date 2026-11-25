@@ -1472,3 +1472,12 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | model/device | none; CPU on `jetson_orin`; read-only on committed cells |
 | verdict | PASS. The per-instant 32BI cloud score is arm-independent: 278,609 dashcam instants delivered by both simplestream and another arm, >=99.85% exactly equal, p99 abs diff 0.0000, max 0.375 (batching noise), decision flips across D197 theta=-2.9298 = 1/278609 = 0.0004% (< 0.5% bar), representation identical, score invariant to differing traffic_mix. simplestream (99.9-100% dashcam coverage all 8 cells) adopted as the dense per-instant cloud-score source for the oracle dashcam valuation; 5-8 missing instants/cell = device-only (conservative). Also recorded: per-seed robot variance (device 0.058-0.371, all-57 0.228) and the s6 single-question outlier flag. |
 | old name | none; gate before oracle stage 2-live |
+
+## StudyORACLE stage 2-live dashcam valuation (PRELIMINARY, 2026-11-25, Orin)
+
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/oracle_dashcam_live.json`; module `experiments/analysis/oracle/oracle_dashcam_live.py` |
+| model/device | none; offline CPU on `jetson_orin`; read-only; D240 1x and kv0.5r separate (identical here: device + arm-independent cloud scores do not vary with memory) |
+| headline | PRELIMINARY stage artifact, NOT a bound. Dashcam episode FAIR (expected per-tier DEV accuracy: crash gain TPR_cloud-TPR_dev=0.1333, no-crash 0) and HINDSIGHT (actual crossing 0/1) valuation on live episodes, simplestream dense cloud source. Per cell ~712-714 episodes, 172-192 crash. HINDSIGHT improvable 41-52 (integer gain); FAIR improvable = all crash (fractional gain ~23-26). FAIR != HINDSIGHT confirmed. cloud-miss 3-10 instants/cell (device-only fallback). |
+| old name | none; oracle stage 2-live |

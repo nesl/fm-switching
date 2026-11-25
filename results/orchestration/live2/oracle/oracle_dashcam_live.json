@@ -1,0 +1,181 @@
+{
+ "_what": "StudyORACLE stage 2-live: dashcam episode FAIR (expected per-tier accuracy) and HINDSIGHT (actual crossing) valuation on live episodes. D240 1x/kv0.5r separate.",
+ "dev_tier_accuracy": {
+  "device": {
+   "theta": -0.20141326215572522,
+   "tpr": 0.15555555555555556,
+   "tnr": 0.8888888888888888
+  },
+  "cloud": {
+   "theta": -2.9298319411413662,
+   "tpr": 0.28888888888888886,
+   "tnr": 0.8888888888888888
+  }
+ },
+ "cloud_source": "simplestream (arm-independent, verified)",
+ "results": {
+  "1x": {
+   "s4": {
+    "n_episodes": 712,
+    "n_crash": 172,
+    "n_nocrash": 540,
+    "n_cloud_instants_missing": 5,
+    "HINDSIGHT": {
+     "device_floor": 523.0,
+     "n_improvable": 41,
+     "total_gain": 41,
+     "w_e_median": 340.0
+    },
+    "FAIR": {
+     "device_floor": 506.7556,
+     "n_improvable": 172,
+     "total_gain": 22.9333,
+     "gain_per_crash": 0.1333,
+     "w_e_median": 340.0
+    }
+   },
+   "s5": {
+    "n_episodes": 714,
+    "n_crash": 192,
+    "n_nocrash": 522,
+    "n_cloud_instants_missing": 7,
+    "HINDSIGHT": {
+     "device_floor": 500.0,
+     "n_improvable": 52,
+     "total_gain": 52,
+     "w_e_median": 340.0
+    },
+    "FAIR": {
+     "device_floor": 493.8667,
+     "n_improvable": 192,
+     "total_gain": 25.6,
+     "gain_per_crash": 0.1333,
+     "w_e_median": 340.0
+    }
+   },
+   "s6": {
+    "n_episodes": 712,
+    "n_crash": 173,
+    "n_nocrash": 539,
+    "n_cloud_instants_missing": 3,
+    "HINDSIGHT": {
+     "device_floor": 517.0,
+     "n_improvable": 46,
+     "total_gain": 46,
+     "w_e_median": 340.0
+    },
+    "FAIR": {
+     "device_floor": 506.0222,
+     "n_improvable": 173,
+     "total_gain": 23.0667,
+     "gain_per_crash": 0.1333,
+     "w_e_median": 340.0
+    }
+   },
+   "s7": {
+    "n_episodes": 714,
+    "n_crash": 187,
+    "n_nocrash": 527,
+    "n_cloud_instants_missing": 8,
+    "HINDSIGHT": {
+     "device_floor": 508.0,
+     "n_improvable": 44,
+     "total_gain": 44,
+     "w_e_median": 340.0
+    },
+    "FAIR": {
+     "device_floor": 497.5333,
+     "n_improvable": 187,
+     "total_gain": 24.9333,
+     "gain_per_crash": 0.1333,
+     "w_e_median": 340.0
+    }
+   }
+  },
+  "kv0.5r": {
+   "s4": {
+    "n_episodes": 712,
+    "n_crash": 172,
+    "n_nocrash": 540,
+    "n_cloud_instants_missing": 5,
+    "HINDSIGHT": {
+     "device_floor": 523.0,
+     "n_improvable": 41,
+     "total_gain": 41,
+     "w_e_median": 340.0
+    },
+    "FAIR": {
+     "device_floor": 506.7556,
+     "n_improvable": 172,
+     "total_gain": 22.9333,
+     "gain_per_crash": 0.1333,
+     "w_e_median": 340.0
+    }
+   },
+   "s5": {
+    "n_episodes": 714,
+    "n_crash": 192,
+    "n_nocrash": 522,
+    "n_cloud_instants_missing": 8,
+    "HINDSIGHT": {
+     "device_floor": 500.0,
+     "n_improvable": 52,
+     "total_gain": 52,
+     "w_e_median": 340.0
+    },
+    "FAIR": {
+     "device_floor": 493.8667,
+     "n_improvable": 192,
+     "total_gain": 25.6,
+     "gain_per_crash": 0.1333,
+     "w_e_median": 340.0
+    }
+   },
+   "s6": {
+    "n_episodes": 712,
+    "n_crash": 173,
+    "n_nocrash": 539,
+    "n_cloud_instants_missing": 3,
+    "HINDSIGHT": {
+     "device_floor": 517.0,
+     "n_improvable": 46,
+     "total_gain": 46,
+     "w_e_median": 340.0
+    },
+    "FAIR": {
+     "device_floor": 506.0222,
+     "n_improvable": 173,
+     "total_gain": 23.0667,
+     "gain_per_crash": 0.1333,
+     "w_e_median": 340.0
+    }
+   },
+   "s7": {
+    "n_episodes": 714,
+    "n_crash": 187,
+    "n_nocrash": 527,
+    "n_cloud_instants_missing": 10,
+    "HINDSIGHT": {
+     "device_floor": 508.0,
+     "n_improvable": 44,
+     "total_gain": 44,
+     "w_e_median": 340.0
+    },
+    "FAIR": {
+     "device_floor": 497.5333,
+     "n_improvable": 187,
+     "total_gain": 24.9333,
+     "gain_per_crash": 0.1333,
+     "w_e_median": 340.0
+    }
+   }
+  }
+ },
+ "_provenance": {
+  "git_commit": "3d06eac5c1d2fe48d7fd05f66e4d41702830dce2",
+  "script": "oracle_dashcam_live.py",
+  "model": "qwen3vl32b",
+  "timestamp": "2026-11-25T10:49:07.270566",
+  "device": "jetson_orin"
+ }
+}
