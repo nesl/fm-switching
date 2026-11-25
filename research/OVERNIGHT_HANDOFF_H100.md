@@ -1,5 +1,50 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** USER RULING D262 (2026-11-25 11:49): THE ROBOT-HEAVY MIX IS THE PRESSURE REGIME. QUEUE IT AFTER THE D250 s4 SET AND THE D257 n20 BASELINES. ***
+
+**P3 established that `_c3-11-2` (eleven robots of sixteen) is the one direction that produces memory
+pressure: it is the first cell in the pilot where any D253 condition fired, and two did. The user has now
+made that mix THE REGIME for touches and for outages under pressure.**
+
+### 1. CONFIRM THE REGIME
+**`covex-v6-fair-final` `_c3-11-2` n16 1x **s5** `_preD249`. Report the cold-span census and the idle
+P(cold) BESIDE the three D253 numbers.** **The census both ways as agreed: decision-kind `decline` and the
+no-request proxy as separate columns, with `release_infeasible_recall` and `budget_refusal_recall` confirmed
+zero before they are equated. And the `cached_fraction` DECILES with n, per the pass rule, so the 0.5
+threshold can be moved without a re-run.**
+
+### 2. REGIME GATE AT s4, THEN s5 TO s7
+**Arms at `_c3-11-2` s4: `covex-v6-fair-final-notouch`, `covex-v6-fair-final-stateoff`, `simplestream`,
+`llf`, `mooncake`. Scored against the P3 rung-3 cell.**
+| report, per arm | note |
+|---|---|
+| robot cloud on-time **with cloud accuracy on served AND correct-by-deadline beside it** | per D257 (3), never on-time alone |
+| dashcam per device against target | per episode per device, 0.25 |
+| single-shot | |
+| **idle P(cold)** | the regime's own signature |
+| **evictions** | `enact_placement_totals.evicted` |
+| **TOUCH counts for rung 3, and the notouch gate count** | the port rule: an arm's characteristic decision must occur at least once |
+**Then s5 to s7 for the same arms.**
+
+### 3. ESTIMATE ONLY, BUILD NOTHING
+**The next outage design IN THIS REGIME. FIXED window; victims NESTED, k=3 a SUBSET of k=5, achieved by
+keying placement on `(seed, window)` and NOT on k; 1x only per D240. Hours and files. This is being
+estimated on flash and nothing is built until the user rules.**
+*** THE NESTING IS THE POINT AND IT FIXES A CONFOUND WE ALREADY RECORDED: in the earlier outage grid the
+k=3 and k=5 victim sets were drawn independently, so a k-to-k comparison moved both the victim COUNT and
+the victim IDENTITY at once. Keying on `(seed, window)` makes k=3's victims a strict subset of k=5's, so k
+becomes the only thing that varies. ***
+
+### QUEUE POSITION, STATED SO YOU CAN CORRECT IT
+```
+D250 s4 set  ->  [D249 live gate cell, ONE cell, policy priority]  ->  D257 n20 baselines
+             ->  D262 regime cells  ->  D244  ->  D258  ->  MATRIX
+```
+**D262 is ruled to go after the D250 s4 set and the D257 n20 baselines, which pushes D244 and D258 back one
+place each. The D249 gate cell is one cell on the policy line, which has had priority since D252 Part A, so
+I have slotted it at the first boundary after the D250 s4 set. SAY IF YOUR FILE ORDER DISAGREES.**
+**When D249's gate passes, `covex-v6-fair-final-q` is ADDED to the regime cells.**
+
 ## *** USER RULING D261: THE D259 MARGIN IS SCOPED TO `covex-v6-fair-final-q` ONLY. YOUR COMMITTED RUNG-3 CELLS STAY COMPARABLE. ***
 
 **The recalibrated margin (Method A, 0.331566) goes BEHIND THE D249 SWITCH, so rung 3 and every other arm
