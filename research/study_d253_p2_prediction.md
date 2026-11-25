@@ -93,6 +93,40 @@ than the predicted one.**
 the n16 reference to any higher-demand cell. If refusals rise while frames-per-episode stays flat, the
 episode-length half of the mechanism is wrong even if the refusal half holds.**
 
+## *** THE PREDICTION IS SCORED: CONFIRMED ON EVERY COUNT, AND THE FALSIFIER DID NOT FIRE. ***
+
+**P2 = `covex-v6-fair-final` n16 1x s4 `_L3_epg_rq10_preD249`, 10:47:52 to 11:09:17. Valid, 11,872
+requests, 1 transport error, `source_agreement` OK.**
+| the prediction, committed 10:30:09 | the result |
+|---|---|
+| fails all three D253 conditions | **FAILS ALL THREE** (server host max 0.205, none at capacity; P(cold) 0 of 18; evictions 0) |
+| refusals RISING | **2,165 against 1,979, +9 pct, ALL ALERT** |
+| host peak FLAT OR FALLING against 0.221 | **0.205, a fall** |
+| **the falsifier: a PASS, or a host peak ABOVE 0.221** | **DID NOT FIRE** |
+| second signature: served per play falling | **41.62 against 44.04** |
+
+*** SO P2 IS A FOURTH CONFIRMING POINT. I SAID I WOULD RATHER HAVE A REFUTATION, AND I DID NOT GET ONE. ***
+
+## *** BUT THE CONFIRMATION IS WEAK, AND THE WEAKNESS POINTS WHERE THE USER POINTED ***
+```
+cell            host_peak  vs ref   refusals  vs ref   served/play  vs ref
+P2 rq10  n16      0.205     -7.2%     2,165    +9.4%       41.62     -5.5%
+P1 n20            0.135    -38.9%     3,191   +61.2%       31.89    -27.6%
+P1 n24            0.128    -42.1%     3,685   +86.2%       22.49    -48.9%
+```
+**TRIPLING the robot question rate moves occupancy by 7 percent; adding FOUR DEVICES moved it by 39.**
+*** SO ADDING ROBOT DEMAND BARELY PERTURBS THE DASHCAM SHEDDING CHANNEL. That is the user's P3 reasoning
+appearing in the P2 data before P3 runs: the mechanism is about the ALERT channel, and robot demand reaches
+it only indirectly. *** **It also means P2 was a weaker test than I treated it as: it loaded the channel
+the mechanism does not govern, so its confirmation carries less than the device-count cells did.**
+
+## AND THE PILOT'S PROBLEM IN ONE LINE, FROM THIS CELL
+
+**P2 is a cell where the POLICY DOES WELL: robot correct-by-deadline 0.645070, the best seen; cloud
+accuracy on served 0.666667; 342 of 355 on time; dashcam 7,867 of 11,764 with ZERO devices below the 0.25
+target.** *** AND MEMORY IS STILL NEVER PRESSED. THE POLICY PERFORMS WELL AND THE MEMORY SYSTEM IS NOT
+STRESSED, WHICH IS EXACTLY WHY THE PILOT CANNOT FIND ITS REGIME BY ADDING DEMAND. ***
+
 ## THE CONSEQUENCE FOR THE PILOT, stated as a question for the user and not as a decision
 
 **P1, P2, P3 and P4 ALL WORK BY ADDING DEMAND** (device count, question rate, robot-heavy mix,
