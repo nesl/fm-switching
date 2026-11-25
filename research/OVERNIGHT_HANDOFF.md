@@ -914,6 +914,31 @@ unscraped; **rung-4 seeds 5 to 7 must scrape.** Only flash's main session may in
 records each run's unix `t0` (the D211 proxy this removes). The 31 stub cells are marked only and their
 scores stand.
 
+## *** DISK GUARD (standing rule, user 2026-11-24): EVERY BUILD OR PROOF CHECKS FREE DISK BEFORE STARTING AND REFUSES BELOW 15 GB. AND ANY "No space left" IN A LOG MARKS EVERY RESULT OF THAT RUN **INVALID**, NEVER ABSENT AND NEVER ZERO. ***
+
+**Why the second half is the important half.** The volume reached **2 GB free** and killed four dry cells.
+**Three of the four wrote ZERO BYTES of stderr and returned rc=120 and rc=2**; only the first carried the
+`Errno 28` message. So **a disk-full cell can fail with an empty error and a non-obvious exit code**, and a
+session reading four empty stderrs would read four clean runs with missing output.
+**It then did exactly that damage in the worst possible place.** The `-notouch` build's proof 2 came back
+with **`state_touch_chosen_not_enacted: ABSENT`** alongside three other ABSENT counters - **which is
+precisely the reading the H100's pre-scoring check exists to flag as "not wired".** It was a full disk. Had
+the build not captured `rc` per cell and had `grep` not found "No space left" in the same log, the
+conclusion would have been that the counter was never published, and the fix would have been applied to a
+bug that does not exist.
+**So the rule is not about tidiness, it is about a failure that disguises itself as a finding.** An absent
+counter, a zero counter and a truncated log are the three things this project spends most of its time
+distinguishing, and a full disk produces all three at once.
+
+**WHAT FREED THE SPACE, for the next session's reference: 18 GB of it was MINE and dead.** Five staging
+trees from commits that had already landed - `ptg_push_6736b0`, `p1land_1795546337`, `e1p1_fix_6736b0`,
+`e1p1_commit_6736b0`, `e1land_6736b0`. Each was censused for holders by `/proc` cwd **and** open fds before
+removal, each commit confirmed an ancestor of `origin/main`, and each removed with a **literal absolute
+path** rather than a shell variable that could expand to `/`. **A commit-staging tree is disposable the
+moment its commit is on origin, and leaving five of them lying around is what took a shared box to 2 GB.**
+**The collective picture is invisible from any one session**: no single tree was unreasonable, six of them
+together were 26 GB on a volume already at 100 percent.
+
 ## *** THE DAY'S MOST EXPENSIVE FAILURE CLASS, NAMED: A NUMBER THAT IS TRUE OF SOMETHING. NONE OF THESE WAS AN ARITHMETIC ERROR. ***
 
 **Seven instances between two sessions in one afternoon, each self-consistent, each confidently wrong.**
