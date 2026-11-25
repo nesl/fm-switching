@@ -1,5 +1,42 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** USER RULING 2026-11-25 09:50, PROVISIONAL: THE QUEUE IS REORDERED. THIS SUPERSEDES D252's ORDER BELOW. ***
+
+*** DO NOT STOP THE RUNNING CELL. The reorder takes effect at the END of the current D244 cell. ***
+*** AND ONE ITEM NEEDS ACTION NOW: THE D244 SEED-5 LINES ARE CURRENTLY LIVE AND MUST BE COMMENTED OUT,
+NOT DELETED, per the D252 single-seed gating rule. The user decides on seed 5 AFTER the s4 result. ***
+
+**THE PRESSURE PILOT IS THE CRITICAL PATH: it decides the REGIME for both the touches and the outage
+experiments. That is why D244 is demoted from first to third.**
+
+| # | what | cells |
+|---|---|---|
+| **1** | **D253 P1 PRESSURE PILOT: `covex-v6-fair-final` `_preD249` at n20 AND n24**, default mix, 1x, s4 | 2 |
+| **2** | **D250 MEMORY GATE at s4**, `_kv0.5r_h0.5` under driver v40, **GATE CELL FIRST with the three readings checked** before any baseline | 1 + 6 |
+| **3** | **D244 REMAINDER, SEED 4 ONLY**: `-stateoff` k5; `llf`, `mooncake`, `simplestream` at k3 AND k5 | 6 remaining after the running `llf k3 s4` |
+| **4** | **D244 SEED-5 CELLS HELD** - commented out, NOT deleted | 9 held (`fair-final k3 s5` is already done) |
+| **5** | **Baselines in any passing new condition, then the BASELINE-ONLY filler** | |
+
+**ETAs, at the MEASURED cell wall time of 21m24s (two completed cells agree exactly), with n20/n24 allowed
+23 min since higher n may run longer:**
+```
+running   llf k3 s4                                    ends ~10:04
+1         P1 n20 + n24                                 ~10:51
+2         D250 gate cell (fair-final)                  ~11:13
+          D250 six baselines (needed to SCORE the rule) ~13:22
+3         D244 remainder s4, 6 cells                   ~15:31
+```
+**These are estimates from one measured figure, not a schedule. Report the actual as each lands.**
+
+**D244 STATE, so the remainder list is unambiguous: DONE are `fair-final k3 s4`, `fair-final k5 s4`,
+`fair-final k3 s5`, `-stateoff k3 s4`. RUNNING is `llf k3 s4`.** **So item 3's six are `-stateoff k5`,
+`llf k5`, `mooncake k3`, `mooncake k5`, `simplestream k3`, `simplestream k5`, all at seed 4.**
+
+**UNCHANGED BY THIS RULING: the D250 preflight bar (BOTH limits proved, host size from the server's own
+mmap line, never the launch line); D240 (never stack `_out` with `_kv0.5r_h0.5`); `_preD249` on
+`covex-v6-fair-final` ONLY and never on a baseline; the three-reading gate before any D250 baseline runs;
+and the baseline-only filler.**
+
 ## *** D252, USER RULING 2026-11-25 09:29, PROVISIONAL: THE H100 QUEUE, IN THIS ORDER. THIS SUPERSEDES THE FILLER'S PLACE IN THE ORDER. ***
 
 *** ITEM 6 FIRST, BECAUSE IT CHANGES WHAT IS RUNNING RIGHT NOW: THE MATRIX FILLER IS **BASELINE ARMS
