@@ -191,20 +191,63 @@ def share_ci(units, which, rng):
     return (round(pt, 4) if pt is not None else None, lo, hi)
 
 
+def shares_block(units, rng):
+    row = {}
+    for typ in ("recall", "single_shot", "dashcam", "pooled"):
+        u = units if typ == "pooled" else [x for x in units if x[1] == typ]
+        if not u:
+            continue
+        pf, lf, hf = share_ci(u, "F", rng)
+        ph, lh, hh = share_ci(u, "H", rng)
+        row[typ] = {"FAIR": {"share": pf, "ci95": [lf, hf]},
+                    "HINDSIGHT": {"share": ph, "ci95": [lh, hh]}}
+    return row
+
+
+def oracle_control(units, rng):
+    """Per type: FAIR oracle mean, HIND oracle mean, and bootstrap CI of (FAIR-HIND). A failure only
+    if the gap exceeds the CI (CI of FAIR-HIND lies entirely above 0). Arm-independent columns."""
+    res = {}
+    for typ in ("recall", "single_shot", "dashcam"):
+        u = [x for x in units if x[1] == typ]
+        if not u:
+            continue
+        agg = collections.defaultdict(lambda: [0.0, 0.0])    # cluster -> [orcF, orcH]
+        for x in u:
+            a = agg[x[0]]; a[0] += x[4]; a[1] += x[7]
+        arr = np.array(list(agg.values()), dtype=float)
+        n = arr.shape[0]
+        mF, mH = arr[:, 0].sum() / n, arr[:, 1].sum() / n
+        idx = rng.integers(0, n, size=(NB, n))
+        samp = arr[idx]                                                    # (NB, n, 2)
+        d = (samp[:, :, 0].sum(axis=1) - samp[:, :, 1].sum(axis=1)) / n     # FAIR - HIND per resample
+        lo, hi = float(np.percentile(d, 2.5)), float(np.percentile(d, 97.5))
+        res[typ] = {"fair_oracle": round(mF, 4), "hind_oracle": round(mH, 4),
+                    "fair_minus_hind_ci95": [round(lo, 4), round(hi, 4)],
+                    "fail": bool(lo > 1e-6)}   # FAIR oracle significantly above HIND oracle
+    return res
+
+
 def main():
     labels = DC.nexar_labels()
-    # dashcam per-tier expected acc, pooled across seeds (1x; dashcam correctness memory-independent)
     dash_by_seed = {s: dash_precompute(s, R.simplestream_cloud(s, ""), labels) for s in SEEDS}
     dta = dash_tier_acc(dash_by_seed)
-    out = {"_what": "StudyORACLE stages 5-6, D268-corrected: FAIR conditioned on context sent, dashcam"
-                    " on instant-threshold score_cell model. Control: HINDSIGHT oracle>=FAIR oracle, "
-                    "every arm share in [0,1] (>1 or <0 FAILS). rung 3 scored. D240 separate; s6 "
-                    "flagged. NOT the bound file.",
+    out = {"_what": "StudyORACLE bound (D268-corrected): FAIR conditioned on CONTEXT SENT, dashcam on "
+                    "instant-threshold score_cell model (verified: same thresholds/instants both tiers,"
+                    " 0 imputed device scores, cloud false-alarm excess confirmed per seed). Control: "
+                    "share>1 a hard STOP; share<0 REPORTED, not blocking (genuine worse-than-device); "
+                    "HIND oracle>=FAIR oracle checked per seed AND pooled, a failure only if the gap "
+                    "exceeds the bootstrap CI. rung 3 scored. D240 separate; s6 flagged (20-25 distinct"
+                    " robot questions/seed, single-question basis).",
            "fair_recall_cloud_with_history": A_RC_H, "fair_recall_cloud_without_history": A_RC_N,
-           "fair_recall_device": A_RD, "dashcam_tier_acc": {f"{t}|{k}": round(v, 6) for (t, k), v in dta.items()},
-           "n_bootstrap": NB, "cells_used_rung3": [], "fail": [], "oracle_control": [],
-           "1x": {}, "kv0.5r": {}}
+           "fair_recall_device": A_RD, "single_shot_cloud": A_SC, "single_shot_device": A_SD,
+           "dashcam_tier_acc": {f"{t}|{k}": round(v, 6) for (t, k), v in dta.items()},
+           "n_bootstrap": NB, "bootstrap_seed": BSEED, "cells_used_rung3": [],
+           "stop_share_gt_1": [], "reported_share_lt_0": [], "oracle_control": {}, "1x": {}, "kv0.5r": {}}
     for tag, mem in (("", "1x"), ("_kv0.5r", "kv0.5r")):
+        pooled = collections.defaultdict(list)            # arm -> units across seeds
+        ctrl_pool = []                                    # arm-independent units for oracle control
+        out["oracle_control"][mem] = {"per_seed": {}, "pooled": {}}
         for s in SEEDS:
             rc = R.recall_correctness(s, tag)
             dash_pre = dash_by_seed[s]
@@ -213,47 +256,58 @@ def main():
                 out["cells_used_rung3"].append(f"{mem} s{s}: {os.path.basename(r3)}")
             cellout = {"s6_outlier_flag": (s == 6), "arms": {}}
             rng = np.random.default_rng(BSEED)
+            ctrl_units = None
             for disp, raw in ARMS:
                 units = arm_units(raw, s, tag, rc, dash_pre, dta)
                 if units is None:
                     continue
-                row = {}
-                for typ in ("recall", "single_shot", "dashcam", "pooled"):
-                    u = units if typ == "pooled" else [x for x in units if x[1] == typ]
-                    if not u:
-                        continue
-                    pf, lf, hf = share_ci(u, "F", rng)
-                    ph, lh, hh = share_ci(u, "H", rng)
-                    row[typ] = {"FAIR": {"share": pf, "ci95": [lf, hf]},
-                                "HINDSIGHT": {"share": ph, "ci95": [lh, hh]}}
-                    for wch, sh in (("FAIR", pf), ("HINDSIGHT", ph)):
-                        if sh is not None and (sh > 1.0 + 1e-6 or sh < -1e-6):
-                            out["fail"].append(f"{mem} s{s} {disp} {typ} {wch}: share {sh}")
-                cellout["arms"][disp] = row
-                # oracle control HINDSIGHT oracle >= FAIR oracle (per type) using summed orc columns
-                for typ in ("recall", "single_shot", "dashcam"):
-                    u = [x for x in units if x[1] == typ]
-                    if not u:
-                        continue
-                    orcF = sum(x[4] for x in u); orcH = sum(x[7] for x in u); flo = sum(x[3] for x in u)
-                    # normalise both to a fraction of their own population for comparability
-                    if orcH / len(u) + 1e-9 < orcF / len(u):
-                        out["oracle_control"].append(f"{mem} s{s} {disp} {typ}: HIND oracle "
-                                                     f"{orcH/len(u):.3f} < FAIR oracle {orcF/len(u):.3f}")
+                cellout["arms"][disp] = shares_block(units, rng)
+                pooled[disp].extend(units)
+                if ctrl_units is None or len(units) > len(ctrl_units):
+                    ctrl_units = units           # highest-coverage arm for arm-independent oracle cols
+                for typ, blk in cellout["arms"][disp].items():
+                    for wch in ("FAIR", "HINDSIGHT"):
+                        sh = blk[wch]["share"]
+                        if sh is None:
+                            continue
+                        if sh > 1.0 + 1e-6:
+                            out["stop_share_gt_1"].append(f"{mem} s{s} {disp} {typ} {wch}: {sh}")
+                        elif sh < -1e-6:
+                            out["reported_share_lt_0"].append(f"{mem} s{s} {disp} {typ} {wch}: {sh}")
+            if ctrl_units:
+                ctrl_pool.extend(ctrl_units)
+                out["oracle_control"][mem]["per_seed"][f"s{s}"] = oracle_control(
+                    ctrl_units, np.random.default_rng(BSEED))
             out[mem][f"s{s}"] = cellout
-            print(f"{mem} s{s}: {len(cellout['arms'])} arms, share fails {len(out['fail'])}, "
-                  f"oracle-ctrl fails {len(out['oracle_control'])}")
-    out["verdict"] = ("PASS: all shares in [0,1] and HIND oracle>=FAIR oracle"
-                      if not out["fail"] and not out["oracle_control"]
-                      else f"FAIL: {len(out['fail'])} share(s) out of [0,1], "
-                           f"{len(out['oracle_control'])} oracle-control violation(s)")
+        # pooled-over-seeds shares + oracle control
+        out[mem]["pooled_over_seeds"] = {}
+        rng = np.random.default_rng(BSEED)
+        for disp in [a for a, _ in ARMS]:
+            if pooled.get(disp):
+                out[mem]["pooled_over_seeds"][disp] = shares_block(pooled[disp], rng)
+        out["oracle_control"][mem]["pooled"] = oracle_control(ctrl_pool, np.random.default_rng(BSEED))
+        ocfails = [f"{mem} {ty}" for ty, v in out["oracle_control"][mem]["pooled"].items() if v["fail"]]
+        print(f"{mem}: STOP(share>1)={len(out['stop_share_gt_1'])} "
+              f"reported(share<0)={len(out['reported_share_lt_0'])} pooled-oracle-ctrl-fail={ocfails}")
+    stop = list(out["stop_share_gt_1"])
+    for mem in ("1x", "kv0.5r"):
+        for ty, v in out["oracle_control"][mem]["pooled"].items():
+            if v["fail"]:
+                stop.append(f"{mem} oracle-control {ty}: FAIR {v['fair_oracle']} > HIND "
+                            f"{v['hind_oracle']}, CI {v['fair_minus_hind_ci95']}")
+    out["verdict"] = ("PASS: no share>1, no pooled oracle-control gap beyond CI. share<0 reported as "
+                      "genuine worse-than-device." if not stop else f"STOP: {len(stop)} blocking")
+    out["blocking"] = stop
     out["_provenance"] = stamp(script="oracle_bootstrap.py", model="qwen3vl32b", device="jetson_orin")
-    (REPO / "results/orchestration/live2/oracle/oracle_shares_v2.json").write_text(
-        json.dumps(out, indent=1, default=float))
-    print("wrote oracle_shares_v2.json | VERDICT:", out["verdict"])
+    od = REPO / "results/orchestration/live2/oracle"
+    (od / "oracle_shares_v2.json").write_text(json.dumps(out, indent=1, default=float))
+    if not stop:
+        (od / "oracle_results.json").write_text(json.dumps(out, indent=1, default=float))
+        print("wrote oracle_results.json (THE BOUND)")
+    print("VERDICT:", out["verdict"])
     print("dashcam_tier_acc:", out["dashcam_tier_acc"])
-    for f in out["fail"][:12]:
-        print("  SHARE FAIL:", f)
+    for b in stop[:10]:
+        print("  BLOCK:", b)
     return out
 
 

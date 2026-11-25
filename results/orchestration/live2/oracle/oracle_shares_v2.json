@@ -1,8 +1,10 @@
 {
- "_what": "StudyORACLE stages 5-6, D268-corrected: FAIR conditioned on context sent, dashcam on instant-threshold score_cell model. Control: HINDSIGHT oracle>=FAIR oracle, every arm share in [0,1] (>1 or <0 FAILS). rung 3 scored. D240 separate; s6 flagged. NOT the bound file.",
+ "_what": "StudyORACLE bound (D268-corrected): FAIR conditioned on CONTEXT SENT, dashcam on instant-threshold score_cell model (verified: same thresholds/instants both tiers, 0 imputed device scores, cloud false-alarm excess confirmed per seed). Control: share>1 a hard STOP; share<0 REPORTED, not blocking (genuine worse-than-device); HIND oracle>=FAIR oracle checked per seed AND pooled, a failure only if the gap exceeds the bootstrap CI. rung 3 scored. D240 separate; s6 flagged (20-25 distinct robot questions/seed, single-question basis).",
  "fair_recall_cloud_with_history": 0.568799,
  "fair_recall_cloud_without_history": 0.212222,
  "fair_recall_device": 0.257732,
+ "single_shot_cloud": 0.621881,
+ "single_shot_device": 0.547985,
  "dashcam_tier_acc": {
   "device|crash": 0.247238,
   "cloud|crash": 0.377072,
@@ -10,6 +12,7 @@
   "cloud|nocrash": 0.676222
  },
  "n_bootstrap": 2000,
+ "bootstrap_seed": 0,
  "cells_used_rung3": [
   "1x s4: covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30",
   "1x s5: covex-v6-fair-final_n16_s5_1200s_h27_3t_L3_epg_rq30",
@@ -20,314 +23,557 @@
   "kv0.5r s6: covex-v6-fair-final_n16_s6_1200s_h27_3t_kv0.5r_L3_epg_rq30",
   "kv0.5r s7: covex-v6-fair-final_n16_s7_1200s_h27_3t_kv0.5r_L3_epg_rq30"
  ],
- "fail": [
-  "1x s4 base dashcam FAIR: share -0.3915",
-  "1x s4 rules dashcam FAIR: share -0.1276",
-  "1x s4 state-uo dashcam FAIR: share -0.1626",
-  "1x s4 state-uo dashcam HINDSIGHT: share -0.04",
-  "1x s4 state-uo-c5attr dashcam FAIR: share -0.208",
-  "1x s4 state-uo-c5attr dashcam HINDSIGHT: share -0.04",
-  "1x s4 state-shares dashcam FAIR: share -0.5255",
-  "1x s4 state-shares dashcam HINDSIGHT: share -0.104",
-  "1x s4 state-shares-r1 dashcam FAIR: share -0.5226",
-  "1x s4 state-shares-r1 dashcam HINDSIGHT: share -0.056",
-  "1x s4 state-shares-r2 dashcam FAIR: share -0.5372",
-  "1x s4 state-shares-r2 dashcam HINDSIGHT: share -0.096",
-  "1x s4 fair-c5attr dashcam FAIR: share -0.3647",
-  "1x s4 fair-c5attr dashcam HINDSIGHT: share -0.064",
-  "1x s4 fair-c5attr-gain0 dashcam FAIR: share -0.1709",
-  "1x s4 edf single_shot HINDSIGHT: share -0.0164",
-  "1x s4 edf dashcam FAIR: share -0.142",
-  "1x s4 edf dashcam HINDSIGHT: share -0.088",
-  "1x s4 edf pooled HINDSIGHT: share -0.0424",
-  "1x s4 llf dashcam FAIR: share -0.4338",
-  "1x s4 attentionstore-prefetch single_shot HINDSIGHT: share -0.0328",
-  "1x s4 lmcache single_shot HINDSIGHT: share -0.0328",
-  "1x s4 simplestream recall FAIR: share -0.1463",
-  "1x s4 simplestream recall HINDSIGHT: share -0.52",
-  "1x s4 simplestream dashcam FAIR: share -0.5539",
-  "1x s4 simplestream dashcam HINDSIGHT: share -0.048",
-  "1x s4 simplestream pooled HINDSIGHT: share -0.0424",
-  "1x s4 streamscout recall FAIR: share -0.1463",
-  "1x s4 streamscout recall HINDSIGHT: share -0.62",
-  "1x s4 streamscout dashcam FAIR: share -0.5366",
-  "1x s4 streamscout dashcam HINDSIGHT: share -0.04",
-  "1x s4 streamscout pooled HINDSIGHT: share -0.0593",
-  "1x s4 querystream-proactive single_shot HINDSIGHT: share -0.0164",
-  "1x s4 fair-c5attr-rr dashcam FAIR: share -0.5285",
-  "1x s4 fair-c5attr-rr dashcam HINDSIGHT: share -0.208",
-  "1x s4 fair-final-rung3 dashcam FAIR: share -0.5169",
-  "1x s4 fair-final-rung3 dashcam HINDSIGHT: share -0.08",
-  "1x s5 base dashcam FAIR: share -0.179",
-  "1x s5 base dashcam HINDSIGHT: share -0.0787",
-  "1x s5 rules dashcam FAIR: share -0.0229",
-  "1x s5 rules dashcam HINDSIGHT: share -0.0394",
-  "1x s5 state-uo dashcam FAIR: share -0.1237",
-  "1x s5 state-uo dashcam HINDSIGHT: share -0.0551",
-  "1x s5 state-uo-c5attr dashcam FAIR: share -0.1723",
-  "1x s5 state-uo-c5attr dashcam HINDSIGHT: share -0.0472",
-  "1x s5 state-shares dashcam FAIR: share -0.2994",
-  "1x s5 state-shares dashcam HINDSIGHT: share -0.0787",
-  "1x s5 state-shares-r1 dashcam FAIR: share -0.3254",
-  "1x s5 state-shares-r1 dashcam HINDSIGHT: share -0.0787",
-  "1x s5 state-shares-r2 dashcam FAIR: share -0.3383",
-  "1x s5 state-shares-r2 dashcam HINDSIGHT: share -0.0472",
-  "1x s5 fair-c5attr dashcam FAIR: share -0.2227",
-  "1x s5 fair-c5attr dashcam HINDSIGHT: share -0.1102",
-  "1x s5 fair-c5attr-gain0 dashcam FAIR: share -0.1054",
-  "1x s5 fair-c5attr-gain0 dashcam HINDSIGHT: share -0.0315",
-  "1x s5 edf recall HINDSIGHT: share -0.0303",
-  "1x s5 edf dashcam FAIR: share -0.1431",
-  "1x s5 edf dashcam HINDSIGHT: share -0.0157",
-  "1x s5 edf pooled HINDSIGHT: share -0.009",
-  "1x s5 llf dashcam FAIR: share -0.3202",
-  "1x s5 llf dashcam HINDSIGHT: share -0.1339",
-  "1x s5 llf pooled HINDSIGHT: share -0.0181",
-  "1x s5 b7-edf-feasibility single_shot HINDSIGHT: share -0.0328",
-  "1x s5 b7-edf-feasibility dashcam FAIR: share -0.0225",
-  "1x s5 always-cloud-fcfs single_shot HINDSIGHT: share -0.0164",
-  "1x s5 always-cloud-fcfs dashcam FAIR: share -0.007",
-  "1x s5 mooncake dashcam FAIR: share -0.025",
-  "1x s5 attentionstore-prefetch single_shot HINDSIGHT: share -0.0492",
-  "1x s5 attentionstore-prefetch dashcam FAIR: share -0.0122",
-  "1x s5 lmcache single_shot HINDSIGHT: share -0.0492",
-  "1x s5 lmcache dashcam FAIR: share -0.0044",
-  "1x s5 kvflow-prefetch single_shot HINDSIGHT: share -0.0328",
-  "1x s5 kvflow-prefetch dashcam FAIR: share -0.0173",
-  "1x s5 simplestream recall FAIR: share -0.1452",
-  "1x s5 simplestream dashcam FAIR: share -0.3481",
-  "1x s5 simplestream dashcam HINDSIGHT: share -0.0157",
-  "1x s5 streamscout recall FAIR: share -0.1452",
-  "1x s5 streamscout dashcam FAIR: share -0.343",
-  "1x s5 streamscout dashcam HINDSIGHT: share -0.0945",
-  "1x s5 querystream-proactive single_shot HINDSIGHT: share -0.0492",
-  "1x s5 querystream-proactive dashcam FAIR: share -0.0019",
-  "1x s5 warm-all-lru single_shot HINDSIGHT: share -0.0492",
-  "1x s5 fair-c5attr-rr dashcam FAIR: share -0.3433",
-  "1x s5 fair-c5attr-rr dashcam HINDSIGHT: share -0.1811",
-  "1x s5 fair-final-rung3 dashcam FAIR: share -0.2838",
-  "1x s5 fair-final-rung3 dashcam HINDSIGHT: share -0.189",
-  "1x s6 base dashcam FAIR: share -0.3398",
-  "1x s6 base dashcam HINDSIGHT: share -0.1176",
-  "1x s6 rules dashcam FAIR: share -0.0482",
-  "1x s6 rules dashcam HINDSIGHT: share -0.1681",
-  "1x s6 state-uo dashcam FAIR: share -0.2093",
-  "1x s6 state-uo dashcam HINDSIGHT: share -0.084",
-  "1x s6 state-uo-c5attr dashcam FAIR: share -0.2408",
-  "1x s6 state-uo-c5attr dashcam HINDSIGHT: share -0.1261",
-  "1x s6 state-shares dashcam FAIR: share -0.5138",
-  "1x s6 state-shares dashcam HINDSIGHT: share -0.1176",
-  "1x s6 state-shares-r1 dashcam FAIR: share -0.5513",
-  "1x s6 state-shares-r1 dashcam HINDSIGHT: share -0.1261",
-  "1x s6 state-shares-r2 dashcam FAIR: share -0.5281",
-  "1x s6 state-shares-r2 dashcam HINDSIGHT: share -0.1849",
-  "1x s6 fair-c5attr dashcam FAIR: share -0.3944",
-  "1x s6 fair-c5attr dashcam HINDSIGHT: share -0.1345",
-  "1x s6 fair-c5attr-gain0 dashcam FAIR: share -0.2583",
-  "1x s6 fair-c5attr-gain0 dashcam HINDSIGHT: share -0.1513",
-  "1x s6 edf dashcam FAIR: share -0.2911",
-  "1x s6 edf dashcam HINDSIGHT: share -0.1345",
-  "1x s6 edf pooled HINDSIGHT: share -0.0324",
-  "1x s6 llf dashcam FAIR: share -0.3878",
-  "1x s6 llf dashcam HINDSIGHT: share -0.2017",
-  "1x s6 llf pooled HINDSIGHT: share -0.0364",
-  "1x s6 b7-edf-feasibility dashcam FAIR: share -0.1788",
-  "1x s6 b7-edf-feasibility dashcam HINDSIGHT: share -0.0252",
-  "1x s6 always-cloud-fcfs dashcam FAIR: share -0.053",
-  "1x s6 mooncake dashcam FAIR: share -0.1846",
-  "1x s6 mooncake dashcam HINDSIGHT: share -0.0672",
-  "1x s6 attentionstore-prefetch single_shot HINDSIGHT: share -0.0323",
-  "1x s6 attentionstore-prefetch dashcam FAIR: share -0.0501",
-  "1x s6 lmcache single_shot HINDSIGHT: share -0.0161",
-  "1x s6 lmcache dashcam FAIR: share -0.0501",
-  "1x s6 kvflow-prefetch dashcam FAIR: share -0.0443",
-  "1x s6 simplestream recall FAIR: share -0.1463",
-  "1x s6 simplestream dashcam FAIR: share -0.542",
-  "1x s6 simplestream dashcam HINDSIGHT: share -0.1008",
-  "1x s6 streamscout recall FAIR: share -0.1463",
-  "1x s6 streamscout dashcam FAIR: share -0.5363",
-  "1x s6 streamscout dashcam HINDSIGHT: share -0.1261",
-  "1x s6 querystream-proactive single_shot HINDSIGHT: share -0.0161",
-  "1x s6 querystream-proactive dashcam FAIR: share -0.0472",
-  "1x s6 eco-llm dashcam FAIR: share -0.2019",
-  "1x s6 eco-llm dashcam HINDSIGHT: share -0.0504",
-  "1x s6 warm-all-lru single_shot HINDSIGHT: share -0.0161",
-  "1x s6 warm-all-lru dashcam FAIR: share -0.0134",
-  "1x s6 fair-c5attr-rr dashcam FAIR: share -0.5052",
-  "1x s6 fair-c5attr-rr dashcam HINDSIGHT: share -0.1345",
-  "1x s6 fair-final-rung3 dashcam FAIR: share -0.4909",
-  "1x s6 fair-final-rung3 dashcam HINDSIGHT: share -0.1176",
-  "1x s7 base dashcam FAIR: share -0.2708",
-  "1x s7 base dashcam HINDSIGHT: share -0.1709",
-  "1x s7 rules dashcam FAIR: share -0.0794",
-  "1x s7 rules dashcam HINDSIGHT: share -0.0427",
-  "1x s7 state-uo dashcam FAIR: share -0.137",
-  "1x s7 state-uo dashcam HINDSIGHT: share -0.1282",
-  "1x s7 state-uo-c5attr dashcam FAIR: share -0.1267",
-  "1x s7 state-uo-c5attr dashcam HINDSIGHT: share -0.0342",
-  "1x s7 state-shares dashcam FAIR: share -0.3579",
-  "1x s7 state-shares dashcam HINDSIGHT: share -0.094",
-  "1x s7 state-shares-r1 dashcam FAIR: share -0.3552",
-  "1x s7 state-shares-r1 dashcam HINDSIGHT: share -0.1026",
-  "1x s7 state-shares-r2 dashcam FAIR: share -0.371",
-  "1x s7 state-shares-r2 dashcam HINDSIGHT: share -0.1966",
-  "1x s7 fair-c5attr dashcam FAIR: share -0.2551",
-  "1x s7 fair-c5attr dashcam HINDSIGHT: share -0.094",
-  "1x s7 fair-c5attr-gain0 dashcam FAIR: share -0.1609",
-  "1x s7 fair-c5attr-gain0 dashcam HINDSIGHT: share -0.0513",
-  "1x s7 edf dashcam FAIR: share -0.204",
-  "1x s7 edf dashcam HINDSIGHT: share -0.0684",
-  "1x s7 edf pooled HINDSIGHT: share -0.0297",
-  "1x s7 llf dashcam FAIR: share -0.2787",
-  "1x s7 llf dashcam HINDSIGHT: share -0.1282",
-  "1x s7 llf pooled HINDSIGHT: share -0.0545",
-  "1x s7 b7-edf-feasibility dashcam FAIR: share -0.3426",
-  "1x s7 b7-edf-feasibility dashcam HINDSIGHT: share -0.1795",
-  "1x s7 always-cloud-fcfs recall FAIR: share -0.0016",
-  "1x s7 always-cloud-fcfs single_shot HINDSIGHT: share -0.0484",
-  "1x s7 always-cloud-fcfs dashcam FAIR: share -0.0603",
-  "1x s7 always-cloud-fcfs pooled HINDSIGHT: share -0.0099",
-  "1x s7 mooncake dashcam FAIR: share -0.2943",
-  "1x s7 mooncake dashcam HINDSIGHT: share -0.1368",
-  "1x s7 attentionstore-prefetch single_shot HINDSIGHT: share -0.0323",
-  "1x s7 attentionstore-prefetch dashcam FAIR: share -0.079",
-  "1x s7 lmcache single_shot HINDSIGHT: share -0.0484",
-  "1x s7 lmcache dashcam FAIR: share -0.071",
-  "1x s7 lmcache pooled HINDSIGHT: share -0.0099",
-  "1x s7 kvflow-prefetch single_shot HINDSIGHT: share -0.0323",
-  "1x s7 kvflow-prefetch dashcam FAIR: share -0.071",
-  "1x s7 kvflow-prefetch pooled HINDSIGHT: share -0.0099",
-  "1x s7 simplestream recall FAIR: share -0.1463",
-  "1x s7 simplestream recall HINDSIGHT: share -0.3043",
-  "1x s7 simplestream dashcam FAIR: share -0.3948",
-  "1x s7 simplestream dashcam HINDSIGHT: share -0.1624",
-  "1x s7 simplestream pooled HINDSIGHT: share -0.0149",
-  "1x s7 streamscout recall FAIR: share -0.1212",
-  "1x s7 streamscout recall HINDSIGHT: share -0.0435",
-  "1x s7 streamscout dashcam FAIR: share -0.3948",
-  "1x s7 streamscout dashcam HINDSIGHT: share -0.1197",
-  "1x s7 querystream-proactive single_shot HINDSIGHT: share -0.0323",
-  "1x s7 querystream-proactive dashcam FAIR: share -0.0737",
-  "1x s7 querystream-proactive pooled HINDSIGHT: share -0.005",
-  "1x s7 eco-llm recall FAIR: share -0.0132",
-  "1x s7 eco-llm dashcam FAIR: share -0.2918",
-  "1x s7 eco-llm dashcam HINDSIGHT: share -0.1368",
-  "1x s7 warm-all-lru dashcam FAIR: share -0.0578",
-  "1x s7 fair-c5attr-rr dashcam FAIR: share -0.35",
-  "1x s7 fair-c5attr-rr dashcam HINDSIGHT: share -0.1538",
-  "1x s7 fair-final-rung3 dashcam FAIR: share -0.3366",
-  "1x s7 fair-final-rung3 dashcam HINDSIGHT: share -0.2222",
-  "kv0.5r s4 llf dashcam FAIR: share -0.4835",
-  "kv0.5r s4 llf dashcam HINDSIGHT: share -0.112",
-  "kv0.5r s4 llf pooled HINDSIGHT: share -0.0042",
-  "kv0.5r s4 mooncake dashcam FAIR: share -0.3085",
-  "kv0.5r s4 simplestream recall FAIR: share -0.1463",
-  "kv0.5r s4 simplestream recall HINDSIGHT: share -0.52",
-  "kv0.5r s4 simplestream dashcam FAIR: share -0.551",
-  "kv0.5r s4 simplestream dashcam HINDSIGHT: share -0.064",
-  "kv0.5r s4 simplestream pooled HINDSIGHT: share -0.0508",
-  "kv0.5r s4 eco-llm recall HINDSIGHT: share -0.24",
-  "kv0.5r s4 eco-llm dashcam FAIR: share -0.2596",
-  "kv0.5r s4 fair-final-rung3 dashcam FAIR: share -0.4978",
-  "kv0.5r s4 fair-final-rung3 dashcam HINDSIGHT: share -0.024",
-  "kv0.5r s5 llf dashcam FAIR: share -0.3254",
-  "kv0.5r s5 llf dashcam HINDSIGHT: share -0.1496",
-  "kv0.5r s5 llf pooled HINDSIGHT: share -0.0588",
-  "kv0.5r s5 mooncake dashcam FAIR: share -0.197",
-  "kv0.5r s5 simplestream recall FAIR: share -0.1452",
-  "kv0.5r s5 simplestream dashcam FAIR: share -0.3481",
-  "kv0.5r s5 simplestream dashcam HINDSIGHT: share -0.0394",
-  "kv0.5r s5 eco-llm dashcam FAIR: share -0.187",
-  "kv0.5r s5 fair-final-rung3 dashcam FAIR: share -0.3391",
-  "kv0.5r s5 fair-final-rung3 dashcam HINDSIGHT: share -0.1654",
-  "kv0.5r s6 llf dashcam FAIR: share -0.428",
-  "kv0.5r s6 llf dashcam HINDSIGHT: share -0.1681",
-  "kv0.5r s6 llf pooled HINDSIGHT: share -0.0304",
-  "kv0.5r s6 mooncake dashcam FAIR: share -0.2974",
-  "kv0.5r s6 mooncake dashcam HINDSIGHT: share -0.1176",
-  "kv0.5r s6 simplestream recall FAIR: share -0.1463",
-  "kv0.5r s6 simplestream dashcam FAIR: share -0.542",
-  "kv0.5r s6 simplestream dashcam HINDSIGHT: share -0.1008",
-  "kv0.5r s6 eco-llm dashcam FAIR: share -0.3059",
-  "kv0.5r s6 eco-llm dashcam HINDSIGHT: share -0.0924",
-  "kv0.5r s6 fair-final-rung3 recall HINDSIGHT: share 1.0612",
-  "kv0.5r s6 fair-final-rung3 dashcam FAIR: share -0.4859",
-  "kv0.5r s6 fair-final-rung3 dashcam HINDSIGHT: share -0.1849",
-  "kv0.5r s7 llf dashcam FAIR: share -0.3158",
-  "kv0.5r s7 llf dashcam HINDSIGHT: share -0.1709",
-  "kv0.5r s7 llf pooled HINDSIGHT: share -0.0343",
-  "kv0.5r s7 mooncake dashcam FAIR: share -0.2919",
-  "kv0.5r s7 mooncake dashcam HINDSIGHT: share -0.1197",
-  "kv0.5r s7 simplestream recall FAIR: share -0.1463",
-  "kv0.5r s7 simplestream recall HINDSIGHT: share -0.28",
-  "kv0.5r s7 simplestream dashcam FAIR: share -0.3948",
-  "kv0.5r s7 simplestream dashcam HINDSIGHT: share -0.1538",
-  "kv0.5r s7 simplestream pooled HINDSIGHT: share -0.0098",
-  "kv0.5r s7 eco-llm recall FAIR: share -0.0362",
-  "kv0.5r s7 eco-llm recall HINDSIGHT: share -0.12",
-  "kv0.5r s7 eco-llm dashcam FAIR: share -0.2819",
-  "kv0.5r s7 eco-llm dashcam HINDSIGHT: share -0.1368",
-  "kv0.5r s7 eco-llm pooled HINDSIGHT: share -0.0245",
-  "kv0.5r s7 fair-final-rung3 dashcam FAIR: share -0.3082",
-  "kv0.5r s7 fair-final-rung3 dashcam HINDSIGHT: share -0.094"
+ "stop_share_gt_1": [],
+ "reported_share_lt_0": [
+  "1x s4 base dashcam FAIR: -0.3915",
+  "1x s4 rules dashcam FAIR: -0.1276",
+  "1x s4 state-uo dashcam FAIR: -0.1626",
+  "1x s4 state-uo dashcam HINDSIGHT: -0.04",
+  "1x s4 state-uo-c5attr dashcam FAIR: -0.208",
+  "1x s4 state-uo-c5attr dashcam HINDSIGHT: -0.04",
+  "1x s4 state-shares dashcam FAIR: -0.5255",
+  "1x s4 state-shares dashcam HINDSIGHT: -0.104",
+  "1x s4 state-shares-r1 dashcam FAIR: -0.5226",
+  "1x s4 state-shares-r1 dashcam HINDSIGHT: -0.056",
+  "1x s4 state-shares-r2 dashcam FAIR: -0.5372",
+  "1x s4 state-shares-r2 dashcam HINDSIGHT: -0.096",
+  "1x s4 fair-c5attr dashcam FAIR: -0.3647",
+  "1x s4 fair-c5attr dashcam HINDSIGHT: -0.064",
+  "1x s4 fair-c5attr-gain0 dashcam FAIR: -0.1709",
+  "1x s4 edf single_shot HINDSIGHT: -0.0164",
+  "1x s4 edf dashcam FAIR: -0.142",
+  "1x s4 edf dashcam HINDSIGHT: -0.088",
+  "1x s4 edf pooled HINDSIGHT: -0.0418",
+  "1x s4 llf dashcam FAIR: -0.4338",
+  "1x s4 attentionstore-prefetch single_shot HINDSIGHT: -0.0328",
+  "1x s4 lmcache single_shot HINDSIGHT: -0.0328",
+  "1x s4 simplestream recall FAIR: -0.1463",
+  "1x s4 simplestream recall HINDSIGHT: -0.4906",
+  "1x s4 simplestream dashcam FAIR: -0.5539",
+  "1x s4 simplestream dashcam HINDSIGHT: -0.048",
+  "1x s4 simplestream pooled HINDSIGHT: -0.0418",
+  "1x s4 streamscout recall FAIR: -0.1463",
+  "1x s4 streamscout recall HINDSIGHT: -0.5849",
+  "1x s4 streamscout dashcam FAIR: -0.5366",
+  "1x s4 streamscout dashcam HINDSIGHT: -0.04",
+  "1x s4 streamscout pooled HINDSIGHT: -0.0586",
+  "1x s4 querystream-proactive single_shot HINDSIGHT: -0.0164",
+  "1x s4 fair-c5attr-rr dashcam FAIR: -0.5285",
+  "1x s4 fair-c5attr-rr dashcam HINDSIGHT: -0.208",
+  "1x s4 fair-final-rung3 dashcam FAIR: -0.5169",
+  "1x s4 fair-final-rung3 dashcam HINDSIGHT: -0.08",
+  "1x s5 base dashcam FAIR: -0.179",
+  "1x s5 base dashcam HINDSIGHT: -0.0787",
+  "1x s5 rules dashcam FAIR: -0.0229",
+  "1x s5 rules dashcam HINDSIGHT: -0.0394",
+  "1x s5 state-uo dashcam FAIR: -0.1237",
+  "1x s5 state-uo dashcam HINDSIGHT: -0.0551",
+  "1x s5 state-uo-c5attr dashcam FAIR: -0.1723",
+  "1x s5 state-uo-c5attr dashcam HINDSIGHT: -0.0472",
+  "1x s5 state-shares dashcam FAIR: -0.2994",
+  "1x s5 state-shares dashcam HINDSIGHT: -0.0787",
+  "1x s5 state-shares-r1 dashcam FAIR: -0.3254",
+  "1x s5 state-shares-r1 dashcam HINDSIGHT: -0.0787",
+  "1x s5 state-shares-r2 dashcam FAIR: -0.3383",
+  "1x s5 state-shares-r2 dashcam HINDSIGHT: -0.0472",
+  "1x s5 fair-c5attr dashcam FAIR: -0.2227",
+  "1x s5 fair-c5attr dashcam HINDSIGHT: -0.1102",
+  "1x s5 fair-c5attr-gain0 dashcam FAIR: -0.1054",
+  "1x s5 fair-c5attr-gain0 dashcam HINDSIGHT: -0.0315",
+  "1x s5 edf recall HINDSIGHT: -0.0238",
+  "1x s5 edf dashcam FAIR: -0.1431",
+  "1x s5 edf dashcam HINDSIGHT: -0.0157",
+  "1x s5 edf pooled HINDSIGHT: -0.0087",
+  "1x s5 llf dashcam FAIR: -0.3202",
+  "1x s5 llf dashcam HINDSIGHT: -0.1339",
+  "1x s5 llf pooled HINDSIGHT: -0.0174",
+  "1x s5 b7-edf-feasibility single_shot HINDSIGHT: -0.0328",
+  "1x s5 b7-edf-feasibility dashcam FAIR: -0.0225",
+  "1x s5 always-cloud-fcfs single_shot HINDSIGHT: -0.0164",
+  "1x s5 always-cloud-fcfs dashcam FAIR: -0.007",
+  "1x s5 mooncake dashcam FAIR: -0.025",
+  "1x s5 attentionstore-prefetch single_shot HINDSIGHT: -0.0492",
+  "1x s5 attentionstore-prefetch dashcam FAIR: -0.0122",
+  "1x s5 lmcache single_shot HINDSIGHT: -0.0492",
+  "1x s5 lmcache dashcam FAIR: -0.0044",
+  "1x s5 kvflow-prefetch single_shot HINDSIGHT: -0.0328",
+  "1x s5 kvflow-prefetch dashcam FAIR: -0.0173",
+  "1x s5 simplestream recall FAIR: -0.1452",
+  "1x s5 simplestream dashcam FAIR: -0.3481",
+  "1x s5 simplestream dashcam HINDSIGHT: -0.0157",
+  "1x s5 streamscout recall FAIR: -0.1452",
+  "1x s5 streamscout dashcam FAIR: -0.343",
+  "1x s5 streamscout dashcam HINDSIGHT: -0.0945",
+  "1x s5 querystream-proactive single_shot HINDSIGHT: -0.0492",
+  "1x s5 querystream-proactive dashcam FAIR: -0.0019",
+  "1x s5 warm-all-lru single_shot HINDSIGHT: -0.0492",
+  "1x s5 fair-c5attr-rr dashcam FAIR: -0.3433",
+  "1x s5 fair-c5attr-rr dashcam HINDSIGHT: -0.1811",
+  "1x s5 fair-final-rung3 dashcam FAIR: -0.2838",
+  "1x s5 fair-final-rung3 dashcam HINDSIGHT: -0.189",
+  "1x s6 base dashcam FAIR: -0.3398",
+  "1x s6 base dashcam HINDSIGHT: -0.1176",
+  "1x s6 rules dashcam FAIR: -0.0482",
+  "1x s6 rules dashcam HINDSIGHT: -0.1681",
+  "1x s6 state-uo dashcam FAIR: -0.2093",
+  "1x s6 state-uo dashcam HINDSIGHT: -0.084",
+  "1x s6 state-uo-c5attr dashcam FAIR: -0.2408",
+  "1x s6 state-uo-c5attr dashcam HINDSIGHT: -0.1261",
+  "1x s6 state-shares dashcam FAIR: -0.5138",
+  "1x s6 state-shares dashcam HINDSIGHT: -0.1176",
+  "1x s6 state-shares-r1 dashcam FAIR: -0.5513",
+  "1x s6 state-shares-r1 dashcam HINDSIGHT: -0.1261",
+  "1x s6 state-shares-r2 dashcam FAIR: -0.5281",
+  "1x s6 state-shares-r2 dashcam HINDSIGHT: -0.1849",
+  "1x s6 fair-c5attr dashcam FAIR: -0.3944",
+  "1x s6 fair-c5attr dashcam HINDSIGHT: -0.1345",
+  "1x s6 fair-c5attr-gain0 dashcam FAIR: -0.2583",
+  "1x s6 fair-c5attr-gain0 dashcam HINDSIGHT: -0.1513",
+  "1x s6 edf dashcam FAIR: -0.2911",
+  "1x s6 edf dashcam HINDSIGHT: -0.1345",
+  "1x s6 edf pooled HINDSIGHT: -0.0314",
+  "1x s6 llf dashcam FAIR: -0.3878",
+  "1x s6 llf dashcam HINDSIGHT: -0.2017",
+  "1x s6 llf pooled HINDSIGHT: -0.0353",
+  "1x s6 b7-edf-feasibility dashcam FAIR: -0.1788",
+  "1x s6 b7-edf-feasibility dashcam HINDSIGHT: -0.0252",
+  "1x s6 always-cloud-fcfs dashcam FAIR: -0.053",
+  "1x s6 mooncake dashcam FAIR: -0.1846",
+  "1x s6 mooncake dashcam HINDSIGHT: -0.0672",
+  "1x s6 attentionstore-prefetch single_shot HINDSIGHT: -0.0323",
+  "1x s6 attentionstore-prefetch dashcam FAIR: -0.0501",
+  "1x s6 lmcache single_shot HINDSIGHT: -0.0161",
+  "1x s6 lmcache dashcam FAIR: -0.0501",
+  "1x s6 kvflow-prefetch dashcam FAIR: -0.0443",
+  "1x s6 simplestream recall FAIR: -0.1463",
+  "1x s6 simplestream dashcam FAIR: -0.542",
+  "1x s6 simplestream dashcam HINDSIGHT: -0.1008",
+  "1x s6 streamscout recall FAIR: -0.1463",
+  "1x s6 streamscout dashcam FAIR: -0.5363",
+  "1x s6 streamscout dashcam HINDSIGHT: -0.1261",
+  "1x s6 querystream-proactive single_shot HINDSIGHT: -0.0161",
+  "1x s6 querystream-proactive dashcam FAIR: -0.0472",
+  "1x s6 eco-llm dashcam FAIR: -0.2019",
+  "1x s6 eco-llm dashcam HINDSIGHT: -0.0504",
+  "1x s6 warm-all-lru single_shot HINDSIGHT: -0.0161",
+  "1x s6 warm-all-lru dashcam FAIR: -0.0134",
+  "1x s6 fair-c5attr-rr dashcam FAIR: -0.5052",
+  "1x s6 fair-c5attr-rr dashcam HINDSIGHT: -0.1345",
+  "1x s6 fair-final-rung3 dashcam FAIR: -0.4909",
+  "1x s6 fair-final-rung3 dashcam HINDSIGHT: -0.1176",
+  "1x s7 base dashcam FAIR: -0.2708",
+  "1x s7 base dashcam HINDSIGHT: -0.1709",
+  "1x s7 rules dashcam FAIR: -0.0794",
+  "1x s7 rules dashcam HINDSIGHT: -0.0427",
+  "1x s7 state-uo dashcam FAIR: -0.137",
+  "1x s7 state-uo dashcam HINDSIGHT: -0.1282",
+  "1x s7 state-uo-c5attr dashcam FAIR: -0.1267",
+  "1x s7 state-uo-c5attr dashcam HINDSIGHT: -0.0342",
+  "1x s7 state-shares dashcam FAIR: -0.3579",
+  "1x s7 state-shares dashcam HINDSIGHT: -0.094",
+  "1x s7 state-shares-r1 dashcam FAIR: -0.3552",
+  "1x s7 state-shares-r1 dashcam HINDSIGHT: -0.1026",
+  "1x s7 state-shares-r2 dashcam FAIR: -0.371",
+  "1x s7 state-shares-r2 dashcam HINDSIGHT: -0.1966",
+  "1x s7 fair-c5attr dashcam FAIR: -0.2551",
+  "1x s7 fair-c5attr dashcam HINDSIGHT: -0.094",
+  "1x s7 fair-c5attr-gain0 dashcam FAIR: -0.1609",
+  "1x s7 fair-c5attr-gain0 dashcam HINDSIGHT: -0.0513",
+  "1x s7 edf dashcam FAIR: -0.204",
+  "1x s7 edf dashcam HINDSIGHT: -0.0684",
+  "1x s7 edf pooled HINDSIGHT: -0.0283",
+  "1x s7 llf dashcam FAIR: -0.2787",
+  "1x s7 llf dashcam HINDSIGHT: -0.1282",
+  "1x s7 llf pooled HINDSIGHT: -0.0519",
+  "1x s7 b7-edf-feasibility dashcam FAIR: -0.3426",
+  "1x s7 b7-edf-feasibility dashcam HINDSIGHT: -0.1795",
+  "1x s7 always-cloud-fcfs recall FAIR: -0.0016",
+  "1x s7 always-cloud-fcfs single_shot HINDSIGHT: -0.0484",
+  "1x s7 always-cloud-fcfs dashcam FAIR: -0.0603",
+  "1x s7 always-cloud-fcfs pooled HINDSIGHT: -0.0094",
+  "1x s7 mooncake dashcam FAIR: -0.2943",
+  "1x s7 mooncake dashcam HINDSIGHT: -0.1368",
+  "1x s7 attentionstore-prefetch single_shot HINDSIGHT: -0.0323",
+  "1x s7 attentionstore-prefetch dashcam FAIR: -0.079",
+  "1x s7 lmcache single_shot HINDSIGHT: -0.0484",
+  "1x s7 lmcache dashcam FAIR: -0.071",
+  "1x s7 lmcache pooled HINDSIGHT: -0.0094",
+  "1x s7 kvflow-prefetch single_shot HINDSIGHT: -0.0323",
+  "1x s7 kvflow-prefetch dashcam FAIR: -0.071",
+  "1x s7 kvflow-prefetch pooled HINDSIGHT: -0.0094",
+  "1x s7 simplestream recall FAIR: -0.1463",
+  "1x s7 simplestream recall HINDSIGHT: -0.2121",
+  "1x s7 simplestream dashcam FAIR: -0.3948",
+  "1x s7 simplestream dashcam HINDSIGHT: -0.1624",
+  "1x s7 simplestream pooled HINDSIGHT: -0.0142",
+  "1x s7 streamscout recall FAIR: -0.1212",
+  "1x s7 streamscout recall HINDSIGHT: -0.0303",
+  "1x s7 streamscout dashcam FAIR: -0.3948",
+  "1x s7 streamscout dashcam HINDSIGHT: -0.1197",
+  "1x s7 querystream-proactive single_shot HINDSIGHT: -0.0323",
+  "1x s7 querystream-proactive dashcam FAIR: -0.0737",
+  "1x s7 querystream-proactive pooled HINDSIGHT: -0.0047",
+  "1x s7 eco-llm recall FAIR: -0.0132",
+  "1x s7 eco-llm dashcam FAIR: -0.2918",
+  "1x s7 eco-llm dashcam HINDSIGHT: -0.1368",
+  "1x s7 warm-all-lru dashcam FAIR: -0.0578",
+  "1x s7 fair-c5attr-rr dashcam FAIR: -0.35",
+  "1x s7 fair-c5attr-rr dashcam HINDSIGHT: -0.1538",
+  "1x s7 fair-final-rung3 dashcam FAIR: -0.3366",
+  "1x s7 fair-final-rung3 dashcam HINDSIGHT: -0.2222",
+  "kv0.5r s4 llf dashcam FAIR: -0.4835",
+  "kv0.5r s4 llf dashcam HINDSIGHT: -0.112",
+  "kv0.5r s4 llf pooled HINDSIGHT: -0.0042",
+  "kv0.5r s4 mooncake dashcam FAIR: -0.3085",
+  "kv0.5r s4 simplestream recall FAIR: -0.1463",
+  "kv0.5r s4 simplestream recall HINDSIGHT: -0.4906",
+  "kv0.5r s4 simplestream dashcam FAIR: -0.551",
+  "kv0.5r s4 simplestream dashcam HINDSIGHT: -0.064",
+  "kv0.5r s4 simplestream pooled HINDSIGHT: -0.0502",
+  "kv0.5r s4 eco-llm recall HINDSIGHT: -0.2264",
+  "kv0.5r s4 eco-llm dashcam FAIR: -0.2596",
+  "kv0.5r s4 fair-final-rung3 dashcam FAIR: -0.4978",
+  "kv0.5r s4 fair-final-rung3 dashcam HINDSIGHT: -0.024",
+  "kv0.5r s5 llf dashcam FAIR: -0.3254",
+  "kv0.5r s5 llf dashcam HINDSIGHT: -0.1496",
+  "kv0.5r s5 llf pooled HINDSIGHT: -0.0522",
+  "kv0.5r s5 mooncake dashcam FAIR: -0.197",
+  "kv0.5r s5 simplestream recall FAIR: -0.1452",
+  "kv0.5r s5 simplestream dashcam FAIR: -0.3481",
+  "kv0.5r s5 simplestream dashcam HINDSIGHT: -0.0394",
+  "kv0.5r s5 eco-llm dashcam FAIR: -0.187",
+  "kv0.5r s5 fair-final-rung3 dashcam FAIR: -0.3391",
+  "kv0.5r s5 fair-final-rung3 dashcam HINDSIGHT: -0.1654",
+  "kv0.5r s6 llf dashcam FAIR: -0.428",
+  "kv0.5r s6 llf dashcam HINDSIGHT: -0.1681",
+  "kv0.5r s6 llf pooled HINDSIGHT: -0.0275",
+  "kv0.5r s6 mooncake dashcam FAIR: -0.2974",
+  "kv0.5r s6 mooncake dashcam HINDSIGHT: -0.1176",
+  "kv0.5r s6 simplestream recall FAIR: -0.1463",
+  "kv0.5r s6 simplestream dashcam FAIR: -0.542",
+  "kv0.5r s6 simplestream dashcam HINDSIGHT: -0.1008",
+  "kv0.5r s6 eco-llm dashcam FAIR: -0.3059",
+  "kv0.5r s6 eco-llm dashcam HINDSIGHT: -0.0924",
+  "kv0.5r s6 fair-final-rung3 dashcam FAIR: -0.4859",
+  "kv0.5r s6 fair-final-rung3 dashcam HINDSIGHT: -0.1849",
+  "kv0.5r s7 llf dashcam FAIR: -0.3158",
+  "kv0.5r s7 llf dashcam HINDSIGHT: -0.1709",
+  "kv0.5r s7 llf pooled HINDSIGHT: -0.0333",
+  "kv0.5r s7 mooncake dashcam FAIR: -0.2919",
+  "kv0.5r s7 mooncake dashcam HINDSIGHT: -0.1197",
+  "kv0.5r s7 simplestream recall FAIR: -0.1463",
+  "kv0.5r s7 simplestream recall HINDSIGHT: -0.2258",
+  "kv0.5r s7 simplestream dashcam FAIR: -0.3948",
+  "kv0.5r s7 simplestream dashcam HINDSIGHT: -0.1538",
+  "kv0.5r s7 simplestream pooled HINDSIGHT: -0.0095",
+  "kv0.5r s7 eco-llm recall FAIR: -0.0362",
+  "kv0.5r s7 eco-llm recall HINDSIGHT: -0.0968",
+  "kv0.5r s7 eco-llm dashcam FAIR: -0.2819",
+  "kv0.5r s7 eco-llm dashcam HINDSIGHT: -0.1368",
+  "kv0.5r s7 eco-llm pooled HINDSIGHT: -0.0238",
+  "kv0.5r s7 fair-final-rung3 dashcam FAIR: -0.3082",
+  "kv0.5r s7 fair-final-rung3 dashcam HINDSIGHT: -0.094"
  ],
- "oracle_control": [
-  "1x s5 base recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 rules recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 state-uo recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 state-uo-c5attr recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 state-shares recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 state-shares-r1 recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 state-shares-r2 recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 fair-c5attr recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 fair-c5attr-gain0 recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 edf recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 llf recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 b7-edf-feasibility recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 always-cloud-fcfs recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 mooncake recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 attentionstore-prefetch recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 lmcache recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 kvflow-prefetch recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 simplestream recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 streamscout recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 querystream-proactive recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 warm-all-lru recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 fair-c5attr-rr recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s5 fair-final-rung3 recall: HIND oracle 0.559 < FAIR oracle 0.569",
-  "1x s7 base recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 rules recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 state-uo recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 state-uo-c5attr recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 state-shares recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 state-shares-r1 recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 state-shares-r2 recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 fair-c5attr recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 fair-c5attr-gain0 recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 llf recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 b7-edf-feasibility recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 mooncake recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 simplestream recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 streamscout recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 eco-llm recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 fair-c5attr-rr recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "1x s7 fair-final-rung3 recall: HIND oracle 0.514 < FAIR oracle 0.569",
-  "kv0.5r s5 llf recall: HIND oracle 0.425 < FAIR oracle 0.569",
-  "kv0.5r s5 mooncake recall: HIND oracle 0.425 < FAIR oracle 0.569",
-  "kv0.5r s5 simplestream recall: HIND oracle 0.425 < FAIR oracle 0.569",
-  "kv0.5r s5 eco-llm recall: HIND oracle 0.425 < FAIR oracle 0.569",
-  "kv0.5r s5 fair-final-rung3 recall: HIND oracle 0.425 < FAIR oracle 0.569",
-  "kv0.5r s6 llf recall: HIND oracle 0.463 < FAIR oracle 0.569",
-  "kv0.5r s6 mooncake recall: HIND oracle 0.463 < FAIR oracle 0.569",
-  "kv0.5r s6 simplestream recall: HIND oracle 0.463 < FAIR oracle 0.569",
-  "kv0.5r s6 eco-llm recall: HIND oracle 0.463 < FAIR oracle 0.569",
-  "kv0.5r s6 fair-final-rung3 recall: HIND oracle 0.463 < FAIR oracle 0.569",
-  "kv0.5r s7 llf recall: HIND oracle 0.533 < FAIR oracle 0.569",
-  "kv0.5r s7 mooncake recall: HIND oracle 0.533 < FAIR oracle 0.569",
-  "kv0.5r s7 simplestream recall: HIND oracle 0.533 < FAIR oracle 0.569",
-  "kv0.5r s7 eco-llm recall: HIND oracle 0.533 < FAIR oracle 0.569",
-  "kv0.5r s7 fair-final-rung3 recall: HIND oracle 0.533 < FAIR oracle 0.569"
- ],
+ "oracle_control": {
+  "1x": {
+   "per_seed": {
+    "s4": {
+     "recall": {
+      "fair_oracle": 3.7541,
+      "hind_oracle": 5.1,
+      "fair_minus_hind_ci95": [
+       -2.7202,
+       0.3024
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7087,
+      "fair_minus_hind_ci95": [
+       -0.1316,
+       -0.0392
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.6528,
+      "hind_oracle": 0.7865,
+      "fair_minus_hind_ci95": [
+       -0.1598,
+       -0.1051
+      ],
+      "fail": false
+     }
+    },
+    "s5": {
+     "recall": {
+      "fair_oracle": 2.8895,
+      "hind_oracle": 3.2,
+      "fair_minus_hind_ci95": [
+       -1.3293,
+       0.8004
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7107,
+      "fair_minus_hind_ci95": [
+       -0.1365,
+       -0.0438
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.6428,
+      "hind_oracle": 0.7843,
+      "fair_minus_hind_ci95": [
+       -0.1699,
+       -0.1124
+      ],
+      "fail": false
+     }
+    },
+    "s6": {
+     "recall": {
+      "fair_oracle": 3.4412,
+      "hind_oracle": 4.05,
+      "fair_minus_hind_ci95": [
+       -1.9006,
+       0.7097
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7087,
+      "fair_minus_hind_ci95": [
+       -0.1316,
+       -0.0392
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.6523,
+      "hind_oracle": 0.7879,
+      "fair_minus_hind_ci95": [
+       -0.162,
+       -0.1078
+      ],
+      "fail": false
+     }
+    },
+    "s7": {
+     "recall": {
+      "fair_oracle": 2.7147,
+      "hind_oracle": 2.9091,
+      "fair_minus_hind_ci95": [
+       -1.3437,
+       1.0143
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7103,
+      "fair_minus_hind_ci95": [
+       -0.1331,
+       -0.0383
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.6454,
+      "hind_oracle": 0.7871,
+      "fair_minus_hind_ci95": [
+       -0.1671,
+       -0.1143
+      ],
+      "fail": false
+     }
+    }
+   },
+   "pooled": {
+    "recall": {
+     "fair_oracle": 4.8398,
+     "hind_oracle": 5.7368,
+     "fair_minus_hind_ci95": [
+      -2.1532,
+      0.3081
+     ],
+     "fail": false
+    },
+    "single_shot": {
+     "fair_oracle": 2.4754,
+     "hind_oracle": 2.8245,
+     "fair_minus_hind_ci95": [
+      -0.5309,
+      -0.1548
+     ],
+     "fail": false
+    },
+    "dashcam": {
+     "fair_oracle": 0.6534,
+     "hind_oracle": 0.7926,
+     "fair_minus_hind_ci95": [
+      -0.1536,
+      -0.1257
+     ],
+     "fail": false
+    }
+   }
+  },
+  "kv0.5r": {
+   "per_seed": {
+    "s4": {
+     "recall": {
+      "fair_oracle": 3.7541,
+      "hind_oracle": 5.1,
+      "fair_minus_hind_ci95": [
+       -2.7202,
+       0.3024
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7087,
+      "fair_minus_hind_ci95": [
+       -0.1316,
+       -0.0392
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.6528,
+      "hind_oracle": 0.7865,
+      "fair_minus_hind_ci95": [
+       -0.1598,
+       -0.1051
+      ],
+      "fail": false
+     }
+    },
+    "s5": {
+     "recall": {
+      "fair_oracle": 2.8895,
+      "hind_oracle": 3.2,
+      "fair_minus_hind_ci95": [
+       -1.3293,
+       0.8004
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7107,
+      "fair_minus_hind_ci95": [
+       -0.1365,
+       -0.0438
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.6428,
+      "hind_oracle": 0.7843,
+      "fair_minus_hind_ci95": [
+       -0.1699,
+       -0.1124
+      ],
+      "fail": false
+     }
+    },
+    "s6": {
+     "recall": {
+      "fair_oracle": 3.4412,
+      "hind_oracle": 4.05,
+      "fair_minus_hind_ci95": [
+       -1.9006,
+       0.7097
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7087,
+      "fair_minus_hind_ci95": [
+       -0.1316,
+       -0.0392
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.6523,
+      "hind_oracle": 0.7879,
+      "fair_minus_hind_ci95": [
+       -0.162,
+       -0.1078
+      ],
+      "fail": false
+     }
+    },
+    "s7": {
+     "recall": {
+      "fair_oracle": 2.7147,
+      "hind_oracle": 2.8182,
+      "fair_minus_hind_ci95": [
+       -1.1765,
+       1.0439
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7103,
+      "fair_minus_hind_ci95": [
+       -0.1331,
+       -0.0383
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.6454,
+      "hind_oracle": 0.7871,
+      "fair_minus_hind_ci95": [
+       -0.1671,
+       -0.1143
+      ],
+      "fail": false
+     }
+    }
+   },
+   "pooled": {
+    "recall": {
+     "fair_oracle": 4.8398,
+     "hind_oracle": 5.7018,
+     "fair_minus_hind_ci95": [
+      -2.1184,
+      0.3207
+     ],
+     "fail": false
+    },
+    "single_shot": {
+     "fair_oracle": 2.4754,
+     "hind_oracle": 2.8245,
+     "fair_minus_hind_ci95": [
+      -0.5309,
+      -0.1548
+     ],
+     "fail": false
+    },
+    "dashcam": {
+     "fair_oracle": 0.6534,
+     "hind_oracle": 0.7926,
+     "fair_minus_hind_ci95": [
+      -0.1536,
+      -0.1257
+     ],
+     "fail": false
+    }
+   }
+  }
+ },
  "1x": {
   "s4": {
    "s6_outlier_flag": false,
@@ -342,10 +588,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.26,
+       "share": 0.2453,
        "ci95": [
-        0.0975,
-        0.3834
+        0.0882,
+        0.3667
        ]
       }
      },
@@ -390,10 +636,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.161,
+       "share": 0.159,
        "ci95": [
         0.0427,
-        0.2703
+        0.2658
        ]
       }
      }
@@ -408,10 +654,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.3,
+       "share": 0.283,
        "ci95": [
-        0.1304,
-        0.4737
+        0.1269,
+        0.4444
        ]
       }
      },
@@ -456,10 +702,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1271,
+       "share": 0.1255,
        "ci95": [
-        0.037,
-        0.2081
+        0.0365,
+        0.2049
        ]
       }
      }
@@ -474,10 +720,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.64,
+       "share": 0.6038,
        "ci95": [
-        0.0238,
-        0.8868
+        0.0222,
+        0.8511
        ]
       }
      },
@@ -522,10 +768,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.2034,
+       "share": 0.2008,
        "ci95": [
         0.0398,
-        0.3387
+        0.3346
        ]
       }
      }
@@ -540,10 +786,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.6,
+       "share": 0.566,
        "ci95": [
-        -0.1542,
-        0.8519
+        -0.1482,
+        0.8246
        ]
       }
      },
@@ -588,10 +834,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1907,
+       "share": 0.1883,
        "ci95": [
-        0.023,
-        0.342
+        0.0221,
+        0.3356
        ]
       }
      }
@@ -606,10 +852,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.46,
+       "share": 0.434,
        "ci95": [
-        0.2127,
-        0.742
+        0.2,
+        0.7027
        ]
       }
      },
@@ -654,10 +900,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1398,
+       "share": 0.1381,
        "ci95": [
-        -0.028,
-        0.271
+        -0.0269,
+        0.2682
        ]
       }
      }
@@ -672,10 +918,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.46,
+       "share": 0.434,
        "ci95": [
-        -0.1155,
-        0.7308
+        -0.1036,
+        0.7067
        ]
       }
      },
@@ -720,10 +966,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.161,
+       "share": 0.159,
        "ci95": [
-        -0.0187,
-        0.3035
+        -0.0182,
+        0.3
        ]
       }
      }
@@ -738,10 +984,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.4,
+       "share": 0.3774,
        "ci95": [
-        -0.2105,
-        0.7143
+        -0.1951,
+        0.6852
        ]
       }
      },
@@ -786,10 +1032,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1186,
+       "share": 0.1172,
        "ci95": [
-        -0.0601,
-        0.2653
+        -0.0585,
+        0.2614
        ]
       }
      }
@@ -804,10 +1050,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.68,
+       "share": 0.6415,
        "ci95": [
-        0.0384,
-        0.9077
+        0.037,
+        0.8788
        ]
       }
      },
@@ -852,10 +1098,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1992,
+       "share": 0.1967,
        "ci95": [
-        0.0192,
-        0.3463
+        0.0189,
+        0.3427
        ]
       }
      }
@@ -870,10 +1116,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.64,
+       "share": 0.6038,
        "ci95": [
         0.0,
-        0.8718
+        0.8358
        ]
       }
      },
@@ -918,10 +1164,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.2288,
+       "share": 0.2259,
        "ci95": [
-        0.0616,
-        0.3722
+        0.061,
+        0.3682
        ]
       }
      }
@@ -936,10 +1182,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.04,
+       "share": 0.0377,
        "ci95": [
         0.0,
-        0.0926
+        0.0882
        ]
       }
      },
@@ -984,10 +1230,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0424,
+       "share": -0.0418,
        "ci95": [
-        -0.1191,
-        0.0278
+        -0.1167,
+        0.0272
        ]
       }
      }
@@ -1002,10 +1248,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.06,
+       "share": 0.0566,
        "ci95": [
         0.0,
-        0.1458
+        0.1379
        ]
       }
      },
@@ -1050,10 +1296,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0466,
+       "share": 0.046,
        "ci95": [
-        -0.0783,
-        0.1524
+        -0.0773,
+        0.1512
        ]
       }
      }
@@ -1116,10 +1362,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0339,
+       "share": 0.0335,
        "ci95": [
         -0.0039,
-        0.0736
+        0.0729
        ]
       }
      }
@@ -1182,10 +1428,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0297,
+       "share": 0.0293,
        "ci95": [
         -0.0069,
-        0.0676
+        0.0664
        ]
       }
      }
@@ -1248,10 +1494,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0212,
+       "share": 0.0209,
        "ci95": [
-        -0.0138,
-        0.0581
+        -0.0137,
+        0.0571
        ]
       }
      }
@@ -1314,10 +1560,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0254,
+       "share": 0.0251,
        "ci95": [
-        -0.0087,
-        0.0601
+        -0.0085,
+        0.0593
        ]
       }
      }
@@ -1380,10 +1626,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0212,
+       "share": 0.0209,
        "ci95": [
-        -0.0162,
-        0.0563
+        -0.0159,
+        0.0558
        ]
       }
      }
@@ -1446,10 +1692,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0212,
+       "share": 0.0209,
        "ci95": [
-        -0.0104,
-        0.0543
+        -0.0102,
+        0.0535
        ]
       }
      }
@@ -1464,10 +1710,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.52,
+       "share": -0.4906,
        "ci95": [
-        -2.4843,
-        0.2535
+        -2.3481,
+        0.2369
        ]
       }
      },
@@ -1512,9 +1758,9 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0424,
+       "share": -0.0418,
        "ci95": [
-        -0.3318,
+        -0.3294,
         0.171
        ]
       }
@@ -1530,10 +1776,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.62,
+       "share": -0.5849,
        "ci95": [
-        -2.6846,
-        0.143
+        -2.5177,
+        0.1376
        ]
       }
      },
@@ -1578,10 +1824,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0593,
+       "share": -0.0586,
        "ci95": [
-        -0.3317,
-        0.1551
+        -0.3246,
+        0.1536
        ]
       }
      }
@@ -1644,10 +1890,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0254,
+       "share": 0.0251,
        "ci95": [
-        -0.0087,
-        0.0574
+        -0.0086,
+        0.0569
        ]
       }
      }
@@ -1710,10 +1956,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0212,
+       "share": 0.0209,
        "ci95": [
         -0.0165,
-        0.0586
+        0.0578
        ]
       }
      }
@@ -1776,10 +2022,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0297,
+       "share": 0.0293,
        "ci95": [
         0.0,
-        0.062
+        0.0614
        ]
       }
      }
@@ -1794,10 +2040,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.7,
+       "share": 0.6604,
        "ci95": [
-        0.0624,
-        0.9432
+        0.0571,
+        0.9131
        ]
       }
      },
@@ -1842,10 +2088,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1314,
+       "share": 0.1297,
        "ci95": [
-        -0.077,
-        0.2966
+        -0.0769,
+        0.2942
        ]
       }
      }
@@ -1860,10 +2106,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.68,
+       "share": 0.6415,
        "ci95": [
         0.0,
-        0.9207
+        0.8971
        ]
       }
      },
@@ -1908,10 +2154,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1907,
+       "share": 0.1883,
        "ci95": [
-        -0.0201,
-        0.3446
+        -0.0198,
+        0.3403
        ]
       }
      }
@@ -1931,10 +2177,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1515,
+       "share": 0.119,
        "ci95": [
-        -0.2593,
-        0.4118
+        -0.1725,
+        0.3333
        ]
       }
      },
@@ -1979,10 +2225,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0769,
+       "share": 0.0739,
        "ci95": [
-        -0.0606,
-        0.1911
+        -0.0578,
+        0.1834
        ]
       }
      }
@@ -1997,10 +2243,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1212,
+       "share": 0.0952,
        "ci95": [
-        -0.5,
-        0.3889
+        -0.3002,
+        0.3281
        ]
       }
      },
@@ -2045,10 +2291,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0588,
+       "share": 0.0565,
        "ci95": [
-        -0.0519,
-        0.1574
+        -0.0498,
+        0.1529
        ]
       }
      }
@@ -2063,10 +2309,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.4848,
+       "share": 0.381,
        "ci95": [
-        -0.8573,
-        0.8936
+        -0.5387,
+        0.7755
        ]
       }
      },
@@ -2111,10 +2357,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1312,
+       "share": 0.1261,
        "ci95": [
-        -0.0428,
-        0.2785
+        -0.041,
+        0.2707
        ]
       }
      }
@@ -2129,10 +2375,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.4848,
+       "share": 0.381,
        "ci95": [
-        -0.8333,
-        0.9105
+        -0.5219,
+        0.7819
        ]
       }
      },
@@ -2177,10 +2423,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1357,
+       "share": 0.1304,
        "ci95": [
-        -0.0488,
-        0.2857
+        -0.0466,
+        0.2743
        ]
       }
      }
@@ -2195,10 +2441,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.4545,
+       "share": 0.3571,
        "ci95": [
-        -0.2384,
-        0.7667
+        -0.1667,
+        0.65
        ]
       }
      },
@@ -2243,10 +2489,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1086,
+       "share": 0.1043,
        "ci95": [
-        -0.0693,
-        0.2682
+        -0.0673,
+        0.2567
        ]
       }
      }
@@ -2261,10 +2507,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.4242,
+       "share": 0.3333,
        "ci95": [
-        -1.0911,
-        0.9091
+        -0.6667,
+        0.7736
        ]
       }
      },
@@ -2309,10 +2555,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1131,
+       "share": 0.1087,
        "ci95": [
-        -0.0914,
-        0.2931
+        -0.0886,
+        0.2824
        ]
       }
      }
@@ -2327,10 +2573,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.3939,
+       "share": 0.3095,
        "ci95": [
-        -1.0,
-        0.8685
+        -0.6215,
+        0.7381
        ]
       }
      },
@@ -2375,10 +2621,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1267,
+       "share": 0.1217,
        "ci95": [
-        -0.086,
-        0.2985
+        -0.0801,
+        0.2881
        ]
       }
      }
@@ -2393,10 +2639,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.4848,
+       "share": 0.381,
        "ci95": [
-        -0.6673,
-        0.871
+        -0.4485,
+        0.7414
        ]
       }
      },
@@ -2441,10 +2687,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.086,
+       "share": 0.0826,
        "ci95": [
-        -0.1053,
-        0.248
+        -0.101,
+        0.2353
        ]
       }
      }
@@ -2459,10 +2705,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.4848,
+       "share": 0.381,
        "ci95": [
-        -0.75,
-        0.9001
+        -0.4743,
+        0.7778
        ]
       }
      },
@@ -2507,10 +2753,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1448,
+       "share": 0.1391,
        "ci95": [
-        -0.0287,
-        0.2819
+        -0.0282,
+        0.2731
        ]
       }
      }
@@ -2525,9 +2771,9 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0303,
+       "share": -0.0238,
        "ci95": [
-        -0.1429,
+        -0.1034,
         0.0
        ]
       }
@@ -2573,10 +2819,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.009,
+       "share": -0.0087,
        "ci95": [
-        -0.101,
-        0.075
+        -0.0971,
+        0.0714
        ]
       }
      }
@@ -2639,10 +2885,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0181,
+       "share": -0.0174,
        "ci95": [
-        -0.1505,
-        0.104
+        -0.1435,
+        0.0995
        ]
       }
      }
@@ -2657,10 +2903,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0303,
+       "share": 0.0238,
        "ci95": [
         0.0,
-        0.087
+        0.069
        ]
       }
      },
@@ -2705,10 +2951,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0136,
+       "share": 0.013,
        "ci95": [
-        -0.0268,
-        0.0505
+        -0.0252,
+        0.0492
        ]
       }
      }
@@ -2723,10 +2969,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0606,
+       "share": 0.0476,
        "ci95": [
         0.0,
-        0.1579
+        0.1163
        ]
       }
      },
@@ -2771,10 +3017,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0136,
+       "share": 0.013,
        "ci95": [
-        -0.0303,
-        0.0548
+        -0.0291,
+        0.0529
        ]
       }
      }
@@ -2789,10 +3035,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0303,
+       "share": 0.0238,
        "ci95": [
         0.0,
-        0.0833
+        0.0667
        ]
       }
      },
@@ -2837,10 +3083,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.009,
+       "share": 0.0087,
        "ci95": [
-        -0.0332,
-        0.05
+        -0.0321,
+        0.0483
        ]
       }
      }
@@ -2855,10 +3101,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0606,
+       "share": 0.0476,
        "ci95": [
         0.0,
-        0.149
+        0.1143
        ]
       }
      },
@@ -2903,10 +3149,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.009,
+       "share": 0.0087,
        "ci95": [
-        -0.0303,
-        0.0446
+        -0.0288,
+        0.0424
        ]
       }
      }
@@ -2971,8 +3217,8 @@
       "HINDSIGHT": {
        "share": 0.0,
        "ci95": [
-        -0.0392,
-        0.0369
+        -0.0372,
+        0.0359
        ]
       }
      }
@@ -2987,10 +3233,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0606,
+       "share": 0.0476,
        "ci95": [
         0.0,
-        0.1429
+        0.1111
        ]
       }
      },
@@ -3035,10 +3281,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0045,
+       "share": 0.0043,
        "ci95": [
-        -0.0408,
-        0.0456
+        -0.039,
+        0.0441
        ]
       }
      }
@@ -3055,8 +3301,8 @@
       "HINDSIGHT": {
        "share": 0.0,
        "ci95": [
-        -1.0,
-        0.4839
+        -0.6877,
+        0.3654
        ]
       }
      },
@@ -3101,10 +3347,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0905,
+       "share": 0.087,
        "ci95": [
-        -0.0878,
-        0.2436
+        -0.0838,
+        0.235
        ]
       }
      }
@@ -3121,8 +3367,8 @@
       "HINDSIGHT": {
        "share": 0.0,
        "ci95": [
-        -1.1502,
-        0.6048
+        -0.8126,
+        0.4384
        ]
       }
      },
@@ -3167,10 +3413,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0452,
+       "share": 0.0435,
        "ci95": [
-        -0.1422,
-        0.2222
+        -0.1407,
+        0.2121
        ]
       }
      }
@@ -3233,10 +3479,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0045,
+       "share": 0.0043,
        "ci95": [
-        -0.0304,
-        0.0393
+        -0.029,
+        0.0376
        ]
       }
      }
@@ -3285,10 +3531,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0303,
+       "share": 0.0238,
        "ci95": [
         0.0,
-        0.0857
+        0.0698
        ]
       }
      },
@@ -3333,10 +3579,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.009,
+       "share": 0.0087,
        "ci95": [
-        -0.0293,
-        0.047
+        -0.0278,
+        0.0456
        ]
       }
      }
@@ -3351,10 +3597,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.5455,
+       "share": 0.4286,
        "ci95": [
-        -0.6364,
-        0.9737
+        -0.4546,
+        0.8473
        ]
       }
      },
@@ -3399,10 +3645,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0633,
+       "share": 0.0609,
        "ci95": [
-        -0.1535,
-        0.2385
+        -0.1474,
+        0.2296
        ]
       }
      }
@@ -3417,10 +3663,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.5455,
+       "share": 0.4286,
        "ci95": [
-        -0.9336,
-        0.9767
+        -0.5771,
+        0.8448
        ]
       }
      },
@@ -3465,10 +3711,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0633,
+       "share": 0.0609,
        "ci95": [
-        -0.1443,
-        0.2381
+        -0.1366,
+        0.2286
        ]
       }
      }
@@ -3488,10 +3734,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.3485,
+       "share": 0.3108,
        "ci95": [
-        0.1852,
-        0.4842
+        0.1538,
+        0.434
        ]
       }
      },
@@ -3536,10 +3782,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1336,
+       "share": 0.1294,
        "ci95": [
-        -0.0145,
-        0.2443
+        -0.014,
+        0.2386
        ]
       }
      }
@@ -3554,10 +3800,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1818,
+       "share": 0.1622,
        "ci95": [
         0.0,
-        0.3397
+        0.2958
        ]
       }
      },
@@ -3602,10 +3848,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0486,
+       "share": 0.0471,
        "ci95": [
-        -0.0554,
-        0.1453
+        -0.0544,
+        0.1413
        ]
       }
      }
@@ -3620,10 +3866,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.803,
+       "share": 0.7162,
        "ci95": [
-        0.3458,
-        0.9524
+        0.25,
+        0.8871
        ]
       }
      },
@@ -3668,10 +3914,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.2672,
+       "share": 0.2588,
        "ci95": [
-        0.0768,
-        0.417
+        0.0742,
+        0.4042
        ]
       }
      }
@@ -3686,10 +3932,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.7424,
+       "share": 0.6622,
        "ci95": [
-        0.2963,
-        0.9024
+        0.238,
+        0.8365
        ]
       }
      },
@@ -3734,10 +3980,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.2267,
+       "share": 0.2196,
        "ci95": [
-        0.039,
-        0.3688
+        0.0379,
+        0.3582
        ]
       }
      }
@@ -3752,10 +3998,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.4545,
+       "share": 0.4054,
        "ci95": [
-        0.175,
-        0.6286
+        0.1372,
+        0.5684
        ]
       }
      },
@@ -3800,10 +4046,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1619,
+       "share": 0.1569,
        "ci95": [
-        -0.0171,
-        0.2928
+        -0.0167,
+        0.2839
        ]
       }
      }
@@ -3818,10 +4064,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.7121,
+       "share": 0.6351,
        "ci95": [
-        0.1142,
-        0.9483
+        0.0909,
+        0.8647
        ]
       }
      },
@@ -3866,10 +4112,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.2227,
+       "share": 0.2157,
        "ci95": [
         0.0,
-        0.3955
+        0.3874
        ]
       }
      }
@@ -3884,10 +4130,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.6061,
+       "share": 0.5405,
        "ci95": [
-        0.0416,
-        0.8571
+        0.0344,
+        0.7876
        ]
       }
      },
@@ -3932,10 +4178,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.166,
+       "share": 0.1608,
        "ci95": [
-        -0.0478,
-        0.3406
+        -0.0459,
+        0.3312
        ]
       }
      }
@@ -3950,10 +4196,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.803,
+       "share": 0.7162,
        "ci95": [
-        0.3783,
-        0.9506
+        0.2973,
+        0.8857
        ]
       }
      },
@@ -3998,10 +4244,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.247,
+       "share": 0.2392,
        "ci95": [
-        0.0469,
-        0.4036
+        0.0458,
+        0.3926
        ]
       }
      }
@@ -4016,10 +4262,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.7576,
+       "share": 0.6757,
        "ci95": [
-        0.3249,
-        0.9167
+        0.2763,
+        0.8445
        ]
       }
      },
@@ -4064,10 +4310,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.2186,
+       "share": 0.2118,
        "ci95": [
-        0.0146,
-        0.3702
+        0.014,
+        0.3603
        ]
       }
      }
@@ -4082,10 +4328,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0758,
+       "share": 0.0676,
        "ci95": [
         0.0,
-        0.2286
+        0.1951
        ]
       }
      },
@@ -4130,10 +4376,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0324,
+       "share": -0.0314,
        "ci95": [
-        -0.1174,
-        0.047
+        -0.1129,
+        0.0457
        ]
       }
      }
@@ -4148,10 +4394,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0758,
+       "share": 0.0676,
        "ci95": [
         0.0,
-        0.2162
+        0.1858
        ]
       }
      },
@@ -4196,10 +4442,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0364,
+       "share": -0.0353,
        "ci95": [
-        -0.1631,
-        0.0782
+        -0.1575,
+        0.0766
        ]
       }
      }
@@ -4214,10 +4460,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0606,
+       "share": 0.0541,
        "ci95": [
         0.0,
-        0.1667
+        0.1447
        ]
       }
      },
@@ -4262,10 +4508,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0486,
+       "share": 0.0471,
        "ci95": [
-        -0.0502,
-        0.1403
+        -0.0479,
+        0.1373
        ]
       }
      }
@@ -4280,10 +4526,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0455,
+       "share": 0.0405,
        "ci95": [
         0.0,
-        0.1637
+        0.1429
        ]
       }
      },
@@ -4328,10 +4574,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0202,
+       "share": 0.0196,
        "ci95": [
-        -0.0374,
-        0.0779
+        -0.0362,
+        0.0753
        ]
       }
      }
@@ -4346,10 +4592,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0606,
+       "share": 0.0541,
        "ci95": [
         0.0,
-        0.1715
+        0.1482
        ]
       }
      },
@@ -4394,10 +4640,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0283,
+       "share": 0.0275,
        "ci95": [
-        -0.0749,
-        0.1215
+        -0.0725,
+        0.1181
        ]
       }
      }
@@ -4412,10 +4658,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0455,
+       "share": 0.0405,
        "ci95": [
         0.0,
-        0.1667
+        0.1385
        ]
       }
      },
@@ -4460,10 +4706,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.004,
+       "share": 0.0039,
        "ci95": [
-        -0.0546,
-        0.0591
+        -0.0532,
+        0.0567
        ]
       }
      }
@@ -4478,10 +4724,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0455,
+       "share": 0.0405,
        "ci95": [
         0.0,
-        0.1667
+        0.1429
        ]
       }
      },
@@ -4526,10 +4772,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0121,
+       "share": 0.0118,
        "ci95": [
-        -0.0455,
-        0.0677
+        -0.0437,
+        0.0664
        ]
       }
      }
@@ -4544,10 +4790,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0606,
+       "share": 0.0541,
        "ci95": [
         0.0,
-        0.2286
+        0.1905
        ]
       }
      },
@@ -4592,10 +4838,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0283,
+       "share": 0.0275,
        "ci95": [
-        -0.0354,
-        0.0898
+        -0.0335,
+        0.087
        ]
       }
      }
@@ -4610,10 +4856,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1364,
+       "share": 0.1216,
        "ci95": [
-        -0.2245,
-        0.3963
+        -0.2001,
+        0.314
        ]
       }
      },
@@ -4658,10 +4904,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.081,
+       "share": 0.0784,
        "ci95": [
-        -0.0806,
-        0.2255
+        -0.0787,
+        0.2166
        ]
       }
      }
@@ -4676,10 +4922,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.197,
+       "share": 0.1757,
        "ci95": [
-        -0.1071,
-        0.4737
+        -0.0926,
+        0.3667
        ]
       }
      },
@@ -4724,10 +4970,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.085,
+       "share": 0.0824,
        "ci95": [
-        -0.0698,
-        0.2153
+        -0.0676,
+        0.2085
        ]
       }
      }
@@ -4742,10 +4988,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0455,
+       "share": 0.0405,
        "ci95": [
         0.0,
-        0.1667
+        0.1395
        ]
       }
      },
@@ -4790,10 +5036,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0121,
+       "share": 0.0118,
        "ci95": [
-        -0.0455,
-        0.0664
+        -0.0449,
+        0.0644
        ]
       }
      }
@@ -4808,10 +5054,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1515,
+       "share": 0.1351,
        "ci95": [
-        0.0412,
-        0.3585
+        0.037,
+        0.2763
        ]
       }
      },
@@ -4856,10 +5102,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0648,
+       "share": 0.0627,
        "ci95": [
-        -0.0372,
-        0.1561
+        -0.0357,
+        0.1494
        ]
       }
      }
@@ -4874,10 +5120,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0303,
+       "share": 0.027,
        "ci95": [
         0.0,
-        0.1053
+        0.0923
        ]
       }
      },
@@ -4922,10 +5168,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0162,
+       "share": 0.0157,
        "ci95": [
-        -0.0283,
-        0.0588
+        -0.0273,
+        0.0569
        ]
       }
      }
@@ -4940,10 +5186,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.8182,
+       "share": 0.7297,
        "ci95": [
-        0.3998,
-        0.9565
+        0.3043,
+        0.9063
        ]
       }
      },
@@ -4988,10 +5234,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.251,
+       "share": 0.2431,
        "ci95": [
-        0.0372,
-        0.4214
+        0.0354,
+        0.4088
        ]
       }
      }
@@ -5006,10 +5252,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.8182,
+       "share": 0.7297,
        "ci95": [
-        0.4146,
-        0.9608
+        0.3332,
+        0.8987
        ]
       }
      },
@@ -5054,10 +5300,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.2591,
+       "share": 0.251,
        "ci95": [
-        0.0471,
-        0.4256
+        0.0442,
+        0.4159
        ]
       }
      }
@@ -5077,10 +5323,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.3913,
+       "share": 0.2727,
        "ci95": [
-        0.1739,
-        0.8333
+        0.1026,
+        0.5834
        ]
       }
      },
@@ -5125,10 +5371,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0594,
+       "share": 0.0566,
        "ci95": [
-        -0.1124,
-        0.1983
+        -0.107,
+        0.1902
        ]
       }
      }
@@ -5143,10 +5389,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.4348,
+       "share": 0.303,
        "ci95": [
-        0.1712,
-        0.8571
+        0.1,
+        0.625
        ]
       }
      },
@@ -5191,10 +5437,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0743,
+       "share": 0.0708,
        "ci95": [
-        -0.0375,
-        0.1675
+        -0.0361,
+        0.161
        ]
       }
      }
@@ -5209,10 +5455,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.8261,
+       "share": 0.5758,
        "ci95": [
-        -0.8017,
-        1.0801
+        -0.4,
+        0.807
        ]
       }
      },
@@ -5257,10 +5503,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1287,
+       "share": 0.1226,
        "ci95": [
-        -0.0485,
-        0.2967
+        -0.0468,
+        0.2757
        ]
       }
      }
@@ -5275,10 +5521,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.8261,
+       "share": 0.5758,
        "ci95": [
-        -0.8,
-        1.0774
+        -0.4547,
+        0.8
        ]
       }
      },
@@ -5323,10 +5569,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1782,
+       "share": 0.1698,
        "ci95": [
         0.0,
-        0.3365
+        0.3144
        ]
       }
      }
@@ -5341,10 +5587,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.6522,
+       "share": 0.4545,
        "ci95": [
-        0.25,
-        0.84
+        0.0769,
+        0.64
        ]
       }
      },
@@ -5389,10 +5635,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1386,
+       "share": 0.1321,
        "ci95": [
-        -0.0471,
-        0.2789
+        -0.0455,
+        0.2636
        ]
       }
      }
@@ -5407,10 +5653,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.8261,
+       "share": 0.5758,
        "ci95": [
-        -1.0,
-        1.0859
+        -0.385,
+        0.8
        ]
       }
      },
@@ -5455,10 +5701,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1485,
+       "share": 0.1415,
        "ci95": [
-        -0.0747,
-        0.3274
+        -0.0719,
+        0.3065
        ]
       }
      }
@@ -5473,10 +5719,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.8261,
+       "share": 0.5758,
        "ci95": [
-        -0.6726,
-        1.0769
+        -0.3636,
+        0.8044
        ]
       }
      },
@@ -5521,10 +5767,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0941,
+       "share": 0.0896,
        "ci95": [
-        -0.1271,
-        0.2711
+        -0.1214,
+        0.2536
        ]
       }
      }
@@ -5539,10 +5785,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.8261,
+       "share": 0.5758,
        "ci95": [
-        -0.6738,
-        1.0835
+        -0.3636,
+        0.8039
        ]
       }
      },
@@ -5587,10 +5833,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1485,
+       "share": 0.1415,
        "ci95": [
-        -0.0544,
-        0.3125
+        -0.052,
+        0.2935
        ]
       }
      }
@@ -5605,10 +5851,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.8261,
+       "share": 0.5758,
        "ci95": [
-        -0.8,
-        1.0774
+        -0.4119,
+        0.8036
        ]
       }
      },
@@ -5653,10 +5899,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1683,
+       "share": 0.1604,
        "ci95": [
-        -0.0232,
-        0.3247
+        -0.023,
+        0.3022
        ]
       }
      }
@@ -5719,10 +5965,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0297,
+       "share": -0.0283,
        "ci95": [
-        -0.1346,
-        0.065
+        -0.1289,
+        0.0628
        ]
       }
      }
@@ -5737,10 +5983,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.087,
+       "share": 0.0606,
        "ci95": [
         0.0,
-        0.5
+        0.2667
        ]
       }
      },
@@ -5785,10 +6031,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0545,
+       "share": -0.0519,
        "ci95": [
-        -0.212,
-        0.0754
+        -0.2,
+        0.0712
        ]
       }
      }
@@ -5803,10 +6049,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1304,
+       "share": 0.0909,
        "ci95": [
         0.0,
-        0.3333
+        0.2274
        ]
       }
      },
@@ -5853,8 +6099,8 @@
       "HINDSIGHT": {
        "share": 0.0,
        "ci95": [
-        -0.1643,
-        0.1495
+        -0.1592,
+        0.1458
        ]
       }
      }
@@ -5917,10 +6163,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0099,
+       "share": -0.0094,
        "ci95": [
-        -0.0612,
-        0.0374
+        -0.058,
+        0.0356
        ]
       }
      }
@@ -5935,10 +6181,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1739,
+       "share": 0.1212,
        "ci95": [
         0.0,
-        0.5
+        0.3686
        ]
       }
      },
@@ -5983,10 +6229,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0347,
+       "share": 0.033,
        "ci95": [
-        -0.1379,
-        0.1757
+        -0.1333,
+        0.1675
        ]
       }
      }
@@ -6051,8 +6297,8 @@
       "HINDSIGHT": {
        "share": 0.0,
        "ci95": [
-        -0.0443,
-        0.0417
+        -0.0428,
+        0.0402
        ]
       }
      }
@@ -6115,10 +6361,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0099,
+       "share": -0.0094,
        "ci95": [
-        -0.058,
-        0.0348
+        -0.0556,
+        0.0335
        ]
       }
      }
@@ -6181,10 +6427,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0099,
+       "share": -0.0094,
        "ci95": [
-        -0.0595,
-        0.0375
+        -0.057,
+        0.0361
        ]
       }
      }
@@ -6199,10 +6445,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.3043,
+       "share": -0.2121,
        "ci95": [
-        -3.8625,
-        0.6258
+        -2.0835,
+        0.4287
        ]
       }
      },
@@ -6247,10 +6493,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0149,
+       "share": -0.0142,
        "ci95": [
-        -0.2513,
-        0.1628
+        -0.2411,
+        0.1579
        ]
       }
      }
@@ -6265,10 +6511,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0435,
+       "share": -0.0303,
        "ci95": [
-        -3.25,
-        1.0934
+        -1.7653,
+        0.68
        ]
       }
      },
@@ -6313,10 +6559,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0396,
+       "share": 0.0377,
        "ci95": [
-        -0.1934,
-        0.2176
+        -0.1881,
+        0.2116
        ]
       }
      }
@@ -6379,10 +6625,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.005,
+       "share": -0.0047,
        "ci95": [
-        -0.0535,
-        0.0398
+        -0.051,
+        0.0385
        ]
       }
      }
@@ -6397,10 +6643,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0435,
+       "share": 0.0303,
        "ci95": [
-        -1.8042,
-        0.8677
+        -1.0013,
+        0.5
        ]
       }
      },
@@ -6445,10 +6691,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0149,
+       "share": 0.0142,
        "ci95": [
-        -0.1784,
-        0.1734
+        -0.173,
+        0.1651
        ]
       }
      }
@@ -6511,10 +6757,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.005,
+       "share": 0.0047,
        "ci95": [
-        -0.034,
-        0.0426
+        -0.0319,
+        0.0409
        ]
       }
      }
@@ -6529,10 +6775,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.8261,
+       "share": 0.5758,
        "ci95": [
-        -1.0,
-        1.0741
+        -0.5,
+        0.8023
        ]
       }
      },
@@ -6577,10 +6823,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1188,
+       "share": 0.1132,
        "ci95": [
-        -0.0975,
-        0.2995
+        -0.0956,
+        0.2803
        ]
       }
      }
@@ -6595,10 +6841,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.8261,
+       "share": 0.5758,
        "ci95": [
-        -0.5125,
-        1.0732
+        -0.3083,
+        0.7955
        ]
       }
      },
@@ -6643,12 +6889,1598 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0792,
+       "share": 0.0755,
        "ci95": [
-        -0.1361,
-        0.2724
+        -0.13,
+        0.2542
        ]
       }
+     }
+    }
+   }
+  },
+  "pooled_over_seeds": {
+   "base": {
+    "recall": {
+     "FAIR": {
+      "share": 0.2515,
+      "ci95": [
+       0.1788,
+       0.3267
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.2475,
+      "ci95": [
+       0.1172,
+       0.3532
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9776,
+      "ci95": [
+       0.9691,
+       0.9847
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3659,
+      "ci95": [
+       0.0803,
+       0.5731
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.2916,
+      "ci95": [
+       -0.4059,
+       -0.194
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.082,
+      "ci95": [
+       -0.1773,
+       0.0076
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.3246,
+      "ci95": [
+       0.2796,
+       0.3673
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1068,
+      "ci95": [
+       0.0038,
+       0.1888
+      ]
+     }
+    }
+   },
+   "rules": {
+    "recall": {
+     "FAIR": {
+      "share": 0.268,
+      "ci95": [
+       0.1995,
+       0.3393
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.203,
+      "ci95": [
+       0.0726,
+       0.3063
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.7621,
+      "ci95": [
+       0.7366,
+       0.7869
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.2358,
+      "ci95": [
+       -0.0184,
+       0.4258
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.0684,
+      "ci95": [
+       -0.1295,
+       -0.0144
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0594,
+      "ci95": [
+       -0.1041,
+       -0.0172
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.3266,
+      "ci95": [
+       0.2911,
+       0.3624
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0748,
+      "ci95": [
+       -0.0036,
+       0.1429
+      ]
+     }
+    }
+   },
+   "state-uo": {
+    "recall": {
+     "FAIR": {
+      "share": 0.8722,
+      "ci95": [
+       0.7918,
+       0.9275
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.5941,
+      "ci95": [
+       0.2961,
+       0.7655
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9783,
+      "ci95": [
+       0.9706,
+       0.9853
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3496,
+      "ci95": [
+       0.0351,
+       0.5684
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.1568,
+      "ci95": [
+       -0.2444,
+       -0.076
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0758,
+      "ci95": [
+       -0.1386,
+       -0.0159
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.6282,
+      "ci95": [
+       0.5701,
+       0.6754
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1806,
+      "ci95": [
+       0.0566,
+       0.2854
+      ]
+     }
+    }
+   },
+   "state-uo-c5attr": {
+    "recall": {
+     "FAIR": {
+      "share": 0.866,
+      "ci95": [
+       0.7892,
+       0.9204
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.5644,
+      "ci95": [
+       0.2266,
+       0.7461
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9594,
+      "ci95": [
+       0.949,
+       0.9691
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3374,
+      "ci95": [
+       0.0483,
+       0.5434
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.1854,
+      "ci95": [
+       -0.2771,
+       -0.1015
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0615,
+      "ci95": [
+       -0.1364,
+       0.0079
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.6121,
+      "ci95": [
+       0.554,
+       0.6591
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1784,
+      "ci95": [
+       0.0616,
+       0.2851
+      ]
+     }
+    }
+   },
+   "state-shares": {
+    "recall": {
+     "FAIR": {
+      "share": 0.4866,
+      "ci95": [
+       0.3931,
+       0.5769
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.4109,
+      "ci95": [
+       0.25,
+       0.5261
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9727,
+      "ci95": [
+       0.9635,
+       0.9811
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3659,
+      "ci95": [
+       0.0856,
+       0.5772
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.4195,
+      "ci95": [
+       -0.5424,
+       -0.3079
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0984,
+      "ci95": [
+       -0.2102,
+       0.0077
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.39,
+      "ci95": [
+       0.3357,
+       0.4396
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1335,
+      "ci95": [
+       0.0202,
+       0.2266
+      ]
+     }
+    }
+   },
+   "state-shares-r1": {
+    "recall": {
+     "FAIR": {
+      "share": 0.7753,
+      "ci95": [
+       0.6705,
+       0.8614
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.5099,
+      "ci95": [
+       0.1808,
+       0.7005
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9916,
+      "ci95": [
+       0.9867,
+       0.9958
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3618,
+      "ci95": [
+       0.0591,
+       0.5804
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.4339,
+      "ci95": [
+       -0.5645,
+       -0.3176
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0902,
+      "ci95": [
+       -0.2129,
+       0.0098
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.5161,
+      "ci95": [
+       0.4451,
+       0.576
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1581,
+      "ci95": [
+       0.0237,
+       0.2778
+      ]
+     }
+    }
+   },
+   "state-shares-r2": {
+    "recall": {
+     "FAIR": {
+      "share": 0.7402,
+      "ci95": [
+       0.6346,
+       0.8302
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.4554,
+      "ci95": [
+       0.1358,
+       0.6493
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9853,
+      "ci95": [
+       0.979,
+       0.9909
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3537,
+      "ci95": [
+       0.0613,
+       0.5685
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.4393,
+      "ci95": [
+       -0.5763,
+       -0.3238
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1291,
+      "ci95": [
+       -0.2495,
+       -0.0223
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.4977,
+      "ci95": [
+       0.4324,
+       0.558
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1239,
+      "ci95": [
+       0.0,
+       0.2405
+      ]
+     }
+    }
+   },
+   "fair-c5attr": {
+    "recall": {
+     "FAIR": {
+      "share": 0.8845,
+      "ci95": [
+       0.8034,
+       0.936
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.604,
+      "ci95": [
+       0.3019,
+       0.768
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.965,
+      "ci95": [
+       0.9543,
+       0.9741
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3415,
+      "ci95": [
+       0.0405,
+       0.5538
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.3058,
+      "ci95": [
+       -0.4146,
+       -0.2015
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1004,
+      "ci95": [
+       -0.1952,
+       -0.0141
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.5895,
+      "ci95": [
+       0.5297,
+       0.6413
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1677,
+      "ci95": [
+       0.0459,
+       0.2742
+      ]
+     }
+    }
+   },
+   "fair-c5attr-gain0": {
+    "recall": {
+     "FAIR": {
+      "share": 0.8701,
+      "ci95": [
+       0.7935,
+       0.9224
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.5792,
+      "ci95": [
+       0.2695,
+       0.7523
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9671,
+      "ci95": [
+       0.9574,
+       0.9755
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3415,
+      "ci95": [
+       0.057,
+       0.5572
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.1718,
+      "ci95": [
+       -0.2585,
+       -0.0966
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0553,
+      "ci95": [
+       -0.1218,
+       0.0125
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.6199,
+      "ci95": [
+       0.5612,
+       0.6678
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1859,
+      "ci95": [
+       0.0648,
+       0.2919
+      ]
+     }
+    }
+   },
+   "edf": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0317,
+      "ci95": [
+       0.0109,
+       0.0576
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0297,
+      "ci95": [
+       -0.0085,
+       0.0811
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.1959,
+      "ci95": [
+       0.1718,
+       0.2204
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0203,
+      "ci95": [
+       -0.0792,
+       0.0975
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.1939,
+      "ci95": [
+       -0.2786,
+       -0.1171
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0758,
+      "ci95": [
+       -0.1489,
+       -0.0112
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0206,
+      "ci95": [
+       -0.0036,
+       0.0441
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0278,
+      "ci95": [
+       -0.0735,
+       0.0139
+      ]
+     }
+    }
+   },
+   "llf": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0515,
+      "ci95": [
+       0.0251,
+       0.0788
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0495,
+      "ci95": [
+       0.0118,
+       0.0952
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.5423,
+      "ci95": [
+       0.5157,
+       0.5684
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1341,
+      "ci95": [
+       -0.05,
+       0.2727
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.3526,
+      "ci95": [
+       -0.4731,
+       -0.2438
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1148,
+      "ci95": [
+       -0.2225,
+       -0.0156
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.091,
+      "ci95": [
+       0.0597,
+       0.1221
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0139,
+      "ci95": [
+       -0.0913,
+       0.0549
+      ]
+     }
+    }
+   },
+   "b7-edf-feasibility": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0515,
+      "ci95": [
+       0.0203,
+       0.0887
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0396,
+      "ci95": [
+       0.0126,
+       0.0727
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.3849,
+      "ci95": [
+       0.3627,
+       0.4078
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1098,
+      "ci95": [
+       -0.0255,
+       0.2103
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.1328,
+      "ci95": [
+       -0.2031,
+       -0.0708
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0246,
+      "ci95": [
+       -0.0992,
+       0.0432
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.1025,
+      "ci95": [
+       0.0788,
+       0.1272
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0246,
+      "ci95": [
+       -0.03,
+       0.0709
+      ]
+     }
+    }
+   },
+   "always-cloud-fcfs": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0294,
+      "ci95": [
+       0.0073,
+       0.0578
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0248,
+      "ci95": [
+       0.0,
+       0.0601
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.1085,
+      "ci95": [
+       0.0812,
+       0.1361
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0122,
+      "ci95": [
+       -0.1026,
+       0.0664
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.0271,
+      "ci95": [
+       -0.0593,
+       0.0045
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0225,
+      "ci95": [
+       -0.0122,
+       0.0566
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0382,
+      "ci95": [
+       0.0219,
+       0.0554
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0139,
+      "ci95": [
+       -0.015,
+       0.044
+      ]
+     }
+    }
+   },
+   "mooncake": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0515,
+      "ci95": [
+       0.0215,
+       0.0881
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0446,
+      "ci95": [
+       0.0139,
+       0.0811
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.3912,
+      "ci95": [
+       0.3687,
+       0.4159
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.122,
+      "ci95": [
+       -0.0135,
+       0.2195
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.1244,
+      "ci95": [
+       -0.1945,
+       -0.0597
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0369,
+      "ci95": [
+       -0.1074,
+       0.0312
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.1067,
+      "ci95": [
+       0.0818,
+       0.1328
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0224,
+      "ci95": [
+       -0.0296,
+       0.0712
+      ]
+     }
+    }
+   },
+   "attentionstore-prefetch": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0277,
+      "ci95": [
+       0.0064,
+       0.0573
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0248,
+      "ci95": [
+       0.0,
+       0.0628
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.0847,
+      "ci95": [
+       0.0609,
+       0.1112
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0366,
+      "ci95": [
+       -0.1111,
+       0.0243
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.0326,
+      "ci95": [
+       -0.0644,
+       0.0005
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0266,
+      "ci95": [
+       -0.0064,
+       0.0602
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0287,
+      "ci95": [
+       0.0134,
+       0.0463
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0096,
+      "ci95": [
+       -0.0158,
+       0.0346
+      ]
+     }
+    }
+   },
+   "lmcache": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0214,
+      "ci95": [
+       0.0,
+       0.0488
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0149,
+      "ci95": [
+       0.0,
+       0.0467
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.0875,
+      "ci95": [
+       0.0632,
+       0.1131
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0366,
+      "ci95": [
+       -0.1126,
+       0.0233
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.0278,
+      "ci95": [
+       -0.0611,
+       0.0052
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0246,
+      "ci95": [
+       -0.0079,
+       0.0571
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0282,
+      "ci95": [
+       0.0126,
+       0.0452
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0064,
+      "ci95": [
+       -0.0196,
+       0.0312
+      ]
+     }
+    }
+   },
+   "kvflow-prefetch": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0342,
+      "ci95": [
+       0.0085,
+       0.0698
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0297,
+      "ci95": [
+       0.0,
+       0.0747
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.1057,
+      "ci95": [
+       0.0791,
+       0.1336
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0122,
+      "ci95": [
+       -0.1037,
+       0.0673
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.0312,
+      "ci95": [
+       -0.0638,
+       -0.0002
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0164,
+      "ci95": [
+       -0.0168,
+       0.0502
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0382,
+      "ci95": [
+       0.0212,
+       0.0581
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0118,
+      "ci95": [
+       -0.0197,
+       0.0404
+      ]
+     }
+    }
+   },
+   "simplestream": {
+    "recall": {
+     "FAIR": {
+      "share": -0.146,
+      "ci95": [
+       -0.1463,
+       -0.1453
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1188,
+      "ci95": [
+       -0.6684,
+       0.2043
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9993,
+      "ci95": [
+       0.9979,
+       1.0
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3659,
+      "ci95": [
+       0.0588,
+       0.5976
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.4554,
+      "ci95": [
+       -0.5887,
+       -0.3412
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0799,
+      "ci95": [
+       -0.2097,
+       0.0331
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.1161,
+      "ci95": [
+       0.0671,
+       0.1711
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0288,
+      "ci95": [
+       -0.1094,
+       0.1466
+      ]
+     }
+    }
+   },
+   "streamscout": {
+    "recall": {
+     "FAIR": {
+      "share": -0.1406,
+      "ci95": [
+       -0.146,
+       -0.1301
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0941,
+      "ci95": [
+       -0.6371,
+       0.2274
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9993,
+      "ci95": [
+       0.9979,
+       1.0
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3659,
+      "ci95": [
+       0.0577,
+       0.5736
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.4485,
+      "ci95": [
+       -0.5844,
+       -0.3339
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0943,
+      "ci95": [
+       -0.2133,
+       0.01
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.1203,
+      "ci95": [
+       0.0703,
+       0.1755
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0267,
+      "ci95": [
+       -0.1128,
+       0.1457
+      ]
+     }
+    }
+   },
+   "querystream-proactive": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0235,
+      "ci95": [
+       0.0022,
+       0.0528
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0149,
+      "ci95": [
+       0.0,
+       0.0488
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.098,
+      "ci95": [
+       0.0712,
+       0.1258
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0285,
+      "ci95": [
+       -0.1085,
+       0.0402
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.0278,
+      "ci95": [
+       -0.0599,
+       0.0036
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0266,
+      "ci95": [
+       -0.0065,
+       0.0581
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0323,
+      "ci95": [
+       0.0165,
+       0.0483
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0096,
+      "ci95": [
+       -0.0159,
+       0.0344
+      ]
+     }
+    }
+   },
+   "eco-llm": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0198,
+      "ci95": [
+       -0.0232,
+       0.0619
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0688,
+      "ci95": [
+       -0.0522,
+       0.164
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.4911,
+      "ci95": [
+       0.4668,
+       0.5154
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1622,
+      "ci95": [
+       0.0064,
+       0.2882
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.1213,
+      "ci95": [
+       -0.189,
+       -0.0565
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0348,
+      "ci95": [
+       -0.1025,
+       0.0279
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.1045,
+      "ci95": [
+       0.0731,
+       0.1359
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0288,
+      "ci95": [
+       -0.0304,
+       0.0815
+      ]
+     }
+    }
+   },
+   "warm-all-lru": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0211,
+      "ci95": [
+       0.002,
+       0.0485
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0149,
+      "ci95": [
+       0.0,
+       0.0404
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.0728,
+      "ci95": [
+       0.0498,
+       0.0975
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0163,
+      "ci95": [
+       -0.0872,
+       0.0452
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.0129,
+      "ci95": [
+       -0.0411,
+       0.0143
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0307,
+      "ci95": [
+       0.0043,
+       0.0563
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0276,
+      "ci95": [
+       0.0137,
+       0.0437
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.015,
+      "ci95": [
+       -0.0089,
+       0.0375
+      ]
+     }
+    }
+   },
+   "fair-c5attr-rr": {
+    "recall": {
+     "FAIR": {
+      "share": 0.9093,
+      "ci95": [
+       0.8362,
+       0.9604
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.6238,
+      "ci95": [
+       0.2999,
+       0.8012
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9902,
+      "ci95": [
+       0.9846,
+       0.9951
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3577,
+      "ci95": [
+       0.0656,
+       0.5605
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.4277,
+      "ci95": [
+       -0.557,
+       -0.315
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1701,
+      "ci95": [
+       -0.2836,
+       -0.064
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.5751,
+      "ci95": [
+       0.5095,
+       0.6327
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.14,
+      "ci95": [
+       -0.005,
+       0.2616
+      ]
+     }
+    }
+   },
+   "fair-final-rung3": {
+    "recall": {
+     "FAIR": {
+      "share": 0.9113,
+      "ci95": [
+       0.8348,
+       0.9613
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.6188,
+      "ci95": [
+       0.2633,
+       0.7964
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9902,
+      "ci95": [
+       0.9846,
+       0.9951
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3577,
+      "ci95": [
+       0.0792,
+       0.5705
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.4023,
+      "ci95": [
+       -0.5287,
+       -0.2952
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1516,
+      "ci95": [
+       -0.271,
+       -0.0479
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.5828,
+      "ci95": [
+       0.5185,
+       0.6393
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1485,
+      "ci95": [
+       0.0125,
+       0.2662
+      ]
      }
     }
    }
@@ -6668,10 +8500,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.02,
+       "share": 0.0189,
        "ci95": [
         0.0,
-        0.0588
+        0.0556
        ]
       }
      },
@@ -6718,8 +8550,8 @@
       "HINDSIGHT": {
        "share": -0.0042,
        "ci95": [
-        -0.1171,
-        0.0951
+        -0.1148,
+        0.0939
        ]
       }
      }
@@ -6734,10 +8566,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.04,
+       "share": 0.0377,
        "ci95": [
         0.0,
-        0.0968
+        0.0909
        ]
       }
      },
@@ -6782,10 +8614,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1017,
+       "share": 0.1004,
        "ci95": [
-        -0.0164,
-        0.2009
+        -0.0158,
+        0.2
        ]
       }
      }
@@ -6800,10 +8632,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.52,
+       "share": -0.4906,
        "ci95": [
-        -2.5242,
-        0.2353
+        -2.3469,
+        0.2242
        ]
       }
      },
@@ -6848,10 +8680,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0508,
+       "share": -0.0502,
        "ci95": [
-        -0.3348,
-        0.1755
+        -0.3274,
+        0.1718
        ]
       }
      }
@@ -6866,10 +8698,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.24,
+       "share": -0.2264,
        "ci95": [
-        -1.0313,
-        0.0811
+        -0.9584,
+        0.0705
        ]
       }
      },
@@ -6914,10 +8746,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0636,
+       "share": 0.0628,
        "ci95": [
-        -0.0777,
-        0.1894
+        -0.0766,
+        0.1853
        ]
       }
      }
@@ -6932,10 +8764,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.66,
+       "share": 0.6226,
        "ci95": [
-        0.0999,
-        0.8868
+        0.0929,
+        0.853
        ]
       }
      },
@@ -6980,10 +8812,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1992,
+       "share": 0.1967,
        "ci95": [
         0.0141,
-        0.3414
+        0.3382
        ]
       }
      }
@@ -7051,10 +8883,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0588,
+       "share": -0.0522,
        "ci95": [
-        -0.2126,
-        0.068
+        -0.1843,
+        0.0613
        ]
       }
      }
@@ -7069,10 +8901,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1875,
+       "share": 0.0714,
        "ci95": [
-        -0.4294,
-        1.0
+        -0.1333,
+        0.2432
        ]
       }
      },
@@ -7117,10 +8949,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1127,
+       "share": 0.1,
        "ci95": [
-        -0.0259,
-        0.2432
+        -0.0232,
+        0.2161
        ]
       }
      }
@@ -7135,10 +8967,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.125,
+       "share": 0.0476,
        "ci95": [
-        -2.7806,
-        0.9592
+        -0.6155,
+        0.4146
        ]
       }
      },
@@ -7183,10 +9015,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0931,
+       "share": 0.0826,
        "ci95": [
-        -0.1015,
-        0.2602
+        -0.0905,
+        0.2369
        ]
       }
      }
@@ -7201,10 +9033,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1875,
+       "share": 0.0714,
        "ci95": [
-        -2.6067,
-        1.0
+        -0.6429,
+        0.4
        ]
       }
      },
@@ -7249,10 +9081,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1078,
+       "share": 0.0957,
        "ci95": [
-        -0.055,
-        0.2531
+        -0.05,
+        0.2217
        ]
       }
      }
@@ -7267,10 +9099,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 1.0,
+       "share": 0.381,
        "ci95": [
-        -1.8182,
-        3.8033
+        -0.5716,
+        0.8136
        ]
       }
      },
@@ -7315,10 +9147,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0392,
+       "share": 0.0348,
        "ci95": [
-        -0.1795,
-        0.2381
+        -0.1619,
+        0.2041
        ]
       }
      }
@@ -7338,10 +9170,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1224,
+       "share": 0.0811,
        "ci95": [
         0.0,
-        0.2353
+        0.1731
        ]
       }
      },
@@ -7386,10 +9218,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0304,
+       "share": -0.0275,
        "ci95": [
-        -0.1683,
-        0.0826
+        -0.1533,
+        0.0757
        ]
       }
      }
@@ -7404,10 +9236,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1224,
+       "share": 0.0811,
        "ci95": [
         0.0,
-        0.3126
+        0.1837
        ]
       }
      },
@@ -7452,10 +9284,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0522,
+       "share": 0.0471,
        "ci95": [
-        -0.0743,
-        0.1711
+        -0.0667,
+        0.1547
        ]
       }
      }
@@ -7470,10 +9302,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1837,
+       "share": 0.1216,
        "ci95": [
-        -0.2964,
-        0.5758
+        -0.1925,
+        0.3279
        ]
       }
      },
@@ -7518,10 +9350,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.087,
+       "share": 0.0784,
        "ci95": [
-        -0.0894,
-        0.2284
+        -0.079,
+        0.2073
        ]
       }
      }
@@ -7536,10 +9368,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.2245,
+       "share": 0.1486,
        "ci95": [
-        -0.0699,
-        0.5455
+        -0.0465,
+        0.2973
        ]
       }
      },
@@ -7584,10 +9416,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0913,
+       "share": 0.0824,
        "ci95": [
-        -0.0507,
-        0.2103
+        -0.0457,
+        0.1884
        ]
       }
      }
@@ -7602,10 +9434,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 1.0612,
+       "share": 0.7027,
        "ci95": [
-        0.44,
-        1.5
+        0.2653,
+        0.8772
        ]
       }
      },
@@ -7650,10 +9482,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.2391,
+       "share": 0.2157,
        "ci95": [
-        -0.0048,
-        0.4259
+        -0.0045,
+        0.3757
        ]
       }
      }
@@ -7673,10 +9505,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.04,
+       "share": 0.0323,
        "ci95": [
         0.0,
-        0.25
+        0.1364
        ]
       }
      },
@@ -7721,10 +9553,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0343,
+       "share": -0.0333,
        "ci95": [
-        -0.1905,
-        0.1009
+        -0.1837,
+        0.098
        ]
       }
      }
@@ -7739,10 +9571,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.04,
+       "share": 0.0323,
        "ci95": [
         0.0,
-        0.2308
+        0.1429
        ]
       }
      },
@@ -7787,10 +9619,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.0049,
+       "share": 0.0048,
        "ci95": [
-        -0.1626,
-        0.1453
+        -0.1596,
+        0.1416
        ]
       }
      }
@@ -7805,10 +9637,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.28,
+       "share": -0.2258,
        "ci95": [
-        -4.1457,
-        0.5625
+        -2.3333,
+        0.4
        ]
       }
      },
@@ -7853,10 +9685,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0098,
+       "share": -0.0095,
        "ci95": [
-        -0.233,
-        0.1736
+        -0.2266,
+        0.1683
        ]
       }
      }
@@ -7871,10 +9703,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.12,
+       "share": -0.0968,
        "ci95": [
-        -1.9036,
-        0.5714
+        -1.2731,
+        0.3182
        ]
       }
      },
@@ -7919,10 +9751,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": -0.0245,
+       "share": -0.0238,
        "ci95": [
-        -0.1934,
-        0.1272
+        -0.1889,
+        0.1217
        ]
       }
      }
@@ -7937,10 +9769,10 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.76,
+       "share": 0.6129,
        "ci95": [
-        -1.0,
-        0.9655
+        -0.4444,
+        0.8767
        ]
       }
      },
@@ -7985,23 +9817,356 @@
        ]
       },
       "HINDSIGHT": {
-       "share": 0.1618,
+       "share": 0.1571,
        "ci95": [
-        -0.0374,
-        0.3214
+        -0.0351,
+        0.3104
        ]
       }
      }
     }
    }
+  },
+  "pooled_over_seeds": {
+   "llf": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0433,
+      "ci95": [
+       0.0163,
+       0.0737
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.04,
+      "ci95": [
+       0.0093,
+       0.0708
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.5318,
+      "ci95": [
+       0.5059,
+       0.5579
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1545,
+      "ci95": [
+       -0.0222,
+       0.2842
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.385,
+      "ci95": [
+       -0.5113,
+       -0.2791
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1496,
+      "ci95": [
+       -0.2533,
+       -0.0504
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0756,
+      "ci95": [
+       0.0423,
+       0.1065
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0289,
+      "ci95": [
+       -0.1047,
+       0.0364
+      ]
+     }
+    }
+   },
+   "mooncake": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0969,
+      "ci95": [
+       0.0571,
+       0.1415
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.06,
+      "ci95": [
+       0.0,
+       0.1292
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.7579,
+      "ci95": [
+       0.7355,
+       0.7814
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.2805,
+      "ci95": [
+       0.0251,
+       0.4704
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.272,
+      "ci95": [
+       -0.379,
+       -0.1782
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.043,
+      "ci95": [
+       -0.1384,
+       0.0517
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.1971,
+      "ci95": [
+       0.1634,
+       0.2329
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0642,
+      "ci95": [
+       -0.0247,
+       0.1457
+      ]
+     }
+    }
+   },
+   "simplestream": {
+    "recall": {
+     "FAIR": {
+      "share": -0.146,
+      "ci95": [
+       -0.1463,
+       -0.1453
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.11,
+      "ci95": [
+       -0.6947,
+       0.208
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9993,
+      "ci95": [
+       0.9979,
+       1.0
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3659,
+      "ci95": [
+       0.0309,
+       0.5909
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.4547,
+      "ci95": [
+       -0.5865,
+       -0.3364
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0881,
+      "ci95": [
+       -0.2116,
+       0.0344
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.1163,
+      "ci95": [
+       0.0696,
+       0.1737
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0268,
+      "ci95": [
+       -0.1268,
+       0.1491
+      ]
+     }
+    }
+   },
+   "eco-llm": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0278,
+      "ci95": [
+       -0.0266,
+       0.0877
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.005,
+      "ci95": [
+       -0.2973,
+       0.1667
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.7271,
+      "ci95": [
+       0.7043,
+       0.7507
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.2642,
+      "ci95": [
+       0.0196,
+       0.438
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.2572,
+      "ci95": [
+       -0.3552,
+       -0.1656
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0225,
+      "ci95": [
+       -0.1179,
+       0.0619
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.1621,
+      "ci95": [
+       0.1238,
+       0.2043
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0567,
+      "ci95": [
+       -0.0366,
+       0.139
+      ]
+     }
+    }
+   },
+   "fair-final-rung3": {
+    "recall": {
+     "FAIR": {
+      "share": 0.8948,
+      "ci95": [
+       0.8244,
+       0.9436
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.6,
+      "ci95": [
+       0.2537,
+       0.7858
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9552,
+      "ci95": [
+       0.9433,
+       0.9658
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3252,
+      "ci95": [
+       0.0416,
+       0.5411
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.4039,
+      "ci95": [
+       -0.521,
+       -0.2979
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1168,
+      "ci95": [
+       -0.213,
+       -0.0257
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.5647,
+      "ci95": [
+       0.4974,
+       0.6187
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1531,
+      "ci95": [
+       0.0227,
+       0.2678
+      ]
+     }
+    }
+   }
   }
  },
- "verdict": "FAIL: 249 share(s) out of [0,1], 55 oracle-control violation(s)",
+ "verdict": "PASS: no share>1, no pooled oracle-control gap beyond CI. share<0 reported as genuine worse-than-device.",
+ "blocking": [],
  "_provenance": {
-  "git_commit": "d6b24cb94f422b4aaeaae3555a301bafb52bb69f",
+  "git_commit": "ee97a87558a21083613c51ee3b5079a1ef70cced",
   "script": "oracle_bootstrap.py",
   "model": "qwen3vl32b",
-  "timestamp": "2026-11-25T12:50:11.469505",
+  "timestamp": "2026-11-25T13:05:21.073354",
   "device": "jetson_orin"
  }
 }

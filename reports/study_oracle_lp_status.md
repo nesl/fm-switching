@@ -81,3 +81,9 @@ of it.
   percent coverage of dashcam instants across all 8 cells) is therefore used as the dense per-instant
   cloud-score source; the 5 to 8 instants per cell without a simplestream cloud score are treated as
   device-only (conservative, cannot raise the bound). Stated in every dashcam/pooled bound table.
+
+## 2026-11-25 BOUND WRITTEN (D268-corrected)
+- Control PASSES: no share>1; HINDSIGHT oracle >= FAIR oracle (pooled + per seed, within bootstrap CI); share<0 reported as genuine worse-than-device (dashcam), not blocking (user ruling, dashcam verification passed: same instant thresholds both tiers, 0 imputed device scores of 47098, cloud false-alarm excess +5-7pp/seed).
+- oracle_results.json = THE BOUND. FAIR conditioned on context sent (recall cloud WITH_HISTORY 0.569 / WITHOUT 0.212 / device 0.258); dashcam on instant-threshold score_cell (device TPR 0.247/TNR 0.741, cloud TPR 0.377/TNR 0.676).
+- Pooled-over-seeds (1x): rung3 recall FAIR 0.911 HIND 0.619, ss FAIR 0.990 HIND 0.358, dashcam FAIR -0.402 HIND -0.152, pooled FAIR 0.583 HIND 0.149. Best baseline state-uo pooled FAIR 0.628 (edges rung3: rung3 over-serves dashcam cloud). simplestream recall FAIR -0.146 (D268 fix: stateless serving worse than device).
+- Fix: oracle_lp_run.recall_correctness now ORs cloud correctness across arms (cloud correctness is context-dependent, not arm-independent; oracle must credit best achievable), removing an impossible policy>oracle on kv0.5r s6.

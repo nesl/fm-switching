@@ -55,8 +55,11 @@ def recall_correctness(seed, tag):
             cc = None if cl is None else bool(r.get("cloud_correct"))
             if oid not in out:
                 out[oid] = [bool(r.get("device_correct")), cc]
-            elif out[oid][1] is None and cc is not None:
-                out[oid][1] = cc
+            elif cc is not None:
+                # cloud correctness depends on CONTEXT SENT (D268), so it is NOT arm-independent; the
+                # oracle (provable upper bound) credits the BEST achievable cloud answer = OR across
+                # arms (any arm that sent history and got it right). Prevents policy > oracle.
+                out[oid][1] = True if (out[oid][1] or cc) else False
     return out
 
 
