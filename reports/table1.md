@@ -1,6 +1,6 @@
 # StudyTABLE1: canonical correct-by-deadline table (D209)
 
-Pipeline sha canon 42312ae9 (episodic_lib 35e3c57e, dsmap 35e3c57e, dashcam_episodic 1d0125c9). Seeds 4-7, four-seed means. Superseded arms dropped (D205): confidence-cascade.
+Pipeline sha canon 298d8315 (episodic_lib 35e3c57e, dsmap 35e3c57e, dashcam_episodic 1d0125c9). Seeds 4-7, four-seed means. Superseded arms dropped (D205): confidence-cascade.
 
 Columns: robot correct-by-deadline (correct by 3 s, cloud if on time else device); robot D176 (same, excluding the over-32k context-refusal recalls); single-shot correct by 2 s (StudySS2); pooled correct-in-time over robot and single-shot units; dashcam delivered-stream Nexar challenge mAP (D199, on-time cloud only, EVAL); the on-time service columns; and the dashcam per-episode on-time attainment SERVICE columns.
 
