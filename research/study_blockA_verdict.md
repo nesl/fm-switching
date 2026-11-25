@@ -97,6 +97,33 @@ including a minimum episode size of 1 that no other seed has.** **Carrying "712"
 count right, passes a plausibility check, and silently uses the wrong instant total.** **Four of the five
 carried-denominator errors tonight produced a visibly wrong number; this one would not.**
 
+## Figure check by the accelerator box, every integer re-read from the nine cells
+
+**All match.** The pooled alert on-time integers, the robot and single-shot denominators, both dose columns,
+the robot on-time deltas (-67 = 52 - 119, -50 = 54 - 104, -57 = 27 - 84) and the three
+`correct_by_deadline` deltas were re-read **from the cells rather than from its own earlier reports**, and
+every one agrees with what this verdict divided by.
+*** ONE EXCEPTION, STATED RATHER THAN GLOSSED: THE EPISODE COUNTS 714 / 712 / 714 ARE MINE AND IT CANNOT
+CERTIFY THEM. *** They were read from the cells by this box, so they are verified once and not twice.
+**Every attainment figure in this verdict divides by them**, so a wrong episode count would move every
+delta. **The s7 figure in particular decides whether `-notouch` reads 0.99x INSIDE or something else, which
+is the one place the count is load-bearing.**
+
+## The 6,475 repeat: RESOLVED, a real coincidence
+
+**Checked on the per-device dashcam breakdown, and the two cells differ on EVERY ONE of the six devices
+while summing to the same total:**
+```
+stateoff s6   988  1,072  1,018  1,093  1,198  1,106   = 6,475
+stateoff s7   921  1,059  1,198  1,192  1,026  1,079   = 6,475
+differ on all six devices; no device matches
+```
+**So it is a genuine coincidence of integer arithmetic, not a copied or defaulted value.** **That is the
+FIFTH exact equality tonight and the FOURTH that turned out real and differently composed** - alongside the
+55-equals-55 robot tie, the s7 `correct_by_deadline` tie that decomposed into two offsetting one-unit
+changes, and the 121-equals-121 count coincidence. **Only one of the five was an artefact, and it was a
+broken probe rather than a broken number.**
+
 ## Flagged, not diagnosed
 
 *** `-stateoff` gives a pooled alert on-time of EXACTLY 6,475 at BOTH s6 AND s7, over DIFFERENT denominators
