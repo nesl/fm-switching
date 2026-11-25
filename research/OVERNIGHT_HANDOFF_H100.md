@@ -1,5 +1,98 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## D244, USER RULING 2026-11-25 07:08, PROVISIONAL: THE NETWORK RUN IS ON. 20 CELLS, CORRELATED MULTI-ROBOT OUTAGE AT 1x ONLY.
+
+*** THIS IS THE QUEUE. IT GOES AFTER THE MATRIX FILLER CELL CURRENTLY RUNNING, AND THE DRY RUN IS A GATE
+BEFORE IT, NOT A FORMALITY. ***
+| field | value |
+|---|---|
+| outage | correlated multi-robot, **1x memory ONLY** (D240: never at kv0.5r, never stacked) |
+| k | **{3, 5}** (k = 1 is NOT in this grid) |
+| D | **120 s**, ONE window per episode, MID-EPISODE, deterministic from the seed |
+| arms | `covex-v6-fair-final`, `covex-v6-fair-final-stateoff`, `llf`, `mooncake`, `simplestream` |
+| seeds | **4 and 5** |
+| cells | **5 x 2 x 2 = 20** |
+| tag | `_L3_epg_rq30_out-k3-d120` form. **OUTAGE CELLS MUST NEVER POOL WITH NO-OUTAGE CELLS.** |
+**THE `-outage` AND `-outage-fifo` ORDERING ARMS ARE EXPLICITLY EXCLUDED. Do not queue them and do not
+accept a cell line naming them; they are not in this run.**
+
+**GATE BEFORE THE 20 CELLS.** Flash is running the ruled dry run now: one cell per arm with outages ON,
+k = 3, D = 120, seed 4, 1x. **It must show, per arm, FRAMES WITHHELD during the window, A BURST AT
+RECONNECT, and DEVICE-ONLY QUESTIONS, as COUNTS.** **If any arm shows zero of any of the three, the 20
+cells do not start and I will say so.** I will send the cell lines only after that dry run passes.
+
+**WHAT TO REPORT PER CELL, additional to the usual valid / `source_agreement` / ENOSPC / digests:**
+- **the characteristic-decision count.** **A ZERO count makes the cell an ABSENT LINK, never a negative**
+  (prereg, carried forward). A low count is a WEAK-DOSE condition and must be labelled one.
+- **per robot: whether HISTORY WAS CACHED at the FIRST POST-RECONNECT QUESTION**, and **the number of
+  DEVICE-ONLY QUESTIONS during the window.** **These two are the quantities that actually test the
+  prediction** (Orin screen `f07c3d8f`: rung 3 keeps offline histories, baselines and `-stateoff` lose
+  them).
+- **all four attainment metrics: robot cloud on-time, correct-by-deadline, dashcam on-time, single-shot**,
+  each against **that cell's own sweep-row denominator**, never a denominator carried from another seed.
+
+*** A METRIC CONFLICT YOU SHOULD KNOW ABOUT BEFORE YOU SCORE ANYTHING, recorded in
+`research/study_outage_corr_AMENDMENT_2.md` and awaiting the user's ruling. *** **D244 names robot cloud
+on-time as PRIMARY. The standing pre-registration's metrics section says that metric CANNOT WORK for this
+experiment**, because `robot_value.n_cloud_standing` counts only rows whose `source == "cloud"` and is
+therefore **blind to device answers by construction**, so an outage that forces questions device-only
+depresses it for EVERY arm identically whatever the policy does. **The ruling's own reason for moving off
+correct-by-deadline is that an outage leaves ITS device half inert.** **If both hold, both robot attainment
+metrics are compromised under outage and neither discriminates the arms.** **Score as ruled, with cloud
+on-time primary, AND report the history-cached observable beside it in every cell, because if the four
+attainment metrics move identically across all five arms then that observable is the only thing that can
+rescue the run.** **Do not resolve this yourself and do not quietly re-rank the metrics; it is with the
+user.**
+
+## D246, USER RULING 2026-11-25 07:08, PROVISIONAL: TOUCHES ARE KEPT.
+
+*** `covex-v6-fair-final` STAYS THE FREEZE CANDIDATE **WITH** TOUCHES. NO `-notouch` ARM IS PROMOTED. ***
+**This closes the question block A and block D were run to answer.** **Block D's verdict stands as written
+(`research/study_blockA_verdict.md`): the touches factor is NOT ESTABLISHED as load-bearing at either
+memory condition, classified under Rule 2 as "fired and did not help", with the ablation itself serving as
+the Step 4 control.** **A factor that is not established as load-bearing is not thereby established as
+useless, and D246 keeps it. Nothing in the 28 cells is withdrawn and nothing is re-run.**
+
+## D247, USER RULING 2026-11-25 07:08, PROVISIONAL: DIAGNOSE THE s7 STALL FROM ENGINE TIMING. LOW PRIORITY.
+
+**WHEN YOU HAVE A GAP, AND NEVER AHEAD OF A D244 CELL.** **Question: why do 6 of 11 kv0.5r s7 cells
+complete NOTHING from about 1,196 s to about 1,199.5 s?**
+```
+STALLED      confidence-cascade, covex-v6-fair-final (BOTH code states), -notouch, -stateoff, covex-v6-rules
+NOT STALLED  covex-v6-base, eco-llm, llf, mooncake, simplestream, covex-v6-state-final
+```
+**FIVE HYPOTHESES ARE ALREADY ELIMINATED and should not be re-tested: builds** (cascade builds nothing and
+stalls, base builds nothing and does not), **code state** (both fair-final s7 code states stall),
+**the piece-size pattern** (fair-final emits {121, 1024}, `-stateoff` emits remainders, both stall),
+**the rules core** (`state-final` wraps `rules`; `rules` stalls, `state-final` does not), and **the state
+channel** (all four combinations of presence and stalling occur, confirmed from `state_decisions` in the
+cells rather than from arm names).
+**It needs the vLLM server log or per-request engine timing. A jq over the decision logs has been taken as
+far as it goes and will not answer it.** **The effect bound is unchanged and small: at most the 4 to 16
+requests submitted into a roughly 3 s window per cell, against about 11,780 dashcam instants and 105 robot
+opportunities, so no verdict moves either way.** **One open sub-question worth one line if the log answers
+it easily: two devices' last completions sit about 5 s before the window closes, and whether they STOPPED
+EARLY or simply HAD NOTHING LEFT decides whether the stall is 3.8 s or nearer 5 s.**
+
+## FLASH-SIDE RULINGS, recorded here only so you know they exist and are NOT yours
+
+- **D243 WATCHDOG.** `ops/STANDDOWN` is extended through **23:59 local today** (epoch 1795679940). **It had
+  LAPSED at 07:00 and was briefly able to restart sessions again; it is re-armed.** A replacement liveness
+  gate is being built and proved both ways on flash, with the diff to be reported before installing.
+  **Nothing for you.**
+- **D245 QUEUE TERM.** An ESTIMATE ONLY of wiring the D162 queued-ahead term into the state planner's
+  pricing. **No build, no cells, nothing for you.**
+
+## A PUSH WINDOW I NEED FROM YOU, and it is the only thing I am asking for
+
+**D244 item 1 orders the D242 TRACE build pushed (outages default OFF) with its proofs: OFF byte-identity,
+the 1,200 s identity proof, and `fairness_digest` unchanged. The `-outage` arms are NOT in that push.**
+**It touches `experiments/orchestration/live2`, and a push into a cell's START-UP window tore a lazy import
+yesterday and cost a cell.** **So: tell me a safe window, or tell me when the current filler cell ends and
+I will push immediately after it and before the next one starts.** **I will not push blind.**
+
+
+
 ## D241, USER RULING 2026-11-24, PROVISIONAL: NO GPU TIME FOR StudyOUTAGE-PROBE TONIGHT. BLOCK B TAKES ITS SLOT.
 
 *** THE PROBE IS OFF THE QUEUE FOR TONIGHT, INCLUDING the 8-minute design (iii) preliminary I had
