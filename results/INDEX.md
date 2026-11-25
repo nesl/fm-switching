@@ -1499,3 +1499,12 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | model/device | none; offline CPU on `jetson_orin`; HiGHS LP; read-only; D240 1x/kv0.5r separate |
 | headline | PRELIMINARY intermediate, not a bound. Transportation LP at T and 1.10xT, per type + pooled, FAIR+HINDSIGHT, s4-7 x {1x,kv0.5r}. Pooled LP_opt (gain over floor) 1x: FAIR s4 86.2 s5 67.4 s6 108.9 s7 83.0; HINDSIGHT s4 134 s5 130 s6 155 s7 112. HINDSIGHT>=FAIR every cell. Capacity binds (Step 2b) at s4 both levels + s5 kv0.5r; else GPU not the constraint at T. oracle_total = device_floor + lp_opt. Bound file written after stage 6 (control + STOP gate). |
 | old name | none; oracle stage 4 |
+
+## StudyORACLE stages 4-6 result: HINDSIGHT bound valid, FAIR>=arms control FAILS (ESCALATION, 2026-11-25, Orin)
+
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/oracle_lp_opt.json`, `oracle_shares.json`; modules `oracle_lp_run.py`, `oracle_shares.py` |
+| model/device | none; offline CPU on `jetson_orin`; HiGHS LP; read-only; D240 1x/kv0.5r separate |
+| headline | NO bound file written (pre-reg: only verified stages). STOP gate (HINDSIGHT share>1 at 1.10T): 0 flags - the HINDSIGHT oracle bounds every arm (pooled share>1 at T: none), VALID. HINDSIGHT>=FAIR holds everywhere. FAIR>=arms FAILS on 3 recall cells (1x s5 FAIR 53.42<arm 56; 1x s7 45<50; kv0.5r s5 39.31<41) - STRUCTURAL: FAIR serves every unit to cloud at acc_cloud, but arms use cloud-if-delivered-else-device (the union), harvesting device-right-cloud-wrong questions FAIR forgoes, so FAIR (expected cloud-only) is NOT an upper bound on realized correct-in-time; only HINDSIGHT (union) is. Two assembly bugs fixed en route (FAIR ss floor used gain not acc_device; policy read 1x cell for kv0.5r). Escalated for user ruling on FAIR's role. |
+| old name | none; oracle stages 4-6 |

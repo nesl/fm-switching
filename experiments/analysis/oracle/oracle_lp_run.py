@@ -25,6 +25,8 @@ from oracle_lp import Unit, solve_oracle_lp, greedy_edf  # noqa: E402
 from _provenance import stamp  # noqa: E402
 
 SEEDS = [4, 5, 6, 7]
+SS_ACC_DEVICE = 0.547985   # SS2 box device accuracy (stage 1); the FAIR ss floor is sum of THIS
+SS_FAIR_GAIN = 0.073896    # acc_cloud - acc_device (stage 1)
 T_CAP = {"1x": 17945.2, "kv0.5r": 15569.8}
 NET = 0.044 / 2.0
 L = {"recall": 3.0, "single_shot": 2.0, "dashcam": 1.0}
@@ -102,7 +104,15 @@ def build_units(seed, tag, mem, rc, acc_c, acc_d, ssbox, cloud, tier, th_dev, th
     units = {"recall": [], "single_shot": [], "dashcam": []}
     floor = {"recall": {"FAIR": 0.0, "HINDSIGHT": 0}, "single_shot": {"FAIR": 0.0, "HINDSIGHT": 0},
              "dashcam": {"FAIR": 0.0, "HINDSIGHT": 0}}
-    vgap = acc_c - acc_d if (acc_c is not None and acc_d is not None) else 0.0
+    # FAIR recall acc from the PER-QUESTION correctness over ALL recall opportunities (unbiased),
+    # NOT the "on served" robot_headline value (which is measured on the delivered subset and is
+    # biased high, inflating FAIR above the actual HINDSIGHT union). rc = {oid:(dev_correct,
+    # cloud_correct)} over all recall opportunities with near-complete cloud coverage.
+    _dcs = [int(dc) for dc, cc in rc.values()]
+    _ccs = [int(cc) for dc, cc in rc.values() if cc is not None]
+    acc_d = (sum(_dcs) / len(_dcs)) if _dcs else 0.0
+    acc_c = (sum(_ccs) / len(_ccs)) if _ccs else 0.0
+    vgap = max(0.0, acc_c - acc_d)
     # recall + single-shot warm W_q (incremental D2 frames per session)
     by_sess = collections.defaultdict(list)
     for r in recs:
@@ -133,9 +143,10 @@ def build_units(seed, tag, mem, rc, acc_c, acc_d, ssbox, cloud, tier, th_dev, th
                 if not v or "device" not in v or "cloud" not in v:
                     continue
                 dc, cc = int(v["device"]), int(v["cloud"])
-                floor["single_shot"]["FAIR"] += 0.073896; floor["single_shot"]["HINDSIGHT"] += dc
-                units["single_shot"].append((Unit(r["opportunity_id"], 0.073896, W, a,
-                                                   a + L["single_shot"] - NET), 0.073896, cc - dc))
+                floor["single_shot"]["FAIR"] += SS_ACC_DEVICE
+                floor["single_shot"]["HINDSIGHT"] += dc
+                units["single_shot"].append((Unit(r["opportunity_id"], SS_FAIR_GAIN, W, a,
+                                                   a + L["single_shot"] - NET), SS_FAIR_GAIN, cc - dc))
     # dashcam episodes
     inst = [r for r in recs if r["kind"] == "monitor_opportunity"]
     by_ep = collections.defaultdict(list)
