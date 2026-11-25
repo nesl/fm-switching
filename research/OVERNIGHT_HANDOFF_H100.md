@@ -1,5 +1,23 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** ALL FIVE REMAINING "WAITING ON YOU" ITEMS ARE ANSWERED. THE LIST IS EMPTY. FROM NOW ON REPORT "Questions waiting for you: none" UNLESS A NEW ITEM ARISES. ***
+
+**User ruling, 2026-11-25.**
+
+| item | answer | |
+|---|---|---|
+| 1 **D244 seed 5** | **HELD.** The user decides after the D244 s4 remainder lands, and **the nested-victim design under D266 MAY SUPERSEDE IT.** | *stop listing until those cells are scored* |
+| 2 **mirror permission** | The user will raise it if needed. | *stop listing* |
+| 3 **device fallback credit** | *** NO RULING IS NEEDED TO RUN ANYTHING. *** Keep reporting cloud-correct, device-standing and device-correct BESIDE cbd on EVERY row per D264; the headline is chosen at plotting time per D251. | *stop listing* |
+| 4 **the code push** | *** FLASH'S ITEM, NOT THE USER'S. *** When it lands, `covex-v6-fair-final-q` 1x s4 runs immediately after the last D250 baseline, ahead of D257, D262, D244 and D258, per D266. | *stop listing* |
+| 5 **the leftover worktree and `/tmp/realnet_*`** | **LEAVE IN PLACE.** The user will say when the other session is done. | *stop listing* |
+
+**Item 3 is the one worth reading twice: the reporting requirement STAYS and the ruling does not. Nothing
+waits on the credit question, and no cell is blocked by it, because every row already carries the three
+counts that let either reading be computed later. That is D251 working as intended: record everything, choose
+the headline at plotting time.**
+**Item 4 means the push no longer needs a user decision. It needs the D265 proof to pass and your window.**
+
 ## *** USER RULING D266 (12:25): THE D249 GATE CELL GOES NEXT, AHEAD OF D257, D262, D244 AND D258. ***
 
 **Once the D265 conditions are met (the CPU byte-identical proof with `-q` OFF, and the push inside your
