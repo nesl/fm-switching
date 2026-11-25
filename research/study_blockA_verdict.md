@@ -284,12 +284,50 @@ conditions. Only 1x s4 is same-code, the kv0.5r s4 `-notouch` cell ran on tree e
 same-code, with the diff named), and s5, s6 and s7 are stratum B at 1x. s7 will not separate them either,
 because its 1x comparator is also an original. ***
 **BLOCK D CANNOT BE POOLED ACROSS SEEDS**, because its three stratum-B comparators are three different
-pieces of code: it is ONE CLEAN PAIR plus THREE PAIRS THAT ARE EACH INDIVIDUALLY INTERPRETABLE AND NOT
-COMPARABLE TO ONE ANOTHER.
+pieces of code: it is ONE CLEAN PAIR plus THREE STRATUM-B PAIRS SPANNING **TWO** COMPARATOR CODE STATES.
+*(Corrected: this first read "three pairs not comparable to one another". The s6 and s7 originals SHARE
+orchestration `29c42039ad11`, so block D has THREE comparator code states across FOUR pairs, not four, and
+**s6 and s7 ARE mutually comparable**. Only s5 stands alone.)*
 **A third reading of these rows is withdrawn here. "The sign reverses between memory conditions" was a
 CONFOUND, asserted without naming the alternative explanation that was stated in the same message that
 supplied the delta. That is a Step 5 failure specifically: the alternative was not merely available, it had
 already been given to me.**
+
+## BLOCK D VERDICT: 4 of 4 VALID, AND THE TOUCHES FACTOR IS NOT ESTABLISHED AS LOAD-BEARING AT 1x
+
+**D238's condition is met: 4 of 4 valid, `source_agreement` OK on all four, no ENOSPC, no INVALID, no
+reruns. The verdict may be written.**
+| seed | stratum | robot | cbd | single-shot | dashcam | dashcam pp | dose notouch / comp |
+|---|---|---|---|---|---|---|---|
+| s4 | **SAME CODE** | -3 | **-1** | +1 | **+245** | +2.083 | 2,633 / 2,676 |
+| s5 | B | 0 | **0** | -3 | +35 | +0.297 | 175 / 172 |
+| s6 | B | -1 | **0** | 0 | -12 | -0.102 | 406 / 413 |
+| s7 | B | 0 | **0** | -1 | +28 | +0.238 | 2,211 / 2,205 |
+
+*** THE VERDICT: BLOCK D ESTABLISHES NO EFFECT OF THE TOUCHES FACTOR AT 1x ON ANY CHANNEL. ***
+**`correct_by_deadline`, the headline robot metric, moves by -1, 0, 0, 0 against denominators of 132, 127,
+121 and 105. Cloud on-time moves -3, 0, -1, 0. Single-shot moves +1, -3, 0, -1. Three of four channels are
+indistinguishable from zero in EVERY cell.**
+*** AND THE ONE NOTABLE VALUE IS NOT CORROBORATED BY THE CELL BEST PLACED TO CORROBORATE IT. s4 and s7
+carry COMPARABLE DOSES - 2,633 and 2,211 touches suppressed, a ratio of 1.19 - and dashcam deltas of +245
+and +28, a ratio of 8.8. The effect does NOT track the dose. *** **So the +245 at s4, which is block D's
+only same-code pair and its largest figure, is not reproduced at a near-equal dose.**
+
+**RULE 2 CLASSIFICATION: this is a null and it is classified "FIRED AND DID NOT HELP", which is the only
+class that is evidence about the policy.** **The mechanism was PRESENT and VARIED: `state_touch_chosen_not_enacted` ran 175, 406, 2,211 and 2,633 across the four cells, a 15-fold range,
+with `submitted_touch` 0 throughout and the comparator's `completed_touch` matching within 1.7 percent at
+every seed. `state_decisions` agreed to within 0.5 percent, so the planner ran the same and the difference
+was in ENACTMENT.** **It is NOT unexercised, NOT unexpressible and NOT cancelled by geometry.**
+**Step 4 applies DIRECTLY and without a separate control run, because `-notouch` IS the negative control
+for the touches factor: disabling touches does not change the outcome, which by Step 4's own statement
+means the mechanism is not driving the result.**
+*** SCOPE, STATED SO IT IS NOT OVERREAD: this is a finding about the TOUCHES FACTOR inside the policy, at
+1x, on these four seeds. It is NOT a finding about the policy as a whole, and it does not bear on the other
+four factors. ***
+**TAKEN WITH BLOCK A: dashcam deltas across all seven cells are 4 positive and 3 negative with no stable
+sign, the robot channel sits inside its floor at both memory conditions, and memory and comparator code are
+confounded at every seed except 1x s4. THE TOUCHES FACTOR IS NOT ESTABLISHED AS LOAD-BEARING AT EITHER
+MEMORY CONDITION.**
 
 ## What this does NOT establish
 
