@@ -1,5 +1,54 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** D252, USER RULING 2026-11-25 09:29, PROVISIONAL: THE H100 QUEUE, IN THIS ORDER. THIS SUPERSEDES THE FILLER'S PLACE IN THE ORDER. ***
+
+*** ITEM 6 FIRST, BECAUSE IT CHANGES WHAT IS RUNNING RIGHT NOW: THE MATRIX FILLER IS **BASELINE ARMS
+ONLY**. COMMENT OUT EVERY `covex-*` LINE IN IT UNTIL D249 LANDS. *** **Rung-3 cells in NEW conditions still
+run (see the label rule at the bottom); it is the FILLER's covex lines that stop.**
+
+| # | what | notes |
+|---|---|---|
+| **1** | **D244 outage run, UNCHANGED, to completion** | 3 of 20 done, all gates clean. Nothing about it changes. |
+| **2** | **PRESSURE PILOT P1 (D253): `covex-v6-fair-final` at 20 DEVICES**, default mix, **1x**, **s4** | **ALSO at 24 devices IF the trace generator supports n24 WITHOUT a code change. IF IT NEEDS ONE, REPORT THE ESTIMATE INSTEAD and do not build it.** |
+| **3** | **MEMORY GATE (D250), A NEW CONDITION: GPU KV pool halved (as `kv0.5r`) AND native HOST OFFLOAD halved, 27 GiB to 13.5 GiB, about 55k tokens** | tag `_kv0.5r_h0.5`. See the preflight bar below. |
+| **4** | **P2 / P3 / P4, ONLY IF P1 FAILS D253's pass rule**, in this order: P2 default mix at a higher question rate, P3 robot-heavy `_c3-11-2`, P4 dashcam-heavy `_c10-4-2` | **ONE rung-3 s4 cell each. STOP AT THE FIRST PASS.** |
+| **5** | **Baselines in any passing new condition** | |
+| **6** | **Matrix filler, BASELINE ARMS ONLY** | every `covex-*` line commented out until D249 lands |
+
+*** THE D250 PREFLIGHT BAR, AND IT IS A BAR: THE PREFLIGHT MUST PROVE **BOTH** LIMITS TOOK EFFECT, with the
+HOST size read from the SERVER'S OWN METRICS OR LOG, not from the launch line. ***
+**AND THE TRAP THE RULING NAMES EXPLICITLY: THE LAST OCCURRENCE OF A FLAG IN `argv` WINS.** **So a halved
+host size appended before an existing one is silently overridden, and the launch line would read correct
+while the server ran the old value. Read it back from the server.**
+**D250 PASS RULE, at s4, on `covex-v6-fair-final` plus the SIX 0.5x baselines (`covex-v6-base`,
+`confidence-cascade`, `simplestream`, `llf`, `mooncake`, `eco-llm`): rung 3 beats the BEST baseline on
+ROBOT CLOUD ON-TIME by MORE THAN 2, and is NOT worse on dashcam beyond its same-code observation.**
+**SCORE THE s4 GATE CELLS BEFORE ANY OTHER SEED. If it PASSES, queue s5 to s7 for the same arms. IF IT
+FAILS, STOP AND REPORT.**
+
+*** D240 STILL HOLDS AND IT BITES HERE: MEMORY AND NETWORK ARE NEVER STACKED. The D250 cells carry NO
+outage, and the D244 outage cells stay at 1x memory. Do not combine `_kv0.5r_h0.5` with `_out-k*-d*` under
+any circumstances. ***
+
+**THE LABEL RULE FOR EVERYTHING IN THIS QUEUE: rung-3 cells in new conditions RUN AS-IS NOW on the current
+code, and are LABELLED `pre-D249`. They are RE-RUN with `covex-v6-fair-final-q` once that arm's gate
+passes.** **So nothing waits on the D249 build, and nothing run now is mistaken later for a D249 result.**
+
+**STANDING RULES, with two that are NEW or CHANGED:**
+- *** `GPU 2 EXCLUSIVE` (new wording in this ruling). Confirm which GPU you are actually on and tell me if
+  it is not 2; `research/HOST_H100.md` previously said GPU 3 preferred, so this may be a change. ***
+- *** NEVER SEEDS 1 TO 3 (now D248). ***
+- no 0.25x; disk refusal below 15 GB; never `pkill -f`; no stacking of memory and network (D240).
+
+## D254 (PART C), FLASH-SIDE, RECORDED HERE ONLY SO YOU KNOW IT EXISTS
+
+**The watchdog liveness gate IS APPROVED FOR INSTALL and flash is installing it, with a post-install proof
+that it does not restart a LIVE session.** **The 10.12 doc fixes (`policy_spec_v6.md:276` and the
+"missing" string in `arm_names_v6.py:59`) are docs and metadata only, no decision code - but
+`arm_names_v6.py` is under `experiments/`, so THAT push waits for a CELL BOUNDARY and I will ask you for one
+rather than push blind.** **10.11 and 10.13 closures and the ptg ruling (the pre-registered bar-1 reading
+GOVERNS, so it is a FAIL, and plain rung 3 stays) are record-only. Nothing for you in any of it.**
+
 ## CHECK-1 COMPARATOR: THE ORIN'S WRITE-UP IS ON ORIGIN AND AWAITS THREE USER RULINGS. THE SCORER IS UNCHANGED.
 
 *** `research/study_check1_comparator_writeup.md`, committed at `db0730f0`. LINKED HERE as offered; nothing
