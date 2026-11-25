@@ -1,5 +1,28 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** USER RULING: THE D250 PASS RULE IS REPLACED, BEFORE ANY BASELINE IS SCORED. ***
+
+**Written here BEFORE the first D250 baseline lands, as the ruling requires.**
+```
+RUNG 3 PASSES D250 if BOTH hold:
+  (1) its robot CORRECT-BY-DEADLINE COUNT beats the best baseline's by MORE THAN 2
+      (an absolute COUNT against the same-code observation, never a fraction, per D234 (3))
+  (2) dashcam on-time is NOT WORSE beyond its same-code observation
+REPORT BESIDE IT, ALWAYS: robot cloud on-time AND cloud accuracy on served.
+NEVER DECIDE ON CLOUD ON-TIME ALONE.
+```
+**This replaces the earlier on-time-based rule and is consistent with D257 (3).**
+
+*** ONE PROPERTY OF THE CHOSEN METRIC THAT MUST TRAVEL WITH EVERY SCORE, BECAUSE IT WAS MEASURED TODAY AND
+IT CUTS BOTH WAYS: CORRECT-BY-DEADLINE INCLUDES DEVICE CREDIT. Per D155 (3) it counts the cloud's answer
+inside the deadline, OTHERWISE THE DEVICE'S ANSWER IF THAT ALSO ARRIVES IN TIME. On the D250 gate cell that
+is 49 cloud plus 23 DEVICE of 72, so a THIRD of the credit is device answers, and the device is 54 pct as
+accurate as the cloud (0.371 against 0.681). Cloud-only correct-by-deadline is 49/132 = 0.371 against
+82/132 = 0.621 for the reference, a 25 pp fall where the composite falls 10. ***
+**So the pass rule is scored exactly as ruled, AND cloud-correct, device-standing and device-correct are
+carried beside it so the reader can see both. Device credit in robot on-time remains an open user question
+and this condition is where it decides rather than decorates.**
+
 ## *** USER RULING D262 (2026-11-25 11:49): THE ROBOT-HEAVY MIX IS THE PRESSURE REGIME. QUEUE IT AFTER THE D250 s4 SET AND THE D257 n20 BASELINES. ***
 
 **P3 established that `_c3-11-2` (eleven robots of sixteen) is the one direction that produces memory
