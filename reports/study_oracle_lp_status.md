@@ -39,3 +39,26 @@ value is emitted, and D240 keeps 1x and kv0.5r separate throughout.
 
 The LP core landing now de-risks the hard correctness dependency; the valuation stages follow on top
 of it.
+
+## 2026-11-25 stage progress (D254 (4))
+
+- **Stage 1 (per-type FAIR valuation) VERIFIED** (`oracle_valuation.py`,
+  `results/orchestration/live2/oracle/oracle_fair_valuation.json`): single-shot FAIR gain acc_cloud
+  - acc_device = 0.621881 - 0.547985 = 0.073896 (SS2 box, n 1042); recall FAIR gain per seed (1x) s4
+  0.279582, s5 0.122275, s6 0.491699, s7 0.300000 (kv0.5r within 0.004), from the rung-3
+  robot_headline cloud_accuracy_on_served and device_only_accuracy. acc_cloud is "on served" by the
+  highest-delivery arm (stated limitation). acc_cloud >= acc_device at every seed; no flags.
+- **Stage 2 (dashcam episode max-over-subsets) MACHINERY VERIFIED** (`oracle_dashcam.py`): the
+  standing-crossing episode-value function and the exact decisive-instant subset enumeration pass a
+  5-case UNIT TEST on hand-built episodes - crash rescue (device misses, cloud detects: gain 1),
+  no-crash no-serve (cloud would false-alarm so it is NOT served: gain 0, non-monotonicity handled),
+  no-crash suppress (cloud fixes a device false alarm: gain 1), min-work improving subset (picks the
+  30-token instant over the 70-token one), and already-correct (gain 0). Built and unit-tested
+  BEFORE touching live data, per D254 (4).
+- **Still to do in stage 2:** apply the machinery to the live episodes by joining the committed
+  DENSE per-instant 32BI (cloud) and 4BI (device) scores (the live2 dense calibration has
+  n_unscored_32b = 0, so a cloud score exists for all 42,014 instants) against the D197 episode-level
+  thresholds (`dashcam_episodic.thresholds_episode`), FAIR using per-tier episode-threshold expected
+  correctness. Then stages 3 (HINDSIGHT), 4 (LP at T and 1.10 x T, per type and pooled, s4-s7 x
+  {1x, kv0.5r}), 5 (shares + clustered bootstrap), 6 (positive control + STOP gate). No bound is
+  written until each stage verifies.

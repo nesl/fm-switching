@@ -1446,3 +1446,12 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | result files | `reports/study_robot_idle_survival.md` (headline corrected), `experiments/analysis/robot_idle/robot_idle_report.py` |
 | correction | the warm survival is PER-TYPE HOST RETENTION, not touches. The one-factor TOUCH ablation covex-v6-fair-final-notouch (touches OFF) has the same survival: kv0.5r 30-60s P(cold)=0.02 (n100) vs fair-final 0.0101. Turning touches off does not make histories cold; baselines (llf 1x) go fully cold by 30-60s. Underlying survival numbers unchanged; only the headline interpretation is corrected. |
 | old name | corrects the prior headline that credited touches |
+
+## StudyORACLE stages 1-2 (FAIR valuation + dashcam max-over-subsets machinery), 2026-11-25, Orin)
+
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/oracle_fair_valuation.json`; `reports/study_oracle_lp_status.md`; modules `experiments/analysis/oracle/oracle_valuation.py`, `oracle_dashcam.py` |
+| model/device | none; offline CPU on `jetson_orin`; read-only, no images; D240 1x and kv0.5r separate |
+| headline | Oracle stage 1 (FAIR valuation) VERIFIED: single-shot gain 0.0739 (cloud 0.622/device 0.548), recall gain per seed 1x s4 0.280 s5 0.122 s6 0.492 s7 0.300, acc_cloud>=acc_device, no flags. Stage 2 (dashcam max-over-subsets) MACHINERY VERIFIED by a 5-case unit test on hand-built episodes (crash rescue, no-crash no-serve, no-crash suppress, min-work subset, already-correct). No bound emitted; live-data application + stages 3-6 pending. |
+| old name | none; staged build on LP core c7219ff4 |
