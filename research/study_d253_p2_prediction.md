@@ -65,7 +65,20 @@ different commits (`da24cee4` original, `629f2c7a` `_rep2`, `d80d4dcd` P1 n20), 
 post-`9e38d937` live2 subtree that NEITHER n16 cell has. **The outages-OFF byte-identity proof bridges the
 OUTAGE BUILD specifically, since P1 carries no outage; it does NOT license the whole interval between those
 commits, and I could not compute that interval because both shas are UNRESOLVABLE in this clone.**
-*** SO THE n16 ANCHOR IS LABELLED CROSS-CODE. The n20-to-n24 leg is the part that can be read without that
+*** CAVEAT DISCHARGED, BY MEASUREMENT RATHER THAN BY ARGUMENT: the accelerator box diffed the interval
+and it is EXACTLY THE THREE OUTAGE FILES. `git diff --stat 629f2c7a d80d4dcd -- live2 lib` lists
+`fleet/emulator.py`, `fleet/trace.py` and `run_live2_real.py` only, 176 insertions and 4 deletions, with
+`lib` unchanged. Those are precisely the three files of the `9e38d937` push, whose OUTAGES-OFF
+BYTE-IDENTITY PROOF covers exactly that change, and P1 CARRIES NO OUTAGE. SO THE n16 ANCHOR IS SOUND, AND
+IS RELABELLED from CROSS-CODE to BRIDGED BY THE OUTAGES-OFF IDENTITY PROOF, interval = the three outage
+files. ***
+*** AND THE P1 PAIR IS SAME-CODE BY SUBTREE **AND** DIGEST: n20 and n24 both carry live2
+`a7eac4ee7c8c`, lib `46a6bf61441a`, `runner_digest e0b4e1f2ca601e14` and `child_start_digest
+bdde7cc77f192dda`, at the same arm, condition and seed with only n differing. So the n20-to-n24 leg is a
+CLEAN ONE-FACTOR COMPARISON. ***
+**The original caveat is kept above because making it was right: the bridge was not established when the
+figures were first quoted, and it was discharged by diffing the interval rather than by assuming the
+subtree rule.** The n20-to-n24 leg is the part that can be read without that
 caveat, and it alone shows the direction on every count. ***
 ## THE PREDICTION, for P2 (`covex-v6-fair-final` n16 s4 1x `_L3_epg_rq10_preD249`)
 
