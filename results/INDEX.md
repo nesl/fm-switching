@@ -1508,3 +1508,12 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | model/device | none; offline CPU on `jetson_orin`; HiGHS LP; read-only; D240 1x/kv0.5r separate |
 | headline | NO bound file written (pre-reg: only verified stages). STOP gate (HINDSIGHT share>1 at 1.10T): 0 flags - the HINDSIGHT oracle bounds every arm (pooled share>1 at T: none), VALID. HINDSIGHT>=FAIR holds everywhere. FAIR>=arms FAILS on 3 recall cells (1x s5 FAIR 53.42<arm 56; 1x s7 45<50; kv0.5r s5 39.31<41) - STRUCTURAL: FAIR serves every unit to cloud at acc_cloud, but arms use cloud-if-delivered-else-device (the union), harvesting device-right-cloud-wrong questions FAIR forgoes, so FAIR (expected cloud-only) is NOT an upper bound on realized correct-in-time; only HINDSIGHT (union) is. Two assembly bugs fixed en route (FAIR ss floor used gain not acc_device; policy read 1x cell for kv0.5r). Escalated for user ruling on FAIR's role. |
 | old name | none; oracle stages 4-6 |
+
+## StudyORACLE stages 5-6 matched-valuation re-run: STOP (FAIR recall W_q overcharge, 2026-11-25, Orin)
+
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/oracle_shares.json`; module `oracle_shares.py` |
+| model/device | none; CPU on `jetson_orin`; read-only; D240 1x/kv0.5r separate; FAIR share now uses the matched expected-accuracy valuation (served*gain), HINDSIGHT realised (user ruling 2026-11-25) |
+| verdict | STOP, NO bound written. HINDSIGHT oracle VALID (0 share>1, bounds every arm). FAIR share>1 on 98 flags = recall(54)+recall-driven pooled(44), seeds 5/6/7 only, 49 arm-cells. CAUSE: stage-4 recall W_q charged the full cold history for the first recall per session, but those frames are pre-uploaded via history_batch (warm at recall), so W_q is too heavy -> recall LP capacity-binds (serves ~64 of 127 at s5) -> FAIR recall oracle undershoots below feasible arms (e.g. state-uo served 115). Fix pending: recall W_q = warmest (question-only). Not a genuine policy-beats-oracle. |
+| old name | none; oracle stages 5-6 matched valuation |

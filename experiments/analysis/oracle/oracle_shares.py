@@ -17,7 +17,7 @@ and pooled. STOP GATE: if any arm's realized exceeds its oracle (share > 1) at 1
 not a bound -> do not write the bound; stop and report.
 """
 from __future__ import annotations
-import json, os, sys, random
+import json, os, sys, random, glob
 from pathlib import Path
 
 REPO = Path("/home/nesl/fm-switching")
@@ -31,7 +31,43 @@ from _provenance import stamp  # noqa: E402
 
 SEEDS = [4, 5, 6, 7]
 LP = json.load(open(REPO / "results/orchestration/live2/oracle/oracle_lp_opt.json"))["results"]
+SS_ACC_CLOUD, SS_ACC_DEVICE = 0.621881, 0.547985
+SS_FAIR_GAIN = SS_ACC_CLOUD - SS_ACC_DEVICE
+# DEV per-tier episode accuracy (stage 2): crash TPR, no-crash TNR
+TIER = {"device": {"tpr": 0.155556, "tnr": 0.888889}, "cloud": {"tpr": 0.288889, "tnr": 0.888889}}
 _LAB = None
+
+
+def acc_allq(seed, tag):
+    """Unbiased per-seed recall acc_cloud/acc_device over ALL recall opportunities (union of arms'
+    robot_rows), matching the FAIR oracle's valuation in stage 4."""
+    dcs, ccs = [], []
+    seen = {}
+    pat = str(RUNS / f"*_n16_s{seed}_1200s_h27_3t{tag}_L3_epg_rq30")
+    for c in sorted(glob.glob(pat) + glob.glob(pat + "_rerun"),
+                    key=lambda c: (0 if "always-cloud-fcfs" in c else 1)):
+        p = os.path.join(c, "cell.json")
+        if not os.path.exists(p):
+            continue
+        try:
+            rows = (((json.load(open(p)).get("score") or {}).get("score") or {}).get("robot_rows")) or []
+        except Exception:
+            continue
+        for r in rows:
+            if not str(r.get("device_id", "")).startswith("robo"):
+                continue
+            oid = r.get("opportunity_id")
+            if oid in seen:
+                continue
+            cl = r.get("cloud_letter")
+            seen[oid] = (bool(r.get("device_correct")), None if cl is None else bool(r.get("cloud_correct")))
+    for dc, cc in seen.values():
+        dcs.append(int(dc))
+        if cc is not None:
+            ccs.append(int(cc))
+    ad = sum(dcs) / len(dcs) if dcs else 0.0
+    ac = sum(ccs) / len(ccs) if ccs else 0.0
+    return ac, ad
 
 
 def dash_labels_thr():
@@ -73,14 +109,13 @@ def _cell_path(arm_raw, seed, tag):
 
 
 def cell_units(path, device_only):
-    """Per-unit recall+single-shot correct-in-time for an EXPLICIT cell path (so kv0.5r policy reads
-    the kv0.5r cell, not the 1x one). Mirrors canon.collect_units: robot 'R' standing_correct_by_
-    deadline (device-only: device_correct within 3 s), single-shot 'S' on-time cloud-else-device with
-    the D226(3) delivery_status; over-32k refusals excluded (D176)."""
+    """Returns (realized_units, served) for an EXPLICIT cell path. realized_units[key]=0/1 realized
+    correct-in-time (HINDSIGHT policy); served[key]=1 iff the arm served cloud ON-TIME for that unit
+    (used for the matched FAIR policy valuation). Robot 'R' / single-shot 'S'; over-32k excluded."""
     cell = E.load_cell(path)
     rr = (((cell.get("score") or {}).get("score") or {}).get("robot_rows")) or []
     over = C.over32k_oids(path)
-    units = {}
+    units, served = {}, {}
     for r in rr:
         oid = r.get("opportunity_id")
         if oid is None or oid in over or not str(r.get("device_id", "")).startswith("robo"):
@@ -90,6 +125,7 @@ def cell_units(path, device_only):
         else:
             ok = bool(r.get("standing_correct_by_deadline"))
         units[("R", oid)] = 1 if ok else 0
+        served[("R", oid)] = 1 if r.get("source_by_deadline") == "cloud" else 0
     corr = E.ss2_correctness()
     refused, present = C.refused_and_present(path)
     for o in E.read_jsonl_gz(os.path.join(path, "outcomes.jsonl")):
@@ -98,97 +134,139 @@ def cell_units(path, device_only):
         c = corr.get(o.get("question_id"))
         if c is None:
             continue
+        cp = o.get("cloud_payload") or {}
+        verified = E.delivery_status(o, refused, present) == "delivered"
+        on_time = (bool(cp.get("on_time")) or bool(o.get("within_L"))) and verified
         if device_only:
             ok = c.get("device")
         else:
-            cp = o.get("cloud_payload") or {}
-            verified = E.delivery_status(o, refused, present) == "delivered"
-            on_time = (bool(cp.get("on_time")) or bool(o.get("within_L"))) and verified
             ok = c.get("cloud") if on_time else c.get("device")
         units[("S", o.get("question_id"))] = 1 if ok else 0
-    return units
+        served[("S", o.get("question_id"))] = 1 if on_time else 0
+    return units, served
+
+
+def dash_served_crash(arm_raw, seed, tag):
+    """Count of CRASH episodes the arm cloud-served on-time on a pre-event instant (the improving
+    window). This is the number of dashcam episodes that realize the FAIR crash gain."""
+    path = _cell_path(arm_raw, seed, tag)
+    if path is None:
+        return 0
+    onc = set()
+    for o in E.read_jsonl_gz(os.path.join(path, "outcomes.jsonl")):
+        if str(o.get("device_id", "")).startswith("dash"):
+            cp = o.get("cloud_payload") or {}
+            if bool(cp.get("on_time")):
+                onc.add(o["opportunity_id"])
+    labels = DC.nexar_labels()
+    by_ep = {}
+    for r in DC.load_trace_instants(seed):
+        by_ep.setdefault(r["episode_id"], []).append(r)
+    cnt = 0
+    for eid, rows in by_ep.items():
+        meta = labels.get(rows[0]["clip"]) or {}
+        ref = meta.get("ref"); is_pos = (meta.get("label") == "positive")
+        if not (is_pos and ref is not None):
+            continue
+        pre = [r for r in rows if float(r["t_local"]) < ref]
+        if pre and any(r["opportunity_id"] in onc for r in pre):
+            cnt += 1
+    return cnt
 
 
 def arm_realized(arm_raw, seed, tag):
-    """Per-type realized correct-in-time + device floor for the arm's cell AT THIS memory level.
-    Returns None if the arm has no cell at this memory level (so kv0.5r only covers arms run there)."""
+    """Per-type HINDSIGHT realized correct-in-time and FAIR SERVED counts (matched valuation: the
+    arm realizes gain only on units it served on-time). Returns None if no cell at this level."""
     path = _cell_path(arm_raw, seed, tag)
     if path is None:
         return None
-    units = cell_units(path, device_only=False)
+    units, served = cell_units(path, device_only=False)
     if not units:
         return None
-    floor_u = cell_units(path, device_only=True)
     rob = sum(v for k, v in units.items() if k[0] == "R")
     ss = sum(v for k, v in units.items() if k[0] == "S")
-    rob_f = sum(v for k, v in floor_u.items() if k[0] == "R")
-    ss_f = sum(v for k, v in floor_u.items() if k[0] == "S")
     dash, _ = dash_cit(arm_raw, seed, tag, device_only=False)
-    dash_f, _ = dash_cit(arm_raw, seed, tag, device_only=True)
-    return {"recall": (rob, rob_f), "single_shot": (ss, ss_f),
-            "dashcam": (dash, dash_f), "units": units, "floor_units": floor_u}
+    served_rob = sum(served[k] for k in units if k[0] == "R")
+    served_ss = sum(served[k] for k in units if k[0] == "S")
+    served_dash = dash_served_crash(arm_raw, seed, tag)
+    return {"HIND": {"recall": rob, "single_shot": ss, "dashcam": dash},
+            "served": {"recall": served_rob, "single_shot": served_ss, "dashcam": served_dash}}
 
 
 def main():
     arms = list(E.ARMS)
-    out = {"_what": "StudyORACLE stages 5-6: per-arm share, positive control, STOP gate. "
-                    "share=(policy-floor)/(oracle-floor), D192 units, per type + pooled. "
-                    "FAIR headline, HINDSIGHT reference. D240 1x/kv0.5r separate.",
+    out = {"_what": "StudyORACLE stages 5-6: per-arm share, positive control, STOP gate. Each arm's "
+                    "FAIR share values its served items with the SAME expected-accuracy valuation as "
+                    "the FAIR oracle (matched, user ruling 2026-11-25); HINDSIGHT on realised "
+                    "outcomes. Control: HINDSIGHT oracle >= FAIR oracle, and each oracle >= every "
+                    "arm on its OWN valuation. D240 1x/kv0.5r separate; s6 is a flagged outlier.",
            "1x": {}, "kv0.5r": {}}
     stop_flags = []
     control_fail = []
+    TYPES = ("recall", "single_shot", "dashcam", "pooled")
     for tag, mem in (("", "1x"), ("_kv0.5r", "kv0.5r")):
         for s in SEEDS:
             key = f"s{s}"
             if key not in LP.get(mem, {}):
                 continue
             lp = LP[mem][key]
-            cell = {"arms": {}, "s6_outlier_flag": (s == 6)}
+            acc_c, acc_d = acc_allq(s, tag)
+            GAIN = {"recall": acc_c - acc_d, "single_shot": SS_FAIR_GAIN,
+                    "dashcam": TIER["cloud"]["tpr"] - TIER["device"]["tpr"]}
+            cell = {"arms": {}, "s6_outlier_flag": (s == 6), "recall_acc_cloud_allq": round(acc_c, 4),
+                    "recall_acc_device_allq": round(acc_d, 4)}
             for disp, raw in arms:
                 rz = arm_realized(raw, s, tag)
                 if rz is None:
                     continue
                 row = {}
-                for typ in ("recall", "single_shot", "dashcam", "pooled"):
+                for typ in TYPES:
+                    base_types = ("recall", "single_shot", "dashcam")
                     if typ == "pooled":
-                        pol = sum(rz[t][0] for t in ("recall", "single_shot", "dashcam")
-                                  if rz[t][0] is not None)
-                        flo = sum(rz[t][1] for t in ("recall", "single_shot", "dashcam")
-                                  if rz[t][1] is not None)
+                        polH = sum(rz["HIND"][t] for t in base_types if rz["HIND"][t] is not None)
                     else:
-                        pol, flo = rz[typ]
-                    if pol is None or flo is None:
+                        polH = rz["HIND"][typ]
+                    if polH is None:
                         continue
-                    ent = {"policy_cit": pol, "device_floor": flo}
-                    for which in ("FAIR", "HINDSIGHT"):
-                        for scale in ("T", "1.10T"):
+                    # FAIR matched policy = floor + served*gain (on the oracle's unit set)
+                    def fair_pol(scale, t):
+                        f = lp[scale]["FAIR"][t].get("floor")
+                        return None if f is None else f + rz["served"][t] * GAIN[t]
+                    ent = {"policy_realized": polH,
+                           "served": (rz["served"][typ] if typ != "pooled" else
+                                      {t: rz["served"][t] for t in base_types})}
+                    for scale in ("T", "1.10T"):
+                        if typ == "pooled":
+                            polF = sum(fair_pol(scale, t) for t in base_types
+                                       if fair_pol(scale, t) is not None)
+                        else:
+                            polF = fair_pol(scale, typ)
+                        for which, pol in (("FAIR", polF), ("HINDSIGHT", polH)):
                             o = lp[scale][which][typ]
-                            orc = o.get("oracle_total")
-                            if orc is None:
+                            orc, flo = o.get("oracle_total"), o.get("floor")
+                            if orc is None or flo is None or pol is None:
                                 continue
                             denom = orc - flo
                             share = ((pol - flo) / denom) if abs(denom) > 1e-9 else None
-                            ent[f"{which}_{scale}"] = {"oracle_cit": round(orc, 4),
+                            ent[f"{which}_{scale}"] = {"oracle": round(orc, 4), "policy": round(pol, 4),
                                                        "share": (round(share, 4) if share is not None else None)}
-                            if which == "HINDSIGHT" and scale == "1.10T" and share is not None and share > 1.0 + 1e-6:
-                                stop_flags.append(f"{mem} {key} {disp} {typ}: share {share:.4f} > 1")
+                            if share is not None and share > 1.0 + 1e-6:
+                                stop_flags.append(f"{mem} {key} {disp} {typ} {which} {scale}: "
+                                                  f"share {share:.4f} > 1 (policy {pol:.2f} > oracle {orc:.2f})")
                     row[typ] = ent
                 cell["arms"][disp] = row
-            # positive control per type+pooled: HINDSIGHT oracle >= FAIR oracle >= max policy
-            for typ in ("recall", "single_shot", "dashcam", "pooled"):
+            # control: HINDSIGHT oracle >= FAIR oracle at T, per type+pooled
+            for typ in TYPES:
                 fo = lp["T"]["FAIR"][typ].get("oracle_total")
                 ho = lp["T"]["HINDSIGHT"][typ].get("oracle_total")
-                maxpol = max((cell["arms"][a][typ]["policy_cit"] for a in cell["arms"]
-                              if typ in cell["arms"][a]), default=None)
-                if fo is not None and ho is not None and maxpol is not None:
-                    if not (ho >= fo - 1e-6 and fo >= maxpol - 1e-6):
-                        control_fail.append(f"{mem} {key} {typ}: HIND {ho:.2f} FAIR {fo:.2f} maxpol {maxpol}")
+                if fo is not None and ho is not None and ho < fo - 1e-6:
+                    control_fail.append(f"{mem} {key} {typ}: HINDSIGHT oracle {ho:.2f} < FAIR oracle {fo:.2f}")
             out[mem][key] = cell
     out["STOP_gate_flags"] = stop_flags
-    out["positive_control_failures"] = control_fail
-    out["verdict"] = ("STOP: share>1 at 1.10T" if stop_flags else
-                      ("CONTROL FAIL: HINDSIGHT>=FAIR>=arms violated" if control_fail else
-                       "PASS: no share>1, positive control holds"))
+    out["control_failures_HIND_lt_FAIR"] = control_fail
+    out["verdict"] = ("STOP: an arm exceeds its oracle (share>1)" if stop_flags else
+                      ("STOP: HINDSIGHT oracle < FAIR oracle" if control_fail else
+                       "PASS: HINDSIGHT >= FAIR >= every arm (matched valuations); no share>1"))
     out["_provenance"] = stamp(script="oracle_shares.py", model="qwen3vl32b", device="jetson_orin")
     outdir = REPO / "results/orchestration/live2/oracle"
     (outdir / "oracle_shares.json").write_text(json.dumps(out, indent=1, default=float))
