@@ -1,8 +1,8 @@
 # D250 (user ruling 2026-11-25 09:29, provisional) MEMORY GATE: GPU KV pool halved (kv0.5r) AND native host offload halved 27 -> 13.5 GiB (~55,315 tokens), tag _kv0.5r_h0.5, s4, NO outage (D240). Runs under driver v40 (_h<f> proven live from server argv, server mmap log and cell header). Line 1 is a GATE: its readings (both limits) go to flash before the '#PENDING-GATE' lines are un-commented. _preD249 on the rung-3 arm only (D252 label rule). PASS RULE: rung 3 beats the BEST baseline on robot cloud on-time by MORE THAN 2 and is not worse on dashcam beyond its same-code observation; PASS -> s5-s7, FAIL -> STOP AND REPORT.
 covex-v6-fair-final 16 4 _kv0.5r_h0.5_L3_epg_rq30_preD249 --num-gpu-blocks-override 1968 --max-model-len 31472
-#PENDING-GATE covex-v6-base 16 4 _kv0.5r_h0.5_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
-#PENDING-GATE confidence-cascade 16 4 _kv0.5r_h0.5_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
-#PENDING-GATE simplestream 16 4 _kv0.5r_h0.5_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
-#PENDING-GATE llf 16 4 _kv0.5r_h0.5_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
-#PENDING-GATE mooncake 16 4 _kv0.5r_h0.5_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
-#PENDING-GATE eco-llm 16 4 _kv0.5r_h0.5_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
+covex-v6-base 16 4 _kv0.5r_h0.5_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
+confidence-cascade 16 4 _kv0.5r_h0.5_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
+simplestream 16 4 _kv0.5r_h0.5_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
+llf 16 4 _kv0.5r_h0.5_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
+mooncake 16 4 _kv0.5r_h0.5_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
+eco-llm 16 4 _kv0.5r_h0.5_L3_epg_rq30 --num-gpu-blocks-override 1968 --max-model-len 31472
