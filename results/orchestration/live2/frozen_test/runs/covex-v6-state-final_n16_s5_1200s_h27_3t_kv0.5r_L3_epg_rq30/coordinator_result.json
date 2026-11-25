@@ -1,0 +1,501 @@
+{
+ "arm": "covex-v6-state-final",
+ "arm_version": "covex-v6-state-uo-c5attr-1.0",
+ "is_measurement": false,
+ "tick_s": 0.1,
+ "decision_period_s": 0.1,
+ "h_s": null,
+ "upload_mode": "A",
+ "window_s": 1200.0,
+ "n_devices": 16,
+ "n_sessions": 377,
+ "n_opportunities": 12252,
+ "n_requests": 5838,
+ "n_decisions": 6439,
+ "rd_decisions_log": null,
+ "guard_state_log": null,
+ "request_rows_written": 5838,
+ "request_log_complete": true,
+ "counts": {
+  "belief_corrections": 1257,
+  "belief_corrections_changed": 22,
+  "belief_to_cold": 2,
+  "belief_to_gpu": 20,
+  "completed_monitor": 4573,
+  "completed_piece": 174,
+  "completed_recall": 482,
+  "completed_touch": 601,
+  "device_wait_measured": 5055,
+  "device_wait_measured_dashcam": 4573,
+  "device_wait_measured_robot": 126,
+  "device_wait_measured_single_shot": 356,
+  "epg_frames_bytes_resent_unconfirmed": 4181,
+  "epg_frames_sent_as_bytes": 15334,
+  "epg_frames_sent_as_reference": 35723,
+  "epg_monitor_requests": 4580,
+  "racefix_bytes_confirmed_monitor": 15300,
+  "racefix_bytes_confirmed_session": 4581,
+  "racefix_bytes_resent": 315,
+  "racefix_confirm_dropped_stale": 0,
+  "recall_CLOUD": 483,
+  "request_rows_written": 5838,
+  "requests_abandoned_at_end": 7,
+  "requests_first_token_unfinished_at_end": 1,
+  "session_KEEP_GPU_WARM": 601,
+  "session_MATERIALIZE": 187,
+  "state_priced_build": 174,
+  "state_priced_build_cold": 38,
+  "state_priced_build_gpu": 136,
+  "submitted_monitor": 4580,
+  "submitted_piece": 174,
+  "submitted_recall": 483,
+  "submitted_touch": 601,
+  "touch_considered": 601,
+  "touch_issued": 601,
+  "touch_issued_gpu": 601,
+  "touch_price_milli_sum": 1803
+ },
+ "n_monitor_answers": 11751,
+ "n_recall_answers": 482,
+ "n_on_time": 1282,
+ "submit_delay_ms": {
+  "n": 5838,
+  "p50": 6.8342,
+  "p90": 16.6597,
+  "p99": 30.2823,
+  "max": 44.9749
+ },
+ "decision_time": {
+  "n": 12000,
+  "cpu_clock": "time.thread_time() of the deciding thread",
+  "wall_ms": {
+   "n": 12000,
+   "p50": 1.7995,
+   "p90": 2.6306,
+   "p99": 3.6809,
+   "max": 17.9113
+  },
+  "cpu_ms": {
+   "n": 12000,
+   "p50": 1.7937,
+   "p90": 2.6179,
+   "p99": 3.6675,
+   "max": 17.8791
+  },
+  "wall_over_cpu": {
+   "n": 12000,
+   "p50": 1.0033,
+   "p90": 1.0048,
+   "p99": 1.0202,
+   "max": 1.6854
+  },
+  "candidates": {
+   "n": 12000,
+   "p50": 6,
+   "p90": 6,
+   "p99": 7,
+   "max": 8
+  },
+  "candidates_source": "pending items ordered"
+ },
+ "n_pulls": 0,
+ "n_cloud_answers": 5055,
+ "decision_latency_ms": {
+  "p50": 1.7995,
+  "p99": 3.6809,
+  "max": 17.9113,
+  "n": 12000
+ },
+ "cpu_s": 452.767,
+ "wall_s": 1197.8,
+ "cpu_percent": 37.8,
+ "request_rate_per_s": 4.87,
+ "budget_gpu_s": 1200.0,
+ "budget_spent_gpu_s": 884.44,
+ "epoch_overruns": 0,
+ "max_epoch_lag_s": 0.0,
+ "wall_guard_hit": false,
+ "wall_guard_s": null,
+ "virtual_t_reached_s": 0.0,
+ "n_errors": 0,
+ "first_errors": [],
+ "mu_time_average": null,
+ "arm_stats": {
+  "state_skipped_nothing_built": 1560,
+  "submitted_piece": 174,
+  "state_skipped_no_question_estimate": 11584,
+  "submitted_recall": 483,
+  "submitted_monitor": 4580,
+  "state_decisions": 39965,
+  "state_decisions_without_a_rebuild": 39830,
+  "harm_warm_no_queue": 38665,
+  "cf_planner_decisions": 39965,
+  "cf_planner_decisions_state": 39965,
+  "cf_budget_ms": 20.0,
+  "state_chosen_KEEP": 39362,
+  "state_delta_max_milli": 998,
+  "state_delta_gt_0": 38911,
+  "state_delta_milli_sum": 5828950,
+  "state_delta_n": 39965,
+  "gain_TOUCH_n": 39965,
+  "gain_TOUCH_milli_sum": 5827937,
+  "gain_TOUCH_max_milli": 775,
+  "gain_HOLD_BACK_n": 39965,
+  "gain_HOLD_BACK_milli_sum": 998,
+  "gain_HOLD_BACK_max_milli": 998,
+  "harm_warm_priced": 1435,
+  "harm_warm_nonzero": 1015,
+  "harm_warm_milli_sum": 1181,
+  "harm_warm_max_milli": 998,
+  "state_delta_gt_0p01": 25869,
+  "state_deferred_to_guard_epochs": 4412,
+  "state_decisions_with_a_rebuild": 135,
+  "state_delta_gt_0p05": 19509,
+  "gain_WARM_n": 135,
+  "gain_WARM_milli_sum": 16058,
+  "gain_WARM_max_milli": 714,
+  "state_delta_gt_0p1": 15972,
+  "state_delta_gt_0p12": 14693,
+  "state_delta_gt_0p14": 13577,
+  "state_delta_gt_0p16": 12713,
+  "state_delta_gt_0p16456": 12502,
+  "state_delta_gt_0p18": 11879,
+  "state_delta_gt_0p2": 11007,
+  "state_delta_gt_0p25": 9528,
+  "harm_warm_capped": 1,
+  "state_chosen_HOLD_BACK": 1,
+  "state_delta_over_margin": 603,
+  "gain_HOLD_BACK_over_margin": 1,
+  "state_deviations": 603,
+  "state_hold_back_enacted": 1,
+  "state_chosen_TOUCH": 601,
+  "gain_TOUCH_over_margin": 602,
+  "state_touch_emitted": 601,
+  "submitted_touch": 601,
+  "state_chosen_WARM": 1,
+  "gain_WARM_over_margin": 1,
+  "epochs": 12000,
+  "chunk_roster_missing_est_tokens": 1,
+  "chunk_trigger_size": 130,
+  "warm_ahead_wanted": 260,
+  "warm_ahead_emitted": 188,
+  "warm_ahead_unexpressible": 2,
+  "chunk_trigger_horizon": 130,
+  "jit_suppressed_already_used": 84024,
+  "guard_active_epochs": 4412,
+  "guard_by_lag": 4412,
+  "guard_by_backlog": 0,
+  "guard_shed_warming_epochs": 4412,
+  "c2_throttled_dash": 8299,
+  "c5_dash_held": 64738,
+  "decisions": 12000,
+  "ss_seen": 356,
+  "c5_attr_slow_all_self_released": 6715,
+  "c5_attr_suppressed_decrease": 6715,
+  "c2_throttle_periods": 1851,
+  "c2_robots_at_risk_while_throttling": 94,
+  "c5_attr_slow_mixed": 83,
+  "c5_decrease": 93,
+  "c5_increase": 63,
+  "c5_attr_trip_without_slow_evidence": 10,
+  "planner_time_limit": {
+   "budget_ms": 20.0,
+   "decisions": 39965,
+   "abandoned_to_base": 0,
+   "fraction": 0.0,
+   "by_kind": {
+    "state": {
+     "decisions": 39965,
+     "abandoned_to_base": 0,
+     "fraction": 0.0
+    }
+   },
+   "over_1_percent": [],
+   "flag": false,
+   "_note": "cf_instrument.over_budget is a WALL-CLOCK limit (D99 (3), D151 (5)), so this rate is a property of the host CPU as well as of the policy. The H100 host is about 2.2x slower than flash on the committed policy benchmark (D115 (1)), so a rate measured on flash is a LOWER BOUND for a live cell and must not be quoted for one. Proofs run with the limit OFF so a decision digest is a property of the arm; live cells run with it ON because it is a real cost"
+  }
+ },
+ "release_infeasible_events": [],
+ "release_infeasible_events_total": 0,
+ "share_events": [],
+ "share_events_total": 0,
+ "share_events_cap": 20000,
+ "dashcam_format": "epg",
+ "epg": {
+  "requests": 4580,
+  "frames_min": 3,
+  "frames_max": 21,
+  "frames_median": 11,
+  "frames_total": 51057,
+  "prompt_tokens_total": 17449626,
+  "episodes": 688,
+  "by_episode_index": {
+   "2": {
+    "n": 298,
+    "frames": 894,
+    "as_reference": 0
+   },
+   "3": {
+    "n": 286,
+    "frames": 1144,
+    "as_reference": 255
+   },
+   "4": {
+    "n": 281,
+    "frames": 1405,
+    "as_reference": 611
+   },
+   "5": {
+    "n": 277,
+    "frames": 1662,
+    "as_reference": 867
+   },
+   "6": {
+    "n": 284,
+    "frames": 1988,
+    "as_reference": 1138
+   },
+   "7": {
+    "n": 297,
+    "frames": 2376,
+    "as_reference": 1355
+   },
+   "8": {
+    "n": 273,
+    "frames": 2457,
+    "as_reference": 1576
+   },
+   "9": {
+    "n": 254,
+    "frames": 2540,
+    "as_reference": 1669
+   },
+   "10": {
+    "n": 262,
+    "frames": 2882,
+    "as_reference": 1895
+   },
+   "11": {
+    "n": 252,
+    "frames": 3024,
+    "as_reference": 2116
+   },
+   "12": {
+    "n": 227,
+    "frames": 2951,
+    "as_reference": 2032
+   },
+   "13": {
+    "n": 205,
+    "frames": 2870,
+    "as_reference": 2144
+   },
+   "14": {
+    "n": 202,
+    "frames": 3030,
+    "as_reference": 2356
+   },
+   "15": {
+    "n": 203,
+    "frames": 3248,
+    "as_reference": 2547
+   },
+   "16": {
+    "n": 198,
+    "frames": 3366,
+    "as_reference": 2623
+   },
+   "17": {
+    "n": 204,
+    "frames": 3672,
+    "as_reference": 2966
+   },
+   "18": {
+    "n": 186,
+    "frames": 3534,
+    "as_reference": 2906
+   },
+   "19": {
+    "n": 197,
+    "frames": 3940,
+    "as_reference": 3303
+   },
+   "20": {
+    "n": 194,
+    "frames": 4074,
+    "as_reference": 3364
+   }
+  }
+ },
+ "bridge": {
+  "arm": "covex-v6-state-final",
+  "n_events": 17571,
+  "n_ticks": 220888,
+  "n_pulls": 0,
+  "n_cloud_answers": 5055,
+  "n_decisions": 12000,
+  "decision_period_s": 0.1,
+  "n_forwarded_on_completion": 5056,
+  "n_skipped_forwarded": 5055,
+  "n_forward_mismatch": 0,
+  "n_recall_first_token": 482,
+  "n_recall_letter_differs": 0,
+  "recall_letter_diffs": [],
+  "n_monitor_score_differs": 0
+ },
+ "self_ticks": 100891,
+ "self_tick_s": 0.005,
+ "backend": {
+  "n_built": 5838,
+  "callback_errors": [],
+  "wire_image_parts": {
+   "piece": 16695,
+   "assistive": 356,
+   "monitor": 51057,
+   "recall": 23215,
+   "touch": 137475
+  },
+  "wire_image_parts_with_uuid": {
+   "piece": 16695,
+   "assistive": 356,
+   "monitor": 51057,
+   "recall": 23215,
+   "touch": 137475
+  },
+  "wire_extra_delay_ms": {
+   "n": 5838,
+   "p50": 8.9836,
+   "p90": 17.1936,
+   "p99": 30.3228,
+   "max": 2104.6493
+  },
+  "submit_delay_total_ms": {
+   "n": 5838,
+   "p50": 16.7397,
+   "p90": 32.4965,
+   "p99": 57.9637,
+   "max": 2109.7715
+  },
+  "first_line_to_first_content_ms": {
+   "n": 5831,
+   "p50": 0.1419,
+   "p99": 2.9073,
+   "max": 58.6603
+  },
+  "n_callback_errors": 0,
+  "build_ms_total": 4199.116,
+  "build_ms_mean": 0.7193,
+  "cache": {
+   "n_cached": 18041,
+   "held_bytes": 1334288187,
+   "cap_bytes": 1500000000,
+   "hits": 19988,
+   "misses": 18041,
+   "encoded_bytes": 1334288187,
+   "hit_fraction": 0.525599
+  },
+  "metrics_health": {
+   "state": "never_scraped",
+   "scrape_enabled": false,
+   "engine_metrics_trusted": false,
+   "n_scrapes": 0,
+   "n_failures": 0,
+   "last_success_t": null,
+   "metric_names_found": [],
+   "untrusted_quantities_when_not_ok": [
+    "cloud.gpu_kv_fraction",
+    "arm_stats.pd_kv_bound_by_engine_metric",
+    "arm_stats.pd_free_kv_min",
+    "arm_stats.pd_free_kv_max",
+    "arm_stats.pd_free_kv_sum",
+    "backend.engine_metrics"
+   ],
+   "why": "the /metrics scrape was switched off for this cell, so every engine-metric quantity in it is an absence and not an observation"
+  }
+ },
+ "cache": {
+  "n_cached": 18041,
+  "held_bytes": 1334288187,
+  "cap_bytes": 1500000000,
+  "hits": 19988,
+  "misses": 18041,
+  "encoded_bytes": 1334288187,
+  "hit_fraction": 0.525599
+ },
+ "pid": 4124941,
+ "cpu_s_child": 452.7753,
+ "completion_to_forward_ms": {
+  "n": 5056,
+  "p50_ms": 0.0579,
+  "p90_ms": 0.109,
+  "p99_ms": 0.1578,
+  "max_ms": 1.8661
+ },
+ "first_token_to_forward_ms": {
+  "n": 5056,
+  "p50_ms": 0.0579,
+  "p90_ms": 0.109,
+  "p99_ms": 0.1578,
+  "max_ms": 1.8661
+ },
+ "memory_pressure": {
+  "kv_capacity_enforced": true,
+  "gpu_kv_tokens": 31472,
+  "pressure": {
+   "epochs": 12000,
+   "epochs_over_cap": 6,
+   "peak_tokens": 32256,
+   "intervals": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "host_peak_tokens": 31353,
+   "host_epochs_over_cap": 0,
+   "intervals_n": 6
+  },
+  "enact_placement_totals": {
+   "calls": 12000,
+   "offloaded": 0,
+   "kept_warm": 1830,
+   "evicted": 7,
+   "resident": 21
+  }
+ },
+ "source_agreement": {
+  "runner_loaded_n": 150,
+  "child_loaded_at_start_n": 126,
+  "overlap_n": 124,
+  "runner_only_n": 26,
+  "child_only_at_start_n": 2,
+  "runner_digest": "2d2ce4ed51b586d0",
+  "child_start_digest": "66128702d111118c",
+  "runner_child_mismatch": [],
+  "start_files_n": 478,
+  "start_hash_wall_s": 0.0281,
+  "verdict": "OK",
+  "torn_lazy_import": [],
+  "moved_after_import": [],
+  "child_only_late_n": 3,
+  "tree_files_changed_during_cell": [],
+  "tree_files_changed_during_cell_n": 0,
+  "end_files_n": 478,
+  "end_hash_wall_s": 0.0328,
+  "note": "sha256 of files ON DISK (did the tree move under the cell, not what bytecode executed). Case 1 runner_child_mismatch -> TornTree before running; case 2 moved_after_import -> WARNING, cell kept (an imported module is cached, the change did not execute); case 3 torn_lazy_import -> INVALID. Bounds: a file changed and changed back within a cell is invisible; runner-only files are outside case 1 and are covered by the runner's pre-flight refusal instead (disjoint halves, keep both); repo files only."
+ },
+ "wire_events_sent": 17571,
+ "wire_replies_received": 5056,
+ "wire_write_errors": 1,
+ "wire_max_send_backlog": 30,
+ "completion_to_emulator_ms": {
+  "n": 5056,
+  "p50_ms": 4.9181,
+  "p90_ms": 8.8124,
+  "p99_ms": 10.1063,
+  "max_ms": 65.7022
+ },
+ "result_status": "received"
+}
