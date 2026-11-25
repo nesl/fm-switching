@@ -1,6 +1,6 @@
 # Figure-data readiness (StudyFIGDATA, D214)
 
-Pipeline sha (D209 canonical scorer): `42312ae9`. Generated 2026-11-23. Tables in `reports/figdata/`. NO FIGURES until the user says plot.
+Pipeline sha (D209 canonical scorer): `298d8315`. Generated 2026-11-23. Tables in `reports/figdata/`. NO FIGURES until the user says plot.
 
 ## Arm coverage (standard grid: 1x memory, 16 devices, robot deadline 3.0 s, rq30)
 
@@ -95,13 +95,13 @@ The standard-grid cells DO apply the committed D75 link model (fleet/links.py, a
 - F4: 1392 rows
 - F6: 16 rows
 - F7: 0 rows
-- F8: 44 rows
+- F8: 50 rows
 - F9: 17 rows
 - F10: 8 rows
 - F11: 0 rows
 - F12: 0 rows
-- F13: 150 rows
-- F14: 150 rows
+- F13: 155 rows
+- F14: 155 rows
 - F15: 1 rows
 - F16: 1 rows
 - F17: 0 rows
