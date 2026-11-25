@@ -17,6 +17,11 @@ while true; do
   # start). So also hold while the last cell event is an "end" younger than 120 s (an idle driver cannot block forever).
   le=$(grep -E "^\[[0-9-]+ [0-9:]+\] (start|end) " $G 2>/dev/null | tail -1)
   case "$le" in *"] end "*) [ $(( $(date +%s) - $(date -d "$(echo "$le" | cut -c2-20)" +%s) )) -lt 120 ] && { sleep 10; continue; };; esac
+  # 2026-11-25 11:30 (incident: an outside actor checked out branch live-experiment in this tree): push ONLY from
+  # branch main. `git push origin HEAD:main` from any other branch would put that branch's HEAD on main if it ever
+  # diverges. Refuse and log instead; commits wait locally until the tree is back on main.
+  br=$(git symbolic-ref --short -q HEAD)
+  if [ "$br" != "main" ]; then echo "[$(date '+%F %T')] REFUSED: working tree is on branch [$br], not main; not pushing" >> $P; sleep 60; continue; fi
   git fetch -q origin 2>>$P
   if ! git merge-base --is-ancestor HEAD origin/main 2>/dev/null; then
     echo "[$(date '+%F %T')] HEAD $(git rev-parse --short HEAD) not on origin/main $(git rev-parse --short origin/main); pushing" >> $P
