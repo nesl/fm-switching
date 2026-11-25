@@ -914,6 +914,43 @@ unscraped; **rung-4 seeds 5 to 7 must scrape.** Only flash's main session may in
 records each run's unix `t0` (the D211 proxy this removes). The 31 stub cells are marked only and their
 scores stand.
 
+## *** TWO VALIDITY FLAGS, AND WE WERE BOTH CHECKING THE WRONG ONE. `run_meta.run_valid` IS **TRUE** ON A CELL ITS OWN HARNESS DECLARES `INVALID torn_lazy_import`. ***
+
+**Read `header.source_agreement.verdict` before scoring any cell, and refuse it if the verdict contains
+INVALID.** Now a standing pre-scoring check on the H100. Measured across six cells at one pinned sha:
+```
+stateoff 1x             source_agreement: OK      torn=[]                     files_moved=0
+stateoff kv0.5r         *** INVALID torn_lazy_import ***  torn=[arms_final_ladder.py]  files_moved=8
+stateoff kv0.5r _rerun  source_agreement: OK      torn=[]                     files_moved=0
+fair-final 1x           source_agreement: ABSENT (key missing entirely)
+fair-final kv0.5r       source_agreement: ABSENT (key missing entirely)
+```
+**`run_valid` is `true` on the invalid cell**, and `run_valid` is the flag both boxes were gating on. **Two
+different validities with similar names: one says the run completed, the other says the code did not change
+underneath it.** `source_agreement.py:15` defines the fatal class as a module **first loaded after start**
+whose file at the end differs from its start hash, so **the new bytes may have executed beside the old
+ones**. Here the torn file was `arms_final_ladder.py` - **`make_rung3`, the arm's own builder** - which is
+why it is INVALID and not a warning.
+**The cost, and it is mine: I cited that cell for most of an afternoon.** Its 72/132 and 0.583333 went into
+a tie investigation, a replicate-pair hypothesis, and an alert-attainment number I had to withdraw and
+recompute. **The push that tore it was mine, the `_rerun` existed as the remedy for exactly it, and I then
+analysed the cell it had replaced.** Nobody read `source_agreement` first - **not the agent that scored the
+attainment, not the agent that spent forty minutes explaining the tie as a coincidence, and not me when I
+briefed either of them.** Per CLAUDE.md the number was **struck, not caveated.**
+**The tie needed no explanation at all. One side of it should never have been read.** A real finding came
+out of that work - counts matching over different membership - but **it was produced at the cost of an
+agent, on a comparison that was void before it began.**
+
+*** AND THE SAME CHANNEL EXPOSES THE REVERSE ASYMMETRY, WHICH IS THE USER'S CALL AND NOT OURS: BOTH
+`covex-v6-fair-final` COMPARATORS HAVE NO `source_agreement` KEY AT ALL. *** Not OK - **ABSENT**; those
+cells predate the instrument. **So the bar every ablation verdict is measured against cannot be certified
+by the channel that just caught an invalid treatment.** The treatments are instrumented and the comparators
+are not - **the audited-one-side problem pointing the other way, and arm-versus-arm checking cannot see it
+because every arm is compared against the same unexamined bar.** Absence of the key is not evidence of
+tearing, so this is **not** a claim that the comparators are suspect; the remedy is that **"comparator
+agreement ABSENT" is now recorded beside every verdict that cites them**, and whether that is acceptable for
+the freeze is for the user to rule.
+
 ## *** THE PROOFS WERE CERTIFIED BY AN INSTRUMENT THAT WAS NEVER COMMITTED. `tree_guard.py` HAD NO PATH, NO BLOB AND NO STRING ANYWHERE ON ORIGIN. ***
 
 `research/EXPERIMENTS.md`'s `StudyD222-PASS1-NQD` row certifies **"EVERY TREE-GUARD CALL EXITED 0 ... per
