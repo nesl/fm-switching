@@ -363,6 +363,28 @@ rather than assumes. ***
 silent failure and not noise, and because the safe-push procedure it forced is now the precedent: pause the
 pusher at a cell boundary, rebase with no cell running, restore.**
 
+## *** THE SUBTREE CLAIM ABOVE IS BOUNDED IN TIME: IT ENDS AT 07:46 ON 2026-11-25 ***
+
+**The 34-of-34 run-path check above covers cells started between 19:00 on 2026-11-24 and 07:44 on
+2026-11-25, all on orchestration subtree `c6a83f0eaf3d`.** **At 07:46:13 the D244 trace build landed
+(`9e38d937`, three files) and the subtree became `9b20a73d8358`.** (`experiments` whole subtree
+`91e0e6666d2d`; `experiments/lib` unchanged at `46a6bf61441a`.)
+*** SO FROM 07:46 ONWARDS NO CELL IS SUBTREE-SAME-CODE WITH ANY CELL IN THIS VERDICT, AND THE SUBTREE RULE
+MUST NOT BE USED TO BRIDGE THAT BOUNDARY. *** **A later reader comparing a post-07:46 cell against block A
+or block D on the strength of the 34-of-34 check would be wrong, which is why the bound is written here
+rather than left implicit.**
+
+**THE HALF THAT MAKES THE BOUNDARY CROSSABLE ANYWAY, and it is stronger than the subtree rule:** the push
+carried an **outages-OFF byte-identity proof**, so with outages off the new tree reproduces
+`5a03c2807da3681a` over **14,539** rows for `covex-v6-fair-final` **and** `961be8fe4942d86b` over
+**14,075** rows for `llf`, with byte-identical canonical rows (6,911,460 bytes) and a null
+first-differing index, each with a positive control that differs in digest and row count at row 0.
+**So across this boundary, with outages off, the two trees are DECISION-IDENTICAL for a covex arm and for a
+baseline. That is a measured identity rather than an argument from unchanged code, and it is the only thing
+that should be cited for a cross-boundary outages-off comparison.**
+**Practical consequence, agreed with the accelerator box: the D244 cells and any no-outage references run on
+the NEW tree, so they pair by subtree and nobody has to invoke the proof at all.**
+
 ## What this does NOT establish
 
 - **No settled finding for either arm.** `-stateoff` clears the bar at two of three seeds and declines into
