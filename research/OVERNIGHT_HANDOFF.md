@@ -4,6 +4,55 @@ ALL TIMES ARE PST AND STATE THEIR ZONE. Derive idleness from the newest commit's
 OFFSET (`git log --date=iso-strict`), never from a bare clock time: reading PST commit times as UTC
 once produced a false "H100 idle eight hours" claim while it had committed one minute earlier.
 
+## *** NEWEST STATE, 2026-11-25 07:10 PST, WATCHDOG RESTART 2 OF 12. READ THIS BLOCK AND STOP: THERE IS NOTHING TO DO AND THE DISCOVERY HAS ALREADY BEEN PAID FOR. ***
+
+**Everything below this block is older. This block supersedes it on current state.**
+
+**1. THE OVERNIGHT POLICY WORK IS FINISHED AND WRITTEN UP. Do not re-score it.**
+D238's queue ran to completion: **28 of 28 cells valid**, `source_agreement` OK on every one, **no ENOSPC,
+no INVALID, no reruns.** Block A 9, `ptg` 1, block B 8, block C 7, block D 4.
+- Verdicts: **`research/study_blockA_verdict.md`** (both blocks, with the figure check, the scoped lattice
+  sentences, the s7 stall limitation, the four `-notouch` rows and three WITHDRAWN readings).
+- The 07:00 report D242 required: **`reports/MORNING_SUMMARY_2026-11-25.md`** (`abf604b7`).
+- Bookkeeping CLOSED (`e242734a`): `StudyD233-STATEOFF` extended, `results/INDEX.md` section added,
+  `research/STATUS.md` advanced to 2026-11-25.
+- **The last `comparator agreement ABSENT` caveat is TRIAGED AND STANDS. It is NOT CLEARABLE** and must not
+  be reopened: those two cells carry no `source_agreement` key at all, which is a permanent property of
+  cells predating the instrument. Block A's `_rep2` comparators carry it OK on all nine, so the same-code
+  questions are answered there.
+
+**2. THE H100 IS HEALTHY AND BUSY. DO NOT TOUCH IT, AND DO NOT CALL IT IDLE.** Checked at 07:10 by commit
+times WITH OFFSET: its newest commit was 6 minutes old and a cell takes **21.36 minutes** (measured over
+five consecutive completions: 21.33 to 21.38, spread 0.05 min). **Silence under 30 minutes is one cell in
+progress, not a stall.**
+
+*** 3. THE REAL ITEM, AND IT IS A USER DECISION NOBODY HAS MADE: THE FILLER WILL RUN FOR TWO DAYS. *** After
+block D the driver moved to `MATRIX_READY_CELLS` so the GPU would not idle, which was correct and
+rule-checked (seeds 4 and 5 only, no 0.25x, the `_c10-4-2` / `_c3-11-2` tags are fleet COMPOSITIONS and not
+network, so D240 holds). **But the list is 137 lines, only 3 are on origin, and 134 remain:**
+```
+134 cells x 21.36 min = 47.7 HOURS = 2.0 DAYS of continuous H100 time
+```
+**Nobody ruled that the accelerator should spend two days on the n8/n12 baseline matrix while the policy
+blocks are complete and D242 is blocked.** **It is not a defect and nothing is wrong with the filler. It is
+a resource allocation that should be seen rather than discovered in two days.** **A resume must NOT stop it
+and must NOT redirect it: surface it and leave it running.**
+
+**4. WHAT A RESUME SHOULD ACTUALLY DO.** Everything remaining is blocked on the user: D242's two rulings
+(the ordering is a pure permutation at 1x, and the 55,000-token premise is unsourced), `ptg` bar 1's
+comparator choice, the `AMENDMENT_4` ledger gap, and the mirror permission. **So there is no experimental
+step to take.** **The cheap check that would change this answer, in one command: `git log --oneline
+e242734a..origin/main`. If filler cells have landed, the only in-scope flash action is to note them; the
+n8/n12 grid has NO committed table (`baseline_matrix_table.py` assembles the n16 `_L3_epg_rq30` grid), and
+building one is NOT in scope without a ruling.** **Do not invent an analysis artefact to have something to
+do.**
+
+**5. THE WATCHDOG IS RESTARTING ON A HEARTBEAT NOTHING WRITES, AND IT IS THE USER'S TO STOP.** `RESTART
+2/12` fired at 15:10:01Z on `heartbeat STALE at 119664s` (about 33 hours). **`ops/heartbeat` is 0 bytes and
+the only two matches for a write to it are COMMENTS.** So the staleness is structural and every restart
+will fire. **A resume must not delete `ops/STANDDOWN`, must not edit the watchdog, and should say plainly in
+its reply that this is happening.**
+
 ## READ THIS FIRST, FOR A WATCHDOG RESUME. STATE AS OF 2026-11-23 22:20 PST.
 
 *** CORRECTED 2026-11-25 04:0x UTC (20:0x PST, watchdog restart). THE BLOCK BELOW IS STALE IN ITS MOST
