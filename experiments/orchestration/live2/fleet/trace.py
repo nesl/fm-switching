@@ -211,6 +211,38 @@ DEFAULT_STAGGER_S = DS.HISTORY_BATCH_S      # 30 s, the D68 history-batch period
 ANSWER_PAYLOAD_B = 300                      # a cloud answer body; see links.deliver_s
 JOIN_FRAC_MAX = 0.5                         # D101: join ~ U[0, 0.5 x session duration)
 
+# ------------------------------------------------- D242 item A: correlated multi-robot outage
+# `k` of the robots lose the uplink together for `D` seconds, then reconnect. ONE window per
+# run, the SAME window for every robot in the set, so the loss is CORRELATED and not k
+# independent losses. OFF BY DEFAULT (`outage_robots_k = 0`): the block does not run, no stats
+# attribute is set and no meta key is added, so a trace built without it is byte-identical to
+# the committed one. Same idiom as the D159 (C) re-ask block.
+#
+# PLACEMENT IS PROVISIONAL AND AWAITS A RULING. D242 says "start chosen deterministically from
+# the seed, placed mid-episode", which does not settle whether "mid-episode" is the MIDPOINT or
+# a seeded draw inside a middle band. A midpoint needs no seed and would leave
+# `outage_seed_offset` with no effect on the start, so the band reading is implemented: a draw
+# uniform in [LO, HI] x (run_s - D). Changing the reading changes these two constants and
+# nothing else.
+OUTAGE_PLACEMENT_LO = 0.25
+OUTAGE_PLACEMENT_HI = 0.75
+
+OUTAGE_NOTE = (
+    "D242 item A (PROVISIONAL, placement awaiting a ruling): `outage_robots_k` robots drawn "
+    "from a dedicated RNG stream keyed on (seed, outage_seed_offset, k, D) lose the uplink "
+    "TOGETHER for `outage_duration_s` seconds, in ONE window per run whose start is drawn "
+    "uniformly in [%.2f, %.2f] x (run_s - D). INSIDE THE WINDOW NOTHING IS OFFERED. A "
+    "`history_batch` record's `t` IS its offer time, so its `t` moves to the reconnect instant "
+    "and `fleet/links.py`'s committed UplinkQueue produces the burst and records `queue_s`; no "
+    "burst model is written here and links.py is unedited. A `recall_question`'s `t` is the ASK "
+    "time and the deadline anchor, so it does NOT move: the question gains `t_offer`, read at "
+    "`fleet/emulator.py::_on_recall_question` and handed to UplinkQueue.send, so the question "
+    "reaches the cloud only after the reconnect and past its own deadline, and the COMMITTED "
+    "standing-answer rule (`scorer/score.py::_standing` / `_standing_by_deadline`) leaves the "
+    "DEVICE's answer standing. No second device-only mechanism exists. `device_answers.jsonl` "
+    "is untouched, and so are every `opportunity_id` and the monitor and question record order, "
+    "because only history offer times move." % (OUTAGE_PLACEMENT_LO, OUTAGE_PLACEMENT_HI))
+
 
 def _epg_episode(play_id: str, refs: Sequence[str], idx: int,
                  cap_frames: int = EPG_CAP_FRAMES) -> Dict[str, Any]:
@@ -385,7 +417,10 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                    dashcam_format: str = "oneframe",
                    dashcam_min_frames: int = EPG_MIN_FRAMES,
                    robot_upload: str = ROBOT_UPLOAD_DEFAULT,
-                   robot_reask_mean_s: float = 0.0) -> Dict[str, Any]:
+                   robot_reask_mean_s: float = 0.0,
+                   outage_robots_k: int = 0,
+                   outage_duration_s: float = 0.0,
+                   outage_seed_offset: int = 0) -> Dict[str, Any]:
     """Build one run's opportunity trace. Returns {records, device_answers, meta, stats}.
 
     `dashcam_format="epg"` is D153's append-only episode context (D148). It adds the episode
@@ -395,6 +430,10 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
     `robot_upload="per-frame"` is D154 (4) / D150 SYNC (1): one `history_batch` record per D2
     frame, offered at its capture time, instead of D68's 30-s windows (see ROBOT_UPLOAD_NOTE).
     "batch-30s" is the default and changes nothing.
+
+    `outage_robots_k`, `outage_duration_s` and `outage_seed_offset` are D242 item A's correlated
+    multi-robot outage (see OUTAGE_NOTE). OFF by default, and off means the block below does not
+    run at all: no record moves, no stats attribute is set and no meta key is added.
 
     Deterministic in `seed` alone given (n_devices, ratio, run_s, stagger_s): the same seed
     produces a byte-identical trace, which is what makes the arms paired (D79).
@@ -414,6 +453,8 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
         raise ValueError(f"dashcam_format {dashcam_format!r} not in {DASHCAM_FORMATS} (D153)")
     if robot_upload not in ROBOT_UPLOADS:
         raise ValueError(f"robot_upload {robot_upload!r} not in {ROBOT_UPLOADS} (D154 (4))")
+    if int(outage_robots_k) < 0 or float(outage_duration_s) < 0.0:
+        raise ValueError("outage_robots_k and outage_duration_s must be non-negative (D242 A)")
     per_frame = robot_upload == "per-frame"
     epg = dashcam_format == "epg"
     floor = int(dashcam_min_frames)
@@ -893,6 +934,85 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
         st.robot_question_repeats = sum(v - 1 for v in st.robot_question_ask_counts.values()
                                        if v > 1)
 
+    # ------------------------------------------------ D242 item A: correlated robot outage
+    # OFF BY DEFAULT. See OUTAGE_NOTE for the rule and for what is deliberately NOT changed.
+    # The schedule is computed and applied here, BEFORE the canonical sort, so the moved
+    # history offers take their new place in the trace's canonical order. Only `history_batch`
+    # records move, and `history_batch` is not an opportunity kind, so the relative order of
+    # the `monitor_opportunity` and `recall_question` records is unchanged and every
+    # `opportunity_id` below is assigned exactly as it would have been with the outage off.
+    outage_meta: Optional[Dict[str, Any]] = None
+    outage_q_keys: List[str] = []
+    if int(outage_robots_k) > 0 and float(outage_duration_s) > 0.0:
+        k_out = int(outage_robots_k)
+        d_out = float(outage_duration_s)
+        if k_out > len(rob_ids):
+            raise ValueError("outage_robots_k %d exceeds the %d robot devices in this fleet"
+                             % (k_out, len(rob_ids)))
+        if d_out >= float(run_s):
+            raise ValueError("outage_duration_s %g does not fit inside run_s %g"
+                             % (d_out, float(run_s)))
+        # A DEDICATED RNG STREAM, keyed on (seed, offset, k, D) and never the generator's own,
+        # so turning the outage on cannot perturb one other draw in the trace.
+        rng_out = random.Random("outage|%d|%d|%d|%.6f"
+                                % (int(seed), int(outage_seed_offset), k_out, d_out))
+        victims = sorted(rng_out.sample(sorted(rob_ids), k_out))
+        span = float(run_s) - d_out
+        t_out0 = rng_out.uniform(OUTAGE_PLACEMENT_LO * span, OUTAGE_PLACEMENT_HI * span)
+        t_out1 = t_out0 + d_out
+        vset = set(victims)
+        n_def_rec = n_def_frames = n_def_est_tokens = 0
+        per_robot: Dict[str, Dict[str, int]] = {v: dict(records=0, frames=0) for v in victims}
+        for r in records:
+            if str(r.get("device_id")) not in vset:
+                continue
+            t_r = float(r.get("t", 0.0))
+            if not (t_out0 <= t_r < t_out1):
+                continue
+            if r["kind"] == "history_batch":
+                # `t` IS the offer time for a history record (the generator's own `t_offer`), so
+                # moving it to the reconnect instant is the WHOLE change on this path: the
+                # committed UplinkQueue then takes t_start = max(offer, free_at) and records the
+                # queueing delay it imposed. Nothing here models a burst.
+                r["t"] = round(t_out1, 6)
+                n_def_rec += 1
+                n_def_frames += len(r.get("frame_refs") or ())
+                n_def_est_tokens += int(r["est_tokens"])
+                per_robot[str(r["device_id"])]["records"] += 1
+                per_robot[str(r["device_id"])]["frames"] += len(r.get("frame_refs") or ())
+            elif r["kind"] == "recall_question":
+                # `t` is the ASK time and the deadline anchor and MUST NOT move. Only the OFFER
+                # moves, in its own field, and the READ that makes it causal is
+                # `fleet/emulator.py::_on_recall_question`, which hands this value to
+                # UplinkQueue.send in place of the event time.
+                r["t_offer"] = round(t_out1, 6)
+                outage_q_keys.append(r["opportunity_key"])
+        outage_meta = dict(
+            args=dict(outage_robots_k=k_out, outage_duration_s=d_out,
+                      outage_seed_offset=int(outage_seed_offset)),
+            robots=victims, n_robots_total=len(rob_ids),
+            t_start=round(t_out0, 6), t_end=round(t_out1, 6), duration_s=d_out,
+            placement_rule=("seeded uniform draw in [%.2f, %.2f] x (run_s - D); PROVISIONAL, "
+                            "see OUTAGE_NOTE" % (OUTAGE_PLACEMENT_LO, OUTAGE_PLACEMENT_HI)),
+            rng_stream_key="outage|%d|%d|%d|%.6f" % (int(seed), int(outage_seed_offset),
+                                                     k_out, d_out),
+            deferred_history_records=n_def_rec, deferred_history_frames=n_def_frames,
+            deferred_history_est_tokens=n_def_est_tokens,
+            backlog_tokens_d2=n_def_frames * DS.D2_TOK_PER_IMG,
+            deferred_per_robot=per_robot,
+            device_only_questions=len(outage_q_keys),
+            rule=OUTAGE_NOTE)
+        st.outage_robots_k = k_out
+        st.outage_duration_s = d_out
+        st.outage_seed_offset = int(outage_seed_offset)
+        st.outage_robots = victims
+        st.outage_t_start = round(t_out0, 6)
+        st.outage_t_end = round(t_out1, 6)
+        st.outage_deferred_history_records = n_def_rec
+        st.outage_deferred_history_frames = n_def_frames
+        st.outage_backlog_tokens_d2 = n_def_frames * DS.D2_TOK_PER_IMG
+        st.outage_device_only_questions = len(outage_q_keys)
+
     records.sort(key=lambda r: (round(float(r.get("t", 0.0)), 6),
                                 TRACE_KINDS.index(r["kind"]), r["device_id"],
                                 r.get("opportunity_key") or r.get("session_id") or ""))
@@ -918,6 +1038,10 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
     for r in records:
         if "reask_of" in r:
             r["reask_of"] = assigned[r["reask_of"]]
+    # D242 item A: the deferred questions were collected by `opportunity_key`, which has just
+    # been popped, so they are translated here from the SAME map for the same reason.
+    if outage_meta is not None:
+        outage_meta["device_only_question_ids"] = sorted(assigned[k] for k in outage_q_keys)
 
     meta = dict(robot_question_set=robot_question_set, ss_question_set=ss_question_set,
                 robot_upload=robot_upload,
@@ -963,6 +1087,11 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                 trace_label="NOT A MEASUREMENT: a deterministic device script",
                 mode_affects_trace=False,
                 caveats=[DS.AP_CAVEAT, DS.DEVICE_ANSWER_CAVEAT, DS.SEMBER_JPEG_CAVEAT])
+    # D242 item A: the key is ADDED ONLY WHEN THE OUTAGE IS ON. A `None`-valued key would move
+    # one byte of trace_meta.json on the default path and break the identity gate, so the
+    # schedule travels as a key that is absent rather than as a key that is null.
+    if outage_meta is not None:
+        meta["outage"] = outage_meta
     return dict(records=records, device_answers=answers, meta=meta, stats=st.as_dict())
 
 
@@ -1061,12 +1190,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     help="D153: 'epg' is the append-only episode context of D148")
     ap.add_argument("--dashcam-min-frames", type=int, default=EPG_MIN_FRAMES,
                     help="D153's minimum-frame floor; epg only")
+    ap.add_argument("--outage-robots-k", type=int, default=0,
+                    help="D242 A: robots that lose the uplink together; 0 is off")
+    ap.add_argument("--outage-duration-s", type=float, default=0.0,
+                    help="D242 A: the window D in seconds; 0 is off")
+    ap.add_argument("--outage-seed-offset", type=int, default=0,
+                    help="D242 A: offsets the dedicated outage RNG stream only")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
     b = generate_trace(a.seed, a.devices, a.ratio, a.run_s, a.mode, a.stagger_s,
                        Path(a.frame_manifest) if a.frame_manifest else None,
                        dashcam_format=a.dashcam_format,
-                       dashcam_min_frames=a.dashcam_min_frames)
+                       dashcam_min_frames=a.dashcam_min_frames,
+                       # D242 A: forwarded unconditionally HERE because this entry point has no
+                       # committed trace to keep byte-identical; the defaults are the off values.
+                       outage_robots_k=a.outage_robots_k,
+                       outage_duration_s=a.outage_duration_s,
+                       outage_seed_offset=a.outage_seed_offset)
     meta = write_trace(Path(a.out), b)
     print(json.dumps(meta, indent=2, sort_keys=True))
     return 0

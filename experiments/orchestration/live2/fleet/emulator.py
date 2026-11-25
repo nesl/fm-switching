@@ -414,7 +414,17 @@ class FleetEmulator:
                                      deadline_s=r["deadline_s"], session_id=r["session_id"],
                                      question_id=r["question_id"])
         self.presented.append(r)
-        tr = self._upload(r, "recall_question", opp, QUESTION_TEXT_B, t)
+        # D242 item A: THE OFFER TIME, and it is `t` for every question but one the trace put
+        # inside a correlated outage window. `t_offer` is present only on those (fleet/trace.py,
+        # the outage block) and carries the reconnect instant. THIS IS THE READ THAT MAKES THE
+        # DEFERRAL CAUSAL: the value goes straight into links.UplinkQueue.send, which decides
+        # when the question reaches the coordinator, so the question arrives after the reconnect
+        # and past its own deadline and the committed standing-answer rule leaves the DEVICE's
+        # answer standing. The record's `t`, its `deadline_s` and the Outcome row above are
+        # untouched, so the deadline is still measured from the ASK, and `self.presented` holds
+        # the record unchanged so the fairness digest is unaffected.
+        t_offer = float(r.get("t_offer", t))
+        tr = self._upload(r, "recall_question", opp, QUESTION_TEXT_B, t_offer)
         self.outcomes[opp].uplink_queue_s = tr.queue_s
         self._push(tr.t_arrive, "question_arrived", dict(rec=r, t_arrive=tr.t_arrive))
 

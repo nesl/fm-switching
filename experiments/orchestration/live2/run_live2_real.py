@@ -123,6 +123,14 @@ def build_parser() -> argparse.ArgumentParser:
                          "request per frame, for ALL arms; 'batch-30s' is D68's fixed 30-s batch and the committed "
                          "default (earlier cells are labelled upload-30s). It is a property of the TRACE, so a "
                          "per-frame cell gets its own trace directory, its own fairness digest and its own run tag")
+    # D242 item A: the correlated multi-robot outage. ALL THREE DEFAULT OFF/ZERO, so the default
+    # path is the committed one and the trace directory keeps its committed name.
+    ap.add_argument("--outage-robots-k", type=int, default=0,
+                    help="D242 A: how many robots lose the uplink TOGETHER; 0 is off")
+    ap.add_argument("--outage-duration-s", type=float, default=0.0,
+                    help="D242 A: the outage window D in seconds; 0 is off")
+    ap.add_argument("--outage-seed-offset", type=int, default=0,
+                    help="D242 A: offsets the dedicated outage RNG stream only")
     ap.add_argument("--frames-root", default=None)
     ap.add_argument("--server", default=None, help="OpenAI-compatible base URL; omit to send nothing")
     ap.add_argument("--server-kind", default="vllm")
@@ -218,6 +226,14 @@ def _trace(a, work: Path) -> Path:
     # differ or `if not (tdir / "trace.jsonl").exists()` would silently reuse the non-re-ask trace.
     if float(a.robot_reask_mean_s) > 0.0:
         extra += "_rq%g" % float(a.robot_reask_mean_s)
+    # D242 item A: an outage is a different trace, and the directory MUST differ or the
+    # `trace.jsonl` existence check below would silently reuse the no-outage trace. The
+    # seed offset enters the name only when it is non-zero, so a k/D cell at offset 0 keeps
+    # one name. Outages off adds nothing, which is what keeps every committed name addressable.
+    if int(a.outage_robots_k) > 0 and float(a.outage_duration_s) > 0.0:
+        extra += "_outk%dd%g" % (int(a.outage_robots_k), float(a.outage_duration_s))
+        if int(a.outage_seed_offset) != 0:
+            extra += "o%d" % int(a.outage_seed_offset)
     tdir = work / "traces" / f"seed{a.seed}_n{a.n_devices}_{int(a.run_s)}s_{a.mode}{extra}"
     if not (tdir / "trace.jsonl").exists():
         TR.write_trace(tdir, TR.generate_trace(
@@ -230,7 +246,13 @@ def _trace(a, work: Path) -> Path:
                          dashcam_min_frames=int(a.dashcam_min_frames))),
             **({} if a.robot_upload == "batch-30s" else dict(robot_upload=a.robot_upload)),
             **({} if float(a.robot_reask_mean_s) <= 0.0
-               else dict(robot_reask_mean_s=float(a.robot_reask_mean_s)))))
+               else dict(robot_reask_mean_s=float(a.robot_reask_mean_s))),
+            # D242 item A: passed only when ON, for the same reason as every switch above: the
+            # defaulted call must be the call the committed traces were built with.
+            **({} if not (int(a.outage_robots_k) > 0 and float(a.outage_duration_s) > 0.0)
+               else dict(outage_robots_k=int(a.outage_robots_k),
+                         outage_duration_s=float(a.outage_duration_s),
+                         outage_seed_offset=int(a.outage_seed_offset)))))
     return tdir
 
 
