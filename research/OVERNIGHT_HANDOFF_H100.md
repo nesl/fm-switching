@@ -44,6 +44,22 @@ counts that let either reading be computed later. That is D251 working as intend
 the headline at plotting time.**
 **Item 4 means the push no longer needs a user decision. It needs the D265 proof to pass and your window.**
 
+## *** THE s5 CONFIRM PLACEMENT IS SETTLED BY THE USER: BEFORE NESTOUT, AS THE GATE FILE ALREADY HAS IT. NO SPLIT. ***
+
+**The escalated question is closed. `D262_REGIME_CELLS` stays as ONE list and is NOT split.**
+```
+D262_REGIME_CELLS   (a) s4 regime check, 5 arms    (b) s5 rung-3 CONFIRM cell    (c) s5-s7, pending
+  ->  StudyD266-NESTOUT  scope A
+  ->  D244  s4 remainder
+```
+*** SO THE s5 CONFIRM RUNS BEFORE NESTOUT. NOTHING MOVES, NO NEW LIST, NO `D262_SEEDS`. The placement I
+inferred was wrong and the gate file was already right. ***
+**The reasoning that was put to the user and that they accepted: the s5 confirm exists to CONFIRM THE REGIME
+at a second seed, and all eight NESTOUT cells RUN IN THAT REGIME, so the confirm is logically prior. And the
+asymmetry decides it: the confirm is ONE cell that could weaken NESTOUT's premise, costing 21 minutes, where
+running it second risks 2.88 hours on eight cells whose regime had not been confirmed. The cheap cell that
+can stop the expensive ones goes first.**
+
 ## *** THREE QUEUE RULINGS. THE FULL ORDER IS BELOW AND ONE PLACEMENT IS MY READING, NOT THE USER'S WORDS. ***
 
 ```
