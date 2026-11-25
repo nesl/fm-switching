@@ -1,4 +1,14 @@
-# D266 ITEM 2: PRE-REGISTRATION OF THE NESTED-VICTIM FIXED-WINDOW OUTAGE
+# StudyD266-NESTOUT: PRE-REGISTRATION OF THE NESTED-VICTIM, TRUE-OUTAGE CONDITION
+
+*** AMENDED UNDER USER RULING D273 (1), 2026-11-25: NESTOUT MOVES TO TRUE OUTAGE SEMANTICS.
+Frames a victim captures during the outage are LOST TO THE CLOUD, not buffered and not drained on
+reconnect; THE DEVICE STILL HOLDS THEM. The buffered variant that this file first pre-registered is
+NOT deleted and NOT wrong: it is the other semantics, it is the CLOSED ALTERNATIVE recorded at
+commit `722c449f`, and it is still the DEFAULT everywhere else in the harness. D = 120 s, the
+centred window at 540.0 to 660.0 s, and the nested victims are UNCHANGED. ***
+**Re-resolved for this amendment: `origin/main` = `f8ae560d80e69f9028517f8bae08dede625089ba`,
+47 commits past the sha the build was read through, and all five files the build changes are still
+byte-identical at it, so nothing needs rebasing.**
 
 **Ruling: user, D266 item 2, 2026-11-25 12:25. Estimate it implements: `research/study_d262_nested_outage_estimate.md`
 (commit `523b350d`), APPROVED. Built as specified; nothing redesigned.**
@@ -46,6 +56,23 @@ document had open:**
 | comparator | **P3 and the in-regime regime-gate cells. NEVER the existing 40:40:20 outage grid.** `w_d`'s definition is unchanged but its value moves, because the pooled robot denominator moves from 132 to 229 (confirmed below: 229 robot questions at this mix). |
 
 ---
+
+## 1b. *** THE SEMANTICS SWITCH, AND WHY THE RULING CHANGED IT ***
+
+| | |
+|---|---|
+| switch | `outage_semantics`, **DEFAULT `buffered`** (the committed D242 behaviour, verbatim) |
+| this condition | `outage_semantics=true`: the victim's in-window `history_batch` records are REMOVED, so those frames never reach the cloud and no reconnect drains them |
+| cell tag | **`_lost`**, on an outage-tagged cell, refused unless the flag is in the launch arguments and unless the cell's own `trace_meta` records frames actually lost at 90 tokens per frame |
+| meta | `outage.semantics`, plus an `outage.lost` block with the records, frames, tokens, per-session split and the header re-attribution |
+| the device | **UNTOUCHED.** `device_answers` is built before the outage block and never read by it |
+
+**WHY: the buffered semantics closed the mechanism this study exists to test.** Measured before any
+cell: the deferred frames are 60 records and 1,449,630 bytes per victim, which serialise in 0.853 s
+on the committed 13.6 Mbps uplink with one queue per device, so the whole backlog has landed 0.87
+to 0.89 s after reconnect, and **not one affected question is asked inside that sub-second
+interval**, making the drain-bounded dose zero at every pair. Under true semantics there is no
+drain, so **the bounded columns are NOT APPLICABLE and must never be read as zeros.**
 
 ## 2. THE CAUSAL CHAIN, THE DOSE, AND WHAT THE HARNESS ACTUALLY DOES WITH THE WITHHELD FRAMES
 
@@ -128,17 +155,54 @@ Per affected question, with its overlap and the frames inside it:
 s4 overlaps the window by 1.02 s, which is shorter than the 2.000 s D2 frame period, so **no capture instant
 lies inside the overlap and nothing was physically withheld for it.** That is why both readings are reported.
 
+### 2.3b THE DOSE IN THE CONDITION THAT WILL ACTUALLY RUN (`outage_semantics=true`)
+
+**The dose is unchanged by the semantics, because an evidence overlap does not depend on what
+happens to the frames. What changes is that NOTHING BOUNDS IT.**
+
+| pair | added victims | **R1 DISTINCT questions** | R1 instances | R2 | R3 | drain bound |
+|---|---|---|---|---|---|---|
+| s4, k 1 to 3 | robo003, robo009 | **1** | 5 | 0 | 31 | **NOT APPLICABLE** |
+| s4, k 3 to 5 | robo004, robo010 | **2** | 9 | 9 | 15 | **NOT APPLICABLE** |
+| s5, k 1 to 3 | robo007, robo009 | **1** | 1 | 1 | 11 | **NOT APPLICABLE** |
+| s5, k 3 to 5 | robo006, robo008 | **3** | 22 | 22 | 22 | **NOT APPLICABLE** |
+
+**NO DOSE IS ZERO, SO SCOPE A PROCEEDS.** The stop condition was every added-victim dose zero at
+both seeds.
+
+### 2.3c WHAT THE SWITCH ACTUALLY LOSES, PROVED ON THE ARTEFACT
+
+`experiments/analysis/robot_idle/d273_true_outage_proofs.py`, both halves, at all six cells
+(seeds 4 and 5 x k in {1, 3, 5}):
+
+| cell | lost frames | lost tokens | 90 per frame exactly | questions whose cloud history fell |
+|---|---|---|---|---|
+| s4 k1 | 60 | 5,400 | yes | 4 |
+| s4 k3 | 180 | 16,200 | yes | 23 |
+| s4 k5 | 298 | 26,820 | yes | 38 |
+| s5 k1 | 60 | 5,400 | yes | 8 |
+| s5 k3 | 180 | 16,200 | yes | 14 |
+| s5 k5 | 299 | 26,910 | yes | 36 |
+
+The lost counts equal the buffered variant's deferred counts exactly, which cross-checks the two
+semantics against each other.
+
+**AND THE D2 HEADER IS NOT A FRAME.** Found by the proof rather than assumed: at this design point
+some victim sessions START INSIDE the window, so the batch carrying the session's one-off 31-token
+D2 header is itself lost. The cut is therefore **90 tokens per lost FRAME** and the header is
+**re-attributed to the first surviving batch**, because the ruling asks for exactly the frames to go
+and a header is not a frame. The affected sessions and the re-attribution are listed in the meta.
+
 ### 2.4 WHAT THIS MEANS, STATED BEFORE THE CELLS RATHER THAN AFTER
 
 1. **PROCEED WITH SCOPE A.** The ruling stops the design only if every added-victim dose is zero at both
    seeds. No dose is zero: 1, 2, 1 and 3 distinct questions.
 2. **IT IS A WEAK-DOSE CONDITION AND MUST BE LABELLED ONE WHEREVER IT IS QUOTED.** One to three distinct
    questions out of 229 robot questions, and a delta at low dose is not an effect size.
-3. *** THE MISSED-EVIDENCE CHANNEL IS BOUNDED BY A SUB-SECOND DELAY, SO ON THE RULING'S OWN BUFFERED RULE
-   ITS DOSE IS ZERO AT EVERY PAIR. The drain is 0.87 to 0.89 s and not one affected question is asked inside
-   that interval. In this harness, at D = 120 s and this mix, no question is answered without evidence it
-   would otherwise have had: the evidence arrives under a second after reconnect. Any residual effect must
-   come from the CLOUD-SIDE handling of the burst, not from evidence being absent. ***
+3. *** UNDER THE BUFFERED SEMANTICS THE CHANNEL WAS CLOSED BY A SUB-SECOND DRAIN, WHICH IS WHY D273 (1)
+   MOVED THIS STUDY TO TRUE SEMANTICS. That finding stands as the record of the closed alternative
+   (commit `722c449f`) and is NOT a finding about this condition: here the frames never arrive, so every
+   affected question is affected for the rest of the run and no drain bounds anything. ***
 4. **THE SURVIVING CHANNEL IS THE RECONNECT BURST, AND IT HAS REAL MAGNITUDE.** 5,400 D2 tokens per victim
    arrive at one instant (60 frames x 90 tokens), 27,000 at k = 5. Under the committed D162 first-token model
    (`results/orchestration/live2/v5/cf_ontime_model_d162.json`: 0.06780 + 0.00018243 x uncached +
@@ -148,6 +212,167 @@ lies inside the overlap and nothing was physically withheld for it.** That is wh
    cells are what would measure it.
 5. **The dose remains collinear with k** by construction, so any k-effect is a k-and-dose effect. Breaking
    that needs D varied at fixed k, which this ruling does not order.
+
+## 2b. *** THE PRIMARY READOUT IS PER AFFECTED QUESTION, MATCHED. THE FLEET TOTALS ARE CONTEXT. ***
+
+**User ruling, prompted by the dose table above and binding before the first scope A cell is scored.**
+
+> "The doses are 1, 2, 1 and 3 distinct affected questions, BELOW THE ROBOT cbd SAME-CODE OBSERVATION OF 2,
+> SO THE FLEET TOTAL CANNOT CARRY THE RESULT. Pre-register the primary readout as PER AFFECTED QUESTION,
+> matched across the nested cells that share it: answered or not, correct or not, on time or not, and
+> whether it was served by the CLOUD (window evidence missing) or the DEVICE (evidence complete). Fleet
+> robot cbd and cloud-correct are reported BESIDE it, not used as the verdict."
+
+**So the verdict is the per-question readout. `correct_answers_delivered_by_deadline` and
+`cloud_accuracy_on_served` are reported beside it as CONTEXT and are not the verdict.** Section 3's abandon
+check keeps them as its own classification, because its question is different: whether a metric separates
+k at all. **The study's verdict is section 2b.**
+
+### 2b.1 WHY THIS IS STRONGER THAN SEVEN INDEPENDENT OBSERVATIONS, said explicitly
+
+*** BECAUSE THE VICTIM SETS NEST, AN AFFECTED QUESTION APPEARS IN A CELL WHERE ITS DEVICE IS A VICTIM AND
+IN A CELL WHERE IT IS NOT, AT THE SAME WINDOW, THE SAME ARM, THE SAME SEED AND THE SAME TRACE STRUCTURE. SO
+EACH QUESTION IS ITS OWN CONTROL AND THE READOUT IS A WITHIN-QUESTION, WITHIN-ARM, ACROSS-k MATCHED
+COMPARISON. The between-question variance that would otherwise swamp seven observations is differenced
+away, which is why seven matched questions can carry a large effect where seven unmatched ones could not.
+THIS IS EXACTLY THE QUANTITY THE NESTING WAS BUILT TO CREATE, and before the keying change it did not exist
+at all: the committed grid's k=3 and k=5 victim sets were disjoint with windows 157 s apart, so no question
+had a control. ***
+
+### 2b.2 THE MATCHING KEY, AND THE PROOF THAT THE MATCH IS COMPLETE
+
+**KEY: `(question_id, device_id)` against victim membership against k.** Victim membership is never
+re-derived: it is read from the cell's own recorded `outage.victim_permutation`, and the device's index in
+it plus one is the k at which it first becomes a victim. **Because victims are the permutation PREFIX, that
+one number fixes every cell's role for that question:**
+
+| | |
+|---|---|
+| `k < first_victim_k` | **CONTROL** cell: the device is not a victim, its evidence is COMPLETE |
+| `k >= first_victim_k` | **TREATED** cell: the device is a victim, the window's frames are MISSING |
+
+**THE MATCH IS PROVED COMPLETE BEFORE ANY OUTCOME IS READ**, by
+`experiments/analysis/robot_idle/d273_per_question_readout.py`, which refuses rather than scoring a partial
+match. It checks: every matched question present in every cell of its ladder; one permutation and one window
+across the ladder; one semantics; equal per-question row counts; every cell `run_valid`; and the victim
+membership each cell records agreeing with the census. **A cell whose `header.json` carries no `outage`
+block is REFUSED by name rather than crashed on** (the committed D244 cells are that case, since the header
+gained the block only with D266 item 2, and they are not part of this design).
+
+### 2b.3 THE FOUR FIELDS, EXACTLY AS RULED, AND WHERE EACH COMES FROM
+
+Each from the cell's own committed per-question row, `cell.json` at `/score/score/robot_rows`, written by
+`scorer/score.py:890-902`. **Nothing is recomputed, so the readout cannot disagree with the scored cell.**
+
+| field | source | expressibility, per invalidation condition 13 |
+|---|---|---|
+| **answered** | `source_by_deadline != "none"` | **EXPRESSIBLE**: needs only an arm reacting to a smaller cloud history |
+| **correct** | `standing_correct_by_deadline` | **EXPRESSIBLE** |
+| **on time** | `source_by_deadline != "none"`, which is delivery within the deadline by construction (D155 (3)); `device_on_time` reported beside it | **EXPRESSIBLE** |
+| **served by CLOUD or DEVICE** | `source_by_deadline` | **EXPRESSIBLE**, and it is the one that carries the mechanism |
+
+*** THE FOURTH FIELD CARRIES THE MECHANISM. Under this ruling the DEVICE history is COMPLETE and the
+cloud's is SHORT, so a question served by the device is answered from full evidence and one served by the
+cloud is not. And routing to the device is FULLY EXPRESSIBLE: `RECALL_ACTIONS` includes `DEVICE`
+(`baselines/interface.py:47`) and the coordinator honours it at `live2/coordinator.py:998-1009`. So the
+cloud-against-device split is the reading most likely to show anything at all. ***
+**NONE of the four readings requires an arm to RECOGNISE the outage, which is unexpressible (condition 13):
+every one of them needs only an arm reacting to a smaller cloud history, which it does see through
+`readiness_tokens` (`cstate.py:669-683`, fed from `cum_tokens` at `fleet/emulator.py:233-240`).** **Any
+reading that would require recognition is out of scope before the run, not after it.**
+
+### 2b.4 THE CENSUS, COMPUTED. SEVEN MATCHED QUESTIONS, AND NONE IS SHARED
+
+`experiments/analysis/robot_idle/d273_matched_power.py`. **Scope A as designed, seeds 4 and 5, ladder
+{1, 3, 5}: 10 affected questions, of which 7 ARE MATCHED and 3 are not.** The 7 reproduce the ruling's
+1 + 2 + 1 + 3 exactly, by an independent route (first-victim-k off the permutation rather than per-pair
+added victims).
+
+| seed | device | question | first victim at k | CONTROL cells | TREATED cells | ask instances | evidence overlap |
+|---|---|---|---|---|---|---|---|
+| 4 | robo009 | `71b5dc7d` | 3 | k1 | k3, k5 | 5 | 1.02 s |
+| 4 | robo004 | `faedddfd` | 5 | k1, k3 | k5 | 6 | 9.00 s |
+| 4 | robo004 | `eaf0abfe` | 5 | k1, k3 | k5 | 3 | 3.00 s |
+| 5 | robo007 | `441041f7` | 3 | k1 | k3, k5 | 1 | **120.00 s, the whole window** |
+| 5 | robo008 | `b0f9b6a0` | 4 | k1, k3 | k5 | 11 | 3.00 s |
+| 5 | robo008 | `b07b787c` | 4 | k1, k3 | k5 | 5 | 5.77 s |
+| 5 | robo006 | `b513bc6c` | 5 | k1, k3 | k5 | 6 | 3.51 s |
+
+**NO QUESTION IS SHARED between pairs or between seeds**, so the 7 are 7 and not fewer. A question affected
+at two rungs is ONE question with one control set and one or two treated cells, and is counted once.
+**THREE AFFECTED QUESTIONS ARE UNMATCHED** because their device is a victim at the lowest rung in the
+ladder, so that seed has no control cell for them: they are reported as a census and never as a comparison.
+**THE k = 1 RUNG IS LOAD-BEARING, NOT A DECORATION: it is the only control cell for the two questions whose
+device becomes a victim at k = 3.**
+
+### 2b.5 THE MINIMUM DETECTABLE EFFECT, AS A COUNT OF DISCORDANT PAIRS
+
+The test is the exact sign test on discordant pairs, which is McNemar's exact form, and each matched
+question contributes AT MOST ONE discordant pair per comparison.
+
+| | |
+|---|---|
+| matched questions | **7** |
+| discordant pairs needed, one-sided 0.05 | **5** (`0.5^5 = 0.031`) |
+| discordant pairs needed, two-sided 0.05 | **6** (`2 x 0.5^6 = 0.031`) |
+| p if ALL SEVEN flip one way | **0.0078** |
+
+*** SAID PLAINLY: WITH SEVEN MATCHED QUESTIONS, NOTHING SMALLER THAN FIVE OF THE SEVEN CHANGING OUTCOME
+ALL IN THE SAME DIRECTION CAN EVER REACH ONE-SIDED p <= 0.05, AND SIX OF SEVEN FOR TWO-SIDED. That is 71
+and 86 percent of the affected questions. ANY DISCORDANT COUNT BELOW THAT IS A CENSUS AND MUST BE REPORTED
+AS ONE, never as a difference between arms. ***
+**AND THE EFFECTIVE n MAY BE BELOW SEVEN.** A question whose outcome cannot move in either cell, because it
+was never answered in either, contributes no discordant pair. The readout reports
+`n_matched_questions_readable` per field, and that number, not 7, is the denominator. **The first two cells
+of scope A reveal it, and it is to be read before any comparison.**
+
+### 2b.6 THE INVERSION: WHAT WOULD BE NEEDED, ON BOTH AXES, PRICED
+
+**The yields are MEASURED, not extrapolated.** Matched questions per seed on the {1, 3, 5} ladder:
+**s4 = 3, s5 = 4, s6 = 2, s7 = 0**, mean **2.25**. *** THE YIELD IS HIGHLY VARIABLE AND A SEED CAN
+CONTRIBUTE NOTHING: seed 7 yields ZERO matched questions. So any seed count below is a mean and not a
+guarantee, and the seed axis must be bought in blocks with the yield checked as it goes. ***
+
+Marginal matched questions by rung, measured per seed:
+
+| seed | k1 | k3 | k5 | k7 | k9 | k11 |
+|---|---|---|---|---|---|---|
+| 4 | 1 | 1 | 2 | **0** | **0** | 2 |
+| 5 | 2 | 1 | 1 | **0** | 1 | 0 |
+| 6 | 0 | 0 | 0 | 1 | 0 | 2 |
+| 7 | 1 | 0 | 0 | 1 | 0 | 1 |
+
+*** THE NEWLY EXPRESSIBLE k = 7 AND k = 9 RUNGS ARE NEARLY EMPTY AT THE TWO RULED SEEDS: they add 0 and 0
+at seed 4 and 0 and 1 at seed 5. Buying them at seeds 4 and 5 would buy almost no matched questions. ***
+
+**At 80 percent power, 1,295 s per cell, 2 arms, ladder of 3 rungs:**
+
+| effect per question | matched questions needed | SEED AXIS: seeds | cells | hours | RUNG AXIS at s4+s5: top rung | cells | hours |
+|---|---|---|---|---|---|---|---|
+| 0.8 | 7 | 4 | 24 | **8.63** | **k = 5** | 12 | **4.32** |
+| 0.6 | 10 | 5 | 30 | **10.79** | **k = 11** | 24 | **8.63** |
+| 0.5 | 12 | 6 | 36 | 12.95 | **unreachable** | | |
+| 0.4 | 16 | 8 | 48 | 17.27 | **unreachable** | | |
+| 0.3 | 21 | 10 | 60 | 21.58 | **unreachable** | | |
+| 0.2 | 33 | 15 | 90 | **32.38** | **unreachable** | | |
+
+Scope B at 5 arms is 2.5 times the cell count and the hours.
+
+**THE ANSWER TO THE RULING'S QUESTION, PLAINLY. The design is NOT closed by this: a feasible number does
+reach a useful effect. But the price is specific and it should be bought knowingly.**
+1. **The design as ruled (7 matched questions) can only ever read an effect of 71 percent or larger per
+   affected question.** It is the right first spend because it is already paid for, and a large effect is
+   exactly what a lost-evidence condition might produce; but it cannot read a moderate one.
+2. **THE RUNG AXIS ALONE CANNOT GO BELOW 0.6, EVER.** At the two ruled seeds the whole ladder to k = 11,
+   the ceiling at this mix, yields 10 matched questions. k = 7 and k = 9 are nearly empty there. So adding
+   victims is the cheaper axis (8.63 h to reach 0.6) and it dead-ends.
+3. **Only the SEED axis reaches a moderate effect, and 15 seeds / 90 cells / 32.4 hours at 2 arms is what
+   a 0.2 per-question effect costs.** Seeds 1 to 3 are excluded, so that is seeds 4 to 18, and the measured
+   yield variance (0 to 4 per seed) means the count is a mean.
+4. **If the first two cells show the effective n below seven**, because the affected questions' outcomes
+   cannot move, then the readout cannot separate arms at any price on this axis and that IS the finding, in
+   the same register as the host-awareness line: an effect that the harness cannot express is reported as
+   unexpressible, not as absent.
 
 ## 3. THE ABANDON CHECK. ITS CRITERIA ARE FIXED HERE AND ARE NOT NEGOTIABLE AFTERWARDS
 
@@ -170,9 +395,23 @@ every metric would mislabel two of the three. ***
 
 | channel | dose at the ruled design point | the metric it bears on |
 |---|---|---|
-| forced device-only questions | 2, 1, 0, 0 instances | `robot_pool_on_time`: this is its arithmetic floor |
-| **missed evidence** | **1, 2, 1, 3 distinct questions** (5, 9, 1, 22 instances) | `correct_by_deadline` |
-| reconnect burst | about +10,700 D2 tokens per rung at both seeds | both, through first-token latency |
+| forced device-only questions | 2, 1, 0, 0 instances | `robot_pool_on_time` only, and that metric DECIDES NOTHING under D273 (1) |
+| **missed evidence (THE DECIDING DOSE)** | **1, 1, 2, 3 distinct questions** (5, 1, 9, 22 instances) | **`correct_answers_delivered_by_deadline` AND `cloud_accuracy_on_served`** |
+| reconnect burst | does NOT apply under true semantics: there is no burst, the frames are gone | none |
+
+*** AND SECTION 2b IS THE STUDY'S VERDICT, NOT THIS SECTION. The abandon check answers a different
+question - whether a FLEET metric separates k at all - and the user ruling has taken the verdict off the
+fleet totals entirely. What follows decides whether scope B is worth running; it does not decide the study.
+***
+
+*** D273 (1): THE ABANDON CHECK IS SCORED ON ROBOT `correct_answers_delivered_by_deadline` AND
+`cloud_accuracy_on_served`, NEVER ON `robot_pool_on_time`, which read 121/132 at BOTH k in the
+committed cells. `robot_pool_on_time` is still reported, marked `DECIDES_NOTHING`, so the record
+shows what it did without anything being read off it. `cloud_accuracy_on_served` (with its own
+`cloud_answers_available` denominator, `scorer/score.py:931-933`) is the sharpest of the two here:
+it is the accuracy of the CLOUD's own answers on the questions it served, so a cloud answering with
+frames missing shows in it with no intact device half to dilute it. ITS DENOMINATOR IS ARM-DEPENDENT
+AND MUST BE QUOTED BESIDE IT. ***
 
 **Script:** `experiments/analysis/robot_idle/d262_abandon_check.py`, run on the FIRST TWO CELLS of scope A,
 with `experiments/analysis/robot_idle/d262_dose_readings.py` for the dose under every reading.
@@ -331,9 +570,28 @@ Carried forward from the standing prereg and AMENDMENT 2, unchanged and binding,
 10. **A missed-evidence figure quoted as INSTANCES rather than distinct questions**: withdrawn. The re-ask
     mechanism multiplies one affected question by up to eleven, and an instance count reads as an effect size
     while being a re-ask count.
-11. **A missed-evidence effect claimed without the drain beside it**: withdrawn. The harness buffers, the
-    drain is 0.87 to 0.89 s, and the drain-bounded dose is zero at every pair, so a correctness effect
-    attributed to absent evidence must first explain how the evidence was absent when the question was asked.
+11. **A missed-evidence effect claimed under BUFFERED semantics without the drain beside it**: withdrawn.
+    That is the closed alternative, where the drain is 0.87 to 0.89 s and the bounded dose is zero.
+12. **A `_lost` cell whose `trace_meta` shows no frames lost, or lost tokens that are not 90 per frame**:
+    VOID. The driver refuses it before the cell is scored. A true-outage cell that lost nothing is an
+    ABSENT LINK wearing a lost-frames name.
+13b. **A fleet total quoted as the verdict**: withdrawn. The verdict is the per-question matched readout
+    (section 2b); robot cbd and cloud-correct are context. The dose is 1 to 3 distinct questions per pair,
+    below the robot-cbd same-code observation of 2.
+13c. **A per-question comparison read before the match-completeness proof passes**: refused by the tool,
+    and any figure produced another way is withdrawn.
+13d. **A discordant count below 5 of 7 reported as a difference between arms**: withdrawn. Below that
+    threshold the readout is a CENSUS and is reported as one.
+13e. **The denominator taken as 7 when the readable n is lower**: withdrawn. A question whose outcome
+    cannot move contributes no discordant pair, and `n_matched_questions_readable` is the denominator.
+13. **A result that depends on an ARM RECOGNISING the outage**: UNEXPRESSIBLE, and known so before the run.
+    `research/study_d273_policy_visibility.md` shows that nothing in `Observation` says frames were lost,
+    that the one declared epoch for it (`connectivity_change`) is never emitted on the run path, and that
+    `NetworkState.connected` is hard-coded `True` at `cstate.py:662`. What IS expressible is an arm reacting
+    to a SMALLER cloud history, which it does see through `readiness_tokens` (`cstate.py:669-683`, fed from
+    `cum_tokens` at `fleet/emulator.py:233-240`), and routing to the device, which is in the action space
+    (`interface.py:47`) and honoured at `coordinator.py:998-1009`. Any NESTOUT claim must say which of the
+    two it rests on.
 
 ---
 
@@ -348,7 +606,11 @@ Carried forward from the standing prereg and AMENDMENT 2, unchanged and binding,
 | `experiments/orchestration/live2/d262_nested_switch_proofs.py` | nesting, window invariance, the band-rule positive control, Step 2b, and the switch's arrival with its declared type and value |
 | `experiments/analysis/robot_idle/d262_outage_history_cached.py` | the history-cached observable, with its three controls |
 | `experiments/analysis/robot_idle/d262_abandon_check.py` | the abandon check, `--predict` and `--score`, with the missed-evidence dose and the computed drain |
-| `experiments/analysis/robot_idle/d262_dose_readings.py` | the added-victim dose under all three evidence readings, per question, with the drain bound |
+| `experiments/analysis/robot_idle/d262_dose_readings.py` | the added-victim dose under all three evidence readings, per question, with the drain bound and a `--semantics` flag |
+| `experiments/analysis/robot_idle/d273_true_outage_proofs.py` | both halves of the true-outage proof, against the NO-OUTAGE baseline, with an off-against-off negative control |
+| `research/study_d273_policy_visibility.md` | what the policy can and cannot see after a reconnect, read-only, no policy code changed |
+| `experiments/analysis/robot_idle/d273_matched_power.py` | the per-question matched census, the minimum detectable effect as a count of discordant pairs, and the priced inversion on the seed and rung axes |
+| `experiments/analysis/robot_idle/d273_per_question_readout.py` | **THE PRIMARY READOUT**: the four fields per affected question, matched across cells, with the match-completeness proof that refuses rather than scoring a partial match |
 | `experiments/orchestration/study_frozen_grid_driver_v42.sh` | the `_nest` tag token, its refusals, and the tightened trace validation |
 
 **Every result file this study writes goes under `results/orchestration/live2/robot_idle/` or the frozen-test run
