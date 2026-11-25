@@ -134,7 +134,7 @@ import costs as C              # noqa: E402
 DASH_L_S = DS.NEXAR_DEADLINE_S          # 1.0 (D71)
 DASH_P = 0.25                           # D71
 DASH_MIN_INSTANTS = 200                 # D71
-ROB_L_S = DS.ROBOT_DEADLINE_S           # 5.0 (D71)
+ROB_L_S = DS.ROBOT_DEADLINE_S           # 3.0 (D147, D154 (1))
 ROB_P = 0.90                            # D71
 ROB_MIN_QUESTIONS = 20                  # D82, POOLED over the run
 # D142 item 3 / D143: single-shot is a THIRD device type and must not be scored as a robot. Its
