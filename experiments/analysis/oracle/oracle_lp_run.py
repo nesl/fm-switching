@@ -69,6 +69,37 @@ def acc_cloud_device(seed, tag):
     return None, None
 
 
+def min_recall_uncached(seed, tag):
+    """Warmest recall W_q per opportunity = MIN over arms of the logged uncached (prompt_tokens -
+    cached_tokens) in the request logs, + decode. This is a strict lower bound on ANY arm's recall
+    work (the best-cached realization), so it keeps the oracle an upper bound and does not let the
+    LP charge more work than a real arm did (which otherwise makes the recall LP undershoot)."""
+    import gzip as _gz
+    best = {}
+    pat = str(RUNS / f"*_n16_s{seed}_1200s_h27_3t{tag}_L3_epg_rq30")
+    for c in sorted(glob.glob(pat) + glob.glob(pat + "_rerun")):
+        for nm, op in (("request.jsonl.gz", _gz.open), ("request.jsonl", open)):
+            p = os.path.join(c, nm)
+            if not os.path.exists(p):
+                continue
+            with op(p, "rt") as f:
+                for l in f:
+                    try:
+                        r = json.loads(l)
+                    except Exception:
+                        continue
+                    if not str(r.get("device_id", "")).startswith("robo"):
+                        continue
+                    oid = r.get("opportunity_id"); pt = r.get("prompt_tokens"); ct = r.get("cached_tokens")
+                    if oid is None or pt is None:
+                        continue
+                    unc = max(0, int(pt) - int(ct or 0))
+                    if oid not in best or unc < best[oid]:
+                        best[oid] = unc
+            break
+    return best
+
+
 def simplestream_cloud(seed, tag):
     for suf in ("_rerun", ""):
         c = RUNS / (f"simplestream_n16_s{seed}_1200s_h27_3t{tag}_L3_epg_rq30" + suf)
@@ -96,7 +127,7 @@ def ss_box():
     return E.ss2_correctness()
 
 
-def build_units(seed, tag, mem, rc, acc_c, acc_d, ssbox, cloud, tier, th_dev, th_cloud):
+def build_units(seed, tag, mem, rc, acc_c, acc_d, ssbox, cloud, tier, th_dev, th_cloud, recall_unc):
     recs = TR.generate_trace(seed=seed, n_devices=16, ratio="40:40:20", run_s=1200.0, mode="A",
                              robot_question_set="lh_req", ss_question_set="ss2",
                              dashcam_format="epg", robot_upload="per-frame",
@@ -125,9 +156,8 @@ def build_units(seed, tag, mem, rc, acc_c, acc_d, ssbox, cloud, tier, th_dev, th
             is_rob = str(r["device_id"]).startswith("robo")
             a = r["t"]
             if is_rob:
-                new = max(0, nfr - prev); hdr = D2_HDR if prev == 0 else 0
-                W = D2_TOK * new + hdr + DECODE
-                prev = max(prev, nfr)
+                # warmest recall W_q = min logged uncached across arms (fallback to cold if no log)
+                W = recall_unc.get(r["opportunity_id"], D2_TOK * nfr + D2_HDR) + DECODE
                 dc_cc = rc.get(r["opportunity_id"])
                 if dc_cc is None:
                     continue
@@ -209,7 +239,8 @@ def main():
             rc = recall_correctness(s, tag)
             ac, ad = acc_cloud_device(s, tag)
             cloud = simplestream_cloud(s, tag)
-            units, floor = build_units(s, tag, mem, rc, ac, ad, ssbox, cloud, tier, th_dev, th_cloud)
+            recall_unc = min_recall_uncached(s, tag)
+            units, floor = build_units(s, tag, mem, rc, ac, ad, ssbox, cloud, tier, th_dev, th_cloud, recall_unc)
             cell = {"device_floor": floor, "n_units": {k: len(v) for k, v in units.items()}}
             for scale, Tc in (("T", T), ("1.10T", 1.10 * T)):
                 cell[scale] = {}

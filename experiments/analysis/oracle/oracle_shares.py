@@ -39,32 +39,13 @@ _LAB = None
 
 
 def acc_allq(seed, tag):
-    """Unbiased per-seed recall acc_cloud/acc_device over ALL recall opportunities (union of arms'
-    robot_rows), matching the FAIR oracle's valuation in stage 4."""
-    dcs, ccs = [], []
-    seen = {}
-    pat = str(RUNS / f"*_n16_s{seed}_1200s_h27_3t{tag}_L3_epg_rq30")
-    for c in sorted(glob.glob(pat) + glob.glob(pat + "_rerun"),
-                    key=lambda c: (0 if "always-cloud-fcfs" in c else 1)):
-        p = os.path.join(c, "cell.json")
-        if not os.path.exists(p):
-            continue
-        try:
-            rows = (((json.load(open(p)).get("score") or {}).get("score") or {}).get("robot_rows")) or []
-        except Exception:
-            continue
-        for r in rows:
-            if not str(r.get("device_id", "")).startswith("robo"):
-                continue
-            oid = r.get("opportunity_id")
-            if oid in seen:
-                continue
-            cl = r.get("cloud_letter")
-            seen[oid] = (bool(r.get("device_correct")), None if cl is None else bool(r.get("cloud_correct")))
-    for dc, cc in seen.values():
-        dcs.append(int(dc))
-        if cc is not None:
-            ccs.append(int(cc))
+    """Per-seed recall acc_cloud/acc_device EXACTLY as the FAIR oracle (stage 4) computes it, by
+    calling the SAME oracle_lp_run.recall_correctness, so the arm's matched FAIR policy uses the
+    IDENTICAL per-unit gain as the oracle (a mismatch here inflates the policy above the oracle)."""
+    import oracle_lp_run as R
+    rc = R.recall_correctness(seed, tag)
+    dcs = [int(dc) for dc, cc in rc.values()]
+    ccs = [int(cc) for dc, cc in rc.values() if cc is not None]
     ad = sum(dcs) / len(dcs) if dcs else 0.0
     ac = sum(ccs) / len(ccs) if ccs else 0.0
     return ac, ad
