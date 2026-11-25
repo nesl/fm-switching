@@ -106,3 +106,5 @@ The standard-grid cells DO apply the committed D75 link model (fleet/links.py, a
 - F16: 1 rows
 - F17: 0 rows
 - F1_units: 43416 rows
+
+- NOTE (2026-11-24, DO NOT PLOT): the figures/d190 images F1, F2, F3 and F5 (.png and .pdf) were re-rendered at commit 97814dca without approval and are NOT current paper figures; image rendering in the d190 pipeline is now switched off (writes data only).

@@ -24,5 +24,12 @@ def run(script):
 
 if __name__ == "__main__":
     run("build_frontier.py")
-    run("make_figures.py")
-    print("D190 regenerate complete")
+    # IMAGE RENDERING SWITCHED OFF (user ruling 2026-11-24, DO NOT PLOT). The pipeline writes data
+    # only (CSV, JSON, README); it no longer renders F1 to F5 .png/.pdf. Set D190_RENDER_IMAGES=1
+    # to re-enable, only after the user says "plot".
+    if os.environ.get("D190_RENDER_IMAGES") == "1":
+        run("make_figures.py")
+    else:
+        print("make_figures.py SKIPPED: image rendering is OFF (DO NOT PLOT); "
+              "set D190_RENDER_IMAGES=1 to re-enable after approval")
+    print("D190 regenerate complete (data only)")

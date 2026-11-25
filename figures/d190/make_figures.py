@@ -341,6 +341,13 @@ def f5():
 
 
 def main():
+    # DEFENSIVE GUARD (user ruling 2026-11-24, DO NOT PLOT): refuse to render images unless
+    # explicitly re-enabled, so a direct invocation cannot re-render F1 to F5 by accident. The
+    # pipeline switch lives in run_all.py; this is the belt-and-suspenders stop.
+    if os.environ.get("D190_RENDER_IMAGES") != "1":
+        print("make_figures.py: image rendering is OFF (DO NOT PLOT); no .png/.pdf written. "
+              "Set D190_RENDER_IMAGES=1 to re-enable after approval.")
+        return
     rows1 = FL.load(memory="1x")
     made = []
     made.append(f1(rows1))
