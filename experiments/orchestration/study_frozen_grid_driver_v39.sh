@@ -186,6 +186,9 @@ cell() {   # arm n seed [tag]
   # v39 (D244 conditions 2 and 3): once launched, the harness's OWN argv must carry both outage flags, and the cell's
   # trace_meta.json must RECORD the outage (.outage.args k and D); otherwise the cell is stopped with SIGINT by its pid.
   if [ -n "$_ok" ]; then
+    # SAFETY OF pgrep -f HERE RESTS ON THE PATTERN'S SPECIFICITY, not on the flag: the string below occurs only in the
+    # harness's own argv; this subshell carries the DRIVER's cmdline (bash .../study_frozen_grid_driver_v39.sh), so it
+    # cannot match itself. Do NOT shorten the pattern (e.g. to "run_live2_real"), or it may self-match or match others.
     ( hp=""; for i in $(seq 1 300); do
         hp=$(pgrep -n -u pragya -f "live2/run_live2_real.py --arm $arm --n-devices $n ")
         if [ -n "$hp" ]; then
