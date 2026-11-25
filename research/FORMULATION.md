@@ -187,18 +187,19 @@ not against a single global budget.
 
 **DECISION RULE.** **Deviate from KEEP only if `value - harm > margin`.**
 
-*** A NAMING DISCREPANCY TO BE RESOLVED BEFORE THE MARGIN IS USED, FLAGGED RATHER THAN SILENTLY PICKED.
-The ruling writes "MARGIN_CF (0.6582)". IN THE COMMITTED CODE THOSE ARE TWO DIFFERENT CONSTANTS: ***
+*** RESOLVED BY USER RULING D255 (2026-11-25 09:45): THE MARGIN IS `MARGIN_CF_ON_TIME = 0.6582`, IN
+ON-TIME UNITS. The user confirms the "MARGIN_CF" label in D249 was wrong and that this reading is correct.
+It is STILL recalibrated after the build, with the method reported BEFORE it is applied. ***
+**The discrepancy that prompted the question is kept below, because it is a live trap for anyone reading
+the code rather than this document: the two symbols differ by a factor of four and both are committed.**
 ```
 MARGIN_CF_ON_TIME  = 0.6582     (cf_protect_defer.py:277 asserts it; cf_pd_tests.py:86 checks it)
 MARGIN_CF          = 0.16456    (test_cf_objective_d177.py:153)
 and the planner's bar is recorded as MARGIN_CF / A_D2_DEV = 0.65824
 ```
 **So 0.6582 is the value of `MARGIN_CF_ON_TIME`, which equals `MARGIN_CF / A_D2_DEV`, and NOT the value of
-`MARGIN_CF`.** **This draft takes the ruling's NUMBER (0.6582) as authoritative and reads the symbol as
-`MARGIN_CF_ON_TIME`, because that is the constant the number belongs to. If the user meant the other
-constant, the bar is four times tighter and the build must be told.** **This is recorded as an open item,
-not a decision.**
+`MARGIN_CF`.** *** D255 CONFIRMS THE NUMBER AND THE SYMBOL: `MARGIN_CF_ON_TIME = 0.6582`. SO THE BAR IS NOT
+FOUR TIMES TIGHTER AND THE BUILD PROCEEDS ON THIS READING. CLOSED, NOT OPEN. ***
 
 **RECALIBRATION.** The margin **is recalibrated after the build**, and **the recalibration method is
 reported BEFORE it is applied**, not after.

@@ -1,5 +1,13 @@
 # P5 ESTIMATE: a mid-run dashcam surge (rate multiplier over a window), default OFF
 
+*** DISPOSITION, USER RULING D255 (2026-11-25 09:45, PROVISIONAL): DO NOT BUILD. ***
+**P5 stays LAST in D253's order and is built ONLY IF P1 THROUGH P4 ALL FAIL.** **No H100 frame check is
+needed now, so open item 1 below (whether the 0.25-grid JPEGs exist on the run host) is DEFERRED rather
+than owed - but it must be done BEFORE any dry run if P5 is ever reached, because it fails SILENTLY.**
+**Everything below stands as the estimate for that contingency. The 2x cap is a property of the committed
+data and does not change with the ruling: if P5 is ever built, it is a single-multiplier experiment.**
+
+
 **ESTIMATE ONLY per user ruling D254 part D (2026-11-25 09:29, provisional). NOTHING BUILT.** Every
 load-bearing claim below was re-verified against origin/main and against the committed artefact at the
 point of use, not carried from the agent report that produced it.
