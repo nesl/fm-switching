@@ -207,6 +207,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 - b7-edf-feasibility_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - confidence-cascade_n12_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - confidence-cascade_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
+- confidence-cascade_n16_s4_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - confidence-cascade_n8_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-base_n12_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-base_n12_s5_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
@@ -240,6 +241,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 - llf_n16_s4_1200s_h27_3t_L2.5_epg_rq30: name did not match the rq30 cell pattern
 - llf_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
 - llf_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
+- llf_n16_s4_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - llf_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - llf_n8_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - mooncake_n16_s4_1200s_h27_3t_L2.5_epg_rq30: name did not match the rq30 cell pattern
@@ -252,6 +254,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 - simplestream_n12_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - simplestream_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
 - simplestream_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
+- simplestream_n16_s4_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - simplestream_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - simplestream_n8_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - v5-rules_n16_s7_1200s_h27_3t_L3_epg_rq30: preflight-only stub, absent: cell.json, outcomes.jsonl.gz
@@ -260,7 +263,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 
 ## Provenance
 
-- runs dir last commit: 03039ec4
+- runs dir last commit: 6f2d74e3
 - scorer score.py last commit: cb9120cc
 - d179_rung2_verdict.py last commit: cd580554
 - build time is deliberately NOT stamped here: the output is byte-deterministic given the input. The git commit of this file is the build time of record.
