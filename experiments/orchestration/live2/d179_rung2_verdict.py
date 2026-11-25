@@ -366,17 +366,20 @@ def _alert_episode_block(mons: List[Dict[str, Any]], on_time) -> Dict[str, Any]:
         eps[_episode_key(o)].append(o)
     sizes = sorted(len(v) for v in eps.values())
     positions = sorted({_episode_pos(o) for o in mons})
-    att_flat, att_true, sf_flat, sf_true, at_target = [], [], [], [], 0
+    att_flat, att_true, sf_flat, sf_true = [], [], [], []
+    at_target_true, at_target_flat = 0, 0
     for v in eps.values():
         k = sum(1 for o in v if on_time(o))
         a_flat = k / float(ALERT_INSTANTS_PER_EPISODE)
-        a_true = k / float(len(v))
+        a_true = (k / float(len(v))) if len(v) else 0.0
         att_flat.append(a_flat)
         att_true.append(a_true)
         sf_flat.append(max(0.0, ALERT_TARGET - a_flat))
         sf_true.append(max(0.0, ALERT_TARGET - a_true))
+        if a_true >= ALERT_TARGET - 1e-12:
+            at_target_true += 1
         if a_flat >= ALERT_TARGET - 1e-12:
-            at_target += 1
+            at_target_flat += 1
     n_inst = len(mons)
     pooled_k = sum(1 for o in mons if on_time(o))
     return {
@@ -390,16 +393,23 @@ def _alert_episode_block(mons: List[Dict[str, Any]], on_time) -> Dict[str, Any]:
         "episode_positions_seen": {"min": positions[0] if positions else None,
                                    "max": positions[-1] if positions else None},
         "per_episode_PRIMARY": {
-            "denominator": ALERT_INSTANTS_PER_EPISODE,
-            "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
-            "mean_attainment": round(sum(att_flat) / len(att_flat), 6) if att_flat else None,
-            "mean_shortfall_clipped": round(sum(sf_flat) / len(sf_flat), 6) if sf_flat else None,
-            "episodes_at_or_above_target": at_target,
-            "fraction_of_episodes_at_or_above_target": _pct(at_target, len(eps)),
-        },
-        "per_episode_true_denominator_BESIDE": {
+            "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+            "denominator_source": ("D232 (2): per-episode attainment divides by that episode's "
+                                   "actual number of decision instants, not a fixed 19; the D178 "
+                                   "25 percent per-episode target is unchanged"),
             "mean_attainment": round(sum(att_true) / len(att_true), 6) if att_true else None,
             "mean_shortfall_clipped": round(sum(sf_true) / len(sf_true), 6) if sf_true else None,
+            "episodes_at_or_above_target": at_target_true,
+            "fraction_of_episodes_at_or_above_target": _pct(at_target_true, len(eps)),
+        },
+        "per_episode_fixed19_BESIDE": {
+            "denominator": ALERT_INSTANTS_PER_EPISODE,
+            "denominator_source": ("D178 (1) fixed constant, positions 2 to 20 of 21; this was the "
+                                   "PRIMARY before D232 (2) and is kept BESIDE, labelled"),
+            "mean_attainment": round(sum(att_flat) / len(att_flat), 6) if att_flat else None,
+            "mean_shortfall_clipped": round(sum(sf_flat) / len(sf_flat), 6) if sf_flat else None,
+            "episodes_at_or_above_target": at_target_flat,
+            "fraction_of_episodes_at_or_above_target": _pct(at_target_flat, len(eps)),
         },
         "pooled_BESIDE": {
             "on_time": pooled_k,
@@ -815,15 +825,21 @@ def _gain_class(gain: Optional[float]) -> str:
 
 def verdict_for_seed(seed: int, base: Optional[Dict[str, Any]],
                      rung2: Optional[Dict[str, Any]],
-                     shares: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+                     shares: Optional[Dict[str, Any]],
+                     comparator: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    # D232 (1): check 1's attainment bar is the COMPARATOR cell, passed explicitly by the caller
+    # (rungs 2/3 pass the base; rung 4 passes same-code covex-v6-fair-final). There is NO silent
+    # default to the base: a missing comparator makes the seed INCOMPLETE, never a weaker test.
     out: Dict[str, Any] = {"seed": seed,
                            "cells": {"base": base and base["cell_name"],
                                      "rung2_committed": rung2 and rung2["cell_name"],
-                                     "shares": shares and shares["cell_name"]}}
-    if not (base and rung2 and shares):
+                                     "shares": shares and shares["cell_name"],
+                                     "comparator": comparator and comparator["cell_name"]}}
+    if not (base and rung2 and shares and comparator):
         out["status"] = "INCOMPLETE: a required cell is absent, so no check is scored for this seed"
         out["missing"] = [k for k, v in (("base", base), ("rung2_committed", rung2),
-                                         ("shares", shares)) if v is None]
+                                         ("shares", shares), ("comparator", comparator))
+                          if v is None]
         return out
 
     def alert_mean(c, rule):
@@ -833,27 +849,37 @@ def verdict_for_seed(seed: int, base: Optional[Dict[str, Any]],
         return (c["alert_episodes"][rule]["per_episode_PRIMARY"]
                 ["fraction_of_episodes_at_or_above_target"])
 
-    c1 = {}
+    c1 = {"comparator_cell": comparator["cell_name"]}
     for label, rule in (("COMMITTED_RULE_PRIMARY", "numerator_COMMITTED_RULE_PRIMARY"),
                         ("CLOUD_FLAG_FIRST_TOKEN_BESIDE",
                          "numerator_CLOUD_FLAG_FIRST_TOKEN_BESIDE")):
-        b, s = alert_mean(base, rule), alert_mean(shares, rule)
+        # the bar b is the COMPARATOR'S attainment (not hard-coded to the base)
+        b, s = alert_mean(comparator, rule), alert_mean(shares, rule)
+        base_b = alert_mean(base, rule)
         c1[label] = {
-            "mean_per_episode_attainment": {"base": b, "rung2_committed": alert_mean(rung2, rule),
+            "mean_per_episode_attainment": {"comparator": b, "base": base_b,
+                                            "rung2_committed": alert_mean(rung2, rule),
                                             "shares": s},
-            "delta_shares_minus_base": (round(s - b, 6) if (b is not None and s is not None)
-                                        else None),
+            "delta_shares_minus_comparator": (round(s - b, 6) if (b is not None and s is not None)
+                                              else None),
+            "delta_shares_minus_base_CONTEXT": (round(s - base_b, 6)
+                                                if (base_b is not None and s is not None)
+                                                else None),
             "pass": (bool(s is not None and b is not None and s >= b - 1e-12)),
             "fraction_of_episodes_at_or_above_0p25": {
+                "comparator": alert_atfrac(comparator, rule),
                 "base": alert_atfrac(base, rule), "rung2_committed": alert_atfrac(rung2, rule),
                 "shares": alert_atfrac(shares, rule)},
             "pooled_attainment_BESIDE": {
                 k: v["alert_episodes"][rule]["pooled_BESIDE"]["attainment"]
-                for k, v in (("base", base), ("rung2_committed", rung2), ("shares", shares))},
+                for k, v in (("comparator", comparator), ("base", base),
+                             ("rung2_committed", rung2), ("shares", shares))},
         }
     c1["verdicts_agree_across_rules"] = (
         c1["COMMITTED_RULE_PRIMARY"]["pass"] == c1["CLOUD_FLAG_FIRST_TOKEN_BESIDE"]["pass"])
-    c1["_check"] = "1. alert per-episode target attainment AT LEAST THE BASE'S"
+    c1["_check"] = ("1. alert per-episode target attainment AT LEAST THE COMPARATOR'S (%s); the "
+                    "comparator is passed explicitly by the caller and is never defaulted to the "
+                    "base (D232 (1))" % comparator["cell_name"])
     out["check_1_alert"] = c1
 
     pools = {k: v["committed_score_block"]["robot_pool_n"] if v["committed_score_block"]["robot_pool_n"]
@@ -970,15 +996,18 @@ def _md(res: Dict[str, Any]) -> str:
                  f"{s['check_2_robot_retention']['pass']} | {s['check_3_assistance']['pass']} | "
                  f"{s['all_three_pass']} |")
     L.append("")
-    L.append("| seed | alert att. base | alert att. shares | robot gain | retained | asst min dev |")
-    L.append("|---|---|---|---|---|---|")
+    L.append("| seed | alert att. comparator (bar) | alert att. shares | c1 delta | robot gain "
+             "| retained | asst min dev |")
+    L.append("|---|---|---|---|---|---|---|")
     for s in res.get("per_seed", []):
         if "check_1_alert" not in s:
             continue
-        a = s["check_1_alert"]["COMMITTED_RULE_PRIMARY"]["mean_per_episode_attainment"]
+        c1p = s["check_1_alert"]["COMMITTED_RULE_PRIMARY"]
+        a = c1p["mean_per_episode_attainment"]
         r = s["check_2_robot_retention"]
         m = s["check_3_assistance"]["per_device_min_fraction"]["shares"]
-        L.append(f"| {s['seed']} | {a['base']} | {a['shares']} | {r['gain_rung2_minus_base']} "
+        L.append(f"| {s['seed']} | {a['comparator']} | {a['shares']} | "
+                 f"{c1p['delta_shares_minus_comparator']} | {r['gain_rung2_minus_base']} "
                  f"({r['gain_class']}) | {r['retained_fraction']} | {m} |")
     L.append("")
     L.append("Pooled figures are in the JSON under `pooled_BESIDE_not_the_verdict`; they are "
@@ -998,6 +1027,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--shares-arm", default="covex-v6-state-shares")
     ap.add_argument("--base-arm", default="hybrid-F-lhreq-noc3")
     ap.add_argument("--rung2-arm", default="covex-v6-state-uo")
+    ap.add_argument("--comparator-arm", required=True,
+                    help="D232 (1): the cell whose per-episode alert attainment is check 1's bar. "
+                         "REQUIRED, no default: rungs 2/3 pass the base arm, rung 4 passes "
+                         "covex-v6-fair-final. There is no silent fallback to the base.")
     ap.add_argument("--control-only", action="store_true")
     ap.add_argument("--pins", help="json of pinned comparator shas to carry into the output")
     a = ap.parse_args(argv)
@@ -1012,8 +1045,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return os.path.join(a.runs, arm + a.suffix.format(seed=seed) + a.tag)
 
     loaded: Dict[str, Dict[int, Dict[str, Any]]] = {"base": {}, "rung2_committed": {},
-                                                    "shares": {}}
-    arm_of = {"base": a.base_arm, "rung2_committed": a.rung2_arm, "shares": a.shares_arm}
+                                                    "shares": {}, "comparator": {}}
+    arm_of = {"base": a.base_arm, "rung2_committed": a.rung2_arm, "shares": a.shares_arm,
+              "comparator": a.comparator_arm}
     absent: List[str] = []
     for role, arm in arm_of.items():
         for s in seeds:
@@ -1059,7 +1093,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                        "No comparison is reported.")
     elif not a.control_only:
         per_seed = [verdict_for_seed(s, loaded["base"].get(s), loaded["rung2_committed"].get(s),
-                                    loaded["shares"].get(s)) for s in seeds]
+                                    loaded["shares"].get(s), loaded["comparator"].get(s))
+                    for s in seeds]
         res["per_seed"] = per_seed
         scored = [p for p in per_seed if "check_1_alert" in p]
         res["per_seed_summary"] = {

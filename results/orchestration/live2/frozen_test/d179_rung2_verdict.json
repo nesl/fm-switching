@@ -4,7 +4,8 @@
  "arms": {
   "base": "hybrid-F-lhreq-noc3",
   "rung2_committed": "covex-v6-state-uo",
-  "shares": "covex-v6-state-shares"
+  "shares": "covex-v6-state-shares",
+  "comparator": "hybrid-F-lhreq-noc3"
  },
  "seeds": [
   4,
@@ -13,7 +14,7 @@
   7
  ],
  "tag": "_L3_epg_rq30",
- "runs_dir": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/verdict_runs",
+ "runs_dir": "results/orchestration/live2/frozen_test/runs",
  "cells_absent": [],
  "definitions": {
   "on_time_PRIMARY": {
@@ -60,7 +61,7 @@
     "NORMAL": "gain >= +0.01: retained is the ratio, bar 0.90",
     "NO_GAIN_TO_RETAIN": "|gain| < 0.01: the ratio is null and the check is VACUOUS for that seed and said to be; the absolute fallback applies",
     "NEGATIVE_GAIN": "gain <= -0.01: the ratio is reported but marked UNINTERPRETABLE because its sign inverts; the absolute fallback applies",
-    "absolute_fallback": "shares on-time fraction must not fall more than 0.01 below the base's",
+    "absolute_fallback": "shares' GAIN OVER BASE must be at least the RUNG-2 base's",
     "no_seed_dropped": "every seed is reported with its gain_class, never dropped"
    },
    "committed_gains": "base-to-rung2 gain is +0.629 / +0.693 / +0.545 / +0.610 on seeds 4 to 7",
@@ -1742,16 +1743,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.501461,
+       "mean_shortfall_clipped": 0.080023,
+       "episodes_at_or_above_target": 446,
+       "fraction_of_episodes_at_or_above_target": 0.626404
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.44249,
        "mean_shortfall_clipped": 0.083068,
        "episodes_at_or_above_target": 431,
        "fraction_of_episodes_at_or_above_target": 0.605337
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.501461,
-       "mean_shortfall_clipped": 0.080023
       },
       "pooled_BESIDE": {
        "on_time": 5986,
@@ -1774,16 +1779,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.516332,
+       "mean_shortfall_clipped": 0.076214,
+       "episodes_at_or_above_target": 457,
+       "fraction_of_episodes_at_or_above_target": 0.641854
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.455869,
        "mean_shortfall_clipped": 0.079668,
        "episodes_at_or_above_target": 439,
        "fraction_of_episodes_at_or_above_target": 0.616573
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.516332,
-       "mean_shortfall_clipped": 0.076214
       },
       "pooled_BESIDE": {
        "on_time": 6167,
@@ -2052,16 +2061,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.455183,
+       "mean_shortfall_clipped": 0.080916,
+       "episodes_at_or_above_target": 426,
+       "fraction_of_episodes_at_or_above_target": 0.596639
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.396211,
        "mean_shortfall_clipped": 0.085324,
        "episodes_at_or_above_target": 408,
        "fraction_of_episodes_at_or_above_target": 0.571429
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.455183,
-       "mean_shortfall_clipped": 0.080916
       },
       "pooled_BESIDE": {
        "on_time": 5375,
@@ -2084,16 +2097,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.469408,
+       "mean_shortfall_clipped": 0.076931,
+       "episodes_at_or_above_target": 432,
+       "fraction_of_episodes_at_or_above_target": 0.605042
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.408374,
        "mean_shortfall_clipped": 0.081638,
        "episodes_at_or_above_target": 412,
        "fraction_of_episodes_at_or_above_target": 0.577031
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.469408,
-       "mean_shortfall_clipped": 0.076931
       },
       "pooled_BESIDE": {
        "on_time": 5540,
@@ -2362,16 +2379,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.527273,
+       "mean_shortfall_clipped": 0.074853,
+       "episodes_at_or_above_target": 455,
+       "fraction_of_episodes_at_or_above_target": 0.639045
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.465479,
        "mean_shortfall_clipped": 0.078892,
        "episodes_at_or_above_target": 433,
        "fraction_of_episodes_at_or_above_target": 0.608146
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.527273,
-       "mean_shortfall_clipped": 0.074853
       },
       "pooled_BESIDE": {
        "on_time": 6297,
@@ -2394,16 +2415,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.540798,
+       "mean_shortfall_clipped": 0.071004,
+       "episodes_at_or_above_target": 468,
+       "fraction_of_episodes_at_or_above_target": 0.657303
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.477085,
        "mean_shortfall_clipped": 0.074882,
        "episodes_at_or_above_target": 448,
        "fraction_of_episodes_at_or_above_target": 0.629213
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.540798,
-       "mean_shortfall_clipped": 0.071004
       },
       "pooled_BESIDE": {
        "on_time": 6454,
@@ -2672,16 +2697,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.627063,
+       "mean_shortfall_clipped": 0.050171,
+       "episodes_at_or_above_target": 529,
+       "fraction_of_episodes_at_or_above_target": 0.740896
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.553811,
        "mean_shortfall_clipped": 0.053387,
        "episodes_at_or_above_target": 515,
        "fraction_of_episodes_at_or_above_target": 0.721289
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.627063,
-       "mean_shortfall_clipped": 0.050171
       },
       "pooled_BESIDE": {
        "on_time": 7513,
@@ -2704,16 +2733,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.642184,
+       "mean_shortfall_clipped": 0.047438,
+       "episodes_at_or_above_target": 536,
+       "fraction_of_episodes_at_or_above_target": 0.7507
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.566785,
        "mean_shortfall_clipped": 0.050144,
        "episodes_at_or_above_target": 523,
        "fraction_of_episodes_at_or_above_target": 0.732493
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.642184,
-       "mean_shortfall_clipped": 0.047438
       },
       "pooled_BESIDE": {
        "on_time": 7689,
@@ -2984,16 +3017,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.182833,
+       "mean_shortfall_clipped": 0.162704,
+       "episodes_at_or_above_target": 186,
+       "fraction_of_episodes_at_or_above_target": 0.261236
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.163291,
        "mean_shortfall_clipped": 0.166784,
        "episodes_at_or_above_target": 169,
        "fraction_of_episodes_at_or_above_target": 0.23736
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.182833,
-       "mean_shortfall_clipped": 0.162704
       },
       "pooled_BESIDE": {
        "on_time": 2209,
@@ -3016,16 +3053,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.195042,
+       "mean_shortfall_clipped": 0.158048,
+       "episodes_at_or_above_target": 192,
+       "fraction_of_episodes_at_or_above_target": 0.269663
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.17364,
        "mean_shortfall_clipped": 0.161886,
        "episodes_at_or_above_target": 176,
        "fraction_of_episodes_at_or_above_target": 0.247191
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.195042,
-       "mean_shortfall_clipped": 0.158048
       },
       "pooled_BESIDE": {
        "on_time": 2349,
@@ -3300,16 +3341,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.197605,
+       "mean_shortfall_clipped": 0.141154,
+       "episodes_at_or_above_target": 231,
+       "fraction_of_episodes_at_or_above_target": 0.323529
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.174996,
        "mean_shortfall_clipped": 0.146064,
        "episodes_at_or_above_target": 212,
        "fraction_of_episodes_at_or_above_target": 0.296919
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.197605,
-       "mean_shortfall_clipped": 0.141154
       },
       "pooled_BESIDE": {
        "on_time": 2374,
@@ -3332,16 +3377,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.209052,
+       "mean_shortfall_clipped": 0.135754,
+       "episodes_at_or_above_target": 243,
+       "fraction_of_episodes_at_or_above_target": 0.340336
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.184874,
        "mean_shortfall_clipped": 0.141162,
        "episodes_at_or_above_target": 226,
        "fraction_of_episodes_at_or_above_target": 0.316527
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.209052,
-       "mean_shortfall_clipped": 0.135754
       },
       "pooled_BESIDE": {
        "on_time": 2508,
@@ -3616,16 +3665,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.268813,
+       "mean_shortfall_clipped": 0.128359,
+       "episodes_at_or_above_target": 286,
+       "fraction_of_episodes_at_or_above_target": 0.401685
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.240242,
        "mean_shortfall_clipped": 0.133131,
        "episodes_at_or_above_target": 264,
        "fraction_of_episodes_at_or_above_target": 0.370787
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.268813,
-       "mean_shortfall_clipped": 0.128359
       },
       "pooled_BESIDE": {
        "on_time": 3250,
@@ -3648,16 +3701,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.282509,
+       "mean_shortfall_clipped": 0.124115,
+       "episodes_at_or_above_target": 297,
+       "fraction_of_episodes_at_or_above_target": 0.417135
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.251848,
        "mean_shortfall_clipped": 0.129029,
        "episodes_at_or_above_target": 270,
        "fraction_of_episodes_at_or_above_target": 0.379213
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.282509,
-       "mean_shortfall_clipped": 0.124115
       },
       "pooled_BESIDE": {
        "on_time": 3407,
@@ -3932,16 +3989,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.241525,
+       "mean_shortfall_clipped": 0.129135,
+       "episodes_at_or_above_target": 262,
+       "fraction_of_episodes_at_or_above_target": 0.366947
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.216792,
        "mean_shortfall_clipped": 0.134159,
        "episodes_at_or_above_target": 234,
        "fraction_of_episodes_at_or_above_target": 0.327731
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.241525,
-       "mean_shortfall_clipped": 0.129135
       },
       "pooled_BESIDE": {
        "on_time": 2941,
@@ -3964,16 +4025,20 @@
        "max": 20
       },
       "per_episode_PRIMARY": {
+       "denominator": "each episode's ACTUAL decision-instant count (D232 (2))",
+       "denominator_source": "D232 (2): per-episode attainment divides by that episode's actual number of decision instants, not a fixed 19; the D178 25 percent per-episode target is unchanged",
+       "mean_attainment": 0.254991,
+       "mean_shortfall_clipped": 0.122337,
+       "episodes_at_or_above_target": 277,
+       "fraction_of_episodes_at_or_above_target": 0.387955
+      },
+      "per_episode_fixed19_BESIDE": {
        "denominator": 19,
-       "denominator_source": "D178 (1) declared constant, positions 2 to 20 of 21",
+       "denominator_source": "D178 (1) fixed constant, positions 2 to 20 of 21; this was the PRIMARY before D232 (2) and is kept BESIDE, labelled",
        "mean_attainment": 0.228734,
        "mean_shortfall_clipped": 0.127783,
        "episodes_at_or_above_target": 248,
        "fraction_of_episodes_at_or_above_target": 0.347339
-      },
-      "per_episode_true_denominator_BESIDE": {
-       "mean_attainment": 0.254991,
-       "mean_shortfall_clipped": 0.122337
       },
       "pooled_BESIDE": {
        "on_time": 3103,
@@ -4011,23 +4076,29 @@
    "cells": {
     "base": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
     "rung2_committed": "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30",
-    "shares": "covex-v6-state-shares_n16_s4_1200s_h27_3t_L3_epg_rq30"
+    "shares": "covex-v6-state-shares_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "comparator": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30"
    },
    "check_1_alert": {
+    "comparator_cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
     "COMMITTED_RULE_PRIMARY": {
      "mean_per_episode_attainment": {
-      "base": 0.44249,
-      "rung2_committed": 0.163291,
-      "shares": 0.64725
+      "comparator": 0.501461,
+      "base": 0.501461,
+      "rung2_committed": 0.182833,
+      "shares": 0.745509
      },
-     "delta_shares_minus_base": 0.20476,
+     "delta_shares_minus_comparator": 0.244048,
+     "delta_shares_minus_base_CONTEXT": 0.244048,
      "pass": true,
      "fraction_of_episodes_at_or_above_0p25": {
-      "base": 0.605337,
-      "rung2_committed": 0.23736,
-      "shares": 0.877809
+      "comparator": 0.626404,
+      "base": 0.626404,
+      "rung2_committed": 0.261236,
+      "shares": 0.900281
      },
      "pooled_attainment_BESIDE": {
+      "comparator": 0.508841,
       "base": 0.508841,
       "rung2_committed": 0.187776,
       "shares": 0.744305
@@ -4035,25 +4106,29 @@
     },
     "CLOUD_FLAG_FIRST_TOKEN_BESIDE": {
      "mean_per_episode_attainment": {
-      "base": 0.455869,
-      "rung2_committed": 0.17364,
-      "shares": 0.65309
+      "comparator": 0.516332,
+      "base": 0.516332,
+      "rung2_committed": 0.195042,
+      "shares": 0.752078
      },
-     "delta_shares_minus_base": 0.197221,
+     "delta_shares_minus_comparator": 0.235746,
+     "delta_shares_minus_base_CONTEXT": 0.235746,
      "pass": true,
      "fraction_of_episodes_at_or_above_0p25": {
-      "base": 0.616573,
-      "rung2_committed": 0.247191,
-      "shares": 0.880618
+      "comparator": 0.641854,
+      "base": 0.641854,
+      "rung2_committed": 0.269663,
+      "shares": 0.901685
      },
      "pooled_attainment_BESIDE": {
+      "comparator": 0.524226,
       "base": 0.524226,
       "rung2_committed": 0.199677,
       "shares": 0.75102
      }
     },
     "verdicts_agree_across_rules": true,
-    "_check": "1. alert per-episode target attainment AT LEAST THE BASE'S"
+    "_check": "1. alert per-episode target attainment AT LEAST THE COMPARATOR'S (hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30); the comparator is passed explicitly by the caller and is never defaulted to the base (D232 (1))"
    },
    "check_2_robot_retention": {
     "_check": "2. at least 90 percent of the committed rung-2 robot on-time GAIN OVER BASE retained",
@@ -4080,7 +4155,8 @@
     "retained_fraction": 0.301204,
     "retained_bar": 0.9,
     "absolute_fallback_bound": {
-     "rule": "shares on-time fraction must not fall more than 0.01 below the base's",
+     "rule": "shares' GAIN OVER BASE must be at least the RUNG-2 COMPARATOR'S gain over base (delta >= gain - GAIN_EPS)",
+     "_erratum_2026_11_23": "label corrected; see the module docstring. The governing computation is unchanged.",
      "pass": false
     },
     "basis_used": "ratio",
@@ -4354,23 +4430,29 @@
    "cells": {
     "base": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
     "rung2_committed": "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30",
-    "shares": "covex-v6-state-shares_n16_s5_1200s_h27_3t_L3_epg_rq30"
+    "shares": "covex-v6-state-shares_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "comparator": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30"
    },
    "check_1_alert": {
+    "comparator_cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
     "COMMITTED_RULE_PRIMARY": {
      "mean_per_episode_attainment": {
-      "base": 0.396211,
-      "rung2_committed": 0.174996,
-      "shares": 0.646469
+      "comparator": 0.455183,
+      "base": 0.455183,
+      "rung2_committed": 0.197605,
+      "shares": 0.74539
      },
-     "delta_shares_minus_base": 0.250258,
+     "delta_shares_minus_comparator": 0.290207,
+     "delta_shares_minus_base_CONTEXT": 0.290207,
      "pass": true,
      "fraction_of_episodes_at_or_above_0p25": {
-      "base": 0.571429,
-      "rung2_committed": 0.296919,
-      "shares": 0.897759
+      "comparator": 0.596639,
+      "base": 0.596639,
+      "rung2_committed": 0.323529,
+      "shares": 0.915966
      },
      "pooled_attainment_BESIDE": {
+      "comparator": 0.456708,
       "base": 0.456708,
       "rung2_committed": 0.201716,
       "shares": 0.745178
@@ -4378,25 +4460,29 @@
     },
     "CLOUD_FLAG_FIRST_TOKEN_BESIDE": {
      "mean_per_episode_attainment": {
-      "base": 0.408374,
-      "rung2_committed": 0.184874,
-      "shares": 0.651039
+      "comparator": 0.469408,
+      "base": 0.469408,
+      "rung2_committed": 0.209052,
+      "shares": 0.750381
      },
-     "delta_shares_minus_base": 0.242665,
+     "delta_shares_minus_comparator": 0.280973,
+     "delta_shares_minus_base_CONTEXT": 0.280973,
      "pass": true,
      "fraction_of_episodes_at_or_above_0p25": {
-      "base": 0.577031,
-      "rung2_committed": 0.316527,
-      "shares": 0.89916
+      "comparator": 0.605042,
+      "base": 0.605042,
+      "rung2_committed": 0.340336,
+      "shares": 0.915966
      },
      "pooled_attainment_BESIDE": {
+      "comparator": 0.470728,
       "base": 0.470728,
       "rung2_committed": 0.213102,
       "shares": 0.750446
      }
     },
     "verdicts_agree_across_rules": true,
-    "_check": "1. alert per-episode target attainment AT LEAST THE BASE'S"
+    "_check": "1. alert per-episode target attainment AT LEAST THE COMPARATOR'S (hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30); the comparator is passed explicitly by the caller and is never defaulted to the base (D232 (1))"
    },
    "check_2_robot_retention": {
     "_check": "2. at least 90 percent of the committed rung-2 robot on-time GAIN OVER BASE retained",
@@ -4423,7 +4509,8 @@
     "retained_fraction": 0.556818,
     "retained_bar": 0.9,
     "absolute_fallback_bound": {
-     "rule": "shares on-time fraction must not fall more than 0.01 below the base's",
+     "rule": "shares' GAIN OVER BASE must be at least the RUNG-2 COMPARATOR'S gain over base (delta >= gain - GAIN_EPS)",
+     "_erratum_2026_11_23": "label corrected; see the module docstring. The governing computation is unchanged.",
      "pass": false
     },
     "basis_used": "ratio",
@@ -4701,23 +4788,29 @@
    "cells": {
     "base": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
     "rung2_committed": "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30",
-    "shares": "covex-v6-state-shares_n16_s6_1200s_h27_3t_L3_epg_rq30"
+    "shares": "covex-v6-state-shares_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "comparator": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30"
    },
    "check_1_alert": {
+    "comparator_cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
     "COMMITTED_RULE_PRIMARY": {
      "mean_per_episode_attainment": {
-      "base": 0.465479,
-      "rung2_committed": 0.240242,
-      "shares": 0.691233
+      "comparator": 0.527273,
+      "base": 0.527273,
+      "rung2_committed": 0.268813,
+      "shares": 0.790631
      },
-     "delta_shares_minus_base": 0.225754,
+     "delta_shares_minus_comparator": 0.263358,
+     "delta_shares_minus_base_CONTEXT": 0.263358,
      "pass": true,
      "fraction_of_episodes_at_or_above_0p25": {
-      "base": 0.608146,
-      "rung2_committed": 0.370787,
-      "shares": 0.91573
+      "comparator": 0.639045,
+      "base": 0.639045,
+      "rung2_committed": 0.401685,
+      "shares": 0.924157
      },
      "pooled_attainment_BESIDE": {
+      "comparator": 0.534278,
       "base": 0.534278,
       "rung2_committed": 0.275751,
       "shares": 0.793399
@@ -4725,25 +4818,29 @@
     },
     "CLOUD_FLAG_FIRST_TOKEN_BESIDE": {
      "mean_per_episode_attainment": {
-      "base": 0.477085,
-      "rung2_committed": 0.251848,
-      "shares": 0.696555
+      "comparator": 0.540798,
+      "base": 0.540798,
+      "rung2_committed": 0.282509,
+      "shares": 0.796838
      },
-     "delta_shares_minus_base": 0.21947,
+     "delta_shares_minus_comparator": 0.25604,
+     "delta_shares_minus_base_CONTEXT": 0.25604,
      "pass": true,
      "fraction_of_episodes_at_or_above_0p25": {
-      "base": 0.629213,
-      "rung2_committed": 0.379213,
-      "shares": 0.917135
+      "comparator": 0.657303,
+      "base": 0.657303,
+      "rung2_committed": 0.417135,
+      "shares": 0.925562
      },
      "pooled_attainment_BESIDE": {
+      "comparator": 0.547599,
       "base": 0.547599,
       "rung2_committed": 0.289072,
       "shares": 0.799508
      }
     },
     "verdicts_agree_across_rules": true,
-    "_check": "1. alert per-episode target attainment AT LEAST THE BASE'S"
+    "_check": "1. alert per-episode target attainment AT LEAST THE COMPARATOR'S (hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30); the comparator is passed explicitly by the caller and is never defaulted to the base (D232 (1))"
    },
    "check_2_robot_retention": {
     "_check": "2. at least 90 percent of the committed rung-2 robot on-time GAIN OVER BASE retained",
@@ -4770,7 +4867,8 @@
     "retained_fraction": 0.333333,
     "retained_bar": 0.9,
     "absolute_fallback_bound": {
-     "rule": "shares on-time fraction must not fall more than 0.01 below the base's",
+     "rule": "shares' GAIN OVER BASE must be at least the RUNG-2 COMPARATOR'S gain over base (delta >= gain - GAIN_EPS)",
+     "_erratum_2026_11_23": "label corrected; see the module docstring. The governing computation is unchanged.",
      "pass": false
     },
     "basis_used": "ratio",
@@ -5047,23 +5145,29 @@
    "cells": {
     "base": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
     "rung2_committed": "covex-v6-state-uo_n16_s7_1200s_h27_3t_L3_epg_rq30",
-    "shares": "covex-v6-state-shares_n16_s7_1200s_h27_3t_L3_epg_rq30"
+    "shares": "covex-v6-state-shares_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "comparator": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30"
    },
    "check_1_alert": {
+    "comparator_cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
     "COMMITTED_RULE_PRIMARY": {
      "mean_per_episode_attainment": {
-      "base": 0.553811,
-      "rung2_committed": 0.216792,
-      "shares": 0.683252
+      "comparator": 0.627063,
+      "base": 0.627063,
+      "rung2_committed": 0.241525,
+      "shares": 0.781948
      },
-     "delta_shares_minus_base": 0.129441,
+     "delta_shares_minus_comparator": 0.154885,
+     "delta_shares_minus_base_CONTEXT": 0.154885,
      "pass": true,
      "fraction_of_episodes_at_or_above_0p25": {
-      "base": 0.721289,
-      "rung2_committed": 0.327731,
-      "shares": 0.914566
+      "comparator": 0.740896,
+      "base": 0.740896,
+      "rung2_committed": 0.366947,
+      "shares": 0.931373
      },
      "pooled_attainment_BESIDE": {
+      "comparator": 0.63783,
       "base": 0.63783,
       "rung2_committed": 0.249682,
       "shares": 0.786909
@@ -5071,25 +5175,29 @@
     },
     "CLOUD_FLAG_FIRST_TOKEN_BESIDE": {
      "mean_per_episode_attainment": {
-      "base": 0.566785,
-      "rung2_committed": 0.228734,
-      "shares": 0.68937
+      "comparator": 0.642184,
+      "base": 0.642184,
+      "rung2_committed": 0.254991,
+      "shares": 0.788426
      },
-     "delta_shares_minus_base": 0.122585,
+     "delta_shares_minus_comparator": 0.146242,
+     "delta_shares_minus_base_CONTEXT": 0.146242,
      "pass": true,
      "fraction_of_episodes_at_or_above_0p25": {
-      "base": 0.732493,
-      "rung2_committed": 0.347339,
-      "shares": 0.914566
+      "comparator": 0.7507,
+      "base": 0.7507,
+      "rung2_committed": 0.387955,
+      "shares": 0.931373
      },
      "pooled_attainment_BESIDE": {
+      "comparator": 0.652772,
       "base": 0.652772,
       "rung2_committed": 0.263435,
       "shares": 0.793955
      }
     },
     "verdicts_agree_across_rules": true,
-    "_check": "1. alert per-episode target attainment AT LEAST THE BASE'S"
+    "_check": "1. alert per-episode target attainment AT LEAST THE COMPARATOR'S (hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30); the comparator is passed explicitly by the caller and is never defaulted to the base (D232 (1))"
    },
    "check_2_robot_retention": {
     "_check": "2. at least 90 percent of the committed rung-2 robot on-time GAIN OVER BASE retained",
@@ -5116,7 +5224,8 @@
     "retained_fraction": 0.281251,
     "retained_bar": 0.9,
     "absolute_fallback_bound": {
-     "rule": "shares on-time fraction must not fall more than 0.01 below the base's",
+     "rule": "shares' GAIN OVER BASE must be at least the RUNG-2 COMPARATOR'S gain over base (delta >= gain - GAIN_EPS)",
+     "_erratum_2026_11_23": "label corrected; see the module docstring. The governing computation is unchanged.",
      "pass": false
     },
     "basis_used": "ratio",
@@ -5443,6 +5552,6 @@
   "model": "n/a (read-only scorer over committed run logs)",
   "device": "n/a (CPU)",
   "n": 4,
-  "timestamp": "2026-11-23T01:47:46.457047+00:00"
+  "timestamp": "2026-11-24T23:30:09.138908+00:00"
  }
 }

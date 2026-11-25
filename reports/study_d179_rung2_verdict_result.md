@@ -66,11 +66,11 @@ Verdict **PASS**, 8 of 8 committed cells reproduced exactly.
 | 6 | True | False | True | False |
 | 7 | True | False | True | False |
 
-| seed | alert att. base | alert att. shares | robot gain | retained | asst min dev |
-|---|---|---|---|---|---|
-| 4 | 0.44249 | 0.64725 | 0.628787 (NORMAL) | 0.301204 | 0.949153 |
-| 5 | 0.396211 | 0.646469 | 0.692914 (NORMAL) | 0.556818 | 0.95 |
-| 6 | 0.465479 | 0.691233 | 0.545455 (NORMAL) | 0.333333 | 0.97479 |
-| 7 | 0.553811 | 0.683252 | 0.609524 (NORMAL) | 0.281251 | 0.975 |
+| seed | alert att. comparator (bar) | alert att. shares | c1 delta | robot gain | retained | asst min dev |
+|---|---|---|---|---|---|---|
+| 4 | 0.501461 | 0.745509 | 0.244048 | 0.628787 (NORMAL) | 0.301204 | 0.949153 |
+| 5 | 0.455183 | 0.74539 | 0.290207 | 0.692914 (NORMAL) | 0.556818 | 0.95 |
+| 6 | 0.527273 | 0.790631 | 0.263358 | 0.545455 (NORMAL) | 0.333333 | 0.97479 |
+| 7 | 0.627063 | 0.781948 | 0.154885 | 0.609524 (NORMAL) | 0.281251 | 0.975 |
 
 Pooled figures are in the JSON under `pooled_BESIDE_not_the_verdict`; they are reported beside the per-seed table and are never the verdict.
