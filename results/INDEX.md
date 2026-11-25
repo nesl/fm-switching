@@ -1341,3 +1341,25 @@ each DEVICE's own instant fraction; on this cell all six dashcam devices are eli
 fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edited here.**
 | `results/orchestration/live2/kind2_retry/k2_proof_results.jsonl` | experiments/orchestration/live2/held/kind2_retry/k2_proof.py | - | h100nvl (CPU) | 3 cases x 3 configs | **Kind-2 fix PREPARED, NOT APPLIED (user ruling 2026-11-24): retry once on a fresh connection only on httpx.ReadError before any response byte; OFF identical to the base on all cases; ON fixes the pre-byte case only. Patch held at experiments/orchestration/live2/held/kind2_retry/; to be applied to all arms before the held-out seeds 1-3.** |
 | `results/orchestration/live2/d231_ptg_guard/` | `d231_ptg_guard_proofs.py`, `d231_ptg_latch_unit.py` (11-24) | n/a (dry and CPU; no engine, no GPU) | flash | 28 dry cells at 300 s + 10 at 1200 s, n16 s4, posted workload knobs; plus a 4-part unit test | **`covex-v6-fair-final-ptg` BUILT AND PROVED, NO CELL SCORED (D230 (2), D178 (3), D166 (3), D231 (3)).** Rung 3 plus the per-type guard thresholds 0.8/1.6/2.4 s (derived as 0.8 x the committed DEADLINE_S), a THIRD additive EWMA lag class for assistance at `coordinator._collect` (the absent link: the committed guard has no assistance channel and is blind to it even at 100 s lag, shown as a unit fact), the D166 (3) exit latch, and `guard_state` logged per decision period. All five proofs pass: 7 non-ptg arms byte-identical and matching their COMMITTED dry-300 s digests; Step 2b 6,594 positional / 1,572 set-wise differing decisions with per-factor attribution; Step 4 control collapses to rung 3 at `987c2b98784d2dc7` exactly; the log is decision-neutral on both sides. **THE ALERT CHANNEL FIRED 0 TIMES AND THAT IS `unexercised`, NOT A NEGATIVE:** the dry monitor service time is a constant 0.394966 s and cannot reach 0.8 s, so the alert count is pre-registered as a check on the s4 GPU cell; the branch is shown reachable by a control at a 0.3 s bar (11,935 firings, 13,946 decisions moved). In the dry cell the per-type thresholds REDUCE activations 1,046 -> 612, because the only reachable channel has its bar RAISED - the pre-registered alternative explanation, not the mechanism. Check 7 fired for real and the CHECK was broken, not the arm (the bar cited the pristine tree's digest for `covex-v6-final`). Pre-registration frozen at FROZEN CONTENT sha256 `c908e140...` (amendment 3; bar 1 at s4 is now explicit at rung 3's 0.619234, and the committed scorer's own check 1 compares to the BASE 0.442 and must NOT be taken as bar 1). | new (no old name) |
+
+## D232 TABLES REGENERATED under the actual-instant denominator (2026-11-24, Orin)
+
+| field | value |
+|---|---|
+| result files | `reports/figures/table1.csv`, `reports/figures/table1_means.json`, `reports/table1.md`, `reports/figdata/F8.csv` (+ F1-F17 schemas), committed `ab6ebdc0` |
+| script | `experiments/analysis/canon/canon.py` (commit `42312ae9`, which now also records `d179_rung2_verdict` `45d6cfbd` in `pipeline_sha`), `experiments/analysis/figdata/figdata.py` |
+| model/device | none; offline CPU re-derivation on Orin |
+| headline | `dash_attain_per_episode` (F8) now divides by each episode's ACTUAL decision-instant count (D232 (2)); the fixed-19 version is kept BESIDE in `d179_rung2_verdict`. **17 of 24 arms move > 0.01**, all upward (actual instants < 19); largest simplestream +0.1214, state-shares-r1 +0.1011, streamscout +0.1000; near-floor arms move <= 0.01; device-only 0. Max attainment 0.9491 < 1, no share>1. No verdict flips. `pipeline_sha` now stamps the committed d179 source `45d6cfbd`. |
+| old name | same paths; prior committed values were the fixed-19 denominator |
+
+## StudyOUTAGE-HEADROOM (PRELIMINARY, 2026-11-24, Orin)
+
+| field | value |
+|---|---|
+| result files | `reports/figures/outage_headroom_results.json`, `reports/study_outage_headroom_results.md` |
+| pre-registration | `reports/study_outage_headroom.md` (committed `cd8f6eb7`) |
+| script | `experiments/analysis/outage/outage_headroom.py` |
+| model/device | `qwen3vl32b` cost model only; offline CPU on `jetson_orin`; no runs, no GPU, no plot |
+| n | 75 scenarios ({10,30,60}s x {robot1,dashcam1,K2,K4,K7} x 5 starts), s4 1x, trace digest `96c1a0b4...` MATCH |
+| headline | after a network outage, recovery ORDER can change on-time answers only modestly: at the committed 13.6 Mbit/s link bursts clear in ~0.6-3.8 s, SOME ROOM for dashcam-involving/correlated outages >= 30 s, NO ROOM for robot-only and short small outages, never LARGE. Headroom 5-8 dashcam episodes, 0-2 recall/ss per scenario. UPLOAD-bound per dashcam, GPU-bound across correlated devices. Low tier 0.9 Mbit/s FLAGGED confounded (0.90x a dashcam's sustained upload need). Positive control pass, no STOP flag. |
+| old name | none; new study |
