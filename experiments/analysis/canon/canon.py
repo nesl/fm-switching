@@ -290,7 +290,8 @@ def main():
     sha = {"canon": git_sha("experiments/analysis/canon/canon.py"),
            "episodic_lib": git_sha("experiments/analysis/episodic/episodic_lib.py"),
            "dsmap": git_sha("experiments/analysis/early1/dsmap.py"),
-           "dashcam_episodic": git_sha("experiments/analysis/episodic/dashcam_episodic.py")}
+           "dashcam_episodic": git_sha("experiments/analysis/episodic/dashcam_episodic.py"),
+           "d179_rung2_verdict": git_sha("experiments/orchestration/live2/d179_rung2_verdict.py")}
     means = {a: {c: mean(a, c) for c in ("robot_acc", "robot_d176_acc", "robot_on_time_frac",
                                          "ss_acc", "ss_within_2s_frac", "pooled_frac",
                                          "dash_ontime_attain", "dash_frac_ep_ge_025")}
