@@ -1,5 +1,32 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## CHECK-1 COMPARATOR: THE ORIN'S WRITE-UP IS ON ORIGIN AND AWAITS THREE USER RULINGS. THE SCORER IS UNCHANGED.
+
+*** `research/study_check1_comparator_writeup.md`, committed at `db0730f0`. LINKED HERE as offered; nothing
+in it is actioned and THE SCORER STAYS AS COMMITTED UNTIL THE USER RULES. ***
+**The headline is narrower than the question that prompted it: `d179`'s check 1 is ALREADY
+comparator-parameterized by D232 (1), with an AT-LEAST test (`s >= b - 1e-12`). What remains
+base-referenced is NOT the check itself but two reads around it:**
+- **the module docstring, which still says "AT LEAST THE BASE'S" and is now STALE;**
+- **`score.py:776-777`, which gates per-device attainment against the 0.25 TARGET rather than any arm, so
+  *** THE SCORER'S PRINTED PER-CELL "meets" IS NOT THE SAME-CODE CHECK-1 BAR. *** Anyone reading a cell's
+  printed `meets` as if it were check 1 is reading a different test.**
+
+**THREE DECISIONS FOR THE USER, none of them mine or the Orin's:** strictly-above against at-least; per-seed
+against pooled; and whether a D234-floor tolerance applies.
+**WHY IT IS NOT COSMETIC: the comparator choice FLIPS VERDICTS IN BOTH DIRECTIONS.** On the write-up's own
+cells, **rung-4 s7 check 1 FAILS at 0.6288 against `covex-v6-fair-final`'s 0.6483 where it PASSES
+base-referenced**; and **the five-factor state ablation PASSES base-referenced by 0.0059 (0.448403 against
+0.442490) while being a REGRESSION OF 0.170831 against its same-code comparator, 6.16x the measured noise
+floor, over 627 of 712 episodes.**
+*** A REGISTER WARNING I AM ADDING, BECAUSE THE ARM NAMES INVITE THE ERROR: THESE ARE **NOT** BLOCK A's
+CELLS. None of 0.448403, 0.442490 or 0.170831 appears anywhere in `study_blockA_verdict.md`, whose stateoff
+attainments are 0.437049, 0.478637 and 0.477296. *** **Whether the check-1 comparator question also moves
+block A's figures is UNESTABLISHED and must not be assumed from the shared arm name. Do not carry these
+numbers onto block A or block A's onto these.**
+**Also folded in by the Orin: the D234 floor 0.027752 with the note that n = 8 cannot support a p95, and the
+ABSENT `source_agreement` caveat on BOTH comparator cells.**
+
 ## D244, USER RULING 2026-11-25 07:08, PROVISIONAL: THE NETWORK RUN IS ON. 20 CELLS, CORRELATED MULTI-ROBOT OUTAGE AT 1x ONLY.
 
 *** THIS IS THE QUEUE. IT GOES AFTER THE MATRIX FILLER CELL CURRENTLY RUNNING, AND THE DRY RUN IS A GATE
