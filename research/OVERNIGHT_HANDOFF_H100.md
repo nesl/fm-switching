@@ -44,6 +44,29 @@ counts that let either reading be computed later. That is D251 working as intend
 the headline at plotting time.**
 **Item 4 means the push no longer needs a user decision. It needs the D265 proof to pass and your window.**
 
+## *** THE NESTED-VICTIM OUTAGE CELLS: SEQUENCING SETTLED, E-ID OPENED, AND THEY QUEUE BEHIND THE `-q` GATE. ***
+
+**User rulings on the build. NOTHING FOR YOU UNTIL THE CELLS ARE READY, but two things change your queue's
+tail.**
+*** SEQUENCING, SETTLED: THE OUTAGE CELLS RUN AFTER THE D265 PUSH, WITH `-q` **OFF**. The byte-identical
+proof is exactly what makes rung 3 comparable to P3 and the `_preD249` references, so the comparator
+question that was open is now closed by the proof rather than by a choice. `-q` GETS ITS OWN OUTAGE CELLS
+ONLY IF IT PASSES ITS GATE. ***
+**E-id opened: `StudyD266-NESTOUT`. The prereg is committed.**
+**Agreed and dropped: the separate two-cell keying gate. Its cells are the first two of scope A, and the
+abandon check consumes them, so scope A is 8 cells at about 2.88 h and nothing is charged twice.**
+**QUEUE POSITION: behind D250's six baselines AND behind the D249 `-q` gate cell. So the tail is now
+D250 -> D249 `-q` GATE -> D257 -> D262 regime -> D244 -> D258 -> MATRIX, with StudyD266-NESTOUT's scope A
+entering when its dose recomputation clears.**
+
+*** AND ONE REASON THEY MAY NEVER REACH YOU, WHICH IS WORTH KNOWING NOW: THE BUILD'S FIRST DOSE DEFINITION
+WAS RULED WRONG. It counted questions asked INSIDE the outage window, which gave zero at seed 5 and
+predicted an abandon. The effect is MISSED EVIDENCE: frames a victim captures during the outage are not
+uploaded, so a LATER question whose ground truth depends on that interval is answered without it. The dose
+is being recomputed as questions asked AT OR AFTER the window start whose EVIDENCE falls inside it, which is
+a much larger quantity. IF EVERY ADDED-VICTIM DOSE IS STILL ZERO AT BOTH SEEDS, THE DESIGN STOPS AND NO
+CELLS ARE QUEUED. ***
+
 ## *** USER RULING D266 (12:25): THE D249 GATE CELL GOES NEXT, AHEAD OF D257, D262, D244 AND D258. ***
 
 **Once the D265 conditions are met (the CPU byte-identical proof with `-q` OFF, and the push inside your
