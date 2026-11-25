@@ -941,6 +941,29 @@ unlike the robot counts.** `read_cell` recomputes the alert block from `outcomes
 producer; and the `cell.json -> score -> sweep[0]` path feeds only the robot and single-shot block. **Two
 separate pipes, so the same pair of cells can be confounded on one metric and clean on another.**
 
+## *** `git diff --name-only <A> <B>` AGAINST AN UNRESOLVABLE SHA RETURNS AN EMPTY DIFF AND EXITS 0, WHICH READS AS A SAME-CODE PROOF. IT ALMOST MANUFACTURED THE EXACT FLOOR WE HAVE BEEN MISSING. ***
+
+The floor study's own same-code test is: "where the headers' shas differ, run
+`git diff --name-only <shaA> <shaB> -- experiments/ fleet/ scorer/` and count the changed `.py` files. A
+pair with any changed `.py` in the run path is NOT a replicate." **Run on the comparator original against
+its `_rep2`, that command returns ZERO changed `.py` files.** By the written rule that is a replicate pair,
+**and it would have been the FIRST same-code pair in the `L3_epg_rq30` condition, the single gap every
+attainment verdict on origin currently rests on.**
+*** IT IS FALSE. `6282ee40`, the sha `_rep2`'s header records, IS ABSENT FROM THE OBJECT STORE, AND `git
+diff` AGAINST AN UNRESOLVABLE SHA YIELDS AN EMPTY DIFF RATHER THAN AN ERROR. *** Zero changed files means
+"nothing was compared", not "nothing differs". **An agent caught it and rejected the pair; the gap still
+stands.**
+**This is the second member of the same family tonight**, after `git rev-parse <absent-sha>:<path>`
+printing the input sha back and exiting 0. **Both are git commands that answer a question about an object
+they do not have, in the shape of a reassuring answer.** The rule for both: **`git cat-file -t` the sha
+first, and treat an unresolvable commit as UNRESOLVABLE, which is neither absent nor different.**
+**The general form is worth more than either instance: A COMPARISON AGAINST SOMETHING THAT IS NOT THERE
+REPORTS AGREEMENT.** Three registers of it today - an empty diff, an echoed sha, and a comparator whose
+`source_agreement` key does not exist - and in every one the missing side read as consent.
+**What makes this the most dangerous of the three: it would not have produced a wrong number, it would have
+produced a FLOOR, and a floor is the instrument every other result is judged against.** A fabricated
+same-code pair in this condition would have been quoted for weeks.
+
 ## *** PAIR ON THE TREE HASH, NEVER ON `header.git_commit`: A REBASE CAN REWRITE THE COMMIT A CELL RECORDS, AND `git rev-parse <absent-sha>:<path>` ECHOES THE INPUT BACK INSTEAD OF FAILING. ***
 
 `_rep2`'s `header.git_commit` is `6282ee40`, which **exists only in the H100's clone**: it was that box's
