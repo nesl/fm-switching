@@ -146,9 +146,10 @@ D201: a missing `device_score` RAISES; it is never replaced with a neutral value
 
 ## Measured network floors (2026-11-25)
 
-Real 59,601 B round trips, 200 samples per host, to the H100:
+Real 59,601 B round trips, 200 samples per host, to the H100. **All values are
+MILLISECONDS** (a sub-millisecond floor on a 1 to 10 GbE LAN is expected, not anomalous):
 
-| Host | p50 | p99 | stdev | link |
+| Host | p50 (ms) | p99 (ms) | stdev (ms) | link |
 |---|---|---|---|---|
 | flash (A6000) | 0.761 | 0.862 | 0.032 | 10 GbE, 1 hop |
 | orin-4 | 0.546 | 1.248 | 0.332 | 10 GbE direct, **MTU 1466** |
@@ -157,6 +158,26 @@ Real 59,601 B round trips, 200 samples per host, to the H100:
 | orin-1 | 1.366 | 2.354 | 0.369 | 1 GbE switch |
 
 Shaping targets `(target - floor p50)`; feasibility tests `floor p99 < target`.
+
+### The floor is far BELOW every profile, which is why shaping is required
+
+Read as seconds these figures would exceed the links being emulated and nothing could be
+shaped. They are milliseconds, so the margin is large and runs the other way:
+
+| Profile | Target RTT | Worst floor p99 | Headroom | Emulable |
+|---|---|---|---|---|
+| 5G committed (D75) | 44.0 ms | 2.354 ms (orin-1) | **+41.6 ms** | all 5 hosts |
+| Wi-Fi 6, 8 clients | 44.8 ms | 2.354 ms | **+42.4 ms** | all 5 hosts |
+| Wi-Fi 6, quiet 2-client | 3.6 ms | 2.354 ms | +1.2 ms | all 5 hosts |
+| Wi-Fi 6 best case, 1 ms one-way | 2.0 ms | 2.354 ms | **-0.4 ms** | orin-3, orin-4, flash only |
+
+For the same 59,601 B frame the committed 5G link costs about 79 ms end to end
+(35.1 ms serialisation + 44 ms RTT) against a measured floor of 0.55 to 1.37 ms: a 58x to
+145x margin. `cell_config.py` refuses a target BELOW a host's floor, which at these targets
+refuses nothing: `cells/cell_c_5g.json` resolves with all 16 devices feasible.
+
+The only regime this testbed cannot represent is an idealised contention-free Wi-Fi link
+around 1 ms one-way, and only on orin-1 and orin-2.
 
 ## Citations
 

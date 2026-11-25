@@ -31,7 +31,10 @@ import json
 import sys
 from typing import Any, Dict, List, Optional, Sequence
 
-# Measured round-trip floors, ms (p50 / stdev), real 59,601 B payloads, 2026-11-25.
+# Measured round-trip floors in MILLISECONDS, real 59,601 B payloads, 2026-11-25.
+# Sub-millisecond is expected on a 1 to 10 GbE LAN. Read as seconds these would exceed every
+# profile below and nothing could be shaped; read correctly, the floor is 58x to 145x under
+# the committed 5G budget for the same frame (35.1 ms serialisation + 44 ms RTT = ~79 ms).
 FLOOR_RT_MS: Dict[str, Dict[str, float]] = {
     "flash":  dict(p50=0.761, p90=0.816, p99=0.862, stdev=0.032, link_mbps=10000.0),
     "orin-1": dict(p50=1.366, p90=1.861, p99=2.354, stdev=0.369, link_mbps=1000.0),
