@@ -4,6 +4,86 @@
 **Frame, as ruled: the engine is a BLACK BOX; we cannot place KV and cannot see the host tier. EXCLUDED
 FROM SCOPE: any change to engine eviction settings. That is harness, not policy.**
 
+## *** AMENDMENT, SAME DAY: THE RANKING IS REORDERED, AND ONE CLAIM BELOW IS FALSE. ***
+
+**The empirical leg of item 5 landed after this report was written. It CONFIRMS item 5 and WEAKENS lever A.**
+
+### *** LEVER A WAS PRICED ON THE WRONG CELL'S NUMBER. LEVER B IS NOW THE FIRST MOVE. ***
+**`P(host | not in GPU KV) = 0.5740` came from a probe captured during a `covex-v6-base` **kv0.25** cell: a
+DIFFERENT ARM AND A DIFFERENT MEMORY CONDITION from the D250 cells. The cells that matter read much lower.**
+| cell | P(host, not in GPU KV) | mixture at 14k | verdict at 2.956 s slack |
+|---|---|---|---|
+| **A, fair-final 13.5 GiB, THE D250 GATE CELL** | **0.1987** | **2.603 s** | SEND |
+| B, covex-v6-base 13.5 GiB | 0.0420 | 3.004 s | *** DECLINE *** |
+| C, fair-final 27 GiB | 0.3304 | 2.267 s | SEND |
+| the probe originally cited | 0.5740 | 1.644 s | SEND |
+*** SO THE LEVER STILL FLIPS THE DECLINE ON THE CELL THAT MATTERS, BUT THE MARGIN IS 0.353 s AND NOT 1.3 s,
+AND THE BREAK-EVEN IS CLEARED 3.3x AND NOT 9.5x. AND THE ESTIMATE VARIES 14x ACROSS CELLS, 0.042 TO 0.574. ***
+**In cell B the ratio is BELOW break-even, so the lever would correctly keep declining there. Reassuring
+about calibration, sobering about robustness.**
+
+**Three screws tighten on the same lever.**
+1. *** THE 0.555 s HOST ESTIMATE IS FROM MEASUREMENTS TAKEN ONE REQUEST AT A TIME. The measured in-cell
+   host-to-GPU bandwidth is 10x to 150x BELOW the isolated 47.6 GB/s. The two are not directly comparable, a
+   fleet average over an interval against an isolated peak, BUT THE GAP EXCEEDS CONSISTENCY CHECK 1's 2x BAR
+   AND MUST BE EXPLAINED BEFORE LEVER A IS COSTED: if a host reload under concurrency is materially slower
+   than 0.555 s, THE 0.353 s MARGIN DISAPPEARS. ***
+2. **Four touches in the gate cell became FULL RE-PREFILLS: 4 of 1,371, uncached up to 17,651 against a
+   committed max of 15, residual p50 +1.374 s. Small, but it is the FIRST PER-REQUEST EVIDENCE that the
+   halved tier drops prefixes.**
+3. *** THE QUANTILE PROBLEM IS WORSE, NOT UNCHANGED. With P(cold) = 0.80 in the gate cell, a MEDIAN RULE NOW
+   DECLINES TOO, because 0.199 < 0.5. ONLY AN EXPECTATION-BASED RULE ADMITS, SO LEVER A IS A DELIBERATE BET
+   ON EXPECTED VALUE AGAINST A DEADLINE, LATE ON FOUR FIFTHS OF WHAT IT ADMITS. ***
+
+*** REVISED ORDER: B, THEN A, THEN C. Lever B (turn C3 back on, 1 to 2 hours, no new code) is the clear
+first move: a 467-token RECENT recall is feasible at ANY readiness, depends on NO residency estimate, and
+carries NO lateness bet. The bandwidth question above is answered BEFORE any hours go to A. ***
+
+### ITEM 5 IS NOW A REAL NEGATIVE RATHER THAN INCONCLUSIVE, AND THE CONTROL IS WHY
+**Step 2 passes: host reloads measurably occurred in all five cells, and `kv_offload_load_bytes` divided by
+`external_kv_transfer` equals 262,144 bytes per token in all five, independently confirming the committed
+constant. Step 4 is built in: one cell has 5.3x fewer host tokens than another with indistinguishable
+residuals.**
+*** AND THE POSITIVE CONTROL DECIDED WHICH MEASURE TO TRUST, WHICH IS CHECK 7 APPLIED TO THE INSTRUMENT
+RATHER THAN THE RESULT. On requests whose OWN uncached work is 3 tokens, the D162 residual reads touch p50
+at +0.019 / -0.012 / -0.005 / -0.025 s, straddling zero, so it is SOUND. The cost-curve-rate residual reads
++0.728 s on THOSE SAME REQUESTS with a minimum of +0.063 and NOT ONE ROW NEAR ZERO, so it is BROKEN. EVERY
+SEPARABILITY CLAIM RESTS ON THE MEASURE THAT PASSED. ***
+**Physical bound beyond statistics: sustained host-to-GPU bandwidth is p50 0.32 to 0.53 GB/s against a
+residual IQR of 107 to 559 ms. Essentially every candidate band fails the rate bar, one by 377x at an
+implied 541 GB/s, ABOVE HBM BANDWIDTH. And the implied rate CLIMBS MONOTONICALLY with bucket size, 4,236 to
+82,739 tok/s, which is the signature of A FIXED PER-REQUEST OFFSET, NOT A TRANSFER: a transfer gives a
+CONSTANT implied rate.**
+**No size-proportional band: `corr(residual, cached_tokens)` is -0.067, +0.103, +0.068 across three cells,
+so it does not replicate, while `corr(residual, queue_uncached_ahead)` is +0.771. THE RESIDUAL TRACKS THE
+QUEUE, NOT THE PREFIX.**
+**The self-referential threat is acknowledged and answered: the queue term was RECONSTRUCTED from submit-to-
+first-token overlaps, so a request delayed by a reload widens its own interval and the term would ABSORB the
+host signal. TWO CHECKS THAT USE NO QUEUE TERM FIND THE SAME NOTHING: the host-active against host-quiet
+contrast, at most 0.008 s and RUNNING THE WRONG WAY in several rows, which a real reload cost cannot do; and
+the physical bandwidth bound.** *** 3(d) IS CLOSED BY TWO INDEPENDENT ROUTES. DO NOT REOPEN IT ON A TIMING
+ARGUMENT. ***
+
+### *** A CLAIM BELOW IS FALSE AND I COMMITTED IT ***
+**This report states the 13.5 GiB D250 cell is "the ONLY cell in the whole live2 tree with
+`host_tier_gib != 27.0`". THAT IS WRONG.** There is a second:
+`covex-v6-base_n16_s4_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30`, `host_tier_gib` 13.5, verdict OK, **which is
+the FIRST OF THE SIX D250 BASELINES.** A listing for `_h0.5` returns four paths, two of them frozen_test
+runs. **The 22-cell census was correctly scoped to `header.arm == covex-v6-fair-final`, so that baseline was
+outside it; the stronger "only cell in the tree" claim was not scoped and is false.**
+
+### TWO THINGS NOW PROVEN RATHER THAN ASSERTED
+**CACHING, named as CLAUDE.md requires: ALL FIVE CELLS RAN WITH PREFIX CACHING ENABLED, recorded the hard
+way as `--no-enable-prefix-caching` at argv index 13 OVERRIDDEN by `--enable-prefix-caching` at index 27,
+with `engine_reported.enable_prefix_caching` True. THESE ARE WARM-SERVING CONDITIONS THROUGHOUT: nothing in
+this corpus is a cold measurement and nothing above compares across a warm/cold boundary. It is also a live
+instance of the last-wins argv hazard.**
+*** SINGLE-SHOT TRAFFIC IS COLD BY CONSTRUCTION: `cached_tokens` is 0 on every one of 356 single-shot
+requests, max 0, in every cell. SO THE `kind == "recall"` HAZARD IS WORSE THAN DILUTION - IT MIXES AN
+ALL-COLD POPULATION WITH AN 88-PERCENT-WARM ONE UNDER ONE LABEL. The `robo` prefix filter is not optional. ***
+
+---
+
 ## 1. WHAT THE RUN PATH KNOWS TODAY
 
 | quantity | exists | READ at a site that changes a decision |
