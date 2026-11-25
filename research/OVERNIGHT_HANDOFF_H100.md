@@ -1,5 +1,40 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** THE "WAITING ON YOU" LIST IS CLOSED TO THREE ITEMS. TWELVE OF THE FOURTEEN ARE RESOLVED. STOP LISTING THEM. ***
+
+**User ruling (provisional, 2026-11-25). From now on list ONLY items that are genuinely open.**
+
+| # | item | disposition |
+|---|---|---|
+| 2 | metric conflict | **RESOLVED by D251**: record all metrics, choose the headline at plotting time |
+| 3 | re-key outage placement | **RESOLVED for the next design**: fixed window, nested victims. *** NO RE-RUN OF THE D244 k5 CELLS *** |
+| 4 | drivers v39 and v40 | **ENDORSED by the user**, approvals 2026-11-25 07:08 and 09:27 |
+| 5, 14 | ptg comparator and its D-row | **RESOLVED by D254**: the pre-registered reading governs; PLAIN RUNG 3 STAYS |
+| 6 | crediting deliberate device answers | **MOOT**: rung 4 and DEVICE_ANSWERS are out of the candidate, per D232 and D234 |
+| 7 | freeze | **RESOLVED by D248**: no freeze yet |
+| 8 | Orin check 1 | **RESOLVED by D251**: per-seed verdicts with the pooled fraction beside them; tolerance is the named same-code difference; SCORER UNCHANGED |
+| 9 | E-id for the ablations | **DONE**: `StudyD233-STATEOFF`, per D237 |
+| 10 | overnight relaunch | **SUPERSEDED** by the D243 and D255 watchdog |
+| 12 | comparators without a code-agreement verdict | **RESOLVED by the `_rep2` reruns.** *** FROM NOW ON, SAME-CODE COMPARATORS ARE REQUIRED *** |
+| 13 | pooling notouch | **RESOLVED**: per seed with the dose beside each figure, NEVER pooled |
+
+### *** THE ONLY GENUINELY OPEN ITEMS ***
+
+| # | item | whose | note |
+|---|---|---|---|
+| 1 | **D244 seed 5** | **the user's**, after the s4 results | KEEP LISTING THIS ONE |
+| 11 | **mirror permission** | **the user's** | KEEP LISTING THIS ONE. Low priority |
+| new | **the `experiments/` code push for `covex-v6-fair-final-q`** | **the user's** | 4 new and 7 modified live2 files. Until it lands the D249 gate cell CANNOT RUN: the arm is not in `live2 a7eac4ee7c8c` and is registered in ZERO files on origin |
+
+**Two notes on the dispositions, neither of which changes any of them.**
+*** Item 3's resolving ruling is recorded here as D262 item 3 (2026-11-25 11:49), where the closure note
+attributes it to D253. The DESIGN is unambiguous either way - fixed window, victims nested by keying
+placement on `(seed, window)` and not on k, 1x only - and no cell turns on which number labels it, so
+nothing is blocked. The D-number is flagged for the user's ledger and is NOT being chosen here. ***
+**Item 12's standing requirement is now load-bearing twice over: the D250 comparison and the D262 regime
+gate both rest on same-code comparators, and the D261 margin work had to be scoped precisely so that the
+committed rung-3 cells would remain same-code with everything run after them.**
+
 ## *** USER RULING: THE D250 PASS RULE IS REPLACED, BEFORE ANY BASELINE IS SCORED. ***
 
 **Written here BEFORE the first D250 baseline lands, as the ruling requires.**
