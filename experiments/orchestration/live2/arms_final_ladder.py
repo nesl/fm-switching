@@ -66,6 +66,8 @@ import arms_v6cfr3 as R4                                                       #
 import arms_v6fairfeed as FF                                                   # noqa: E402
 import arms_v6rr as RRARM                                                      # noqa: E402
 import arms_v6state as VS                                                      # noqa: E402
+import d249_queue_visibility as QV                                             # noqa: E402
+import d261_cold_unlatch as CU                                                 # noqa: E402
 import deficit_gain_d178 as GAIND                                              # noqa: E402
 import planner_deficit_weights as PDW                                          # noqa: E402
 import release_recheck as RR                                                   # noqa: E402
@@ -79,6 +81,10 @@ RUNG4 = "covex-v6-final"
 # SAME CLASS and the SAME constructor as RUNG3 with one switch flipped, so a difference
 # between the two cells is attributable to that switch and to nothing else.
 RUNG3_PTG = "covex-v6-fair-final-ptg"
+# D249 (2026-11-25, PROVISIONAL): rung 3 with queue and harm visibility in the state planner.
+# SAME CLASS and SAME constructor as RUNG3 with one switch flipped, so a difference between the
+# two cells is attributable to that switch and to nothing else.
+RUNG3_D249 = "covex-v6-fair-final-q"
 
 # The committed arm each final rung is built FROM, for the mapping row the user asked for.
 BUILT_FROM = {RUNG2: "covex-v6-state-uo-c5attr",
@@ -254,6 +260,36 @@ def _set_guard_log(arm: Any) -> None:
                                 "be the empty one the coordinator happens to hold")
 
 
+def _set_d249(arm: Any) -> None:
+    """Turn D249 queue-and-harm visibility on for THIS INSTANCE and read it back strictly.
+
+    The coordinator reads the SAME instance attribute (`coordinator.__init__` ->
+    `d249_queue_visibility.arm_enables`) to decide whether to publish the in-flight rows, and
+    `arms_v6state` reads it to decide whether to consume them. One attribute on one object, so a
+    build where the publisher is on and the consumer off is not expressible.
+    """
+    object.__setattr__(arm, QV.D249_SWITCH, True)
+    arm.__dict__.pop("_d249_resolved", None)
+    if not QV.arm_enables(arm):                                            # pragma: no cover
+        raise LadderSwitchError(
+            "%s did not take on the instance of %s, so the cell would have run rung 3 under a "
+            "D249 name with no queue visibility at all" % (QV.D249_SWITCH, type(arm).__name__))
+
+
+def _set_cold_unlatch(arm: Any) -> None:
+    """Turn D261 (a rejection is not proof of cold) on for THIS INSTANCE and read it back.
+
+    `coordinator.__init__` reads the SAME instance attribute through
+    `d261_cold_unlatch.arm_enables`, and the coordinator is the only consumer, so a build where
+    the switch is set and the consumer off is not expressible.
+    """
+    object.__setattr__(arm, CU.D261_SWITCH, True)
+    if not CU.arm_enables(arm):                                            # pragma: no cover
+        raise LadderSwitchError(
+            "%s did not take on the instance of %s, so the cell would have run the latch under "
+            "a name that says it clears" % (CU.D261_SWITCH, type(arm).__name__))
+
+
 def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                recheck_types: Any = RRARM.RECHECK_TYPES,
                deficit_feed: bool = True, gain: float = GAIND.GAIN,
@@ -261,6 +297,8 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                planner_reads_feed: bool = True, qcache_key_fix: bool = True,
                per_type_guard: bool = False, guard_lag_s_by_class: Any = None,
                hysteresis: Any = None, guard_log: Any = None,
+               d249_queue_visibility: bool = False,
+               cold_unlatch: Any = None,
                **kw: Any) -> Any:
     """Build rung 3. Four switches, each set on the instance and each read back.
 
@@ -298,6 +336,16 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         _set_hysteresis(arm)
     if (per_type_guard if guard_log is None else bool(guard_log)):
         _set_guard_log(arm)
+    # D249, DEFAULT OFF (the ruling): `make_rung3()` with no arguments is still exactly
+    # `covex-v6-fair-final`, and the only arm that passes True is `covex-v6-fair-final-q`.
+    if d249_queue_visibility:
+        _set_d249(arm)
+    # D261 (user ruling 2026-11-25 item 2), DEV LINE ONLY. `cold_unlatch=None` means "follow the
+    # D249 switch", so `covex-v6-fair-final-q` carries it and `covex-v6-fair-final` does not:
+    # `make_rung3()` with no arguments is still exactly rung 3. An explicit False is how the
+    # switch-off control separates this mechanism from D249 inside ONE tree.
+    if (d249_queue_visibility if cold_unlatch is None else bool(cold_unlatch)):
+        _set_cold_unlatch(arm)
     arm._planner_reads_feed_declared = bool(planner_reads_feed)
     if planner_reads_feed:
         # wire it NOW rather than lazily, so a wiring failure raises in construction
@@ -399,6 +447,8 @@ FINAL_LADDER_ARMS: Dict[str, Any] = {
     RUNG3: (lambda **kw: make_rung3(RUNG3, **kw)),
     # D230 (2): rung 3 with the D178 (3) per-type guard. The ONLY difference from RUNG3.
     RUNG3_PTG: (lambda **kw: make_rung3(RUNG3_PTG, per_type_guard=True, **kw)),
+    # D249: rung 3 plus queue and harm visibility. DEFAULT OFF EVERYWHERE ELSE.
+    RUNG3_D249: (lambda **kw: make_rung3(RUNG3_D249, d249_queue_visibility=True, **kw)),
     # CLAUDE.md Step 4 negative control, as a NAMED ARM so the control is a cell and not a
     # code edit: the per-type machinery fully live with all three thresholds set to the
     # committed single 2.0 s bar. It must collapse to `covex-v6-fair-final` EXACTLY.

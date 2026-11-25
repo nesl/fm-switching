@@ -363,7 +363,9 @@ class Counterfactual:
                  safety: Optional[float] = None,
                  clock: Optional[DecisionClock] = None,
                  budget_ms: float = BUDGET_MS,
-                 dry: bool = False, dry_margin: Optional[float] = None) -> None:
+                 dry: bool = False, dry_margin: Optional[float] = None,
+                 margin_cf_override: Optional[float] = None,
+                 margin_cf_scope: Optional[str] = None) -> None:
         self.model = model if model is not None else CC.load_gate_model()
         self.residuals = residuals if residuals is not None else CC.load_residuals()
         # D206: NO NEUTRAL DEFAULT. A default here is exactly how the defect D200 (1) names
@@ -391,6 +393,14 @@ class Counterfactual:
         self.budget_ms = float(budget_ms)
         self.dry = bool(dry)
         self.dry_margin = dry_margin
+        # D261 (user ruling 2026-11-25): an ARM-SCOPED margin, in CORRECTNESS units, or None for
+        # the committed constant. None on every caller that does not pass it, which is every
+        # caller in the tree except the D249 dev line, so no committed cell changes.
+        # `margin_cf_scope` is the arm name the scope was granted to, carried so the decision rows
+        # say WHOSE margin produced them rather than leaving a reader to infer it.
+        self.margin_cf_override = (None if margin_cf_override is None
+                                   else float(margin_cf_override))
+        self.margin_cf_scope = margin_cf_scope
         self.log: List[Decision] = []
         self.counts: Dict[str, int] = {
             "decisions": 0, "request": 0, "state": 0, "sync": 0,
@@ -420,6 +430,19 @@ class Counterfactual:
         before and after the conversion.
         """
         m = CM.resolve_margin(dry=self.dry, dry_value=self.dry_margin)
+        # D261 (user ruling 2026-11-25), ARM-SCOPED, DEFAULT None. `margin_cf_override` is in the
+        # SAME register `resolve_margin` returns (correctness units), so the one conversion below
+        # is applied to it exactly as it is to the committed constant and no second conversion
+        # exists. It is None for every arm but `covex-v6-fair-final-q`, so this is a no-op on
+        # rung 3 and on every committed cell, and `cf_margin.MARGIN_CF` is neither re-pinned nor
+        # deleted: the DEFAULT IS THE COMMITTED VALUE. A scorable override stays SCORABLE, which
+        # is what distinguishes it from the `dry` path.
+        if self.margin_cf_override is not None and not self.dry:
+            m = CM.Margin(float(self.margin_cf_override),
+                          "d261_margin_scope.MARGIN_CF_D259_METHOD_A (arm-scoped to %s; "
+                          "cf_margin.MARGIN_CF is unchanged at %r for every other arm)"
+                          % (self.margin_cf_scope or "the D249 dev line", CM.MARGIN_CF),
+                          m.scorable)
         return CM.Margin(CO.attainment_margin(m.value),
                          m.source + " / cf_objective.A_D2_DEV (D177 (3): on-time units)",
                          m.scorable)

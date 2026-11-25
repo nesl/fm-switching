@@ -212,6 +212,39 @@ class RecallQuery:
 
 
 @dataclass(frozen=True)
+class InFlightWork:
+    """One request the cloud is ALREADY working on, as the planner needs to see it (D249 (a)).
+
+    PRESENT-TIME, NOT FUTURE. Every field is a property of a request that has already been
+    submitted: its id, the device that owns it, its query type, the uncached prompt tokens it was
+    charged, and the time left to its own deadline. Nothing here is an arrival that has not
+    happened, which is what `FORBIDDEN_FIELDS` guards, and `scrub` walks this dataclass like any
+    other so the guard is applied rather than asserted.
+
+    `uncached_tokens` IS THE W REGISTER'S OWN NUMBER (`share_admission.WTracker`, submit to first
+    token), and deliberately NOT `coordinator._uncached_in_flight`, which drains at COMPLETION and
+    so carries the decode tail: that quantity overstates the queue ahead of a prefill and is the
+    wrong register for the D162 queue coefficient, which was fitted on uncached PROMPT tokens
+    (`coordinator.py:1143-1150` records the same distinction for the budget charge).
+
+    `slack_s` is THIS request's own deadline minus now, per the D249 draft's "measured against
+    EACH REQUEST'S OWN DEADLINE SLACK, not against a single global budget".
+    """
+    request_id: str
+    device_id: str
+    qtype: str                               # "alert" | "recall" | "assistance"
+    kind: str                                # the coordinator's request kind
+    uncached_tokens: int
+    slack_s: float
+    # BACKGROUND WORK (a build piece, a whole, a touch) HAS NO DEADLINE OF ITS OWN (D179 (3)), so
+    # it cannot be a harm row: a row needs a slack to lose. It IS queued ahead of everything else,
+    # so it is published with `has_deadline = False` and a slack of 0.0 that no harm term reads,
+    # and its tokens still count towards the queued-ahead total. Dropping those rows instead would
+    # understate the queue, which is the unsafe direction.
+    has_deadline: bool = True
+
+
+@dataclass(frozen=True)
 class CloudState:
     queued_by_class: Dict[str, int]
     running_by_class: Dict[str, int]
@@ -220,6 +253,10 @@ class CloudState:
     gpu_warm_sessions: Tuple[str, ...]
     host_warm_sessions: Tuple[str, ...]
     latency_estimate_s: Dict[str, float]     # class -> recent estimate from the measured curves
+    # D249 (a): the in-flight work itself, one row per request, DEFAULT EMPTY. Every existing
+    # construction of CloudState stays valid and every arm that does not read it sees exactly
+    # what it saw before, which is what makes the OFF-switch identity proof possible at all.
+    in_flight_work: Tuple[InFlightWork, ...] = ()
 
 
 @dataclass(frozen=True)

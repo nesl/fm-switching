@@ -145,6 +145,15 @@ class SessionRec:
     measured_tier: str = "cold"
     last_touch_s: float = 0.0
     placement_events: int = 0
+    # D261 (user ruling 2026-11-25 item 2), ARM-SCOPED: written and read ONLY while
+    # `d261_cold_unlatch.arm_enables` is true, so every other arm leaves both at the default and
+    # no decision of theirs can see them. `cold_provisional_from` is the tier the belief held
+    # before a demotion to cold that came from a SINGLE telemetry zero and has not been re-tested
+    # by any later reading; None means there is no untested cold mark. See
+    # `d261_cold_unlatch.note_telemetry` (the write) and `clear_on_reject` (the read that
+    # restores the belief the arm then reads back as readiness).
+    cold_provisional_from: Optional[str] = None
+    cold_provisional_s: float = -1.0
 
     def believed_tier(self) -> str:
         return max(self.belief, key=lambda k: self.belief[k])
@@ -481,6 +490,12 @@ class CoordState:
     # RECONSTRUCTING the before-state, which is what produced two invalid controls today; gating
     # it once here disables the whole change.
     category_enabled: bool = True
+    # ---- D249 (a): THE PUBLISHED IN-FLIGHT REGISTER, written by the coordinator -------------
+    # Only the coordinator knows what is in flight, and only `observation` builds what the arm
+    # sees, so the two are joined by this one field. It is EMPTY unless the coordinator's D249
+    # switch is on, which is what keeps every committed arm's observation byte-identical: an
+    # empty tuple reaches `CloudState.in_flight_work`, whose default is also empty.
+    inflight_work: Tuple[Any, ...] = ()
 
     def enact_placement(self, now: float) -> Dict[str, int]:
         """Read `desired_tier` and enact it. The one shared steering path (D133 Part A).
@@ -696,7 +711,8 @@ class CoordState:
                                   episodic=int(self.in_flight.get("monitor", 0))),
             gpu_kv_fraction=float(self.metrics.get("vllm:gpu_cache_usage_perc", 0.0)),
             host_kv_fraction=self._host_fraction(), gpu_warm_sessions=gpu,
-            host_warm_sessions=host, latency_estimate_s=dict(self.lat))
+            host_warm_sessions=host, latency_estimate_s=dict(self.lat),
+            in_flight_work=tuple(self.inflight_work))
         return Observation(now_s=round(now, 3), epoch=epoch, streams=tuple(streams),
                            recall=tuple(queries), cloud=cloud,
                            budget_remaining_gpu_s=(self.budget.remaining_gpu_s()

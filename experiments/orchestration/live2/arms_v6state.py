@@ -64,6 +64,7 @@ from interface import Action, Observation, SessionAction                       #
 
 import arms_v5rules2 as V2                                                     # noqa: E402
 import d162_price as DP                                                        # noqa: E402
+import d249_queue_visibility as QV                                            # noqa: E402
 import cf_planner as CP                                                        # noqa: E402
 from touch_policy import TOUCH_UNCACHED_TOKENS as TP_TOUCH_UNCACHED            # noqa: E402
 
@@ -209,9 +210,28 @@ class V6StateArm:
                                       clock=CI.DecisionClock(),
                                       counters=_CO.NoPlannerDeficitFeed(
                                           rung=getattr(self, "name", "covex-v6-state")))
+            # D261 (user ruling 2026-11-25): THE MARGIN TRAVELS WITH THE ARM. `margin_override_for`
+            # returns None for every arm but `covex-v6-fair-final-q`, so rung 3 and every other
+            # arm construct the planner exactly as before and read `cf_margin.MARGIN_CF`
+            # unchanged. The scope is keyed on the SAME instance attribute as the D249 queue
+            # term, so the two cannot be switched apart. Read back and asserted, because a scope
+            # that silently did not take would run the D259 bar under a name that says it does
+            # not, or the reverse, and either way the cell would be mislabelled.
+            import d261_margin_scope as _MS                                # noqa: PLC0415
+            _mov = _MS.margin_override_for(self)
+            if _mov is not None:
+                _MS.assert_unit_relation(float(getattr(_CO, "A_D2_DEV", 0.25)))
+                kw["margin_cf_override"] = _mov
+                kw["margin_cf_scope"] = str(getattr(self, "name", "")) or None
             if self._cf_budget_ms is not None:
                 kw["budget_ms"] = float(self._cf_budget_ms)
             self._cf = CP.Counterfactual(**kw)
+            if getattr(self._cf, "margin_cf_override", None) != _mov:      # pragma: no cover
+                raise RuntimeError(
+                    "the D261 arm-scoped margin did not take on the planner instance for %r: "
+                    "wanted %r, the planner holds %r"
+                    % (getattr(self, "name", "?"), _mov,
+                       getattr(self._cf, "margin_cf_override", None)))
         return self._cf
 
     # ---- delegation, named statically (the v5-full recursion, D172) --------------------------
@@ -253,29 +273,191 @@ class V6StateArm:
                                 "coefficient per research/prereg_harm_warm_d172.md; never a "
                                 "declared grid value. Capped at the healthy-regime bound with "
                                 "harm_warm_capped counted"),
-                     margin="DRY_OVERRIDE" if self.dry else "cf_margin.MARGIN_CF",
-                     scorable=not self.dry),
+                     margin=("DRY_OVERRIDE" if self.dry else
+                             ("d261_margin_scope.MARGIN_CF_D259_METHOD_A (arm-scoped)"
+                              if self._d249_on() else "cf_margin.MARGIN_CF")),
+                     d261_margin_scope=__import__("d261_margin_scope").describe(self),
+                     scorable=not self.dry,
+                     d249_queue_visibility=(dict(QV.describe(), enabled=True)
+                                            if self._d249_on() else
+                                            {"enabled": False,
+                                             "switch": QV.D249_SWITCH,
+                                             "note": ("OFF: the harm row source is obs.recall "
+                                                      "only and the warm/cold pair is priced at "
+                                                      "zero queued-ahead tokens, exactly as "
+                                                      "rung 3 prices it")})),
                  source=self.live2_source)
         return d
 
     # ---- the warm / cold delivery pair plan_state is scored on -------------------------------
-    def _p_warm_cold(self, est_tokens: int, built_tokens: int) -> Optional[Dict[str, float]]:
+    # ---- D249: the in-flight source, the queued-ahead token count, and the harm rows ---------
+    def _d249_on(self) -> bool:
+        """Resolved ONCE per arm instance and memoised, for the reason `_queued_behind` gives:
+        the OFF path runs inside the planner's wall-clock budget and an MRO scan per call would
+        charge that budget for a switch that is off."""
+        on = self.__dict__.get("_d249_resolved")
+        if on is None:
+            on = QV.arm_enables(self)
+            self.__dict__["_d249_resolved"] = on
+        return bool(on)
+
+    def _d249_inflight(self, obs: Observation) -> tuple:
+        """`obs.cloud.in_flight_work`, defensively: () on any arm or harness that does not carry
+        it, so this method is safe on an observation built by an older tree."""
+        return tuple(getattr(getattr(obs, "cloud", None), "in_flight_work", ()) or ())
+
+    def _d249_tok_sum(self, obs: Observation) -> int:
+        """The raw token sum, WITHOUT counters: `_d249_rows` needs the same number the counted
+        reader returns, and a second counted read per decision would inflate every D249 counter
+        by the number of times the sum happens to be needed."""
+        return sum(int(getattr(r, "uncached_tokens", 0) or 0) for r in self._d249_inflight(obs))
+
+    def _d249_queued_ahead_tokens(self, obs: Observation) -> int:
+        """The uncached PROMPT tokens the engine is already working on, W's own numbers summed.
+
+        Every row counts, background included: a build piece occupies the engine ahead of a
+        question exactly as a deadline request does. It is the count that goes through
+        `QV.queue_delay_s`, which asserts the coefficient is `per_queue_token` and so is in
+        SECONDS PER TOKEN. It is never passed to `cf_cost.predict`'s `overlap_ft`, which is
+        seconds per overlapping REQUEST and 247.5x larger.
+        """
+        if not self._d249_on():
+            return 0
+        tot = self._d249_tok_sum(obs)
+        self.stats["d249_queued_ahead_token_sum"] += int(tot)
+        self.stats["d249_queued_ahead_reads"] += 1
+        if tot > 0:
+            self.stats["d249_queued_ahead_nonzero"] += 1
+            self.stats["d249_queued_ahead_max"] = max(
+                int(self.stats.get("d249_queued_ahead_max", 0)), int(tot))
+        return int(tot)
+
+    def _d249_rows(self, obs: Observation, session_id: str) -> List[Dict[str, Any]]:
+        """The D249 harm rows: one per IN-FLIGHT DEADLINE REQUEST of another device.
+
+        THIS IS THE ROW SOURCE THE D245 ESTIMATE SAID WAS MISSING. `obs.recall` is the
+        arrived-and-UNDECIDED set and the arm decides every 0.1 s, so it structurally holds at
+        most one item (measured: npend_hist {0: 58,607, 1: 2,313} over this cell's 60,920
+        decisions, never 2). These rows are the requests the engine is ALREADY SERVING, which is
+        the set a warm would actually sit behind, and they carry the three things
+        `cf_objective.harm_warm_from_queue_delay` needs and `EpisodicStream` has never had:
+        `device_id`, `engine_s` and `slack_s`. DASHCAM (`alert`) and SINGLE-SHOT (`assistance`)
+        requests are rows here, which is D249 (c): the planner can now weigh a robot state action
+        against them.
+
+        THE EXCLUSION IS BY DEVICE, not by session. `_queued_behind` excludes the planned
+        session's own rows because a warm cannot harm the question it is warming for; an in-flight
+        row carries the device that owns it, and a robot session's device is its own, so the device
+        comparison is the same exclusion at the granularity the row has.
+
+        EACH ROW'S OWN `engine_s` INCLUDES THE QUEUE AHEAD OF IT, which is the "P(on time now)"
+        half of the D249 formula: a request that is already behind other work is already less
+        likely to be on time. The queue ahead of a row is approximated by the total in-flight
+        tokens minus its own, because the published register is a SET and carries no submit order.
+        That approximation is stated here and counted below; it is an over-estimate for the
+        request at the head of the queue and an under-estimate for none.
+        """
+        if not self._d249_on():
+            return []
+        rows_in = [r for r in self._d249_inflight(obs) if bool(getattr(r, "has_deadline", True))]
+        if not rows_in:
+            self.stats["d249_rows_none_in_flight"] += 1
+            return []
+        sdev = (getattr(self._rules, "_roster", None) or {}).get("session_device") or {}
+        own_dev = str(sdev.get(session_id, ""))
+        total_tok = self._d249_tok_sum(obs)
+        out: List[Dict[str, Any]] = []
+        try:
+            import cf_cost as CC
+            cf = self._cf_engine()
+        except Exception:                                                      # noqa: BLE001
+            self.stats["d249_rows_unpriced"] += 1
+            return []
+        for r in rows_in:
+            did = str(getattr(r, "device_id", ""))
+            if did and did == own_dev:
+                self.stats["d249_rows_excluded_own_device"] += 1
+                continue
+            u = int(getattr(r, "uncached_tokens", 0) or 0)
+            ahead = max(int(total_tok) - u, 0)
+            # overlap_ft and overlap_decode STAY ZERO (see d249_queue_visibility): the queue is
+            # priced in SECONDS by the D162 per-token coefficient and added here.
+            pr = CC.predict(cf.model, u, 0, 0, 0)
+            eng = float(pr.engine_s) + QV.queue_delay_s(ahead, cf.model)
+            out.append({"req_id": str(getattr(r, "request_id", "")),
+                        # NOT a session: an in-flight row is keyed on its request and its device.
+                        # The empty session id is what makes `_queued_behind`'s session filter a
+                        # no-op for these rows, and the device exclusion above is what replaces it.
+                        "session_id": "", "device_id": did,
+                        "engine_s": eng,
+                        # ONE DEFINITION OF SLACK, consistency check 4. The committed recall rows
+                        # above use `deadline - now - LINK_RTT_S`; the coordinator publishes the
+                        # raw `deadline - now`, which is a harness fact and not a policy choice,
+                        # so the link term is subtracted HERE and the two row kinds carry the same
+                        # quantity under the same name.
+                        "slack_s": float(getattr(r, "slack_s", 0.0)) - CC.LINK_RTT_S,
+                        "p_device_on_time": 1.0, "weight": 1.0,
+                        "d249_qtype": str(getattr(r, "qtype", "")),
+                        "d249_queued_ahead_tokens": int(ahead)})
+        self.stats["d249_rows_built"] += len(out)
+        if out:
+            self.stats["d249_row_batches_nonempty"] += 1
+            self.stats["d249_rows_max_in_one_batch"] = max(
+                int(self.stats.get("d249_rows_max_in_one_batch", 0)), len(out))
+        return out
+
+    def _p_warm_cold(self, est_tokens: int, built_tokens: int,
+                     queued_ahead_tokens: int = 0) -> Optional[Dict[str, float]]:
         """P(this session's next question is answered on time) warm against cold.
 
         The SAME cost model and the SAME delivery curve the request counterfactual uses, so the
         two kinds are priced in one currency. Warm means the built prefix is cached; cold means
         none of it is. Returns None when the model cannot price the session, and the caller counts
         that rather than substituting a number.
+
+        D249 (b): `queued_ahead_tokens` IS DECLARED AND DEFAULTS TO ZERO, which is the house
+        convention for a planner input that prices a FUTURE question (`plan_sync`'s
+        `coarse_overlap_forecast: float = 0.0`), and with the D249 switch off every caller passes
+        the default so the two predictions are bit-for-bit what they were. The signature changed
+        rather than the method reaching for an observation it does not have: it had exactly one
+        caller, and a future question's queue is an INPUT to it and not a fact it can look up.
+
+        THE QUEUE IS ADDED IN SECONDS AND `overlap_ft` STAYS THE HARD ZERO. `QV.queue_delay_s`
+        asserts the coefficient applied to the token count is D162's `per_queue_token`; passing
+        that count into `CC.predict`'s third argument instead would apply `per_overlap`, which is
+        247.5x larger and in seconds per overlapping REQUEST, and once predicted 165.6 s against
+        0.818 s observed.
         """
         try:
             import cf_cost as CC
+            import cf_objective as CO
             cf = self._cf_engine()
             warm = CC.predict(cf.model, int(est_tokens), int(built_tokens), 0, 0)
             cold = CC.predict(cf.model, int(est_tokens), 0, 0, 0)
+            q_s = QV.queue_delay_s(int(queued_ahead_tokens), cf.model) \
+                if int(queued_ahead_tokens) > 0 else 0.0
+            # D256 (a): THE CAP, mirroring `cf_objective.py:838-839` exactly, on the same bound
+            # and for the same reason (D160 (2) does not trust the D162 model across the
+            # saturation transition). The harm path has capped its added delay since it was
+            # written; the D249 (b) pricing path did not, and added up to 15.705 s of predicted
+            # first token in the posted cell, 9.31 pct of its prices landing outside the bound.
+            # Counted, never silent, as `harm_warm_capped` is.
+            capped = False
+            if q_s > CO.HEALTHY_FIRST_TOKEN_BOUND_S:
+                q_s = CO.HEALTHY_FIRST_TOKEN_BOUND_S
+                capped = True
+            if capped:
+                self.stats["d249_pwc_queue_capped"] += 1
+            if q_s > 0.0:
+                self.stats["d249_pwc_queue_priced"] += 1
+                self.stats["d249_pwc_queue_milli_sum"] += int(round(q_s * 1000.0))
+                self.stats["d249_pwc_queue_max_milli"] = max(
+                    int(self.stats.get("d249_pwc_queue_max_milli", 0)),
+                    int(round(q_s * 1000.0)))
             return {
-                "warm": CC.p_on_time(cf.residuals, warm.engine_s,
+                "warm": CC.p_on_time(cf.residuals, warm.engine_s + q_s,
                                      ROBOT_DEADLINE_S - CC.LINK_RTT_S),
-                "cold": CC.p_on_time(cf.residuals, cold.engine_s,
+                "cold": CC.p_on_time(cf.residuals, cold.engine_s + q_s,
                                      ROBOT_DEADLINE_S - CC.LINK_RTT_S),
             }
         except Exception:                                                      # noqa: BLE001
@@ -318,7 +500,19 @@ class V6StateArm:
                         "p_device_on_time": 1.0, "weight": 1.0})
             except Exception:                                                  # noqa: BLE001
                 self._q_cache = []
-        return [r for r in self._q_cache if r["session_id"] != session_id]
+        out = [r for r in self._q_cache if r["session_id"] != session_id]
+        # D249: the in-flight rows are APPENDED, not substituted. The recall-opportunity rows are
+        # the committed source and stay exactly as they are, so a difference between this arm and
+        # rung 3 is attributable to the rows D249 ADDS. They are not cached with the others
+        # because the exclusion is per session and the rows are already built per decision.
+        if self._d249_on():
+            add = self._d249_rows(obs, session_id)
+            if add:
+                have = {r["req_id"] for r in out}
+                add = [r for r in add if r["req_id"] not in have]
+                self.stats["d249_rows_appended"] += len(add)
+                out = out + add
+        return out
 
     def _harm_warm(self, obs: Observation, session_id: str, uncached_tokens: int) -> float:
         """`harm_warm`, COMPUTED from the D162 model and never declared.
@@ -408,7 +602,10 @@ class V6StateArm:
             if not q["has_estimate"]:
                 self.stats["state_skipped_no_question_estimate"] += 1
                 continue
-            p = self._p_warm_cold(int(est.get(sid, b) or b), b)
+            # D249 (b): the queued-ahead tokens the warm/cold pair is priced against. Zero, and
+            # therefore the committed prediction, whenever the switch is off.
+            qa = self._d249_queued_ahead_tokens(obs)
+            p = self._p_warm_cold(int(est.get(sid, b) or b), b, qa)
             if p is None:
                 self.stats["state_skipped_unpriced"] += 1
                 continue

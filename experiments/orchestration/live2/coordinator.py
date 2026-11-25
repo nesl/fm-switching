@@ -59,6 +59,8 @@ import release_recheck as RR                                            # noqa: 
 # ---- END D179 (4) -----------------------------------------------------------------------------
 # ---- D179 (1) to (3) SHARE ADMISSION (session A), import. BEGIN --------------------------------
 import share_admission as SA                                             # noqa: E402
+import d249_queue_visibility as QV                                       # noqa: E402
+import d261_cold_unlatch as CU                                           # noqa: E402
 from share_capacity import FLOORS_TOKENS as SCAP_FLOORS                  # noqa: E402
 from share_capacity import W_MAX_TOKENS as SCAP_W_MAX                    # noqa: E402
 # ---- END D179 (1) to (3) ----------------------------------------------------------------------
@@ -347,6 +349,21 @@ class Live2Coordinator:
         # thousands.
         self._share_admission = SA.arm_enables(arm)
         self._w = SA.WTracker()
+        # ---- D249 (a): PUBLISH THE IN-FLIGHT WORK INTO THE OBSERVATION. ARM-SCOPED, DEFAULT OFF.
+        # The rows are built from W's OWN tracked set (`SA.WTracker.items`), joined to the live
+        # submissions for the device and the deadline. W is the right register: submit to first
+        # token, uncached PROMPT tokens, which is the regressor the D162 queue coefficient was
+        # fitted on. `_uncached_in_flight` is the WRONG one here and is not read by this path.
+        self._d249_queue_visibility = QV.arm_enables(arm)
+        # ---- D261 (user ruling 2026-11-25 item 2): A REJECTION IS NOT PROOF OF COLD.
+        # ARM-SCOPED, DEFAULT OFF, read from the INSTANCE exactly as D249's switch is. It is
+        # meaningless without the belief corrector in APPLY mode, because the provisional mark is
+        # only ever written where the corrector has already applied a demotion, so this flag is
+        # ANDed with `_belief_apply` below rather than being allowed to look live on a cell where
+        # nothing can mark anything. (`_belief_apply` is assigned further down this method, so the
+        # conjunction is written at each use site rather than here.)
+        self._d261_cold_unlatch = CU.arm_enables(arm)
+        self._d261_unlatch_log: List[Dict[str, Any]] = []
         self._share_held_instants: Dict[str, set] = {t: set() for t in SA.TYPES}
         self._share_events: List[Dict[str, Any]] = []
         # ---- END D179 (1) to (3) block --------------------------------------------------------
@@ -573,6 +590,10 @@ class Live2Coordinator:
         # observation, so the instant deadline and the built-prefix size the arm reads describe
         # the same state the observation does. It is O(devices + sessions) per period.
         self._roster(t)
+        # D249 (a): refreshed in the same place and for the same reason the roster is - the arm
+        # must read an in-flight set that describes the SAME instant as its observation.
+        if self._d249_queue_visibility:
+            self.st.inflight_work = self._d249_inflight_rows(t)
         obs = self.st.observation(t, epoch if epoch in _EPOCHS else "tick",
                                   reads_device_answer=self.reads_device)
         k0 = self._candidates_counter()
@@ -598,6 +619,57 @@ class Live2Coordinator:
             # a submission made OUTSIDE an epoch (a chained recall released by a completion in
             # `_settle`) is stamped at the instant it is made, not charged this epoch's delay
             self._epoch_wall0 = None
+
+    def _d249_inflight_rows(self, now: float) -> Tuple[Any, ...]:
+        """D249 (a): one `InFlightWork` row per DEADLINE request the engine is already working on.
+
+        THE TOKEN REGISTER IS W, NOT `_uncached_in_flight`. The loop iterates `self._w.items()`,
+        so every row's `uncached_tokens` is the number W was given at submit, and a request that
+        has left W (first token seen, or settled) has no row. `_uncached_in_flight` drains at
+        COMPLETION and so includes decode: it would overstate the prefill queue, which is the one
+        register error this field exists to avoid (`coordinator.py:1143-1150`).
+
+        BACKGROUND WORK IS PUBLISHED WITH `has_deadline = False`. A piece, a whole or a touch has
+        no deadline of its own (D179 (3)), so it cannot be a harm ROW: a row needs a slack to
+        lose. Its tokens ARE queued ahead of everything else, so the row is published and the
+        planner counts its tokens and never values its slack. Dropping it would understate the
+        queue, which is the unsafe direction.
+
+        THE DEADLINE IS THE REQUEST'S OWN, read from the opportunity it was released for, which is
+        what the D249 draft requires ("measured against EACH REQUEST'S OWN DEADLINE SLACK, not
+        against a single global budget"). A request whose opportunity is gone keeps a row with
+        `slack_s` carried from its own submission instant plus its type's committed deadline, and
+        the fallback is counted so a run can tell how many rows used it.
+        """
+        from interface import InFlightWork                                 # noqa: PLC0415
+        subs = {str(s.request_id): s for _f, s in self.futures}
+        rows: List[Any] = []
+        for rid, qtype, unc, background in self._w.items():
+            sub = subs.get(str(rid))
+            if sub is None:
+                # tracked by W and not in `futures`: it has settled this period and its row would
+                # describe work that is no longer queued. Counted, never guessed at.
+                self.counts["d249_rows_skipped_not_in_flight"] += 1
+                continue
+            opp = self.st.opps.get(str(sub.opportunity_id)) if sub.opportunity_id else None
+            if background:
+                slack, has_dl = 0.0, False
+                self.counts["d249_rows_background_no_deadline"] += 1
+            elif opp is not None:
+                slack, has_dl = float(opp.deadline_abs()) - float(now), True
+                self.counts["d249_rows_deadline_from_opportunity"] += 1
+            else:
+                slack = (float(sub.sent_s) + float(SA.DEADLINE_S.get(qtype, 0.0))
+                         - float(now))
+                has_dl = True
+                self.counts["d249_rows_deadline_from_submission_fallback"] += 1
+            rows.append(InFlightWork(request_id=str(rid), device_id=str(sub.device_id),
+                                     qtype=str(qtype), kind=str(sub.kind),
+                                     uncached_tokens=int(unc), slack_s=float(slack),
+                                     has_deadline=bool(has_dl)))
+        self.counts["d249_rows_published"] += len(rows)
+        self.counts["d249_publish_periods"] += 1
+        return tuple(rows)
 
     def _priority_for(self, kind, device_id, session_id, opportunity_id) -> Dict[str, Any]:
         """vllm-priority: the priority the arm set for this item, if any (monitor by stream, recall
@@ -996,6 +1068,23 @@ class Live2Coordinator:
                                    latency_ms=dt_ms, preds=preds, mix=mix)
                 continue
             if ra.decision in ("DEVICE", "REJECT"):
+                # D261 half 2, THE FIX (user ruling 2026-11-25 item 2). A REJECT must not leave
+                # standing the untested cold belief that produced it: the rejection sends nothing,
+                # so nothing re-warms the prefix AND nothing produces the next telemetry reading,
+                # and the next question on this session is rejected for the same reason. Clearing
+                # the provisional mark here restores the belief to the last positively evidenced
+                # tier, which `cstate.ClusterState.observation` reads back as
+                # `RecallQuery.readiness` and `hybrid/hybrid_arm.py` reads as the feasibility
+                # estimate. REJECT only: `DEVICE` is an arm choosing the device answer, not a
+                # feasibility rejection, and it is not what the diagnosis traced.
+                if (self._d261_cold_unlatch and self._belief_apply
+                        and ra.decision == "REJECT" and o.session_id):
+                    _us = self.st.sessions.get(o.session_id)
+                    _ur = CU.clear_on_reject(_us, t) if _us is not None else None
+                    if _ur is not None:
+                        self.counts["d261_cold_unlatched"] += 1
+                        if len(self._d261_unlatch_log) < 2000:
+                            self._d261_unlatch_log.append(dict(_ur, query_id=ra.query_id))
                 o.state = "declined"
                 o.served_at = (o.t_event + self._device_wait_s(o) if self.reads_device
                                else t)
@@ -1949,6 +2038,14 @@ class Live2Coordinator:
                         _s.belief, _s.last_touch_s = _snap
                         if _bu.changed:
                             self.counts["belief_corrections_observed_only"] += 1
+                    elif self._d261_cold_unlatch:
+                        # D261 half 1, and it runs ONLY where the correction was APPLIED: a
+                        # demotion to cold from a SINGLE zero is recorded as PROVISIONAL together
+                        # with the tier it came from, and ANY later reading on this session
+                        # settles it. This is the only write of `cold_provisional_from`.
+                        _cu = CU.note_telemetry(_s, ct, _bu.before, _bu.after, now=t)
+                        if _cu != "none":
+                            self.counts["d261_cold_" + _cu] += 1
             done_s = sub.sent_s + (r["total_s"] * self.speed if r.get("total_s") else 0.0)
             first_s = (sub.sent_s + r["ttft_s"] * self.speed) if r.get("ttft_s") else None
             _sp = self._released_prefills.get(sub.request_id)

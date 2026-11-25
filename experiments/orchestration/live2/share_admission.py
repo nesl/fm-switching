@@ -136,6 +136,17 @@ class WTracker:
         return {"w_by_type": dict(self._w), "w_background_by_type": dict(self._bg),
                 "w_total": self.total(), "tracked_requests": len(self._per_request)}
 
+    def items(self) -> Tuple[Tuple[str, str, int, bool], ...]:
+        """D249 (a): the tracked set itself, as (request_id, qtype, uncached, background).
+
+        READ-ONLY and a COPY: the tuple cannot be used to mutate `_per_request`, so publishing W
+        into the observation cannot disturb the resource it reports. This is the accessor D249 (a)
+        needs, and it exists so the published rows carry W's OWN uncached numbers rather than a
+        second count derived somewhere else; two similar numbers under one name is how an
+        in-flight total drifts, which `on_submit`'s comment records.
+        """
+        return tuple((rid, v[0], int(v[1]), bool(v[2])) for rid, v in self._per_request.items())
+
 
 def allowed(*, qtype: str, uncached: int, kind: str, tracker: WTracker,
             pending_by_type: Optional[Dict[str, int]] = None,
