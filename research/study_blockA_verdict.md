@@ -260,6 +260,37 @@ s6 cell rather than from the rows, and it used robot CLOUD ON-TIME, the secondar
 at s5 and s6, TIED at s7 and DOWN at 1x s4. The two metrics disagree in sign on the same cells, which is
 why the metric must be named before the direction.**
 
+## THE 1x CELLS, AND WHY THE SIGN CHANGE IS CONFOUNDED RATHER THAN A MEMORY EFFECT
+
+**Block D's `-notouch` dashcam deltas against their same-seed comparators, with s7 still to land:**
+```
+1x s4  +245  (dose 2,633)   SAME-CODE pair, c6a83f0eaf3d: block D's ONLY stratum-A pair
+1x s5   +35  (dose   175)   STRATUM B, comparator f73fb3e4e5c9
+1x s6   -12  (dose   406)   STRATUM B, comparator 29c42039ad11
+```
+**So across six cells the dashcam delta is 4 POSITIVE and 2 NEGATIVE, ranging 0.10 to 3.17 percent of about
+11,780 instants.**
+*** THE SIGN CHANGE BETWEEN kv0.5r AND 1x AT s5 AND s6 IS NOT A MEMORY EFFECT, AND MUST NOT BE WRITTEN AS
+ONE. *** **The kv0.5r deltas (-234, +146) are SAME-CODE pairs; the 1x deltas (+35, -12) are STRATUM B
+against ORIGINAL comparators running TWO DIFFERENT OLDER CODE STATES. So each apparent flip changes TWO
+THINGS AT ONCE: the memory condition AND the comparator's code.** **The measured code-delta bound is 29 to
+310 pooled dashcam instants, which COVERS BOTH 1x DELTAS ENTIRELY, so a comparator code change alone could
+produce them.**
+**The supported statement is therefore: "the dashcam delta's sign is NOT STABLE ACROSS THE CELLS WE HAVE,
+and the two condition-to-condition sign changes COINCIDE WITH A COMPARATOR CODE CHANGE, so memory and code
+are CONFOUNDED."** **It is NOT "the sign depends on the memory condition".**
+*** AND THE SEPARATING COMPARISON DOES NOT EXIST IN THE DATA: no seed has a clean same-code pair at BOTH
+conditions. Only 1x s4 is same-code, the kv0.5r s4 `-notouch` cell ran on tree e849b005af8d (functionally
+same-code, with the diff named), and s5, s6 and s7 are stratum B at 1x. s7 will not separate them either,
+because its 1x comparator is also an original. ***
+**BLOCK D CANNOT BE POOLED ACROSS SEEDS**, because its three stratum-B comparators are three different
+pieces of code: it is ONE CLEAN PAIR plus THREE PAIRS THAT ARE EACH INDIVIDUALLY INTERPRETABLE AND NOT
+COMPARABLE TO ONE ANOTHER.
+**A third reading of these rows is withdrawn here. "The sign reverses between memory conditions" was a
+CONFOUND, asserted without naming the alternative explanation that was stated in the same message that
+supplied the delta. That is a Step 5 failure specifically: the alternative was not merely available, it had
+already been given to me.**
+
 ## What this does NOT establish
 
 - **No settled finding for either arm.** `-stateoff` clears the bar at two of three seeds and declines into
