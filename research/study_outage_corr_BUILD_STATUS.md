@@ -25,6 +25,45 @@ detecting exactly the 5 dark devices.**
 branch issues rather than only reorders**, and it is the kind of check that turns an absent link into a
 design.
 
+## ITEM D's OWED PROOF IS CLOSED: THE 1,200 SECOND OUTAGES-OFF IDENTITY PASSES, WITH A POSITIVE CONTROL AT THE SAME LENGTH
+
+**The one proof this file listed as owed is done. Nothing is now owed on the build.**
+```
+posted cell, seed 4, n16, 1200 s, 40:40:20, lh_req, ss2, epg, per-frame, rq30
+                            rows      digest (first 32)                  element-by-element diff
+covex-v6-fair-final        14,539    5a03c2807da3681a64bf19fc8524dd0a    (the comparator)
+covex-v6-fair-final-outage 14,539    5a03c2807da3681a64bf19fc8524dd0a    IDENTICAL, first_diff_index null
+...-outage-fifo            14,539    5a03c2807da3681a64bf19fc8524dd0a    IDENTICAL, first_diff_index null
+POSITIVE CONTROL  llf      14,075    961be8fe4942d86b9c6c690f0cf973a1    DIFFERS, first diff at index 0
+```
+**Proved in TWO configurations, with the planner's wall-clock cutoff ON and OFF**, because every committed
+digest proof in live2 patches it off while the 300 s proof had it on, and at 1,200 s a wall-clock cutoff is
+a real nondeterminism risk. **Both configurations give the same digests, so the cutoff changed no decision
+at this length, which retires that confound rather than leaving it as a caveat.**
+**Non-vacuity, three ways:** the runner reproduced the **committed 300 s** rung-3 digest `edb7e948...` and
+2,814 rows exactly before any 1,200 s cell ran; the positive control differs at row 0, in KIND
+(`release_piece` at t=0.1 against `release_monitor` at t=6.2); and **the new arms demonstrably ran** -
+`outage_last_arrival_reads` is **11,996** on both, up from 2,996 at 300 s and scaling with the cell, while
+rung 3 and `llf` publish that counter **ABSENT, not zero**, with `live2_outage_order` read back typed `str`
+as `'planner_score'` and `'first_reconnected'`.
+**Why the identity holds structurally rather than by luck:** `arms_v6outage.py:386` returns `act` BY
+IDENTITY when no robot has reconnected, and at 1,200 s `outage_reconnects_detected` is **0** because no
+natural arrival gap reaches the measured 20.0 s threshold. **So the read site fires 11,996 times and
+correctly changes nothing.**
+**A useful operational finding: the prior attempt did not finish because `proof_identity.py` runs SEVEN
+cells in ONE process. Split one cell per process, a 1,200 s cell is 180 to 185 s alone and the whole
+eight-cell proof is about 27 minutes.**
+**REGISTER, stated rather than buried: the 1,200 s rung-3 digest is a NEW number with no committed 1,200 s
+counterpart to check it against, so its control is INTERNAL** - the runner reproduces the committed 300 s
+digest, and the 1,200 s value reproduced across two independent processes in two configurations.
+**One EXTERNAL corroboration does exist and is worth recording: a different harness computed
+`987c2b98784d2dc7` for the same arm at the same length over the SAME 14,539 ROWS.** **So the ROW COUNT is
+independently confirmed across harnesses while the DIGEST is harness-specific** - which is the register
+distinction that caused a false alarm earlier in this study and is now pinned down.
+
+*** NEITHER BLOCKER IS TOUCHED BY THIS. The outages-ON behaviour at 1,200 s remains proved only at 700 s,
+and nothing here is evidence about the planner's ranking. ***
+
 ## *** BLOCKER 1: THE ORDERING IS A PURE PERMUTATION. THE TWO ARMS' FULL DECISION-ROW MULTISETS ARE IDENTICAL. ***
 
 The ordering **fires**: 22 of 22 orderable epochs differ from FIFO, digests differ, 61 positional row
