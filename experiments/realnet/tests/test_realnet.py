@@ -279,6 +279,248 @@ def test_integration(slice_root: Path, port: int, devices, run_s: float, speed: 
           % (lat.get("p50_ms"), lat.get("p99_ms"), lat.get("max_ms"), lat.get("gate_pass")))
 
 
+def test_device_sends_are_schema_valid(slice_root: Path, devs):
+    """GATE 2b -- the gap the first review found.
+
+    The old gates checked that the SERVER could build a valid event. They never checked that
+    the DEVICE sends one. `_send_passthrough` used to forward the raw trace record, which
+    carries the generator's own bookkeeping (duration_s, join_offset_s, joined_part_way,
+    source_session on session_start) that the wire schema does not define. It survived only
+    because the server rebuilt from named fields and discarded the rest -- and
+    `live2/bridge.py` calls SC.parse() and is stricter than that.
+
+    This gate captures every message the device would put on the wire and validates it.
+    """
+    print("\n[agent] gate 2b: every OUTBOUND device message is schema-valid")
+    import device_agent as DA2
+
+    captured = []
+
+    class FakeWire:
+        def __init__(self):
+            self.bytes_sent = 0
+            self.n_sent = 0
+
+        def send(self, msg, blob=None):
+            captured.append(msg)
+            return 0
+
+        def stats(self):
+            return dict(n_sent=0, n_recv=0, bytes_sent=0, bytes_recv=0)
+
+    # Drive the senders directly, with no socket and no server.
+    for d in devs[:4]:
+        ag = DA2.DeviceAgent.__new__(DA2.DeviceAgent)
+        ag.dir = slice_root / d
+        ag.meta = json.loads((ag.dir / "slice_meta.json").read_text())
+        ag.device_id = str(ag.meta["device_id"])
+        ag.records = [json.loads(l) for l in open(ag.dir / "trace.jsonl") if l.strip()]
+        ag.profile = DA2.Profile(ag.dir / "device_answers.jsonl")
+        ag.frames = DA2.FrameStore(None, True)
+        fw = FakeWire()
+        ag.wire = fw
+        ag.t0 = time.monotonic()
+        ag.speed = 1.0
+        ag._stop = threading.Event()
+        sent = []
+
+        class CapturingUplink:
+            def offer(self, kind, ref, msg, blob=None):
+                sent.append(msg)
+                return 0.0
+
+        ag.uplink = CapturingUplink()
+        deadlines = []
+        for rec in ag.records:
+            k = rec["kind"]
+            try:
+                if k == "monitor_opportunity":
+                    ag._send_monitor(rec, deadlines)
+                elif k == "history_batch":
+                    ag._send_history(rec)
+                elif k == "recall_question":
+                    ag._send_recall(rec, deadlines)
+                else:
+                    ag._send_passthrough(rec)
+            except Exception as e:
+                check("%s builds every outbound event (%s)" % (d, k), False,
+                      "%s: %s" % (type(e).__name__, e))
+                break
+        else:
+            allmsgs = captured + sent
+            bad = []
+            for m in allmsgs:
+                kind = m.get("kind")
+                want = EC.OFFLINE_FIELDS.get(kind)
+                if want is None:
+                    bad.append("unknown kind %r" % kind)
+                    continue
+                extra = [f for f in m if f != "kind" and f not in want]
+                if extra:
+                    bad.append("%s carries %s" % (kind, extra))
+            check("%s: %d outbound messages, none off-schema" % (d, len(allmsgs)),
+                  not bad, "; ".join(bad[:3]))
+        captured.clear()
+
+
+def test_uplink_queue():
+    """The FIFO uplink: queueing delay recorded SEPARATELY, per links.py."""
+    print("\n[uplink] gate: FIFO queue records queue_s, never hides it")
+    import device_agent as DA3
+
+    class SlowWire:
+        """A wire that takes a fixed time per send, standing in for a shaped link."""
+
+        def __init__(self, per_send: float):
+            self.per_send = per_send
+            self.sent = []
+
+        def send(self, msg, blob=None):
+            time.sleep(self.per_send)
+            self.sent.append((msg, len(blob) if blob else 0))
+
+    t0 = time.monotonic()
+    clock = lambda: time.monotonic() - t0          # noqa: E731
+    w = SlowWire(0.02)
+    up = DA3.UplinkSender(w, clock)
+    up.start()
+    # Offer 5 transfers back-to-back. Each takes 20 ms, so later ones MUST queue.
+    for i in range(5):
+        up.offer("monitor_frame", "opp%d" % i, {"kind": "monitor_frame", "i": i},
+                 blob=b"x" * 1000)
+    up.drain_and_stop(timeout=10.0)
+    check("every offered transfer left the uplink", len(w.sent) == 5,
+          "sent=%d" % len(w.sent))
+    check("no sender error", up.err is None, str(up.err))
+    check("one log row per transfer", len(up.log) == 5, "rows=%d" % len(up.log))
+    check("FIFO order preserved",
+          [m[0]["i"] for m in w.sent] == list(range(5)))
+    qs = [r["queue_s"] for r in up.log]
+    check("later transfers record a NON-ZERO queue_s (delay not hidden)",
+          max(qs) > 0.01, "max queue_s=%.4f" % max(qs))
+    check("queue_s is monotonic non-decreasing for a saturated uplink",
+          qs == sorted(qs), str([round(q, 4) for q in qs]))
+    check("occupancy is recorded separately from queueing",
+          all(r["occupancy_s"] > 0 for r in up.log))
+    st = up.stats()
+    check("stats report n, busy_s and queue percentiles",
+          st["n"] == 5 and st["busy_s"] > 0 and st["queue_max"] is not None)
+    # A transfer must never block the OFFER side.
+    w2 = SlowWire(0.05)
+    up2 = DA3.UplinkSender(w2, clock)
+    up2.start()
+    a = time.monotonic()
+    for i in range(10):
+        up2.offer("monitor_frame", "o%d" % i, {"kind": "monitor_frame"}, blob=b"y" * 100)
+    offer_elapsed = time.monotonic() - a
+    check("offering 10 transfers does not block the replay loop",
+          offer_elapsed < 0.05, "offer took %.3f s" % offer_elapsed)
+    up2.drain_and_stop(timeout=10.0)
+
+
+def test_cell_config():
+    """A cell is one declarative object, and bad cells are refused."""
+    print("\n[config] cell configs resolve, and guards refuse bad cells")
+    import cell_config as CC
+    import tempfile as TF
+
+    here = Path(__file__).resolve().parent.parent
+    for name in ("cell_c_5g", "cell_d_wifi6", "cell_e_unshaped", "cell_smoke_loopback"):
+        p = here / "cells" / (name + ".json")
+        if not p.exists():
+            check("cells/%s.json exists" % name, False)
+            continue
+        try:
+            r = CC.load(p)
+            check("%s resolves (%d real + %d emulated)"
+                  % (name, r["n_real"], r["n_emulated"]), True)
+        except Exception as e:
+            check("%s resolves" % name, False, "%s: %s" % (type(e).__name__, e))
+
+    trace = (here / ".." / ".." / "results" / "orchestration" / "live2" / "frozen_test"
+             / "traces" / "seed4_n16_1200s_A_r40-40-20_lh_req_ss2").resolve()
+    base = dict(name="t", trace_dir=str(trace), run_s=1200.0,
+                devices=[dict(device_id="dash000", host="orin-1", role="real",
+                              profile="unshaped")])
+
+    def refuses(label, mutate):
+        c = json.loads(json.dumps(base))
+        mutate(c)
+        p = Path(TF.mkdtemp()) / "c.json"
+        p.write_text(json.dumps(c))
+        try:
+            CC.load(p)
+            check("refuses: " + label, False, "it was ACCEPTED")
+        except CC.ConfigError:
+            check("refuses: " + label, True)
+        except Exception as e:
+            check("refuses: " + label, False, "wrong error %s" % type(e).__name__)
+
+    refuses("run_s shorter than the trace", lambda c: c.update(run_s=60.0))
+    refuses("mode B (not implemented)", lambda c: c.update(mode="B"))
+    refuses("unknown profile", lambda c: c["devices"][0].update(profile="nope"))
+    refuses("host with no measured floor",
+            lambda c: c["devices"][0].update(host="mystery-box"))
+    refuses("missing a required key", lambda c: c.pop("run_s"))
+
+    # The pluggability claim: a new profile AND a new host, from a FILE, no code edit.
+    import shutil
+    d = Path(TF.mkdtemp())
+    src = here / "cells" / "profiles_example.json"
+    if src.exists():
+        shutil.copy(src, d / "profiles_example.json")
+        c = dict(name="plug", trace_dir=str(trace), run_s=1200.0,
+                 profiles_file="profiles_example.json",
+                 devices=[dict(device_id="dash000", host="orin-5", role="real",
+                               profile="wifi6-quiet-2client")])
+        p = d / "c.json"
+        p.write_text(json.dumps(c))
+        try:
+            r = CC.load(p)
+            check("a NEW profile and host load from a config file, no code edit",
+                  r["devices"][0]["shaping"]["feasible"])
+        except Exception as e:
+            check("a NEW profile and host load from a config file, no code edit", False,
+                  "%s: %s" % (type(e).__name__, e))
+
+
+def test_shaping_actuation():
+    """Shaping emits real commands and refuses to apply them by default."""
+    print("\n[shaping] commands are emitted; applying is refused unless confirmed")
+    cmds = MP.tc_commands("5g-committed", "orin-1", "eth0")
+    check("tc commands are produced", len(cmds) >= 2, "n=%d" % len(cmds))
+    flat = " ".join(" ".join(c) for c in cmds)
+    check("netem delay is target minus floor, halved for one-way",
+          "netem delay 21.317ms" in flat, flat[:120])
+    check("the uplink rate is capped", "tbf" in flat and "13600kbit" in flat)
+    r = MP.apply("5g-committed", "orin-1", "eth0", confirm=False)
+    check("a dry run applies NOTHING", r["applied"] is False and "refused" in r)
+
+    seen = []
+    r2 = MP.apply("5g-committed", "orin-1", "eth0", confirm=True,
+                  runner=lambda c: (seen.append(c), 0)[1])
+    check("confirm=True runs every command", r2["applied"] and len(seen) == len(cmds))
+    check("an infeasible host is refused before any command is built",
+          _refuses_infeasible())
+    m = MP.mnwifi_params("wifi6-8clients", "orin-4")
+    check("Mininet-WiFi params carry bw, delay and provenance",
+          m["bw"] and m["delay"] and m["provenance"])
+    check("orin-4's MTU 1466 is carried into the params", m["mtu"] == 1466)
+
+
+def _refuses_infeasible():
+    MP.PROFILES["_imposs"] = dict(rtt_ms=1.0, uplink_mbps=1.0, downlink_mbps=1.0,
+                                  loss_pct=0.0, jitter_ms=0.0, one_way=False,
+                                  provenance="test")
+    try:
+        MP.tc_commands("_imposs", "orin-1", "eth0")
+        return False
+    except ValueError:
+        return True
+    finally:
+        del MP.PROFILES["_imposs"]
+
+
 def test_host_timing_control():
     print("\n[control] the host's own scheduler tail, no sockets, no coordinator")
     t0 = time.monotonic()
@@ -326,6 +568,11 @@ def main(argv=None):
     else:
         print("\n[slicer/agent] SKIPPED: no --trace-dir given")
 
+    test_shaping_actuation()
+    test_cell_config()
+    test_uplink_queue()
+    if slice_root and devs:
+        test_device_sends_are_schema_valid(slice_root, devs)
     if slice_root and not a.skip_integration:
         test_integration(slice_root, a.port,
                          ["dash000", "robo000", "asst000"], a.run_s, a.speed)

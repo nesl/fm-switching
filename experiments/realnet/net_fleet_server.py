@@ -131,10 +131,16 @@ class NetFleetServer:
         self.n_ticks = 0
         self.n_replies = 0
         self.n_unroutable = 0
-        self.events_seen: List[Dict[str, Any]] = []
-        self.arrivals: List[Dict[str, Any]] = []
+        self.short_run = False
+        # F6: arrivals are STREAMED, not buffered. At 16 devices x 1200 s the buffered form
+        # was ~30k dicts (20-40 MB) and grew with run length; a 10x longer run would be
+        # 300-400 MB. `events_seen` keeps only counts now.
+        self.events_by_kind: Dict[str, int] = {}
+        self.n_arrivals = 0
         self.errors: List[str] = []
         self._lsock: Optional[socket.socket] = None
+        self._arrivals_fh = None
+        self._out_dir: Optional[Path] = None
 
     # ---- clock
     def now(self) -> float:
@@ -178,6 +184,12 @@ class NetFleetServer:
                                         rtt_ms=msg.get("rtt_ms"),
                                         start_t=msg.get("start_t")))
 
+    def _write_arrival(self, row: Dict[str, Any]) -> None:
+        self.n_arrivals += 1
+        if self._arrivals_fh is not None:
+            self._arrivals_fh.write(json.dumps(row, sort_keys=True,
+                                               separators=(",", ":")) + "\n")
+
     def _drop(self, c: DeviceConn) -> None:
         try:
             c.wire.close()
@@ -189,7 +201,31 @@ class NetFleetServer:
             del self.by_device[c.device_id]
 
     # ---- phase 2: release the barrier and run
+    def check_run_s(self, trace_run_s: Optional[float],
+                    allow_short: bool = False) -> None:
+        """F5: a --run-s below the trace's own run_s silently truncates the cell.
+
+        The frozen trace declares `run_s = 1200.0`. Passing a smaller value drops every
+        record after it and produces a partial cell that looks complete. That is how the
+        60 s development runs worked, which is exactly why it needs a guard rather than a
+        convention.
+        """
+        if trace_run_s is None:
+            return
+        if abs(float(trace_run_s) - self.run_s) < 1e-6:
+            return
+        msg = ("--run-s %.3f disagrees with the trace's run_s %.3f; a short run silently "
+               "truncates the cell" % (self.run_s, float(trace_run_s)))
+        if not allow_short:
+            raise ValueError(msg + " (pass allow_short=True / --allow-short-run to accept)")
+        self.errors.append("SHORT RUN ACCEPTED: " + msg)
+        self.short_run = True
+
     def run(self, out_dir: Optional[Path] = None) -> Dict[str, Any]:
+        if out_dir is not None:
+            self._out_dir = Path(out_dir)
+            self._out_dir.mkdir(parents=True, exist_ok=True)
+            self._arrivals_fh = open(self._out_dir / "arrivals.jsonl", "w")
         self.accept_until_quorum()
         # Feed every device_register to the coordinator at t=0, then release the fleet.
         self.t0 = time.monotonic()
@@ -273,11 +309,11 @@ class NetFleetServer:
         # (2) t_arrive IS STAMPED HERE, on the run clock. This is what removes the need for
         # cross-host clock sync: the device's own clock never reaches the coordinator.
         t = self.now()
-        self.arrivals.append(dict(device_id=c.device_id, kind=kind,
-                                  opportunity_id=msg.get("opportunity_id"),
-                                  t_arrive=round(t, 6),
-                                  t_capture=msg.get("t_capture"),
-                                  bytes=(len(blob) if blob else 0)))
+        self._write_arrival(dict(device_id=c.device_id, kind=kind,
+                                 opportunity_id=msg.get("opportunity_id"),
+                                 t_arrive=round(t, 6),
+                                 t_capture=msg.get("t_capture"),
+                                 bytes=(len(blob) if blob else 0)))
         ev = self._to_wire_event(msg, t, blob)
         if ev is None:
             return
@@ -335,9 +371,7 @@ class NetFleetServer:
 
     def _to_coord(self, ev: Dict[str, Any], t: float) -> None:
         self.n_events += 1
-        self.events_seen.append(dict(kind=ev["kind"], device_id=ev.get("device_id"),
-                                     opportunity_id=ev.get("opportunity_id"),
-                                     t=round(t, 6)))
+        self.events_by_kind[ev["kind"]] = self.events_by_kind.get(ev["kind"], 0) + 1
         for reply in (self.coord.on_event(ev, t) or ()):
             self._route(reply, t)
 
@@ -357,6 +391,13 @@ class NetFleetServer:
             c.done = True
 
     def _finish(self, out_dir: Optional[Path]) -> Dict[str, Any]:
+        if self._arrivals_fh is not None:
+            try:
+                self._arrivals_fh.flush()
+                self._arrivals_fh.close()
+            except Exception:
+                pass
+            self._arrivals_fh = None
         for c in list(self.conns):
             try:
                 c.wire.close()
@@ -388,6 +429,9 @@ class NetFleetServer:
             t0_unix=self.t0_unix,
             n_events=self.n_events, n_ticks=self.n_ticks, n_replies=self.n_replies,
             n_unroutable_replies=self.n_unroutable,
+            events_by_kind=dict(sorted(self.events_by_kind.items())),
+            n_arrivals=self.n_arrivals,
+            short_run=self.short_run,
             lateness=lat,
             n_errors=len(self.errors), errors=self.errors[:50],
             per_device={c.device_id: dict(n_events=c.n_events, n_replies=c.n_replies,
@@ -405,9 +449,6 @@ class NetFleetServer:
             out_dir.mkdir(parents=True, exist_ok=True)
             (out_dir / "server_meta.json").write_text(
                 json.dumps(summary, indent=2, sort_keys=True, default=str) + "\n")
-            with open(out_dir / "arrivals.jsonl", "w") as fh:
-                for a in self.arrivals:
-                    fh.write(json.dumps(a, sort_keys=True, separators=(",", ":")) + "\n")
         return summary
 
 
@@ -456,6 +497,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--tick-s", type=float, default=DEFAULT_TICK_S)
     ap.add_argument("--drain-s", type=float, default=5.0)
     ap.add_argument("--barrier-timeout-s", type=float, default=120.0)
+    ap.add_argument("--mode", default="A", choices=("A", "B"),
+                    help="A = frames pushed with the bytes. B (pull) is NOT IMPLEMENTED: "
+                         "no monitor_offer is ever sent, so the coordinator could never "
+                         "issue a pull_request and the run would silently carry no frames")
+    ap.add_argument("--trace-run-s", type=float, default=None,
+                    help="the trace's own run_s; --run-s must match it (F5)")
+    ap.add_argument("--allow-short-run", action="store_true",
+                    help="accept a --run-s shorter than the trace, producing a PARTIAL cell")
     ap.add_argument("--coordinator", default="stub", choices=("stub",),
                     help="stub only for now; the real bridge lands at integration step 4")
     ap.add_argument("--stub-capacity", type=float, default=8.0)
@@ -463,9 +512,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--out", default=None)
     a = ap.parse_args(argv)
 
+    if a.mode == "B":
+        print("--mode B (pull) is not implemented: this server never sends monitor_offer, so "
+              "no pull_request can be answered and the cell would carry no frames. Refusing "
+              "rather than running an empty cell.", file=sys.stderr)
+        return 2
     coord = build_stub(a.stub_capacity, a.stub_service_s)
     srv = NetFleetServer(coord, a.expect_devices, a.run_s, a.port, a.tick_s,
                          a.drain_s, a.barrier_timeout_s)
+    try:
+        srv.check_run_s(a.trace_run_s, a.allow_short_run)
+    except ValueError as e:
+        print(str(e), file=sys.stderr)
+        return 2
     summ = srv.run(Path(a.out) if a.out else None)
     print(json.dumps(summ, indent=2, sort_keys=True, default=str))
     ok = summ["lateness"]["gate_pass"] and summ["n_errors"] == 0

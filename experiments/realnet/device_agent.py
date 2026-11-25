@@ -25,6 +25,7 @@ import argparse
 import json
 import os
 import random
+import queue as _queue
 import socket
 import sys
 import threading
@@ -33,6 +34,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import events_check as EC  # noqa: E402
 import wire as W  # noqa: E402
 
 # Kinds in a trace slice, and the wire event each becomes.
@@ -110,12 +112,111 @@ class FrameStore:
                     synthetic_mode=self.synthetic, missing_sample=list(self._miss))
 
 
+class UplinkSender:
+    """ONE uplink per device, drained FIFO by a thread, with the queueing delay RECORDED.
+
+    WHY THIS EXISTS. `live2/fleet/links.py` defines the semantics this harness has to
+    reproduce:
+
+      "ONE UPLINK PER DEVICE, SHARED SERIALLY. Monitoring frames and history batches contend
+       for it FIFO in the order they are offered: a transfer starts at
+       max(offer_time, uplink_free_at) and THE QUEUEING DELAY IT SUFFERED IS RECORDED, NEVER
+       HIDDEN INSIDE THE TRANSFER TIME."
+
+    Calling a blocking `sendall` from the replay loop violates both halves of that. It stalls
+    the replay (so the offered load stops matching the trace: at the Irish 5G p10 profile,
+    0.90 Mbit/s, one 66,595 B frame serialises in 0.592 s against a 0.5 s dashcam cadence) and
+    it folds the queueing delay into the next frame's send time, losing the one quantity a
+    real-fleet run measures better than arithmetic.
+
+    So the replay loop OFFERS and never blocks; this thread drains. Per transfer it records
+    t_offer / t_start / t_done / queue_s, the same fields as `links.UplinkTransfer`.
+    """
+
+    def __init__(self, wire: "W.Wire", clock, max_queue: int = 0) -> None:
+        self.wire = wire
+        self.clock = clock                       # callable -> run-relative seconds
+        self.q: "_queue.Queue" = _queue.Queue(maxsize=max_queue)  # 0 = unbounded
+        self.log: List[Dict[str, Any]] = []
+        self.err: Optional[str] = None
+        self._stop = threading.Event()
+        self._th: Optional[threading.Thread] = None
+        self.free_at = 0.0                       # when the uplink next becomes idle
+        self.n_sent = 0
+
+    def start(self) -> None:
+        self._th = threading.Thread(target=self._drain, name="uplink")
+        self._th.daemon = True
+        self._th.start()
+
+    def offer(self, kind: str, ref: str, msg: Dict[str, Any],
+              blob: Optional[bytes] = None) -> float:
+        """Hand a transfer to the uplink. Returns t_offer. NEVER BLOCKS on the link."""
+        t_offer = self.clock()
+        self.q.put((kind, ref, msg, blob, t_offer))
+        return t_offer
+
+    def _drain(self) -> None:
+        while not self._stop.is_set():
+            try:
+                item = self.q.get(timeout=0.05)
+            except _queue.Empty:
+                continue
+            if item is None:
+                break
+            kind, ref, msg, blob, t_offer = item
+            try:
+                # FIFO: a transfer starts when the uplink is free, not when it was offered.
+                t_start = max(t_offer, self.free_at, self.clock())
+                nbytes = len(blob) if blob else 0
+                self.wire.send(msg, blob=blob)
+                t_done = self.clock()
+                self.free_at = t_done
+                self.n_sent += 1
+                self.log.append(dict(kind=kind, ref=ref, bytes=nbytes,
+                                     t_offer=round(t_offer, 6),
+                                     t_start=round(t_start, 6),
+                                     t_done=round(t_done, 6),
+                                     queue_s=round(max(0.0, t_start - t_offer), 6),
+                                     occupancy_s=round(max(0.0, t_done - t_start), 6)))
+            except Exception as e:
+                self.err = "%s: %s" % (type(e).__name__, e)
+                self._stop.set()
+                return
+            finally:
+                self.q.task_done()
+
+    def drain_and_stop(self, timeout: float = 30.0) -> None:
+        """Wait for every offered transfer to leave, then stop the thread."""
+        end = time.monotonic() + timeout
+        while not self.q.empty() and self.err is None and time.monotonic() < end:
+            time.sleep(0.02)
+        self._stop.set()
+        if self._th is not None:
+            self._th.join(timeout=5.0)
+
+    def stats(self) -> Dict[str, Any]:
+        q = sorted(t["queue_s"] for t in self.log)
+        occ = sum(t["occupancy_s"] for t in self.log)
+        if not q:
+            return dict(n=0, busy_s=0.0, queue_p50=None, queue_p99=None, queue_max=None,
+                        pending=self.q.qsize(), error=self.err)
+
+        def pc(p):
+            return q[min(len(q) - 1, int(round(p * (len(q) - 1))))]
+
+        return dict(n=len(q), busy_s=round(occ, 6),
+                    queue_p50=round(pc(0.50), 6), queue_p99=round(pc(0.99), 6),
+                    queue_max=round(q[-1], 6),
+                    pending=self.q.qsize(), error=self.err)
+
+
 class DeviceAgent:
     """Replays one slice against a StudyREAL-NET server."""
 
     def __init__(self, slice_dir: Path, host: str, port: int,
                  frames_root: Optional[Path] = None, synthetic_frames: bool = False,
-                 speed: float = 1.0) -> None:
+                 speed: float = 1.0, drain_s: float = 30.0) -> None:
         self.dir = Path(slice_dir)
         self.meta = json.loads((self.dir / "slice_meta.json").read_text())
         self.device_id = str(self.meta["device_id"])
@@ -130,12 +231,14 @@ class DeviceAgent:
         self.frames = FrameStore(frames_root, synthetic_frames)
         self.host, self.port = host, int(port)
         self.speed = float(speed)            # >1 runs the schedule faster, for tests
+        self.drain_s = float(drain_s)
         self.wire: Optional[W.Wire] = None
         self.t0 = 0.0
         self.answers: Dict[str, Dict[str, Any]] = {}
         self.log: List[Dict[str, Any]] = []
         self._stop = threading.Event()
         self._rx: Optional[threading.Thread] = None
+        self.uplink: Optional[UplinkSender] = None
         self.n_pull = 0
         self.err: Optional[str] = None
 
@@ -190,6 +293,8 @@ class DeviceAgent:
         self._rx = threading.Thread(target=self._recv_loop, name="rx")
         self._rx.daemon = True
         self._rx.start()
+        self.uplink = UplinkSender(self.wire, self.now)
+        self.uplink.start()
 
         deadlines: List[Dict[str, Any]] = []
         for rec in sorted(self.records, key=lambda r: float(r.get("t") or 0.0)):
@@ -210,8 +315,15 @@ class DeviceAgent:
             elif k in PASSTHROUGH:
                 self._send_passthrough(rec)
 
-        # Drain: wait out the longest outstanding deadline.
-        horizon = max([d["t_deadline"] for d in deadlines] or [self.now()])
+        # DRAIN, in the order the semantics require:
+        #   1. every offered transfer must actually leave the uplink;
+        #   2. then wait out the longest outstanding deadline;
+        #   3. then resolve what is left.
+        # The horizon is taken over the LAST SCHEDULED RECORD as well as the pending
+        # deadlines, so an empty deadline list cannot collapse the drain to "now" (F7).
+        self.uplink.drain_and_stop(timeout=max(30.0, self.drain_s))
+        last_t = max([float(r.get("t") or 0.0) for r in self.records] or [0.0])
+        horizon = max([d["t_deadline"] for d in deadlines] + [last_t, self.now()])
         self.sleep_until(horizon + 0.05)
         self._resolve_due(deadlines, force=True)
         try:
@@ -225,27 +337,55 @@ class DeviceAgent:
         return self._summary(st)
 
     # ---- senders
+    #
+    # EVERY outbound event is built through `events_check.make()`, which is the REPO's own
+    # `fleet/events.make()` when the repo is reachable. Forwarding a raw trace record instead
+    # ships the generator's bookkeeping onto the wire: a real `session_start` record carries
+    # duration_s, join_offset_s, joined_part_way and source_session, none of which the schema
+    # defines. The server's rebuild happened to discard them, so it worked by luck -- but
+    # `live2/bridge.py` calls `SC.parse(event)` on every event and is stricter than that, and
+    # the extra fields inflate every line on the wire.
     def _send_passthrough(self, rec: Dict[str, Any]) -> None:
-        m = {k: v for k, v in rec.items() if k != "kind"}
-        m["kind"] = rec["kind"]
-        self.wire.send(m)
+        k = rec["kind"]
+        if k == "device_register":
+            ev = EC.make("device_register", device_id=self.device_id, type=rec["type"],
+                         uplink_mbps=rec.get("uplink_mbps"), rtt_ms=rec.get("rtt_ms"),
+                         start_t=rec.get("start_t"))
+        elif k in ("session_start", "session_end"):
+            ev = EC.make(k, device_id=self.device_id, session_id=rec["session_id"],
+                         t=float(rec["t"]))
+        elif k == "history_preload":
+            # D101: NO UPLINK TIME. The frames were on cloud-side disk before the clock
+            # started, so a preload neither occupies the uplink nor queues behind anything.
+            ev = EC.make("history_preload", device_id=self.device_id,
+                         session_id=rec["session_id"],
+                         frame_refs=rec.get("frame_refs") or [],
+                         est_tokens=int(rec.get("cum_tokens")
+                                        or rec.get("est_tokens") or 0),
+                         t=float(rec["t"]))
+        else:
+            raise ValueError("passthrough does not handle %r" % k)
+        self.wire.send(ev)
 
     def _send_monitor(self, rec: Dict[str, Any], deadlines: List[Dict[str, Any]]) -> None:
         opp = str(rec["opportunity_id"])
         nb = int(rec.get("frame_bytes") or 0)
         blob = self.frames.get(str(rec.get("frame_ref") or opp), nb)
         prof = self.profile.by_opp.get(opp) or {}
-        ev = dict(kind="monitor_frame", device_id=self.device_id, opportunity_id=opp,
+        ev = dict(device_id=self.device_id, opportunity_id=opp,
                   instant_id=rec.get("instant_id") or opp,
-                  t_capture=float(rec["t"]), deadline_s=float(rec["deadline_s"]),
+                  t_capture=float(rec["t"]), t_arrive=float(rec["t"]),
+                  deadline_s=float(rec["deadline_s"]),
                   frame_ref=rec.get("frame_ref"), frame_bytes=nb)
         if prof.get("device_score") is not None:
             ev["device_score"] = float(prof["device_score"])
         for f in ("episode_id", "episode_index", "frame_refs", "episode_frames"):
             if rec.get(f) is not None:
                 ev[f] = rec[f]
-        t_send = self.now()
-        self.wire.send(ev, blob=blob)
+        # OFFERED to the uplink, not written inline: the replay loop must not block on the
+        # link (see UplinkSender).
+        t_send = self.uplink.offer("monitor_frame", opp, EC.make("monitor_frame", **ev),
+                                   blob=blob)
         deadlines.append(dict(opportunity_id=opp, kind="monitor",
                               t_capture=float(rec["t"]), t_send=t_send,
                               t_deadline=float(rec["t"]) + float(rec["deadline_s"]),
@@ -257,15 +397,16 @@ class DeviceAgent:
         blob = b""
         if nb:
             blob = self.frames.get(str(refs[0]) if refs else str(rec.get("batch_id")), nb)
-        self.wire.send(dict(kind="history_append", device_id=self.device_id,
-                            session_id=rec["session_id"], batch_id=rec["batch_id"],
-                            t_arrive=float(rec["t"]), frame_refs=refs,
-                            est_tokens=int(rec.get("cum_tokens") or rec.get("est_tokens") or 0)),
-                       blob=blob or None)
+        ev = EC.make("history_append", device_id=self.device_id,
+                     session_id=rec["session_id"], batch_id=rec["batch_id"],
+                     t_arrive=float(rec["t"]), frame_refs=refs,
+                     est_tokens=int(rec.get("cum_tokens") or rec.get("est_tokens") or 0))
+        # D75: history batches contend for the SAME single uplink as monitoring frames.
+        self.uplink.offer("history_append", str(rec["batch_id"]), ev, blob=blob or None)
 
     def _send_recall(self, rec: Dict[str, Any], deadlines: List[Dict[str, Any]]) -> None:
         opp = str(rec["opportunity_id"])
-        ev = dict(kind="recall_question", device_id=self.device_id, opportunity_id=opp,
+        ev = dict(device_id=self.device_id, opportunity_id=opp,
                   session_id=rec.get("session_id"),
                   question_id=rec.get("question_id") or opp,
                   t_ask=float(rec["t"]), t_arrive=float(rec["t"]),
@@ -273,8 +414,7 @@ class DeviceAgent:
                   question=rec.get("question"), options=rec.get("options") or [])
         if rec.get("category") is not None:
             ev["category"] = rec["category"]
-        t_send = self.now()
-        self.wire.send(ev)
+        t_send = self.uplink.offer("recall_question", opp, EC.make("recall_question", **ev))
         deadlines.append(dict(opportunity_id=opp, kind="recall",
                               t_capture=float(rec["t"]), t_send=t_send,
                               t_deadline=float(rec["t"]) + float(rec["deadline_s"]),
@@ -322,6 +462,10 @@ class DeviceAgent:
                     n_pull_requests=self.n_pull,
                     n_fallback_errors=len(errs),
                     wire=wire_stats, frames=self.frames.stats(),
+                    # D75 / links.py: the queueing delay the single uplink imposed, recorded
+                    # SEPARATELY and never folded into the transfer time.
+                    uplink=(self.uplink.stats() if self.uplink else None),
+                    send_error=(self.uplink.err if self.uplink else None),
                     recv_error=self.err)
 
     def write_log(self, out_dir: Path) -> None:
@@ -330,6 +474,10 @@ class DeviceAgent:
         with open(out_dir / ("device_log_%s.jsonl" % self.device_id), "w") as fh:
             for r in self.log:
                 fh.write(json.dumps(r, sort_keys=True, separators=(",", ":")) + "\n")
+        if self.uplink is not None:
+            with open(out_dir / ("uplink_%s.jsonl" % self.device_id), "w") as fh:
+                for r in self.uplink.log:
+                    fh.write(json.dumps(r, sort_keys=True, separators=(",", ":")) + "\n")
 
 
 def selftest(slice_dir: Path) -> int:

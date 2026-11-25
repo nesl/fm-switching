@@ -1,0 +1,14 @@
+{
+  "_comment": "Extra network profiles and host floors, merged at load time. This file is how a NEW link model or a NEW host enters the experiment WITHOUT editing mnwifi_profiles.py.",
+  "profiles": {
+    "wifi6-quiet-2client": {
+      "rtt_ms": 3.6, "uplink_mbps": 200.0, "downlink_mbps": 200.0,
+      "loss_pct": 0.0, "jitter_ms": 0.5, "one_way": true, "one_way_ms": 1.8,
+      "provenance": "Liu & Choi SIGMETRICS'23 Fig 10(d): UL CSMA/CA, 2 clients, no external contention, 1.8 ms ONE-WAY, doubled for a round trip. Jitter ASSUMED."
+    }
+  },
+  "floors": {
+    "orin-5": {"p50": 1.2, "p90": 1.6, "p99": 2.0, "stdev": 0.3, "link_mbps": 1000.0}
+  },
+  "mtu": {"orin-5": 1500}
+}

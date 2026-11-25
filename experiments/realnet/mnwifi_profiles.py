@@ -28,7 +28,8 @@ from __future__ import annotations
 
 import argparse
 import json
-from typing import Any, Dict, Optional, Sequence
+import sys
+from typing import Any, Dict, List, Optional, Sequence
 
 # Measured round-trip floors, ms (p50 / stdev), real 59,601 B payloads, 2026-11-25.
 FLOOR_RT_MS: Dict[str, Dict[str, float]] = {
@@ -143,13 +144,124 @@ def plan(profile: str, hosts: Sequence[str]) -> Dict[str, Any]:
                 infeasible_hosts=[r["host"] for r in rows if not r["feasible"]])
 
 
+# --------------------------------------------------------------------------- actuation
+#
+# F3: until now this module computed a plan and applied nothing, so cells C and D could not
+# run. It now EMITS the commands, and applies them only when explicitly told to.
+#
+# DEFAULT IS DRY RUN. Shaping needs root and changes a NIC's behaviour for every process on
+# that host, so `plan_commands()` returns the exact argv list and `apply()` refuses unless
+# `confirm=True` AND the caller passes a host it is actually running on. Nothing here ever
+# reaches out to another machine: the commands are meant to be run BY that host, under the
+# operator's own hand.
+
+def tc_commands(profile: str, host: str, iface: str) -> List[List[str]]:
+    """The `tc` commands that realise `profile` on `host`'s `iface`.
+
+    netem ADDS to the existing path, so the delay injected is (target - measured floor p50)
+    and the rate cap is the profile's uplink. `tc` takes HALF the round trip as its one-way
+    delay, which is why add_rtt_ms is halved here: netem delays egress only, and the reply
+    traverses the peer's own qdisc.
+    """
+    f = feasible(profile, host)
+    if not f["feasible"]:
+        raise ValueError("%s cannot represent %s: %s" % (host, profile, f["note"]))
+    p = PROFILES[profile]
+    if p["rtt_ms"] is None:
+        return []
+    one_way_ms = max(0.0, f["add_rtt_ms"] / 2.0)
+    jitter_ms = float(p.get("jitter_ms") or 0.0) / 2.0
+    cmds = [["tc", "qdisc", "del", "dev", iface, "root"]]          # idempotent reset
+    netem = ["tc", "qdisc", "add", "dev", iface, "root", "handle", "1:", "netem",
+             "delay", "%.3fms" % one_way_ms]
+    if jitter_ms > 0:
+        netem += ["%.3fms" % jitter_ms, "distribution", "normal"]
+    if float(p.get("loss_pct") or 0.0) > 0:
+        netem += ["loss", "%.3f%%" % float(p["loss_pct"])]
+    cmds.append(netem)
+    up = p.get("uplink_mbps")
+    if up:
+        # Rate-limit below netem so the cap applies to the shaped egress path.
+        cmds.append(["tc", "qdisc", "add", "dev", iface, "parent", "1:", "handle", "10:",
+                     "tbf", "rate", "%.0fkbit" % (float(up) * 1000.0),
+                     "burst", "32kbit", "latency", "400ms"])
+    return cmds
+
+
+def mnwifi_params(profile: str, host: str) -> Dict[str, Any]:
+    """The same profile as Mininet-WiFi station parameters.
+
+    Mininet-WiFi (Fontes et al., CNSM 2015), used as CADET's NetWaggle does
+    (arXiv:2606.04072). A station's link is given as bandwidth / delay / loss, so the same
+    (target - floor) arithmetic applies.
+    """
+    f = feasible(profile, host)
+    p = PROFILES[profile]
+    return dict(profile=profile, host=host,
+                bw=p.get("uplink_mbps"),
+                delay="%.3fms" % (max(0.0, f["add_rtt_ms"]) / 2.0)
+                      if p["rtt_ms"] is not None else None,
+                loss=float(p.get("loss_pct") or 0.0),
+                jitter_ms=p.get("jitter_ms"),
+                mtu=MTU.get(host),
+                feasible=f["feasible"],
+                provenance=p.get("provenance"))
+
+
+def apply(profile: str, host: str, iface: str, confirm: bool = False,
+          runner=None) -> Dict[str, Any]:
+    """Apply shaping. REFUSES unless confirm=True.
+
+    `runner` is injected so a test can observe the commands without a privileged call; by
+    default nothing is executed and the commands are only returned.
+    """
+    cmds = tc_commands(profile, host, iface)
+    out = dict(profile=profile, host=host, iface=iface,
+               commands=[" ".join(c) for c in cmds], applied=False)
+    if not confirm:
+        out["refused"] = ("dry run: shaping needs root and changes the NIC for every process "
+                          "on the host; pass confirm=True to apply")
+        return out
+    if runner is None:
+        import subprocess
+        def runner(cmd):  # noqa: E306
+            return subprocess.run(cmd, capture_output=True, text=True).returncode
+    rcs = []
+    for c in cmds:
+        rcs.append(runner(c))
+    out["applied"] = True
+    out["returncodes"] = rcs
+    # The first command is a `del` that fails harmlessly when no qdisc exists.
+    out["ok"] = all(rc == 0 for rc in rcs[1:]) if len(rcs) > 1 else True
+    return out
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="StudyREAL-NET shaping profiles")
     ap.add_argument("--profile", default=None, help="one profile, or omit for all")
     ap.add_argument("--hosts", default="flash,orin-1,orin-2,orin-3,orin-4")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--emit-tc", default=None, metavar="HOST:IFACE",
+                    help="print the tc commands for one host (dry run; applies nothing)")
+    ap.add_argument("--emit-mnwifi", default=None, metavar="HOST",
+                    help="print Mininet-WiFi station parameters for one host")
     a = ap.parse_args(argv)
     hosts = [h.strip() for h in a.hosts.split(",") if h.strip()]
+
+    if a.emit_tc:
+        if not a.profile:
+            print("--emit-tc needs --profile", file=sys.stderr)
+            return 2
+        host, _, iface = a.emit_tc.partition(":")
+        r = apply(a.profile, host, iface or "eth0", confirm=False)
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0
+    if a.emit_mnwifi:
+        if not a.profile:
+            print("--emit-mnwifi needs --profile", file=sys.stderr)
+            return 2
+        print(json.dumps(mnwifi_params(a.profile, a.emit_mnwifi), indent=2, sort_keys=True))
+        return 0
     names = [a.profile] if a.profile else sorted(PROFILES)
     out = {n: plan(n, hosts) for n in names}
     if a.json:
