@@ -44,6 +44,33 @@ counts that let either reading be computed later. That is D251 working as intend
 the headline at plotting time.**
 **Item 4 means the push no longer needs a user decision. It needs the D265 proof to pass and your window.**
 
+## *** THREE QUEUE RULINGS. THE FULL ORDER IS BELOW AND ONE PLACEMENT IS MY READING, NOT THE USER'S WORDS. ***
+
+```
+D250  six baselines  (llf, mooncake, eco-llm remaining)
+  ->  D249 -q GATE        covex-v6-fair-final-q 16 4 _L3_epg_rq30        single seed s4
+  ->  [ONLY IF IT PASSES] -q seeds 5, 6, 7                               AHEAD OF D257
+  ->  D257               n20 baselines
+  ->  D262 regime        the s4 regime check (five arms)
+  ->  StudyD266-NESTOUT  scope A, 8 cells      <-- INSERTED HERE
+  ->  D244               s4 remainder          <-- STILL RUNS, AFTER NESTOUT
+  ->  D258  ->  MATRIX
+```
+**1. IF THE D249 `-q` GATE PASSES, ITS SEEDS 5 TO 7 RUN IMMEDIATELY AFTER IT, AHEAD OF D257.** Three more
+cells. If it fails, they do not run.
+**2. `StudyD266-NESTOUT` SCOPE A IS QUEUED AFTER THE D262 SEED-4 REGIME CHECK AND BEFORE THE D244 s4
+REMAINDER. The D244 remainder STILL RUNS, after it.** **Gated on its prereg AND its dose check being
+committed, and the dose check may yet stop the design outright.**
+*** 3. IF THE D250 VERDICT IS A FAIL: REPORT IT IN FULL AND DO **NOT** STOP THE QUEUE. The D249 `-q` gate
+cell and everything after it PROCEED. A fail is a result to be reported, not a reason to hold the
+accelerator. ***
+
+*** THE ONE PLACEMENT THAT IS MY READING AND NOT THE RULING'S WORDS: the ruling names two anchors, after the
+D262 SEED-4 regime check and before the D244 remainder. D262's OWN s5 to s7 lines are `#PENDING-GATE` on the
+s4 report, so if they are un-commented they land in the SAME GAP as NESTOUT scope A. I have placed NESTOUT
+immediately after the s4 check, which puts it AHEAD of D262's s5 to s7. SAY IF YOUR FILE ORDER DISAGREES OR
+IF YOU READ IT THE OTHER WAY, AND I WILL PUT IT TO THE USER RATHER THAN CHOOSE. ***
+
 ## *** THE NESTED-VICTIM OUTAGE CELLS: SEQUENCING SETTLED, E-ID OPENED, AND THEY QUEUE BEHIND THE `-q` GATE. ***
 
 **User rulings on the build. NOTHING FOR YOU UNTIL THE CELLS ARE READY, but two things change your queue's
