@@ -1,5 +1,47 @@
 # THE D249 `-q` GATE CELL AND ITS PASS RULE, AS PRE-REGISTERED BEFORE THE CELL RAN
 
+## *** AMENDMENT BY USER RULING, TIMESTAMPED 2026-11-25T22:51:05Z (local 14:51:05 PST), AND WRITTEN BEFORE ANY RESULT OF THE CELL HAS BEEN SEEN. ***
+
+**At the moment of this commit the cell `covex-v6-fair-final-q 16 4 _L3_epg_rq30` is RUNNING and NO FIGURE
+FROM IT HAS REACHED THIS SESSION. That is the whole point of the timestamp: an amendment to a pass rule is
+legitimate only before the result, and this one is.**
+
+*** THE ROBOT CLOUD ON-TIME CRITERION IS REPLACED WITH THE D264 FORM. PASS REQUIRES BOTH: ***
+```
+1. ROBOT CORRECT-BY-DEADLINE count beats SAME-CODE RUNG 3 by MORE THAN 2
+   comparator: the committed cell NAMED IN THE PREREG, the un-suffixed
+   covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30 , cbd 83 of 132
+   SO PASS NEEDS -q cbd OF AT LEAST 86.
+2. DASHCAM ON-TIME not worse beyond its same-code observation
+   comparator dashcam 8,377 ; the same-code spread against _rep2 (8,323) is 54 counts
+   SO CONDITION 2 FAILS ONLY IF DASHCAM IS WORSE BY MORE THAN 54.
+```
+**REPORTED BESIDE IT, ALWAYS: robot cloud on-time, cloud-correct, device-correct, and cloud accuracy on
+served.**
+*** AND A PROPERTY OF THE NEW BAR WORTH SEEING: THE THRESHOLD OF "MORE THAN 2" IS **EXACTLY** THE OBSERVED
+cbd SPREAD BETWEEN THE TWO REPLICATES, 83 AND 85. SO THE BAR SITS PRECISELY ON THE REPLICATE NOISE, WHICH IS
+WHAT D264 INTENDS, AND A SCORE OF 85 WOULD TIE `_rep2` AND STILL FAIL. ***
+
+### THE REACHABILITY CHECK STANDS, AND IT NEEDS TWO FIELDS, NOT ONE
+**The ruling says ZERO TOUCH CHOSEN MAKES THE CELL AN ABSENT LINK, NOT A RESULT. That is `state_chosen_TOUCH`
+in the state planner, which was 0 of 61,678 at the old bar and 1,175 at the recalibrated one.**
+*** BUT THAT FIELD ALONE CANNOT SHOW THE D249 SWITCH DID ANYTHING, BECAUSE PLAIN RUNG 3 ALSO CHOOSES TOUCH,
+2,676 TIMES IN `_rep2` AND 2,954 IN THE DRY PROBE. THE `-q` ARM TOUCHES **LESS**, NOT MORE, SINCE THE
+QUEUE-AWARE TERM MAKES A TOUCH DEARER EVEN AT A LOWER BAR. SO THE DIRECTION OF THE TOUCH DELTA IS NOT A PASS
+CRITERION AND MUST NOT BE READ AS ONE. ***
+**The field that shows the SWITCH acted is `d249_queued_ahead_reads`, which must be NON-ZERO in the `-q`
+cell and ABSENT OR ZERO on rung 3, with `d249_pwc_queue_priced` and `d249_pwc_queue_capped` beside it. The
+two checks answer different questions: TOUCH CHOSEN asks whether the arm did anything, and the d249 read
+count asks whether the switch is what made it do so.**
+
+### WHAT THE AMENDMENT DOES NOT CHANGE
+**Check 7 on the comparator before the comparison is read; the comparator's `source_agreement` being ABSENT
+rather than OK, stated as the provenance weakness it is; `_rep2` reported beside it with any verdict
+difference between the two comparators reported AS A FINDING rather than resolved by picking; an unfloored
+dashcam delta reported as UNFLOORED; and A FAIL IS REPORTED AS A FAIL, with the margin NOT re-derived, the
+quantile NOT moved and the bins NOT changed.**
+
+
 *** COMMITTED NOW, MINUTES BEFORE THE CELL STARTS, BECAUSE UNTIL THIS COMMIT THE PASS RULE EXISTED ONLY IN
 A SCRATCH DIRECTORY. A PRE-REGISTRATION THAT LIVES ONE CLEANUP FROM DELETION IS NOT A PRE-REGISTRATION. The
 text below is the file written before any gate cell existed, sha256 prefix `84b34f170f347aa5`, reproduced
