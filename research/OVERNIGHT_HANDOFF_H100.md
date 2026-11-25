@@ -1,5 +1,50 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** D265 PROOF PASSES: ZERO MISMATCHES. BUT MY FILE LIST WAS WRONG AND YOUR live2 CHECK HAS A BLIND SPOT. READ BEFORE THE WINDOW. ***
+
+**THE PROOF: total mismatches 0. The 13 named baselines plus rung 3 on the FULL posted cell at 1,200 s, 0
+positional and 0 setwise; the whole registry, 186 of 228 arms at 300 s, also 0 and 0. Chosen-action counts,
+recall decision counts and session-action counts identical across trees for every arm compared. The
+current-main comparator reproduced the committed rung-3 digest 14,539 / `5a03c2807da3681a` and `llf` 14,075 /
+`961be8fe4942d86b` BEFORE any comparison was read, and non-vacuity holds: different arms on the same tree
+differ at ROW INDEX 0.**
+
+*** CORRECTION 1: IT IS TWELVE FILES, NOT ELEVEN. I MISSED `experiments/orchestration/baselines/interface.py`,
+WHICH IS THE ACTION-SPACE AND Observation DEFINITION SHARED BY EVERY ARM - the most load-bearing of them.
+Verified here: blob `304d4014` on origin against `44f97538` in the dev tree. ***
+*** CORRECTION 2, AND THIS ONE IS ABOUT YOUR CHECK: THAT FILE IS A SIBLING OF live2, NOT INSIDE IT. I
+confirmed that the live2 subtree after the push is STILL `5edd1245654e5653`, unchanged by it. SO YOUR live2
+COMPARISON WOULD PASS WHILE A TWELFTH FILE LANDED INVISIBLY TO IT. ***
+**SO CHECK TWO HASHES AT STEP (e), NOT ONE:**
+```
+experiments/orchestration/live2       a7eac4ee7c8c...  ->  5edd1245654e56539474ff7fb39cd25f13beaf94
+experiments/orchestration/baselines   e1717290595626c188931becc709148103b094bc
+                                      ->  e784d87321966d4307b7dad418a8d7b8f0b88732
+```
+**If EITHER differs from those, STOP THE QUEUE.**
+
+*** CORRECTION 3, A PUSH HAZARD I WOULD HAVE WALKED INTO: PUSHING THE DEV TREE'S `experiments/` WHOLESALE
+WOULD **DELETE** FILES. Verified here: `study_frozen_grid_driver_v40.sh` and `v41.sh` are BOTH on origin and
+BOTH ABSENT from the dev tree, and origin has 9 `analysis/oracle` files against the dev tree's 1. So a
+directory push would remove your two live drivers. I AM PUSHING THE TWELVE SCOPED PATHS, NEVER THE
+DIRECTORY, and the resulting tree shows EXACTLY 12 CHANGED PATHS. ***
+
+**MY TWO SHARED-CODE PRECONDITIONS ARE DISCHARGED, both with reasons rather than assurances.**
+**`share_admission.py` adds ONE read-only accessor returning a COPY, required by D249 so the published rows
+carry the tracker's OWN uncached numbers rather than a second count derived elsewhere; it adds no call site
+and mutates nothing.** **`arms_v6cfr3.py` is registry-only, one new factory and one new key with NO existing
+entry touched; the file is named for rung 4 but it HOSTS the registry where rungs 2, 3 and 4 are all
+registered, so a new arm name goes there or it cannot be resolved at launch.**
+
+**DEFAULT OFF, confirmed three ways: on CURRENT MAIN the held arm is NOT CONSTRUCTIBLE AT ALL (229 registered
+names on main against 230 on the dev tree, the one extra being exactly `covex-v6-fair-final-q`); on the dev
+tree `arm_enables` is False for all 228 arms and True for exactly one, with ZERO raises.**
+
+**ONE CAVEAT, STATED NOT BURIED: the 215 non-baseline registry arms ran at 300 s rather than the posted
+1,200 s, because the full census measured 5.6 hours wall. THE 13 NAMED BASELINES AND RUNG 3 DID GET THE FULL
+POSTED CELL. The 42 arms not compared all fail IDENTICALLY ON BOTH TREES on a pre-existing profile gap, with
+ZERO arms succeeding on one tree and failing on the other.**
+
 ## *** THE D249 GATE CELL LINE IS CONFIRMED BY THE USER. QUEUE EXACTLY THIS. ***
 
 ```
