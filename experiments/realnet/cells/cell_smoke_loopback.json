@@ -1,7 +1,8 @@
 {
   "allow_short_run": true,
+  "comparator": null,
   "coordinator": "stub",
-  "description": "3 devices, 60 s of trace, synthetic frames, all on one host against the StubCoordinator. A TRANSPORT TEST, not a measured cell.",
+  "description": "3 devices, 60 s of trace, synthetic frames, all on one host against the StubCoordinator. A TRANSPORT TEST, not a measured cell. Declares NO comparator and NO recipe on purpose: it uses the un-suffixed committed trace (robot deadline 5.0 s, one-frame dashcam, batch-30s upload, no re-asks), which is a DIFFERENT WORKLOAD from the paper's _L3_epg_rq30 grid and must never be compared against it.",
   "devices": [
     {
       "device_id": "dash000",
@@ -28,6 +29,7 @@
   "name": "cell_smoke_loopback",
   "out_dir": "results/cell_smoke_loopback",
   "profile": "unshaped",
+  "recipe": null,
   "run_s": 60.0,
   "seed": 4,
   "server": {

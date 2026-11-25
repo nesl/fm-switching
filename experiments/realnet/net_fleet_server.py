@@ -43,7 +43,7 @@ import socket
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import events_check as EC  # noqa: E402
@@ -112,7 +112,9 @@ class NetFleetServer:
 
     def __init__(self, coordinator, expect_devices: int, run_s: float,
                  port: int = DEFAULT_PORT, tick_s: float = DEFAULT_TICK_S,
-                 drain_s: float = 5.0, barrier_timeout_s: float = 120.0) -> None:
+                 drain_s: float = 5.0, barrier_timeout_s: float = 120.0,
+                 link_by_device: Optional[Dict[str, Dict[str, float]]] = None,
+                 default_link: Optional[Dict[str, float]] = None) -> None:
         self.coord = coordinator
         self.expect = int(expect_devices)
         self.run_s = float(run_s)
@@ -120,6 +122,10 @@ class NetFleetServer:
         self.drain_s = float(drain_s)
         self.barrier_timeout_s = float(barrier_timeout_s)
         self.port = int(port)
+        # D75 committed defaults, the same pair every emulated cell has used.
+        self.link_by_device: Dict[str, Dict[str, float]] = dict(link_by_device or {})
+        self.default_link: Dict[str, float] = dict(default_link
+                                                   or dict(uplink_mbps=13.6, rtt_ms=44.0))
         self.lateness = Lateness()
         self.conns: List[DeviceConn] = []
         self.by_device: Dict[str, DeviceConn] = {}
@@ -184,6 +190,23 @@ class NetFleetServer:
                                         rtt_ms=msg.get("rtt_ms"),
                                         start_t=msg.get("start_t")))
 
+    def _link_for(self, device_id: str) -> Tuple[float, float]:
+        """The (uplink_mbps, rtt_ms) the coordinator is told this device has.
+
+        Order of preference, each explicit:
+          1. `link_by_device[device_id]`, set from the cell config's resolved shaping. This is
+             the shaped link the device actually experiences, so it is what the coordinator
+             should believe.
+          2. `default_link`, for a run with no per-device profile (an unshaped smoke cell).
+          3. live2's own committed D75 LinkSpec defaults, so a bare run still matches what
+             every emulated cell has always used.
+        Never None: a null here is the defect described at the registration site.
+        """
+        spec = self.link_by_device.get(str(device_id))
+        if spec:
+            return float(spec["uplink_mbps"]), float(spec["rtt_ms"])
+        return float(self.default_link["uplink_mbps"]), float(self.default_link["rtt_ms"])
+
     def _write_arrival(self, row: Dict[str, Any]) -> None:
         self.n_arrivals += 1
         if self._arrivals_fh is not None:
@@ -232,9 +255,24 @@ class NetFleetServer:
         self.t0_unix = time.time()
         self.next_tick = 0.0
         for row in self.roster:
+            # THE LINK NUMBERS ARE NOT OPTIONAL AT THE COORDINATOR.
+            #
+            # The trace's own device_register carries null uplink_mbps and rtt_ms (the
+            # generator leaves them unset), and `FleetEmulator` FILLS them from its per-device
+            # LinkSpec before calling the coordinator (fleet/emulator.py:497-498). Forwarding
+            # the nulls instead makes `coordinator._ingest` raise
+            # `TypeError: float() argument must be ... not 'NoneType'` at coordinator.py:721,
+            # registration never completes, and every later event for that device then raises
+            # `KeyError: '<device_id>'`. That is one bug with a long tail: in the first dry-bridge
+            # run it produced 2,176 monitor_frame KeyErrors from 3 failed registrations.
+            #
+            # The StubCoordinator never caught it because it does not model a roster.
+            #
+            # Here the device's link IS the shaped profile, so that is the honest source: the
+            # cell config's resolved per-device shaping, not a trace default and not a guess.
+            up, rtt = self._link_for(row["device_id"])
             ev = EC.make("device_register", device_id=row["device_id"], type=row["type"],
-                         uplink_mbps=row.get("uplink_mbps"), rtt_ms=row.get("rtt_ms"),
-                         start_t=row.get("start_t"))
+                         uplink_mbps=up, rtt_ms=rtt, start_t=row.get("start_t"))
             self._to_coord(ev, 0.0)
         for d, c in sorted(self.by_device.items()):
             try:

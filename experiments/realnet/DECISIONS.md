@@ -293,7 +293,45 @@ Reason 1 belongs in the paper. Reason "CPU contention" does not, because it is n
 
 ## 5. Dataset decisions
 
-**The trace is the frozen production trace**, not a new one:
+**CORRECTED 2026-11-25 (review item 1).** This section previously named the un-suffixed
+trace `seed4_n16_1200s_A_r40-40-20_lh_req_ss2` and recorded its 5.0 s robot deadline without
+noticing that **every paper cell runs a different workload**. The paper's grid is
+`_L3_epg_rq30`, and all three tokens are TRACE-GENERATION inputs baked into the trace
+directory name by `run_live2_real.py::_trace` (lines 216-236), not run-time labels:
+
+| Token | Flag | Ruling | Trace-name effect |
+|---|---|---|---|
+| `_L3` | `--robot-deadline-s 3.0` | D147 | `_L3` (the name anchor is 5.0, so 3.0 is suffixed) |
+| `_epg` | `--dashcam-format epg` (EPG_ARGS) | D153 | `_epg` |
+| (implied by `_epg`) | `--robot-upload per-frame` | D156 (2) | `_perframe` |
+| `_rq30` | `--robot-reask-mean-s 30` (RQ30_ARGS) | D159 (C), D161 | `_rq30` |
+
+The driver applies them at `study_frozen_grid_driver_v41.sh:90` (`_L3`), `:102` (`_epg` plus
+per-frame) and `:112` (`_rq30`). So the cell tag `_L3_epg_rq30` corresponds to the trace
+directory `..._L3_epg_perframe_rq30`: tag and trace name differ by the `_perframe` token that
+`_epg` implies.
+
+`baseline_matrix_table.py:548` states it plainly: the `_L3_epg` and `_L3_epg_rq30` cells are
+**DIFFERENT WORKLOADS**. So the correct trace for a cell comparable to the paper is
+`seed4_n16_1200s_A_r40-40-20_lh_req_ss2_L3_epg_perframe_rq30`, whose comparator
+`covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30` carries fairness digest
+`96c1a0b486381709...`. The un-suffixed trace carries `150289c5fb6964dc...`: a different
+workload and not comparable.
+
+**That recipe trace is NOT committed.** The repo holds only its `device_answers.jsonl.gz` and
+`dashcam_instants.jsonl.gz`; `run_live2_real.py::_trace` regenerates `trace.jsonl` on demand,
+and generating it needs the JPEG frame manifest at
+`/home/pragya/data/live2/jpeg/combined_manifest.jsonl`, which lives on the H100. The cell
+configs therefore point at the recipe trace and **refuse to resolve** anywhere that manifest
+is unreachable, naming the reason. `cell_config.py` additionally refuses any cell whose
+fairness digest or recipe differs from its declared comparator.
+
+The un-suffixed committed trace is still used by `cell_smoke_loopback`, which declares **no
+comparator and no recipe** on purpose: it is a transport test, and its workload (5.0 s robot
+deadline, one-frame dashcam, batch-30s upload, no re-asks) must never be compared against a
+paper cell.
+
+For reference, the un-suffixed trace that this harness was first built and tested against:
 `results/orchestration/live2/frozen_test/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2`.
 16 devices (6 dashcam, 7 robot, 3 assistive), 1200 s, 14,985 records, 13,570 opportunities,
 deadlines 1.0 s dashcam and 5.0 s robot, JPEG wire format with frame p50 66.6 KB
@@ -331,7 +369,7 @@ and is why a slice directory is metadata-sized rather than 140 MB.
 | 2 | Irish 5G percentiles still unconfirmed as UPLINK (D215; `e31_network.py:84` reads `DL_bitrate`) | the 5G-vs-Wi-Fi comparison |
 | 3 | Mininet-WiFi not installed on flash or the H100; needs root | cells C and D |
 | 4 | sudo on the Orins for their shaping side | cells C and D |
-| 5 | **The `EmulatorBridge` path has never been run.** `--coordinator` accepts `stub` only. `bridge.py` calls `SC.parse()` on every event and is stricter than the stub | the first measured cell |
+| 5 | ~~The `EmulatorBridge` path has never been run~~ **RUN 2026-11-25, dry, and fixed.** See section 8 | (cleared) |
 | 6 | Mode B (pull) is not implemented; the server and the cell loader both refuse it | any mode-B study |
 | 7 | Gate 7, the negative control (real devices swapped for emulated, same slices and shaping, results must match within noise), needs two cells so it is not a unit test | interpreting cells C and D |
 | 8 | Clock sync (chrony/PTP) deliberately NOT used; server-side `t_arrive` stamping makes it unnecessary for the coordinator's view, but one-way timing cannot be separated without it | separating uplink from downlink |
@@ -358,3 +396,60 @@ any committed result.
 
 The honest one-line framing: **the device is real, the network is real, the link budget is
 cited, and the device's answer is profiled.**
+
+
+---
+
+## 8. The EmulatorBridge dry run (review item 2)
+
+Run 2026-11-25 on a Mac, no GPU and no H100 time: the REAL `bridge.EmulatorBridge` wrapping
+the REAL `coordinator.Live2Coordinator` with `backend=None` and `dry_run=True`, which is the
+mode `run_live2_real.py:712-713` uses for a cell with no `--server`. Arm
+`covex-v6-fair-final`, `host_tier_tokens` from `run_live2_cell.host_tokens(27.0)` = 110,630.
+
+### Schema: clean
+
+All **14,985** device-side events across all 16 slices were pushed through live2's own
+`schema.parse()`, the first thing `bridge.on_event` calls. **Zero rejections.** So the concern
+carried in earlier notes, that `SC.parse()` is stricter than this harness's own rebuild and
+might reject events the stub accepted, does not hold: the D201 schema fix covered it.
+
+### Semantics: ONE REAL BUG, with a long tail
+
+Past the schema check the bridge rejected **five distinct signatures**:
+
+    x2176  monitor_frame      KeyError: 'dash000'
+    x119   session_start      KeyError: 'asst000'
+    x3     device_register    TypeError: float() argument must be ... not 'NoneType'
+    x3     session_start      KeyError: 'robo000'
+    x3     recall_question    KeyError: 'robo000'
+
+All five are one bug. The trace's own `device_register` carries **null** `uplink_mbps` and
+`rtt_ms` (the generator leaves them unset), and `FleetEmulator` FILLS them from its per-device
+`LinkSpec` before calling the coordinator (`fleet/emulator.py:497-498`). This harness forwarded
+the nulls, so `coordinator._ingest` raised `TypeError` at `coordinator.py:721`, registration
+never completed, and every later event for that device raised `KeyError` on the roster. Three
+failed registrations produced 2,301 downstream failures.
+
+**The StubCoordinator never caught it because it models no roster.** That is exactly the class
+of defect a stub cannot find, which is why this dry run was worth doing before any cell.
+
+### The fix, fleet side only
+
+`net_fleet_server._link_for()` now supplies the link the coordinator is told about, in a
+declared order: the cell config's resolved per-device shaping first (the device's link IS the
+shaped profile, so that is the honest source), then an explicit `default_link`, then live2's
+own committed D75 pair (13.6 Mbit/s, 44 ms). It can never return None.
+
+After the fix: **zero rejections**, 2,701 events accepted, and the real coordinator produced
+**2,175 cloud answers** and 2,177 decisions. `coordinator.py`, `bridge.py` and every arm are
+byte-identical to main; nothing outside `experiments/realnet/` was touched.
+
+A gate now covers it: `tests/test_realnet.py::test_bridge_link_numbers` asserts the fallback
+is the D75 pair, that a per-device shaped link overrides it, and that the value is never None.
+
+### Still not run
+
+A full real-time loopback through the real bridge (rather than events fed in sequence), and
+anything with a live `--server`. The dry path proves the schema and the roster semantics, not
+the timing.

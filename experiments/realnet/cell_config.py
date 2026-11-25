@@ -27,6 +27,28 @@ import mnwifi_profiles as MP  # noqa: E402
 
 REQUIRED = ("name", "trace_dir", "devices", "run_s")
 
+# The paper's grid recipe, as the H100 driver applies it. Every token is a TRACE-GENERATION
+# input, baked into the trace directory name by run_live2_real.py::_trace (lines 216-236), not
+# a run-time label:
+#
+#   _L3    D147: --robot-deadline-s 3.0. The trace name anchor is 5.0, so 3.0 is suffixed _L3.
+#   _epg   D153: --dashcam-format epg (EPG_ARGS), append-only EP-G episodes, and D156 (2) adds
+#          --robot-upload per-frame, which suffixes _perframe.
+#   _rq30  D159 (C) / D161: --robot-reask-mean-s 30 (RQ30_ARGS), suffixing _rq30.
+#
+# So the cell tag `_L3_epg_rq30` corresponds to the trace directory
+# `..._L3_epg_perframe_rq30`: the driver's tag and the trace name differ by the _perframe
+# token that _epg implies. baseline_matrix_table.py:548 states plainly that `_L3_epg` and
+# `_L3_epg_rq30` cells are DIFFERENT WORKLOADS, so a realnet cell that declares an emulated
+# comparator must match the comparator's recipe exactly, not approximately.
+RECIPE_FLAGS = {
+    "robot_deadline_s": 3.0,
+    "dashcam_format": "epg",
+    "robot_upload": "per-frame",
+    "robot_reask_mean_s": 30.0,
+}
+RECIPE_TRACE_SUFFIX = "_L3_epg_perframe_rq30"
+
 
 class ConfigError(Exception):
     """A cell config that cannot be resolved. Raised rather than defaulted."""
@@ -58,7 +80,18 @@ def load(path: Path) -> Dict[str, Any]:
     if not trace.is_absolute():
         trace = (path.parent / trace).resolve()
     if not (trace / "trace_meta.json").exists():
-        raise ConfigError("trace_dir %s holds no trace_meta.json" % trace)
+        hint = ""
+        if RECIPE_TRACE_SUFFIX in trace.name:
+            hint = (
+                "\n\n    This is the PAPER RECIPE trace, and it is deliberately not committed: "
+                "the repo holds only its device_answers.jsonl.gz and dashcam_instants.jsonl.gz. "
+                "run_live2_real.py::_trace regenerates it on demand (the existence check at "
+                "`if not (tdir / \"trace.jsonl\").exists()`), and generating it needs the JPEG "
+                "frame manifest at /home/pragya/data/live2/jpeg/combined_manifest.jsonl, which "
+                "lives on the H100.\n    So this cell can only be resolved where that manifest "
+                "is reachable. It is NOT a config error: it is the cell correctly refusing to "
+                "run against a workload it cannot reproduce.")
+        raise ConfigError("trace_dir %s holds no trace_meta.json%s" % (trace, hint))
     meta = json.loads((trace / "trace_meta.json").read_text())
 
     # F5: the cell's run_s must match the trace's, or the cell is partial.
@@ -92,6 +125,48 @@ def load(path: Path) -> Dict[str, Any]:
                             profile=prof, iface=d.get("iface", "eth0"),
                             shaping=f, mnwifi=MP.mnwifi_params(prof, host)))
 
+    # GATE: recipe and digest parity against a declared emulated comparator.
+    comparator = cfg.get("comparator")
+    recipe = dict(RECIPE_FLAGS) if cfg.get("recipe") == "L3_epg_rq30" else cfg.get("recipe")
+    parity: Dict[str, Any] = dict(declared_comparator=comparator, recipe=recipe)
+    if comparator:
+        want_digest = comparator.get("fairness_digest")
+        want_trace = comparator.get("trace_dir")
+        got_digest = meta.get("fairness_digest")
+        parity["comparator_fairness_digest"] = want_digest
+        parity["cell_fairness_digest"] = got_digest
+        if want_digest and got_digest and want_digest != got_digest:
+            raise ConfigError(
+                "FAIRNESS DIGEST MISMATCH: this cell's trace carries %s but the declared "
+                "comparator %r carries %s. The two are not the same workload, so the cells "
+                "are not comparable (D96 (2), D209 parity). Point trace_dir at the "
+                "comparator's own trace."
+                % (str(got_digest)[:16], comparator.get("cell", "?"), str(want_digest)[:16]))
+        if want_trace and RECIPE_TRACE_SUFFIX in str(want_trace) \
+                and RECIPE_TRACE_SUFFIX not in str(trace):
+            raise ConfigError(
+                "RECIPE MISMATCH: the comparator's trace is %r (recipe %s) but this cell's "
+                "trace is %r, which carries no %s. _L3_epg_rq30 and the un-suffixed trace are "
+                "DIFFERENT WORKLOADS (baseline_matrix_table.py:548): different robot deadline "
+                "(3.0 vs 5.0 s), dashcam format (EP-G vs one-frame), upload contract "
+                "(per-frame vs batch-30s) and question volume (rq30 vs none)."
+                % (str(want_trace).rsplit("/", 1)[-1], RECIPE_TRACE_SUFFIX,
+                   str(trace).rsplit("/", 1)[-1], RECIPE_TRACE_SUFFIX))
+    if recipe:
+        # A declared recipe must agree with the trace it points at, where the trace records it.
+        for k, want in recipe.items():
+            got = meta.get(k)
+            if got is None:
+                continue                      # the trace does not record this knob
+            if isinstance(want, (int, float)) and not isinstance(want, bool):
+                bad = abs(float(got) - float(want)) > 1e-9
+            else:
+                bad = (got != want)
+            if bad:
+                raise ConfigError(
+                    "RECIPE MISMATCH on %s: cell declares %r but the trace records %r"
+                    % (k, want, got))
+
     resolved = dict(
         name=cfg["name"],
         description=cfg.get("description"),
@@ -116,6 +191,7 @@ def load(path: Path) -> Dict[str, Any]:
         devices=devices,
         n_real=sum(1 for d in devices if d["role"] == "real"),
         n_emulated=sum(1 for d in devices if d["role"] == "emulated"),
+        parity=parity,
     )
 
     if resolved["mode"] == "B":

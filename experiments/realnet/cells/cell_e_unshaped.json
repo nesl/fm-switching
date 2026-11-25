@@ -1,4 +1,11 @@
 {
+  "comparator": {
+    "arm": "covex-v6-fair-final",
+    "cell": "covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "fairness_digest": "96c1a0b486381709e2fc63e9b0f33f9e1ba1d887d6cedf21d89d407621177849",
+    "note": "The emulated comparator. Its trace is generated on demand by run_live2_real.py and is NOT committed: only device_answers.jsonl.gz and dashcam_instants.jsonl.gz are. Generating it needs the JPEG frame manifest at /home/pragya/data/live2/jpeg/, which lives on the H100, so trace_dir below must point at the H100's generated copy and the digest gate will confirm it before any cell runs.",
+    "trace_dir": "/home/pragya/data/live2/frozen_grid/work/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2_L3_epg_perframe_rq30"
+  },
   "coordinator": "stub",
   "description": "Same fleet, no shaping: the lab fabric as measured (~1 ms, 1-10 GbE). An ideal-network BOUND, never reported as a wireless condition.",
   "devices": [
@@ -109,6 +116,8 @@
   "name": "cell_e_unshaped",
   "out_dir": "results/cell_e_unshaped",
   "profile": "unshaped",
+  "recipe": "L3_epg_rq30",
+  "recipe_flags_note": "_L3 = --robot-deadline-s 3.0 (D147); _epg = --dashcam-format epg (D153) which implies --robot-upload per-frame (D156 (2)) and the _perframe trace token; _rq30 = --robot-reask-mean-s 30 (D159 (C)). All three are TRACE-GENERATION inputs baked into the trace directory name by run_live2_real.py::_trace, not run-time labels.",
   "run_s": 1200.0,
   "seed": 4,
   "server": {
@@ -117,5 +126,5 @@
   },
   "synthetic_frames": false,
   "tick_s": 0.01,
-  "trace_dir": "../../../results/orchestration/live2/frozen_test/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2"
+  "trace_dir": "../../../results/orchestration/live2/frozen_test/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2_L3_epg_perframe_rq30"
 }

@@ -425,7 +425,13 @@ def test_cell_config():
     import tempfile as TF
 
     here = Path(__file__).resolve().parent.parent
-    for name in ("cell_c_5g", "cell_d_wifi6", "cell_e_unshaped", "cell_smoke_loopback"):
+    # The three PAPER cells point at the _L3_epg_perframe_rq30 recipe trace, which is
+    # generated on demand and is NOT committed (only its device_answers and dashcam_instants
+    # are). They therefore CANNOT resolve anywhere the JPEG frame manifest is unreachable, and
+    # that refusal is correct behaviour rather than a failure: a cell must not silently fall
+    # back to a different workload. What is asserted here is that each one either resolves, or
+    # refuses for exactly that reason and no other.
+    for name in ("cell_c_5g", "cell_d_wifi6", "cell_e_unshaped"):
         p = here / "cells" / (name + ".json")
         if not p.exists():
             check("cells/%s.json exists" % name, False)
@@ -434,8 +440,22 @@ def test_cell_config():
             r = CC.load(p)
             check("%s resolves (%d real + %d emulated)"
                   % (name, r["n_real"], r["n_emulated"]), True)
+        except CC.ConfigError as e:
+            msg = str(e)
+            check("%s either resolves or refuses ONLY for the ungenerated recipe trace" % name,
+                  "holds no trace_meta.json" in msg and CC.RECIPE_TRACE_SUFFIX in msg,
+                  msg[:100])
         except Exception as e:
             check("%s resolves" % name, False, "%s: %s" % (type(e).__name__, e))
+    # The smoke cell uses the committed un-suffixed trace and must always resolve.
+    p = here / "cells" / "cell_smoke_loopback.json"
+    if p.exists():
+        try:
+            r = CC.load(p)
+            check("cell_smoke_loopback resolves (%d real + %d emulated)"
+                  % (r["n_real"], r["n_emulated"]), True)
+        except Exception as e:
+            check("cell_smoke_loopback resolves", False, "%s: %s" % (type(e).__name__, e))
 
     trace = (here / ".." / ".." / "results" / "orchestration" / "live2" / "frozen_test"
              / "traces" / "seed4_n16_1200s_A_r40-40-20_lh_req_ss2").resolve()
@@ -521,6 +541,125 @@ def _refuses_infeasible():
         del MP.PROFILES["_imposs"]
 
 
+def test_recipe_parity():
+    """GATE: a cell declaring an emulated comparator must match its recipe AND its digest.
+
+    The paper's grid is `_L3_epg_rq30`: robot deadline 3.0 s (D147), EP-G append-only dashcam
+    episodes plus per-frame robot upload (D153, D156 (2)), and 30 s mean re-asks (D159 (C)).
+    Every token is a TRACE-GENERATION input baked into the trace directory name by
+    run_live2_real.py::_trace, not a run-time label, and
+    `baseline_matrix_table.py:548` states that `_L3_epg` and `_L3_epg_rq30` cells are
+    DIFFERENT WORKLOADS. A realnet cell pointed at the un-suffixed committed trace is
+    therefore not comparable to any paper cell, and this gate refuses it.
+    """
+    print("\n[parity] gate: recipe and fairness digest vs the declared comparator")
+    import cell_config as CC
+    import tempfile as TF
+
+    here = Path(__file__).resolve().parent.parent
+    check("the recipe flags are the driver's", CC.RECIPE_FLAGS == {
+        "robot_deadline_s": 3.0, "dashcam_format": "epg",
+        "robot_upload": "per-frame", "robot_reask_mean_s": 30.0})
+    check("the recipe trace suffix includes _perframe (implied by _epg)",
+          CC.RECIPE_TRACE_SUFFIX == "_L3_epg_perframe_rq30")
+
+    trace_unsuffixed = (here / ".." / ".." / "results" / "orchestration" / "live2"
+                        / "frozen_test" / "traces"
+                        / "seed4_n16_1200s_A_r40-40-20_lh_req_ss2").resolve()
+    COMP = dict(cell="covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30",
+                fairness_digest="96c1a0b486381709e2fc63e9b0f33f9e1ba1d887d6ce"
+                                "df21d89d407621177849",
+                trace_dir="/home/pragya/data/live2/frozen_grid/work/traces/"
+                          "seed4_n16_1200s_A_r40-40-20_lh_req_ss2_L3_epg_perframe_rq30")
+
+    # The wrong trace with a declared comparator must be REFUSED on the digest.
+    cfg = dict(name="t", trace_dir=str(trace_unsuffixed), run_s=1200.0,
+               recipe="L3_epg_rq30", comparator=COMP,
+               devices=[dict(device_id="dash000", host="orin-1", role="real",
+                             profile="unshaped")])
+    p = Path(TF.mkdtemp()) / "c.json"
+    p.write_text(json.dumps(cfg))
+    try:
+        CC.load(p)
+        check("refuses the un-suffixed trace against an _L3_epg_rq30 comparator", False,
+              "it was ACCEPTED")
+    except CC.ConfigError as e:
+        msg = str(e)
+        check("refuses the un-suffixed trace against an _L3_epg_rq30 comparator", True)
+        check("the refusal names the digest mismatch", "FAIRNESS DIGEST MISMATCH" in msg,
+              msg[:80])
+
+    # A recipe declared against a trace that records a CONTRADICTING value must be refused.
+    cfg2 = dict(cfg)
+    cfg2["comparator"] = None
+    p2 = Path(TF.mkdtemp()) / "c.json"
+    p2.write_text(json.dumps(cfg2))
+    try:
+        CC.load(p2)
+        check("refuses recipe robot_deadline_s 3.0 against a 5.0 s trace", False,
+              "it was ACCEPTED")
+    except CC.ConfigError as e:
+        check("refuses recipe robot_deadline_s 3.0 against a 5.0 s trace",
+              "RECIPE MISMATCH" in str(e), str(e)[:90])
+
+    # A cell with no comparator and no recipe (the smoke cell) must still load.
+    smoke = here / "cells" / "cell_smoke_loopback.json"
+    if smoke.exists():
+        try:
+            r = CC.load(smoke)
+            check("a cell declaring NO comparator still loads (transport test)",
+                  r["parity"]["declared_comparator"] is None)
+        except Exception as e:
+            check("a cell declaring NO comparator still loads", False,
+                  "%s: %s" % (type(e).__name__, e))
+
+    # The paper cells must DECLARE the recipe and the comparator, even where the trace they
+    # point at cannot be resolved on this host.
+    for name in ("cell_c_5g", "cell_d_wifi6", "cell_e_unshaped"):
+        f = here / "cells" / (name + ".json")
+        if not f.exists():
+            check("%s exists" % name, False)
+            continue
+        c = json.loads(f.read_text())
+        check("%s declares recipe L3_epg_rq30" % name, c.get("recipe") == "L3_epg_rq30")
+        comp = c.get("comparator") or {}
+        check("%s declares the comparator digest" % name,
+              comp.get("fairness_digest", "").startswith("96c1a0b4"))
+        check("%s points at the %s trace" % (name, CC.RECIPE_TRACE_SUFFIX),
+              CC.RECIPE_TRACE_SUFFIX in str(c.get("trace_dir")))
+
+
+def test_bridge_link_numbers():
+    """GATE: device_register must never carry a null uplink_mbps or rtt_ms.
+
+    The trace's own device_register leaves both unset and `FleetEmulator` fills them from its
+    per-device LinkSpec (fleet/emulator.py:497-498). Forwarding the nulls makes
+    `coordinator._ingest` raise TypeError at coordinator.py:721, registration never completes,
+    and every later event for that device raises KeyError. In the first dry-bridge run that
+    one bug produced 2,176 monitor_frame KeyErrors from 3 failed registrations, and the
+    StubCoordinator never caught it because it models no roster.
+    """
+    print("\n[bridge] gate: device_register carries real link numbers, never null")
+    import net_fleet_server as S
+
+    srv = S.NetFleetServer(S.build_stub(), 1, 10.0, 47999, 0.010, 1.0, 5.0)
+    up, rtt = srv._link_for("nobody")
+    check("an unknown device falls back to the D75 committed pair",
+          (up, rtt) == (13.6, 44.0), "got %s/%s" % (up, rtt))
+    check("the fallback is never None", up is not None and rtt is not None)
+
+    srv2 = S.NetFleetServer(S.build_stub(), 1, 10.0, 47999, 0.010, 1.0, 5.0,
+                            link_by_device={"dash000": dict(uplink_mbps=9.58, rtt_ms=22.4)})
+    up2, rtt2 = srv2._link_for("dash000")
+    check("a per-device shaped link overrides the default",
+          (up2, rtt2) == (9.58, 22.4), "got %s/%s" % (up2, rtt2))
+
+    srv3 = S.NetFleetServer(S.build_stub(), 1, 10.0, 47999, 0.010, 1.0, 5.0,
+                            default_link=dict(uplink_mbps=200.0, rtt_ms=3.6))
+    check("an explicit default_link is used",
+          srv3._link_for("x") == (200.0, 3.6))
+
+
 def test_host_timing_control():
     print("\n[control] the host's own scheduler tail, no sockets, no coordinator")
     t0 = time.monotonic()
@@ -570,6 +709,8 @@ def main(argv=None):
 
     test_shaping_actuation()
     test_cell_config()
+    test_recipe_parity()
+    test_bridge_link_numbers()
     test_uplink_queue()
     if slice_root and devs:
         test_device_sends_are_schema_valid(slice_root, devs)
