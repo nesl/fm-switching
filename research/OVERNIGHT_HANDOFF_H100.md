@@ -1,5 +1,31 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** THE D249 GATE CELL LINE IS CONFIRMED BY THE USER. QUEUE EXACTLY THIS. ***
+
+```
+covex-v6-fair-final-q 16 4 _L3_epg_rq30
+```
+**1x, NO memory token. The `_dev` label is NOT used: it is not a driver token and not reserved-inert, and a
+bare `_dev` line would have run harness defaults with no 3 s robot deadline, no EP-G workload and no 30 s
+reask. THE ARM NAME CARRIES THE D249 SWITCH (`arms_final_ladder.py:87`, `RUNG3_D249 =
+"covex-v6-fair-final-q"`), so the tag does not need to.**
+**Comparator: the COMMITTED `covex-v6-fair-final 16 4 _L3_epg_rq30_preD249` cell, which the byte-identity
+proof makes same-code and therefore valid. Single seed s4; other seeds only if it passes.**
+
+**Still gated on the two items that are MINE: the D265 byte-identity proof with `-q` OFF across every
+baseline, and your window. Expected new live2 after the push: `5edd1245654e56539474ff7fb39cd25f13beaf94`,
+computed against main at `79b00fc8`; if anything else lands in `experiments/` first I send a new one.**
+
+## THE D250 DIAGNOSIS IS MARKED UNCONFIRMED AND MAY NOT BE CITED AS A CAUSE YET
+
+**The user found the hole: the host tier never exceeded 0.311 usage, yet robot P(cold) at 30 to 120 s idle
+went from 0.000 at 27 GiB to 0.400 and 0.500 at 13.5 GiB. A tier at 31 percent does not evict without a
+mechanism.** *** AND BOTH CELLS PEAKED AT ESSENTIALLY THE SAME ABSOLUTE BYTES, 4.196 AGAINST 4.023 GiB, SO
+THE TIER SIZE DID NOT CHANGE WHAT THE ENGINE HELD. ONLY THE FRACTION MOVED. *** **What still stands: the
+declared size is an ABSENT LINK, `OFFLOAD_TO_HOST` is absent in both cells, and the 34 declines are
+measured with their read named. What is unconfirmed is only the first link, that the smaller tier caused the
+drop. A CPU investigation of the vLLM connector's eviction policy is running. NOTHING FOR YOU.**
+
 ## *** ALL FIVE REMAINING "WAITING ON YOU" ITEMS ARE ANSWERED. THE LIST IS EMPTY. FROM NOW ON REPORT "Questions waiting for you: none" UNLESS A NEW ITEM ARISES. ***
 
 **User ruling, 2026-11-25.**

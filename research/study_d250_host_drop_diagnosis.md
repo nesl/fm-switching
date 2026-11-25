@@ -2,6 +2,34 @@
 
 **CPU, committed artefacts, read-only. Nothing fixed, as the ruling required.**
 
+## *** UNCONFIRMED, BY USER RULING 2026-11-25: THE "SMALLER TIER DROPPED THE PREFIXES" READING IS NOT YET A CAUSE. ***
+
+**The user has identified a hole this diagnosis did not close.** *** THE TIER NEVER EXCEEDED 0.311 USAGE,
+YET ROBOT P(cold) AT 30 TO 120 s IDLE WENT FROM 0.000 AT 27 GiB TO 0.400 AND 0.500 AT 13.5 GiB. A TIER AT 31
+PERCENT DOES NOT EVICT WITHOUT A MECHANISM, AND NO MECHANISM IS NAMED BELOW. ***
+**Everything else in this file stands: the declared size is an ABSENT LINK (two reads, one a counter and one
+write-only), `OFFLOAD_TO_HOST` is absent in both cells, the 34 declines and their read at
+`hybrid_arm.py:412,437` are measured, and the timing rules out policy feedback as the root. WHAT IS
+UNCONFIRMED IS THE FIRST LINK ONLY: that the smaller tier is what made the engine drop the prefixes.**
+
+**And one computation sharpens the hole rather than closing it:**
+```
+13.5 GiB cell : peak usage 0.3108 x 13.5 = 4.196 GiB held at peak
+27   GiB cell : peak usage 0.1490 x 27.0 = 4.023 GiB held at peak
+```
+*** BOTH CELLS PEAKED AT ESSENTIALLY THE SAME ABSOLUTE BYTES, 4 PERCENT APART. SO THE TIER SIZE DID NOT
+CHANGE WHAT THE ENGINE ACTUALLY HELD. THE ONLY THING THAT MOVED IS THE FRACTION, 31 PERCENT AGAINST 15. ***
+**That makes one hypothesis testable and worth more than the rate-normalised argument this file originally
+rested on: IF THE CONNECTOR EVICTS ON A WATERMARK EXPRESSED AS A FRACTION OF THE CONFIGURED SIZE, then an
+identical 4.2 GiB working set crosses it in a 13.5 GiB tier and not in a 27 GiB one, with NEITHER TIER
+ANYWHERE NEAR FULL. At any watermark between about 0.16 and 0.31 that is exactly what happens.**
+**A CPU investigation is running against the installed vLLM offload connector source and the committed
+artefacts, to settle three things: what the usage gauge measures and how often it updates against our
+10 s sampling; the connector's host eviction policy and whether it evicts before the tier is full; and the
+engine-side store and evict events around each loss, timestamped against host usage.** *** "THE DATA CANNOT
+TELL" IS AN ACCEPTABLE OUTCOME AND IS BETTER THAN A MECHANISM THAT CANNOT BE EVIDENCED. UNTIL IT REPORTS,
+NOTHING BELOW MAY BE CITED AS THE CAUSE OF THE DROP. ***
+
 ## *** THE ANSWER: NEITHER. ***
 
 **The engine's 13.5 GiB host tier NEVER RAN OUT: usage max 0.3108, ZERO samples at or above 0.99, 0.90 or
