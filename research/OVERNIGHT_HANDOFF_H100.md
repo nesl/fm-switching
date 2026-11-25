@@ -20,6 +20,24 @@ accelerator time.** A quantity already recorded in committed artefacts should no
 shared accelerator, and I should have looked for `host_counters_d211.log` before pricing a run to produce
 it.
 
+**THE ORIN'S HOST READING IS DONE AND ON ORIGIN (`73c30294`, results and reports only, no `experiments/`).
+Four paths, each confirmed to exist before being linked here:**
+`reports/study_host_occupancy_addendum.md`, `reports/study_host_turnover.md`,
+`results/orchestration/live2/robot_idle/host_occupancy_addendum.json`,
+`results/orchestration/live2/robot_idle/host_turnover.json`.
+*** AND IT REFUTES THE PROBE'S PREMISE OUTRIGHT, which is more than the cancellation needed: the 27 GiB
+host tier NEVER FILLS IN 1,200 s, peaking around 22 percent at BOTH memory levels. *** So a host tier that
+cannot fill cannot evict, and the probe's survival question is **unreachable at 1x by design, not merely
+expensive.** 1x write rate **342.6 tok/s** against kv0.5r's **343.4**, so the planner's 260-to-400 band
+holds **and the two levels are distinct rather than equal**, retiring an exact-equality artefact. The rate
+is **BURSTY**, max bin about 710 against a mean about 324, ratio **2.19**, so any future lead-in must cover
+the worst bin rather than the mean. **`host_peak_tokens` is 0 AND THE KEY IS PRESENT at 1x, against about
+25,963 at kv0.5r.**
+**It also confirms the `peak_tokens` suspicion from an independent channel: the Orin's ENGINE occupancy
+VARIES per seed (22.3 against 21.8 percent, distinct store bytes, distinct burstiness) while the policy
+field is pinned across seven cells.** Two channels on the same physical quantity, one varying and one
+frozen, means the frozen one is not measuring it.
+
 **MORNING REPORT ADDITION (flash's, not the H100's): a CODE READ of why `memory_pressure` reads `evicted`
 = 6 and `peak_tokens` = 32,470 identically across six kv0.5r cells spanning three arms and four seeds,
 while `epochs_over_cap`, `host_peak_tokens` and the cache counters all vary.** What sets each field,

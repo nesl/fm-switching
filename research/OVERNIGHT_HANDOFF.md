@@ -941,6 +941,48 @@ unlike the robot counts.** `read_cell` recomputes the alert block from `outcomes
 producer; and the `cell.json -> score -> sweep[0]` path feeds only the robot and single-shot block. **Two
 separate pipes, so the same pair of cells can be confounded on one metric and clean on another.**
 
+## *** THE PAIRING RULE, SETTLED: SAME-CODE iff the orchestration subtree, the lib subtree AND three blobs all match. The whole-`experiments/` tree is REPORTED BESIDE, never INSTEAD. ***
+
+**Why the whole tree is the wrong key.** The driver pulls origin before every cell, so any session's commit
+moves the whole-`experiments/` tree. The Orin pushed two analysis commits at 19:44 and 19:48 adding six
+files under `experiments/analysis/robot_idle/`, **which no cell imports**, and the whole-tree rule
+immediately marked a run-path-identical cell as stratum B. **Left alone it would have done that every time
+anyone committed an analysis script, all night.**
+**Verified, not assumed:** `experiments/analysis/` holds 25 files and **ZERO references to it exist from
+`experiments/orchestration` or `experiments/lib`** (probe fires: the same grep form returns 45 `import
+arms` hits in orchestration).
+*** AND THE RULE IS SCOPED BY `sys.path`, NOT BY A HAND-WRITTEN PAIR OF NAMES, which is what keeps it from
+going stale. *** Enumerated from the code by the H100: `coordinator.py:44-49` iterates over
+`experiments/orchestration/live2`, `.../live`, `.../baselines`, `.../baselines/reconstructed`, `.../sim`
+and `experiments/lib`; `run_live2_real.py:44-49` adds `fleet`, `scorer`, `hybrid` and the same set, with
+`:725` adding `experiments/orchestration`; `procsplit.coordinator_process` adds its own subset. **Every
+importable path lies inside `experiments/orchestration` or `experiments/lib`, so the two-subtree rule IS
+the `sys.path` scope today.** **If a third subtree is ever added to `sys.path`, the rule extends to it
+automatically and every pair must be re-derived.**
+**I did NOT ask the Orin to freeze `experiments/analysis`.** Freezing a path no cell imports would be a
+cost with no benefit.
+
+## *** THE FIRST SAME-CODE REPLICATE PAIR IN `L3_epg_rq30` NOW EXISTS, AND IT GIVES THREE METRICS A FLOOR THEY HAVE NEVER HAD. ***
+
+`covex-v6-fair-final` kv0.5r s4 `_rep2` against `_rep3`, both on `experiments/` tree `3932b279c3ea`, both
+`source_agreement` OK. **Observed differences, n = 1 PAIR, which cannot support a percentile, a spread or a
+confidence statement:**
+```
+robot cloud on-time        2 opportunities   (the cross-regime floor was ONE)
+robot correct-by-deadline  2                 *** FIRST DATA POINT EVER: previously n=0, NOT MEASURABLE
+single-shot served         4 of 357          *** FIRST EVER
+dashcam on-time            2                 *** FIRST EVER
+```
+**So the robot on-time floor DOUBLES in our own condition**, and three metrics that had none now have one.
+**This retires a claim of mine:** I reported `-notouch`'s single-shot `+12` and dashcam `+383` as
+**UNFLOORED**. They now have floors of 4 and 2 and survive at about 3x and far above. **And `-notouch`'s
+robot NET difference of 0 sits INSIDE a floor of 2, which strengthens the no-difference reading.**
+*** THE SHARPEST THING IN THE PAIR IS THE CONTRAST BETWEEN THE STRATA: the comparator's dashcam ranges
+6,244 to 6,398 ACROSS CODE VERSIONS, a spread of 154, against 2 WITHIN THE SAME CODE. A 77-fold
+difference. *** That is the demonstration that the stratum distinction is not pedantry: "same code,
+different run" and "different code, different run" are not the same quantity, and a floor built from the
+second would be 77 times too wide on this metric.
+
 ## *** `git diff --name-only <A> <B>` AGAINST AN UNRESOLVABLE SHA RETURNS AN EMPTY DIFF AND EXITS 0, WHICH READS AS A SAME-CODE PROOF. IT ALMOST MANUFACTURED THE EXACT FLOOR WE HAVE BEEN MISSING. ***
 
 The floor study's own same-code test is: "where the headers' shas differ, run
