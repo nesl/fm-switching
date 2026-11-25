@@ -91,10 +91,10 @@ cell() {   # arm n seed [tag]
   # D151 WARM-ALL calibration, PROVISIONAL (user away; pre-registered default): "0.5x / 0.25x GPU pool" is the harness's
   # LOGICAL pool with enforcement on (coordinator belief and enforcement); the engine's real pool is pinned and unchanged
   case "$tag" in *_kv0.5*) lflag="$lflag --gpu-kv-tokens 31472";; *_kv0.25*) lflag="$lflag --gpu-kv-tokens 15736";; esac
-  # v37 (D230 (7), user 2026-11-24): EVERY cell scrapes the engine /metrics and records metrics_health. The flag is
-  # passed EXPLICITLY on every cell, so it holds whatever the runner's default is. The _ms tag token from v36 is now
-  # a NO-OP retained for PARSE COMPATIBILITY ONLY: an _ms cell run by v37 does not differ from any other v37 cell.
-  lflag="$lflag --metrics-scrape"; wl_ms=" metrics-scrape"
+  # v36 (flash 2026-11-24, rung-4 pass 1 at 0.5x): a tag token _ms turns the engine /metrics scrape ON for that cell
+  # (runner --metrics-scrape; the runner default is OFF since 3b610470). Matched as a whole token, so the cell name says
+  # it scraped and no arm is special-cased.
+  case "${tag}_" in *_ms_*) lflag="$lflag --metrics-scrape"; wl_ms=" metrics-scrape";; *) wl_ms="";; esac
   # D153: a cell tagged _epg runs the EP-G dashcam episode workload with the arguments flash's commit put in EPG_ARGS;
   # a cell without it is dashcam-1f (one frame per call), recorded in its label
   local wl="dashcam-1f upload-30s"; case "$tag" in *_cal1f*) wl="CALIBRATION-1F dashcam-1f upload-30s";; esac
@@ -131,12 +131,16 @@ cell() {   # arm n seed [tag]
   # stopping the cell with SIGINT (atexit stops the server) if it is not. Every cell restarts the server, so the next cell
   # is on the standard server again.
   local sxf=""
+  # v37 (2026-11-24): an automatic rerun is tagged ..._rerun, but its server flags live on the ORIGINAL list line, so
+  # the lookup strips trailing _rerun tokens (before v37 a kv0.5r rerun got NO flags: under v35 it would have run on
+  # the FULL pool under a 0.5x name; v36's pre-launch assertion refused it instead, and the cell was skipped).
+  local _ltag="$tag"; while [ "${_ltag%_rerun}" != "$_ltag" ]; do _ltag="${_ltag%_rerun}"; done
   # v30 (D189, user ruling 2026-11-23 ~07:40: REAL engine 0.25x): server flags may come from fields 5+ of ANY GATED list
   # (C5DIAG_CELLS or any list recorded with its current sha256 in V6_GATE_OK); the first gated match wins
   local _f
   for _f in C5DIAG_CELLS $(awk '{print $1}' $OUT/V6_GATE_OK 2>/dev/null | sort -u); do
     grep -qx "$_f $(sha256sum $OUT/$_f 2>/dev/null | cut -c1-64)" $OUT/V6_GATE_OK 2>/dev/null || continue
-    sxf=$(grep -v '^#' $OUT/$_f 2>/dev/null | awk -v a="$arm" -v n="$n" -v s="$seed" -v t="$tag" '$1==a && $2==n && $3==s && $4==t {for (i=5;i<=NF;i++) printf "%s ", $i}' | head -1 | sed 's/ *$//')
+    sxf=$(grep -v '^#' $OUT/$_f 2>/dev/null | awk -v a="$arm" -v n="$n" -v s="$seed" -v t="$_ltag" '$1==a && $2==n && $3==s && $4==t {for (i=5;i<=NF;i++) printf "%s ", $i}' | head -1 | sed 's/ *$//')
     [ -n "$sxf" ] && break
   done
   # a KV / context override is a D189 EDGE CONDITION (reported in the usual table), not an engine-flag diagnostic
