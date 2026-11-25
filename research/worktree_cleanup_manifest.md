@@ -849,7 +849,14 @@ established.
 | build records | `/home/pragya/fm_archive/2026-11-24/rung4p1_build_records` | 123 | 2.2 | `d1535bdbdbe24d192a4a35728dc0c341d8408f1020d44833a90b91c5edfb318e` | **both**: per-file `cmp` (0 mismatches) **and** tree sha256 |
 
 The tree sha256 is taken over sorted repo-relative paths with each path, its byte size and its
-content fed to one digest, so a renamed or truncated file changes it. Both archives were verified
+content fed to one digest, so a renamed or truncated file changes it. **Reproducing the two
+hashes:** `rung4p1_contaminated_e2`'s digest covers the directory exactly as it stands, all 6,588
+files, and was re-derived after the source was deleted and still matches. `rung4p1_build_records`'s
+digest `d1535bdb` covers the **123 mirrored files only**, which is the set that was compared
+against the source; the directory as it stands also holds the 5 files of `_e6_divergent_files/`,
+which have no counterpart in the source layout, so a digest over the whole directory is
+`6df5f86fcaa6930337e03757ce7ff3b8c88e352675bf2eecfef3af63178e70b7` instead. Both figures are given
+so that neither reads as a mismatch. Both archives were verified
 **before** the source was touched. `rung4p1_contaminated_e2_EVIDENCE.txt` sits beside the archive
 and carries the base sha, the divergent paths with the git blob sha of the archived copy against
 the base blob, the DEVICE_ANSWERS reference count per file, and the six points above, so the
