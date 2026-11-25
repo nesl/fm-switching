@@ -748,6 +748,41 @@ different one in the pattern. **Fixing it means matching the interpreter and the
 `--permission-mode`, not an adjacency of two flags.** Not fixed here: this session is standing down, not
 editing live-path files, and the flag makes it moot until the user rules.
 
+## *** D233 AND D234: THE FREEZE CANDIDATE IS RUNG 3, THE COUNTERFACTUAL IS JUDGED BY ABLATION RATHER THAN BY A NEW BUILD, AND NETWORK HANDLING IS NOW P1. (user, 2026-11-24, provisional) ***
+
+**The reframing.** The counterfactual's paper role is **state management under memory and network change**.
+Rungs 2 and 3 **already** run the state planner - 65,044 to 67,676 state decisions per cell with 2,386 to
+2,680 deviations, **almost all TOUCH** - and **no committed `plan_state`-off ablation exists**, so its
+contribution has never been measured. Meanwhile the request-side legs failed on their own evidence:
+`covex-v6-final-nqd` kv0.5r s4 gave robot cloud on-time **66 of 132 against rung 3's 121** and
+correct-by-deadline 0.485 against 0.621, with DEVICE_ANSWERS firing 55 times, **all on robots**. D233's
+reading: the request-side legs **move value between types**, and with weights floored at 1 they **shed
+robots for surplus alerts**.
+
+*** D234 AMENDS D233 (2) AND THE AMENDMENT IS THE IMPORTANT PART: `covex-v6-final-kr` IS NOT BUILT. *** The
+25-to-44-hour estimate stands as **recorded future work** in `reports/study_kr_estimate.md`, and **the (a)
+reachability gate is not started.** "Does the counterfactual help" is answered by **ablating rung 3**, which
+costs two cells rather than two session-days:
+- **`covex-v6-fair-final-stateoff`**, the **STATE-CHANNEL** ablation - and it must be labelled that way,
+  because `plan_state=False` also disables **offload controls, touch requests, state-priced costs and
+  belief apply**, five factors rather than one. Pre-registration **StudyD233-STATEOFF**.
+- **`covex-v6-fair-final-notouch`**, the **ONE-FACTOR** ablation: the planner decides and its **TOUCH**
+  choices - **99.8 percent of its deviations** - are **not enacted**.
+
+**The noise floor is now a rule, not a caveat.** The 95th percentile of the absolute difference across
+committed same-arm, same-seed, same-condition rerun pairs, for per-episode alert attainment, robot on-time
+and robot correct-by-deadline. **A difference inside the floor is reported as NO DIFFERENCE, and today's
+four attainment verdicts are re-read against it.** This matters because every one of them sat at magnitude
+**0.010 to 0.016** with the floor unmeasured.
+
+*** THE FREEZE CANDIDATE IS RUNG 3, `covex-v6-fair-final`, WHICH CONTAINS THE COUNTERFACTUAL STATE PLANNER.
+AND THE FREEZE IS RUNG 3 PLUS NETWORK HANDLING. *** That ordering is the point: network handling must land
+**before** the freeze, so the post-freeze network cells test **the frozen policy** rather than a policy that
+changed underneath them. Per-device link estimate in the feasibility checks (D30, D226 (1b)); outage
+handling (the connectivity flag going live, device buffering, reconnect upload, type-aware backlog);
+`plan_sync` on the live path. **Everything behind switches defaulting OFF and byte-identical when off, with
+no network cells until the user rules on the freeze.** Then seeds 1 to 3 come off hold.
+
 ## *** D232: QUESTION DEFERRAL IS REMOVED FROM RUNG 4. THE NEW ARM IS `covex-v6-final-nqd`. (user, 2026-11-24, revisit later) ***
 
 **Rung 4 is now rung 3 + protect-and-defer + DEVICE_ANSWERS + the deficit-fed state planner, with the
