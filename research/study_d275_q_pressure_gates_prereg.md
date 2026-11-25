@@ -22,6 +22,15 @@ number I do not write into a pre-registration.**
 **The TOUCH delta is reported; ITS DIRECTION IS NOT A CRITERION. At 1x the `-q` arm touched 906 against
 rung 3's 2,674, and fewer is the expected direction.**
 
+## *** CORRECTION, 2026-11-25T23:30:04Z: BOTH COMPARATORS READ `source_agreement` **OK**, NOT ABSENT. MY CLAIM WAS WRONG AND IT IS WITHDRAWN. ***
+
+**I read `header.source_agreement` inside `cell.json`. THAT FILE HAS NO `header` KEY AT ALL: the header is a
+SEPARATE `header.json`, where both comparators read verdict OK.** *** SO THE PROVENANCE WEAKNESS I RECORDED
+ABOVE DOES NOT EXIST. A FALSE WEAKNESS IN A PRE-REGISTRATION IS WORSE THAN NONE, BECAUSE IT DISCOUNTS A
+SOUND COMPARATOR. *** **Same class as reading `run_meta.n_errors` earlier today when `n_errors` is
+top-level: a wrong key path reported as an absence. Check 7 still runs on each comparator; it will now
+record OK rather than an absence.**
+
 ## UNCHANGED
 **Check 7 on each comparator before its comparison is read; robot cloud on-time never quoted alone, with
 cloud-correct, device-correct and cloud accuracy on served beside it; an unfloored dashcam delta reported as
