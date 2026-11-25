@@ -1,6 +1,46 @@
 # D243: a replacement liveness gate for `ops/watchdog.sh`. PREPARED AND PROVED IN SCRATCH. NOTHING INSTALLED.
 
-**Status: the ruling says "Report the diff before installing it", so nothing is installed and
+*** STATUS SUPERSEDED 2026-11-25: IT IS NOW INSTALLED, ON USER RULING D254. The two statements below
+that nothing is installed and that `ops/watchdog.sh` is byte-identical to origin/main ARE BOTH NOW FALSE,
+and are left in place rather than quietly edited so the sequence is legible. ***
+```
+ops/watchdog.sh        5d638dc6b7e81ca7efbc170bd2f6be14  ->  6ab97a8770add0aeb9e28fb894749014
+ops/session_runner.sh  absent -> installed, 2,108 bytes, mode 755
+origin/main still carries the OLD file: ops/ is UNTRACKED, so the install is invisible to git
+ops/STANDDOWN NOT deleted, expiry 2026-11-25 23:59 PST
+```
+**BOTH MANDATED POST-INSTALL PROOFS PASS, run on the INSTALLED bytes with the FULL gate and not only
+`--classify`, which is the invocation that would actually restart:**
+- **LIVE worker** (real work: 1,332 file hashes, 122 MB in 3 s; lease written by the installed
+  `session_runner.sh` itself, not by hand) -> **LIVE, declined. No `watchdog.state` written, no tmux session
+  created, worker untouched.**
+- **COMPLETED** (rc=0, process gone) -> **COMPLETED, declined.** **The old gate on this identical state
+  would have restarted it**, because `ops/heartbeat` is 0 bytes with no writer and its age gate was
+  unconditionally stale.
+- **POSITIVE CONTROL, because two declines prove nothing if the harness cannot restart: a lease saying
+  RUNNING on a reaped pid -> DIED -> `watchdog.state` WRITTEN and a tmux session CREATED.** **And the
+  restarted session was verified to run the test worker, NOT a real `claude`, so no Claude session was
+  spawned by the proofs.**
+
+*** A DEFECT FOUND AT INSTALL THAT CONTRADICTS THIS DOCUMENT'S OWN CLAIMS, VERIFIED ON THE LIVE FILE:
+`--classify` PRINTS NOTHING WHILE `ops/STANDDOWN` EXISTS. ***
+```
+$ ops/watchdog.sh --classify
+stdout=[]  rc=0
+CLASSIFY_ONLY is set at line 37 and honoured at line 172, but the STANDDOWN gate exits at line 102.
+```
+**So `--classify` is NOT a pure classifier: a standdown swallows it.** *** CONSEQUENCE FOR THIS FILE: THE
+THREE PRE-INSTALL PROOFS RECORDED BELOW AS "PRODUCED WITH THIS FLAG" CANNOT HAVE BEEN RUN AGAINST A TREE
+WITH A LIVE STANDDOWN. They were run against a throwaway tree via the file's own `WATCHDOG_REPO` hook,
+which had no standdown, and that is the register they belong in. *** **The post-install proofs above are in
+the same register and marked so: the installed file's exact bytes, exercised against a scratch tree,
+because proving against the live path would require deleting the standdown, which was forbidden.**
+**THE FIX IS A TWO-LINE REORDER (move the classify check above the standdown gate) AND IT WAS DELIBERATELY
+NOT MADE: it changes gate behaviour, it is unruled, and installing a changed gate would mean installing
+something that was not the proved artefact.** **It is the one thing standing between these proofs and
+reproducibility against the live repo.**
+
+**Original status line, retained for the record:** the ruling said "Report the diff before installing it", so at the time of writing nothing was installed and
 `ops/watchdog.sh` is byte-identical to origin/main (md5 `5d638dc6b7e81ca7efbc170bd2f6be14` both ways).**
 Precedent for this form: `research/study_fix102_prepared.md`, prepared and not applied.
 **Full candidate files and the 263-line diff:**
