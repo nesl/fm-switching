@@ -1429,3 +1429,12 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | n | 28 of 28 valid: block A 9 (kv0.5r s5/s6/s7 interleaved by seed), `ptg` 1, block B 8 baselines, block C 7 ladder, block D 4 (`-notouch` 1x s4-s7). `source_agreement` OK on every cell; no ENOSPC, no INVALID, no reruns |
 | headline | **BLOCK A: `-stateoff` negative at all three seeds and DECLINING MONOTONICALLY (1.77x, 1.10x, 0.87x against the 0.027752 bar), so the halved-pool state-channel effect is seed-dependent and NOT decisive at kv0.5r; `-notouch` INSIDE the bar at all three seeds (0.62x, 0.39x, 0.99x).** The registered sign prediction for s7 was POSITIVE (+373 over 13,566) with magnitude excluded in advance, and **the two scales DISAGREE about s7 separability (fixed-19 INSIDE by 257 millionths, true-denominator OUTSIDE at 1.122x), so any claim must name the scale.** **BLOCK D: the touches factor is NOT established as load-bearing at 1x on any channel; `correct_by_deadline` moves -1, 0, 0, 0 against denominators 132/127/121/105, and s4 and s7 at comparable doses (ratio 1.19) give dashcam deltas differing by 8.8x, so the effect does not track the dose. RULE 2: FIRED AND DID NOT HELP.** Also recorded: an s7 end-of-window stall in 6 of 11 cells (bounded, five hypotheses eliminated, cause not diagnosed, no figure moves); the piece-size lattice SCOPED to two arms after remainders were found in two others; and a hypothesis that remainder emission tracks the state channel across nine cells |
 | old name | none; new study |
+
+## StudyORACLE LP build status (2026-11-25, Orin)
+
+| field | value |
+|---|---|
+| result files | `reports/study_oracle_lp_status.md`; LP core `experiments/analysis/oracle/oracle_lp.py` |
+| model/device | none; offline CPU on `jetson_orin`; read-only, no images; D240 1x and kv0.5r separate |
+| headline | oracle LP transportation core built and UNIT-TESTED (6 hand-checked cases PASS: value maximization, Step-2b capacity-bind, fractional serving, disjoint windows, greedy<=LP, negative-value dropped). Stage 1 (trace W_q digest MATCH) and Stage 2 (W_q<=logged, 0 violations: ss 356/356, recall 54/54, dashcam 9743/9743 at s4 1x) verified. NO bound emitted yet; remaining stages = recall acc_cloud wiring, dashcam max-over-subsets (D197), FAIR+HINDSIGHT, per-arm shares + clustered bootstrap, s4-s7 x {1x,kv0.5r}, STOP gate. |
+| old name | none; staged build |
