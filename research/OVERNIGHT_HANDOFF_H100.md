@@ -44,6 +44,45 @@ counts that let either reading be computed later. That is D251 working as intend
 the headline at plotting time.**
 **Item 4 means the push no longer needs a user decision. It needs the D265 proof to pass and your window.**
 
+## *** USER RULING D273 (2): THE D250 DASHCAM CLAUSE, CLARIFIED. THIS IS AN INTENT CLARIFICATION, NOT A CHANGE. APPLY IT BEFORE mooncake AND eco-llm ARE SCORED. ***
+
+*** RUNG 3's DASHCAM ON-TIME IS COMPARED AGAINST **THE SAME BASELINE ITS ROBOT cbd IS COMPARED AGAINST**,
+WHICH IS THE BEST BASELINE ON ROBOT cbd. NOT AGAINST ALL OF THEM, AND NOT AGAINST THE BEST DASHCAM ARM. ***
+**AND REPORT THE FULL DASHCAM TABLE FOR ALL SIX BASELINES BESIDE THE VERDICT, NAMING EVERY BASELINE THAT
+BEATS RUNG 3 ON DASHCAM BEYOND THE SAME-CODE OBSERVATION.**
+
+**The dashcam same-code observation, so "beyond" is computable: the three `kv0.5r` host-27 s4 reps span
+6,244 to 6,398, a range of 154 counts on 11,764. USE 154 AS THE DASHCAM BAR unless you have a better
+replicate set, and say which you used.**
+```
+arm                 cbd   dashcam   vs rung 3's 6,112
+rung 3               72     6,112    -
+covex-v6-base        61     5,301    -811          <-- the cbd WINNER so far
+confidence-cascade   56     1,972   -4,140
+llf                  48     6,641    +529   BEATS, and beyond the 154 bar
+simplestream         22    10,988   +4,876  BEATS, and far beyond
+```
+*** SO THE CLARIFICATION CHANGES THE READING: THE cbd WINNER IS `covex-v6-base`, AND RUNG 3 BEATS IT ON
+DASHCAM BY 811 COUNTS. UNDER THIS CLAUSE BOTH CONDITIONS HOLD AGAINST THE RELEVANT COMPARATOR, AND THE TWO
+ARMS THAT BEAT RUNG 3 ON DASHCAM ARE NOT THE cbd WINNER. *** **That is exactly why the full table is
+reported beside the verdict rather than folded into it: the clause is satisfied and the table is still the
+honest picture.**
+**If mooncake or eco-llm takes the cbd lead, THE DASHCAM COMPARATOR MOVES WITH IT. Recompute, do not carry
+`covex-v6-base` forward.**
+
+## USER RULING D273 (1): NESTOUT MOVES TO TRUE OUTAGE SEMANTICS. NOT YOUR TIME YET.
+
+**Frames a victim captures during the outage are LOST TO THE CLOUD, not buffered and not drained on
+reconnect. The DEVICE still holds them, so its own history is intact. A new outage-semantics switch, DEFAULT
+OFF, recorded in the cell tag and the meta; THE BUFFERED BEHAVIOUR STAYS THE DEFAULT EVERYWHERE ELSE. D, the
+centred window and the nested victims are unchanged.**
+**The buffered variant is recorded as the CLOSED ALTERNATIVE at `722c449f`, where the missed-evidence dose
+was zero because the drain is 0.88 s.**
+*** AND THE QUEUE CONSEQUENCE FOR YOU: THIS IS A CODE CHANGE ON THE RUN PATH, SO IT GOES THROUGH ITS OWN
+PUSH WINDOW WITH ITS OWN BYTE-IDENTICAL PROOF, NEVER DURING A CELL'S START-UP. Position unchanged: after the
+D262 s5 confirm and before the D244 remainder, once the build and proofs are committed. SO EXPECT A SECOND
+WINDOW REQUEST FROM ME LATER, AND IT IS NOT THE `-q` ONE. ***
+
 ## *** THE s5 CONFIRM PLACEMENT IS SETTLED BY THE USER: BEFORE NESTOUT, AS THE GATE FILE ALREADY HAS IT. NO SPLIT. ***
 
 **The escalated question is closed. `D262_REGIME_CELLS` stays as ONE list and is NOT split.**
