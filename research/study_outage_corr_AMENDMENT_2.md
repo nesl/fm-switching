@@ -101,6 +101,52 @@ reconcile the two statements themselves. ***
 - **No 0.25x. Never seeds 1 to 3. Disk refusal below 15 GB. Outage work at 1x only, never stacked with
   reduced memory (D240).**
 
+## *** ADDED 2026-11-25 08:4x, BEFORE ANY k-EFFECT IS READ: k = 5's OUTAGE IS NOT k = 3's OUTAGE PLUS TWO ROBOTS ***
+
+**Measured on the first two gate cells, both `covex-v6-fair-final` at seed 4:**
+```
+k = 3   victims robo003, robo005, robo006      window  786.901505 - 906.901505 s   deferred 180
+k = 5   victims robo001, robo002, robo003,     window  509.505651 - 629.505651 s   deferred 299
+                robo004, robo005
+```
+*** THE VICTIM SETS DO NOT NEST - `robo006` is a victim at k = 3 and NOT at k = 5 - AND THE WINDOWS DO NOT
+OVERLAP AT ALL, being 157 s apart. *** **The cause is in the committed code: `trace.py`'s
+`rng_stream_key` is `"outage|<seed>|<offset>|<k>|<D>"`, so k is part of the placement draw and changing k
+re-draws BOTH the victims and the window.**
+**CONSEQUENCE: ANY k = 3 AGAINST k = 5 CONTRAST CHANGES THREE THINGS AT ONCE - the number of robots, which
+robots, and WHEN IN THE RUN the outage falls.** **The third may matter as much as the first: a different
+window means a different episode phase and a different cache state.** *** SO NO k-EFFECT MAY BE READ FROM
+THIS GRID. k = 3 and k = 5 are two separate conditions, not two doses of one. ***
+**This is the same shape as the dose-and-seed confound recorded for the touch ablation, and it is recorded
+here BEFORE any cell is scored rather than after a difference is seen.**
+
+**WHAT IS NOT AFFECTED, and it is the study's actual question: THE ARM-VERSUS-ARM CONTRAST IS CLEAN.** All
+five arms at a given k share the same seed, the same victims and the same window - confirmed on the k = 3
+gate cell, whose victims and window reproduce the dry run's to six decimals across five arms. **The
+prediction under test is "rung 3 keeps offline histories, baselines and `-stateoff` lose them", which is an
+arm contrast within a k. That contrast is unharmed.**
+**A FIX EXISTS IF THE USER WANTS A k-EFFECT: drop k from the placement key so the window is shared and the
+victim sets nest. It is a code change plus a re-run of the k = 5 cells, and it is the user's call, not
+mine.**
+
+## THE METRIC CONFLICT, SHARPENED BY THE FIRST GATE CELL'S RUN-LEVEL DATA
+
+**On `covex-v6-fair-final` k = 3 s4: the 132 robot rows are 128 cloud (121 within L, 7 late) and EXACTLY 4
+with no cloud payload. Those 4 are all `robo003`, all inside the window, and they have ZERO request rows -
+never sent to the cloud, as the outage requires.**
+*** AND THEY COUNT AGAINST CLOUD ON-TIME BY CONSTRUCTION: 121 of 132 includes them in the denominator.
+AMENDMENT 2's Conflict 1 is therefore CONFIRMED on data rather than argued from the schema. ***
+**But the sharpening matters and runs in the policy's favour: the outage is IDENTICAL across all five arms
+at a given k, so those 4 are a COMMON penalty, not a bias. A common additive penalty shifts every arm down
+equally and does NOT destroy discrimination between arms.** **So cloud on-time can still rank the arms on
+the other 128 questions.**
+*** WHAT IT CANNOT DO IS SEE THE DEVICE-ONLY PATH AT ALL, and `t_local` IS NULL ON EVERY ROBOT ROW, so the
+device answer is not timestamped either. BOTH ROBOT METRICS ARE BLIND TO THOSE 4 QUESTIONS, in opposite
+ways. *** **Therefore: the 4 device-only questions are UNMEASURABLE in this grid and must be reported as a
+count, never scored as successes or failures. The discriminating signal has to come from the
+history-cached observable on the POST-RECONNECT questions, which is exactly why that observable is
+collected.**
+
 ## What would invalidate a run of this grid, declared in advance
 
 1. **A zero characteristic-decision count in any cell**: that cell is an ABSENT LINK and is not a negative.
