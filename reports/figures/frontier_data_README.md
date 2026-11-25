@@ -33,7 +33,7 @@ For every scorable cell the D179 scorer re-derives the counts from the raw logs.
 
 ## Arm families present (scorable)
 
-always-cloud-fcfs, attentionstore-prefetch, b7-edf-feasibility, base, cascade-routing, covex-v6-fair-c5attr-rr, covex-v6-fair-final, covex-v6-fair-final-notouch, covex-v6-fair-final-stateoff, covex-v6-final, covex-v6-final-nqd, covex-v6-state-final, eco-llm, edf, fair-c5attr, fair-c5attr-gain0, joint-c3, kvflow-prefetch, llf, lmcache, mooncake, querystream-proactive, r3-streaming, rules, shares, shares-r1, shares-r2, simplestream, state, state-uo, state-uo-c5attr, streamscout, v5-rules-old, warm-all-lru
+always-cloud-fcfs, attentionstore-prefetch, b7-edf-feasibility, base, cascade-routing, covex-v6-fair-c5attr-rr, covex-v6-fair-final, covex-v6-fair-final-notouch, covex-v6-fair-final-ptg, covex-v6-fair-final-stateoff, covex-v6-final, covex-v6-final-nqd, covex-v6-state-final, eco-llm, edf, fair-c5attr, fair-c5attr-gain0, joint-c3, kvflow-prefetch, llf, lmcache, mooncake, querystream-proactive, r3-streaming, rules, shares, shares-r1, shares-r2, simplestream, state, state-uo, state-uo-c5attr, streamscout, v5-rules-old, warm-all-lru
 
 base and rules each cover two raw arm names at different memory: base = hybrid-F-lhreq-noc3 (1x) and covex-v6-base (0.5x); rules = v5-rules-2 (1x) and covex-v6-rules (0.5x).
 
@@ -205,6 +205,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 - attentionstore-prefetch_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - b7-edf-feasibility_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - b7-edf-feasibility_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
+- confidence-cascade_n12_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - confidence-cascade_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
 - confidence-cascade_n8_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-base_n12_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
@@ -231,6 +232,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 - covex-v6-state_n16_s6_1200s_h27_3t_L3_epg_rq30: preflight-only stub, absent: outcomes.jsonl.gz
 - covex-v6-state_n16_s7_1200s_h27_3t_L3_epg_rq30: preflight-only stub, absent: cell.json, outcomes.jsonl.gz
 - eco-llm_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
+- eco-llm_n8_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - edf_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - edf_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - llf_n16_s4_1200s_h27_3t_L2.5_epg_rq30: name did not match the rq30 cell pattern
@@ -242,8 +244,10 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 - mooncake_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
 - mooncake_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - mooncake_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
+- mooncake_n8_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - querystream-proactive_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - querystream-proactive_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
+- simplestream_n12_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - simplestream_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
 - simplestream_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - simplestream_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
@@ -254,7 +258,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 
 ## Provenance
 
-- runs dir last commit: 88194372
+- runs dir last commit: 7d2c457d
 - scorer score.py last commit: cb9120cc
 - d179_rung2_verdict.py last commit: cd580554
 - build time is deliberately NOT stamped here: the output is byte-deterministic given the input. The git commit of this file is the build time of record.
