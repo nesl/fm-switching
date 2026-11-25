@@ -1,5 +1,50 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** D257, USER RULING 2026-11-25 10:38, PROVISIONAL. ONE PART OF THIS CHANGES EVERY REPORT YOU WRITE. ***
+
+### *** (3) FIRST, BECAUSE IT IS A STANDING RULE: NEVER QUOTE ROBOT CLOUD ON-TIME ALONE. AGAIN. ***
+**Always report, together:**
+```
+robot cloud ON-TIME          |   robot cloud ACCURACY ON SERVED   |   CORRECT-BY-DEADLINE
+```
+*** THE FACT THAT FORCES IT: at n16 s4 1x, `simplestream` is on time for 132 OF 132 ROBOT QUESTIONS - a
+perfect score - and its cloud answers are CORRECT 14 PERCENT, with correct-by-deadline 0.14, BELOW THE
+DEVICE-ONLY 0.37. Rung 3 is 65 percent and 0.63. ***
+**So `simplestream` delivers every answer on time and its answers are WORSE THAN NOT ASKING THE CLOUD AT
+ALL. On-time alone ranks it FIRST; correct-by-deadline ranks it BELOW DOING NOTHING.**
+**This is not new in kind and that is the point: D152 (1) recorded the same shape (an arm delivering 2.3x
+the on-time rate with no more correct answers, because its on-time answers used RECENT at 11 percent
+against the device's 25 percent), and CLAUDE.md records an accuracy column whose spread tracked only how
+many questions each arm DELIVERED and ranked the arms BACKWARDS.** **A fast wrong answer is not a win and
+the metric must not let it look like one.**
+
+### (1) FOUR BASELINE CELLS AT 20 DEVICES
+```
+arms   simplestream | llf | mooncake | confidence-cascade
+cell   n 20, seed 4, 1x, tag _L3_epg_rq30
+```
+*** NO `_preD249` ON THESE: baselines are not re-run with the D249 arm, so the token would promise a re-run
+that is not coming. ***
+**PLACEMENT, exactly as ruled: AFTER the D250 s4 set (the gate cell plus its six baselines) and BEFORE the
+D244 seed-4 remainder.** *** DO NOT DISTURB THE D250 GATE PROCEDURE: its gate cell still runs first and its
+three readings still come to flash before any D250 baseline is un-commented. ***
+**SCORE EACH against `covex-v6-fair-final` n20 s4 `_preD249` (the P1 cell 1 you already have) on: robot
+cloud on-time, ROBOT CLOUD ACCURACY ON SERVED, correct-by-deadline, WORST ROBOT, dashcam on-time PER DEVICE
+against the 0.25 target, single-shot.** **Plus the D253 memory diagnostics: host occupancy (both readings),
+evictions, idle-robot P(cold) with its decile distribution.**
+
+### WHERE P2 SITS, AND THIS PLACEMENT IS FLASH'S CALL, NOT THE RULING'S
+**D257 does not mention P2. D253's order stands ("the order holds unless a new ruling changes it") and the
+09:50 ruling made the pressure pilot THE CRITICAL PATH, so P2 runs after P1 and BEFORE the D250 set:**
+```
+P1 n24 (running) -> P2 rq10 -> D250 s4 gate + 6 baselines -> the FOUR n20 baselines -> D244 s4 remainder
+```
+**If the user wants D250 ahead of P2, that is one line and nothing is wasted.**
+
+### (2) NOT YOURS: the robo001 diagnosis
+**Flash is diagnosing, on CPU from committed artefacts only, why `robo001` got 4 of 17 robot questions on
+time in the P1 n20 cell while every other robot got 74 to 100 percent. No GPU, no cells, nothing fixed.**
+
 ## *** THE "WAITING ON YOU" LIST IS CLOSED DOWN TO TWO ITEMS. STOP LISTING THE OTHER TWELVE. ***
 
 **User ruling 2026-11-25. From now on list ONLY items that are genuinely open.**
