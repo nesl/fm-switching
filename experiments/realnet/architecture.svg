@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600" font-family="system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
+<title>StudyREAL-NET architecture</title>
+<desc>Four real Jetson Orins and twelve emulated devices on flash, both shaped through Mininet-WiFi, reaching an unchanged live2 coordinator on the H100 where only the 32B model uses GPU.</desc>
+<rect width="900" height="600" fill="#ffffff"/>
+<text x="24" y="34" font-size="17" font-weight="600" fill="#111">StudyREAL-NET: 4 real Orins + 12 emulated on flash, one unchanged coordinator</text>
+<text x="24" y="54" font-size="12" fill="#555">Floors measured 2026-11-25 with real 59,601 B round trips, 200 samples per host. Shaping adds (target - floor p50).</text>
+
+<rect x="24" y="80" width="250" height="150" rx="10" fill="#e1f5ee" stroke="#0f6e56" stroke-width="1"/>
+<text x="40" y="104" font-size="13" font-weight="600" fill="#085041">4 real Jetson AGX Orin</text>
+<text x="40" y="126" font-size="11.5" fill="#0f6e56">device_agent.py, CPU only</text>
+<text x="40" y="145" font-size="11.5" fill="#0f6e56">trace slice on local disk</text>
+<text x="40" y="164" font-size="11.5" fill="#0f6e56">profiled answer table (D201)</text>
+<text x="40" y="183" font-size="11.5" fill="#0f6e56">UplinkSender: FIFO, records queue_s</text>
+<text x="40" y="207" font-size="11" fill="#0f6e56">floor 0.55 to 1.37 ms, jitter 0.13 to 0.37</text>
+<text x="40" y="223" font-size="11" fill="#0f6e56">802.11ac radios, unused: all paths Ethernet</text>
+
+<rect x="24" y="250" width="250" height="132" rx="10" fill="#e6f1fb" stroke="#185fa5" stroke-width="1"/>
+<text x="40" y="274" font-size="13" font-weight="600" fill="#0c447c">12 emulated on flash (A6000)</text>
+<text x="40" y="296" font-size="11.5" fill="#185fa5">emulated_fleet_client.py</text>
+<text x="40" y="315" font-size="11.5" fill="#185fa5">one thread + one socket per device</text>
+<text x="40" y="334" font-size="11.5" fill="#185fa5">same wire, same fallback logic</text>
+<text x="40" y="358" font-size="11" fill="#185fa5">floor 0.761 ms, jitter 0.032 (11.6x</text>
+<text x="40" y="374" font-size="11" fill="#185fa5">steadier than orin-1): cleaner instrument</text>
+
+<rect x="320" y="150" width="190" height="162" rx="10" fill="#faeeda" stroke="#854f0b" stroke-width="1"/>
+<text x="336" y="174" font-size="13" font-weight="600" fill="#633806">Mininet-WiFi shaping</text>
+<text x="336" y="196" font-size="11.5" fill="#854f0b">cite CADET arXiv:2606.04072</text>
+<text x="336" y="214" font-size="11.5" fill="#854f0b">+ Fontes et al. CNSM 2015</text>
+<text x="336" y="238" font-size="11.5" fill="#854f0b">5G: 13.6 Mbit/s, 44 ms (D75)</text>
+<text x="336" y="256" font-size="11.5" fill="#854f0b">Wi-Fi 6: 1.8 to 60 ms one-way</text>
+<text x="336" y="274" font-size="11.5" fill="#854f0b">(Liu &amp; Choi, doubled for RT)</text>
+<text x="336" y="298" font-size="11" fill="#854f0b">netem gets HALF the offset</text>
+
+<path d="M274 152 L300 152 L300 200 L316 200" fill="none" stroke="#666" stroke-width="1.4"/>
+<path d="M274 300 L300 300 L300 262 L316 262" fill="none" stroke="#666" stroke-width="1.4"/>
+<polygon points="316,200 308,196 308,204" fill="#666"/>
+<polygon points="316,262 308,258 308,266" fill="#666"/>
+
+<text x="300" y="130" font-size="11" fill="#444">real JPEG bytes</text>
+<text x="300" y="146" font-size="11" fill="#444">one persistent TCP</text>
+
+<rect x="556" y="80" width="320" height="104" rx="10" fill="#eeedfe" stroke="#534ab7" stroke-width="1"/>
+<text x="572" y="104" font-size="13" font-weight="600" fill="#3c3489">net_fleet_server.py  (H100, CPU)</text>
+<text x="572" y="126" font-size="11.5" fill="#534ab7">owns the ONE run clock</text>
+<text x="572" y="145" font-size="11.5" fill="#534ab7">stamps t_arrive on receipt: no clock sync</text>
+<text x="572" y="164" font-size="11.5" fill="#534ab7">barrier holds t=0 until all register</text>
+
+<path d="M510 200 L533 200 L533 132 L550 132" fill="none" stroke="#666" stroke-width="1.4"/>
+<polygon points="550,132 542,128 542,136" fill="#666"/>
+
+<rect x="556" y="206" width="320" height="86" rx="10" fill="#eeedfe" stroke="#534ab7" stroke-width="1"/>
+<text x="572" y="230" font-size="13" font-weight="600" fill="#3c3489">EmulatorBridge + Live2Coordinator</text>
+<text x="572" y="252" font-size="11.5" fill="#534ab7">BYTE-IDENTICAL, incl. all 200+ arms</text>
+<text x="572" y="271" font-size="11.5" fill="#534ab7">on_event(event, t) / tick(t)</text>
+
+<line x1="716" y1="184" x2="716" y2="202" stroke="#666" stroke-width="1.4"/>
+<polygon points="716,202 712,194 720,194" fill="#666"/>
+
+<rect x="556" y="314" width="320" height="68" rx="10" fill="#faece7" stroke="#993c1d" stroke-width="1"/>
+<text x="572" y="338" font-size="13" font-weight="600" fill="#712b13">vLLM 32B  (GPU)</text>
+<text x="572" y="360" font-size="11.5" fill="#993c1d">the only model that runs anywhere</text>
+
+<line x1="716" y1="292" x2="716" y2="310" stroke="#666" stroke-width="1.4"/>
+<polygon points="716,310 712,302 720,302" fill="#666"/>
+
+<path d="M556 258 L530 258 L530 420 L150 420 L150 392" fill="none" stroke="#999" stroke-width="1.3" stroke-dasharray="5 4"/>
+<polygon points="150,392 146,400 154,400" fill="#999"/>
+<text x="300" y="414" font-size="11" fill="#666">cloud_answer: used if it arrives by deadline_s, else the profiled device answer (D165 B)</text>
+
+<rect x="24" y="446" width="852" height="130" rx="10" fill="#f7f7f5" stroke="#ccc" stroke-width="1"/>
+<text x="40" y="470" font-size="12.5" font-weight="600" fill="#222">What is real, and what is profiled</text>
+<text x="40" y="492" font-size="11.5" fill="#333">REAL: frame bytes on the wire, send schedule, transport, arrival time, uplink queueing (queue_s recorded separately per D75),</text>
+<text x="40" y="510" font-size="11.5" fill="#333">the deadline comparison, which branch the application takes, and the cloud 32B.</text>
+<text x="40" y="532" font-size="11.5" fill="#333">PROFILED: the device's own answer, from device_answers.jsonl. D177: within a type the accuracy gap is a positive constant</text>
+<text x="40" y="550" font-size="11.5" fill="#333">that never changes a policy decision. D201: a missing device_score RAISES, never a neutral value.</text>
+<text x="40" y="568" font-size="11.5" fill="#333">NOT RUN: device-side inference. That is P21's claim, not this study's.</text>
+</svg>

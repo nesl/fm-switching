@@ -9,6 +9,13 @@ Deliberately **outside** `experiments/orchestration/` and `experiments/lib/`. Th
 are the run-path identity used for same-code pairing, so adding a directory to either would
 change that identity for every committed cell.
 
+## Decision log
+
+`DECISIONS.md` records where every network number came from, which are measurements and which
+are assumptions, the architecture (also rendered in `architecture.svg`), the choices that were
+reversed and why, and the eight items still open. Read it before citing any figure from this
+harness.
+
 ## The invariant
 
 `orchestration/live2/coordinator.py`, `bridge.py`, `fleet/links.py` and every `arms_*.py` are
