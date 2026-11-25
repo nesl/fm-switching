@@ -1383,3 +1383,24 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | n | 152 valid L3_epg_rq30 cells (seeds 4-7), 34 arms at 1x, 11 at kv0.5r; D240 1x and kv0.5r reported separately, never pooled |
 | headline | robot KV survival vs idle gap. Positive control reproduces the planner scratch EXACTLY: rung3 kv0.5r 30-60s P(cold)=0.0101 (n396), llf 1x 30-60s P(cold)=1.000 (n39), rung3 kv0.5r question P(cold)=0.0022 (n460). rung3 keeps histories warm (touches); llf goes cold by 30-60s and misses the 3s first-token deadline ~half the time. INVALID cells excluded, ABSENT marked. |
 | old name | none; new study |
+
+## Host-tier KV offload turnover (2026-11-24 overnight, Orin)
+
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/robot_idle/host_turnover.json`, `reports/study_host_turnover.md` |
+| script | `experiments/analysis/robot_idle/host_turnover.py`, `host_turnover_report.py` |
+| model/device | none; offline CPU on `jetson_orin`; read-only, no images; D240 1x and kv0.5r separate |
+| headline | steady-state vllm:kv_offload_store_bytes_total over middle 60%, tokens/s at 262144 B/tok, turnover 110592/rate. Planner's "337 for BOTH rung3 1x s4 and kv0.5r s4" was an artefact: honest recompute gives 342.6 (1x s4) and 343.4 (kv0.5r s4) tok/s, NOT identical (turnover ~322-323s both). |
+| old name | none; new study |
+
+## Reconnect cost-model replay (2026-11-24 overnight, Orin; MODEL SCREEN, 1x only)
+
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/robot_idle/reconnect_replay.json`, `reports/study_reconnect_replay.md` |
+| script | `experiments/analysis/robot_idle/reconnect_replay.py`, `reconnect_replay_report.py` |
+| model/device | D162 model prediction only (engine NOT run); CPU on `jetson_orin`; NETWORK experiment, 1x only (D240) |
+| n | 463 rung-3 (covex-v6-fair-final) 1x robot questions, seeds 4-7; tokens/frame measured 90.0 |
+| headline | P(first token within 3s) after outage D: (ii) history kept + catch up at reconnect ~0.989 at all D; (i) catch up at question 0.974/0.937/0.382 for D=60/120/300; (iii) evicted 0.145/0.028/0.000. The (ii) vs (i)/(iii) gap is the room an outage-aware policy has. Model-based screen, not a measurement. |
+| old name | none; new study |

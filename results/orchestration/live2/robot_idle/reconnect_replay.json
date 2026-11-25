@@ -1,0 +1,137 @@
+{
+ "_what": "Reconnect cost-model replay for rung-3 (covex-v6-fair-final) 1x robot questions. MODEL-BASED SCREEN, NOT A MEASUREMENT (D162 prediction, engine not run). NETWORK experiment, 1x only (D240: separate from memory experiments).",
+ "model": {
+  "d162": "first_token = 0.0678 + 0.000182*uncached + 0.000154*queued_ahead",
+  "deadline_s": 3.0,
+  "frame_stride_s": 2.0,
+  "backlog": "(D/2) frames * tokens_per_frame",
+  "policies": {
+   "i": "history kept, catch up at question time (uncached=backlog)",
+   "ii": "history kept, catch up at reconnect (uncached=0)",
+   "iii": "history evicted (uncached = full history + backlog)"
+  }
+ },
+ "tokens_per_frame_by_seed": {
+  "4": 90.0,
+  "5": 90.0,
+  "6": 90.0,
+  "7": 90.0
+ },
+ "results": {
+  "per_seed": {
+   "4": {
+    "n_questions": 132,
+    "tokens_per_frame": 90.0,
+    "p_within_3s": {
+     "D60": {
+      "i_hist_kept_catchup_question": 0.984848,
+      "ii_hist_kept_catchup_reconnect": 0.992424,
+      "iii_hist_evicted": 0.181818
+     },
+     "D120": {
+      "i_hist_kept_catchup_question": 0.939394,
+      "ii_hist_kept_catchup_reconnect": 0.992424,
+      "iii_hist_evicted": 0.037879
+     },
+     "D300": {
+      "i_hist_kept_catchup_question": 0.416667,
+      "ii_hist_kept_catchup_reconnect": 0.992424,
+      "iii_hist_evicted": 0.0
+     }
+    }
+   },
+   "5": {
+    "n_questions": 123,
+    "tokens_per_frame": 90.0,
+    "p_within_3s": {
+     "D60": {
+      "i_hist_kept_catchup_question": 0.98374,
+      "ii_hist_kept_catchup_reconnect": 0.98374,
+      "iii_hist_evicted": 0.113821
+     },
+     "D120": {
+      "i_hist_kept_catchup_question": 0.96748,
+      "ii_hist_kept_catchup_reconnect": 0.98374,
+      "iii_hist_evicted": 0.02439
+     },
+     "D300": {
+      "i_hist_kept_catchup_question": 0.325203,
+      "ii_hist_kept_catchup_reconnect": 0.98374,
+      "iii_hist_evicted": 0.0
+     }
+    }
+   },
+   "6": {
+    "n_questions": 121,
+    "tokens_per_frame": 90.0,
+    "p_within_3s": {
+     "D60": {
+      "i_hist_kept_catchup_question": 0.950413,
+      "ii_hist_kept_catchup_reconnect": 0.983471,
+      "iii_hist_evicted": 0.157025
+     },
+     "D120": {
+      "i_hist_kept_catchup_question": 0.884298,
+      "ii_hist_kept_catchup_reconnect": 0.983471,
+      "iii_hist_evicted": 0.016529
+     },
+     "D300": {
+      "i_hist_kept_catchup_question": 0.31405,
+      "ii_hist_kept_catchup_reconnect": 0.983471,
+      "iii_hist_evicted": 0.0
+     }
+    }
+   },
+   "7": {
+    "n_questions": 87,
+    "tokens_per_frame": 90.0,
+    "p_within_3s": {
+     "D60": {
+      "i_hist_kept_catchup_question": 0.977011,
+      "ii_hist_kept_catchup_reconnect": 1.0,
+      "iii_hist_evicted": 0.114943
+     },
+     "D120": {
+      "i_hist_kept_catchup_question": 0.965517,
+      "ii_hist_kept_catchup_reconnect": 1.0,
+      "iii_hist_evicted": 0.034483
+     },
+     "D300": {
+      "i_hist_kept_catchup_question": 0.505747,
+      "ii_hist_kept_catchup_reconnect": 1.0,
+      "iii_hist_evicted": 0.0
+     }
+    }
+   }
+  },
+  "pooled_1x": {
+   "n_questions": 463,
+   "tokens_per_frame_median": 90.0,
+   "p_within_3s": {
+    "D60": {
+     "i_hist_kept_catchup_question": 0.974082,
+     "ii_hist_kept_catchup_reconnect": 0.989201,
+     "iii_hist_evicted": 0.144708
+    },
+    "D120": {
+     "i_hist_kept_catchup_question": 0.937365,
+     "ii_hist_kept_catchup_reconnect": 0.989201,
+     "iii_hist_evicted": 0.028078
+    },
+    "D300": {
+     "i_hist_kept_catchup_question": 0.382289,
+     "ii_hist_kept_catchup_reconnect": 0.989201,
+     "iii_hist_evicted": 0.0
+    }
+   }
+  }
+ },
+ "_provenance": {
+  "git_commit": "f35709c4377d9eba4cd9e1d1c90fa8b1ca9dd155",
+  "script": "reconnect_replay.py",
+  "model": "qwen3vl32b",
+  "timestamp": "2026-11-24T19:47:17.922576",
+  "device": "jetson_orin",
+  "n": 463
+ }
+}
