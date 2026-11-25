@@ -1,35 +1,35 @@
 # StudyTABLE1: canonical correct-by-deadline table (D209)
 
-Pipeline sha canon 35e3c57e (episodic_lib 35e3c57e, dsmap 35e3c57e, dashcam_episodic 1d0125c9). Seeds 4-7, four-seed means. Superseded arms dropped (D205): confidence-cascade.
+Pipeline sha canon 42312ae9 (episodic_lib 35e3c57e, dsmap 35e3c57e, dashcam_episodic 1d0125c9). Seeds 4-7, four-seed means. Superseded arms dropped (D205): confidence-cascade.
 
 Columns: robot correct-by-deadline (correct by 3 s, cloud if on time else device); robot D176 (same, excluding the over-32k context-refusal recalls); single-shot correct by 2 s (StudySS2); pooled correct-in-time over robot and single-shot units; dashcam delivered-stream Nexar challenge mAP (D199, on-time cloud only, EVAL); the on-time service columns; and the dashcam per-episode on-time attainment SERVICE columns.
 
 | arm | robot | robot D176 | single-shot | pooled | dashcam mAP (EVAL) | robot on-time | SS within 2s | dash per-episode on-time attainment | dash episodes >= 0.25 |
 |---|---|---|---|---|---|---|---|---|---|
-| fair-c5attr-rr | 0.514 | 0.514 | 0.599 | 0.578 | 0.672 | 0.904 | 0.987 | 0.639 | 0.850 |
-| state-uo | 0.503 | 0.503 | 0.598 | 0.574 | 0.630 | 0.869 | 0.973 | 0.199 | 0.308 |
-| fair-c5attr | 0.507 | 0.507 | 0.596 | 0.574 | 0.656 | 0.881 | 0.961 | 0.445 | 0.629 |
-| fair-c5attr-gain0 | 0.497 | 0.497 | 0.596 | 0.571 | 0.634 | 0.866 | 0.958 | 0.226 | 0.340 |
-| state-uo-c5attr | 0.491 | 0.491 | 0.596 | 0.569 | 0.650 | 0.863 | 0.951 | 0.258 | 0.392 |
-| state-shares-r1 | 0.469 | 0.469 | 0.600 | 0.567 | 0.673 | 0.773 | 0.992 | 0.684 | 0.906 |
-| state-shares-r2 | 0.447 | 0.447 | 0.598 | 0.560 | 0.650 | 0.741 | 0.985 | 0.683 | 0.917 |
-| state-shares | 0.427 | 0.427 | 0.600 | 0.557 | 0.659 | 0.482 | 0.972 | 0.667 | 0.901 |
-| base | 0.359 | 0.359 | 0.600 | 0.540 | 0.669 | 0.249 | 0.968 | 0.464 | 0.627 |
-| rules | 0.341 | 0.341 | 0.578 | 0.518 | 0.627 | 0.266 | 0.719 | 0.092 | 0.136 |
-| streamscout | 0.222 | 0.222 | 0.600 | 0.504 | 0.651 | 0.955 | 0.999 | 0.675 | 0.953 |
-| simplestream | 0.209 | 0.209 | 0.600 | 0.501 | 0.662 | 0.998 | 0.999 | 0.828 | 0.993 |
-| eco-llm | 0.272 | 0.272 | 0.565 | 0.492 | 0.659 | 0.352 | 0.473 | 0.361 | 0.457 |
-| llf | 0.277 | 0.277 | 0.561 | 0.489 | 0.639 | 0.051 | 0.431 | 0.543 | 0.742 |
-| mooncake | 0.276 | 0.276 | 0.558 | 0.487 | 0.664 | 0.053 | 0.373 | 0.288 | 0.363 |
-| b7-edf-feasibility | 0.273 | 0.273 | 0.556 | 0.485 | 0.662 | 0.053 | 0.367 | 0.286 | 0.361 |
-| edf | 0.268 | 0.278 | 0.541 | 0.472 | 0.618 | 0.030 | 0.155 | 0.239 | 0.338 |
-| kvflow-prefetch | 0.268 | 0.282 | 0.535 | 0.468 | 0.632 | 0.031 | 0.098 | 0.071 | 0.089 |
-| always-cloud-fcfs | 0.266 | 0.277 | 0.535 | 0.467 | 0.635 | 0.030 | 0.100 | 0.071 | 0.091 |
+| fair-c5attr-rr | 0.514 | 0.514 | 0.599 | 0.578 | 0.672 | 0.904 | 0.987 | 0.729 | 0.887 |
+| state-uo | 0.503 | 0.503 | 0.598 | 0.574 | 0.630 | 0.869 | 0.973 | 0.223 | 0.338 |
+| fair-c5attr | 0.507 | 0.507 | 0.596 | 0.574 | 0.656 | 0.881 | 0.961 | 0.502 | 0.665 |
+| fair-c5attr-gain0 | 0.497 | 0.497 | 0.596 | 0.571 | 0.634 | 0.866 | 0.958 | 0.254 | 0.367 |
+| state-uo-c5attr | 0.491 | 0.491 | 0.596 | 0.569 | 0.650 | 0.863 | 0.951 | 0.291 | 0.422 |
+| state-shares-r1 | 0.469 | 0.469 | 0.600 | 0.567 | 0.673 | 0.773 | 0.992 | 0.785 | 0.922 |
+| state-shares-r2 | 0.447 | 0.447 | 0.598 | 0.560 | 0.650 | 0.741 | 0.985 | 0.784 | 0.935 |
+| state-shares | 0.427 | 0.427 | 0.600 | 0.557 | 0.659 | 0.482 | 0.972 | 0.766 | 0.918 |
+| base | 0.359 | 0.359 | 0.600 | 0.540 | 0.669 | 0.249 | 0.968 | 0.528 | 0.651 |
+| rules | 0.341 | 0.341 | 0.578 | 0.518 | 0.627 | 0.266 | 0.719 | 0.102 | 0.145 |
+| streamscout | 0.222 | 0.222 | 0.600 | 0.504 | 0.651 | 0.955 | 0.999 | 0.775 | 0.980 |
+| simplestream | 0.209 | 0.209 | 0.600 | 0.501 | 0.662 | 0.998 | 0.999 | 0.949 | 0.999 |
+| eco-llm | 0.272 | 0.272 | 0.565 | 0.492 | 0.659 | 0.352 | 0.473 | 0.411 | 0.465 |
+| llf | 0.277 | 0.277 | 0.561 | 0.489 | 0.639 | 0.051 | 0.431 | 0.621 | 0.763 |
+| mooncake | 0.276 | 0.276 | 0.558 | 0.487 | 0.664 | 0.053 | 0.373 | 0.326 | 0.370 |
+| b7-edf-feasibility | 0.273 | 0.273 | 0.556 | 0.485 | 0.662 | 0.053 | 0.367 | 0.324 | 0.368 |
+| edf | 0.268 | 0.278 | 0.541 | 0.472 | 0.618 | 0.030 | 0.155 | 0.272 | 0.361 |
+| kvflow-prefetch | 0.268 | 0.282 | 0.535 | 0.468 | 0.632 | 0.031 | 0.098 | 0.079 | 0.092 |
+| always-cloud-fcfs | 0.266 | 0.277 | 0.535 | 0.467 | 0.635 | 0.030 | 0.100 | 0.080 | 0.094 |
 | device-only | 0.256 | 0.256 | 0.537 | 0.467 | 0.627 | n/a | n/a | 0.000 | 0.000 |
-| warm-all-lru | 0.262 | 0.272 | 0.535 | 0.466 | 0.637 | 0.020 | 0.070 | 0.050 | 0.063 |
-| attentionstore-prefetch | 0.266 | 0.279 | 0.531 | 0.464 | 0.634 | 0.026 | 0.079 | 0.070 | 0.088 |
-| querystream-proactive | 0.262 | 0.275 | 0.533 | 0.464 | 0.632 | 0.022 | 0.090 | 0.069 | 0.087 |
-| lmcache | 0.262 | 0.277 | 0.531 | 0.463 | 0.633 | 0.020 | 0.083 | 0.071 | 0.090 |
+| warm-all-lru | 0.262 | 0.272 | 0.535 | 0.466 | 0.637 | 0.020 | 0.070 | 0.055 | 0.066 |
+| attentionstore-prefetch | 0.266 | 0.279 | 0.531 | 0.464 | 0.634 | 0.026 | 0.079 | 0.078 | 0.092 |
+| querystream-proactive | 0.262 | 0.275 | 0.533 | 0.464 | 0.632 | 0.022 | 0.090 | 0.077 | 0.089 |
+| lmcache | 0.262 | 0.277 | 0.531 | 0.463 | 0.633 | 0.020 | 0.083 | 0.079 | 0.093 |
 
 Dashcam is a ranking metric (challenge mAP) with no per-unit correctness, so it is not pooled into the unit count; the pooled column is robot and single-shot units only.
 

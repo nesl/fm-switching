@@ -1,6 +1,6 @@
 # Figure-data readiness (StudyFIGDATA, D214)
 
-Pipeline sha (D209 canonical scorer): `35e3c57e`. Generated 2026-11-23. Tables in `reports/figdata/`. NO FIGURES until the user says plot.
+Pipeline sha (D209 canonical scorer): `42312ae9`. Generated 2026-11-23. Tables in `reports/figdata/`. NO FIGURES until the user says plot.
 
 ## Arm coverage (standard grid: 1x memory, 16 devices, robot deadline 3.0 s, rq30)
 
