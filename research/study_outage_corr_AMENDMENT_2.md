@@ -129,6 +129,32 @@ arm contrast within a k. That contrast is unharmed.**
 victim sets nest. It is a code change plus a re-run of the k = 5 cells, and it is the user's call, not
 mine.**
 
+## *** THE DOSE IN THIS GRID IS NOT A VARIABLE: IT IS k x (D / 2), FIXED BY CONSTRUCTION ***
+
+**Measured on all three gate cells and explained from the trace design:**
+```
+in per-frame mode every robot streams ONE FRAME EVERY 2 s, so a D-second outage defers D/2 records per
+victim robot, and the dose is k x (D / 2):
+   k = 3, D = 120  ->  predicted 180   observed 180 (60 / 60 / 60), at seed 4 AND at seed 5
+   k = 5, D = 120  ->  predicted 300   observed 299 (60 / 60 / 60 / 59 / 60)
+```
+*** SO `deferred_history_records` IS CONSTANT ACROSS SEEDS AND ACROSS ARMS. THREE CONSEQUENCES, ALL
+RECORDED BEFORE SCORING: ***
+1. **The carried-forward prereg rule "a cell whose count is low is a WEAK-DOSE condition and is labelled
+   one" CAN NEVER FIRE in this grid.** **There are no weak-dose cells, and nobody should look for dose
+   variation or explain a seed difference by dose.** *(This is the OPPOSITE of the touch ablation, where
+   the dose varied 15-fold across these same two seeds and the sign flipped with it.)*
+2. **The dose is COLLINEAR WITH k, so it cannot serve as a covariate either.** **With k already confounded
+   with window placement, that leaves NOTHING to regress a k-effect on, which reinforces the no-k-effect
+   bar above rather than softening it.**
+3. **The zero-count stopping rule still stands and is still meaningful**, because a zero would mean the
+   outage did not fire at all, which is a different condition from a small dose.
+**`CONTRACT.md`'s "`history_append` every 30 s per robot session" is a DIFFERENT QUANTITY from the
+per-frame stream and must not be used to predict this count.**
+**Side effect worth recording so it is not re-flagged: the non-victim in-window count (275) and the victim
+whole-run count (1,797) are IDENTICAL at seed 4 and seed 5 despite different victims and different windows.
+That is structural, not a coincidence, for the same reason.**
+
 ## THE METRIC CONFLICT, SHARPENED BY THE FIRST GATE CELL'S RUN-LEVEL DATA
 
 **On `covex-v6-fair-final` k = 3 s4: the 132 robot rows are 128 cloud (121 within L, 7 late) and EXACTLY 4
