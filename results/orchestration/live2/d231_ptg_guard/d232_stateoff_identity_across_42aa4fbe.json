@@ -1,0 +1,87 @@
+{
+ "study": "D232/D233: is commit 42aa4fbe decision-neutral for covex-v6-fair-final-stateoff?",
+ "_why": "42aa4fbe was pushed four minutes into a running covex-v6-fair-final-stateoff kv0.5r s4 cell, which was voided (torn-tree guard case 3, torn_lazy_import, on arms_final_ladder.py, its first live firing). The 1x s4 cell then started on a tree that INCLUDES 42aa4fbe. That cell is comparable with the committed rung-3 1x cell only if the commit moves nothing for covex-v6-fair-final and covex-v6-fair-final-stateoff. The former was already proved; -stateoff could not have been, because it landed at 2b72b463, AFTER the tip the earlier identity run used.",
+ "why_the_static_census_could_not_answer_it": "-stateoff is a V6StateArm derivative that reaches arms_v5rules2.py:191, which IS this build's read site, so it is the one arm where the question was live rather than answerable from the reader census. plan_state=False also turns off five things, so its decision path is not the one the covex-v6-fair-final run exercised. Hence a measurement.",
+ "method": {
+  "instrument": "hybrid/test_hybrid.dry, realtime=False, in-process, dry_run=True",
+  "cell": "1200 s, n16, seed 4, posted workload knobs (ratio 40:40:20, lh_req, ss2, epg, per-frame, rq30)",
+  "AFTER": "a pristine worktree at the current tip 499d4ece, the tree the 1x cell runs on",
+  "BEFORE": "THE SAME TIP with only the six code files of 42aa4fbe reverted to their pre-commit blobs at bf7d6f49 and the two new scripts removed. Verified first that no commit between 42aa4fbe and the tip touches any of the six, and that each reverted file hashes to its bf7d6f49 blob.",
+  "caching": "NO engine and no prefix cache; a dry cell sends no HTTP. No latency here is a measurement."
+ },
+ "cells": {
+  "so_before": {
+   "rows": 11585,
+   "digest": "5d9c9aa4e6378661",
+   "rc": 0,
+   "tree": "BEFORE(six reverted to bf7d6f49)",
+   "loadavg": [
+    1.29,
+    2.12
+   ]
+  },
+  "so_before2": {
+   "rows": 11585,
+   "digest": "5d9c9aa4e6378661",
+   "rc": 0,
+   "tree": "BEFORE(six reverted to bf7d6f49)",
+   "loadavg": [
+    2.17,
+    2.26
+   ]
+  },
+  "so_after": {
+   "rows": 11585,
+   "digest": "5d9c9aa4e6378661",
+   "rc": 0,
+   "tree": "AFTER(tip 499d4ece)",
+   "loadavg": [
+    2.12,
+    2.22
+   ]
+  },
+  "so_after2": {
+   "rows": 11585,
+   "digest": "5d9c9aa4e6378661",
+   "rc": 0,
+   "tree": "AFTER(tip 499d4ece)",
+   "loadavg": [
+    0.77,
+    2.17
+   ]
+  },
+  "ff_before": {
+   "rows": 14539,
+   "digest": "987c2b98784d2dc7",
+   "rc": 0,
+   "tree": "BEFORE(six reverted to bf7d6f49)",
+   "loadavg": [
+    2.15,
+    2.6
+   ]
+  },
+  "ff_after": {
+   "rows": 14539,
+   "digest": "987c2b98784d2dc7",
+   "rc": 0,
+   "tree": "AFTER(tip 499d4ece)",
+   "loadavg": [
+    2.26,
+    2.15
+   ]
+  }
+ },
+ "RESULTS": {
+  "aa_control_stateoff_BEFORE": "IDENTICAL",
+  "aa_control_stateoff_AFTER": "IDENTICAL",
+  "stateoff_BEFORE_vs_AFTER": "IDENTICAL",
+  "positive_control_fair_final_BEFORE_vs_AFTER": "IDENTICAL",
+  "every_cell_rc": 0
+ },
+ "PROOF_THE_TWO_RUNS_LOADED_DIFFERENT_CODE": "Identical digests are exactly what a silently-identical-tree bug produces, so this was checked. The arm's own live2_describe differs between the runs as it must: the AFTER run reports six keys the BEFORE run does not have at all (guard_per_type, guard_lag_s_by_class, guard_hysteresis, guard_exit_factor, guard_exit_hold_s, guard_log), all at OFF values. So the AFTER cell imported the patched arms_v5rules2.py, reached the read site at :191, and decided identically.",
+ "CROSS_CHECK_worth_more_than_the_cell_it_came_from": "covex-v6-fair-final at this tip gives 987c2b98784d2dc7 / 14,539 rows, EXACTLY the digest this build measured for that arm at 1200 s on the pre-nqd tree. Independent evidence that rung 3 is unchanged at this tip despite both -nqd and -stateoff landing.",
+ "REGISTER_WARNING": "The coordinator supplied 5a03c2807da3681a as the committed bar for covex-v6-fair-final at 14,539 rows. This harness gives 987c2b98784d2dc7 at the SAME row count, so the two harnesses serialise or strip differently: a REGISTER difference, not a disagreement about decisions. The check that matters is the 300 s committed bar 62b0f9a977189c78, which this harness reproduces exactly. Left unreconciled by agreement; the register is stated at the point of use.",
+ "DISK_D234_3": "The first attempt at these controls died with OSError errno 28, No space left on device, at 2 GB free. THREE of the four failed cells wrote ZERO bytes of stderr and returned rc=120 and rc=2; only the first carried the ENOSPC string. Per-cell rc capture is what made them legible as failures rather than as clean runs with missing output. All cells reported here are from the re-run; a scan of every surviving log of this task for 'No space left on device' returns none.",
+ "VERDICT": "42aa4fbe IS DECISION-NEUTRAL for covex-v6-fair-final-stateoff and for covex-v6-fair-final at the tree the 1x cell runs on. The 1x cell does NOT need voiding on account of this commit.",
+ "register": "OBSERVED, 6 dry 1200 s cells, rc=0 each, with A/A controls on both sides."
+}
