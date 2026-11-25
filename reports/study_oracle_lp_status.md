@@ -62,3 +62,22 @@ of it.
   correctness. Then stages 3 (HINDSIGHT), 4 (LP at T and 1.10 x T, per type and pooled, s4-s7 x
   {1x, kv0.5r}), 5 (shares + clustered bootstrap), 6 (positive control + STOP gate). No bound is
   written until each stage verifies.
+
+## 2026-11-25 additional rulings and gates
+
+- **Per-seed robot variance (D254 (4)):** each seed draws only 20 to 25 DISTINCT robot questions, so
+  per-seed robot accuracy and FAIR gain vary widely - device accuracy ranges 0.058 (s6) to 0.371
+  (s4), while over all 57 distinct questions drawn across seeds it is 0.228. Per-seed recall numbers
+  are therefore high-variance and are reported per seed, never pooled across seeds (D240).
+- **s6 is a flagged OUTLIER:** its device accuracy 0.058 is a genuine low-tail draw (the device
+  answers 1 of its 20 distinct questions correctly, qid 0a99c448..., re-asked 7 times); verified a
+  property of the s6 question set, not an extraction error
+  (`reports/study_s6_device_accuracy_check.md`). s6 stays in the bound with this single-question flag
+  carried into every per-seed table.
+- **Dashcam dense cloud-score source (stage 2-live):** the per-instant 32BI cloud score is
+  ARM-INDEPENDENT (`reports/study_cloud_score_arm_independence.md`: 278,609 shared instants, >=99.85
+  percent exactly equal, decision flips 1 in 278,609 = 0.0004 percent across the D197 cloud
+  threshold, representation identical, score invariant to traffic_mix). simplestream (99.9 to 100
+  percent coverage of dashcam instants across all 8 cells) is therefore used as the dense per-instant
+  cloud-score source; the 5 to 8 instants per cell without a simplestream cloud score are treated as
+  device-only (conservative, cannot raise the bound). Stated in every dashcam/pooled bound table.

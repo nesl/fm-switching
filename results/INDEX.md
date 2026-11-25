@@ -1463,3 +1463,12 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | result files | `reports/study_s6_device_accuracy_check.md`, `results/orchestration/live2/oracle/s6_device_accuracy_check.json` |
 | verdict | s6 recall device accuracy 0.057851 (7/121) is a GENUINE PROPERTY of the s6 question set, NOT an extraction error. Checks: device_correct==(device_answer==gold) 0 mismatches; per-question (device,gold) seed-invariant (23 shared qids, 0 inconsistent); device answers real varied letters; s6 device right on 1 of 20 distinct questions (qid 0a99c448..., re-asked 7x); identical across all s6 cells 1x and kv0.5r. Union distinct acc 0.228, s6 a low-tail draw. Feed into the bound as a flagged OUTLIER (per-seed, D240), not dropped. |
 | old name | none; gate before oracle stage 3 |
+
+## Dashcam cloud-score arm-independence check (oracle stage 2-live gate, 2026-11-25, Orin)
+
+| field | value |
+|---|---|
+| result files | `reports/study_cloud_score_arm_independence.md`; status `reports/study_oracle_lp_status.md` |
+| model/device | none; CPU on `jetson_orin`; read-only on committed cells |
+| verdict | PASS. The per-instant 32BI cloud score is arm-independent: 278,609 dashcam instants delivered by both simplestream and another arm, >=99.85% exactly equal, p99 abs diff 0.0000, max 0.375 (batching noise), decision flips across D197 theta=-2.9298 = 1/278609 = 0.0004% (< 0.5% bar), representation identical, score invariant to differing traffic_mix. simplestream (99.9-100% dashcam coverage all 8 cells) adopted as the dense per-instant cloud-score source for the oracle dashcam valuation; 5-8 missing instants/cell = device-only (conservative). Also recorded: per-seed robot variance (device 0.058-0.371, all-57 0.228) and the s6 single-question outlier flag. |
+| old name | none; gate before oracle stage 2-live |
