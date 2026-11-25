@@ -1000,6 +1000,59 @@ unlike the robot counts.** `read_cell` recomputes the alert block from `outcomes
 producer; and the `cell.json -> score -> sweep[0]` path feeds only the robot and single-shot block. **Two
 separate pipes, so the same pair of cells can be confounded on one metric and clean on another.**
 
+## *** RESUME 2026-11-25 04:2xZ (restart 3/12): A PRIOR RESUME'S CONCLUSION WAS OVERTAKEN BY FOUR MINUTES, AND THE RESTART LOOP'S CAUSE IS A GATE ON A QUANTITY NOBODY PRODUCES. ***
+
+**CORRECTION TO `49a8a7a7` ("block A did not run"), which I verified rather than repeated.** That resume
+committed at **20:12 local** and reported the 1x s4 `_rep2` cell as **"never landed"**. *** IT LANDED AT
+20:16, four minutes later: `2114ebe6` "frozen-test: covex-v6-fair-final at 16 devices, seed 4
+(_L3_epg_rq30_rep2)", with its proof-load record at `7b22c1a3` (20:19). The cell directory is on origin with
+36 files. *** **So that claim was true when it was made and false by the time it was pushed.** Not a method
+failure: **block A STARTED at 20:16:54, after that resume had already looked and concluded.** The lesson for
+the next resume is narrow and practical: **a "did not run" finding about a queue that is still being
+dispatched has a shelf life of minutes, and should carry the time it was taken.**
+**And a distinction that will mislead anyone grepping for block A's output: `covex-v6-fair-final` cells DO
+exist at kv0.5r s5, s6 and s7, and they are NOT block A's.** They are the untagged originals from earlier
+work. **Block A's comparator cells carry `_rep2`, and ZERO `_rep2` or `_rep3` cells exist at s5, s6 or s7.
+Nor does any `-stateoff` or `-notouch` cell outside s4, nor any `ptg` cell at all.** Block A has produced
+nothing yet, which at five minutes in is expected rather than wrong: its first cell was due about 20:39.
+
+*** THE RESTART LOOP: NOTHING WRITES `ops/heartbeat`. MEASURED, NOT INFERRED. *** The only two matches for
+a write to it in the committed tree are **comments** - `ops/watchdog.sh:56` "A live worker touches the
+heartbeat" and a line of prose in `reports/OVERNIGHT_DECISIONS.md`. **No code anywhere touches the file.**
+It is **0 bytes, mtime 2026-11-23 21:55**, so the staleness gate at `watchdog.sh:78-85` reads **80,000+
+seconds** and **can never read anything else.** `watchdog.sh:17` and `:58` record the author's own awareness
+of the failure mode, so **the gate was designed to prevent exactly this loop and its writer was never
+implemented.** This is the same shape as the night's other instrument failures: **a check against a
+quantity nobody produces.**
+**AND THE LOOP IS UNBOUNDED, NOT CAPPED AT 12.** `MAX_RESTARTS=12` is a budget per `WINDOW_S`, and
+`watchdog.sh:104` resets `first=$now; count=0` once the window elapses, so **the budget renews.**
+`ops/watchdog.log` carries **121 RESTART lines today** and the counter runs 1,2,3,4,5,1,2,3,4,1,2,1,2,3.
+**Each restart spawns a Claude session that completes its prompt, exits, and lets the heartbeat go stale
+again.**
+**ACTION TAKEN, and it is reversible with one `rm`: `ops/STANDDOWN` re-applied, self-expiring at 07:00
+local, which covers the D238 queue to block D's end.** Local-only (`ops/` is untracked apart from
+`watchdog.sh`), and **scoped to the Claude relaunch only: this watchdog has no driver section and its sole
+action is one `tmux new-session`, so it does NOT touch the run driver or the H100 cell queue.** The prior
+expired file is preserved as `STANDDOWN.expired-20261124`. **Grounded in the user's own D230 (8) and D229,
+and the user is driving interactively, which is the condition that ruling names.**
+*** THE REAL FIX IS NOT APPLIED, because it changes a committed operational script and the user rules
+those: either implement a writer for `ops/heartbeat`, or replace the staleness gate with a test that can
+distinguish a live worker from a dead one. ***
+
+**STATE I COULD NOT ESTABLISH, stated rather than assumed.** *** THE H100 SESSION IS NOT REACHABLE: the
+peer list holds only the interactive A6000 session. So block A was running at 20:16:54 by the H100's own
+report, nothing has reached origin since 20:20, and WHETHER ITS DRIVER IS STILL RUNNING IS UNKNOWN FROM
+THIS BOX. *** A dead operator session does not imply a dead driver - they are separate processes and the
+night's notes distinguish them - **but I cannot confirm progress either way, and I am not claiming block A
+is healthy.** **The check that settles it costs nothing: if the kv0.5r s5 `_rep2` cell reaches origin by
+about 20:42, the driver is alive; if nothing lands, it is not.**
+**I have touched no live-path file. `experiments/` is frozen until block A finishes under D238, and there
+was nothing to do there in any case.** The shared worktree's 154 porcelain lines are **staleness, not
+another session's work**: `mapwt` HEAD is **1,258 commits behind origin**, and against ORIGIN its
+`experiments/` tree differs by **270 added against 56,190 deleted across 229 files**, with
+`arms_v6state.py` byte-identical. **Measuring that worktree against its own HEAD would have read a stale
+checkout as pending edits, which is the trap this file already records.**
+
 ## *** THE PAIRING RULE, SETTLED: SAME-CODE iff the orchestration subtree, the lib subtree AND three blobs all match. The whole-`experiments/` tree is REPORTED BESIDE, never INSTEAD. ***
 
 **Why the whole tree is the wrong key.** The driver pulls origin before every cell, so any session's commit
