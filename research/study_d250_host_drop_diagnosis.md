@@ -2,7 +2,85 @@
 
 **CPU, committed artefacts, read-only. Nothing fixed, as the ruling required.**
 
-## *** UNCONFIRMED, BY USER RULING 2026-11-25: THE "SMALLER TIER DROPPED THE PREFIXES" READING IS NOT YET A CAUSE. ***
+## *** RESOLVED 2026-11-25, AND THE ANSWER CORRECTS THIS FILE: THE TIER WAS FULL. THE GAUGE WAS MISREAD. ***
+
+**The user's contradiction is settled, and not in favour of anything this file originally argued.**
+*** `kv_offload_cpu_cache_usage_perc` IS NOT AN OCCUPANCY GAUGE. IT IS THE FRACTION PINNED BY IN-FLIGHT
+TRANSFERS, WITH RESIDENT-IDLE CHUNKS EXPLICITLY SUBTRACTED OUT. *** vLLM 0.31.0,
+`v1/kv_offload/cpu/manager.py:442-452`:
+```python
+num_used = (self._num_allocated_chunks - len(self._free_list)
+            - self._num_evictable_cache_chunks)      # <-- residency subtracted
+usage = num_used / self._num_chunks
+```
+`_num_evictable_cache_chunks` counts chunks resident with `ref_cnt == 0`, which is **exactly the warm
+prefixes sitting in the tier waiting to be reused.** *** SO A TIER 100 PERCENT FULL OF IDLE CACHED ROBOT
+PREFIXES READS usage = 0.0. *** And vLLM says so itself at `v1/kv_offload/cpu/spec.py:52-59`: "Fraction of
+CPU KV-cache space currently **pinned by active transfers** (0.0 = idle, 1.0 = saturated)."
+
+### THE EVIDENCE THAT THE TIER WAS FULL, FROM THE COMMITTED COUNTERS
+| | gate 13.5 GiB | rep2 27 GiB |
+|---|---|---|
+| `kv_offload_store_bytes_total` | *** 220.0 GiB = 16.30x ITS OWN CAPACITY *** | 97.1 GiB = 3.59x |
+| robot `cached_tokens == 0` | 71 of 1,624 (4.4 pct) | 26 of 3,178 (0.8 pct) |
+| `usage_perc` samples reading EXACTLY 0.0000 | **87 of 117** | 93 of 117 |
+**A chunk is inserted only when absent (`manager.py:258-260`), so a key is stored twice only after being
+evicted. 220 GiB through a 13.5 GiB pool therefore requires about 206 GiB of eviction, and eviction happens
+only at exhaustion (`manager.py:304-317`, demand-driven). THE TIER WAS FULL, REPEATEDLY, BY ARITHMETIC.**
+*** THE SINGLE SAMPLE THAT KILLS THE GAUGE: at t = 986.9 s it reads EXACTLY 0.0000 while 7.72 GiB was
+stored in that same 10 s window, which is 57 PERCENT OF THE WHOLE TIER WRITTEN WHILE THE GAUGE SAID IDLE. ***
+
+### THE MECHANISM IS PLAIN LRU ON EXHAUSTION, AND THE WATERMARK HYPOTHESIS IS REFUTED
+**`eviction_policy` defaults to `"lru"` (`spec.py:135`), implemented at `policies/lru.py:115-159`. Eviction
+fires if and only if an incoming store does not fit the free chunks. NO high-water mark, NO low-water mark,
+NO target utilisation, NO per-request cap. A grep for `watermark|high_water|low_water|free_ratio` across
+`v1/kv_offload/` hits ONE file, `tiering/backpressure.py`, and those are LATENCY watermarks in seconds, in a
+tiering layer not in our path (the server runs `--kv-offloading-backend native` with no transfer config).**
+*** AND MY OWN OBSERVATION REFUTED MY OWN HYPOTHESIS. I argued that equal ABSOLUTE peaks, 4.196 against
+4.023 GiB, pointed at a fractional watermark. The code says the numerator is chunks pinned by in-flight
+transfers, which is concurrency-driven, and concurrency is IDENTICAL in the two cells. So equal absolute
+peaks is EXACTLY what the code predicts, and it was the strongest available evidence AGAINST a watermark
+rather than for one. A watermark would have CLIPPED the small cell's series; instead 87 of 117 samples read
+exactly zero and the series is spiky. ***
+
+### THE CAPACITY ARITHMETIC WAS IN THE HEADER ALL ALONG
+**`host_tier_tokens` is 55,315 at 13.5 GiB and 110,630 at 27 GiB. The robot working set alone, summing each
+of the 22 distinct robot sessions' peak prompt length, is 342,722 tokens in the gate cell (6.20x the tier)
+and 369,115 in rep2 (3.34x), before any dashcam or single-shot traffic competes for the same pool.**
+*** ROBOT PREFIXES RUN TO 26,940 TOKENS, SO THE 13.5 GiB TIER HOLDS ABOUT TWO MATURE ROBOT HISTORIES AND
+THE 27 GiB TIER ABOUT FOUR. THAT IS THE RETENTION HORIZON, AND IT PREDICTS THE OBSERVED STRATUM DIRECTLY:
+P(cold) 0.000 out to 120 s at 27 GiB, failing at 30 s at 13.5 GiB. ***
+
+### THREE CORRECTIONS TO WHAT FOLLOWS IN THIS FILE
+1. *** "THE TIER NEVER RAN OUT ... ZERO SAMPLES AT OR ABOVE 0.99" IS NOT SUPPORTED BY THAT GAUGE, WHICH
+   CANNOT REACH HIGH VALUES FROM RESIDENCY AT ALL. AND THE ALTERNATIVE THIS FILE REJECTS, "ENGINE OUT OF
+   HOST MEMORY", IS REJECTED ON A MISREAD INSTRUMENT AND ON THE STORE-BYTE EVIDENCE SHOULD BE **ACCEPTED**. ***
+2. **"never FULL but too small to RETAIN" becomes "FULL IN BOTH CELLS; the small one recycled its entire
+   capacity 16.3 times against 3.6". The downstream chain this file traced is intact and BETTER supported,
+   because LRU is precisely the mechanism that drops long idle robot prefixes first.**
+3. **THE DECLARED-SIZE FINDING STANDS UNTOUCHED, and is independent of all of this: `host_tier_tokens` has
+   no read that changes a decision, and `OFFLOAD_TO_HOST` is absent in both cells. The policy still reacted
+   to a measured consequence rather than a declared number. What changes is that the consequence now has a
+   named engine-side cause.**
+
+### THE PROCESS LESSON, RECORDED BECAUSE IT IS THE SECOND TIME TODAY
+**This is a PROXY VALIDITY failure in the sense of consistency check 6: a gauge was used as a proxy for
+occupancy and it measures pinning. It returned a confident wrong answer and every arithmetic check passed,
+because the number was real and its meaning was not.** *** THE RULE THAT WOULD HAVE CAUGHT IT IS ALREADY IN
+MY MEMORY: JUDGE AN INSTRUMENT BY WHAT IT CLASSIFIED, NOT BY ITS VERDICT. I did not read the gauge's
+definition before resting a rejection on it. The user's contradiction is what forced the read. ***
+**Instrumentation that would make this directly observable, as a build item: scrape
+`kv_offload_cpu_cache_write_usage_perc` and `..._read_usage_perc`, both already exported
+(`cpu/common.py:12-13`), and confirm `usage ~= write + read`. TRUE OCCUPANCY IS NOT EXPORTED BY vLLM 0.31.0
+at all; the alternative is `--kv-events-config`, which makes the connector emit per-key eviction events
+(`manager.py:329-336`) that could be joined against robot cold beliefs directly.**
+
+---
+---
+
+# THE ORIGINAL DIAGNOSIS FOLLOWS. READ IT UNDER THE THREE CORRECTIONS ABOVE.
+
+
 
 **The user has identified a hole this diagnosis did not close.** *** THE TIER NEVER EXCEEDED 0.311 USAGE,
 YET ROBOT P(cold) AT 30 TO 120 s IDLE WENT FROM 0.000 AT 27 GiB TO 0.400 AND 0.500 AT 13.5 GiB. A TIER AT 31
