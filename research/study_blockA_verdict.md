@@ -190,6 +190,52 @@ nothing and does not), **NOT code state** (the original `fair-final` s7 is a dif
 `_rep2` and both stall), and **NOT the piece-size pattern** (fair-final emits only {121, 1024} and
 `-stateoff` emits remainders; both stall).
 
+## REQUEST-COUNT RETENTION UNDER A HALVED POOL, and why it is NOT a capacity result
+
+**Asked as "does rung 3 hold more throughput than rung 2 under memory pressure", and the answer has to be
+stated in the unit that was actually measured.**
+```
+ratio kv0.5r / 1x, n_requests
+  covex-v6-fair-final  s4  10,585 / 12,177 = 0.869   SAME CODE, SAME DIGEST: the clean one
+  covex-v6-fair-final  s5 0.845   s6 0.862   s7 0.859  (_rep2 against 1x ORIGINALS: STRATUM B)
+  covex-v6-state-final     mean 6,110 / 11,873 = 0.515
+```
+*** THE HONEST FORM: `fair-final` keeps about 86 PERCENT OF ITS 1x REQUEST COUNT under a halved pool and
+`state-final` about 52 PERCENT. NEITHER NUMBER IS SERVED CAPACITY. ***
+**`n_requests` is what the ARM CHOSE TO SEND, not what the server could serve**, and `state-final`'s count
+is low largely because its policy leaves dashcam instants UNSENT: **7,195 / 6,414 / 7,455 of about 11,780
+at s5 / s6 / s7, so it declines to send 54 to 63 percent of them.**
+*** AND THE ENGINE POINTS THE OTHER WAY: the watch line shows `state-final` kv0.5r at 4,700 to 4,800 tok/s
+against `fair-final` kv0.5r at 4,200 to 4,500, so the engine is NO LESS BUSY under `state-final` - it sends
+FEWER BUT LARGER requests. ***
+**So a first framing of this as "capacity falls linearly with the pool and quality falls superlinearly" is
+WITHDRAWN before it was recorded as a result. It mixed a POLICY choice with SERVICE capacity, which is a
+proxy-validity failure of exactly the kind check 6 exists to catch.** **A real capacity-retention
+comparison needs served tokens or engine load, not request counts.**
+**What DOES survive: the dashcam on-time rates are measured against ALL instants and therefore already
+charge an arm for declining to send, so they remain a fair end-to-end metric. It is the request count that
+is policy-contaminated, not the attainment.**
+
+## THE s7 END-OF-WINDOW STALL: SIX ARMS EACH SIDE, FIVE HYPOTHESES ELIMINATED
+
+```
+STALLED      confidence-cascade, covex-v6-fair-final (BOTH code states), -notouch, -stateoff, covex-v6-rules
+NOT STALLED  covex-v6-base, eco-llm, llf, mooncake, simplestream, covex-v6-state-final
+```
+| eliminated as the trigger | why |
+|---|---|
+| builds | `cascade` builds nothing and STALLS; `base` builds nothing and does NOT |
+| code state | both `fair-final` s7 code states stall |
+| piece-size pattern | `fair-final` {121, 1024} and `-stateoff` remainders BOTH stall |
+| the rules core | `state-final` WRAPS `rules`; `rules` stalls, `state-final` does not |
+| the state channel | ALL FOUR combinations occur, so it neither predicts nor prevents |
+
+**The state channel's elimination is confirmed FROM THE CELLS, not from the arm names:** `state-final`
+carries it (`state_decisions` 40,844 / 39,965 / 37,137 / 29,212 at s4 to s7, `completed_touch` 876 / 601 /
+476 / 922) and `covex-v6-rules` does NOT (`state_decisions` ABSENT at s7). **So the four combinations are
+ON and not stalled, ON and stalled, OFF and stalled, and ABSENT and stalled.**
+**CAUSE NOT DIAGNOSED, NEEDS ENGINE TIMING: bounded and declined, not missed.**
+
 ## What this does NOT establish
 
 - **No settled finding for either arm.** `-stateoff` clears the bar at two of three seeds and declines into
