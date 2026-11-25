@@ -8,7 +8,7 @@ without a user ruling.**
 
 | item | built | proofs |
 |---|---|---|
-| **A** trace-level correlated outage, default OFF | YES, 3 files | **OFF-path byte-identity PASSES** on all three trace files in two configurations, and the committed `fairness_digest 96c1a048...` reproduces exactly. Probe shown non-vacuous three ways. **`fleet/links.py` needed NO edit**: the burst and `queue_s` come from committed code. |
+| **A** trace-level correlated outage, default OFF | YES, 3 files | **OFF-path byte-identity PASSES** on all three trace files in two configurations, and the committed `fairness_digest 96c1a0b4...` reproduces exactly. Probe shown non-vacuous three ways. **`fleet/links.py` needed NO edit**: the burst and `queue_s` come from committed code. |
 | **B** the per-device last-arrival observable | YES, 3 files | **READ SITE NAMED AND FIRING**, below. Not write-only. |
 | **C** `-outage` and `-outage-fifo` | YES, 2 files, 710 new lines | switch read-back PASSES typed; one-factor **40 of 42 attributes identical**, differing only in `name` and the ordering flag; **every other `arms*.py` byte-identical**; outages-OFF decision log **identical to rung 3**, digest `edb7e94867917ac0b845f0e0432f05b9`, with `llf` as a positive control proving the check can fail. |
 | **D** proofs | PARTLY | the 1,200 s identity proof is **OWED**: a 1,200 s cell did not finish, so the identity rests on 300 s and the outage proof on 700 s. |
@@ -31,9 +31,9 @@ design.
 ```
 posted cell, seed 4, n16, 1200 s, 40:40:20, lh_req, ss2, epg, per-frame, rq30
                             rows      digest (first 32)                  element-by-element diff
-covex-v6-fair-final        14,539    5a03c2807da3681a64bf19fc8524dd0a    (the comparator)
-covex-v6-fair-final-outage 14,539    5a03c2807da3681a64bf19fc8524dd0a    IDENTICAL, first_diff_index null
-...-outage-fifo            14,539    5a03c2807da3681a64bf19fc8524dd0a    IDENTICAL, first_diff_index null
+covex-v6-fair-final        14,539    5a03c2807da3681a    (the comparator)
+covex-v6-fair-final-outage 14,539    5a03c2807da3681a    IDENTICAL, first_diff_index null
+...-outage-fifo            14,539    5a03c2807da3681a    IDENTICAL, first_diff_index null
 POSITIVE CONTROL  llf      14,075    961be8fe4942d86b9c6c690f0cf973a1    DIFFERS, first diff at index 0
 ```
 **Proved in TWO configurations, with the planner's wall-clock cutoff ON and OFF**, because every committed
@@ -56,7 +56,7 @@ eight-cell proof is about 27 minutes.**
 **REGISTER, CORRECTED 2026-11-25 upward: I first recorded that the 1,200 s rung-3 digest had NO committed
 counterpart and that its control was INTERNAL. THAT WAS WRONG, AND THE PROOF IS STRONGER THAN I RECORDED
 IT.** *** A COMMITTED REPORT FROM 2026-11-23, TWO DAYS BEFORE THIS RUN, ALREADY CARRIES IT:
-`reports/study_d214_figure_instrumentation.md:379` records `covex-v6-fair-final` (rung 3) at n = 16 with
+`reports/study_d214_figure_instrumentation.md:448` records `covex-v6-fair-final` (rung 3) at n = 16 with
 **14,539 rows** and digest **`5a03c2807da3681a`**, from a different study, on a different night, for a
 different purpose. So tonight's measurement REPRODUCES A PRE-EXISTING COMMITTED DIGEST and the control is
 EXTERNAL, not internal. *** **How the error happened, recorded because it is the same class as the night's
@@ -74,6 +74,23 @@ distinction that caused a false alarm earlier in this study and is now pinned do
 
 *** NEITHER BLOCKER IS TOUCHED BY THIS. The outages-ON behaviour at 1,200 s remains proved only at 700 s,
 and nothing here is evidence about the planner's ranking. ***
+
+## CORRECTIONS 2026-11-25: THREE CARRIED VALUES IN THIS FILE WERE WRONG, ALL MINE, ALL OVER-CLAIMING PRECISION
+
+**Fixed in place above, and recorded here because a silent fix to a proof record is worse than the error.**
+| what I wrote | what is committed | how it was checked |
+|---|---|---|
+| `study_d214_figure_instrumentation.md:379` | **line 448** | line 379 is grep output from an unrelated section |
+| the 32-hex digest ending `64bf19fc8524dd0a` as the committed bar | **only the 16-hex prefix `5a03c2807da3681a` is committed** | the 32-hex string occurred in **exactly ONE file in the repo: this one**. The 16-hex form is in **33** |
+| the fairness digest with its third byte pair transposed | **`96c1a0b4...`** | **165 files** carry the correct form; **exactly one**, this file, carried mine |
+*** AND THE UNDERLYING PROOFS ARE UNHARMED AND THE EXTERNAL CONTROL IS STRONGER THAN I RECORDED IT. *** The
+1,200 s digest-and-row-count bar appears in **THREE committed reports predating this work**:
+`study_d214_figure_instrumentation.md`, `study_d216_kv025_final.md` (12 occurrences, "produced five
+independent times") and `study_d218_device_answers.md` (9). **So the control is not one line in one report;
+it is a multiply-committed bar, and the unpatched arm had to hit it before any comparison was read.**
+**The pattern in all three: a 32-hex where 16 are committed, a line number carried from a grep, and two
+transposed digits. None changes a verdict and each would have survived every arithmetic check, because the
+arithmetic was right and the identifier was not.**
 
 ## *** BLOCKER 1: THE ORDERING IS A PURE PERMUTATION. THE TWO ARMS' FULL DECISION-ROW MULTISETS ARE IDENTICAL. ***
 
