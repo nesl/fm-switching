@@ -1,5 +1,24 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** USER RULING: THE DASHCAM-DEADLINE BUILD IS DEFERRED BEHIND THE D249 GATE CELL. THE ROBOT SWEEP PROCEEDS. ***
+
+**(1) THE 0.5 s DASHCAM RESCORE IS HAPPENING NOW ON FLASH, CPU ONLY. Nothing for you.** It uses the
+scorer's existing `L_dash` parameter (`score.py:752`), so it needs no code change and no cells, and it is
+labelled *** "DELIVERY WITHIN 0.5 s, POLICY PLANNED FOR 1.0 s" *** because it answers WHO DELIVERED FAST,
+not who would do well if the deadline were 0.5 s. Every arm optimised against the 1.0 s deadline it was
+given.
+**(2) THE DASHCAM-DEADLINE DRIVER TAG (the v39/v40 pattern, 3 to 5 h) IS NOT BUILT YET. It is built ONLY
+AFTER the D249 dev line has run its live gate cell, and D249 KEEPS PRIORITY.** Then the 0.5 s dashcam cells
+run for the D258 arms at s4 AS A GATE.
+*** AND NOTE THE CHAIN, BECAUSE IT MEANS THIS IS NOT WAITING ON YOU: the dashcam build waits on the D249
+GATE CELL; the gate cell waits on its COMPARATOR, which must be a SAME-CODE rung-3 cell on the Method A
+tree rather than the committed one; and that waits on a SCOPE QUESTION that is the user's and is
+unanswered. So the dashcam build is TRANSITIVELY BLOCKED ON A RULING, not on accelerator time. ***
+**(3) THE ROBOT DEADLINE SWEEP PROCEEDS AS QUEUED and is NOT affected: `_L1.5`, `_L2` and `_L5` need no
+code change (driver v40 lines 85 to 90 already map `_L<k>`), the gate is rung 3 plus `simplestream` at
+robot 1.5 s with BOTH reported before the rest, and every cell is scored with correct-by-deadline and cloud
+accuracy on served beside cloud on-time per D257 (3).**
+
 ## *** USER RULING 2026-11-25: P3 RUNS REGARDLESS OF P2, AND P4 IS SKIPPED. ***
 
 **Let P2 (rq10, running) finish and it is scored against the prediction committed at 10:30:09.**
