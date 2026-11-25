@@ -53,8 +53,19 @@ correctly changes nothing.**
 **A useful operational finding: the prior attempt did not finish because `proof_identity.py` runs SEVEN
 cells in ONE process. Split one cell per process, a 1,200 s cell is 180 to 185 s alone and the whole
 eight-cell proof is about 27 minutes.**
-**REGISTER, stated rather than buried: the 1,200 s rung-3 digest is a NEW number with no committed 1,200 s
-counterpart to check it against, so its control is INTERNAL** - the runner reproduces the committed 300 s
+**REGISTER, CORRECTED 2026-11-25 upward: I first recorded that the 1,200 s rung-3 digest had NO committed
+counterpart and that its control was INTERNAL. THAT WAS WRONG, AND THE PROOF IS STRONGER THAN I RECORDED
+IT.** *** A COMMITTED REPORT FROM 2026-11-23, TWO DAYS BEFORE THIS RUN, ALREADY CARRIES IT:
+`reports/study_d214_figure_instrumentation.md:379` records `covex-v6-fair-final` (rung 3) at n = 16 with
+**14,539 rows** and digest **`5a03c2807da3681a`**, from a different study, on a different night, for a
+different purpose. So tonight's measurement REPRODUCES A PRE-EXISTING COMMITTED DIGEST and the control is
+EXTERNAL, not internal. *** **How the error happened, recorded because it is the same class as the night's
+others: I ran the grep that found 29 committed occurrences IN THE SAME COMMAND BLOCK as the claim, and
+wrote the absence without reading the output.** **An absence claim is cheap to check and expensive to
+propagate, and this one was checked and then not read.**
+**The weaker internal controls also hold and are kept: the runner reproduced the committed 300 s digest
+`edb7e948...` before any 1,200 s cell ran, and the 1,200 s value reproduced across two independent
+processes in two configurations.** - the runner reproduces the committed 300 s
 digest, and the 1,200 s value reproduced across two independent processes in two configurations.
 **One EXTERNAL corroboration does exist and is worth recording: a different harness computed
 `987c2b98784d2dc7` for the same arm at the same length over the SAME 14,539 ROWS.** **So the ROW COUNT is
