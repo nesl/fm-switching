@@ -89,6 +89,26 @@ counts that let either reading be computed later. That is D251 working as intend
 the headline at plotting time.**
 **Item 4 means the push no longer needs a user decision. It needs the D265 proof to pass and your window.**
 
+## *** CORRECTION TO MY OWN PRICE TABLE BELOW: THE D244 s4 REMAINDER IS **SIX** CELLS, NOT THREE. THE THREE WAS MINE AND WAS NOT A RULING. ***
+
+**The accelerator box enumerated it: `mooncake k3`, `simplestream k3`, `stateoff k5`, `llf k5`,
+`mooncake k5`, `simplestream k5`. Committed so far at s4: rung 3 k3, rung 3 k5, stateoff k3, llf k3, which
+is four of the ruled ten (5 arms x k{3,5}), leaving SIX.**
+*** NO RULING EVER SAID THREE. I PUT A NUMBER I HAD NOT SOURCED INTO A PRICE TABLE AND SHOWED IT TO THE
+USER. ALL SIX RUN UNLESS THE USER NAMES A SUBSET. ***
+```
+THE CORRECTED QUEUE
+  D249 -q gate cell                      1 cell    0.36 h
+  -q s5 to s7, ONLY IF IT PASSES         3 cells   1.08 h
+  D250 s5 to s7                         21 cells   7.55 h
+  D257 n20 baselines                     4 cells   1.44 h
+  D262 regime                            6 cells   2.16 h
+  StudyD266-NESTOUT scope A              8 cells   2.88 h
+  D244 s4 remainder                      6 cells   2.16 h   <-- was wrongly priced at 3
+  D258 deadline gate                     2 cells   0.72 h
+                                        51 cells  18.3 h ahead
+```
+
 ## *** USER RULINGS: D250 PASSED AT s4, SO s5 TO s7 RUN. 21 CELLS, AND THEY ARE THE THIRD ITEM IN THE QUEUE. ***
 
 **D250 PASSED at s4: cbd 72 against 61, cloud-correct +24, dashcam +811 against `covex-v6-base`.**
