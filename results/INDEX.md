@@ -1561,10 +1561,12 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | result files | `results/orchestration/live2/oracle/oracle_results.json` (THE BOUND); `oracle_shares_v2.json`; driver `oracle_bootstrap.py`; fix `oracle_lp_run.py` |
 | headline | Control PASSES: no share>1, HIND oracle>=FAIR oracle (pooled+per-seed within CI), share<0 reported not blocking (dashcam, verified real). rung3 pooled-over-seeds 1x FAIR 0.583 HIND 0.149; best baseline state-uo FAIR 0.628 (rung3 over-serves dashcam). simplestream recall FAIR -0.146 (D268 context-sent fix). Fix: recall_correctness ORs cloud correctness (context-dependent). |
 
-## D258 part 2 device-latency rescore: measured Orin latency vs deadline (no verdict change, 2026-11-25, Orin)
+## StudyD258-DEVLAT (D258 part 2): device-latency rescore, measured Orin latency vs deadline (no verdict change, 2026-11-25, Orin)
+
+E-id: **StudyD258-DEVLAT** (research/EXPERIMENTS.md). Commits 6dfbb8c4 (rescore), abe63760 (dashcam oracle serving split).
 
 | field | value |
 |---|---|
 | result files | `results/device/study_devlat/devlat_rescore.json`; module `experiments/analysis/devlat_rescore.py`; report `reports/study_devlat_rescore.md` |
 | model/device | none; CPU on `jetson_orin`; read-only; re-derived from committed cell.json + request.jsonl; committed scorer unchanged |
-| headline | Measured per-item device latency charged to each deadline. Recall device-late=0 in all 177 cells (latency 0.146-0.221s vs 3s), robot cbd IDENTICAL committed vs rescored. Single-shot rescored device-late == committed in every cell (already charged; 126/1042 q over 2s). Dashcam EP-G append max 0.366s < 1s, device-late=0. D250 margin (robot cbd rung3 0.5455 - best baseline covex-v6-base 0.4621) = +0.0833 under both; NO winner changes anywhere. E-id: D258 part 2 (study_devlat), user to confirm row. |
+| headline | Measured per-item device latency charged to each deadline. Recall device-late=0 in all 177 cells (latency 0.146-0.221s vs 3s), robot cbd IDENTICAL committed vs rescored. Single-shot rescored device-late == committed in every cell (already charged; 126/1042 q over 2s). Dashcam EP-G append max 0.366s < 1s, device-late=0. D250 margin (robot cbd rung3 0.5455 - best baseline covex-v6-base 0.4621) = +0.0833 under both; NO winner changes anywhere. |
