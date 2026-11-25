@@ -16,8 +16,17 @@ rebasing, and that is a checked statement and not a hope: the approved estimate'
 D240 stack refusal (tested) refuses any tag carrying an outage together with `_kv0.5`, `_kv0.25` or `_h0.<f>`. The
 D250 duplicated-flag incident is cited in section 4 ONLY as the SHAPE of a last-wins argv hazard, which is a
 statement about how a repeated flag resolves and not a claim about what the host size did or did not drive.**
-**No E-id yet: opening one is the user's, per the ruling. THIS DOCUMENT IS NOT A LICENCE TO RUN; it is what must be
-true before a cell is launched.**
+**E-ID: `StudyD266-NESTOUT`.** The user is writing the row and committing this file.
+**THREE POINTS SETTLED BY THE USER AFTER THE BUILD, recorded here because each one closes something this
+document had open:**
+1. **SEQUENCING (what section 7 lists as the comparator risk) IS SETTLED: the outage cells run AFTER the D265
+   push with `-q` OFF.** The byte-identical proof is what makes rung 3 comparable to P3 and to the `_preD249`
+   references. `-q` gets its own outage cells ONLY if it passes its own gate.
+2. **NO SEPARATE TWO-CELL KEYING GATE.** Its cells are the first two of scope A, and the abandon check runs
+   on them.
+3. **The cells queue behind D250 and the D249 gate cell, so there is no accelerator pressure on this study.**
+
+**THIS DOCUMENT IS NOT A LICENCE TO RUN; it is what must be true before a cell is launched.**
 
 ---
 
@@ -38,46 +47,107 @@ true before a cell is launched.**
 
 ---
 
-## 2. THE CAUSAL CHAIN, AND THE TWO CHANNELS THAT CARRY k
+## 2. THE CAUSAL CHAIN, THE DOSE, AND WHAT THE HARNESS ACTUALLY DOES WITH THE WITHHELD FRAMES
 
-Adding a robot to a correlated outage acts on the run through exactly two channels, and they are not the same size.
+*** THE DOSE WAS WRONG IN THE FIRST VERSION OF THIS FILE AND THE USER RULING CORRECTED IT. The first
+version counted questions ASKED INSIDE the window. That is a real channel but it is not this design's
+effect. THE EFFECT IS MISSED EVIDENCE: frames a victim captures during the outage are not uploaded, and a
+LATER question whose ground truth depends on that interval is answered without it, or after a backlog. A
+question asked long after the window still counts if its evidence sits inside it. The corrected dose is
+below and it is NON-ZERO AT BOTH SEEDS AND BOTH RUNGS, where the wrong quantity was zero at seed 5. ***
 
-1. **The forced-device-only-question channel.** A victim's questions asked inside the window reach the cloud only
-   after the reconnect and past their own deadline, so the committed standing-answer rule leaves the DEVICE's answer
-   standing. Those questions have no cloud payload and no request rows, and `t_local` is null on every robot row, so
-   BOTH robot attainment metrics are blind to them in opposite directions (AMENDMENT 2, Conflict 1, confirmed on
-   data). They are reported as a COUNT and never scored.
-2. **The reconnect-backlog channel.** A victim's whole in-window history is deferred and released as a burst at the
-   reconnect instant. The committed `UplinkQueue` then takes `t_start = max(offer, free_at)` and records the queueing
-   delay it imposed. This channel acts whether or not the added victim owned a question inside the window.
+### 2.1 The evidence field, named, with every candidate that could have stood for it
 
-**MEASURED, BEFORE ANY CELL, AT THE RULED DESIGN POINT** (n=16, 3:11:2, run_s 1200, D=120, centre placement,
-`lh_req` / `ss2` / EP-G min 3 / per-frame / rq30, `ROBOT_DEADLINE_S = 3.0`):
+**CHOSEN: `[answer_start_time, answer_end_time]`** from `results/sember/study_h/data/sember_mcq.jsonl`. Every
+question carries both, in the SAME session-time coordinate as `question_time`, which
+`fleet/data_sources.py:454` loads as `Question.t_ask` and the trace writes as `t_ask_session`. So the
+evidence interval and the ask time are comparable with one subtraction and no rescaling: the run time of a
+play's session-time zero is `t - t_ask_session`. **Chosen because it is the ruling's own quantity (the
+ground-truth event time) and because it is an ANNOTATION OF THE DATA rather than a property of the harness:
+it does not move if the upload contract changes.** **The join is COMPLETE: 229 of 229 robot questions have an
+evidence interval.** (A pooled join rate would read 49 percent, because the 238 assistive single-shot
+questions are VizWiz and EgoThink and have no S-EMBER interval by construction. The rate is reported split
+by device type so that a correct complete join cannot look like a half-failed one.)
 
-| cell pair | nested | same window | added victims | **forced-miss floor (questions)** | backlog, D2 tokens |
+**ALSO REPORTED, because more than one field could stand for "the evidence this answer requires":**
+
+| reading | definition | why it is reported |
+|---|---|---|
+| **R1** | the annotated interval overlaps the window | the ruling's quantity. **CHOSEN** |
+| **R2** | a D2 CAPTURE INSTANT falls inside the overlap | the operational form: what is physically withheld is frames, not seconds. D2 runs at one frame per 2.000 s, so an overlap shorter than that can contain no frame at all. Never larger than R1 |
+| **R3** | every question asked after the window start, because its prompt is the cumulative history `DS.d2_frames_in(0, t_ask)` | the MAXIMAL reading, defensible and reported as an upper bound |
+
+**NOT USABLE, and said rather than omitted:** `question_time` / `t_ask_session` is the ASK time, which is the
+quantity the first version wrongly used; `history_tokens` is HOW MUCH history the cloud holds at the ask and
+cannot localise evidence in time at all.
+
+### 2.2 *** THE FRAMES ARE BUFFERED, NOT DROPPED, AND THAT IS READ OFF THE CODE ***
+
+**`experiments/orchestration/live2/fleet/trace.py:1037-1047`**: a victim's in-window `history_batch` has its
+offer time set to the reconnect instant (`r["t"] = round(t_out1, 6)`) and **NO RECORD IS DELETED**.
+**`:1048-1056`**: a `recall_question` gains `t_offer` and keeps its ask time. The committed
+`UplinkQueue` (**`fleet/links.py:112-120`**) then takes `t_start = max(t_offer, free_at)`.
+**So the evidence is DELAYED, not lost.** Per the ruling, the dose's upper edge is then the drain, and the
+drain is COMPUTED and not assumed, by replaying that same committed arithmetic:
+
+| quantity | value |
+|---|---|
+| deferred `history_batch` records per victim | **60** (120 s of D2 at one frame per 2 s) |
+| bytes per victim | **1,449,630** (p50 frame 24,570 B) |
+| uplink | **13.6 Mbps**, `fleet/links.py:38`, ONE QUEUE PER DEVICE (`fleet/emulator.py:310`), so victims drain in parallel |
+| serialisation | **0.853 s** |
+| **drain after reconnect** | **0.87 to 0.89 s** |
+
+### 2.3 THE DOSE TABLE, measured before any cell runs
+
+Per ADDED victim, robot questions asked at or after the window start whose evidence falls inside the window.
+`instances` counts asks; `distinct` counts questions. **With `robot_reask_mean_s=30` the same question is
+re-asked about every 30 s with the same `question_id` and so the same evidence interval, so one affected
+question can appear as eleven affected instances. READ THE DISTINCT COLUMN.**
+
+| pair | added victims | R1 instances | **R1 distinct questions** | R2 instances | R3 instances | R1 bounded by the drain | old wrong dose |
+|---|---|---|---|---|---|---|---|
+| s4, k 1 to 3 | robo003, robo009 | 5 | **1** | 0 | 31 | **0** | 2 |
+| s4, k 3 to 5 | robo004, robo010 | 9 | **2** | 9 | 15 | **0** | 1 |
+| s5, k 1 to 3 | robo007, robo009 | 1 | **1** | 1 | 11 | **0** | 0 |
+| s5, k 3 to 5 | robo006, robo008 | 22 | **3** | 22 | 22 | **0** | 0 |
+
+Per affected question, with its overlap and the frames inside it:
+
+| pair | victim | evidence interval, run s | overlap with the window | D2 frames in the overlap | instances |
 |---|---|---|---|---|---|
-| s4, k 1 -> 3 | yes | yes (540.0) | robo003, robo009 | **2** (robo003 2, robo009 0) | 5,400 -> 16,200 (+10,800) |
-| s4, k 3 -> 5 | yes | yes (540.0) | robo004, robo010 | **1** (robo004 1, robo010 0) | 16,200 -> 26,820 (+10,620) |
-| s5, k 1 -> 3 | yes | yes (540.0) | robo007, robo009 | **0** | 5,400 -> 16,200 (+10,800) |
-| s5, k 3 -> 5 | yes | yes (540.0) | robo006, robo008 | **0** | 16,200 -> 26,910 (+10,710) |
+| s4 k1-3 | robo009 | 531.0 to 541.0 | **1.02 s** | **0** | 5 |
+| s4 k3-5 | robo004 | 599.7 to 608.7 | 9.00 s | 4 | 6 |
+| s4 k3-5 | robo004 | 590.7 to 593.7 | 3.00 s | 2 | 3 |
+| s5 k1-3 | robo007 | 351.8 to 667.8 | **120.00 s, the whole window** | **60** | 1 |
+| s5 k3-5 | robo008 | 573.2 to 576.2 | 3.00 s | 1 | 11 |
+| s5 k3-5 | robo006 | 656.5 to 671.5 | 3.51 s | 2 | 6 |
+| s5 k3-5 | robo008 | 654.2 to 687.2 | 5.77 s | 3 | 5 |
 
-*** THIS IS THE MOST IMPORTANT PRE-RUN FACT IN THE DESIGN AND IT WAS NOT KNOWN WHEN THE ESTIMATE WAS APPROVED.
-THE FORCED-MISS CHANNEL IS 2, 1, 0 AND 0 QUESTIONS. AT SEED 5 IT IS EXACTLY ZERO AT BOTH RUNGS. So at seed 5 NO
-metric is arithmetically required to move with k at all, and a null on cloud on-time there is **UNEXERCISED** in
-Rule 2's sense, not a negative. The only live channel at seed 5 is the backlog, which grows by about 10,700 D2
-tokens per rung at both seeds. ***
+**R1 and R2 disagree at exactly one pair and for the right reason:** robo009's single affected question at
+s4 overlaps the window by 1.02 s, which is shorter than the 2.000 s D2 frame period, so **no capture instant
+lies inside the overlap and nothing was physically withheld for it.** That is why both readings are reported.
 
-**Consequence for how this study may be read, registered in advance:** any k-effect found at seed 4 and absent at
-seed 5 is consistent with the forced-miss channel alone and is NOT evidence about the policy. A k-effect present at
-BOTH seeds is the only pattern that can be attributed to the backlog channel. The dose is `k x (D/2)` by
-construction and stays exactly collinear with k, so every k-effect remains a k-and-dose effect; breaking that needs
-D varied at fixed k, which this ruling does not order.
+### 2.4 WHAT THIS MEANS, STATED BEFORE THE CELLS RATHER THAN AFTER
 
-**Per-victim question counts are NOT fixed by k** and span **12 to 32** at this mix (robo008 12, robo003 16,
-robo006 17, robo007 17, robo002 18, robo000 21, robo001 21, robo005 23, robo009 25, robo010 27, robo004 32), so each
-victim's own count is reported beside its row and never inferred from k.
-
----
+1. **PROCEED WITH SCOPE A.** The ruling stops the design only if every added-victim dose is zero at both
+   seeds. No dose is zero: 1, 2, 1 and 3 distinct questions.
+2. **IT IS A WEAK-DOSE CONDITION AND MUST BE LABELLED ONE WHEREVER IT IS QUOTED.** One to three distinct
+   questions out of 229 robot questions, and a delta at low dose is not an effect size.
+3. *** THE MISSED-EVIDENCE CHANNEL IS BOUNDED BY A SUB-SECOND DELAY, SO ON THE RULING'S OWN BUFFERED RULE
+   ITS DOSE IS ZERO AT EVERY PAIR. The drain is 0.87 to 0.89 s and not one affected question is asked inside
+   that interval. In this harness, at D = 120 s and this mix, no question is answered without evidence it
+   would otherwise have had: the evidence arrives under a second after reconnect. Any residual effect must
+   come from the CLOUD-SIDE handling of the burst, not from evidence being absent. ***
+4. **THE SURVIVING CHANNEL IS THE RECONNECT BURST, AND IT HAS REAL MAGNITUDE.** 5,400 D2 tokens per victim
+   arrive at one instant (60 frames x 90 tokens), 27,000 at k = 5. Under the committed D162 first-token model
+   (`results/orchestration/live2/v5/cf_ontime_model_d162.json`: 0.06780 + 0.00018243 x uncached +
+   0.00015358 x queued_ahead), one victim's backlog is worth about **1.05 s** of first token, and the fifth
+   victim served behind the other four about **4.37 s**, against the **3 s** robot deadline. **THAT IS A
+   MODEL-BASED SCREEN AND NOT A MEASUREMENT**, quoted here only to show the channel is not negligible; the
+   cells are what would measure it.
+5. **The dose remains collinear with k** by construction, so any k-effect is a k-and-dose effect. Breaking
+   that needs D varied at fixed k, which this ruling does not order.
 
 ## 3. THE ABANDON CHECK. ITS CRITERIA ARE FIXED HERE AND ARE NOT NEGOTIABLE AFTERWARDS
 
@@ -91,7 +161,21 @@ Under nesting the two cells differ by exactly two robots at one identical window
 correct-by-deadline is not flat where cloud on-time is. The abandon check therefore classifies **every** recorded
 robot metric, per D251, and not only the ruling's primary one.
 
-**Script:** `experiments/analysis/robot_idle/d262_abandon_check.py`, run on the FIRST TWO CELLS of scope A.
+*** AND THE THREE CHANNELS BEAR ON DIFFERENT METRICS, WHICH IS WHY ONE FLOOR CANNOT SERVE FOR ALL OF THEM.
+A question forced device-only is invisible to a cloud-on-time count, so the device-only count is the
+arithmetic floor FOR THAT METRIC and for no other. A question answered without the evidence its ground truth
+needs is a CORRECTNESS effect, so the missed-evidence dose is the dose for `correct_by_deadline`. The
+reconnect burst is a LATENCY effect and shows up in both. A check that applied the device-only floor to
+every metric would mislabel two of the three. ***
+
+| channel | dose at the ruled design point | the metric it bears on |
+|---|---|---|
+| forced device-only questions | 2, 1, 0, 0 instances | `robot_pool_on_time`: this is its arithmetic floor |
+| **missed evidence** | **1, 2, 1, 3 distinct questions** (5, 9, 1, 22 instances) | `correct_by_deadline` |
+| reconnect burst | about +10,700 D2 tokens per rung at both seeds | both, through first-token latency |
+
+**Script:** `experiments/analysis/robot_idle/d262_abandon_check.py`, run on the FIRST TWO CELLS of scope A,
+with `experiments/analysis/robot_idle/d262_dose_readings.py` for the dose under every reading.
 
 - `--predict` needs no cells. It computes the forced-miss floor and the backlog delta from the traces alone. The
   floor is a **CONSTRUCTED BOUND, not an observed count** (it assumes every added device-only question was on time at
@@ -184,8 +268,8 @@ cross-check that the window and victims it reconstructs are the ones the cells r
 | 1 | the metric may not separate k | **ADDRESSED IN CODE**: the abandon check above, with its criteria fixed here, runnable on the first two cells. Its `--predict` half already ran and found the forced-miss floor is 2, 1, 0, 0. |
 | 2 | **the trace-dir cache serves the old placement while every gate passes** | **FIXED IN CODE**: the placement rule is now part of the trace-directory token (`..._outk3d120pcentre`). The default rule adds nothing, so every committed trace name stays addressable. Asserted in `d262_nested_switch_proofs.py` proof (D), not assumed. |
 | 3 | the driver validates a DIFFERENT cell's meta | **FIXED IN CODE**: the glob and `ls -t ... | head -1` are gone. The harness now writes the RESOLVED `trace_dir` into its own `header.json` and the driver reads that exact path, then asserts k, D, the placement, AND `robots == sorted(victim_permutation[:k])` on the artefact. |
-| 4 | the comparator may move (`_preD249`) | **NOT SOLVED, BY DESIGN. A SEQUENCING QUESTION FOR THE USER.** P3 and every reference carry `_preD249`; baselines never do. If D249 lands between the first cell and the last, the outage cells stop being comparable to P3. Noted, not fixed. |
-| 5 | no E-id | **OPEN, AND THE USER'S TO OPEN.** Zero rows in `research/EXPERIMENTS.md` match the outage-correlation study. Per CLAUDE.md this is a stopping condition for the build: no cell may run until a row exists. |
+| 4 | the comparator may move (`_preD249`) | **SETTLED BY THE USER, not by code: the outage cells run AFTER the D265 push with `-q` OFF, and the byte-identical proof is what makes rung 3 comparable to P3 and the `_preD249` references.** `-q` gets its own outage cells only if it passes its gate. |
+| 5 | no E-id | **SETTLED: `StudyD266-NESTOUT`.** The user is writing the row. Verified independently at `origin/main` before it was assigned that no existing row covered this study: the only outage rows are `StudyOUTAGE-SURVEY` (read-only, E-id proposed not confirmed) and `StudyOUTAGE-HEADROOM` (model-based, no cells, DO NOT PLOT). |
 | + | prefix caching via a duplicated last-wins flag | **RESTATED IN FULL IN SECTION 4**, with both readings named and the refusal that fires if they disagree. |
 
 ---
@@ -244,6 +328,12 @@ Carried forward from the standing prereg and AMENDMENT 2, unchanged and binding,
 8. **Episodes pooled across seeds**: refused; episode structure is invariant within a seed and not across seeds.
 9. **No 0.25x. Never seeds 1 to 3. Disk refusal below 15 GB. Outage work at 1x only, never stacked with reduced
    memory (D240).**
+10. **A missed-evidence figure quoted as INSTANCES rather than distinct questions**: withdrawn. The re-ask
+    mechanism multiplies one affected question by up to eleven, and an instance count reads as an effect size
+    while being a re-ask count.
+11. **A missed-evidence effect claimed without the drain beside it**: withdrawn. The harness buffers, the
+    drain is 0.87 to 0.89 s, and the drain-bounded dose is zero at every pair, so a correctness effect
+    attributed to absent evidence must first explain how the evidence was absent when the question was asked.
 
 ---
 
@@ -257,7 +347,8 @@ Carried forward from the standing prereg and AMENDMENT 2, unchanged and binding,
 | `experiments/orchestration/live2/d223_dry_digest_identity.py` | `--ratio`, so the identity claim can be made per mix |
 | `experiments/orchestration/live2/d262_nested_switch_proofs.py` | nesting, window invariance, the band-rule positive control, Step 2b, and the switch's arrival with its declared type and value |
 | `experiments/analysis/robot_idle/d262_outage_history_cached.py` | the history-cached observable, with its three controls |
-| `experiments/analysis/robot_idle/d262_abandon_check.py` | the abandon check, `--predict` and `--score` |
+| `experiments/analysis/robot_idle/d262_abandon_check.py` | the abandon check, `--predict` and `--score`, with the missed-evidence dose and the computed drain |
+| `experiments/analysis/robot_idle/d262_dose_readings.py` | the added-victim dose under all three evidence readings, per question, with the drain bound |
 | `experiments/orchestration/study_frozen_grid_driver_v42.sh` | the `_nest` tag token, its refusals, and the tightened trace validation |
 
 **Every result file this study writes goes under `results/orchestration/live2/robot_idle/` or the frozen-test run
