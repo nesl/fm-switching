@@ -1455,3 +1455,11 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | model/device | none; offline CPU on `jetson_orin`; read-only, no images; D240 1x and kv0.5r separate |
 | headline | Oracle stage 1 (FAIR valuation) VERIFIED: single-shot gain 0.0739 (cloud 0.622/device 0.548), recall gain per seed 1x s4 0.280 s5 0.122 s6 0.492 s7 0.300, acc_cloud>=acc_device, no flags. Stage 2 (dashcam max-over-subsets) MACHINERY VERIFIED by a 5-case unit test on hand-built episodes (crash rescue, no-crash no-serve, no-crash suppress, min-work subset, already-correct). No bound emitted; live-data application + stages 3-6 pending. |
 | old name | none; staged build on LP core c7219ff4 |
+
+## s6 recall device-accuracy verification (oracle gate, 2026-11-25, Orin)
+
+| field | value |
+|---|---|
+| result files | `reports/study_s6_device_accuracy_check.md`, `results/orchestration/live2/oracle/s6_device_accuracy_check.json` |
+| verdict | s6 recall device accuracy 0.057851 (7/121) is a GENUINE PROPERTY of the s6 question set, NOT an extraction error. Checks: device_correct==(device_answer==gold) 0 mismatches; per-question (device,gold) seed-invariant (23 shared qids, 0 inconsistent); device answers real varied letters; s6 device right on 1 of 20 distinct questions (qid 0a99c448..., re-asked 7x); identical across all s6 cells 1x and kv0.5r. Union distinct acc 0.228, s6 a low-tail draw. Feed into the bound as a flagged OUTLIER (per-seed, D240), not dropped. |
+| old name | none; gate before oracle stage 3 |
