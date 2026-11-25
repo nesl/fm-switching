@@ -1481,3 +1481,12 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | model/device | none; offline CPU on `jetson_orin`; read-only; D240 1x and kv0.5r separate (identical here: device + arm-independent cloud scores do not vary with memory) |
 | headline | PRELIMINARY stage artifact, NOT a bound. Dashcam episode FAIR (expected per-tier DEV accuracy: crash gain TPR_cloud-TPR_dev=0.1333, no-crash 0) and HINDSIGHT (actual crossing 0/1) valuation on live episodes, simplestream dense cloud source. Per cell ~712-714 episodes, 172-192 crash. HINDSIGHT improvable 41-52 (integer gain); FAIR improvable = all crash (fractional gain ~23-26). FAIR != HINDSIGHT confirmed. cloud-miss 3-10 instants/cell (device-only fallback). |
 | old name | none; oracle stage 2-live |
+
+## StudyORACLE stage 3 recall+single-shot HINDSIGHT valuation (PRELIMINARY, 2026-11-25, Orin)
+
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/oracle_hindsight.json`; module `experiments/analysis/oracle/oracle_hindsight.py` |
+| model/device | none; offline CPU on `jetson_orin`; read-only; D240 1x/kv0.5r separate (correctness memory-independent) |
+| headline | PRELIMINARY stage artifact, not a bound. Recall+single-shot HINDSIGHT (actual per-unit cloud/device correctness) beside FAIR. recall device floor s4 49 / s5 38 / s6 7 / s7 31 (matches stage 1); cloud-right-device-wrong (HINDSIGHT improvable) 50/33/66/25; cloud-wrong-device-right (serving hurts) 13/18/7/5. ss floor ~192, improvable ~61/357. HINDSIGHT != FAIR confirmed (s6 recall HINDSIGHT 66 vs FAIR ~59.5). s6 single-question-basis flag carried. |
+| old name | none; oracle stage 3 |
