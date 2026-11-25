@@ -914,6 +914,52 @@ unscraped; **rung-4 seeds 5 to 7 must scrape.** Only flash's main session may in
 records each run's unix `t0` (the D211 proxy this removes). The 31 stub cells are marked only and their
 scores stand.
 
+## *** A KEY KEPT ITS NAME AND CHANGED ITS MEANING. `per_episode_PRIMARY.mean_attainment` WAS `k / 19` BEFORE 18:23 TONIGHT AND `k / actual` AFTER. SAME READ PATH, SAME CELL, 0.472945 BEFORE AND 0.543782 AFTER. ***
+
+`cd580554` ("D232", 18:23:36, `d179_rung2_verdict.py`) swapped PRIMARY with what had been
+`per_episode_true_denominator_BESIDE`, and renamed the old PRIMARY to `per_episode_fixed19_BESIDE`. **The
+change is correct on the merits** - episodes have 14 distinct sizes with a mean of 16.5, so a fixed
+denominator of 19 was wrong - **and the way it landed is the hazard: the key name is stable, so every
+reader that names it keeps working and silently returns a different quantity.**
+*** THE DAMAGE PATH, WHICH IS THE PART TO REMEMBER: `d234_noise_floor.json` DECLARES ITS `read_route` AS
+THAT KEY, THROUGH THAT MODULE, AT `20155f4a`, WHERE PRIMARY WAS FIXED-19. SO 0.027752, 0.001953 AND
+0.085803 ARE ALL FIXED-19 NUMBERS, AND A POST-D232 DELTA COMPARED AGAINST THEM MIXES SCALES BY ABOUT 0.07
+ON ONE CELL - TWO AND A HALF TIMES THE ENTIRE FLOOR. ***
+**What saved today's numbers was luck of timing, not care:** 0.448403, 0.439976, 0.501257, 0.619234 and
+0.472945 were all computed with the **pre**-D232 blob (md5 `18bcbcef`), so they are mutually commensurable
+and commensurable with the floor. **The break is forward only, from 18:23.** It was caught because an
+agent's md5 came back `fa8bce9b` against the expected `18bcbcef` **and it stopped instead of proceeding** -
+the md5 assertion in every brief, which had looked like boilerplate all day, is the only thing that caught
+it.
+**Two corollaries.** A **definition change behind a stable key needs a key RENAME on the new quantity, not
+on the old one** - renaming the old PRIMARY to `fixed19_BESIDE` preserved every stale reader while
+redirecting it. **And the `k/19` lattice invariant NO LONGER HOLDS** on the new PRIMARY: 111 of 712
+episodes sit off-lattice in one cell, so any check asserting it now fires falsely on a correct cell.
+**One good consequence, worth keeping: the attainment read is CLEAN of the `scorer/score.py` confound,
+unlike the robot counts.** `read_cell` recomputes the alert block from `outcomes.jsonl` and
+`request.jsonl` through its own `_committed_delivery`; `score.py` is a consumer of those traces and never a
+producer; and the `cell.json -> score -> sweep[0]` path feeds only the robot and single-shot block. **Two
+separate pipes, so the same pair of cells can be confounded on one metric and clean on another.**
+
+## *** PAIR ON THE TREE HASH, NEVER ON `header.git_commit`: A REBASE CAN REWRITE THE COMMIT A CELL RECORDS, AND `git rev-parse <absent-sha>:<path>` ECHOES THE INPUT BACK INSTEAD OF FAILING. ***
+
+`_rep2`'s `header.git_commit` is `6282ee40`, which **exists only in the H100's clone**: it was that box's
+local HEAD when the cell started, and the rebase that cleared the stuck state rewrote it, so **that id never
+reached origin and never will.** Pairing on the commit would have been impossible.
+**The tree hash is content-addressed, so it closes it.** `_rep2` ran on `experiments/` tree
+`3932b279c3ea`, and origin carries that identical tree under a later commit, so
+`git rev-parse a5515060:experiments` gives **`3932b279c3ea...`** and the three blobs read straight off it:
+`arms_final_ladder.py` **`6508e4e5f063`**, `arms_v6state.py` **`5b980c612854`**, `scorer/score.py`
+**`b3e49def431b`** - **all three matching the H100's independently reported values.** A pair's code identity
+is a property of content, not of reachability.
+*** AND THE TRAP THAT MAKES THE NAIVE CHECK WORSE THAN NO CHECK, DEMONSTRATED LIVE: `git rev-parse
+6282ee40...:experiments` ON A CLONE THAT LACKS THE OBJECT PRINTS `6282ee401a3984a4bde6...` - THE INPUT SHA
+BACK - AND EXITS 0. *** A script that records that output as a tree hash gets a plausible 40-hex string
+that is not a tree, and two cells whose commits differ would appear to have "different trees" correctly by
+accident while two cells with the same absent commit would appear identical. **Always `git cat-file -t`
+the sha first, and treat an unresolvable commit as UNRESOLVABLE, which is not the same as absent and not
+the same as different.**
+
 ## *** TWO VALIDITY FLAGS, AND WE WERE BOTH CHECKING THE WRONG ONE. `run_meta.run_valid` IS **TRUE** ON A CELL ITS OWN HARNESS DECLARES `INVALID torn_lazy_import`. ***
 
 **Read `header.source_agreement.verdict` before scoring any cell, and refuse it if the verdict contains
