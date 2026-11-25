@@ -1,5 +1,30 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** USER RULING D266 (12:25): THE D249 GATE CELL GOES NEXT, AHEAD OF D257, D262, D244 AND D258. ***
+
+**Once the D265 conditions are met (the CPU byte-identical proof with `-q` OFF, and the push inside your
+window), queue `covex-v6-fair-final-q` 1x s4 IMMEDIATELY AFTER THE LAST D250 BASELINE and AHEAD of D257,
+D262, D244 and D258.** **Gated as ruled before: SINGLE SEED s4, other seeds only if it passes.**
+*** DO NOT DISPLACE ANY D250 BASELINE. The gate cell goes behind all six, then first. ***
+**New file order: D250 (6 baselines) -> D249 `-q` GATE -> D257 -> D262 -> D244 -> D258 -> MATRIX.**
+
+**AND THE TAG DEFECT STANDS UNTIL THE USER RULES: `_dev` is NOT a driver token and is NOT on the
+reserved-inert list that v40:128 keeps for `_preD249`. A bare `_dev` line would run harness defaults, with
+no 3 s robot deadline, no EP-G workload and no 30 s reask, and would be comparable to nothing. The
+condition tokens must be present either way. DO NOT QUEUE A BARE `_dev` LINE.**
+
+## USER RULING D266 (2): THE NESTED-VICTIM OUTAGE DESIGN IS APPROVED FOR BUILD. NOT YOUR TIME YET.
+
+**Built on flash CPU while you run. It does not take accelerator time until scope A is ready.** Robot-heavy
+`_c3-11-2`, 1x only with NO memory token, fixed window at the centre of the committed band, victims nested
+by reordering the draw so the WINDOW COMES FIRST and victims come from an explicit k-independent
+permutation prefix recorded in the meta. **Scope A first, 8 cells, WITH ITS ABANDON CHECK: if the robot
+metric does not separate k under nesting, STOP AND REPORT before scope B.** New code defaults OFF until
+proven.
+*** AND A STANDING CONSTRAINT FOR WHEN THESE CELLS REACH YOU: THEY ARE NEVER DIFFERENCED AGAINST THE OLD
+40:40:20 OUTAGE GRID. The robot target is POOLED and the denominator moves 132 to 229. COMPARATORS ARE P3
+AND THE REGIME CELLS. ***
+
 ## *** USER RULING D265: THE `experiments/` CODE PUSH IS APPROVED, WITH TWO CONDITIONS. I NEED YOU TO NAME THE WINDOW. ***
 
 **Condition 1, BEFORE the push: prove on CPU against committed traces that with `-q` OFF,
