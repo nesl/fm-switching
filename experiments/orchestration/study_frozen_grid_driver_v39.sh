@@ -115,6 +115,8 @@ cell() {   # arm n seed [tag]
   # v39 (D244, authorised by flash under D244 2026-11-25 ~07:55): a tag token _out-k<K>-d<D> runs the D242 trace-level
   # correlated multi-robot outage; run_live2_real.py defaults both flags to 0 = OFF, so without this the tag would be
   # a switch that never reaches the run. EPG_ARGS and RQ30_ARGS still apply (the rq parse reads 30 off ..._rq30_out-...).
+  # LIMIT: D is captured as an INTEGER (d([0-9]+)); the harness takes a float and names its trace dir with %g, so a
+  # fractional D (e.g. 120.5 -> _outk3d120.5) is NOT expressible in a tag and would also miss the trace_meta glob below.
   local _ok _od; _ok=$(echo "$tag" | sed -nE 's/.*_out-k([0-9]+)-d([0-9]+)(_.*)?$/\1/p'); _od=$(echo "$tag" | sed -nE 's/.*_out-k([0-9]+)-d([0-9]+)(_.*)?$/\2/p')
   [ -n "$_ok" ] && { lflag="$lflag --outage-robots-k $_ok --outage-duration-s $_od"; wl="$wl outage-k${_ok}-d${_od}"; }
   # v33 (EVAL_PLAN composition conditions): a tag token _c<d>-<r>-<a> sets --ratio d:r:a (it must be a key of
@@ -190,7 +192,7 @@ cell() {   # arm n seed [tag]
           argv=$(tr '\0' ' ' < /proc/$hp/cmdline)
           if echo " $argv " | grep -qF -- " --outage-robots-k $_ok " && echo " $argv " | grep -qF -- " --outage-duration-s $_od " && echo " $argv " | grep -qF -- " --seed $seed "; then
             log "OUTAGE FLAGS LIVE for $name: harness pid $hp argv carries --outage-robots-k $_ok --outage-duration-s $_od"
-          else log "OUTAGE FLAGS NOT LIVE for $name: harness pid $hp argv lacks them; stopping the cell (SIGINT)"; kill -INT $hp; exit 0; fi
+          else log "OUTAGE FLAGS NOT LIVE for $name: harness pid $hp argv lacks them; stopping the cell (SIGINT)"; echo "outage flags not live in harness argv" > $d/VOID_OUTAGE_STOP; kill -INT $hp; exit 0; fi
           break; fi
         sleep 2; done
       for i in $(seq 1 300); do
@@ -198,7 +200,7 @@ cell() {   # arm n seed [tag]
         if [ -n "$tm" ]; then
           if jq -e --argjson k $_ok --argjson d $_od '.outage.args.outage_robots_k == $k and .outage.args.outage_duration_s == $d' "$tm" >/dev/null 2>&1; then
             log "OUTAGE RECORDED for $name: $tm .outage $(jq -c '{robots: .outage.robots, t_start: .outage.t_start, t_end: .outage.t_end, device_only_q: (.outage.device_only_question_ids | length)}' "$tm")"
-          else log "OUTAGE NOT RECORDED for $name: $tm lacks .outage matching k=$_ok d=$_od; stopping the cell (SIGINT)"; [ -n "$hp" ] && kill -INT $hp; fi
+          else log "OUTAGE NOT RECORDED for $name: $tm lacks .outage matching k=$_ok d=$_od; stopping the cell (SIGINT)"; echo "outage not recorded in trace_meta" > $d/VOID_OUTAGE_STOP; [ -n "$hp" ] && kill -INT $hp; fi
           break; fi
         sleep 2; done ) &
   fi
@@ -233,6 +235,14 @@ cell() {   # arm n seed [tag]
   mm_gate $d
   rm -rf $OUT/$name; cp -r $d $OUT/$name 2>/dev/null; cp $d.stdout $OUT/$name.stdout 2>/dev/null
   find $OUT/$name -type f -size +5M ! -name "*.gz" -exec gzip -9 {} \;
+  # v39 (D244 condition 6): a cell stopped by the outage checks is VOID. Any cell.json it wrote is renamed
+  # cell.json.VOID (in the raw dir and the committed copy) so no scorer can read it as a result, and the cell is
+  # recorded in SKIPPED (never rerun automatically, never scored).
+  if [ -f $d/VOID_OUTAGE_STOP ]; then
+    for f in $d/cell.json $OUT/$name/cell.json; do [ -f $f ] && mv $f $f.VOID; done
+    log "VOID (D244 outage check failed: $(cat $d/VOID_OUTAGE_STOP)) $name: any cell.json renamed cell.json.VOID; recorded in SKIPPED"
+    echo "$name" >> $OUT/SKIPPED_ARGS; echo "$name" >> $OUT/SKIPPED
+  fi
   local v=$(jq -c '{err, run_valid, digests_equal, n_requests, n_errors, lat_p99:.lateness.p99_ms, scored:.score.ok}' $d/cell.json 2>/dev/null)
   [ -z "$v" ] && v='{"err":"no cell.json","run_valid":false}'
   v=$(echo "$v" | jq -c --arg name "$name" --argjson rc $rc --slurpfile g $d/mm_gate.json '. + {name:$name, rc:$rc, mm_gate:($g[0].gate // null),
@@ -442,7 +452,9 @@ while true; do
   # ran): a cell that ends with no cell.json within 120 s never reached its workload, which is an INFRASTRUCTURE
   # failure (import error, preflight refusal), not a property of the cell. Do NOT rerun it and do NOT record it in
   # SKIPPED: log it, set STOP plus the watchdog's HOLD, and exit, so the queue is not burned and an operator fixes it.
-  if [ "$(echo "$v" | jq -r .valid)" != "true" ] && [ $(( $(date +%s) - t0 )) -lt 120 ] && [ ! -f $OUT/${1}_n${2}_s${3}_${RUN_S}s_h27_3t${tg}/cell.json ]; then
+  # v39 (D244): a D244 refusal (excluded arm / outage args) or a VOID outage stop is a recorded SKIP of ONE cell,
+  # not an infrastructure failure, so it must not stop the whole queue; every other case is unchanged from v37.
+  if [ "$(echo "$v" | jq -r .valid)" != "true" ] && [ $(( $(date +%s) - t0 )) -lt 120 ] && [ ! -f $OUT/${1}_n${2}_s${3}_${RUN_S}s_h27_3t${tg}/cell.json ] && ! echo "$v" | jq -e '.skipped == "outage-args-mismatch" or .skipped == "excluded-arm-d244"' >/dev/null 2>&1 && [ ! -f $RAW/runs/${1}_n${2}_s${3}_${RUN_S}s_h27_3t${tg}/VOID_OUTAGE_STOP ]; then
     log "INFRASTRUCTURE FAILURE (no cell.json within $(( $(date +%s) - t0 )) s): $(echo "$v" | jq -c '{name, err, rc}'); NOT rerun, NOT skipped; STOP + HOLD set, driver exits. stdout tail: $(tail -1 $OUT/${1}_n${2}_s${3}_${RUN_S}s_h27_3t${tg}.stdout 2>/dev/null | cut -c1-200)"
     touch $OUT/STOP; mkdir -p $HOME/data/live2/watchdog; echo "infrastructure failure $(date '+%F %T') on ${1} s${3}" > $HOME/data/live2/watchdog/HOLD
     commit_cell "infrastructure failure, $1 at $2 devices, seed $3 (no cell.json; driver stopped)"; exit 1
