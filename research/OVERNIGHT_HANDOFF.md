@@ -6,6 +6,44 @@ once produced a false "H100 idle eight hours" claim while it had committed one m
 
 ## READ THIS FIRST, FOR A WATCHDOG RESUME. STATE AS OF 2026-11-23 22:20 PST.
 
+*** CORRECTED 2026-11-25 04:0x UTC (20:0x PST, watchdog restart). THE BLOCK BELOW IS STALE IN ITS MOST
+LOAD-BEARING SENTENCE, AND A RESUME THAT BELIEVES IT WILL DO NOTHING WHEN THERE IS WORK. ***
+
+**1. "ALL FIVE OVERNIGHT STEPS ARE CLOSED OR BLOCKED ON THE USER. NOTHING EXPERIMENTAL IS ACTIONABLE" IS
+FALSE.** Since it was written the user issued **D238, D240 and D241**, which set a **29-cell overnight
+block on the H100** (block A 9 cells kv0.5r s5/s6/s7 interleaved by seed, then `ptg` at 1x s4, then blocks
+B, C and D), ruled that **memory and network are never stacked** and that all outage work is 1x only, and
+**cancelled the outage probe for tonight**. D238/D240/D241 are in
+`research/OVERNIGHT_HANDOFF_H100.md`, NOT in the design-log ledger. **Flash's standing job is to score each
+cell as it lands, rule same-code pairs by hash, and clear the comparator-agreement caveats row by row.**
+
+**2. BLOCK A HAD NOT STARTED AS OF 04:00 UTC. Verified, not assumed:** zero `_rep2`/`_rep3` cell
+directories exist at s5, s6 or s7; the only ones on origin are `..._s4_...kv0.5r_L3_epg_rq30_rep2` and
+`_rep3`. **The three `covex-v6-fair-final` kv0.5r cells at s5/s6/s7 ARE PRE-EXISTING** (git_commits
+`b935e41b`, `342e693a`, `11e533b7`, all different), from the earlier 0.5x sweep. **Do not mistake them for
+block A.** The 1x s4 `_rep2` had also not landed. So there was nothing of block A to score.
+
+**3. THE STANDDOWN EXPIRED AT 04:00:01Z AND THE WATCHDOG LOOP HAS RESUMED.** `ops/watchdog.log` now holds
+**119 RESTART lines** with **`BUDGET SPENT` still 0**, and the newest is `RESTART 1/12` because the counter
+reset. **This is still the user's to stop and no resume should touch it**; the standing instruction to say
+so plainly in the reply is unchanged.
+
+**4. `ops/watchdog.log` AND `ops/track.log` EXIST LOCALLY, AND THIS RESUME MADE THE EXACT ERROR THIS FILE
+WARNS ABOUT.** I tested them with `git cat-file -e`, **which only tests origin**, and reported them absent.
+They are gitignored and local: watchdog.log **569** lines, track.log **3,299** lines, both mtime 20:00:01.
+**The file already contained this correction and I reproduced the bug anyway**, which is worth more than the
+correction itself: *a warning in a file is not a check*. Test a local path with `test -f`, and reserve
+`git cat-file -e` for questions about origin.
+
+**5. FREEZE-GATE 10.2 IS DONE AND ITS RESULT IS COUNTER-INTUITIVE.** The agent preparing it was stopped
+after completing its runs; the four result files were recovered from
+`scratchpad/fix102_6736b0/work`. **Zero decisions change, because the overlap the hard zero stands in for
+is measured ZERO in all 10,606 observations.** Written up at
+`research/study_freeze_gate_10_2_queue_term.md`. **And a second finding there matters beyond 10.2: the
+kv0.5r override is ALSO decision-neutral on that harness, same digest at 31,472 and 62,944, so that
+instrument cannot see the pool and no kv0.5r decision count can be taken from it.**
+
+
 *** THE RESUME PROMPT CONTAINS THREE STALE PREMISES. DO NOT WASTE CALLS ON THEM. ***
 - **`ops/watchdog.log` AND `ops/track.log` NOW EXIST ON DISK. CORRECTED 2026-11-23 22:31.** The
   earlier entry said they did not exist anywhere; that was checked with `git cat-file -e`, WHICH ONLY
