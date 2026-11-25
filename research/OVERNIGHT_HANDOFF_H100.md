@@ -1,5 +1,59 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** D258 PART 2, USER RULING 2026-11-25 10:45: THE DEADLINE SWEEP. THE TAG CHECK IS DONE AND THE ANSWER IS SPLIT. ***
+
+### THE TAG CHECK, which the ruling asked for before anything is built
+
+*** THE ROBOT DEADLINE NEEDS **NO CODE CHANGE**. `_L<k>` ALREADY MAPS IT. *** Driver v40 lines 85 to 90:
+`[ -n "$_dl" ] && lflag="--robot-deadline-s $_dl"`, with its own comment, "`_L3` keeps giving 3 s exactly as
+before and `_L2.5` gives 2.5 s; no token keeps the harness default". **Committed precedent: 5,306 cells at
+`_L3_` and 105 at `_L2.5_`.** **So `_L1.5`, `_L2` and `_L5` run as-is.**
+*** THE DASHCAM DEADLINE **NEEDS A CODE CHANGE**. There is NO `--dashcam-deadline` or `--alert-deadline`
+flag anywhere in `run_live2_real.py` (zero matches), and `NEXAR_DEADLINE_S = 1.0` is a module constant at
+`fleet/data_sources.py:42` that argv never touches. ***
+**The build, mirroring how the ROBOT deadline already threads (`run_live2_real.py:756-759` sets
+`_DS.ROBOT_DEADLINE_S` ONCE before any module reads it): one harness flag, one module-global assignment,
+one driver tag case, a pre-launch refusal on an unknown or unreachable value, a live check that the
+deadline in the TRACE and in the HEADER matches the tag, and the `extra +=` tag suffix. Comparable in size
+to v40's 54 lines.** **ESTIMATE: 3 to 5 hours including proofs (OFF byte-identity, the live check, and a
+positive control that the digest MOVES when the tag is set).** **Not started; the ruling says report the
+estimate first.**
+**A FREE PARTIAL ALTERNATIVE, which answers a DIFFERENT question and is not a substitute: the SCORER
+already takes `L_dash` as a parameter (`score.py:752`), so dashcam attainment at 0.5 s can be RE-SCORED on
+existing cells at no GPU cost. That answers "who delivered fast", not "who would do well if the deadline
+were 0.5 s", because the policy optimises against the deadline it was given. Both are worth having and
+only the second needs cells.**
+
+### THE SWEEP AS RULED
+```
+robot deadline   1.5 | 2.0 | 3.0 (exists) | 5.0        dashcam   0.5 against 1.0 (exists)
+arms   covex-v6-fair-final (_preD249) | simplestream | llf | mooncake | confidence-cascade
+cell   1x, s4, n16
+```
+*** GATE: `covex-v6-fair-final` AND `simplestream` AT ROBOT 1.5 s FIRST. BOTH REPORTED BEFORE THE REST
+RUNS. *** **PLACEMENT: after the current D250 / D257 / D244 seed-4 work, BEFORE the baseline-only filler.**
+*** AND SCORE EVERY CELL WITH CORRECT-BY-DEADLINE, ROBOT CLOUD ACCURACY ON SERVED AND CLOUD ON-TIME
+TOGETHER. NEVER CLOUD ON-TIME ALONE (D257 (3)). ***
+
+### QUEUE WITH ETAs, at the measured 21m24s per cell
+```
+P1 n24 (running)                                   ends ~10:48
+P2 rq10                                   1 cell   ~11:09
+D250 s4 gate + 6 baselines                7 cells  ~13:40
+D257 four n20 baselines                   4 cells  ~15:06
+D244 s4 remainder                         6 cells  ~17:15
+D258 PART 2 GATE (rung 3 + simplestream, L1.5)  2  ~17:58
+Part 2 robot remainder                   13 cells  ~22:38
+```
+**Estimates from one measured figure, not a schedule. The dashcam half is NOT in this queue: it waits on
+the code change and on the user's go.**
+
+## D258 PART 1 IS NOT YOURS AND, ON THE EVIDENCE, SHOULD NOT BE BUILT. See the flash report.
+**Its premise is that the scorer charges device answers no latency. It does charge them: `score.py:338` is
+`return (DEVICE_WAIT_S + v) <= L + 1e-9` where `v` is the device's own MEASURED latency, and
+`DEVICE_LATENCY_SOURCE` defaults to `orin_rec_warm`, the measured Orin warm table. Nothing for you either
+way.**
+
 ## *** D257, USER RULING 2026-11-25 10:38, PROVISIONAL. ONE PART OF THIS CHANGES EVERY REPORT YOU WRITE. ***
 
 ### *** (3) FIRST, BECAUSE IT IS A STANDING RULE: NEVER QUOTE ROBOT CLOUD ON-TIME ALONE. AGAIN. ***
