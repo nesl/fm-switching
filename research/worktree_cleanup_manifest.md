@@ -760,3 +760,161 @@ session.
 **Verdict: the classification is sound on every row it was possible to check, and the two
 `_provenance` omissions are recorded as the declared gap they are.** No row's action is disputed.
 
+
+## Third pass: `rung4p1_8ab3f7e8`, the rung-4 pass-1 build tree (D228 (5), commit authority D166)
+
+Ruling: **D228 (5)**. Commit authority: **D166**. Produced 2026-11-24 on flash by a session that
+did not perform the first two passes. This section **extends** this file; no earlier row is
+altered.
+
+Target:
+`/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/rung4p1_8ab3f7e8`,
+8,143 MB, the working area of the rung-4 pass-1 build. `mapwt` was left untouched by instruction.
+
+**It is not a git worktree.** `git worktree list` reports exactly three checkouts
+(`/home/pragya/Desktop/FM-switching`, `scratchpad/stateoff_01T8MWad7BRhG6fF73CRUcAn/wt`, and
+`/tmp/claude-1001/mapwt`), none of them this tree. It is a plain directory copy with no `.git`,
+so `git worktree remove` does not apply and `rm -rf` is the removal. This manifest section is
+committed **before** the removal, which is the order D228 (5) clause (d) requires.
+
+### Census by process, not by name or size
+
+Before anything was read for classification, every `/proc/<pid>` was walked for `cwd`, full
+`argv` **and** open fds, plus a scan of `/proc/<pid>/maps`. **Nothing held this tree:** zero
+`cwd` entries, zero open fds and zero mapped files under `rung4p1_8ab3f7e8`. The pass-1 build's
+detached summariser and `da_chain.sh` had both exited (`da_chain.stdout` and `autosumm.log` are
+0 bytes). The only live processes in the scratchpad were under
+`ptg_build_01T8MWad7BRhG6fF73CRUcAn` (pids 1037281, 1037328, 1051797, an A/A `so_before` /
+`so_after` guard-proof run), which is off limits and was not touched. The single `argv` hit for
+the string `rung4p1` was the census command's own shell, a self-match, not a holder.
+
+### The classification base, and why the working tree was never used for it
+
+Base: `origin/main` re-resolved to the literal sha **`009ed6e31b6c1a3e882c5bea31b2ebcb5250d526`**
+(fetched at the start of this pass; `origin/main` had advanced from `044da55d`). Every absence
+claim in this section is a read of origin by sha, never a grep of a checkout:
+`research/worktree_cleanup_manifest.md` **does not exist in the local checkout at all**, which is
+the concrete reason the rule matters here. The `git ls-tree -r` blob list at that sha was asserted
+non-empty before use (12,614 paths, 11,180 distinct blobs); the per-tree lists were asserted at
+over 1,000 entries each. Of the 12,733 files outside the archived tree, **12,567 had their content
+already on origin and 166 did not** - a split recorded here because an all-or-nothing answer would
+have meant the inputs were wrong rather than the trees being uniform.
+
+### THE CONTAMINATED TREE: identified as `e2`, archived, never to be deleted
+
+The build's own record of the defect is `handoff/tree_guard.py` and `handoff/PREREG_AMENDMENT.md`:
+mid-build the session's tree was found carrying the **held DEVICE_ANSWERS implementation in files
+it had not declared changing**, a proof sweep was already running on it, the sweep was killed, the
+digests discarded, numbers already quoted were withdrawn, the tree was rebuilt from a fresh
+archive, and `tree_guard.py` was written as the remedy. **The build could not establish how the
+code arrived and declined to invent a cause, and kept the tree so the contamination stays
+auditable.**
+
+Three `git archive` trees were present (`e2`, `pristine`, `e6`; no `e4` or `e5`). The contaminated
+one is **`e2`**, on this evidence:
+
+1. `tree_guard.py` lists three files that legitimately carry the DEVICE_ANSWERS switch name in
+   `EXPECT_MARKER` and states that `arms_final_ladder.py` is **"DELIBERATELY ABSENT: the ruling
+   forbids touching it until the fold, so a marker there is a FATAL finding and not an expected
+   one."** `e2` carries `DEVICE_ANSWERS_SWITCH_ATTR` in **exactly that file**.
+2. Four files in `e2` carry held DEVICE_ANSWERS code: `arms_final_ladder.py` (9 references),
+   `arms_v6cf.py` (9), `cf_protect_defer.py` (36), `coordinator.py` (1).
+3. `e2`'s `make_rung4` - **`covex-v6-final`'s own factory** - takes `device_answers: bool = True`,
+   so the arm under test carried undeclared code with an **undeclared switch defaulting ON**.
+4. At `e2`'s base sha `1fd0cdc9`, and at `acc34010` and `b8ce0873` too, `git grep` for
+   `DEVICE_ANSWERS_SWITCH_ATTR` and `live2_cf_device_answers` returns hits **only** under
+   `experiments/orchestration/live2/held/d218_device_answers/`. The markers in `e2`'s live files
+   are therefore not committed content.
+5. `handoff/ALONE_p1_final_start.txt` records `tree guard: PASS (6319 examined, 11 declared, 0
+   undeclared, 0 stray markers)` and `e2` holds **6,320** non-`__pycache__` files: the pass-1
+   proofs ran on **this** tree, and it had **no** stray marker at that moment. The
+   `arms_final_ladder.py` marker appeared afterwards. That is the silent acquisition, and this
+   tree is its only physical record.
+6. The siblings are distinguished rather than assumed. **`pristine`** (base `acc34010`, 10:31) is
+   byte-identical to its base - 0 modified, 0 new across 6,276 files - the fresh rebuild.
+   **`e6`** (base `b8ce0873`, 11:54) carries the marker only in the three `EXPECT_MARKER` files
+   plus the new `arms_v6cf_device.py`, with `arms_final_ladder.py` **clean**: it is the legitimate
+   separate-arm DEVICE_ANSWERS build of `PREREG_AMENDMENT.md`. Origin corroborates this
+   independently at `research/OVERNIGHT_HANDOFF.md`, which records that run's guard FAIL as
+   benign, with `UNDECLARED differences: 0` and one forbidden marker that "was the **intentionally
+   restored** `arms_v6cf_device.py`".
+
+**The whole tree is archived, not only the files known to diverge.** Selecting just the diff would
+presuppose knowledge of where the contamination entered, which is precisely what was never
+established.
+
+| archive | path | files | MB | tree sha256 | verification |
+|---|---|---:|---:|---|---|
+| contaminated tree `e2` | `/home/pragya/fm_archive/2026-11-24/rung4p1_contaminated_e2` | 6,588 | 2,719 | `3371b70bc0612e8bec8eb242272f6eb7b88399206fecce880956ac9fe1dfbca0` | **both**: per-file `cmp` (0 mismatches) **and** tree sha256 |
+| build records | `/home/pragya/fm_archive/2026-11-24/rung4p1_build_records` | 123 | 2.2 | `d1535bdbdbe24d192a4a35728dc0c341d8408f1020d44833a90b91c5edfb318e` | **both**: per-file `cmp` (0 mismatches) **and** tree sha256 |
+
+The tree sha256 is taken over sorted repo-relative paths with each path, its byte size and its
+content fed to one digest, so a renamed or truncated file changes it. Both archives were verified
+**before** the source was touched. `rung4p1_contaminated_e2_EVIDENCE.txt` sits beside the archive
+and carries the base sha, the divergent paths with the git blob sha of the archived copy against
+the base blob, the DEVICE_ANSWERS reference count per file, and the six points above, so the
+defect is inspectable without unpacking 2.7 GB.
+
+`rung4p1_build_records` holds `handoff/`, `held/`, `work/`, `da/`, `pc/` and the loose build
+scripts, logs and JSON, plus `_e6_divergent_files/` - the four files in which `e6` diverges from
+its base, with its `BASE_SHA` - so that deleting `e6` as regenerable cannot lose the deliberate
+DEVICE_ANSWERS build even though origin has since moved past it.
+
+### Disk, and the standing 15 GB floor
+
+The archive volume (`/`, shared with the scratchpad) was checked **before starting and again
+immediately before each copy**, with a hard assert at each point rather than an `&&` list.
+Free: **26,702 MB before**, projected 23,983 MB after the 2,719 MB tree, **24,029 MB measured**
+before the records copy, **24,016 MB** after it. The new standing rule - refuse to start below
+15,360 MB and re-check before the copy - held at every check. Neither copy's return code was
+trusted on its own: an earlier space exhaustion on this volume returned rc=120 or rc=2 with
+**zero bytes of stderr**, so both archives were accepted only on the content comparisons above.
+
+### Counts per class
+
+| subtree / group | action | files | MB | reason |
+|---|---|---:|---:|---|
+| `e2` | **archive, never delete** | 6,588 | 2,719 | the contaminated tree; a state that arose once by an unknown mechanism, not regenerable |
+| `pristine` | delete | 6,407 | 2,708 | regenerable: `git archive acc34010`, **proven** byte-identical to its base, 0 modified and 0 new |
+| `e6` | delete | 6,464 | 2,715 | regenerable from `b8ce0873`; its 4 divergent files are archived under `_e6_divergent_files/`, and `cf_protect_defer.py` is on origin at the identical blob `643a8fb0` |
+| `handoff/`, `held/`, `work/`, `da/`, `pc/`, loose scripts and logs | **archive**, then delete | 123 | 2.2 | deliverables and dry-proof captures; substance landed on origin but `work/selfid1`, `work/selfid2` and the ALONE censuses are unverified data, so nothing here was deleted without a copy |
+| `tree_guard.py` | **commit** | 1 | 0.005 | genuinely uncommitted code belonging to landed work |
+
+### Committed (clause c: uncommitted code belonging to landed work)
+
+| path | blob | reason |
+|---|---|---|
+| `experiments/orchestration/live2/tree_guard.py` | see commit below | **absent from origin entirely** at `009ed6e3`: `git ls-tree -r --name-only` matches no path containing `tree_guard`, and the string `tree_guard` appears in no file on origin. Yet D232 (6) is a ruling about this tooling, and `research/EXPERIMENTS.md`'s `StudyD222-PASS1-NQD` row certifies that "**EVERY TREE-GUARD CALL EXITED 0** ... each captured to its own `.rc` and tested with an explicit if-then-exit, never an `&&` list, per D232 (6)". The instrument those proofs rest on was never committed. The version committed is the **later** root copy (5,428 bytes), not `handoff/`'s earlier one (3,590 bytes): it splits severity into FATAL (undeclared difference or stray held marker) and ADVISORY (a declared file that matches git, i.e. a stale list and not a dirty tree), which is the distinction origin's `OVERNIGHT_HANDOFF.md` records as the fix the benign FAIL demanded. |
+
+Nothing else was committed. Every other pass-1 deliverable was checked **by path and by blob** at
+`009ed6e3` and had landed: `arms_v6cf_device.py`, `d222_measured_safety.py`, `metrics_trust.py`,
+`d227_e1_metrics_proofs.py`, `results/orchestration/live2/d222_pass1/d222_safety_refit.json`,
+`d227_e1_metrics/d227_e1_metrics_proofs.json`, and the proof JSONs `proof_ab_pass1_tree.json`,
+`proof_ab_pristine_tree.json` and `proof_c_dry_s4.json`. `e6`'s `cf_protect_defer.py` is on origin
+at the **identical** blob `643a8fb0`.
+
+The `handoff/` design and pre-registration documents were **not** committed: their substance had
+already landed, not as files but folded into committed text - `PREREG_PASS1_ROW.md` and
+`PREREG_AMENDMENT.md` into `research/EXPERIMENTS.md`'s `StudyD222-PASS1` and `-NQD` rows (checked
+by the distinctive constants `0.0001535807289338535`, `1.767170` and `247.4582067460825`) and the
+build-miss disclosure into **D231 (1)** in `research/policy_design_log.md`, which states it
+without softening: "**BUILD MISS: DEVICE_ANSWERS was not built into pass 1** (3 decisions wanted
+it), contrary to D221 / D228 (3)". Committing the drafts would have duplicated landed text into
+`research/` against live edits by other sessions. They are archived instead, and this is the line
+that records it.
+
+### Flagged, not resolved by this session
+
+- `handoff/PREREG_AMENDMENT.md`'s own framing sentence - "**A proof that passes on a tree that was
+  not pushed is not a proof of the cell**, and 'the proofs passed' is exactly the sentence that
+  hid it" - appears **nowhere on origin**. The ruling and the remedy landed; that one generalisable
+  sentence did not. Whoever owns the pass-1 row may want it in the record. The text is preserved at
+  `rung4p1_build_records/handoff/PREREG_AMENDMENT.md`.
+- The cause of the contamination remains **unestablished**, as the pass-1 build said. Archiving it
+  does not close it.
+
+### Spot check for this third pass - TO BE FILLED BY A DIFFERENT SESSION
+
+Per D228 (5) clause (d), a session that did not perform this classification should check it. Left
+deliberately empty. The two claims most worth re-deriving independently: that `e2` and not `e6` is
+the contaminated tree, and that `tree_guard.py` is absent from origin.
