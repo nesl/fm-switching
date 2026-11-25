@@ -64,6 +64,43 @@ late-cloud question where the correct device answer stood); this session's indep
 `correct_by_deadline` field returned 0 of 17. The difference is one question and changes nothing, but it is
 recorded as unreconciled rather than resolved by preference.**
 
+## *** CORRECTION: THE DOSE-RESPONSE CLAIM IS WRONG. THERE ARE THREE SUSTAINED COLD SPANS, NOT TWO, AND THE THIRD HAS QUESTIONS INSIDE IT AND NO DECLINES. ***
+
+**Recomputed from `residency.jsonl` with an explicit definition (a cold span = a maximal run of consecutive
+rows for the SAME `session_id` with `believed_tier == "cold"`, and SUSTAINED means more than one row):**
+```
+robot      longest sustained span   questions INSIDE it   declines
+robo001            320.0 s                 12               12
+robo005            181.5 s                  8                0     <- NOT IN THE TABLE ABOVE
+robo006            159.2 s                  3                3
+all others           0.0 s                  0                0
+```
+*** SO THE STATEMENT ABOVE, "the only two robots with a sustained cold span are the only two with
+declines", IS FALSE. `robo005` has the SECOND-LONGEST span, EIGHT questions arriving inside it, and ZERO
+declines. The "perfect dose-response" is WITHDRAWN. ***
+
+**AND THE OBVIOUS EXPLANATION IS REFUTED, BY ME, BEFORE BEING OFFERED.** The cold-feasibility threshold is
+`recall_ttft_s(tok, COLD) = tok / 4500`, so a history under about 13,500 tokens clears 3.0 s even when
+cold, which would spare a small-history robot. **`robo005`'s prompt tokens reach 25,150, well above that
+threshold, so SIZE DOES NOT EXPLAIN IT.**
+**ONE CANDIDATE REMAINS AND IS NOT ESTABLISHED: `robo005` issued 638 requests against `robo001`'s 24, and
+all 606 `state_action` rows in the cell name `robo005|s001` alone, so it was the one session the state
+planner was actively touching.** **That is CONSISTENT with the amplifier claim - traffic breaks the latch -
+but it is NOT PROVED, because the history size AT the in-span question instants was not checked, only the
+per-robot maximum. Reporting it as the cause would be the second guess after the first was refuted, so it
+is recorded as a candidate and nothing more.**
+
+*** WHAT SURVIVES UNCHANGED, AND IT IS THE PART THAT MATTERS FOR THE FIX: THE AMPLIFIER. A rejection sends
+nothing, nothing sent re-warms the prefix. `robo001` had NO REQUEST OF ANY KIND for 276 s and lost 12 of
+17. `robo004` dropped once, its next piece came back warm, and it finished 28 of 28. `robo005` is the
+robot with the MOST traffic in the cell and has ZERO declines. All three point the same way. *** **The
+three-condition story that would have replaced the dose-response is not established either, and is not
+claimed.**
+
+**ATTRIBUTION, CORRECTED: this census was built by this session's own diagnosing agent from
+`residency.jsonl`. It was described to the accelerator box as that box's work, which it was not. The box
+had computed the D253 `P(cold)` over idle 30-to-60-second questions with deciles, a different quantity.**
+
 ## WHAT THIS MEANS FOR D249
 
 - *** DO NOT FIX THIS WITH ORDERING. The weight was already 1.5 to 2.5 on all 12 lost questions and the
