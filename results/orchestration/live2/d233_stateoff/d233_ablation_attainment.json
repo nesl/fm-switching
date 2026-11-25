@@ -1,0 +1,55 @@
+{
+  "_provenance": {
+    "git_commit": "43a9f65603acdaf635c4182610f38dd55b592931",
+    "script": "ad-hoc analysis on flash; imports the COMMITTED experiments/orchestration/live2/d179_rung2_verdict.py unmodified (md5 18bcbcefdad096048e3ec6dd2ee9b20d) and reads only its published path",
+    "model": "n/a (policy scoring, no model inference)",
+    "device": "n/a (CPU analysis of committed cells)",
+    "n": 4,
+    "timestamp": "2026-11-25T02:30:00.000000+00:00",
+    "NOTE": "Written because these four numbers were quoted in EXPERIMENTS.md StudyD233-STATEOFF while appearing in NO committed artefact; 0.501257 was grep-absent from results/ and reports/ at the parent sha. Recording them rather than citing a path that does not exist."
+  },
+  "read_path": "read_cell(run_dir)['alert_episodes']['numerator_COMMITTED_RULE_PRIMARY']['per_episode_PRIMARY']['mean_attainment']",
+  "deadline_note": "alert channel; the robot deadline is 3.0 s (D147/D154(1)); scorer/score.py:137's '# 5.0 (D71)' comment is STALE",
+  "positive_controls_reproduced_exactly": {
+    "covex-v6-fair-final_1x_s4": 0.619234,
+    "covex-v6-fair-final_kv0.5r_s4": 0.472945,
+    "covex-v6-fair-final-stateoff_1x_s4": 0.448403,
+    "covex-v6-fair-final-stateoff_kv0.5r_s4_rerun": 0.439976,
+    "comment": "all reproduced to six decimals by two independent runs before any difference was read"
+  },
+  "results": [
+    {"arm": "covex-v6-fair-final-stateoff", "pool": "1x", "seed": 4,
+     "cell": "covex-v6-fair-final-stateoff_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "source_agreement": "OK", "attainment": 0.448403, "comparator": 0.619234,
+     "difference": -0.170831, "ratio_to_stratumA_max_observed": 6.157,
+     "verdict": "DECISIVE; clears every stratum-A construction and also stratum B (1.99x)",
+     "episodes_moved": "627 of 712"},
+    {"arm": "covex-v6-fair-final-stateoff", "pool": "kv0.5r", "seed": 4,
+     "cell": "covex-v6-fair-final-stateoff_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30_rerun",
+     "source_agreement": "OK", "attainment": 0.439976, "comparator": 0.472945,
+     "difference": -0.032969, "ratio_to_stratumA_max_observed": 1.188,
+     "ratio_to_stratumB_upper_bound": 0.384,
+     "verdict": "clears the same-code floor THINLY; FAILS the in-condition stratum-B bound; the two strata DISAGREE, unlike the four verdicts the floor voided. Real but weak, sign robust, NOT settled at one seed"},
+    {"arm": "covex-v6-fair-final-notouch", "pool": "kv0.5r", "seed": 4,
+     "cell": "covex-v6-fair-final-notouch_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30",
+     "source_agreement": "OK", "attainment": 0.501257, "comparator": 0.472945,
+     "difference": 0.028312, "ratio_to_stratumA_max_observed": 1.0202,
+     "ratio_to_stratumB_upper_bound": 0.330,
+     "verdict": "clears the same-code floor by 2.0 PERCENT ONLY; fails stratum B. First magnitude of the day past stratum A at all"}
+  ],
+  "EXCLUDED_INVALID": {
+    "cell": "covex-v6-fair-final-stateoff_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30",
+    "source_agreement_verdict": "INVALID torn_lazy_import",
+    "torn_file": "experiments/orchestration/live2/arms_final_ladder.py (make_rung3, the arm's own builder)",
+    "tree_files_changed_during_cell_n": 8,
+    "run_meta_run_valid": true,
+    "note": "run_valid is TRUE on this cell, so that flag does NOT catch this class. It would have given 0.433989, which is 0.005987 from the valid answer and comparable to the entire margin over the floor. Struck, not caveated, per CLAUDE.md."
+  },
+  "CAVEATS_THAT_TRAVEL": [
+    "COMPARATOR AGREEMENT ABSENT: both covex-v6-fair-final cells have NO source_agreement key at all, so the bar every verdict is measured against is unaudited for source tearing",
+    "stratum A n=8 cannot support a p95, and its max observed 0.027752 is set by ONE pair 3.8x the next largest",
+    "NO same-code replicate exists in the L3_epg_rq30 condition; stratum A sits at 0.71-0.93 attainment under a 5.0 s robot deadline on seeds 0 and 6, these cells near 0.44-0.50 under 3.0 s",
+    "single-shot and dashcam on-time have NO measured floor: the strings 'dashcam' and 'shot' appear ZERO times in d234_noise_floor.json, so +12 of 357 and +383 of 11,764 are UNFLOORED and are not effects",
+    "all figures are seed 4, one cell per arm"
+  ]
+}

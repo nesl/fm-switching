@@ -1,0 +1,3937 @@
+{
+ "_provenance": {
+  "git_commit": "546f2cc5dbdfff7a876a8a3bb9ca62d1ef04a81a",
+  "script": "d236_membership_6736b0 (ad-hoc; imports committed d179_rung2_verdict.py UNMODIFIED)",
+  "module": "experiments/orchestration/live2/d179_rung2_verdict.py",
+  "module_md5": "18bcbcefdad096048e3ec6dd2ee9b20d",
+  "cells": {
+   "notouch_A": "covex-v6-fair-final-notouch_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30",
+   "rung3_B": "covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30"
+  },
+  "source_agreement_verdict": {
+   "notouch_A": "OK",
+   "rung3_B": "ABSENT (key not present in header.json; cell predates the instrument)"
+  },
+  "robot_deadline_s": 3.0,
+  "deadline_note": "scorer/score.py:137's '# 5.0 (D71)' comment is STALE; data_sources.ROBOT_DEADLINE_S = 3.0 and both headers carry robot_deadline_s = 3.0. At 5.0 these cells give 127 and 131, manufacturing a difference.",
+  "d146_completion_rewrite_applied": true,
+  "device_latency_source": "orin_rec_warm (results/sember/study_orin_rec/orin_rec_warm.jsonl, 97 rows)",
+  "device_wait_s": 0.0,
+  "trace_dir": "results/orchestration/live2/frozen_test/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2_L3_epg_perframe_rq30 (SHARED by both cells)",
+  "n": 132,
+  "key": "(device_id, opportunity_id); question_id has only 20 distinct values over 132 rows and is UNUSABLE as a key",
+  "timestamp": "2026-11-25T02:26:41.651366+00:00",
+  "untrusted_do_not_cite": [
+   "arm_stats.pd_free_kv_*",
+   "cloud.gpu_kv_fraction"
+  ],
+  "untrusted_reason": "cell A metrics_health.state = never_scraped with engine_metrics_trusted = false; cell B carries no metrics_health block at all"
+ },
+ "control": {
+  "rule": "each cell's own committed robot_value reproduced EXACTLY before any table was built",
+  "notouch_A": {
+   "n": [
+    132,
+    132
+   ],
+   "n_cloud_standing": [
+    121,
+    121
+   ],
+   "n_device_standing_by_deadline": [
+    11,
+    11
+   ],
+   "n_no_answer_by_deadline": [
+    0,
+    0
+   ],
+   "standing_accuracy_by_deadline": [
+    0.621212,
+    0.621212
+   ],
+   "standing_accuracy_by_deadline_n": [
+    132,
+    132
+   ],
+   "cloud_accuracy_on_served": [
+    0.644628,
+    0.644628
+   ],
+   "all_exact": true
+  },
+  "rung3_B": {
+   "n": [
+    132,
+    132
+   ],
+   "n_cloud_standing": [
+    121,
+    121
+   ],
+   "n_device_standing_by_deadline": [
+    11,
+    11
+   ],
+   "n_no_answer_by_deadline": [
+    0,
+    0
+   ],
+   "standing_accuracy_by_deadline": [
+    0.621212,
+    0.621212
+   ],
+   "standing_accuracy_by_deadline_n": [
+    132,
+    132
+   ],
+   "cloud_accuracy_on_served": [
+    0.652893,
+    0.652893
+   ],
+   "all_exact": true
+  },
+  "_format": "[recomputed, committed]",
+  "deadline_sensitivity_probe": {
+   "L_3.0": {
+    "A": 121,
+    "B": 121
+   },
+   "L_5.0": {
+    "A": 127,
+    "B": 131
+   },
+   "_meaning": "the probe CAN fire: the two deadlines give different answers, so 121 == 121 at 3.0 is a measured equality, not an inert one"
+  },
+  "d144_failed_request_nulls": {
+   "A": 0,
+   "B": 0,
+   "_probe_can_fire": "A's failed-request set is NON-empty (r8066, r8067, r8068: end-of-run rows with no http_status and no tokens; opportunities opp0012248, opp0012251, and one with no opportunity_id). No recall outcome's cloud_payload.request_id is in that set, so the zero is a real zero reached by a live path. B's set is empty."
+  },
+  "d226_rowless_nulls": {
+   "A": 0,
+   "B": 0,
+   "_probe_can_fire": "B has EXACTLY ONE rowless cloud answer, r10175 on opp0012248 (recall) - the id named in B's own score_refused_pre_d226_3 block - and _rowless_status classifies it 'delivered', so it is KEPT and nulls nothing. The classifier returned a non-'present' verdict on a real row, so the zero is not an unreached branch."
+  }
+ },
+ "summary": {
+  "cloud_on_time_by_deadline": {
+   "n_A": 121,
+   "n_B": 121,
+   "intersection": 115,
+   "only_A": 6,
+   "only_B": 6,
+   "symmetric_difference": 12,
+   "only_A_keys": [
+    "robo001|opp0009788",
+    "robo002|opp0006611",
+    "robo003|opp0010467",
+    "robo004|opp0003652",
+    "robo004|opp0003857",
+    "robo004|opp0008242"
+   ],
+   "only_B_keys": [
+    "robo000|opp0002395",
+    "robo000|opp0009524",
+    "robo000|opp0009530",
+    "robo000|opp0011117",
+    "robo004|opp0010640",
+    "robo006|opp0009518"
+   ]
+  },
+  "correct_by_deadline": {
+   "n_A": 82,
+   "n_B": 82,
+   "intersection": 79,
+   "only_A": 3,
+   "only_B": 3,
+   "symmetric_difference": 6,
+   "only_A_keys": [
+    "robo002|opp0006611",
+    "robo003|opp0010467",
+    "robo004|opp0008242"
+   ],
+   "only_B_keys": [
+    "robo000|opp0002395",
+    "robo004|opp0010640",
+    "robo006|opp0009518"
+   ]
+  },
+  "source_by_deadline_totals": {
+   "notouch_A": {
+    "cloud": 121,
+    "device": 11,
+    "none": 0
+   },
+   "rung3_B": {
+    "cloud": 121,
+    "device": 11,
+    "none": 0
+   }
+  },
+  "rows_with_source_same_false": 12,
+  "rows_with_correct_same_false": 6,
+  "rows_with_on_time_same_false": 12,
+  "n_disagreement_rows": 12,
+  "key_universe_identical": true,
+  "row_count_preserved": {
+   "notouch_A": 132,
+   "rung3_B": 132,
+   "keys": 132
+  },
+  "latency": {
+   "n_pairs_both_present": 131,
+   "n_bit_identical": 0,
+   "median_abs_delta_s": 0.200729,
+   "max_abs_delta_s": 4.027061
+  }
+ },
+ "rows": [
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0001451",
+   "question_id": "4a400fbf90897f0fd7d7c99be71e0b0edc804db2dd9a04e3f7df6e47eb84e884",
+   "gold_letter": "E",
+   "device_correct": false,
+   "device_latency_s": 0.2944,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.40694000000002,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.2922440000000108,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0002057",
+   "question_id": "4a400fbf90897f0fd7d7c99be71e0b0edc804db2dd9a04e3f7df6e47eb84e884",
+   "gold_letter": "E",
+   "device_correct": false,
+   "device_latency_s": 0.2944,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.7286040000000185,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.227723999999995,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0002253",
+   "question_id": "4a400fbf90897f0fd7d7c99be71e0b0edc804db2dd9a04e3f7df6e47eb84e884",
+   "gold_letter": "E",
+   "device_correct": false,
+   "device_latency_s": 0.2944,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0079389999999933,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.658202999999986,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0002395",
+   "question_id": "4a400fbf90897f0fd7d7c99be71e0b0edc804db2dd9a04e3f7df6e47eb84e884",
+   "gold_letter": "E",
+   "device_correct": false,
+   "device_latency_s": 0.2944,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 3.2750350000000026,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.8646079999999756,
+    "cloud_letter": "E"
+   },
+   "source_same": false,
+   "correct_same": false,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0002717",
+   "question_id": "4a400fbf90897f0fd7d7c99be71e0b0edc804db2dd9a04e3f7df6e47eb84e884",
+   "gold_letter": "E",
+   "device_correct": false,
+   "device_latency_s": 0.2944,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.3646969999999783,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7585000000000264,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0005455",
+   "question_id": "cc2369a7c5499aa4ddc9f07a7eebb55b864e81a9c87c43a3d7b3332cd2fa8144",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2635,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.7417820000000575,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.5908630000001267,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0006264",
+   "question_id": "cc2369a7c5499aa4ddc9f07a7eebb55b864e81a9c87c43a3d7b3332cd2fa8144",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2635,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.3500309999999445,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.2521679999999833,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0006835",
+   "question_id": "cc2369a7c5499aa4ddc9f07a7eebb55b864e81a9c87c43a3d7b3332cd2fa8144",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2635,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8318290000000843,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8870559999999159,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0008801",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.680674999999951,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.5182379999999966,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0008843",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.4728839999999082,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7205069999998841,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0009524",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": false,
+    "latency_s": 5.619823999999994,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.5927630000001045,
+    "cloud_letter": "B"
+   },
+   "source_same": false,
+   "correct_same": true,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0009530",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": false,
+    "latency_s": 5.110416999999984,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0847950000000992,
+    "cloud_letter": "B"
+   },
+   "source_same": false,
+   "correct_same": true,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0009607",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.642786000000001,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.3640920000000278,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0010067",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.8470440000000963,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.8522619999999961,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0010071",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7145450000001574,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.5898250000000189,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0010103",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.5376890000000003,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7998119999998607,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0010125",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.3204779999998664,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.245992000000001,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0011117",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": false,
+    "latency_s": null,
+    "cloud_letter": null
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.6371930000002521,
+    "cloud_letter": "B"
+   },
+   "source_same": false,
+   "correct_same": true,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0011909",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.6186830000001464,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.6283320000000003,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0012160",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.1315350000002127,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.1882880000002842,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0003105",
+   "question_id": "52793f69abbf4d1d5fa566f5af9c5f70fefddab264cae08b1003dbc15c8364fd",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": false,
+    "latency_s": 4.144840000000045,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": false,
+    "latency_s": 4.107043000000033,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0003643",
+   "question_id": "52793f69abbf4d1d5fa566f5af9c5f70fefddab264cae08b1003dbc15c8364fd",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.0143480000000409,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.0121760000000108,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0003840",
+   "question_id": "52793f69abbf4d1d5fa566f5af9c5f70fefddab264cae08b1003dbc15c8364fd",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8259360000000129,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.940714000000014,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0004083",
+   "question_id": "52793f69abbf4d1d5fa566f5af9c5f70fefddab264cae08b1003dbc15c8364fd",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 2.2626520000000028,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 2.5709509999999796,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0004305",
+   "question_id": "52793f69abbf4d1d5fa566f5af9c5f70fefddab264cae08b1003dbc15c8364fd",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.9292540000000145,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.1299830000000384,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0005918",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.4908550000000105,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.8803649999998697,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0005957",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.263785000000098,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8719009999999798,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0006485",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.2897030000000314,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.259012000000098,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0006955",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.9547890000001189,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.9759380000001556,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0007533",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.7015109999998685,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.729885999999965,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0007570",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.3288820000000214,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.3829369999999699,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0008132",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.9018189999999322,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.9522990000000391,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0008461",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8730509999999185,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 2.1121440000000575,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0008852",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.6372219999999515,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.437208000000055,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0009269",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.9751899999999978,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.5470180000000937,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0009358",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.7020400000000109,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 2.3842280000000073,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0009515",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.6748079999999845,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.7882459999999583,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0009788",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.1305299999999079,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 3.0781709999999975,
+    "cloud_letter": "D"
+   },
+   "source_same": false,
+   "correct_same": true,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0010378",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.086496000000011,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.0014739999999165,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0010499",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.9407889999997678,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 2.3832699999998113,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0010697",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.2195910000000367,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.644602999999961,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0000812",
+   "question_id": "497e78d3ff17707246d75c59eaafa1f65fb569334fc86568e7ded67e276a3856",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2595,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.670566000000008,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.353356000000005,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0001241",
+   "question_id": "497e78d3ff17707246d75c59eaafa1f65fb569334fc86568e7ded67e276a3856",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2595,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.2072799999999972,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.3232579999999814,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0001483",
+   "question_id": "497e78d3ff17707246d75c59eaafa1f65fb569334fc86568e7ded67e276a3856",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2595,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0352980000000116,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.327797000000004,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0001755",
+   "question_id": "497e78d3ff17707246d75c59eaafa1f65fb569334fc86568e7ded67e276a3856",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2595,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7035549999999944,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.756606000000005,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0001872",
+   "question_id": "497e78d3ff17707246d75c59eaafa1f65fb569334fc86568e7ded67e276a3856",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2595,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0367419999999754,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.46137099999998554,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0001875",
+   "question_id": "497e78d3ff17707246d75c59eaafa1f65fb569334fc86568e7ded67e276a3856",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2595,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7911959999999851,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.31458699999998885,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0001933",
+   "question_id": "497e78d3ff17707246d75c59eaafa1f65fb569334fc86568e7ded67e276a3856",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2595,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.511131000000006,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.8158590000000174,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0002047",
+   "question_id": "497e78d3ff17707246d75c59eaafa1f65fb569334fc86568e7ded67e276a3856",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2595,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7000370000000089,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7619780000000276,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0006611",
+   "question_id": "156499695EC738B60C57553A0F75F4C37244C0E8A2C44CCBC989779A81FEFEAC",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2779,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.9561330000000225,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 3.085017000000107,
+    "cloud_letter": "B"
+   },
+   "source_same": false,
+   "correct_same": false,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0006808",
+   "question_id": "156499695EC738B60C57553A0F75F4C37244C0E8A2C44CCBC989779A81FEFEAC",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2779,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.8537120000000868,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7651209999999082,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0006964",
+   "question_id": "1A5B6774CFDA46B6EF8754AC0C3290368104EF8A9B55A06587C74BCAD2D0AAD9",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2771,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.9997559999999339,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0847060000000965,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0007564",
+   "question_id": "1A5B6774CFDA46B6EF8754AC0C3290368104EF8A9B55A06587C74BCAD2D0AAD9",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2771,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.8686259999999493,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.9417660000000296,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0008000",
+   "question_id": "156499695EC738B60C57553A0F75F4C37244C0E8A2C44CCBC989779A81FEFEAC",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2779,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.3562100000000328,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0325609999998733,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0008042",
+   "question_id": "156499695EC738B60C57553A0F75F4C37244C0E8A2C44CCBC989779A81FEFEAC",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2779,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 2.255948000000103,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.0449479999999767,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0008560",
+   "question_id": "156499695EC738B60C57553A0F75F4C37244C0E8A2C44CCBC989779A81FEFEAC",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2779,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.593338000000017,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.2510090000000673,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0008918",
+   "question_id": "156499695EC738B60C57553A0F75F4C37244C0E8A2C44CCBC989779A81FEFEAC",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2779,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.447275999999988,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.2656789999999773,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0004175",
+   "question_id": "21B35C16674A99A774E8DF2B1F9A5708FF439ECDD8F77EFF4726F45C76F79060",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.256,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 5.245081999999968,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 5.3791630000000055,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0004451",
+   "question_id": "21B35C16674A99A774E8DF2B1F9A5708FF439ECDD8F77EFF4726F45C76F79060",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.256,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.4897040000000175,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.762266000000011,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0006840",
+   "question_id": "26E0EB0B53556B98F7E54203DA579B1A0126469518895A5735EFCF6C175D3B6B",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2678,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.6731009999999742,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.7272659999998723,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0006892",
+   "question_id": "26E0EB0B53556B98F7E54203DA579B1A0126469518895A5735EFCF6C175D3B6B",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2678,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.8737750000000233,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7297210000000405,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0007020",
+   "question_id": "26E0EB0B53556B98F7E54203DA579B1A0126469518895A5735EFCF6C175D3B6B",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2678,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0418139999999312,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.8210399999999254,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0007227",
+   "question_id": "26E0EB0B53556B98F7E54203DA579B1A0126469518895A5735EFCF6C175D3B6B",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2678,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.848002000000065,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.852655000000027,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0007510",
+   "question_id": "26E0EB0B53556B98F7E54203DA579B1A0126469518895A5735EFCF6C175D3B6B",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2678,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.279965000000061,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0953770000000986,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0008577",
+   "question_id": "26E0EB0B53556B98F7E54203DA579B1A0126469518895A5735EFCF6C175D3B6B",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2678,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.1284840000000713,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.855011000000104,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0008601",
+   "question_id": "3F41111A79BB9CA4A1DEA038CC05D1D851C584A7F7206EFB35E1E982753AA848",
+   "gold_letter": "E",
+   "device_correct": false,
+   "device_latency_s": 0.2691,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.034862999999973,
+    "cloud_letter": "A"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.3956039999999348,
+    "cloud_letter": "A"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0008668",
+   "question_id": "3F41111A79BB9CA4A1DEA038CC05D1D851C584A7F7206EFB35E1E982753AA848",
+   "gold_letter": "E",
+   "device_correct": false,
+   "device_latency_s": 0.2691,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.5577959999999393,
+    "cloud_letter": "A"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.4082300000000032,
+    "cloud_letter": "A"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0008714",
+   "question_id": "3F41111A79BB9CA4A1DEA038CC05D1D851C584A7F7206EFB35E1E982753AA848",
+   "gold_letter": "E",
+   "device_correct": false,
+   "device_latency_s": 0.2691,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.7680979999998954,
+    "cloud_letter": "A"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.157102000000009,
+    "cloud_letter": "A"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0010346",
+   "question_id": "3F41111A79BB9CA4A1DEA038CC05D1D851C584A7F7206EFB35E1E982753AA848",
+   "gold_letter": "E",
+   "device_correct": false,
+   "device_latency_s": 0.2691,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.3387989999999945,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.415078999999878,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0010459",
+   "question_id": "26E0EB0B53556B98F7E54203DA579B1A0126469518895A5735EFCF6C175D3B6B",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2678,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.5700130000000172,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.6160809999998946,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0010467",
+   "question_id": "26E0EB0B53556B98F7E54203DA579B1A0126469518895A5735EFCF6C175D3B6B",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2678,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.655463999999938,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 3.642900999999938,
+    "cloud_letter": "B"
+   },
+   "source_same": false,
+   "correct_same": false,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0010481",
+   "question_id": "26E0EB0B53556B98F7E54203DA579B1A0126469518895A5735EFCF6C175D3B6B",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2678,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.174148999999943,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.7501090000002932,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0001137",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0056160000000034,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.1363460000000032,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0001360",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7773470000000202,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.49368200000000684,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0001471",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.02355,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.2716570000000047,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0001665",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.1694359999999904,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.421939000000009,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0001972",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.9037879999999916,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.9642969999999877,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0002295",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7262289999999894,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.6409519999999986,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0002327",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.48952800000000707,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.45557499999998186,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0002628",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.9120059999999626,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8962589999999864,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0002918",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.1810839999999985,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.2360890000000495,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0003495",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.477283,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.1553690000000074,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0003652",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.1550080000000094,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": false,
+    "latency_s": 3.024312000000009,
+    "cloud_letter": "E"
+   },
+   "source_same": false,
+   "correct_same": true,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0003857",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.9379480000000058,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": false,
+    "latency_s": 3.664145000000019,
+    "cloud_letter": "E"
+   },
+   "source_same": false,
+   "correct_same": true,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0003981",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.092931999999962,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0924610000000143,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0004066",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.960852999999986,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.5753169999999841,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0004769",
+   "question_id": "3f51e14dc90ccd7f08b5a05c405aa21b43159f48a63398c09bb217ca5b2efd12",
+   "gold_letter": "C",
+   "device_correct": true,
+   "device_latency_s": 0.2593,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.1259500000000457,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.0852369999999496,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0004771",
+   "question_id": "3f51e14dc90ccd7f08b5a05c405aa21b43159f48a63398c09bb217ca5b2efd12",
+   "gold_letter": "C",
+   "device_correct": true,
+   "device_latency_s": 0.2593,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8747860000000287,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8334410000000503,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0004846",
+   "question_id": "3f51e14dc90ccd7f08b5a05c405aa21b43159f48a63398c09bb217ca5b2efd12",
+   "gold_letter": "C",
+   "device_correct": true,
+   "device_latency_s": 0.2593,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.774360999999999,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.5205500000000143,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0005164",
+   "question_id": "3f51e14dc90ccd7f08b5a05c405aa21b43159f48a63398c09bb217ca5b2efd12",
+   "gold_letter": "C",
+   "device_correct": true,
+   "device_latency_s": 0.2593,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.1645650000000387,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 2.2192569999999705,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0005229",
+   "question_id": "3f51e14dc90ccd7f08b5a05c405aa21b43159f48a63398c09bb217ca5b2efd12",
+   "gold_letter": "C",
+   "device_correct": true,
+   "device_latency_s": 0.2593,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.9861329999999953,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.688761999999997,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0005320",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.667750999999953,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7783660000000054,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0005847",
+   "question_id": "3f51e14dc90ccd7f08b5a05c405aa21b43159f48a63398c09bb217ca5b2efd12",
+   "gold_letter": "C",
+   "device_correct": true,
+   "device_latency_s": 0.2593,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.2788810000000694,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.2401940000000877,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0007637",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.4728819999999132,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.4976199999999835,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0008035",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.3399229999999989,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.121054000000072,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0008242",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.2918480000000727,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 4.3242460000000165,
+    "cloud_letter": "D"
+   },
+   "source_same": false,
+   "correct_same": false,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0008806",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.5804700000001048,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.7287480000001096,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0008844",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.7147200000000566,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7094750000001113,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0009063",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.1100710000000618,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.5840579999999136,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0010510",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.5498979999997573,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.5685429999998632,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0010640",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 3.0046310000000176,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.388795000000073,
+    "cloud_letter": "D"
+   },
+   "source_same": false,
+   "correct_same": false,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0010713",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.9411139999999705,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.9240810000003421,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0010742",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0068759999999202,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7763649999999416,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0010894",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.8738909999999578,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.6446209999999155,
+    "cloud_letter": "D"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0000002",
+   "question_id": "572b15725ab6a848b154049878f5d935e6bfee8797264a37e2d136eaaa60aeed",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.3065,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.6619710000000003,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.6477309999999994,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0000188",
+   "question_id": "572b15725ab6a848b154049878f5d935e6bfee8797264a37e2d136eaaa60aeed",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.3065,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8381919999999923,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.7866550000000032,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0000511",
+   "question_id": "572b15725ab6a848b154049878f5d935e6bfee8797264a37e2d136eaaa60aeed",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.3065,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.3943690000000117,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.7362870000000044,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0000952",
+   "question_id": "572b15725ab6a848b154049878f5d935e6bfee8797264a37e2d136eaaa60aeed",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.3065,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8398590000000041,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8159530000000075,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0001002",
+   "question_id": "572b15725ab6a848b154049878f5d935e6bfee8797264a37e2d136eaaa60aeed",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.3065,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.9209670000000045,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.7611150000000038,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0001158",
+   "question_id": "572b15725ab6a848b154049878f5d935e6bfee8797264a37e2d136eaaa60aeed",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.3065,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.9750910000000204,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8901150000000086,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0001443",
+   "question_id": "572b15725ab6a848b154049878f5d935e6bfee8797264a37e2d136eaaa60aeed",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.3065,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.8750060000000133,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 0.7906949999999995,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0001698",
+   "question_id": "572b15725ab6a848b154049878f5d935e6bfee8797264a37e2d136eaaa60aeed",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.3065,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.088076000000001,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.3347189999999785,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0004420",
+   "question_id": "a21a2632d6576f76e7beb522e9b11faf80d668b36c23892246a7fd78b5576f3d",
+   "gold_letter": "C",
+   "device_correct": true,
+   "device_latency_s": 0.2837,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.2273700000000076,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.664907000000028,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0004680",
+   "question_id": "a21a2632d6576f76e7beb522e9b11faf80d668b36c23892246a7fd78b5576f3d",
+   "gold_letter": "C",
+   "device_correct": true,
+   "device_latency_s": 0.2837,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.6684699999999566,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7802079999999592,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0004890",
+   "question_id": "a21a2632d6576f76e7beb522e9b11faf80d668b36c23892246a7fd78b5576f3d",
+   "gold_letter": "C",
+   "device_correct": true,
+   "device_latency_s": 0.2837,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.9398580000000152,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.5397869999999898,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0010570",
+   "question_id": "9b1b424d74a3b9746631bfdce855b0fb0e4a46948773cafe6be0c68c58653ecd",
+   "gold_letter": "E",
+   "device_correct": false,
+   "device_latency_s": 0.2767,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 4.631816999999955,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 4.522934999999961,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo005",
+   "opportunity_id": "opp0010784",
+   "question_id": "9b1b424d74a3b9746631bfdce855b0fb0e4a46948773cafe6be0c68c58653ecd",
+   "gold_letter": "E",
+   "device_correct": false,
+   "device_latency_s": 0.2767,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0322499999999764,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.9644049999999424,
+    "cloud_letter": "E"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0001907",
+   "question_id": "d64254fbb21a647dbbac853aa398fb9d98c23909a3a5344d5a1ef8e26cb25f14",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.2815,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.658381999999989,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.0676440000000014,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0001942",
+   "question_id": "d64254fbb21a647dbbac853aa398fb9d98c23909a3a5344d5a1ef8e26cb25f14",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.2815,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.6268369999999948,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7981770000000097,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0002912",
+   "question_id": "d64254fbb21a647dbbac853aa398fb9d98c23909a3a5344d5a1ef8e26cb25f14",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.2815,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.932563000000016,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.9700109999999995,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0003025",
+   "question_id": "d64254fbb21a647dbbac853aa398fb9d98c23909a3a5344d5a1ef8e26cb25f14",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.2815,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.5099340000000439,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.5209619999999973,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0003111",
+   "question_id": "d64254fbb21a647dbbac853aa398fb9d98c23909a3a5344d5a1ef8e26cb25f14",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.2815,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 4.562571999999989,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 4.375262000000021,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0003132",
+   "question_id": "d64254fbb21a647dbbac853aa398fb9d98c23909a3a5344d5a1ef8e26cb25f14",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.2815,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.3954539999999724,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.207862999999975,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0003155",
+   "question_id": "d64254fbb21a647dbbac853aa398fb9d98c23909a3a5344d5a1ef8e26cb25f14",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.2815,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.295421000000033,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.5852559999999585,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0003568",
+   "question_id": "d64254fbb21a647dbbac853aa398fb9d98c23909a3a5344d5a1ef8e26cb25f14",
+   "gold_letter": "C",
+   "device_correct": false,
+   "device_latency_s": 0.2815,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.1303259999999113,
+    "cloud_letter": "C"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.3953689999999597,
+    "cloud_letter": "C"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0009296",
+   "question_id": "d3681012e15b8fb5f3bf630bdf8d408c0048a4639b143d3571595b036cf9e8e4",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2653,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 4.821677000000022,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 4.518728999999894,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0009518",
+   "question_id": "d3681012e15b8fb5f3bf630bdf8d408c0048a4639b143d3571595b036cf9e8e4",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2653,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 5.1933199999999715,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.1689100000000963,
+    "cloud_letter": "B"
+   },
+   "source_same": false,
+   "correct_same": false,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0009620",
+   "question_id": "d3681012e15b8fb5f3bf630bdf8d408c0048a4639b143d3571595b036cf9e8e4",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2653,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7123770000000604,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.7388759999998911,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0009672",
+   "question_id": "d3681012e15b8fb5f3bf630bdf8d408c0048a4639b143d3571595b036cf9e8e4",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2653,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.8416199999999208,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.6348739999998543,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0011722",
+   "question_id": "71b5dc7dfddd6099bb68bcbe31939834aba92393f59e773de9ee1faab74ce5db",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2815,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.6127559999999903,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.5641480000001593,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0011766",
+   "question_id": "71b5dc7dfddd6099bb68bcbe31939834aba92393f59e773de9ee1faab74ce5db",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2815,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.48205800000005183,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.4842869999999948,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0012232",
+   "question_id": "71b5dc7dfddd6099bb68bcbe31939834aba92393f59e773de9ee1faab74ce5db",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2815,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.9536120000002484,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 0.9253539999999703,
+    "cloud_letter": "B"
+   },
+   "source_same": true,
+   "correct_same": true,
+   "on_time_same": true
+  }
+ ],
+ "disagreements": [
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0002395",
+   "question_id": "4a400fbf90897f0fd7d7c99be71e0b0edc804db2dd9a04e3f7df6e47eb84e884",
+   "gold_letter": "E",
+   "device_correct": false,
+   "device_latency_s": 0.2944,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 3.2750350000000026,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.8646079999999756,
+    "cloud_letter": "E"
+   },
+   "source_same": false,
+   "correct_same": false,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0009524",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": false,
+    "latency_s": 5.619823999999994,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.5927630000001045,
+    "cloud_letter": "B"
+   },
+   "source_same": false,
+   "correct_same": true,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0009530",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": false,
+    "latency_s": 5.110416999999984,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.0847950000000992,
+    "cloud_letter": "B"
+   },
+   "source_same": false,
+   "correct_same": true,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo000",
+   "opportunity_id": "opp0011117",
+   "question_id": "0CBF46C2FA0DBDC147382317FA965175B47AB80467C96E913EB9B70E7A8D221C",
+   "gold_letter": "B",
+   "device_correct": true,
+   "device_latency_s": 0.2704,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": false,
+    "latency_s": null,
+    "cloud_letter": null
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.6371930000002521,
+    "cloud_letter": "B"
+   },
+   "source_same": false,
+   "correct_same": true,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo001",
+   "opportunity_id": "opp0009788",
+   "question_id": "bbf8511ce71642e6288e9a7137b962873539e1243941fb45be41585916b6e4ca",
+   "gold_letter": "A",
+   "device_correct": false,
+   "device_latency_s": 0.2673,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": true,
+    "latency_s": 1.1305299999999079,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 3.0781709999999975,
+    "cloud_letter": "D"
+   },
+   "source_same": false,
+   "correct_same": true,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo002",
+   "opportunity_id": "opp0006611",
+   "question_id": "156499695EC738B60C57553A0F75F4C37244C0E8A2C44CCBC989779A81FEFEAC",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2779,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.9561330000000225,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 3.085017000000107,
+    "cloud_letter": "B"
+   },
+   "source_same": false,
+   "correct_same": false,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo003",
+   "opportunity_id": "opp0010467",
+   "question_id": "26E0EB0B53556B98F7E54203DA579B1A0126469518895A5735EFCF6C175D3B6B",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2678,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.655463999999938,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 3.642900999999938,
+    "cloud_letter": "B"
+   },
+   "source_same": false,
+   "correct_same": false,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0003652",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.1550080000000094,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": false,
+    "latency_s": 3.024312000000009,
+    "cloud_letter": "E"
+   },
+   "source_same": false,
+   "correct_same": true,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0003857",
+   "question_id": "7c627702b415f03df7b7f5b302fc66311f89f0a72c2a75333ac93b40aeab3ad6",
+   "gold_letter": "E",
+   "device_correct": true,
+   "device_latency_s": 0.2601,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.9379480000000058,
+    "cloud_letter": "E"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": false,
+    "latency_s": 3.664145000000019,
+    "cloud_letter": "E"
+   },
+   "source_same": false,
+   "correct_same": true,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0008242",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.2918480000000727,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 4.3242460000000165,
+    "cloud_letter": "D"
+   },
+   "source_same": false,
+   "correct_same": false,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo004",
+   "opportunity_id": "opp0010640",
+   "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+   "gold_letter": "D",
+   "device_correct": false,
+   "device_latency_s": 0.2503,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 3.0046310000000176,
+    "cloud_letter": "D"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 2.388795000000073,
+    "cloud_letter": "D"
+   },
+   "source_same": false,
+   "correct_same": false,
+   "on_time_same": false
+  },
+  {
+   "device_id": "robo006",
+   "opportunity_id": "opp0009518",
+   "question_id": "d3681012e15b8fb5f3bf630bdf8d408c0048a4639b143d3571595b036cf9e8e4",
+   "gold_letter": "B",
+   "device_correct": false,
+   "device_latency_s": 0.2653,
+   "device_on_time_by_deadline": true,
+   "notouch": {
+    "source_by_deadline": "device",
+    "standing_correct_by_deadline": false,
+    "cloud_on_time": false,
+    "latency_s": 5.1933199999999715,
+    "cloud_letter": "B"
+   },
+   "rung3": {
+    "source_by_deadline": "cloud",
+    "standing_correct_by_deadline": true,
+    "cloud_on_time": true,
+    "latency_s": 1.1689100000000963,
+    "cloud_letter": "B"
+   },
+   "source_same": false,
+   "correct_same": false,
+   "on_time_same": false
+  }
+ ]
+}
