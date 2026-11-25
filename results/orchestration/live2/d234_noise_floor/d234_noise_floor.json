@@ -1,0 +1,1665 @@
+{
+ "decision": "D234 (3)",
+ "also_cites": "D166",
+ "task": "noise floor of three policy metrics from committed same-arm same-seed same-condition rerun pairs",
+ "read_only": true,
+ "ruling_and_analysis_sha": "20155f4aab50068b4adbd49091ec9e090d62aea6",
+ "sha_note": "origin/main was resolved once to 20155f4aab50068b4adbd49091ec9e090d62aea6, which is the same sha the D234 (3) ruling sits at. Every cell file was read with `git show <sha>:<path>`; the working checkout holds no runs/ directory at all, so nothing was read from it.",
+ "read_route": {
+  "per_episode_alert_attainment": "experiments/orchestration/live2/d179_rung2_verdict.py (imported UNMODIFIED from the ruling sha) -> read_cell(run_dir) -> alert_episodes.numerator_COMMITTED_RULE_PRIMARY.per_episode_PRIMARY.mean_attainment",
+  "robot_on_time": "cell.json -> score.score.robot_value.n_cloud_standing, with denominator score.score.robot_value.n",
+  "robot_correct_by_deadline": "cell.json -> score.score.robot_value.standing_accuracy_by_deadline"
+ },
+ "positive_control": {
+  "_what": "consistency check 7. The imported module is re-run on the eight committed D179 comparator cells and must reproduce results/orchestration/live2/frozen_test/d179_rung2_verdict.json exactly. If it did not, the READER would be broken, not the cells.",
+  "result": "8 of 8 exact to 6 decimals",
+  "cells": {
+   "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": {
+    "committed": 0.44249,
+    "recomputed": 0.44249,
+    "exact_match": true
+   },
+   "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": {
+    "committed": 0.396211,
+    "recomputed": 0.396211,
+    "exact_match": true
+   },
+   "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": {
+    "committed": 0.465479,
+    "recomputed": 0.465479,
+    "exact_match": true
+   },
+   "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30": {
+    "committed": 0.553811,
+    "recomputed": 0.553811,
+    "exact_match": true
+   },
+   "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": {
+    "committed": 0.163291,
+    "recomputed": 0.163291,
+    "exact_match": true
+   },
+   "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": {
+    "committed": 0.174996,
+    "recomputed": 0.174996,
+    "exact_match": true
+   },
+   "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": {
+    "committed": 0.240242,
+    "recomputed": 0.240242,
+    "exact_match": true
+   },
+   "covex-v6-state-uo_n16_s7_1200s_h27_3t_L3_epg_rq30": {
+    "committed": 0.216792,
+    "recomputed": 0.216792,
+    "exact_match": true
+   }
+  }
+ },
+ "pair_search": {
+  "_how": "every directory under results/orchestration/live2/frozen_test/runs/ at the ruling sha (773 entries) was listed; every name ending _rerun was matched to its un-suffixed counterpart, and _rerun_rerun to _rerun. 33 name-level candidates resulted, plus the base <-> _rerun_rerun pairing of eco-llm_n16_s5.",
+  "n_name_level_candidates": 34,
+  "n_pairs_in_the_floor": 8,
+  "rejections": [
+   {
+    "pair": "always-cloud-fcfs_n16_s5_1200s_h27_3t_L3_epg_rq30 <-> always-cloud-fcfs_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "base side holds only 3 preflight files (frames_preflight/mm_gate/mm_uuid_check): no cell.json, no outcomes.jsonl.gz, no header.json. One side is not a scored run."
+   },
+   {
+    "pair": "covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30 <-> covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "base side holds only 3 preflight files; not a scored run."
+   },
+   {
+    "pair": "covex-v6-state_n16_s7_1200s_h27_3t_L3_epg_rq30 <-> covex-v6-state_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "BOTH sides unscored: base has no cell.json/outcomes (10 files, request.jsonl only), rerun has 3 preflight files."
+   },
+   {
+    "pair": "llf_n16_s6_1200s_h27_3t <-> llf_n16_s6_1200s_h27_3t_rerun",
+    "reason": "base side holds 5 preflight/log files, no cell.json, no outcomes."
+   },
+   {
+    "pair": "v5-rules_n16_s7_1200s_h27_3t_L3_epg_rq30 <-> v5-rules_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "base side holds only 3 preflight files; not a scored run."
+   },
+   {
+    "pair": "covex-v6-fair-c5attr-gain0_n16_s4_1200s_h27_3t_L3_epg_rq30 <-> covex-v6-fair-c5attr-gain0_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "rerun side holds only mm_gate.json + mm_uuid_check.json; the rerun never produced a cell."
+   },
+   {
+    "pair": "covex-v6-fair-c5attr-gain0_n16_s5_1200s_h27_3t_L3_epg_rq30 <-> covex-v6-fair-c5attr-gain0_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "rerun side holds only 2 preflight files; no cell."
+   },
+   {
+    "pair": "covex-v6-fair-c5attr_n16_s5_1200s_h27_3t_L3_epg_rq30 <-> covex-v6-fair-c5attr_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "rerun side holds only 2 preflight files; no cell."
+   },
+   {
+    "pair": "covex-v6-fair-c5attr_n16_s6_1200s_h27_3t_L3_epg_rq30 <-> covex-v6-fair-c5attr_n16_s6_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "rerun side holds only 2 preflight files; no cell."
+   },
+   {
+    "pair": "covex-v6-fair-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30 <-> covex-v6-fair-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "rerun side holds only 2 preflight files; no cell."
+   },
+   {
+    "pair": "eco-llm_n16_s5_1200s_h27_3t_L3_epg_rq30 <-> eco-llm_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "the _rerun side has cell.json with score.ok FALSE, run_meta without run_valid, and NO outcomes.jsonl.gz. A refused-scoring stub is not a replicate. (The base is instead paired with _rerun_rerun; see stratum B.)"
+   },
+   {
+    "pair": "eco-llm_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun <-> eco-llm_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun_rerun_rerun",
+    "reason": "same exclusion: the _rerun side of this pair is the score.ok FALSE stub."
+   },
+   {
+    "pair": "warm-all-lru_n16_s5_1200s_h27_3t_L3_epg <-> warm-all-lru_n16_s5_1200s_h27_3t_L3_epg_rerun",
+    "reason": "same git_commit f6511c034 on both sides, but the BASE side carries run_meta.json run_valid FALSE and cell.json run_valid false. An INVALID run is not a replicate; this is why the rerun exists."
+   },
+   {
+    "pair": "confidence-cascade_n16_s4_1200s_h27_3t_L3_epg_rq30 <-> confidence-cascade_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "REJECTED FROM THE FLOOR, kept in stratum B only: 95 to 120 changed .py files between the two sides (including experiments/orchestration/live2/arms_*.py), and n_cloud_standing moves 0 -> 14/23/26 . That is a cascade-routing code fix, not run-to-run noise."
+   },
+   {
+    "pair": "confidence-cascade_n16_s5_1200s_h27_3t_L3_epg_rq30 <-> confidence-cascade_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "REJECTED FROM THE FLOOR, kept in stratum B only: 95 to 120 changed .py files between the two sides (including experiments/orchestration/live2/arms_*.py), and n_cloud_standing moves 0 -> 14/23/26 . That is a cascade-routing code fix, not run-to-run noise."
+   },
+   {
+    "pair": "confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30 <-> confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "REJECTED FROM THE FLOOR, kept in stratum B only: 95 to 120 changed .py files between the two sides (including experiments/orchestration/live2/arms_*.py), and n_cloud_standing moves 0 -> 14/23/26 . That is a cascade-routing code fix, not run-to-run noise."
+   },
+   {
+    "pair": "confidence-cascade_n16_s7_1200s_h27_3t_L3_epg_rq30 <-> confidence-cascade_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "REJECTED FROM THE FLOOR, kept in stratum B only: 95 to 120 changed .py files between the two sides (including experiments/orchestration/live2/arms_*.py), and n_cloud_standing moves 0 -> 14/23/26 . That is a cascade-routing code fix, not run-to-run noise."
+   },
+   {
+    "pair": "covex-v6-final_n16_s4_1200s_h27_3t_L3_epg_rq30 <-> covex-v6-final_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "REJECTED FROM THE FLOOR, kept in stratum B only: 42 to 168 changed .py files between the two sides' header.json git_commit, including experiments/orchestration/live2/arms_*.py, asyncbackend.py and coordinator-side modules. Not a replicate: it measures code change. (eco-llm_n16_s7's rerun sha 89ed710a1 is not even reachable in this checkout, so its code delta is unverifiable.)"
+   },
+   {
+    "pair": "eco-llm_n16_s4_1200s_h27_3t_L3_epg_rq30 <-> eco-llm_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "REJECTED FROM THE FLOOR, kept in stratum B only: 42 to 168 changed .py files between the two sides' header.json git_commit, including experiments/orchestration/live2/arms_*.py, asyncbackend.py and coordinator-side modules. Not a replicate: it measures code change. (eco-llm_n16_s7's rerun sha 89ed710a1 is not even reachable in this checkout, so its code delta is unverifiable.)"
+   },
+   {
+    "pair": "eco-llm_n16_s6_1200s_h27_3t_L3_epg_rq30 <-> eco-llm_n16_s6_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "REJECTED FROM THE FLOOR, kept in stratum B only: 42 to 168 changed .py files between the two sides' header.json git_commit, including experiments/orchestration/live2/arms_*.py, asyncbackend.py and coordinator-side modules. Not a replicate: it measures code change. (eco-llm_n16_s7's rerun sha 89ed710a1 is not even reachable in this checkout, so its code delta is unverifiable.)"
+   },
+   {
+    "pair": "eco-llm_n16_s7_1200s_h27_3t_L3_epg_rq30 <-> eco-llm_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "REJECTED FROM THE FLOOR, kept in stratum B only: 42 to 168 changed .py files between the two sides' header.json git_commit, including experiments/orchestration/live2/arms_*.py, asyncbackend.py and coordinator-side modules. Not a replicate: it measures code change. (eco-llm_n16_s7's rerun sha 89ed710a1 is not even reachable in this checkout, so its code delta is unverifiable.)"
+   },
+   {
+    "pair": "simplestream_n16_s4_1200s_h27_3t_L3_epg_rq30 <-> simplestream_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "REJECTED FROM THE FLOOR, kept in stratum B only: 42 to 168 changed .py files between the two sides' header.json git_commit, including experiments/orchestration/live2/arms_*.py, asyncbackend.py and coordinator-side modules. Not a replicate: it measures code change. (eco-llm_n16_s7's rerun sha 89ed710a1 is not even reachable in this checkout, so its code delta is unverifiable.)"
+   },
+   {
+    "pair": "simplestream_n16_s5_1200s_h27_3t_L3_epg_rq30 <-> simplestream_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "REJECTED FROM THE FLOOR, kept in stratum B only: 42 to 168 changed .py files between the two sides' header.json git_commit, including experiments/orchestration/live2/arms_*.py, asyncbackend.py and coordinator-side modules. Not a replicate: it measures code change. (eco-llm_n16_s7's rerun sha 89ed710a1 is not even reachable in this checkout, so its code delta is unverifiable.)"
+   },
+   {
+    "pair": "simplestream_n16_s6_1200s_h27_3t_L3_epg_rq30 <-> simplestream_n16_s6_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "REJECTED FROM THE FLOOR, kept in stratum B only: 42 to 168 changed .py files between the two sides' header.json git_commit, including experiments/orchestration/live2/arms_*.py, asyncbackend.py and coordinator-side modules. Not a replicate: it measures code change. (eco-llm_n16_s7's rerun sha 89ed710a1 is not even reachable in this checkout, so its code delta is unverifiable.)"
+   },
+   {
+    "pair": "simplestream_n16_s7_1200s_h27_3t_L3_epg_rq30 <-> simplestream_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun",
+    "reason": "REJECTED FROM THE FLOOR, kept in stratum B only: 42 to 168 changed .py files between the two sides' header.json git_commit, including experiments/orchestration/live2/arms_*.py, asyncbackend.py and coordinator-side modules. Not a replicate: it measures code change. (eco-llm_n16_s7's rerun sha 89ed710a1 is not even reachable in this checkout, so its code delta is unverifiable.)"
+   },
+   {
+    "pair": "b7-edf-feasibility_n16_s4/s5_1200s_h27_3t_L3_epg_rq30_ms_rerun",
+    "reason": "NO BASE: a _rerun cell whose un-suffixed counterpart does not exist in the tree, so there is nothing to pair it with."
+   }
+  ]
+ },
+ "same_code_check": {
+  "_how": "each side's header.json git_commit was read; where they differ, `git diff --name-only <shaA> <shaB> -- experiments/ fleet/ scorer/` was run and the changed .py files counted. A pair with any changed .py in the run path is NOT a replicate.",
+  "same_sha_pairs": 7,
+  "zero_code_diff_despite_differing_sha": {
+   "pair": "b7-edf-feasibility_n20_s0_1200s_h27_3t",
+   "shas": [
+    "854787e0a",
+    "0628b3b3b"
+   ],
+   "note": "the only non-results file differing is the ADDITION of experiments/orchestration/study_frozen_grid_driver_v2.sh, a new shell driver that did not exist at the base sha; zero .py files differ, so the two runs executed identical code. Counted as same-code and flagged."
+  },
+  "stub_evidence_lost_is_not_disqualifying": "STUB_EVIDENCE_LOST.json (D228/D166, the procsplit drain defect) records the loss of coordinator-side arm_stats ONLY. None of the three metrics here reads arm_stats: alert attainment comes from outcomes.jsonl.gz and robot on-time / by-deadline from cell.json score. A stub cell was therefore NOT rejected on that ground alone. No stub cell is in stratum A in any case.",
+  "blob_distinctness": "for all 8 floor pairs the two sides' outcomes.jsonl.gz and cell.json blobs are DISTINCT git objects, so no zero difference is a copied directory."
+ },
+ "strata": {
+  "A_same_code_replicates": {
+   "label": "same arm, same seed, same condition, SAME RUNNING CODE",
+   "pairs": [
+    {
+     "base_cell": "b7-edf-feasibility_n16_s0_1200s_h27_3t",
+     "rerun_cell": "b7-edf-feasibility_n16_s0_1200s_h27_3t_rerun",
+     "arm": "b7-edf-feasibility",
+     "seed": 0,
+     "n_devices": 16,
+     "git_commit_base": "379965bbb020fb15494f43a0e22bbe525b1c7b36",
+     "git_commit_rerun": "379965bbb020fb15494f43a0e22bbe525b1c7b36",
+     "same_sha": true,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      false,
+      false
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       5.0
+      ]
+     ],
+     "alert_attainment": [
+      0.814354,
+      0.816342
+     ],
+     "alert_n_episodes": [
+      715,
+      715
+     ],
+     "robot_n_cloud_standing": [
+      17,
+      17
+     ],
+     "robot_denominator_n": [
+      24,
+      24
+     ],
+     "robot_std_acc_by_deadline": [
+      null,
+      null
+     ],
+     "abs_diff_alert_attainment": 0.001988,
+     "abs_diff_robot_on_time_count": 0,
+     "abs_diff_robot_on_time_fraction": 0.0,
+     "robot_correct_by_deadline_ABSENT": "score.score.robot_value.standing_accuracy_by_deadline not present in this condition"
+    },
+    {
+     "base_cell": "b7-edf-feasibility_n20_s0_1200s_h27_3t",
+     "rerun_cell": "b7-edf-feasibility_n20_s0_1200s_h27_3t_rerun",
+     "arm": "b7-edf-feasibility",
+     "seed": 0,
+     "n_devices": 20,
+     "git_commit_base": "854787e0ab00f770e666f242f7e82ee1cd92cc10",
+     "git_commit_rerun": "0628b3b3b5dc54105737a4f9319a3f1535a96e28",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      false,
+      false
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       5.0
+      ]
+     ],
+     "alert_attainment": [
+      0.008055,
+      0.008055
+     ],
+     "alert_n_episodes": [
+      954,
+      954
+     ],
+     "robot_n_cloud_standing": [
+      2,
+      2
+     ],
+     "robot_denominator_n": [
+      28,
+      28
+     ],
+     "robot_std_acc_by_deadline": [
+      null,
+      null
+     ],
+     "abs_diff_alert_attainment": 0.0,
+     "abs_diff_robot_on_time_count": 0,
+     "abs_diff_robot_on_time_fraction": 0.0,
+     "robot_correct_by_deadline_ABSENT": "score.score.robot_value.standing_accuracy_by_deadline not present in this condition"
+    },
+    {
+     "base_cell": "eco-llm_n14_s0_1200s_h27_3t",
+     "rerun_cell": "eco-llm_n14_s0_1200s_h27_3t_rerun",
+     "arm": "eco-llm",
+     "seed": 0,
+     "n_devices": 14,
+     "git_commit_base": "2d037eb76202a4ed0ba12f765c8f3089a3010366",
+     "git_commit_rerun": "2d037eb76202a4ed0ba12f765c8f3089a3010366",
+     "same_sha": true,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      false,
+      false
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       5.0
+      ]
+     ],
+     "alert_attainment": [
+      0.820832,
+      0.821126
+     ],
+     "alert_n_episodes": [
+      715,
+      715
+     ],
+     "robot_n_cloud_standing": [
+      12,
+      12
+     ],
+     "robot_denominator_n": [
+      15,
+      15
+     ],
+     "robot_std_acc_by_deadline": [
+      null,
+      null
+     ],
+     "abs_diff_alert_attainment": 0.000294,
+     "abs_diff_robot_on_time_count": 0,
+     "abs_diff_robot_on_time_fraction": 0.0,
+     "robot_correct_by_deadline_ABSENT": "score.score.robot_value.standing_accuracy_by_deadline not present in this condition"
+    },
+    {
+     "base_cell": "eco-llm_n16_s0_1200s_h27_3t",
+     "rerun_cell": "eco-llm_n16_s0_1200s_h27_3t_rerun",
+     "arm": "eco-llm",
+     "seed": 0,
+     "n_devices": 16,
+     "git_commit_base": "98ff542d4cedc1d4158dad4b4d62d2010fb67f40",
+     "git_commit_rerun": "98ff542d4cedc1d4158dad4b4d62d2010fb67f40",
+     "same_sha": true,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      false,
+      false
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       5.0
+      ]
+     ],
+     "alert_attainment": [
+      0.73883,
+      0.738241
+     ],
+     "alert_n_episodes": [
+      715,
+      715
+     ],
+     "robot_n_cloud_standing": [
+      17,
+      16
+     ],
+     "robot_denominator_n": [
+      24,
+      24
+     ],
+     "robot_std_acc_by_deadline": [
+      null,
+      null
+     ],
+     "abs_diff_alert_attainment": 0.000589,
+     "abs_diff_robot_on_time_count": 1,
+     "abs_diff_robot_on_time_fraction": 0.041667,
+     "robot_correct_by_deadline_ABSENT": "score.score.robot_value.standing_accuracy_by_deadline not present in this condition"
+    },
+    {
+     "base_cell": "eco-llm_n16_s6_1200s_h27_3t",
+     "rerun_cell": "eco-llm_n16_s6_1200s_h27_3t_rerun",
+     "arm": "eco-llm",
+     "seed": 6,
+     "n_devices": 16,
+     "git_commit_base": "858ab8d2cbc208292e00edbb27816d96e5e28127",
+     "git_commit_rerun": "858ab8d2cbc208292e00edbb27816d96e5e28127",
+     "same_sha": true,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      false,
+      false
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       5.0
+      ]
+     ],
+     "alert_attainment": [
+      0.756524,
+      0.754607
+     ],
+     "alert_n_episodes": [
+      714,
+      714
+     ],
+     "robot_n_cloud_standing": [
+      13,
+      13
+     ],
+     "robot_denominator_n": [
+      20,
+      20
+     ],
+     "robot_std_acc_by_deadline": [
+      null,
+      null
+     ],
+     "abs_diff_alert_attainment": 0.001917,
+     "abs_diff_robot_on_time_count": 0,
+     "abs_diff_robot_on_time_fraction": 0.0,
+     "robot_correct_by_deadline_ABSENT": "score.score.robot_value.standing_accuracy_by_deadline not present in this condition"
+    },
+    {
+     "base_cell": "hybrid-F-lhreq_n16_s0_1200s_h27_3t",
+     "rerun_cell": "hybrid-F-lhreq_n16_s0_1200s_h27_3t_rerun",
+     "arm": "hybrid-F-lhreq",
+     "seed": 0,
+     "n_devices": 16,
+     "git_commit_base": "6025069489152576454dafc231233a6f49db9e30",
+     "git_commit_rerun": "6025069489152576454dafc231233a6f49db9e30",
+     "same_sha": true,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      false,
+      false
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       5.0
+      ]
+     ],
+     "alert_attainment": [
+      0.787265,
+      0.779904
+     ],
+     "alert_n_episodes": [
+      715,
+      715
+     ],
+     "robot_n_cloud_standing": [
+      18,
+      18
+     ],
+     "robot_denominator_n": [
+      24,
+      24
+     ],
+     "robot_std_acc_by_deadline": [
+      null,
+      null
+     ],
+     "abs_diff_alert_attainment": 0.007361,
+     "abs_diff_robot_on_time_count": 0,
+     "abs_diff_robot_on_time_fraction": 0.0,
+     "robot_correct_by_deadline_ABSENT": "score.score.robot_value.standing_accuracy_by_deadline not present in this condition"
+    },
+    {
+     "base_cell": "hybrid-F6-lhreq_n16_s0_1200s_h27_3t",
+     "rerun_cell": "hybrid-F6-lhreq_n16_s0_1200s_h27_3t_rerun",
+     "arm": "hybrid-F6-lhreq",
+     "seed": 0,
+     "n_devices": 16,
+     "git_commit_base": "4b92e12d5d890b377ac987225fc06f8930c7edef",
+     "git_commit_rerun": "4b92e12d5d890b377ac987225fc06f8930c7edef",
+     "same_sha": true,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      false,
+      false
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       5.0
+      ]
+     ],
+     "alert_attainment": [
+      0.71071,
+      0.738462
+     ],
+     "alert_n_episodes": [
+      715,
+      715
+     ],
+     "robot_n_cloud_standing": [
+      17,
+      18
+     ],
+     "robot_denominator_n": [
+      24,
+      24
+     ],
+     "robot_std_acc_by_deadline": [
+      null,
+      null
+     ],
+     "abs_diff_alert_attainment": 0.027752,
+     "abs_diff_robot_on_time_count": 1,
+     "abs_diff_robot_on_time_fraction": 0.041667,
+     "robot_correct_by_deadline_ABSENT": "score.score.robot_value.standing_accuracy_by_deadline not present in this condition"
+    },
+    {
+     "base_cell": "mooncake_n16_s6_1200s_h27_3t",
+     "rerun_cell": "mooncake_n16_s6_1200s_h27_3t_rerun",
+     "arm": "mooncake",
+     "seed": 6,
+     "n_devices": 16,
+     "git_commit_base": "69418f6eb084e495e7045fc5e8b2587428355c9f",
+     "git_commit_rerun": "69418f6eb084e495e7045fc5e8b2587428355c9f",
+     "same_sha": true,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      false,
+      false
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       5.0
+      ]
+     ],
+     "alert_attainment": [
+      0.854931,
+      0.858838
+     ],
+     "alert_n_episodes": [
+      714,
+      714
+     ],
+     "robot_n_cloud_standing": [
+      14,
+      14
+     ],
+     "robot_denominator_n": [
+      20,
+      20
+     ],
+     "robot_std_acc_by_deadline": [
+      null,
+      null
+     ],
+     "abs_diff_alert_attainment": 0.003907,
+     "abs_diff_robot_on_time_count": 0,
+     "abs_diff_robot_on_time_fraction": 0.0,
+     "robot_correct_by_deadline_ABSENT": "score.score.robot_value.standing_accuracy_by_deadline not present in this condition"
+    }
+   ],
+   "per_episode_alert_attainment": {
+    "n": 8,
+    "min": 0.0,
+    "median": 0.001953,
+    "max": 0.027752,
+    "p95_linear_interp": 0.020615,
+    "all_sorted": [
+     0.0,
+     0.000294,
+     0.000589,
+     0.001917,
+     0.001988,
+     0.003907,
+     0.007361,
+     0.027752
+    ]
+   },
+   "robot_on_time_fraction": {
+    "n": 8,
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.041667,
+    "p95_linear_interp": 0.041667,
+    "all_sorted": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.041667,
+     0.041667
+    ]
+   },
+   "robot_on_time_absolute_count": {
+    "n": 8,
+    "min": 0.0,
+    "median": 0.0,
+    "max": 1.0,
+    "p95_linear_interp": 1.0,
+    "all_sorted": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     1.0
+    ]
+   },
+   "robot_correct_by_deadline": {
+    "n": 0
+   }
+  },
+  "B_same_condition_as_todays_verdicts_but_CODE_CHANGED": {
+   "label": "L3_epg_rq30 condition, 42 to 168 changed .py files between the two sides: NOT replicates, measures code change",
+   "pairs": [
+    {
+     "base_cell": "covex-v6-final_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "rerun_cell": "covex-v6-final_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+     "arm": "covex-v6-final",
+     "seed": 4,
+     "n_devices": 16,
+     "git_commit_base": "6b79d0695a6e232dc805aabe1350068e15488741",
+     "git_commit_rerun": "7d9bbea70a091e57e0494b38b4ba57d89519e785",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      true,
+      true
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       3.0
+      ]
+     ],
+     "alert_attainment": [
+      0.6233,
+      0.609181
+     ],
+     "alert_n_episodes": [
+      712,
+      712
+     ],
+     "robot_n_cloud_standing": [
+      121,
+      127
+     ],
+     "robot_denominator_n": [
+      132,
+      132
+     ],
+     "robot_std_acc_by_deadline": [
+      0.628788,
+      0.628788
+     ],
+     "abs_diff_alert_attainment": 0.014119,
+     "abs_diff_robot_on_time_count": 6,
+     "abs_diff_robot_on_time_fraction": 0.045455,
+     "abs_diff_robot_correct_by_deadline": 0.0
+    },
+    {
+     "base_cell": "eco-llm_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "rerun_cell": "eco-llm_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+     "arm": "eco-llm",
+     "seed": 4,
+     "n_devices": 16,
+     "git_commit_base": "2a7039c45d8fe5ae0124c9d748b40b48bea35c7b",
+     "git_commit_rerun": "a4eaf9bcde60a0aeb5cd6a3431950ece8577b189",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      true,
+      true
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       3.0
+      ]
+     ],
+     "alert_attainment": [
+      0.061576,
+      0.058693
+     ],
+     "alert_n_episodes": [
+      712,
+      712
+     ],
+     "robot_n_cloud_standing": [
+      6,
+      5
+     ],
+     "robot_denominator_n": [
+      132,
+      132
+     ],
+     "robot_std_acc_by_deadline": [
+      0.371212,
+      0.371212
+     ],
+     "abs_diff_alert_attainment": 0.002883,
+     "abs_diff_robot_on_time_count": 1,
+     "abs_diff_robot_on_time_fraction": 0.007576,
+     "abs_diff_robot_correct_by_deadline": 0.0
+    },
+    {
+     "base_cell": "eco-llm_n16_s6_1200s_h27_3t_L3_epg_rq30",
+     "rerun_cell": "eco-llm_n16_s6_1200s_h27_3t_L3_epg_rq30_rerun",
+     "arm": "eco-llm",
+     "seed": 6,
+     "n_devices": 16,
+     "git_commit_base": "94c9b75fddaa415fec121f36a2c7458004bb26ae",
+     "git_commit_rerun": "607eba83a33e038f20ae880c938f89c4fd083b37",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      true,
+      true
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       3.0
+      ]
+     ],
+     "alert_attainment": [
+      0.375222,
+      0.359772
+     ],
+     "alert_n_episodes": [
+      712,
+      712
+     ],
+     "robot_n_cloud_standing": [
+      30,
+      31
+     ],
+     "robot_denominator_n": [
+      121,
+      121
+     ],
+     "robot_std_acc_by_deadline": [
+      0.140496,
+      0.140496
+     ],
+     "abs_diff_alert_attainment": 0.01545,
+     "abs_diff_robot_on_time_count": 1,
+     "abs_diff_robot_on_time_fraction": 0.008264,
+     "abs_diff_robot_correct_by_deadline": 0.0
+    },
+    {
+     "base_cell": "eco-llm_n16_s7_1200s_h27_3t_L3_epg_rq30",
+     "rerun_cell": "eco-llm_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun",
+     "arm": "eco-llm",
+     "seed": 7,
+     "n_devices": 16,
+     "git_commit_base": "8a9721172b9e58db5dce3e33575066ea078ba02a",
+     "git_commit_rerun": "89ed710a1d27971a4d773e0c9522b48d299ddbf6",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      true,
+      true
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       3.0
+      ]
+     ],
+     "alert_attainment": [
+      0.668804,
+      0.665487
+     ],
+     "alert_n_episodes": [
+      714,
+      714
+     ],
+     "robot_n_cloud_standing": [
+      82,
+      80
+     ],
+     "robot_denominator_n": [
+      105,
+      105
+     ],
+     "robot_std_acc_by_deadline": [
+      0.304762,
+      0.304762
+     ],
+     "abs_diff_alert_attainment": 0.003317,
+     "abs_diff_robot_on_time_count": 2,
+     "abs_diff_robot_on_time_fraction": 0.019048,
+     "abs_diff_robot_correct_by_deadline": 0.0
+    },
+    {
+     "base_cell": "simplestream_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "rerun_cell": "simplestream_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+     "arm": "simplestream",
+     "seed": 4,
+     "n_devices": 16,
+     "git_commit_base": "a0533b6ac247344cdf6b912636e51d4251fdfaa6",
+     "git_commit_rerun": "22c4fffc372b394f3577ae886d4a0e6e53d00132",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      true,
+      true
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       3.0
+      ]
+     ],
+     "alert_attainment": [
+      0.801301,
+      0.818746
+     ],
+     "alert_n_episodes": [
+      712,
+      712
+     ],
+     "robot_n_cloud_standing": [
+      132,
+      132
+     ],
+     "robot_denominator_n": [
+      132,
+      132
+     ],
+     "robot_std_acc_by_deadline": [
+      0.143939,
+      0.174242
+     ],
+     "abs_diff_alert_attainment": 0.017445,
+     "abs_diff_robot_on_time_count": 0,
+     "abs_diff_robot_on_time_fraction": 0.0,
+     "abs_diff_robot_correct_by_deadline": 0.030303
+    },
+    {
+     "base_cell": "simplestream_n16_s5_1200s_h27_3t_L3_epg_rq30",
+     "rerun_cell": "simplestream_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun",
+     "arm": "simplestream",
+     "seed": 5,
+     "n_devices": 16,
+     "git_commit_base": "b889da409545e9050c3706de0d811e61cc3cdc40",
+     "git_commit_rerun": "6a54fcc8fb6449c4a85339fa0e998077847819b1",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      true,
+      true
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       3.0
+      ]
+     ],
+     "alert_attainment": [
+      0.765296,
+      0.793307
+     ],
+     "alert_n_episodes": [
+      714,
+      714
+     ],
+     "robot_n_cloud_standing": [
+      126,
+      126
+     ],
+     "robot_denominator_n": [
+      127,
+      127
+     ],
+     "robot_std_acc_by_deadline": [
+      0.299213,
+      0.299213
+     ],
+     "abs_diff_alert_attainment": 0.028011,
+     "abs_diff_robot_on_time_count": 0,
+     "abs_diff_robot_on_time_fraction": 0.0,
+     "abs_diff_robot_correct_by_deadline": 0.0
+    },
+    {
+     "base_cell": "simplestream_n16_s6_1200s_h27_3t_L3_epg_rq30",
+     "rerun_cell": "simplestream_n16_s6_1200s_h27_3t_L3_epg_rq30_rerun",
+     "arm": "simplestream",
+     "seed": 6,
+     "n_devices": 16,
+     "git_commit_base": "ada052d1c60daff6000cf19616c4509611e401e1",
+     "git_commit_rerun": "f0b2f5ee6bd400a2f17e676ff608884b3eca7621",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      true,
+      true
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       3.0
+      ]
+     ],
+     "alert_attainment": [
+      0.828873,
+      0.853415
+     ],
+     "alert_n_episodes": [
+      712,
+      712
+     ],
+     "robot_n_cloud_standing": [
+      120,
+      121
+     ],
+     "robot_denominator_n": [
+      121,
+      121
+     ],
+     "robot_std_acc_by_deadline": [
+      0.165289,
+      0.132231
+     ],
+     "abs_diff_alert_attainment": 0.024542,
+     "abs_diff_robot_on_time_count": 1,
+     "abs_diff_robot_on_time_fraction": 0.008264,
+     "abs_diff_robot_correct_by_deadline": 0.033058
+    },
+    {
+     "base_cell": "simplestream_n16_s7_1200s_h27_3t_L3_epg_rq30",
+     "rerun_cell": "simplestream_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun",
+     "arm": "simplestream",
+     "seed": 7,
+     "n_devices": 16,
+     "git_commit_base": "f36c46736f1bd9376d563a64980df80933b8cf8e",
+     "git_commit_rerun": "65a13b403f2a23bfe9361556a158f7d31810c090",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      true,
+      true
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       3.0
+      ]
+     ],
+     "alert_attainment": [
+      0.823013,
+      0.845422
+     ],
+     "alert_n_episodes": [
+      714,
+      714
+     ],
+     "robot_n_cloud_standing": [
+      105,
+      105
+     ],
+     "robot_denominator_n": [
+      105,
+      105
+     ],
+     "robot_std_acc_by_deadline": [
+      0.285714,
+      0.228571
+     ],
+     "abs_diff_alert_attainment": 0.022409,
+     "abs_diff_robot_on_time_count": 0,
+     "abs_diff_robot_on_time_fraction": 0.0,
+     "abs_diff_robot_correct_by_deadline": 0.057143
+    },
+    {
+     "base_cell": "confidence-cascade_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "rerun_cell": "confidence-cascade_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+     "arm": "confidence-cascade",
+     "seed": 4,
+     "n_devices": 16,
+     "git_commit_base": "181c9d10666c5f91e88aa3a7767957bbb232ce8b",
+     "git_commit_rerun": "f1821c8164b663f50fad3e2bb0692cac62095fb2",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      false,
+      false
+     ],
+     "crosstab_matches_expected": [
+      true,
+      true
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       3.0
+      ]
+     ],
+     "alert_attainment": [
+      0.25207,
+      0.166396
+     ],
+     "alert_n_episodes": [
+      712,
+      712
+     ],
+     "robot_n_cloud_standing": [
+      3,
+      23
+     ],
+     "robot_denominator_n": [
+      132,
+      132
+     ],
+     "robot_std_acc_by_deadline": [
+      0.393939,
+      0.477273
+     ],
+     "abs_diff_alert_attainment": 0.085674,
+     "abs_diff_robot_on_time_count": 20,
+     "abs_diff_robot_on_time_fraction": 0.151515,
+     "abs_diff_robot_correct_by_deadline": 0.083334
+    },
+    {
+     "base_cell": "confidence-cascade_n16_s5_1200s_h27_3t_L3_epg_rq30",
+     "rerun_cell": "confidence-cascade_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun",
+     "arm": "confidence-cascade",
+     "seed": 5,
+     "n_devices": 16,
+     "git_commit_base": "f9832d5af2c96a7ea7e3142ecd12bb91377f0e7d",
+     "git_commit_rerun": "bbe258e23bfe9ae7a1f2cb7621089c4bbf9a03ad",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      true,
+      false
+     ],
+     "crosstab_matches_expected": [
+      true,
+      true
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       3.0
+      ]
+     ],
+     "alert_attainment": [
+      0.164971,
+      0.176692
+     ],
+     "alert_n_episodes": [
+      714,
+      714
+     ],
+     "robot_n_cloud_standing": [
+      0,
+      14
+     ],
+     "robot_denominator_n": [
+      127,
+      127
+     ],
+     "robot_std_acc_by_deadline": [
+      0.299213,
+      0.283465
+     ],
+     "abs_diff_alert_attainment": 0.011721,
+     "abs_diff_robot_on_time_count": 14,
+     "abs_diff_robot_on_time_fraction": 0.110236,
+     "abs_diff_robot_correct_by_deadline": 0.015748
+    },
+    {
+     "base_cell": "confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30",
+     "rerun_cell": "confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30_rerun",
+     "arm": "confidence-cascade",
+     "seed": 6,
+     "n_devices": 16,
+     "git_commit_base": "f1667d0267954e453166e7f9a77da72443a43bb0",
+     "git_commit_rerun": "e6fbf482f5dfc11072baab9da21245d085b3533b",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      true,
+      false
+     ],
+     "crosstab_matches_expected": [
+      true,
+      true
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       3.0
+      ]
+     ],
+     "alert_attainment": [
+      0.120787,
+      0.169648
+     ],
+     "alert_n_episodes": [
+      712,
+      712
+     ],
+     "robot_n_cloud_standing": [
+      0,
+      26
+     ],
+     "robot_denominator_n": [
+      121,
+      121
+     ],
+     "robot_std_acc_by_deadline": [
+      0.057851,
+      0.198347
+     ],
+     "abs_diff_alert_attainment": 0.048861,
+     "abs_diff_robot_on_time_count": 26,
+     "abs_diff_robot_on_time_fraction": 0.214876,
+     "abs_diff_robot_correct_by_deadline": 0.140496
+    },
+    {
+     "base_cell": "confidence-cascade_n16_s7_1200s_h27_3t_L3_epg_rq30",
+     "rerun_cell": "confidence-cascade_n16_s7_1200s_h27_3t_L3_epg_rq30_rerun",
+     "arm": "confidence-cascade",
+     "seed": 7,
+     "n_devices": 16,
+     "git_commit_base": "622bd591177110605eddd3b119c8c7926bf94e24",
+     "git_commit_rerun": "ef9276ad36927a40b965416f6580ef3dcf031714",
+     "same_sha": false,
+     "stub_evidence_lost": [
+      true,
+      false
+     ],
+     "crosstab_matches_expected": [
+      true,
+      true
+     ],
+     "crosstab": [
+      [
+       "asst",
+       "recall",
+       2.0
+      ],
+      [
+       "dash",
+       "monitor",
+       1.0
+      ],
+      [
+       "robo",
+       "recall",
+       3.0
+      ]
+     ],
+     "alert_attainment": [
+      0.075704,
+      0.161507
+     ],
+     "alert_n_episodes": [
+      714,
+      714
+     ],
+     "robot_n_cloud_standing": [
+      0,
+      23
+     ],
+     "robot_denominator_n": [
+      105,
+      105
+     ],
+     "robot_std_acc_by_deadline": [
+      0.295238,
+      0.4
+     ],
+     "abs_diff_alert_attainment": 0.085803,
+     "abs_diff_robot_on_time_count": 23,
+     "abs_diff_robot_on_time_fraction": 0.219048,
+     "abs_diff_robot_correct_by_deadline": 0.104762
+    }
+   ],
+   "per_episode_alert_attainment": {
+    "n": 12,
+    "min": 0.002883,
+    "median": 0.019927,
+    "max": 0.085803,
+    "p95_linear_interp": 0.085732,
+    "all_sorted": [
+     0.002883,
+     0.003317,
+     0.011721,
+     0.014119,
+     0.01545,
+     0.017445,
+     0.022409,
+     0.024542,
+     0.028011,
+     0.048861,
+     0.085674,
+     0.085803
+    ]
+   },
+   "robot_on_time_fraction": {
+    "n": 12,
+    "min": 0.0,
+    "median": 0.013656,
+    "max": 0.219048,
+    "p95_linear_interp": 0.216753,
+    "all_sorted": [
+     0.0,
+     0.0,
+     0.0,
+     0.007576,
+     0.008264,
+     0.008264,
+     0.019048,
+     0.045455,
+     0.110236,
+     0.151515,
+     0.214876,
+     0.219048
+    ]
+   },
+   "robot_on_time_absolute_count": {
+    "n": 12,
+    "min": 0.0,
+    "median": 1.5,
+    "max": 26.0,
+    "p95_linear_interp": 24.35,
+    "all_sorted": [
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     1.0,
+     1.0,
+     2.0,
+     6.0,
+     14.0,
+     20.0,
+     23.0,
+     26.0
+    ]
+   },
+   "robot_correct_by_deadline": {
+    "n": 12,
+    "min": 0.0,
+    "median": 0.023026,
+    "max": 0.140496,
+    "p95_linear_interp": 0.120842,
+    "all_sorted": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.015748,
+     0.030303,
+     0.033058,
+     0.057143,
+     0.083334,
+     0.104762,
+     0.140496
+    ]
+   }
+  }
+ },
+ "HEADLINE_FLOOR": {
+  "stratum": "A_same_code_replicates",
+  "n_pairs": 8,
+  "per_episode_alert_attainment": {
+   "p95_as_the_ruling_words_it": 0.020615,
+   "max_observed": 0.027752,
+   "min": 0.0,
+   "median": 0.001953,
+   "all_pair_values_sorted": [
+    0.0,
+    0.000294,
+    0.000589,
+    0.001917,
+    0.001988,
+    0.003907,
+    0.007361,
+    0.027752
+   ],
+   "HONESTY": "n=8 cannot carry a 95th percentile. 0.95*(8-1)=6.65, so the interpolated p95 sits 65 percent of the way from the 7th value (0.007361) to the single largest (0.027752) and is set by ONE pair, hybrid-F6-lhreq_n16_s0, whose difference is 3.8x the next largest. The defensible statements are: the MAXIMUM OBSERVED absolute difference over n=8 same-code replicate pairs is 0.0278, and 7 of the 8 pairs are at or below 0.0074. Quoting 0.020615 as a percentile invents precision this sample does not have."
+  },
+  "robot_on_time": {
+   "transferable_quantity": "the ABSOLUTE COUNT. Over 8 pairs the on-time count moves by 0 (6 pairs) or exactly 1 (2 pairs); max 1 opportunity.",
+   "count_stats": {
+    "n": 8,
+    "min": 0.0,
+    "median": 0.0,
+    "max": 1.0,
+    "p95_linear_interp": 1.0,
+    "all_sorted": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     1.0
+    ]
+   },
+   "fraction_stats": {
+    "n": 8,
+    "min": 0.0,
+    "median": 0.0,
+    "max": 0.041667,
+    "p95_linear_interp": 0.041667,
+    "all_sorted": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.041667,
+     0.041667
+    ]
+   },
+   "WHY_THE_FRACTION_DOES_NOT_TRANSFER": "the stratum-A denominators (score.score.robot_value.n) are 15, 20, 24 and 28, so one flipped opportunity is 0.036 to 0.067 and the fraction floor 0.0417 is pure granularity, not noise. In the verdict condition the denominator is 105 to 132, where one flipped opportunity is 0.0076 to 0.0095. The floor to carry forward is ONE OPPORTUNITY, i.e. 0.0076 at n=132 and 0.0095 at n=105."
+  },
+  "robot_correct_by_deadline": {
+   "n_pairs": 0,
+   "status": "NOT MEASURABLE from same-code pairs",
+   "why": "score.score.robot_value.standing_accuracy_by_deadline does not exist as a key in ANY stratum-A cell. The _1200s_h27_3t robot_value block carries only ['cloud_accuracy_on_served','cloud_answers_available','device_only_accuracy','n','n_cloud_standing','n_device_standing','standing_accuracy','standing_accuracy_n','warm_cold']. The by-deadline key appears only in the L3_epg_rq30 cells, and every L3_epg_rq30 rerun pair is code-changed. This is an ABSENT key, read as absent and NOT as a zero.",
+   "stratum_B_upper_bound_only": {
+    "n": 12,
+    "min": 0.0,
+    "median": 0.023026,
+    "max": 0.140496,
+    "p95_linear_interp": 0.120842,
+    "all_sorted": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.015748,
+     0.030303,
+     0.033058,
+     0.057143,
+     0.083334,
+     0.104762,
+     0.140496
+    ]
+   }
+  }
+ },
+ "COMMENSURABILITY_CAVEAT": {
+  "_the_problem": "every same-code replicate pair is in the pre-EP-G `_1200s_h27_3t` condition; every pair in the L3_epg_rq30 condition that today's verdicts were called in is code-changed. The floor and the verdicts are therefore not from the same regime.",
+  "what_IS_the_same": "the alert type is identically (device prefix dash, kind monitor, deadline 1.0 s) in both conditions, and the episode recipe, the 21-frame cap and the declared per-episode denominator 19 are the same committed constants, so the METRIC DEFINITION is identical. The positive control proves the reader.",
+  "what_is_NOT_the_same": "the committed module's own crosstab check returns FALSE on every stratum-A cell, because the robot deadline is 5.0 s there against 3.0 s in L3_epg_rq30. The slacker robot deadline relieves contention, and stratum-A alert attainment sits at 0.710 to 0.932 whereas three of the four verdict arms sit below 0.20. A floor measured at high attainment need not transfer to low attainment.",
+  "which_way_it_cuts": "stratum B, which IS in the verdict condition, gives a LARGER spread on the same metric (min 0.0029, median 0.0199, max 0.0858). It is contaminated by code change so it is an upper bound and not a floor, but both strata put the floor at or above 0.02, i.e. ABOVE all four verdict magnitudes. The two independent reads agree on the direction, which is the one thing this sample can support."
+ },
+ "VERDICT_REREAD": [
+  {
+   "verdict": "rung-4 pass-1, 1x",
+   "delta": -0.010053,
+   "called": "FAIL",
+   "abs_magnitude": 0.010053,
+   "inside_p95_floor_0p020615": true,
+   "inside_max_observed_floor_0p027752": true,
+   "outside_if_single_outlier_pair_dropped_bar_0p007361": true,
+   "becomes": "NO DIFFERENCE (inside the floor, in either direction)"
+  },
+  {
+   "verdict": "cell (a), 0.5x",
+   "delta": 0.015745,
+   "called": "PASS",
+   "abs_magnitude": 0.015745,
+   "inside_p95_floor_0p020615": true,
+   "inside_max_observed_floor_0p027752": true,
+   "outside_if_single_outlier_pair_dropped_bar_0p007361": true,
+   "becomes": "NO DIFFERENCE (inside the floor, in either direction)"
+  },
+  {
+   "verdict": "-nqd, 0.5x",
+   "delta": 0.015302,
+   "called": "PASS",
+   "abs_magnitude": 0.015302,
+   "inside_p95_floor_0p020615": true,
+   "inside_max_observed_floor_0p027752": true,
+   "outside_if_single_outlier_pair_dropped_bar_0p007361": true,
+   "becomes": "NO DIFFERENCE (inside the floor, in either direction)"
+  },
+  {
+   "verdict": "-nqd, 1x",
+   "delta": -0.010201,
+   "called": "FAIL",
+   "abs_magnitude": 0.010201,
+   "inside_p95_floor_0p020615": true,
+   "inside_max_observed_floor_0p027752": true,
+   "outside_if_single_outlier_pair_dropped_bar_0p007361": true,
+   "becomes": "NO DIFFERENCE (inside the floor, in either direction)"
+  }
+ ],
+ "VERDICT_REREAD_CONCLUSION": "All four of today's attainment verdicts (|delta| 0.0101 to 0.0157) are INSIDE the floor on every construction the replicate sample supports: inside the p95 as the ruling words it (0.0206), inside the maximum observed difference over n=8 (0.0278), and inside stratum B's upper bound (0.0857). By D234 (3) all four are NO DIFFERENCE, and the three rung-4 FAILs become no difference rather than failures. The ONLY construction that keeps them is one that drops the single largest replicate pair and sets the bar at 0.0074, which the ruling does not authorise. The floor is large enough to void all four, and this is reported as voiding them.",
+ "LIMITATIONS": [
+  "n=8 is too few for a 95th percentile; the max observed difference is the honest statistic and is reported as such.",
+  "no same-code replicate pair exists in the L3_epg_rq30 condition the verdicts were called in; the floor is transferred across conditions on the strength of an identical alert-metric definition, not an identical regime.",
+  "robot correct-by-deadline has NO same-code replicate pair at all; no floor is reported for it.",
+  "the robot on-time fraction floor is granularity-limited by denominators of 15 to 28; only the count floor of 1 opportunity transfers.",
+  "seeds in the floor are 0 and 6 only (s0 x6, s6 x2); seeds 1 to 3 and HOLDOUT were never read."
+ ],
+ "_provenance": {
+  "git_commit": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
+  "script": "d234_noise_floor (scratchpad analysis, read-only)",
+  "model": "n/a",
+  "timestamp": "2026-11-24T16:37:34.412777",
+  "device": "n/a",
+  "n": 8,
+  "analysis_tree_sha": "20155f4aab50068b4adbd49091ec9e090d62aea6",
+  "note": "git_commit above is the working checkout HEAD, which is behind origin/main; every input was read from the blob store at analysis_tree_sha."
+ }
+}
