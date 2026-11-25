@@ -1,5 +1,21 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## *** USER RULING 2026-11-25: P3 RUNS REGARDLESS OF P2, AND P4 IS SKIPPED. ***
+
+**Let P2 (rq10, running) finish and it is scored against the prediction committed at 10:30:09.**
+*** THEN RUN P3 REGARDLESS OF P2's RESULT: `covex-v6-fair-final` `_preD249`, ROBOT-HEAVY `_c3-11-2`, 1x,
+s4. AND SKIP P4 (dashcam-heavy `_c10-4-2`) ENTIRELY. ***
+**THE REASON, and it is sharper than flash's own mechanism: rung 3 sheds DASHCAM plays, not robots, and
+ROBOTS are what it keeps in HOST MEMORY. So P3 is the ONE demand direction the shedding mechanism does NOT
+cover, and P4 is the direction it covers twice over.** **Flash's blanket "all four fail by the same
+mechanism" was too broad; the user identified which one it does not predict.**
+**IF P3 ALSO FAILS D253, the finding to record is: "RUNG 3 CONVERTS ADDED DEMAND INTO SHEDDING, NOT MEMORY
+PRESSURE." Then the memory-pressure regime is D250 ONLY, and outages stay in the default regime per D240.**
+**Same three D253 conditions and the same definitions as declared before P1 (server host reading governs,
+idle gap from the previous QUESTION, cold at `cached_fraction` < 0.5 with the deciles beside it, planner
+evictions, server-side evictions reported ABSENT).** **And per D257 (3) report robot cloud on-time, cloud
+ACCURACY ON SERVED and CORRECT-BY-DEADLINE together, never on-time alone.**
+
 ## *** D258 PART 2, USER RULING 2026-11-25 10:45: THE DEADLINE SWEEP. THE TAG CHECK IS DONE AND THE ANSWER IS SPLIT. ***
 
 ### THE TAG CHECK, which the ruling asked for before anything is built
