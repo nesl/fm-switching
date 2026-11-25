@@ -586,3 +586,31 @@ def register() -> None:
     import arms_v5rules2 as R2
     R2.register()
     A.ARMS.update(V6STATE_ARMS)
+
+
+# ---------------------------------------------------------------------------------------------
+# D233: `covex-v6-fair-final-stateoff` ON THE NORMAL IMPORT PATH.
+#
+# `run_live2_real.py` reaches an arm through `arms.make_arm`, and `arms.py` does
+# `ARMS.update(V6STATE_ARMS)` at import, so a key added to this dict exists in the harness's
+# process and a posted cell list resolves at launch. A name registered only in the new module's
+# own `register()` would NOT, which is the registration gap that made eleven `covex-v6-cf-pd`
+# arms invisible and that D208 and D232 (2) each had to fix after the fact.
+#
+# THE FACTORY IS LAZY. `arms_v6stateoff` imports `arms_final_ladder`, which imports THIS module,
+# so a module-level import here would be a circular import and would fail. The import happens
+# inside the factory at CALL time. Nothing is imported at registration time, so the cost of this
+# key in a tree that never builds it is one dict entry.
+#
+# NOTHING ABOVE THIS LINE CHANGED. The eleven rung-2 keys, their factories and every byte of
+# `V6StateArm` are untouched, so no committed rung-2 digest can move.
+def _stateoff_lazy(**kw: Any) -> Any:
+    import arms_v6stateoff as SO                                           # noqa: PLC0415
+    return SO.make_stateoff(SO.STATEOFF, **kw)
+
+
+_stateoff_lazy._is_stateoff_factory = True                                 # type: ignore[attr-defined]
+
+if "covex-v6-fair-final-stateoff" in V6STATE_ARMS:                         # pragma: no cover
+    raise RuntimeError("covex-v6-fair-final-stateoff is already registered in V6STATE_ARMS")
+V6STATE_ARMS["covex-v6-fair-final-stateoff"] = _stateoff_lazy
