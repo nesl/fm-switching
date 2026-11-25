@@ -1490,3 +1490,12 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | model/device | none; offline CPU on `jetson_orin`; read-only; D240 1x/kv0.5r separate (correctness memory-independent) |
 | headline | PRELIMINARY stage artifact, not a bound. Recall+single-shot HINDSIGHT (actual per-unit cloud/device correctness) beside FAIR. recall device floor s4 49 / s5 38 / s6 7 / s7 31 (matches stage 1); cloud-right-device-wrong (HINDSIGHT improvable) 50/33/66/25; cloud-wrong-device-right (serving hurts) 13/18/7/5. ss floor ~192, improvable ~61/357. HINDSIGHT != FAIR confirmed (s6 recall HINDSIGHT 66 vs FAIR ~59.5). s6 single-question-basis flag carried. |
 | old name | none; oracle stage 3 |
+
+## StudyORACLE stage 4 transportation LP (PRELIMINARY, 2026-11-25, Orin)
+
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/oracle_lp_opt.json`; module `experiments/analysis/oracle/oracle_lp_run.py` |
+| model/device | none; offline CPU on `jetson_orin`; HiGHS LP; read-only; D240 1x/kv0.5r separate |
+| headline | PRELIMINARY intermediate, not a bound. Transportation LP at T and 1.10xT, per type + pooled, FAIR+HINDSIGHT, s4-7 x {1x,kv0.5r}. Pooled LP_opt (gain over floor) 1x: FAIR s4 86.2 s5 67.4 s6 108.9 s7 83.0; HINDSIGHT s4 134 s5 130 s6 155 s7 112. HINDSIGHT>=FAIR every cell. Capacity binds (Step 2b) at s4 both levels + s5 kv0.5r; else GPU not the constraint at T. oracle_total = device_floor + lp_opt. Bound file written after stage 6 (control + STOP gate). |
+| old name | none; oracle stage 4 |
