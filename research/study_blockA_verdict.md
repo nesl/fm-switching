@@ -329,6 +329,40 @@ sign, the robot channel sits inside its floor at both memory conditions, and mem
 confounded at every seed except 1x s4. THE TOUCHES FACTOR IS NOT ESTABLISHED AS LOAD-BEARING AT EITHER
 MEMORY CONDITION.**
 
+## THE SAME-CODE CLAIM IS STRONGER THAN PAIRWISE: ALL 34 CELLS RUN SINCE 19:00 SHARE ONE RUN-PATH SUBTREE
+
+**Checked across every cell started since 19:00 on 2026-11-24, 34 in all, from the kv0.5r s4 `_rep2`
+through `eco-llm` n8 s4:**
+```
+driver start-line TREE == that cell's OWN header.git_commit tree :  34 of 34   (0 differ, 0 unresolved)
+whole trees        3932b279c3ea    2 cells (kv0.5r s4 _rep2, _rep3)
+                   50e364b42493   32 cells
+experiments/orchestration SUBTREE   c6a83f0eaf3d   in ALL 34
+```
+*** SO THE WHOLE-TREE DIFFERENCE LIES ENTIRELY OUTSIDE THE RUN PATH, and the run path is IDENTICAL across
+all 34 cells. Every cell ran the code we assumed when pairing it, and ALL PAIRINGS STAND UNTOUCHED. ***
+**This is a stronger statement than the pairwise checks it replaces: instead of "this pair matches on the
+subtree", it is "all 34 cells match on the subtree, and the only run-path difference in any pair is the
+stratum-B comparators' OWN older trees, which are already named."**
+**It also vindicates the rule rather than merely passing it. The whole tree moved during the night, because
+`research/` and `results/` pushes moved it; the SUBTREE did not. A pairing read from the whole tree would
+have shown a spurious difference between two cells, and a pairing read from commit order would have been
+wrong outright.**
+
+## *** A DEFECT IN THE DRIVER, FOUND WHILE ARRANGING A PUSH, THAT INVALIDATES NOTHING ***
+
+**The driver's between-cells pull EXISTS (`study_frozen_grid_driver_v37.sh:214`, `git pull --rebase -q
+origin main`, up to 3 tries) and HAS BEEN FAILING SILENTLY ALL NIGHT, with errors sent to `/dev/null`.**
+**The "PUSH NOT ON ORIGIN" lines at cell ends are that failure.** The consequence is that cells start on a
+local base behind origin and the separate pusher completes the rebase about three minutes INTO the next
+cell, which is the mid-cell path that produced an INVALID `torn_lazy_import` cell the previous day.
+*** WHY IT HARMED NOTHING: NO `experiments/` CHANGE REACHED ORIGIN ALL NIGHT. Every push was to `research/`
+or `results/`, so the run path never moved, which the 34-of-34 subtree check above confirms independently
+rather than assumes. ***
+**Recorded because a reader meeting the "PUSH NOT ON ORIGIN" lines in a log should know they are a real
+silent failure and not noise, and because the safe-push procedure it forced is now the precedent: pause the
+pusher at a cell boundary, rebase with no cell running, restore.**
+
 ## What this does NOT establish
 
 - **No settled finding for either arm.** `-stateoff` clears the bar at two of three seeds and declines into
