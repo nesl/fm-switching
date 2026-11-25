@@ -55,7 +55,7 @@ pressure is small. **What P3 establishes is REACHABILITY in the robot-heavy dire
 
 | cell | robot cloud on time | cloud accuracy on served | correct by deadline |
 |---|---|---|---|
-| P2, `_rq10`, 6 robots | 342 of 355 | 0.666667 | 0.645070 |
+| P2, `_rq10`, 7 robots | 342 of 355 | 0.666667 | 0.645070 |
 | **P3, `_c3-11-2`, 11 robots** | **176 of 229** | **0.608** | **0.555** |
 
 **Single-shot and dashcam: SS 222 of 238; dashcam 4,770 of 5,869. `release_infeasible` 776, ALL alert, with
@@ -63,3 +63,14 @@ recall 0 and `budget_refusal_recall` 0, so the census's decline proxy and the de
 exactly: declines 21 = `recall_REJECT` 21, and 10 of the 21 fall inside sustained cold spans.**
 *** MORE ROBOTS, WORSE ON EVERY ROBOT METRIC, AND MEMORY PRESSURE APPEARS. THAT IS ONE COHERENT STORY
 RATHER THAN TWO, AND IT IS THE FIRST TIME THE PRESSURE AND THE DEGRADATION HAVE MOVED TOGETHER. ***
+
+## *** CORRECTION, 2026-11-25: THE REFERENCE HAS SEVEN ROBOTS, NOT SIX. ***
+
+**Counted empirically from the committed cells' own per-device blocks rather than from a split function:**
+```
+40:40:20 at n16   dash 6   robo 7     <- "six" is the DASHCAM count, not the robot count
+_c3-11-2 at n16   dash 3   robo 11
+```
+**So the regime is ELEVEN robots against SEVEN, a factor of 1.57 and not 1.83. The 176/229 against 342/355
+comparison is UNAFFECTED, because each figure is read from its own cell's sweep row, but the device count
+quoted beside it was wrong here and was relayed twice to the accelerator box before being caught.**
