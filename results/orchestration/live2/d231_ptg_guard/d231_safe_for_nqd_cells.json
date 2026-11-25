@@ -1,0 +1,130 @@
+{
+ "study": "D231 (3) / D232 (2): IS THE ptg BUILD SAFE FOR THE DECISIVE covex-v6-final-nqd CELLS? Two independent answers, one observed and one static.",
+ "_why_this_exists": "The coordinator held the push so the two decisive -nqd cells would run on a clean tree, noting that this build's `coordinator._collect` change would otherwise enter the tree those cells run on while the proofs predate covex-v6-final-nqd entirely: the identity proof covered seven arms and -nqd was not one of them, because it did not exist when the build was measured. The reasoning given was 'the change is additive and defaults OFF, so I expect it is harmless, but I expect it is harmless is exactly the sentence that preceded every instrument failure we have found today'. This file replaces that sentence with evidence.",
+ "tip_checked": "3928ac4c7451bd1ee4cd28b5152e1ae441fe021e",
+ "the_nqd_build": {
+  "commit": "51cfb077",
+  "files_touched": [
+   "arms_v6cf.py",
+   "arms_v6cf_device.py",
+   "cf_protect_defer.py"
+  ],
+  "overlap_with_this_build": "NONE of the six files this build edits",
+  "verified_how": "each of the six checked INDIVIDUALLY, blob hash at 281f29c7 against blob hash at the tip, with rev-parse --verify so an unresolvable path reports instead of reading as a match"
+ },
+ "ANSWER_1_OBSERVED": {
+  "_what": "proof 1 re-run at the tip that CARRIES -nqd, with the three -nqd arms ADDED. 10 arms x 2 trees x 2 reps = 40 dry 300 s cells, n16 s4, posted workload knobs.",
+  "arms": {
+   "hybrid-F-lhreq-noc3": {
+    "before_vs_after_positional": 0,
+    "before_vs_after_setwise": 0,
+    "identical": true,
+    "aa_controls_clean": true,
+    "committed_bar": "MATCH"
+   },
+   "covex-v6-state-final": {
+    "before_vs_after_positional": 0,
+    "before_vs_after_setwise": 0,
+    "identical": true,
+    "aa_controls_clean": true,
+    "committed_bar": "MATCH"
+   },
+   "covex-v6-fair-final": {
+    "before_vs_after_positional": 0,
+    "before_vs_after_setwise": 0,
+    "identical": true,
+    "aa_controls_clean": true,
+    "committed_bar": "MATCH"
+   },
+   "covex-v6-final": {
+    "before_vs_after_positional": 0,
+    "before_vs_after_setwise": 0,
+    "identical": true,
+    "aa_controls_clean": true,
+    "committed_bar": "MATCH"
+   },
+   "mooncake": {
+    "before_vs_after_positional": 0,
+    "before_vs_after_setwise": 0,
+    "identical": true,
+    "aa_controls_clean": true,
+    "committed_bar": "MATCH"
+   },
+   "simplestream": {
+    "before_vs_after_positional": 0,
+    "before_vs_after_setwise": 0,
+    "identical": true,
+    "aa_controls_clean": true,
+    "committed_bar": "MATCH"
+   },
+   "llf": {
+    "before_vs_after_positional": 0,
+    "before_vs_after_setwise": 0,
+    "identical": true,
+    "aa_controls_clean": true,
+    "committed_bar": "MATCH"
+   },
+   "covex-v6-final-nqd": {
+    "before_vs_after_positional": 0,
+    "before_vs_after_setwise": 0,
+    "identical": true,
+    "aa_controls_clean": true,
+    "committed_bar": null
+   },
+   "covex-v6-final-nqd-off": {
+    "before_vs_after_positional": 0,
+    "before_vs_after_setwise": 0,
+    "identical": true,
+    "aa_controls_clean": true,
+    "committed_bar": null
+   },
+   "covex-v6-final-nqd-daoff": {
+    "before_vs_after_positional": 0,
+    "before_vs_after_setwise": 0,
+    "identical": true,
+    "aa_controls_clean": true,
+    "committed_bar": null
+   }
+  },
+  "RESULT": "ALL 10 ARMS IDENTICAL (pos=0, set=0), every A/A control clean, 7 of 7 committed bars MATCH, 0 mismatches",
+  "note_the_committed_bars_were_re_validated_too": "the seven committed dry-300 digests still hold AT THIS TIP, after -nqd landed, so the bar itself has not drifted.",
+  "*** THE BOUND ON THIS RESULT, WHICH A READER MUST HAVE ***": "All three -nqd arms produced digest 62b0f9a977189c78 with 2,814 rows, WHICH IS EXACTLY covex-v6-fair-final's. On a DRY cell covex-v6-final-nqd is therefore INDISTINGUISHABLE from rung 3: the counterfactual's protect-and-defer leg is inert because a dry cell prices every session cold (the same reason d222 records its dry s4 as having zero deferrals, UNEXERCISED by construction). So this identity shows that the change does not move -nqd ON A PATH WHERE -nqd's OWN distinguishing mechanism is inert. It is NOT by itself evidence about that mechanism. What it does cover, and this is the part that matters, is the WRITE SITE: `coordinator._collect` runs on every completion in a dry cell, so the new st.ewma call IS exercised in all 40 cells. Answer 2 is what closes the rest."
+ },
+ "ANSWER_2_STATIC_the_complete_reader_census": {
+  "_what": "A dry identity cannot speak for a branch it does not reach, so the question is answered a second way: WHO READS the dict the new key enters? The new key is latency_estimate_s['assistance'], written into live2 cstate.CoordState.lat.",
+  "readers_on_the_nqd_path": {
+   "arms_v6cf.py": 0,
+   "arms_v6cf_device.py": 0,
+   "cf_protect_defer.py": 0,
+   "arms_v6cfr3.py": 0,
+   "conclusion": "NOTHING on the -nqd path reads latency_estimate_s AT ALL, so -nqd cannot be affected by a new key in it, whatever a dry cell can or cannot exercise."
+  },
+  "every_real_reader_in_the_tree": [
+   {
+    "site": "arms_v5rules2.py:191",
+    "form": "dict(...) then .get by NAME over DEADLINE_CLASSES",
+    "note": "this build's own read site"
+   },
+   {
+    "site": "arms_v5full.py:171",
+    "form": ".get by NAME, max over ('episodic','recall')"
+   },
+   {
+    "site": "hybrid/hybrid_arm.py:734",
+    "form": ".get('episodic')"
+   },
+   {
+    "site": "baselines/clockwork_adapted.py:58",
+    "form": ".get('recall', 0.0)"
+   }
+  ],
+  "NONE_ITERATES": "every one of the four accesses a NAMED key. A new key is invisible to all four BY CONSTRUCTION, which is why identity holds by construction and not by luck.",
+  "the_one_reader_that_DOES_iterate_and_why_it_is_unreachable": {
+   "site": "live/adapter.py:778, {k: round(v,4) for k,v in self.lat.items()}",
+   "why_it_would_matter": "it iterates, so a new key WOULD appear in what it serialises. This is the single site where the additive change could have had an effect, so it was checked rather than assumed.",
+   "why_it_cannot_be_reached": "that `self.lat` belongs to `LiveOrchestrator` (live/adapter.py:442, field set at :534), which is StudyLIVE1's orchestrator. live2 imports ONLY `HttpBackend` and `Submission` from that module (live2/backend.py:29, live2/asyncbackend.py:219). LiveOrchestrator is never constructed or fed by live2, and its lat is a DIFFERENT OBJECT from the live2 cstate.CoordState.lat this build writes to."
+  }
+ },
+ "VERDICT": "SAFE FOR THE -nqd CELLS ON BOTH ANSWERS. Observed: all 10 arms byte-identical including the three -nqd arms, at the tip that carries -nqd, with clean A/A controls and 7 of 7 committed bars re-validated. Static: nothing on the -nqd path reads the dict at all, every reader in the tree accesses a NAMED key, and the only iterating reader belongs to live1 and is unreachable from live2. The hold was still the right call: it cost fifty minutes and it is why this file exists rather than the sentence it replaces.",
+ "register": "ANSWER_1 OBSERVED, 40 dry 300 s cells. ANSWER_2 CONSTRUCTED, a static census at one literal sha. Neither is a latency measurement and no cell here used an engine."
+}

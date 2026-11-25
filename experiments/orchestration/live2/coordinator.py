@@ -668,6 +668,45 @@ class Live2Coordinator:
                          "`gate` field says which. If n_rows equals cap the log is truncated and "
                          "the aggregate counters in arm_stats are the complete census.")}
 
+    def write_guard_log(self):
+        """D230 (2) limitation 1: COMMIT `guard_state`'s per-decision-period signal.
+
+        The measurement that triggered this build had to REPLAY the EWMA recurrence from
+        `request.jsonl` because `latency_estimate_s` / `guard_state` reached no committed
+        file: `decision.jsonl` has no guard field and `decision_time.jsonl` is the decision
+        function's own cost. Its own recommendation was to log the signal so the next ruling
+        of this kind needs no replay. This is that log.
+
+        LOGGING ONLY. The rows are built by the arm (`arms_v5rules2.V5Rules2Arm.guard_state`)
+        and NOTHING reads them back, so no decision can depend on one. Written by the
+        coordinator for the reason `write_rd_decisions` above records: it is the object that
+        holds both the arm and `self.logs.out_dir`.
+
+        Returns None, and creates NO FILE AT ALL, for every arm that keeps no such log, which
+        is every arm but `covex-v6-fair-final-ptg` (`guard_log` defaults OFF, D187).
+        """
+        rows = getattr(self.arm, "guard_log_rows", None)
+        if rows is None or self.logs is None:
+            return None
+        import gzip
+        import json
+        out = Path(self.logs.out_dir) / "guard_state.jsonl.gz"
+        n = 0
+        with gzip.open(out, "wt") as f:
+            for r in rows:
+                f.write(json.dumps(r, default=float) + "\n")
+                n += 1
+        cap = int(getattr(self.arm, "GUARD_LOG_CAP", 0))
+        st = dict(getattr(self.arm, "stats", {}) or {})
+        return {"path": out.name, "n_rows": n, "cap": cap, "truncated": bool(cap and n >= cap),
+                "guard_log_periods": st.get("guard_log_periods"),
+                "guard_log_repeat_reads": st.get("guard_log_repeat_reads"),
+                "note": ("one row per DECISION PERIOD (first `guard_state` read of that "
+                         "period; the later reads in the same period see the same "
+                         "observation and are counted in guard_log_repeat_reads). `lag_s` is "
+                         "the committed max over the two committed deadline classes; "
+                         "`lag_s_by_class` is the per-type signal D178 (3) needs.")}
+
     def write_decision_times(self, path: Path) -> None:
         import gzip
         import json
@@ -1932,6 +1971,21 @@ class Live2Coordinator:
                     exc_after_s=r.get("exc_after_s"), conn_reused=r.get("conn_reused")))
                 self.counts["request_rows_written"] += 1
             self.st.ewma("episodic" if sub.kind == "monitor" else "recall", r.get("ttft_s"))
+            # ---- D230 (2) / D178 (3): THE THIRD EWMA LAG CLASS. ADDITIVE, NEVER A REROUTE.
+            # The line ABOVE IS UNCHANGED and still folds every non-monitor completion into
+            # "recall", so `latency_estimate_s["recall"]` is bit-for-bit what every committed
+            # arm has always read and no existing decision can move. What is added is a THIRD
+            # key fed IN PARALLEL from the same completion, which `d230_guard_107.json`
+            # (79eef689) showed is the only way D178 (3) can be implemented at all: with two
+            # channels, assistance has no guard signal and the per-type thresholds cannot be
+            # reached by changing constants.
+            #
+            # CLASSIFIED BY DEVICE-ID PREFIX, NOT BY `kind`, through the same
+            # `share_admission.type_of_device` the shares and the deficit weights use, so the
+            # three consumers cannot disagree about which type a device is. `kind` CANNOT do
+            # it: every `asst00x` completion arrives as kind "recall" (deficit_feed.py:63-68).
+            if SA.type_of_device(sub.device_id) == "assistance":
+                self.st.ewma(SA.GUARD_LAG_CLASS["assistance"], r.get("ttft_s"))
             if hasattr(self.arm, "live2_completed"):
                 # An arm that keeps its own model of what the engine is running must be told
                 # when a request finishes, or its model never empties.
@@ -2314,6 +2368,9 @@ class Live2Coordinator:
         # runner, the split child and every one-cell wrapper - rather than at one call site that
         # another driver would not go through. It is a no-op for every arm below rung 4.
         rd_log = self.write_rd_decisions()
+        # D230 (2) limitation 1, same placement and the same reason as `rd_log` above: every
+        # caller of `_result` gets it, and it is a no-op for every arm without a guard log.
+        guard_log = self.write_guard_log()
         return dict(
             arm=self.arm.name, arm_version=getattr(self.arm, "arm_version", "unversioned"),
             is_measurement=False,
@@ -2323,6 +2380,7 @@ class Live2Coordinator:
             n_sessions=len(self.st.sessions), n_opportunities=len(self.st.opps),
             n_requests=self.n_req, n_decisions=self.n_dec,
             rd_decisions_log=rd_log,
+            guard_state_log=guard_log,
             # D226 (3): positive check, asserted rather than inferred. On a logged run every submitted
             # request has exactly one request.jsonl row (completed, or abandoned at end).
             request_rows_written=int(self.counts.get("request_rows_written", 0)),

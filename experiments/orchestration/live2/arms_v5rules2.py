@@ -54,6 +54,7 @@ from collections import Counter
 from typing import Any, Dict, List, Optional
 
 import engine_actions as EA
+import share_admission as SA
 from interface import Action, Observation
 
 V5RULES2_VERSION = "v5-rules-2.0"
@@ -86,6 +87,75 @@ GUARD_BACKLOG_DEFAULT = 100
 # warming on its own; a sustained lag or a real backlog must.
 DEADLINE_CLASSES = ("episodic", "recall")
 
+# ---------------------------------------------------- D230 (2) / D178 (3) THE PER-TYPE GUARD
+# WHY THIS EXISTS, from the measurement and not from a preference. `d230_guard_107.json`
+# (79eef689) replayed the guard's own EWMA over the four committed rung-3 1x cells and found
+# the single `GUARD_LAG_S_DEFAULT = 2.0` above UNREACHABLE ON THE ALERT CHANNEL at half the
+# seeds: the episodic EWMA never reached 2.0 s at all at s6 (max 1.879 s) or s7 (max 0.964 s),
+# while alert lag exceeded its own D178 (3) threshold of 0.8 s in 92 and 48 periods there. The
+# guard's 277 pooled firings were 257 recall against 16 alert. Pooled, the alert channel
+# crossed 0.8 s in 497 of 47,997 periods (1.0355 percent), above D230 (2)'s pre-declared 1
+# percent bar, so D178 (3) is NOT amended and this variant is built.
+#
+# WHAT IT IS, SAID HERE BECAUSE THE NAME INVITES THE WRONG READING. This is still the
+# D160 (2) SATURATION EARLY WARNING: when it fires, the base action is returned UNTOUCHED and
+# only the background warming channel is shed (and, at rung 2+, state actions deferred). It is
+# NOT a per-request deadline rescue and must not be justified as rescuing individual late
+# alerts. What the per-type form changes is WHEN the policy stops adding speculative prefill
+# work on behalf of a type, measured against that type's own deadline.
+#
+# DEFAULT OFF (D187). It is ON only in the labelled rung-3 variant `covex-v6-fair-final-ptg`.
+# Every other arm keeps the single 2.0 s bar and the two-channel read, byte-identically.
+#
+# NOT IN SCOPE, said here rather than discovered later: D166 (3)'s EXIT HYSTERESIS (all
+# signals below 0.5x entry for 2 s) is NOT ruled out by the measurement and is NOT built here.
+GUARD_PER_TYPE_SWITCH = "guard_per_type"
+# The three thresholds, taken from `share_admission` so there is ONE definition of "80 percent
+# of each type's deadline" in the tree and it is derived from the committed deadlines.
+GUARD_LAG_S_BY_CLASS_D178 = dict(SA.GUARD_LAG_S_BY_CLASS)
+# ("episodic", "recall", "assistance"): the two committed channels plus the third one added at
+# `coordinator._collect`. `DEADLINE_CLASSES` above is NOT widened, because it is what the
+# committed single-threshold read and the committed backlog sum are defined over.
+GUARD_PER_TYPE_CLASSES = tuple(GUARD_LAG_S_BY_CLASS_D178)
+# D230 (2) limitation 1: one row per decision period. 1,200 s at a 0.1 s period is 12,000
+# rows, so the cap is a bound on a pathological run and not on a normal one.
+# D166 (3) / D178 (3) EXIT HYSTERESIS: "exit after ALL signals below 0.5x entry for 2 s".
+# The guard without it is MEMORYLESS: it re-decides from scratch in every 100 ms period, so a
+# signal sitting on its threshold toggles the warming channel on and off at 10 Hz. The latch
+# makes the guard a state machine: ENTRY on any signal above its own entry threshold, EXIT
+# only after every signal has been continuously below 0.5x its entry threshold for 2 s. In
+# between is the hysteresis band, where the latch HOLDS whatever it already was.
+#
+# BOTH NUMBERS ARE D166 (3) AS WRITTEN and neither is tuned here.
+GUARD_EXIT_FACTOR_D166 = 0.5
+GUARD_EXIT_HOLD_S_D166 = 2.0
+GUARD_HYSTERESIS_SWITCH = "guard_hysteresis"
+GUARD_LOG_CAP_DEFAULT = 200000
+
+
+class GuardPerTypeSwitchError(RuntimeError):
+    """The per-type guard switch did not take on the instance it was set on."""
+
+
+def guard_hysteresis_enabled(arm) -> bool:
+    """Instance-only, same strictness and same reason as `guard_per_type_enabled`."""
+    if getattr(type(arm), GUARD_HYSTERESIS_SWITCH, False):
+        raise GuardPerTypeSwitchError(
+            "%s is set on the CLASS %s. It must be an arm-scoped INSTANCE attribute."
+            % (GUARD_HYSTERESIS_SWITCH, type(arm).__name__))
+    return bool(vars(arm).get(GUARD_HYSTERESIS_SWITCH, False))
+
+
+def guard_per_type_enabled(arm) -> bool:
+    """Read the switch from the INSTANCE only, the strictness `release_recheck.arm_enables`
+    uses and for the same reason: a truthy CLASS attribute would turn the per-type guard on
+    for every arm that inherits this one and make the cells incomparable."""
+    if getattr(type(arm), GUARD_PER_TYPE_SWITCH, False):
+        raise GuardPerTypeSwitchError(
+            "%s is set on the CLASS %s. It must be an arm-scoped INSTANCE attribute."
+            % (GUARD_PER_TYPE_SWITCH, type(arm).__name__))
+    return bool(vars(arm).get(GUARD_PER_TYPE_SWITCH, False))
+
 
 class V5Rules2Arm:
     """The base plus one channel, as v5-rules is, with the channel gated two ways."""
@@ -95,6 +165,12 @@ class V5Rules2Arm:
                  chunk_tokens: int = CHUNK_TOKENS_DEFAULT,
                  guard_lag_s: float = GUARD_LAG_S_DEFAULT,
                  guard_backlog: int = GUARD_BACKLOG_DEFAULT,
+                 guard_per_type: bool = False,
+                 guard_lag_s_by_class: Optional[Dict[str, float]] = None,
+                 guard_hysteresis: bool = False,
+                 guard_exit_factor: float = GUARD_EXIT_FACTOR_D166,
+                 guard_exit_hold_s: float = GUARD_EXIT_HOLD_S_D166,
+                 guard_log: bool = False,
                  guard: bool = True,
                  just_in_time: bool = True,
                  slice_tokens: Optional[int] = EA.WARM_AHEAD_SLICE_TOKENS,
@@ -115,6 +191,36 @@ class V5Rules2Arm:
         self.chunk_tokens = int(chunk_tokens)
         self.guard_lag_s = float(guard_lag_s)
         self.guard_backlog = int(guard_backlog)
+        # D230 (2) / D178 (3). All three default OFF, so this block changes nothing for any
+        # arm that does not ask for it. `guard_lag_s_by_class` is populated either way and is
+        # UNREAD while `guard_per_type` is False.
+        self.guard_per_type = bool(guard_per_type)
+        self.guard_lag_s_by_class: Dict[str, float] = (
+            dict(GUARD_LAG_S_BY_CLASS_D178) if guard_lag_s_by_class is None
+            else {str(k): float(v) for k, v in dict(guard_lag_s_by_class).items()})
+        if self.guard_per_type and not self.guard_lag_s_by_class:
+            raise GuardPerTypeSwitchError(
+                "guard_per_type is on with an EMPTY threshold table, which would make the\n"
+                "per-type test vacuously false in every period: the arm would read as a\n"
+                "guarded arm and would never fire. Refuse rather than return the null.")
+        # D166 (3). OFF by default, so the guard stays the memoryless committed one for every
+        # arm that does not ask for the latch.
+        self.guard_hysteresis = bool(guard_hysteresis)
+        self.guard_exit_factor = float(guard_exit_factor)
+        self.guard_exit_hold_s = float(guard_exit_hold_s)
+        # the latch and its clock. `_g_last_t` is SEPARATE from the log's `_guard_log_last_t`
+        # on purpose: the latch must advance exactly once per decision period whether or not
+        # the log is on, and tying them would make the state machine depend on a log switch.
+        self._g_latched = False
+        self._g_below_since: Optional[float] = None
+        self._g_last_t: Optional[float] = None
+        self.guard_log = bool(guard_log)
+        self.GUARD_LOG_CAP = int(GUARD_LOG_CAP_DEFAULT)
+        # Present ONLY when asked for: `coordinator.write_guard_log` keys on the attribute
+        # being absent, so an arm without the log creates no file at all.
+        if self.guard_log:
+            self.guard_log_rows: List[Dict[str, Any]] = []
+            self._guard_log_last_t = None
         self.guard = bool(guard)
         self.just_in_time = bool(just_in_time)
         self.slice_tokens = None if slice_tokens is None else int(slice_tokens)
@@ -172,6 +278,15 @@ class V5Rules2Arm:
                                 just_in_time=self.just_in_time,
                                 guard=self.guard, guard_lag_s=self.guard_lag_s,
                                 guard_backlog=self.guard_backlog,
+                                guard_per_type=self.guard_per_type,
+                                guard_lag_s_by_class=(dict(self.guard_lag_s_by_class)
+                                                      if self.guard_per_type else None),
+                                guard_hysteresis=self.guard_hysteresis,
+                                guard_exit_factor=(self.guard_exit_factor
+                                                   if self.guard_hysteresis else None),
+                                guard_exit_hold_s=(self.guard_exit_hold_s
+                                                   if self.guard_hysteresis else None),
+                                guard_log=self.guard_log,
                                 guard_signal="observed ttft EWMA per deadline class and "
                                              "queued+running deadline work; NEVER offered load",
                                 horizon="causal EWMA of this arm's own observed inter-question "
@@ -195,8 +310,118 @@ class V5Rules2Arm:
         backlog = sum(int(q.get(k, 0) or 0) + int(r.get(k, 0) or 0) for k in DEADLINE_CLASSES)
         by_lag = lag >= self.guard_lag_s
         by_backlog = backlog >= self.guard_backlog
-        return dict(lag_s=lag, backlog=backlog, by_lag=by_lag, by_backlog=by_backlog,
-                    active=bool(self.guard and (by_lag or by_backlog)))
+        # ---- D230 (2) / D178 (3) PER-TYPE TEST. DEFAULT OFF; nothing below executes for any
+        # other arm, which is why every other arm stays byte-identical BY CONSTRUCTION.
+        # The per-type test REPLACES the single-threshold one in `by_lag`. `lag_s` KEEPS ITS
+        # COMMITTED MEANING (the max over the two committed deadline classes) so that a reader
+        # comparing that field across arms is comparing one quantity; the per-type decision is
+        # in `by_lag`, and the per-type signal is reported beside it under `per_type`.
+        lag_by_class: Dict[str, float] = {}
+        fired: tuple = ()
+        if self.guard_per_type:
+            thr = self.guard_lag_s_by_class
+            lag_by_class = {k: float(lat.get(k, 0.0) or 0.0) for k in thr}
+            fired = tuple(k for k in GUARD_PER_TYPE_CLASSES
+                          if k in thr and lag_by_class[k] >= float(thr[k]))
+            by_lag = bool(fired)
+        # ---- D166 (3) EXIT HYSTERESIS. DEFAULT OFF; nothing below executes otherwise, so the
+        # guard stays the memoryless committed one for every other arm.
+        #
+        # `by_lag` and `by_backlog` KEEP THEIR COMMITTED MEANING: they are the ENTRY tests,
+        # i.e. what crossed in THIS period. The latched state is reported separately as
+        # `latched`, and it is `active` that the consumers read. Overwriting `by_lag` with the
+        # latch would make the committed counters `guard_by_lag` / `guard_by_backlog` count
+        # something other than what their names have always meant.
+        #
+        # THE LATCH ADVANCES EXACTLY ONCE PER DECISION PERIOD. `guard_state` is read up to
+        # four times in one period by one rung (here, arms_v6state.py:382, arms_v6cf.py:442,
+        # arms_v6cfr3.py:371) and every read sees the SAME observation. A state machine that
+        # advanced per READ would make the exit clock run at the number of consumers the rung
+        # happens to have, so the 2 s hold would mean 2 s on rung 1 and 0.5 s on rung 4. Keyed
+        # on `obs.now_s`, so repeat reads in the same period are IDEMPOTENT by construction.
+        entry = bool(by_lag or by_backlog)
+        latched = entry
+        below_exit = None
+        if self.guard_hysteresis:
+            f = self.guard_exit_factor
+            if self.guard_per_type:
+                thr_exit = {k: f * float(v) for k, v in self.guard_lag_s_by_class.items()}
+                lag_ok = all(float(lat.get(k, 0.0) or 0.0) < v for k, v in thr_exit.items())
+            else:
+                thr_exit = {"lag_s": f * self.guard_lag_s}
+                lag_ok = lag < thr_exit["lag_s"]
+            thr_exit["backlog"] = f * float(self.guard_backlog)
+            below_exit = bool(lag_ok and backlog < thr_exit["backlog"])
+            t_now = float(getattr(obs, "now_s", 0.0) or 0.0)
+            if self._g_last_t is None or t_now != self._g_last_t:
+                self._g_last_t = t_now
+                if entry:
+                    # ENTRY always wins and restarts the exit clock.
+                    if not self._g_latched:
+                        self.stats["guard_hyst_entries"] += 1
+                    self._g_latched = True
+                    self._g_below_since = None
+                elif below_exit:
+                    if self._g_below_since is None:
+                        self._g_below_since = t_now
+                    if (self._g_latched
+                            and t_now - self._g_below_since >= self.guard_exit_hold_s):
+                        self._g_latched = False
+                        self._g_below_since = None
+                        self.stats["guard_hyst_exits"] += 1
+                else:
+                    # the HYSTERESIS BAND: above the exit bar, below every entry bar. The
+                    # latch holds and the exit clock is reset, which is the whole mechanism.
+                    self._g_below_since = None
+                    if self._g_latched:
+                        self.stats["guard_hyst_held_in_band"] += 1
+            else:
+                self.stats["guard_hyst_repeat_reads"] += 1
+            latched = self._g_latched
+            if latched and not entry:
+                self.stats["guard_hyst_active_without_entry"] += 1
+        g = dict(lag_s=lag, backlog=backlog, by_lag=by_lag, by_backlog=by_backlog,
+                 active=bool(self.guard and latched))
+        if self.guard_hysteresis:
+            g["hysteresis"] = dict(latched=bool(latched), entry=entry,
+                                   below_exit=below_exit,
+                                   exit_factor=self.guard_exit_factor,
+                                   exit_hold_s=self.guard_exit_hold_s,
+                                   exit_thresholds=thr_exit,
+                                   below_since=self._g_below_since)
+        if self.guard_per_type:
+            g["per_type"] = dict(thresholds_s=dict(self.guard_lag_s_by_class),
+                                 lag_s_by_class=dict(lag_by_class),
+                                 fired_classes=list(fired))
+        # ---- D230 (2) limitation 1: the per-decision-period log. LOGGING ONLY: the rows are
+        # appended and never read back by anything, and `coordinator.write_guard_log` writes
+        # them after the run. `guard_state` is read more than once in a period (here, plus
+        # `arms_v6state.py:382`, `arms_v6cf.py:442`, `arms_v6cfr3.py:371`), and all those reads
+        # see the SAME observation, so the FIRST read of a period is the row and the rest are
+        # counted. Without that the "per decision period" denominator would be wrong by the
+        # number of consumers the rung happens to have.
+        if self.guard_log:
+            t = float(getattr(obs, "now_s", 0.0) or 0.0)
+            if self._guard_log_last_t is not None and t == self._guard_log_last_t:
+                self.stats["guard_log_repeat_reads"] += 1
+            elif len(self.guard_log_rows) < self.GUARD_LOG_CAP:
+                self._guard_log_last_t = t
+                self.stats["guard_log_periods"] += 1
+                row = dict(t=round(t, 6), lag_s=round(lag, 6), backlog=backlog,
+                           by_lag=bool(by_lag), by_backlog=bool(by_backlog),
+                           active=bool(g["active"]))
+                if self.guard_hysteresis:
+                    row["latched"] = bool(latched)
+                    row["entry"] = entry
+                    row["below_exit"] = below_exit
+                if self.guard_per_type:
+                    row["lag_s_by_class"] = {k: round(v, 6)
+                                             for k, v in sorted(lag_by_class.items())}
+                    row["fired_classes"] = list(fired)
+                self.guard_log_rows.append(row)
+            else:
+                self.stats["guard_log_dropped_cap"] += 1
+        return g
 
     # ---- the causal horizon (D11 / D48) -------------------------------------------------------
     def _observe_questions(self, obs: Observation) -> None:

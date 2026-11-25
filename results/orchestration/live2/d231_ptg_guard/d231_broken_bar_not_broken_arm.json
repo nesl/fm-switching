@@ -1,0 +1,38 @@
+{
+ "study": "D231 (3) / D230 (2): the proof-1 positive control FAILED, and it was the CHECK that was broken",
+ "_why_this_file_exists": "CLAUDE.md consistency check 7: 'a known-good committed arm must pass the check being applied. If it fails, THE CHECK IS BROKEN, NOT THE ARM.' That happened here, on the first run of the corrected design, and it is recorded rather than quietly fixed, because a control that fires and is silently edited into agreement is worse than no control.",
+ "what_happened": {
+  "the_check": "every arm this build does not touch must still hash to its COMMITTED dry 300 s n16 s4 digest in this tree",
+  "the_failure": "covex-v6-final: bar wanted 62b0f9a977189c78, this tree produced 63eeaf6f7432dece (2,814 rows either way)",
+  "six_of_seven_passed": [
+   "hybrid-F-lhreq-noc3 26fa08e255cfac87",
+   "covex-v6-state-final 8d901f7bc82b7f37",
+   "covex-v6-fair-final 62b0f9a977189c78"
+  ]
+ },
+ "the_diagnosis": {
+  "the_bar_cited_the_WRONG_TREE": "d222_pass1 committed TWO digest tables, one per tree. proof_ab_pristine_tree.json is the tree BEFORE the rung-4 pass-1 counterfactual was built and lists covex-v6-final at 62b0f9a977189c78, the same value as covex-v6-fair-final, because the counterfactual was absent. proof_ab_pass1_tree.json is the tree WITH it and lists covex-v6-final at 63eeaf6f7432dece, with covex-v6-final-off at 62b0f9a977189c78. This build is based on 281f29c7, which is AFTER the pass-1 build landed, so the PASS1 table is the applicable bar and the pristine one is not.",
+  "so_the_arm_is_correct": "this tree's covex-v6-final digest 63eeaf6f7432dece IS its committed pass1-tree value, exactly. And the BEFORE-versus-AFTER comparison for that arm is pos=0, set=0, identical: this build moved nothing in it.",
+  "corroboration": "proof_ab_pass1_tree.json also records covex-v6-final-off at 62b0f9a977189c78, i.e. rung 4 with the counterfactual off collapsing onto rung 3, which is the same arithmetic read from the other side."
+ },
+ "CORRECTION": {
+  "applied": "COMMITTED_DRY300_DIGESTS['covex-v6-final'] changed from the pristine-tree 62b0f9a977189c78 to the pass1-tree 63eeaf6f7432dece, with the original value and the reason kept here.",
+  "scope": "ONE table entry in the proof script. No policy code, no arm, no switch and no cell was changed.",
+  "what_this_does_NOT_excuse": "nothing about the arm needed excusing. Had the correction gone the other way round, i.e. had the ARM been wrong, the remedy would have been to stop and not to move the bar. The direction was established from the committed artefacts BEFORE the constant was touched, which is the only order in which this correction is legitimate."
+ },
+ "register": "OBSERVED, one 300 s dry cell per arm per tree, in this build's own run.",
+ "_provenance": {
+  "git_commit": "281f29c7b5c86ac51a7b77a9127852608bd89753",
+  "script": "d231_ptg_guard_proofs.py (control audit)",
+  "model": "n/a (scheduling-policy build; no model inference)",
+  "timestamp": "2026-11-24T12:58:01.806005",
+  "device": "a6000",
+  "n": 7,
+  "seed": 4,
+  "git_commit_register": "the LOCAL worktree HEAD. The build is based on origin/main 281f29c7b5c86ac51a7b77a9127852608bd89753, verified file by file against its blobs; the six edited files were unchanged upstream at 071c0adc, so the patch applies cleanly on that tip.",
+  "source_commit_built_on": "281f29c7b5c86ac51a7b77a9127852608bd89753",
+  "n_definition": "7 arms x 300 s dry, against the committed digest bar",
+  "is_measurement": false,
+  "caching": "NO prefix cache and NO ENGINE: every cell is dry and sends no HTTP. Service time is the committed cost curve via coordinator._dry_service_s, so no latency in any of these files is a measurement."
+ }
+}

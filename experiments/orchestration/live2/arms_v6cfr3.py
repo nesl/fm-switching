@@ -724,7 +724,47 @@ def _final_ladder_lazy() -> Dict[str, Any]:
     def r4(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung4(FL.RUNG4, **kw)
-    return {"covex-v6-state-final": r2, "covex-v6-fair-final": r3, "covex-v6-final": r4}
+    def r3ptg(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_PTG, per_type_guard=True, **kw)
+
+    def r3ptg_ctl20(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_PTG + "-ctl20", per_type_guard=True, hysteresis=False,
+                             guard_lag_s_by_class={"episodic": 2.0, "recall": 2.0,
+                                                   "assistance": 2.0}, **kw)
+
+    def r3ptg_nohyst(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_PTG + "-nohyst", per_type_guard=True,
+                             hysteresis=False, **kw)
+
+    def r3ptg_hystonly(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_PTG + "-hystonly", per_type_guard=True,
+                             hysteresis=True,
+                             guard_lag_s_by_class={"episodic": 2.0, "recall": 2.0,
+                                                   "assistance": 2.0}, **kw)
+
+    def r3ptg_nolog(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_PTG + "-nolog", per_type_guard=True,
+                             guard_log=False, **kw)
+
+    def r3glog(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3 + "-glog", guard_log=True, **kw)
+
+    # D230 (2): the per-type-guard variant and its three controls reach the harness on the
+    # SAME lazy path as the three rungs, for the same reason the block below gives: a POSTED
+    # cell naming an arm that `arms.make_arm` cannot resolve dies at launch on the H100.
+    return {"covex-v6-state-final": r2, "covex-v6-fair-final": r3, "covex-v6-final": r4,
+            "covex-v6-fair-final-ptg": r3ptg,
+            "covex-v6-fair-final-ptg-ctl20": r3ptg_ctl20,
+            "covex-v6-fair-final-ptg-nohyst": r3ptg_nohyst,
+            "covex-v6-fair-final-ptg-hystonly": r3ptg_hystonly,
+            "covex-v6-fair-final-ptg-nolog": r3ptg_nolog,
+            "covex-v6-fair-final-glog": r3glog}
 
 
 for _k, _v in _final_ladder_lazy().items():

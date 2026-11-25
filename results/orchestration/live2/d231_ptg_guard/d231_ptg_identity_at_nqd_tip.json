@@ -1,0 +1,3029 @@
+{
+ "study": "D230 (2) / D178 (3) / D166 (3) / D231 (3): the proofs for covex-v6-fair-final-ptg, the per-type saturation guard with exit hysteresis",
+ "citations": [
+  "D230 (2)",
+  "D178 (3)",
+  "D166 (3)",
+  "D166 (4) commit rules",
+  "D231 (3)",
+  "D187",
+  "D208",
+  "D216",
+  "D225 (3)"
+ ],
+ "cell": {
+  "seed": 4,
+  "n": 16,
+  "run_s": 1200.0,
+  "workload": {
+   "ratio": "40:40:20",
+   "robot_question_set": "lh_req",
+   "ss_question_set": "ss2",
+   "dashcam_format": "epg",
+   "robot_upload": "per-frame",
+   "robot_reask_mean_s": 30.0
+  },
+  "instrument": "hybrid/test_hybrid.dry: in-process, realtime=False, dry_run=True, therefore deterministic",
+  "CACHING": "NO prefix cache and NO ENGINE AT ALL: a dry cell sends no HTTP. Service time is the committed cost curve via coordinator._dry_service_s. NO LATENCY IN THIS FILE IS A MEASUREMENT and none may be quoted as one.",
+  "is_measurement": false
+ },
+ "proofs": {
+  "1_byte_identity_every_other_arm": {
+   "_register": "OBSERVED, paired cells. BEFORE is a git archive of the origin sha, verified file by file against its blob; AFTER is this build.",
+   "_why_prove_what_holds_by_construction": "The third EWMA class adds a dict key no existing arm reads and every new switch defaults OFF, so identity should hold BY CONSTRUCTION. It is proved anyway: 'no existing arm reads it' is exactly the kind of claim that has been wrong three times on this project today.",
+   "arms": {
+    "hybrid-F-lhreq-noc3": {
+     "committed_digest_bar": {
+      "committed_digest": "26fa08e255cfac87",
+      "committed_rows": 2840,
+      "this_tree_digest": "26fa08e255cfac87",
+      "this_tree_rows": 2840,
+      "before_tree_digest": "26fa08e255cfac87",
+      "cell": "dry, 300 s, n 16, seed 4, the posted workload knobs",
+      "source": "results/orchestration/live2/d222_pass1/proof_ab_pristine_tree.json at b0767b46",
+      "MATCHES": true
+     },
+     "aa_control_before": {
+      "label": "A/A control BEFORE  hybrid-F-lhreq-noc3",
+      "a": "p1_hybrid-F-lhreq-noc3_before",
+      "b": "p1_hybrid-F-lhreq-noc3_before2",
+      "a_digest": "26fa08e255cfac87",
+      "b_digest": "26fa08e255cfac87",
+      "a_rows": 2840,
+      "b_rows": 2840,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "aa_control_after": {
+      "label": "A/A control AFTER   hybrid-F-lhreq-noc3",
+      "a": "p1_hybrid-F-lhreq-noc3_after",
+      "b": "p1_hybrid-F-lhreq-noc3_after2",
+      "a_digest": "26fa08e255cfac87",
+      "b_digest": "26fa08e255cfac87",
+      "a_rows": 2840,
+      "b_rows": 2840,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "before_vs_after": {
+      "label": "BEFORE vs AFTER     hybrid-F-lhreq-noc3",
+      "a": "p1_hybrid-F-lhreq-noc3_before",
+      "b": "p1_hybrid-F-lhreq-noc3_after",
+      "a_digest": "26fa08e255cfac87",
+      "b_digest": "26fa08e255cfac87",
+      "a_rows": 2840,
+      "b_rows": 2840,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "controls_clean": true,
+     "VERDICT": "IDENTICAL",
+     "cells": {
+      "before": {
+       "decision_digest": "26fa08e255cfac87",
+       "n_decision_rows": 2840,
+       "loadavg_at_start": [
+        0.36,
+        0.29,
+        0.59
+       ],
+       "loadavg_at_end": [
+        0.46,
+        0.32,
+        0.59
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      },
+      "before2": {
+       "decision_digest": "26fa08e255cfac87",
+       "n_decision_rows": 2840,
+       "loadavg_at_start": [
+        0.46,
+        0.32,
+        0.59
+       ],
+       "loadavg_at_end": [
+        0.5,
+        0.33,
+        0.59
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      },
+      "after": {
+       "decision_digest": "26fa08e255cfac87",
+       "n_decision_rows": 2840,
+       "loadavg_at_start": [
+        0.5,
+        0.33,
+        0.59
+       ],
+       "loadavg_at_end": [
+        0.58,
+        0.35,
+        0.6
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      },
+      "after2": {
+       "decision_digest": "26fa08e255cfac87",
+       "n_decision_rows": 2840,
+       "loadavg_at_start": [
+        0.58,
+        0.35,
+        0.6
+       ],
+       "loadavg_at_end": [
+        0.65,
+        0.37,
+        0.6
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      }
+     }
+    },
+    "covex-v6-state-final": {
+     "committed_digest_bar": {
+      "committed_digest": "8d901f7bc82b7f37",
+      "committed_rows": 2877,
+      "this_tree_digest": "8d901f7bc82b7f37",
+      "this_tree_rows": 2877,
+      "before_tree_digest": "8d901f7bc82b7f37",
+      "cell": "dry, 300 s, n 16, seed 4, the posted workload knobs",
+      "source": "results/orchestration/live2/d222_pass1/proof_ab_pristine_tree.json at b0767b46",
+      "MATCHES": true
+     },
+     "aa_control_before": {
+      "label": "A/A control BEFORE  covex-v6-state-final",
+      "a": "p1_covex-v6-state-final_before",
+      "b": "p1_covex-v6-state-final_before2",
+      "a_digest": "8d901f7bc82b7f37",
+      "b_digest": "8d901f7bc82b7f37",
+      "a_rows": 2877,
+      "b_rows": 2877,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "aa_control_after": {
+      "label": "A/A control AFTER   covex-v6-state-final",
+      "a": "p1_covex-v6-state-final_after",
+      "b": "p1_covex-v6-state-final_after2",
+      "a_digest": "8d901f7bc82b7f37",
+      "b_digest": "8d901f7bc82b7f37",
+      "a_rows": 2877,
+      "b_rows": 2877,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "before_vs_after": {
+      "label": "BEFORE vs AFTER     covex-v6-state-final",
+      "a": "p1_covex-v6-state-final_before",
+      "b": "p1_covex-v6-state-final_after",
+      "a_digest": "8d901f7bc82b7f37",
+      "b_digest": "8d901f7bc82b7f37",
+      "a_rows": 2877,
+      "b_rows": 2877,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "controls_clean": true,
+     "VERDICT": "IDENTICAL",
+     "cells": {
+      "before": {
+       "decision_digest": "8d901f7bc82b7f37",
+       "n_decision_rows": 2877,
+       "loadavg_at_start": [
+        0.65,
+        0.37,
+        0.6
+       ],
+       "loadavg_at_end": [
+        0.7,
+        0.4,
+        0.61
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6StateFinal.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "before2": {
+       "decision_digest": "8d901f7bc82b7f37",
+       "n_decision_rows": 2877,
+       "loadavg_at_start": [
+        0.7,
+        0.4,
+        0.61
+       ],
+       "loadavg_at_end": [
+        0.75,
+        0.42,
+        0.61
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6StateFinal.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "after": {
+       "decision_digest": "8d901f7bc82b7f37",
+       "n_decision_rows": 2877,
+       "loadavg_at_start": [
+        0.75,
+        0.42,
+        0.61
+       ],
+       "loadavg_at_end": [
+        0.79,
+        0.44,
+        0.62
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6StateFinal.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "after2": {
+       "decision_digest": "8d901f7bc82b7f37",
+       "n_decision_rows": 2877,
+       "loadavg_at_start": [
+        0.79,
+        0.44,
+        0.62
+       ],
+       "loadavg_at_end": [
+        0.89,
+        0.47,
+        0.63
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6StateFinal.state_deferred_to_guard_epochs": 8
+       }
+      }
+     }
+    },
+    "covex-v6-fair-final": {
+     "committed_digest_bar": {
+      "committed_digest": "62b0f9a977189c78",
+      "committed_rows": 2814,
+      "this_tree_digest": "62b0f9a977189c78",
+      "this_tree_rows": 2814,
+      "before_tree_digest": "62b0f9a977189c78",
+      "cell": "dry, 300 s, n 16, seed 4, the posted workload knobs",
+      "source": "results/orchestration/live2/d222_pass1/proof_ab_pristine_tree.json at b0767b46",
+      "MATCHES": true
+     },
+     "aa_control_before": {
+      "label": "A/A control BEFORE  covex-v6-fair-final",
+      "a": "p1_covex-v6-fair-final_before",
+      "b": "p1_covex-v6-fair-final_before2",
+      "a_digest": "62b0f9a977189c78",
+      "b_digest": "62b0f9a977189c78",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "aa_control_after": {
+      "label": "A/A control AFTER   covex-v6-fair-final",
+      "a": "p1_covex-v6-fair-final_after",
+      "b": "p1_covex-v6-fair-final_after2",
+      "a_digest": "62b0f9a977189c78",
+      "b_digest": "62b0f9a977189c78",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "before_vs_after": {
+      "label": "BEFORE vs AFTER     covex-v6-fair-final",
+      "a": "p1_covex-v6-fair-final_before",
+      "b": "p1_covex-v6-fair-final_after",
+      "a_digest": "62b0f9a977189c78",
+      "b_digest": "62b0f9a977189c78",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "controls_clean": true,
+     "VERDICT": "IDENTICAL",
+     "cells": {
+      "before": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        0.89,
+        0.47,
+        0.63
+       ],
+       "loadavg_at_end": [
+        0.91,
+        0.49,
+        0.63
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FairFinalWired.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "before2": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        0.91,
+        0.49,
+        0.63
+       ],
+       "loadavg_at_end": [
+        1.0,
+        0.52,
+        0.64
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FairFinalWired.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "after": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.0,
+        0.52,
+        0.64
+       ],
+       "loadavg_at_end": [
+        1.0,
+        0.54,
+        0.65
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FairFinalWired.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "after2": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.0,
+        0.54,
+        0.65
+       ],
+       "loadavg_at_end": [
+        1.0,
+        0.55,
+        0.65
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FairFinalWired.state_deferred_to_guard_epochs": 8
+       }
+      }
+     }
+    },
+    "covex-v6-final": {
+     "committed_digest_bar": {
+      "committed_digest": "63eeaf6f7432dece",
+      "committed_rows": 2814,
+      "this_tree_digest": "63eeaf6f7432dece",
+      "this_tree_rows": 2814,
+      "before_tree_digest": "63eeaf6f7432dece",
+      "cell": "dry, 300 s, n 16, seed 4, the posted workload knobs",
+      "source": "results/orchestration/live2/d222_pass1/proof_ab_pristine_tree.json at b0767b46",
+      "MATCHES": true
+     },
+     "aa_control_before": {
+      "label": "A/A control BEFORE  covex-v6-final",
+      "a": "p1_covex-v6-final_before",
+      "b": "p1_covex-v6-final_before2",
+      "a_digest": "63eeaf6f7432dece",
+      "b_digest": "63eeaf6f7432dece",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "aa_control_after": {
+      "label": "A/A control AFTER   covex-v6-final",
+      "a": "p1_covex-v6-final_after",
+      "b": "p1_covex-v6-final_after2",
+      "a_digest": "63eeaf6f7432dece",
+      "b_digest": "63eeaf6f7432dece",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "before_vs_after": {
+      "label": "BEFORE vs AFTER     covex-v6-final",
+      "a": "p1_covex-v6-final_before",
+      "b": "p1_covex-v6-final_after",
+      "a_digest": "63eeaf6f7432dece",
+      "b_digest": "63eeaf6f7432dece",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "controls_clean": true,
+     "VERDICT": "IDENTICAL",
+     "cells": {
+      "before": {
+       "decision_digest": "63eeaf6f7432dece",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.0,
+        0.55,
+        0.65
+       ],
+       "loadavg_at_end": [
+        1.0,
+        0.57,
+        0.66
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6Final.pd_deferred_to_guard_epochs": 8,
+        "V6Final.rd_deferred_to_guard_epochs": 8,
+        "V6Final.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "before2": {
+       "decision_digest": "63eeaf6f7432dece",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.0,
+        0.57,
+        0.66
+       ],
+       "loadavg_at_end": [
+        1.0,
+        0.58,
+        0.66
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6Final.pd_deferred_to_guard_epochs": 8,
+        "V6Final.rd_deferred_to_guard_epochs": 8,
+        "V6Final.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "after": {
+       "decision_digest": "63eeaf6f7432dece",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.0,
+        0.58,
+        0.66
+       ],
+       "loadavg_at_end": [
+        1.07,
+        0.61,
+        0.67
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6Final.pd_deferred_to_guard_epochs": 8,
+        "V6Final.rd_deferred_to_guard_epochs": 8,
+        "V6Final.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "after2": {
+       "decision_digest": "63eeaf6f7432dece",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.07,
+        0.61,
+        0.67
+       ],
+       "loadavg_at_end": [
+        1.06,
+        0.63,
+        0.67
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6Final.pd_deferred_to_guard_epochs": 8,
+        "V6Final.rd_deferred_to_guard_epochs": 8,
+        "V6Final.state_deferred_to_guard_epochs": 8
+       }
+      }
+     }
+    },
+    "mooncake": {
+     "committed_digest_bar": {
+      "committed_digest": "b0fdc7d489a16d78",
+      "committed_rows": 3052,
+      "this_tree_digest": "b0fdc7d489a16d78",
+      "this_tree_rows": 3052,
+      "before_tree_digest": "b0fdc7d489a16d78",
+      "cell": "dry, 300 s, n 16, seed 4, the posted workload knobs",
+      "source": "results/orchestration/live2/d222_pass1/proof_ab_pristine_tree.json at b0767b46",
+      "MATCHES": true
+     },
+     "aa_control_before": {
+      "label": "A/A control BEFORE  mooncake",
+      "a": "p1_mooncake_before",
+      "b": "p1_mooncake_before2",
+      "a_digest": "b0fdc7d489a16d78",
+      "b_digest": "b0fdc7d489a16d78",
+      "a_rows": 3052,
+      "b_rows": 3052,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "aa_control_after": {
+      "label": "A/A control AFTER   mooncake",
+      "a": "p1_mooncake_after",
+      "b": "p1_mooncake_after2",
+      "a_digest": "b0fdc7d489a16d78",
+      "b_digest": "b0fdc7d489a16d78",
+      "a_rows": 3052,
+      "b_rows": 3052,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "before_vs_after": {
+      "label": "BEFORE vs AFTER     mooncake",
+      "a": "p1_mooncake_before",
+      "b": "p1_mooncake_after",
+      "a_digest": "b0fdc7d489a16d78",
+      "b_digest": "b0fdc7d489a16d78",
+      "a_rows": 3052,
+      "b_rows": 3052,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "controls_clean": true,
+     "VERDICT": "IDENTICAL",
+     "cells": {
+      "before": {
+       "decision_digest": "b0fdc7d489a16d78",
+       "n_decision_rows": 3052,
+       "loadavg_at_start": [
+        1.06,
+        0.63,
+        0.67
+       ],
+       "loadavg_at_end": [
+        1.06,
+        0.63,
+        0.67
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      },
+      "before2": {
+       "decision_digest": "b0fdc7d489a16d78",
+       "n_decision_rows": 3052,
+       "loadavg_at_start": [
+        1.06,
+        0.63,
+        0.67
+       ],
+       "loadavg_at_end": [
+        1.05,
+        0.65,
+        0.68
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      },
+      "after": {
+       "decision_digest": "b0fdc7d489a16d78",
+       "n_decision_rows": 3052,
+       "loadavg_at_start": [
+        1.05,
+        0.65,
+        0.68
+       ],
+       "loadavg_at_end": [
+        1.04,
+        0.66,
+        0.68
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      },
+      "after2": {
+       "decision_digest": "b0fdc7d489a16d78",
+       "n_decision_rows": 3052,
+       "loadavg_at_start": [
+        1.04,
+        0.66,
+        0.68
+       ],
+       "loadavg_at_end": [
+        1.03,
+        0.67,
+        0.69
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      }
+     }
+    },
+    "simplestream": {
+     "committed_digest_bar": {
+      "committed_digest": "1f80561c5dde58af",
+      "committed_rows": 2932,
+      "this_tree_digest": "1f80561c5dde58af",
+      "this_tree_rows": 2932,
+      "before_tree_digest": "1f80561c5dde58af",
+      "cell": "dry, 300 s, n 16, seed 4, the posted workload knobs",
+      "source": "results/orchestration/live2/d222_pass1/proof_ab_pristine_tree.json at b0767b46",
+      "MATCHES": true
+     },
+     "aa_control_before": {
+      "label": "A/A control BEFORE  simplestream",
+      "a": "p1_simplestream_before",
+      "b": "p1_simplestream_before2",
+      "a_digest": "1f80561c5dde58af",
+      "b_digest": "1f80561c5dde58af",
+      "a_rows": 2932,
+      "b_rows": 2932,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "aa_control_after": {
+      "label": "A/A control AFTER   simplestream",
+      "a": "p1_simplestream_after",
+      "b": "p1_simplestream_after2",
+      "a_digest": "1f80561c5dde58af",
+      "b_digest": "1f80561c5dde58af",
+      "a_rows": 2932,
+      "b_rows": 2932,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "before_vs_after": {
+      "label": "BEFORE vs AFTER     simplestream",
+      "a": "p1_simplestream_before",
+      "b": "p1_simplestream_after",
+      "a_digest": "1f80561c5dde58af",
+      "b_digest": "1f80561c5dde58af",
+      "a_rows": 2932,
+      "b_rows": 2932,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "controls_clean": true,
+     "VERDICT": "IDENTICAL",
+     "cells": {
+      "before": {
+       "decision_digest": "1f80561c5dde58af",
+       "n_decision_rows": 2932,
+       "loadavg_at_start": [
+        1.03,
+        0.67,
+        0.69
+       ],
+       "loadavg_at_end": [
+        1.03,
+        0.68,
+        0.69
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      },
+      "before2": {
+       "decision_digest": "1f80561c5dde58af",
+       "n_decision_rows": 2932,
+       "loadavg_at_start": [
+        1.03,
+        0.68,
+        0.69
+       ],
+       "loadavg_at_end": [
+        1.02,
+        0.69,
+        0.69
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      },
+      "after": {
+       "decision_digest": "1f80561c5dde58af",
+       "n_decision_rows": 2932,
+       "loadavg_at_start": [
+        1.02,
+        0.69,
+        0.69
+       ],
+       "loadavg_at_end": [
+        1.02,
+        0.7,
+        0.7
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      },
+      "after2": {
+       "decision_digest": "1f80561c5dde58af",
+       "n_decision_rows": 2932,
+       "loadavg_at_start": [
+        1.02,
+        0.7,
+        0.7
+       ],
+       "loadavg_at_end": [
+        1.02,
+        0.71,
+        0.7
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      }
+     }
+    },
+    "llf": {
+     "committed_digest_bar": {
+      "committed_digest": "e404b1fe2eeb7dbb",
+      "committed_rows": 3381,
+      "this_tree_digest": "e404b1fe2eeb7dbb",
+      "this_tree_rows": 3381,
+      "before_tree_digest": "e404b1fe2eeb7dbb",
+      "cell": "dry, 300 s, n 16, seed 4, the posted workload knobs",
+      "source": "results/orchestration/live2/d222_pass1/proof_ab_pristine_tree.json at b0767b46",
+      "MATCHES": true
+     },
+     "aa_control_before": {
+      "label": "A/A control BEFORE  llf",
+      "a": "p1_llf_before",
+      "b": "p1_llf_before2",
+      "a_digest": "e404b1fe2eeb7dbb",
+      "b_digest": "e404b1fe2eeb7dbb",
+      "a_rows": 3381,
+      "b_rows": 3381,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "aa_control_after": {
+      "label": "A/A control AFTER   llf",
+      "a": "p1_llf_after",
+      "b": "p1_llf_after2",
+      "a_digest": "e404b1fe2eeb7dbb",
+      "b_digest": "e404b1fe2eeb7dbb",
+      "a_rows": 3381,
+      "b_rows": 3381,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "before_vs_after": {
+      "label": "BEFORE vs AFTER     llf",
+      "a": "p1_llf_before",
+      "b": "p1_llf_after",
+      "a_digest": "e404b1fe2eeb7dbb",
+      "b_digest": "e404b1fe2eeb7dbb",
+      "a_rows": 3381,
+      "b_rows": 3381,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "controls_clean": true,
+     "VERDICT": "IDENTICAL",
+     "cells": {
+      "before": {
+       "decision_digest": "e404b1fe2eeb7dbb",
+       "n_decision_rows": 3381,
+       "loadavg_at_start": [
+        1.02,
+        0.71,
+        0.7
+       ],
+       "loadavg_at_end": [
+        1.01,
+        0.72,
+        0.7
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      },
+      "before2": {
+       "decision_digest": "e404b1fe2eeb7dbb",
+       "n_decision_rows": 3381,
+       "loadavg_at_start": [
+        1.01,
+        0.72,
+        0.7
+       ],
+       "loadavg_at_end": [
+        1.01,
+        0.73,
+        0.71
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      },
+      "after": {
+       "decision_digest": "e404b1fe2eeb7dbb",
+       "n_decision_rows": 3381,
+       "loadavg_at_start": [
+        1.01,
+        0.73,
+        0.71
+       ],
+       "loadavg_at_end": [
+        1.01,
+        0.74,
+        0.71
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      },
+      "after2": {
+       "decision_digest": "e404b1fe2eeb7dbb",
+       "n_decision_rows": 3381,
+       "loadavg_at_start": [
+        1.01,
+        0.74,
+        0.71
+       ],
+       "loadavg_at_end": [
+        1.01,
+        0.75,
+        0.72
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {}
+      }
+     }
+    },
+    "covex-v6-final-nqd": {
+     "committed_digest_bar": null,
+     "aa_control_before": {
+      "label": "A/A control BEFORE  covex-v6-final-nqd",
+      "a": "p1_covex-v6-final-nqd_before",
+      "b": "p1_covex-v6-final-nqd_before2",
+      "a_digest": "62b0f9a977189c78",
+      "b_digest": "62b0f9a977189c78",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "aa_control_after": {
+      "label": "A/A control AFTER   covex-v6-final-nqd",
+      "a": "p1_covex-v6-final-nqd_after",
+      "b": "p1_covex-v6-final-nqd_after2",
+      "a_digest": "62b0f9a977189c78",
+      "b_digest": "62b0f9a977189c78",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "before_vs_after": {
+      "label": "BEFORE vs AFTER     covex-v6-final-nqd",
+      "a": "p1_covex-v6-final-nqd_before",
+      "b": "p1_covex-v6-final-nqd_after",
+      "a_digest": "62b0f9a977189c78",
+      "b_digest": "62b0f9a977189c78",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "controls_clean": true,
+     "VERDICT": "IDENTICAL",
+     "cells": {
+      "before": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.01,
+        0.75,
+        0.72
+       ],
+       "loadavg_at_end": [
+        1.09,
+        0.77,
+        0.73
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+        "V6FinalNQD.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "before2": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.09,
+        0.77,
+        0.73
+       ],
+       "loadavg_at_end": [
+        1.07,
+        0.78,
+        0.73
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+        "V6FinalNQD.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "after": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.07,
+        0.78,
+        0.73
+       ],
+       "loadavg_at_end": [
+        1.06,
+        0.79,
+        0.73
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+        "V6FinalNQD.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "after2": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.06,
+        0.79,
+        0.73
+       ],
+       "loadavg_at_end": [
+        1.05,
+        0.8,
+        0.73
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+        "V6FinalNQD.state_deferred_to_guard_epochs": 8
+       }
+      }
+     }
+    },
+    "covex-v6-final-nqd-off": {
+     "committed_digest_bar": null,
+     "aa_control_before": {
+      "label": "A/A control BEFORE  covex-v6-final-nqd-off",
+      "a": "p1_covex-v6-final-nqd-off_before",
+      "b": "p1_covex-v6-final-nqd-off_before2",
+      "a_digest": "62b0f9a977189c78",
+      "b_digest": "62b0f9a977189c78",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "aa_control_after": {
+      "label": "A/A control AFTER   covex-v6-final-nqd-off",
+      "a": "p1_covex-v6-final-nqd-off_after",
+      "b": "p1_covex-v6-final-nqd-off_after2",
+      "a_digest": "62b0f9a977189c78",
+      "b_digest": "62b0f9a977189c78",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "before_vs_after": {
+      "label": "BEFORE vs AFTER     covex-v6-final-nqd-off",
+      "a": "p1_covex-v6-final-nqd-off_before",
+      "b": "p1_covex-v6-final-nqd-off_after",
+      "a_digest": "62b0f9a977189c78",
+      "b_digest": "62b0f9a977189c78",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "controls_clean": true,
+     "VERDICT": "IDENTICAL",
+     "cells": {
+      "before": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.05,
+        0.8,
+        0.73
+       ],
+       "loadavg_at_end": [
+        1.04,
+        0.8,
+        0.74
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FinalNQD.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "before2": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.04,
+        0.8,
+        0.74
+       ],
+       "loadavg_at_end": [
+        1.12,
+        0.83,
+        0.75
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FinalNQD.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "after": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.12,
+        0.83,
+        0.75
+       ],
+       "loadavg_at_end": [
+        1.1,
+        0.83,
+        0.75
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FinalNQD.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "after2": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.1,
+        0.83,
+        0.75
+       ],
+       "loadavg_at_end": [
+        1.16,
+        0.85,
+        0.76
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FinalNQD.state_deferred_to_guard_epochs": 8
+       }
+      }
+     }
+    },
+    "covex-v6-final-nqd-daoff": {
+     "committed_digest_bar": null,
+     "aa_control_before": {
+      "label": "A/A control BEFORE  covex-v6-final-nqd-daoff",
+      "a": "p1_covex-v6-final-nqd-daoff_before",
+      "b": "p1_covex-v6-final-nqd-daoff_before2",
+      "a_digest": "62b0f9a977189c78",
+      "b_digest": "62b0f9a977189c78",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "aa_control_after": {
+      "label": "A/A control AFTER   covex-v6-final-nqd-daoff",
+      "a": "p1_covex-v6-final-nqd-daoff_after",
+      "b": "p1_covex-v6-final-nqd-daoff_after2",
+      "a_digest": "62b0f9a977189c78",
+      "b_digest": "62b0f9a977189c78",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "before_vs_after": {
+      "label": "BEFORE vs AFTER     covex-v6-final-nqd-daoff",
+      "a": "p1_covex-v6-final-nqd-daoff_before",
+      "b": "p1_covex-v6-final-nqd-daoff_after",
+      "a_digest": "62b0f9a977189c78",
+      "b_digest": "62b0f9a977189c78",
+      "a_rows": 2814,
+      "b_rows": 2814,
+      "digests_equal": true,
+      "n_differing_positional": 0,
+      "n_differing_setwise": 0,
+      "first_differing_decision": null
+     },
+     "controls_clean": true,
+     "VERDICT": "IDENTICAL",
+     "cells": {
+      "before": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.16,
+        0.85,
+        0.76
+       ],
+       "loadavg_at_end": [
+        1.14,
+        0.86,
+        0.76
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+        "V6FinalNQD.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "before2": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.14,
+        0.86,
+        0.76
+       ],
+       "loadavg_at_end": [
+        1.12,
+        0.86,
+        0.76
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+        "V6FinalNQD.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "after": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.12,
+        0.86,
+        0.76
+       ],
+       "loadavg_at_end": [
+        1.17,
+        0.89,
+        0.77
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+        "V6FinalNQD.state_deferred_to_guard_epochs": 8
+       }
+      },
+      "after2": {
+       "decision_digest": "62b0f9a977189c78",
+       "n_decision_rows": 2814,
+       "loadavg_at_start": [
+        1.17,
+        0.89,
+        0.77
+       ],
+       "loadavg_at_end": [
+        1.15,
+        0.89,
+        0.77
+       ],
+       "alone": "GUARD-ASSERTED CLEAR",
+       "foreign_live2_at_start": [],
+       "foreign_live2_at_end": [],
+       "guard_stats": {
+        "V5Rules2Arm.epochs": 3001,
+        "V5Rules2Arm.guard_active_epochs": 8,
+        "V5Rules2Arm.guard_by_backlog": 0,
+        "V5Rules2Arm.guard_by_lag": 8,
+        "V5Rules2Arm.guard_shed_warming_epochs": 8,
+        "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+        "V6FinalNQD.state_deferred_to_guard_epochs": 8
+       }
+      }
+     }
+    }
+   },
+   "arms_checked": [
+    "hybrid-F-lhreq-noc3",
+    "covex-v6-state-final",
+    "covex-v6-fair-final",
+    "covex-v6-final",
+    "mooncake",
+    "simplestream",
+    "llf",
+    "covex-v6-final-nqd",
+    "covex-v6-final-nqd-off",
+    "covex-v6-final-nqd-daoff"
+   ],
+   "arms_added_after_the_first_proof": [
+    "covex-v6-final-nqd",
+    "covex-v6-final-nqd-off",
+    "covex-v6-final-nqd-daoff"
+   ],
+   "cell_length_s": 300.0,
+   "committed_bar_all_match": true,
+   "PASS": true,
+   "_positive_control": "COMMITTED_DRY300_DIGESTS is the positive control. Six of these arms are untouched by this build and the seventh, covex-v6-fair-final, is the comparator the variant is judged against, so all seven must still hash to their committed values IN THIS TREE. If any fails, the CHECK IS BROKEN AND NOT THE ARM and this proof's verdict is void."
+  }
+ },
+ "SCOPE": "PROOF 1 ONLY (--only-proof1). The other four proofs are NOT in this file and no verdict about them may be read from it.",
+ "ALL_PASS": true,
+ "VERDICTS": {
+  "1_byte_identity_every_other_arm": "PASS"
+ },
+ "all_cells": {
+  "p1_hybrid-F-lhreq-noc3_before": {
+   "arm": "hybrid-F-lhreq-noc3",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2840,
+   "decision_digest": "26fa08e255cfac87",
+   "loadavg_at_start": [
+    0.36,
+    0.29,
+    0.59
+   ],
+   "loadavg_at_end": [
+    0.46,
+    0.32,
+    0.59
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_hybrid-F-lhreq-noc3_before",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_hybrid-F-lhreq-noc3_before2": {
+   "arm": "hybrid-F-lhreq-noc3",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2840,
+   "decision_digest": "26fa08e255cfac87",
+   "loadavg_at_start": [
+    0.46,
+    0.32,
+    0.59
+   ],
+   "loadavg_at_end": [
+    0.5,
+    0.33,
+    0.59
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_hybrid-F-lhreq-noc3_before2",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_hybrid-F-lhreq-noc3_after": {
+   "arm": "hybrid-F-lhreq-noc3",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2840,
+   "decision_digest": "26fa08e255cfac87",
+   "loadavg_at_start": [
+    0.5,
+    0.33,
+    0.59
+   ],
+   "loadavg_at_end": [
+    0.58,
+    0.35,
+    0.6
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_hybrid-F-lhreq-noc3_after",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_hybrid-F-lhreq-noc3_after2": {
+   "arm": "hybrid-F-lhreq-noc3",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2840,
+   "decision_digest": "26fa08e255cfac87",
+   "loadavg_at_start": [
+    0.58,
+    0.35,
+    0.6
+   ],
+   "loadavg_at_end": [
+    0.65,
+    0.37,
+    0.6
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_hybrid-F-lhreq-noc3_after2",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-state-final_before": {
+   "arm": "covex-v6-state-final",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2877,
+   "decision_digest": "8d901f7bc82b7f37",
+   "loadavg_at_start": [
+    0.65,
+    0.37,
+    0.6
+   ],
+   "loadavg_at_end": [
+    0.7,
+    0.4,
+    0.61
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6StateFinal.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-state-final_before",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-state-final_before2": {
+   "arm": "covex-v6-state-final",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2877,
+   "decision_digest": "8d901f7bc82b7f37",
+   "loadavg_at_start": [
+    0.7,
+    0.4,
+    0.61
+   ],
+   "loadavg_at_end": [
+    0.75,
+    0.42,
+    0.61
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6StateFinal.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-state-final_before2",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-state-final_after": {
+   "arm": "covex-v6-state-final",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2877,
+   "decision_digest": "8d901f7bc82b7f37",
+   "loadavg_at_start": [
+    0.75,
+    0.42,
+    0.61
+   ],
+   "loadavg_at_end": [
+    0.79,
+    0.44,
+    0.62
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6StateFinal.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_per_type": false,
+    "guard_lag_s_by_class": null,
+    "guard_hysteresis": false,
+    "guard_exit_factor": null,
+    "guard_exit_hold_s": null,
+    "guard_log": false,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-state-final_after",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-state-final_after2": {
+   "arm": "covex-v6-state-final",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2877,
+   "decision_digest": "8d901f7bc82b7f37",
+   "loadavg_at_start": [
+    0.79,
+    0.44,
+    0.62
+   ],
+   "loadavg_at_end": [
+    0.89,
+    0.47,
+    0.63
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6StateFinal.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_per_type": false,
+    "guard_lag_s_by_class": null,
+    "guard_hysteresis": false,
+    "guard_exit_factor": null,
+    "guard_exit_hold_s": null,
+    "guard_log": false,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-state-final_after2",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-fair-final_before": {
+   "arm": "covex-v6-fair-final",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    0.89,
+    0.47,
+    0.63
+   ],
+   "loadavg_at_end": [
+    0.91,
+    0.49,
+    0.63
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FairFinalWired.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-fair-final_before",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-fair-final_before2": {
+   "arm": "covex-v6-fair-final",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    0.91,
+    0.49,
+    0.63
+   ],
+   "loadavg_at_end": [
+    1.0,
+    0.52,
+    0.64
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FairFinalWired.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-fair-final_before2",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-fair-final_after": {
+   "arm": "covex-v6-fair-final",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.0,
+    0.52,
+    0.64
+   ],
+   "loadavg_at_end": [
+    1.0,
+    0.54,
+    0.65
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FairFinalWired.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_per_type": false,
+    "guard_lag_s_by_class": null,
+    "guard_hysteresis": false,
+    "guard_exit_factor": null,
+    "guard_exit_hold_s": null,
+    "guard_log": false,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-fair-final_after",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-fair-final_after2": {
+   "arm": "covex-v6-fair-final",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.0,
+    0.54,
+    0.65
+   ],
+   "loadavg_at_end": [
+    1.0,
+    0.55,
+    0.65
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FairFinalWired.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_per_type": false,
+    "guard_lag_s_by_class": null,
+    "guard_hysteresis": false,
+    "guard_exit_factor": null,
+    "guard_exit_hold_s": null,
+    "guard_log": false,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-fair-final_after2",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final_before": {
+   "arm": "covex-v6-final",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "63eeaf6f7432dece",
+   "loadavg_at_start": [
+    1.0,
+    0.55,
+    0.65
+   ],
+   "loadavg_at_end": [
+    1.0,
+    0.57,
+    0.66
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6Final.pd_deferred_to_guard_epochs": 8,
+    "V6Final.rd_deferred_to_guard_epochs": 8,
+    "V6Final.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final_before",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final_before2": {
+   "arm": "covex-v6-final",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "63eeaf6f7432dece",
+   "loadavg_at_start": [
+    1.0,
+    0.57,
+    0.66
+   ],
+   "loadavg_at_end": [
+    1.0,
+    0.58,
+    0.66
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6Final.pd_deferred_to_guard_epochs": 8,
+    "V6Final.rd_deferred_to_guard_epochs": 8,
+    "V6Final.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final_before2",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final_after": {
+   "arm": "covex-v6-final",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "63eeaf6f7432dece",
+   "loadavg_at_start": [
+    1.0,
+    0.58,
+    0.66
+   ],
+   "loadavg_at_end": [
+    1.07,
+    0.61,
+    0.67
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6Final.pd_deferred_to_guard_epochs": 8,
+    "V6Final.rd_deferred_to_guard_epochs": 8,
+    "V6Final.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_per_type": false,
+    "guard_lag_s_by_class": null,
+    "guard_hysteresis": false,
+    "guard_exit_factor": null,
+    "guard_exit_hold_s": null,
+    "guard_log": false,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final_after",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final_after2": {
+   "arm": "covex-v6-final",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "63eeaf6f7432dece",
+   "loadavg_at_start": [
+    1.07,
+    0.61,
+    0.67
+   ],
+   "loadavg_at_end": [
+    1.06,
+    0.63,
+    0.67
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6Final.pd_deferred_to_guard_epochs": 8,
+    "V6Final.rd_deferred_to_guard_epochs": 8,
+    "V6Final.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_per_type": false,
+    "guard_lag_s_by_class": null,
+    "guard_hysteresis": false,
+    "guard_exit_factor": null,
+    "guard_exit_hold_s": null,
+    "guard_log": false,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final_after2",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_mooncake_before": {
+   "arm": "mooncake",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 3052,
+   "decision_digest": "b0fdc7d489a16d78",
+   "loadavg_at_start": [
+    1.06,
+    0.63,
+    0.67
+   ],
+   "loadavg_at_end": [
+    1.06,
+    0.63,
+    0.67
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_mooncake_before",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_mooncake_before2": {
+   "arm": "mooncake",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 3052,
+   "decision_digest": "b0fdc7d489a16d78",
+   "loadavg_at_start": [
+    1.06,
+    0.63,
+    0.67
+   ],
+   "loadavg_at_end": [
+    1.05,
+    0.65,
+    0.68
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_mooncake_before2",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_mooncake_after": {
+   "arm": "mooncake",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 3052,
+   "decision_digest": "b0fdc7d489a16d78",
+   "loadavg_at_start": [
+    1.05,
+    0.65,
+    0.68
+   ],
+   "loadavg_at_end": [
+    1.04,
+    0.66,
+    0.68
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_mooncake_after",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_mooncake_after2": {
+   "arm": "mooncake",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 3052,
+   "decision_digest": "b0fdc7d489a16d78",
+   "loadavg_at_start": [
+    1.04,
+    0.66,
+    0.68
+   ],
+   "loadavg_at_end": [
+    1.03,
+    0.67,
+    0.69
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_mooncake_after2",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_simplestream_before": {
+   "arm": "simplestream",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2932,
+   "decision_digest": "1f80561c5dde58af",
+   "loadavg_at_start": [
+    1.03,
+    0.67,
+    0.69
+   ],
+   "loadavg_at_end": [
+    1.03,
+    0.68,
+    0.69
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_simplestream_before",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_simplestream_before2": {
+   "arm": "simplestream",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2932,
+   "decision_digest": "1f80561c5dde58af",
+   "loadavg_at_start": [
+    1.03,
+    0.68,
+    0.69
+   ],
+   "loadavg_at_end": [
+    1.02,
+    0.69,
+    0.69
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_simplestream_before2",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_simplestream_after": {
+   "arm": "simplestream",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2932,
+   "decision_digest": "1f80561c5dde58af",
+   "loadavg_at_start": [
+    1.02,
+    0.69,
+    0.69
+   ],
+   "loadavg_at_end": [
+    1.02,
+    0.7,
+    0.7
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_simplestream_after",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_simplestream_after2": {
+   "arm": "simplestream",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2932,
+   "decision_digest": "1f80561c5dde58af",
+   "loadavg_at_start": [
+    1.02,
+    0.7,
+    0.7
+   ],
+   "loadavg_at_end": [
+    1.02,
+    0.71,
+    0.7
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_simplestream_after2",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_llf_before": {
+   "arm": "llf",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 3381,
+   "decision_digest": "e404b1fe2eeb7dbb",
+   "loadavg_at_start": [
+    1.02,
+    0.71,
+    0.7
+   ],
+   "loadavg_at_end": [
+    1.01,
+    0.72,
+    0.7
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_llf_before",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_llf_before2": {
+   "arm": "llf",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 3381,
+   "decision_digest": "e404b1fe2eeb7dbb",
+   "loadavg_at_start": [
+    1.01,
+    0.72,
+    0.7
+   ],
+   "loadavg_at_end": [
+    1.01,
+    0.73,
+    0.71
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_llf_before2",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_llf_after": {
+   "arm": "llf",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 3381,
+   "decision_digest": "e404b1fe2eeb7dbb",
+   "loadavg_at_start": [
+    1.01,
+    0.73,
+    0.71
+   ],
+   "loadavg_at_end": [
+    1.01,
+    0.74,
+    0.71
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_llf_after",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_llf_after2": {
+   "arm": "llf",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 3381,
+   "decision_digest": "e404b1fe2eeb7dbb",
+   "loadavg_at_start": [
+    1.01,
+    0.74,
+    0.71
+   ],
+   "loadavg_at_end": [
+    1.01,
+    0.75,
+    0.72
+   ],
+   "guard_stats": {},
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {},
+   "tag": "p1_llf_after2",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final-nqd_before": {
+   "arm": "covex-v6-final-nqd",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.01,
+    0.75,
+    0.72
+   ],
+   "loadavg_at_end": [
+    1.09,
+    0.77,
+    0.73
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+    "V6FinalNQD.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final-nqd_before",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final-nqd_before2": {
+   "arm": "covex-v6-final-nqd",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.09,
+    0.77,
+    0.73
+   ],
+   "loadavg_at_end": [
+    1.07,
+    0.78,
+    0.73
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+    "V6FinalNQD.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final-nqd_before2",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final-nqd_after": {
+   "arm": "covex-v6-final-nqd",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.07,
+    0.78,
+    0.73
+   ],
+   "loadavg_at_end": [
+    1.06,
+    0.79,
+    0.73
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+    "V6FinalNQD.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_per_type": false,
+    "guard_lag_s_by_class": null,
+    "guard_hysteresis": false,
+    "guard_exit_factor": null,
+    "guard_exit_hold_s": null,
+    "guard_log": false,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final-nqd_after",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final-nqd_after2": {
+   "arm": "covex-v6-final-nqd",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.06,
+    0.79,
+    0.73
+   ],
+   "loadavg_at_end": [
+    1.05,
+    0.8,
+    0.73
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+    "V6FinalNQD.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_per_type": false,
+    "guard_lag_s_by_class": null,
+    "guard_hysteresis": false,
+    "guard_exit_factor": null,
+    "guard_exit_hold_s": null,
+    "guard_log": false,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final-nqd_after2",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final-nqd-off_before": {
+   "arm": "covex-v6-final-nqd-off",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.05,
+    0.8,
+    0.73
+   ],
+   "loadavg_at_end": [
+    1.04,
+    0.8,
+    0.74
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FinalNQD.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final-nqd-off_before",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final-nqd-off_before2": {
+   "arm": "covex-v6-final-nqd-off",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.04,
+    0.8,
+    0.74
+   ],
+   "loadavg_at_end": [
+    1.12,
+    0.83,
+    0.75
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FinalNQD.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final-nqd-off_before2",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final-nqd-off_after": {
+   "arm": "covex-v6-final-nqd-off",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.12,
+    0.83,
+    0.75
+   ],
+   "loadavg_at_end": [
+    1.1,
+    0.83,
+    0.75
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FinalNQD.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_per_type": false,
+    "guard_lag_s_by_class": null,
+    "guard_hysteresis": false,
+    "guard_exit_factor": null,
+    "guard_exit_hold_s": null,
+    "guard_log": false,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final-nqd-off_after",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final-nqd-off_after2": {
+   "arm": "covex-v6-final-nqd-off",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.1,
+    0.83,
+    0.75
+   ],
+   "loadavg_at_end": [
+    1.16,
+    0.85,
+    0.76
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FinalNQD.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_per_type": false,
+    "guard_lag_s_by_class": null,
+    "guard_hysteresis": false,
+    "guard_exit_factor": null,
+    "guard_exit_hold_s": null,
+    "guard_log": false,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final-nqd-off_after2",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final-nqd-daoff_before": {
+   "arm": "covex-v6-final-nqd-daoff",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.16,
+    0.85,
+    0.76
+   ],
+   "loadavg_at_end": [
+    1.14,
+    0.86,
+    0.76
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+    "V6FinalNQD.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final-nqd-daoff_before",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final-nqd-daoff_before2": {
+   "arm": "covex-v6-final-nqd-daoff",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.14,
+    0.86,
+    0.76
+   ],
+   "loadavg_at_end": [
+    1.12,
+    0.86,
+    0.76
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+    "V6FinalNQD.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final-nqd-daoff_before2",
+   "tree_role": "BEFORE",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final-nqd-daoff_after": {
+   "arm": "covex-v6-final-nqd-daoff",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.12,
+    0.86,
+    0.76
+   ],
+   "loadavg_at_end": [
+    1.17,
+    0.89,
+    0.77
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+    "V6FinalNQD.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_per_type": false,
+    "guard_lag_s_by_class": null,
+    "guard_hysteresis": false,
+    "guard_exit_factor": null,
+    "guard_exit_hold_s": null,
+    "guard_log": false,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final-nqd-daoff_after",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  },
+  "p1_covex-v6-final-nqd-daoff_after2": {
+   "arm": "covex-v6-final-nqd-daoff",
+   "tree": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/ptg_build_01T8MWad7BRhG6fF73CRUcAn/nqd_after/experiments/orchestration/live2",
+   "seed": 4,
+   "n": 16,
+   "run_s": 300.0,
+   "n_decision_rows": 2814,
+   "decision_digest": "62b0f9a977189c78",
+   "loadavg_at_start": [
+    1.17,
+    0.89,
+    0.77
+   ],
+   "loadavg_at_end": [
+    1.15,
+    0.89,
+    0.77
+   ],
+   "guard_stats": {
+    "V5Rules2Arm.epochs": 3001,
+    "V5Rules2Arm.guard_active_epochs": 8,
+    "V5Rules2Arm.guard_by_backlog": 0,
+    "V5Rules2Arm.guard_by_lag": 8,
+    "V5Rules2Arm.guard_shed_warming_epochs": 8,
+    "V6FinalNQD.pd_deferred_to_guard_epochs": 8,
+    "V6FinalNQD.state_deferred_to_guard_epochs": 8
+   },
+   "thresholds_applied": null,
+   "guard_log_rows": 0,
+   "describe_guard": {
+    "guard": true,
+    "guard_lag_s": 2.0,
+    "guard_backlog": 100,
+    "guard_per_type": false,
+    "guard_lag_s_by_class": null,
+    "guard_hysteresis": false,
+    "guard_exit_factor": null,
+    "guard_exit_hold_s": null,
+    "guard_log": false,
+    "guard_signal": "observed ttft EWMA per deadline class and queued+running deadline work; NEVER offered load"
+   },
+   "tag": "p1_covex-v6-final-nqd-daoff_after2",
+   "tree_role": "AFTER",
+   "returncode": 0,
+   "foreign_live2_at_start": [],
+   "foreign_live2_at_end": [],
+   "alone": "GUARD-ASSERTED CLEAR"
+  }
+ }
+}

@@ -49,6 +49,24 @@ TYPES = ("alert", "recall", "assistance")
 # the committed device-id prefixes, cross-checked against deadline_s in every committed cell
 PREFIX_TO_TYPE = {"dash": "alert", "robo": "recall", "asst": "assistance"}
 DEADLINE_S = {"alert": 1.0, "recall": 3.0, "assistance": 2.0}
+# ---- D230 (2) / D178 (3): THE GUARD'S EWMA LAG CHANNEL PER TYPE, AND ITS THRESHOLD.
+# `d230_guard_107.json` (79eef689) measured the defect these two tables fix: the saturation
+# guard had only TWO lag channels, because `coordinator._collect` folded every non-monitor
+# completion into "recall". Assistance therefore had NO guard signal at all, and the alert
+# channel crossed its own D178 (3) threshold of 0.8 s in 497 of 47,997 decision periods while
+# reaching the as-built single 2.0 s bar in only 16. The names of the first two channels are
+# NOT changed: they are the keys of `CoordState.lat` (cstate.py:311) and every committed arm
+# reads them by those names. "assistance" is the THIRD channel, added additively.
+GUARD_LAG_CLASS = {"alert": "episodic", "recall": "recall", "assistance": "assistance"}
+# D178 (3): fire when a type's first-token lag exceeds 80 percent of ITS OWN deadline.
+# DERIVED from DEADLINE_S above rather than written out, so the thresholds and the deadlines
+# cannot drift apart and no threshold is a tuned number. The D178 (3) values are asserted
+# below as a CHECK ON THE DERIVATION and are never the source.
+GUARD_LAG_FRACTION_OF_DEADLINE = 0.8
+GUARD_LAG_S_BY_CLASS = {GUARD_LAG_CLASS[t]: round(GUARD_LAG_FRACTION_OF_DEADLINE
+                                                  * DEADLINE_S[t], 6) for t in TYPES}
+assert GUARD_LAG_S_BY_CLASS == {"episodic": 0.8, "recall": 2.4, "assistance": 1.6}, \
+    GUARD_LAG_S_BY_CLASS
 # request kinds that are BACKGROUND work: no floor, flexible pool only (D179 (3))
 BACKGROUND_KINDS = ("piece", "whole", "touch")
 

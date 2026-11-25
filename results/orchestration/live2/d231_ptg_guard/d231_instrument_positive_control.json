@@ -1,0 +1,54 @@
+{
+ "study": "D231 (3) / D230 (2): POSITIVE CONTROL ON THE INSTRUMENT ITSELF, before any verdict is read",
+ "_why": "CLAUDE.md consistency check 7: a known-good COMMITTED arm must pass the check being applied. If it fails, the check is broken, not the arm. An impossible success is as diagnostic as an impossible failure, and a reviewer watching only for implausible results catches neither.",
+ "the_check": "this build's cell runner and decision digest (hybrid/test_hybrid.dry, timing fields stripped, sha256 of the sorted-key JSON, first 16 hex) must reproduce a COMMITTED digest for an arm nobody has changed",
+ "committed_reference": {
+  "source": "results/orchestration/live2/d222_pass1/proof_ab_pristine_tree.json at b0767b4620f85497b1abe0636643c6c11b717ed1",
+  "cell": "300 s, n 16, seed 4, dry, the posted workload knobs",
+  "covex-v6-fair-final": {
+   "digest": "62b0f9a977189c78",
+   "rows": 2814
+  },
+  "covex-v6-final": {
+   "digest": "62b0f9a977189c78",
+   "rows": 2814
+  },
+  "hybrid-F-lhreq-noc3": {
+   "digest": "26fa08e255cfac87",
+   "rows": 2840
+  },
+  "covex-v6-state-final": {
+   "digest": "8d901f7bc82b7f37",
+   "rows": 2877
+  }
+ },
+ "this_build": {
+  "arm_run": "covex-v6-fair-final-ptg",
+  "cell": "300 s, n 16, seed 4, dry, the same posted workload knobs",
+  "tree": "this build, per-type thresholds 0.8/1.6/2.4 ON, hysteresis NOT YET BUILT at the time of this probe",
+  "digest": "62b0f9a977189c78",
+  "rows": 2814
+ },
+ "FINDING_1_the_instrument_is_live": "the digest and the row count reproduce the committed covex-v6-fair-final values EXACTLY. The serialisation, the strip set, the workload knobs and the dry path therefore agree with the committed proof, so a digest comparison in this build is in the same register as the committed one and is not passing on a bar of its own making.",
+ "FINDING_2_and_it_is_a_warning_not_a_pass": {
+  "what_it_says": "covex-v6-fair-final-ptg with the per-type thresholds alone produced the SAME decision log as covex-v6-fair-final on a 300 s dry cell: ZERO differing decisions.",
+  "and_the_guard_did_differ": "the per-period guard log from that same cell shows the signals DID cross differently: the committed max(episodic, recall) >= 2.0 test is satisfied in 8 of 3,001 periods, and the per-type recall bar of 2.4 s is satisfied in NONE. So the guard's own state differed in 8 periods and NO DECISION MOVED in any of them.",
+  "why_that_can_happen_without_a_bug": "when the guard fires it only SHEDS BACKGROUND WARMING and defers state actions; it returns the base action untouched. In a period with no warming candidate and no state action pending, firing and not firing produce the same decision log. The guard changing state is NOT the same event as the guard changing a decision.",
+  "WHAT_IT_MEANS_FOR_STEP_2b": "*** If the 1200 s Step 2b comparison also comes back identical, that is an ABSENT LINK and NEVER a negative (CLAUDE.md Step 2b), and it must be reported as `unexpressible` or `unexercised` under Rule 2 rather than as evidence about the per-type guard. *** This probe is recorded BEFORE the 1200 s proof precisely so that an identical result cannot be reinterpreted after the fact.",
+  "register": "OBSERVED, one 300 s dry cell, on the thresholds-only build. Not the shipped variant, which also carries the D166 (3) latch."
+ },
+ "_provenance": {
+  "git_commit": "281f29c7b5c86ac51a7b77a9127852608bd89753",
+  "script": "d231_ptg_guard_proofs.py (probe)",
+  "model": "n/a (scheduling-policy build; no model inference)",
+  "timestamp": "2026-11-24T12:58:01.804684",
+  "device": "a6000",
+  "n": 1,
+  "seed": 4,
+  "git_commit_register": "the LOCAL worktree HEAD. The build is based on origin/main 281f29c7b5c86ac51a7b77a9127852608bd89753, verified file by file against its blobs; the six edited files were unchanged upstream at 071c0adc, so the patch applies cleanly on that tip.",
+  "source_commit_built_on": "281f29c7b5c86ac51a7b77a9127852608bd89753",
+  "n_definition": "one 300 s dry cell, cross-checked against a committed digest",
+  "is_measurement": false,
+  "caching": "NO prefix cache and NO ENGINE: every cell is dry and sends no HTTP. Service time is the committed cost curve via coordinator._dry_service_s, so no latency in any of these files is a measurement."
+ }
+}

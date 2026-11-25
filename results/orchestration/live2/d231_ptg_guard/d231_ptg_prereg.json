@@ -1,0 +1,242 @@
+{
+ "BARS_OPERATIONALISED": {
+  "AMENDMENT_3_D232_CLOSES_BOTH_OPEN_FLAGS": {
+   "_when": "recorded BEFORE any covex-v6-fair-final-ptg cell has been run. The two statements this block supersedes are KEPT VERBATIM above (bar_1_alert.comparator, COMMITTED_COMPARATOR_NUMBERS...at_1x_s4.covex-v6-fair-final_alert_attainment, watch_item_from_the_same_row, and THE_COMPARATOR_MUST_BE_AUDITED_NOT_ASSUMED's TO_BE_FILLED sentence), per the D185 (2) convention for correcting a pre-registration in place.",
+   "flag_1_CLOSED_bar_2_is_readable": {
+    "CAVEAT_THAT_MUST_BE_CARRIED_check_6_proxy_validity": "*** `correct_by_deadline` IS NOT THE SECOND DEADLINE TEST ITS NAME SUGGESTS. *** The DEVICE half of the predicate is INERT in 244 of 244 cells: DEVICE_WAIT_S = 0 and device latency peaks at 0.3108 s against a 5.0 s deadline, so the device answer can never be late. The metric is therefore NUMERICALLY IDENTICAL to `correct_any_time`, and ALL of its discrimination comes from the CLOUD on-time gate. This does not weaken bar 2, which is about cloud on-time robot answers anyway. It does mean that a reader must not cite bar 2 as evidence that anything was delivered before a DEVICE deadline, and must not treat agreement between `correct_by_deadline` and `correct_any_time` as a cross-check: they are one quantity under two names, which is exactly the shape consistency check 4 is about.",
+    "RESOLUTION": "NOT STUCK. The 83/132 triple-tie is a genuine coincidence of three DIFFERENT question sets (pairwise intersections 81, 81, 80), the base scores 62/132 so the metric moves, and across the corpus it spans 0.144 to 0.629. **BAR 2 IS READABLE.**",
+    "source": "coordinator relay of D232-era findings; D231 (2) closed",
+    "the_flag_was": "robot correct-by-deadline 0.628788 identical across three arms at 1x s4 might be a STUCK VALUE, and if so bar 2 must not be read."
+   },
+   "flag_2_CLOSED_bar_1_has_a_pinned_comparator": {
+    "*** WARNING_DO_NOT_TAKE_THE_SCORER_CHECK_1_VERDICT_FOR_BAR_1 ***": "The committed scorer's OWN check 1 compares alert attainment to the BASE (0.442), NOT to rung 3. On the rung-4 cell that reads `0.609 >= 0.442 = PASS` where the ruling says FAIL. So the scorer's printed verdict and THIS pre-registration's bar 1 ARE DIFFERENT TESTS and a PASS from the scorer is not a pass of bar 1. Bar 1 must be evaluated by comparing the ptg number to 0.619234 EXPLICITLY, and the scorer's check-1 line must be ignored for that purpose. The Orin owns that file and has decided to parameterise the comparator, pending the user; until that lands, the comparison is done by hand against 0.619234. THIS IS THE CONCRETE INSTANCE OF THE GENERIC HAZARD THIS PRE-REGISTRATION ALREADY NAMED under THE_COMPARATOR_MUST_BE_AUDITED_NOT_ASSUMED: a side of the comparison that is never audited, here a bar that silently points at the wrong arm. It was found by the coordinator, not by this session, and it would have turned a FAIL into a PASS if taken at face value.",
+    "RESOLUTION_the_number_exists": {
+     "BAR_1_AT_s4_IS_NOW_EXPLICIT": "ptg mean per-episode alert attainment >= 0.619234. The base value 0.442490 is NOT the bar and must not be substituted for it.",
+     "committed_at": "b0767b46",
+     "covex-v6-fair-final_alert_attainment_1x_s4": 0.619234,
+     "scorer": "d179_rung2_verdict._alert_episode_block, IMPORTED UNMODIFIED (not reimplemented, not retyped)"
+    },
+    "the_flag_was": "rung 3's scored per-seed alert attainment was not in the committed record (StudyLADDER_FINAL_measured_COMPANION.json read TO_BE_FILLED), so bar 1 froze a definition and a source rather than a number."
+   },
+   "flag_3_the_rung_4_cells_this_cell_queues_behind_have_changed": "D232 REMOVED question deferral from rung 4 on its own evidence (about 54 live firings, ZERO rescues, one on-time loss at 1x, alert on-time -11.9 pp inside its own deferral windows, robot 111 against rung 3's 122 at 0.5x). That is CLAUDE.md Rule 2's `fired and did not help`, the only one of the five that is evidence about a policy. The new rung 4 is `covex-v6-final-nqd`. THIS VARIANT'S POSTING ORDER IS UNCHANGED IN SUBSTANCE: ptg 1x s4 goes after BOTH rung-4 cells, which are now the -nqd pair (kv0.5r s4 then 1x s4) rather than the pass-1 pair. Nothing in this build depends on rung 4: the variant is rung 3 plus one switch, and `covex-v6-final` is one of the seven arms proof 1 shows byte-identical."
+  },
+  "COMMITTED_COMPARATOR_NUMBERS_FOUND_AFTER_THE_FIRST_DRAFT": {
+   "_amendment": "The first draft of this file froze the bars' DEFINITION and SOURCE and said rung 3's scored numbers were not in the committed record. They are, for 1x s4, in the D231 row itself, which landed on origin at b0767b46 while this build was being proved. The numbers are recorded here IN PLACE with the original wording kept above, which is the D185 (2) convention for correcting a pre-registration. Nothing has been run on a GPU under either version.",
+   "at_1x_s4": {
+    "bar_2_threshold_at_s4": "35 + 0.90 x (126 - 35) = 116.9, so ptg robot on-time >= 116.9",
+    "base_robot_on_time": 35,
+    "covex-v6-fair-final_alert_attainment": "NOT in the D231 row (rung 4's is recorded as PENDING there), so bar 1's comparator is still read from rung 3's committed cell at scoring time by the committed scorer.",
+    "covex-v6-fair-final_robot_on_time": 126,
+    "covex-v6-final_robot_on_time_for_reference": "127 of 132, retention 1.011",
+    "covex-v6-final_single_shot_for_reference": "98.6 pct"
+   },
+   "source": "research/policy_design_log.md row D231 at b0767b4620f85497b1abe0636643c6c11b717ed1",
+   "watch_item_from_the_same_row": "D231 (2): robot correct-by-deadline 0.628788 is IDENTICAL across covex-v6-final _rerun, covex-v6-fair-final and the superseded covex-v6-final at 1x s4, and whether that is a genuine tie or a STUCK VALUE is an open question assigned to flash. A constant where a distribution is expected is CLAUDE.md check 3's first shape. If it is stuck, it is a defect in a quantity on the same cell this variant will be scored against, so bar 2 must not be read before that question is closed."
+  },
+  "THE_COMPARATOR_MUST_BE_AUDITED_NOT_ASSUMED": "*** CLAUDE.md consistency check 7. *** Two of the three bars are rung 3's OWN numbers, and rung 3's scored per-seed figures are NOT in the committed record yet: results/orchestration/live2/ladder_final/StudyLADDER_FINAL_measured_COMPANION.json still reads `measured_numbers_TO_BE_FILLED`. So this pre-registration freezes the bar's DEFINITION, its COMPARATOR CELL and its SCORER, and NOT a number it does not have. At scoring time BOTH sides must be scored by the SAME scorer with the SAME numerator rule, and rung 3's own numbers must be re-read from its committed cell and cross-checked against base before the comparison is read. A broken control passes every check applied to the treatment, because the treatment is fine. If rung 3's 1x cells are rerun, the bar moves and the comparison must be re-read, not carried over.",
+  "bar_1_alert": {
+   "comparator": "covex-v6-fair-final at the same seed, 1x, same tag: results/orchestration/live2/frozen_test/runs/covex-v6-fair-final_n16_s<seed>_1200s_h27_3t_L3_epg_rq30",
+   "definition": "mean per-episode alert attainment, D192 (1) episodic scoring, the fraction of an episode's decision instants receiving an on-time cloud answer, averaged over episodes; D178 (1) target 0.25 per episode",
+   "scorer": "the committed d179_rung2_verdict.py, numerator COMMITTED_RULE_PRIMARY",
+   "test": "ptg alert attainment >= covex-v6-fair-final's alert attainment, at the same seed"
+  },
+  "bar_2_robot": {
+   "base_alert_attainment_COMMITTED": {
+    "s4": 0.44249,
+    "s5": 0.396211,
+    "s6": 0.465479,
+    "s7": 0.553811
+   },
+   "base_comparator": "hybrid-F-lhreq-noc3, ALIASED covex-v6-base (arm_names_v6.OLD_TO_RUNG: ONE ARM, TWO NAMES). Its committed 1x plain-tag cells live under the OLD directory spelling.",
+   "base_numbers_source": "results/orchestration/live2/frozen_test/runs/FINAL_LADDER_CELLS header at 281f29c7b5c86ac51a7b77a9127852608bd89753",
+   "base_robot_on_time_COMMITTED": {
+    "s4": 35,
+    "s5": 27,
+    "s6": 41,
+    "s7": 19
+   },
+   "test": "ptg robot on-time >= base + 0.90 x (covex-v6-fair-final minus base), at the same seed; i.e. the variant retains at least 90 pct of rung 3's gain over base"
+  },
+  "bar_3_single_shot": {
+   "note": "This is the type the build gives a guard signal to for the first time, so it is the bar most likely to move for a reason the build caused.",
+   "test": "at least 90 pct of single-shot (assistance) questions answered within 2 s"
+  },
+  "late_alert_frames": "REPORTED beside the bars, as D190 (3) requires. Not a bar.",
+  "unit_of_judgement": "PER SEED, not pooled.",
+  "why_per_seed_is_pointed": "The measurement that triggered this build is itself carried by ONE SEED. Per-seed alert fractions were 2.0917 / 0.8833 / 0.7667 / 0.4001 pct at s4 / s5 / s6 / s7: s4 alone is above 1 pct and the other three are all below it, and the pooled 1.0355 pct sits on a margin of 17 epochs in 47,997. A build justified by one seed must not be judged by a pooled number, and D230 (2)'s own DISTRIBUTION_WARNING says so."
+ },
+ "BARS_VERBATIM": "per seed, alert attainment >= rung 3's, robot on-time retention >= 0.90 of rung 3's gain over base, single-shot >= 90 %",
+ "BRIEF_ITEM_LEDGER": {
+  "_why_this_exists": "D231 (3) item 3, from a failure an hour earlier: rung-4 pass 1 was pre-registered, all three proofs passed, and the posted cell did not contain DEVICE_ANSWERS, because the harm code was on origin while the action wiring was still under held/ and the proofs had run on a tree where it WAS present. The cell reported it from the other side as three decisions refused with 'not built here', and the pre-registration had simply OMITTED the item, so the only trace was a counter nobody reads. EVERY SURFACE SIGN SAID THE BUILD WAS COMPLETE. Hence: every item of the brief, named, with its state.",
+  "items": [
+   {
+    "classifier": "share_admission.type_of_device (device-id prefix), the SAME function the shares and the deficit weights use. `kind` cannot do it: every asst00x completion arrives as kind 'recall' (deficit_feed.py:63-68).",
+    "item": "a THIRD EWMA lag class for assistance at the write site coordinator.py:1934",
+    "proved_by": "proof 1 (identity) and the per-period log's assistance channel in proof 2",
+    "state": "BUILT",
+    "where": "coordinator.Live2Coordinator._collect. ADDITIVE: the committed line is UNCHANGED and still folds every non-monitor completion into 'recall', and a second st.ewma call feeds the new 'assistance' key in parallel."
+   },
+   {
+    "item": "per-type thresholds 0.8 / 1.6 / 2.4 s read by the new variant",
+    "proved_by": "proof 2 (Step 2b, thresholds alone) and proof 4 control A",
+    "state": "BUILT",
+    "where": "share_admission.GUARD_LAG_S_BY_CLASS, DERIVED as 0.8 x the committed DEADLINE_S so the thresholds cannot drift from the deadlines; asserted equal to D178 (3)'s written values at import. Read at arms_v5rules2.V5Rules2Arm.guard_state."
+   },
+   {
+    "item": "the variant covex-v6-fair-final-ptg registered as the ladder registers variants",
+    "proved_by": "construction check: all 7 names resolve; PROTECTED_NAMES clash set is empty",
+    "state": "BUILT",
+    "where": "arms_final_ladder.FINAL_LADDER_ARMS and the lazy map in arms_v6cfr3._final_ladder_lazy, so arms.make_arm resolves it ON THE NORMAL IMPORT PATH. A posted cell naming an arm make_arm cannot resolve dies at launch on the H100; that is why the lazy path exists."
+   },
+   {
+    "item": "the guard ON only there; every other arm keeps the single 2.0 s guard, byte-identical",
+    "proved_by": "proof 1, paired BEFORE/AFTER cells with an A/A control on each side, over hybrid-F-lhreq-noc3, covex-v6-state-final, covex-v6-fair-final, covex-v6-final, mooncake, simplestream, llf",
+    "state": "BUILT and PROVED"
+   },
+   {
+    "item": "held or unproved code defaults OFF (D187)",
+    "state": "BUILT",
+    "where": "all five new switches default False / None in V5Rules2Arm.__init__ and in make_rung3; make_rung3() with no arguments is still exactly covex-v6-fair-final"
+   },
+   {
+    "constants": {
+     "entry": "the per-type lag thresholds, or backlog >= 100",
+     "exit_factor": 0.5,
+     "exit_hold_s": 2.0
+    },
+    "item": "D166 (3) exit hysteresis, all signals below 0.5x entry for 2 s",
+    "proved_by": "proof 2 (latch alone, and latch on top of thresholds) and proof 4 control B",
+    "state": "BUILT",
+    "state_history": "the original brief said NOT IN SCOPE and said to stop if it looked necessary; D231 (3) item 1 WITHDREW that and put it in scope. Built.",
+    "where": "arms_v5rules2.V5Rules2Arm.guard_state, a latch keyed on obs.now_s so it advances EXACTLY ONCE PER DECISION PERIOD. guard_state is read up to four times per period by one rung (arms_v5rules2 itself, arms_v6state.py:382, arms_v6cf.py:442, arms_v6cfr3.py:371); a latch advancing per READ would make the 2 s hold mean 2 s on rung 1 and 0.5 s on rung 4."
+   },
+   {
+    "item": "log guard_state's lag_s and backlog per decision period (D230 (2) limitation 1)",
+    "proved_by": "proof 5, on BOTH the variant and rung 3 with the log as the only difference",
+    "state": "BUILT",
+    "where": "rows built in arms_v5rules2.V5Rules2Arm.guard_state, written by coordinator.Live2Coordinator.write_guard_log to <run dir>/guard_state.jsonl.gz and summarised in coordinator_result.json under `guard_state_log`. NO FILE AT ALL for an arm without the log. Logs lag_s, backlog, by_lag, by_backlog, active, the per-class lag, the fired classes and the latch."
+   },
+   {
+    "item": "proof: byte-identical decisions for every non-ptg arm, dry, ALONE, loadavg both ends",
+    "proof": "1",
+    "state": "DONE"
+   },
+   {
+    "item": "proof: Step 2b, ptg vs covex-v6-fair-final, diff the decision logs, count and first",
+    "proof": "2",
+    "state": "DONE"
+   },
+   {
+    "PRE_REGISTERED_CHECK_ON_THE_s4_CELL": "guard_state.jsonl.gz from the s4 ptg cell must show fired_classes containing 'episodic' in at least ONE decision period. IF IT IS ZERO, the variant's characteristic decision never occurred and the cell is reported as an ABSENT LINK, not as a result about the policy, whatever the three bars say. This is the port-rule twin of Step 2b and it is pre-registered here so a zero cannot be discovered after a verdict is written.",
+    "item": "proof: the characteristic decision occurs at least once, i.e. guard activations attributable to the ALERT channel under the new thresholds, non-zero",
+    "proof": "3",
+    "state": "PARTIAL, AND DEFERRED TO THE s4 GPU CELL AS A PRE-REGISTERED CHECK",
+    "what_IS_established_now": "(i) the alert branch is REACHABLE: a positive control moving only the alert threshold to 0.3 s, below the dry constant, through the production setter, fires on the episodic channel and moves decisions; (ii) the CONSTRUCTED expectation for s4, cited from d230_guard_107.json and not re-derived: 251 of 12,000 periods cross 0.8 s at s4 (497 of 47,997 pooled) where the as-built guard reached 2.0 s in 16.",
+    "why": "*** A DRY CELL CANNOT TEST IT. *** coordinator._dry_service_s returns costs.episodic_cloud_latency_s('32BI', 1, 25) for EVERY monitor request: a CONSTANT 0.394966 s with no queueing term. The dry alert EWMA therefore takes exactly two values in a whole cell (0.0 and 0.394966) and cannot reach 0.8 s in any period. The observed alert count in every dry cell is ZERO and that zero is CLAUDE.md Rule 2's `unexercised`, a property of the harness, NOT a negative and NOT evidence about the guard."
+   },
+   {
+    "detail": "control A sets all three thresholds to 2.0 AND turns the latch off, which is the only setting that CAN collapse exactly; a control that left the latch on would fail for a reason other than the thing being controlled. Control B turns the latch off with the per-type thresholds live, which is the negative control for the hysteresis.",
+    "item": "proof: Step 4 negative control, the three per-type thresholds all 2.0, variant collapses to covex-v6-fair-final exactly",
+    "proof": "4",
+    "state": "DONE, AS TWO CONTROLS BECAUSE THE VARIANT NOW ADDS TWO MECHANISMS"
+   },
+   {
+    "item": "proof: adding the per-period log does not change decisions",
+    "proof": "5",
+    "state": "DONE"
+   },
+   {
+    "item": "DEVICE_ANSWERS",
+    "state": "EXPLICITLY DEFERRED, NOT IN THIS BUILD",
+    "why": "not in this brief's scope, and D231 (3) records that the user is ruling on whether it goes into covex-v6-final or a separate covex-v6-final-da. Named here only so that its absence is a recorded decision and not an omission, which is the exact failure D231 (3) item 3 was written from."
+   },
+   {
+    "evidence": "no line of the diff to arms_final_ladder.py matches make_rung4, V6Final or RUNG4; covex-v6-final is one of the seven arms proof 1 shows byte-identical",
+    "item": "covex-v6-final and arms_final_ladder.make_rung4",
+    "state": "EXPLICITLY NOT TOUCHED (D231 (3) freeze)"
+   },
+   {
+    "evidence": "git diff against 281f29c7b5c86ac51a7b77a9127852608bd89753 over that path is empty",
+    "item": "fleet/emulator.py",
+    "state": "EXPLICITLY NOT TOUCHED (the H100 owns it)"
+   },
+   {
+    "item": "D225 (3) switch attribution for the new switches",
+    "state": "BUILT",
+    "where": "d225_switch_diff.ATTRIBUTION gains guard_per_type, guard_hysteresis, guard_exit_factor, guard_exit_hold_s, guard_log and GUARD_LOG_CAP; the latch state fields are added to NOT_SWITCHES because they are run-time state. The variant is not an ADJACENT-RUNG pair so it does not appear in that script's diff today; the rows are there so a session that adds it gets an attribution rather than a DEFECT to adjudicate."
+   },
+   {
+    "item": "new datasets or workloads",
+    "state": "NONE PROPOSED (CLAUDE.md rule)"
+   },
+   {
+    "item": "methodological changes (metrics, n, seeds, baselines, targets, deadlines)",
+    "state": "NONE. Seeds 1 to 3 and HOLDOUT: never read, never run."
+   }
+  ]
+ },
+ "PRE_REGISTERED": "frozen BEFORE any covex-v6-fair-final-ptg cell is run on a GPU",
+ "_provenance": {
+  "amendments": 3,
+  "caching": "NO prefix cache and NO ENGINE: every cell is dry and sends no HTTP. Service time is the committed cost curve via coordinator._dry_service_s, so no latency in any of these files is a measurement.",
+  "device": "a6000",
+  "git_commit": "281f29c7b5c86ac51a7b77a9127852608bd89753",
+  "git_commit_register": "the LOCAL worktree HEAD. The build is based on origin/main 281f29c7b5c86ac51a7b77a9127852608bd89753, verified file by file against its blobs; the six edited files were unchanged upstream at 071c0adc, so the patch applies cleanly on that tip.",
+  "is_measurement": false,
+  "model": "n/a (scheduling-policy build; no model inference)",
+  "n": 0,
+  "n_definition": "pre-registration, nothing measured",
+  "script": "mk_prereg (scratchpad; pre-registration, no measurement)",
+  "seed": 4,
+  "source_commit_built_on": "281f29c7b5c86ac51a7b77a9127852608bd89753",
+  "timestamp": "2026-11-24T13:03:06.923592"
+ },
+ "arm_name": "covex-v6-fair-final-ptg",
+ "authorising_rows": {
+  "D166 (3)": "exit after ALL signals below 0.5x entry for 2 s.",
+  "D166 (4)": "commit rules.",
+  "D178 (3)": "per-type thresholds: alert 0.8 s, assistance 1.6 s, recall 2.4 s; backlog 100.",
+  "D187": "held or unproved code defaults OFF.",
+  "D230 (2)": "freeze-gate row 10.7, MEASURE FIRST. The measurement (results/orchestration/live2/d230_guard_thresholds/d230_guard_107.json at 79eef689) found the alert channel above the D178 (3) 0.8 s threshold in 497 of 47,997 decision periods = 1.0355 pct, above the pre-declared 1 pct bar, so D178 (3) is NOT amended and the per-type guard IS BUILT on rung 3 as a labelled variant, default OFF in other arms, run at s4 first.",
+  "D231 (3)": "WITHDRAWS the earlier deferral of D166 (3): the variant carries BOTH halves of row 10.7. Also sets the bars PER SEED and requires this pre-registration to list every item of the brief as BUILT or EXPLICITLY DEFERRED."
+ },
+ "cell_line_for_the_gated_list": "covex-v6-fair-final-ptg 16 4 _L3_epg_rq30",
+ "consistency_check_plan": {
+  "1_cross_check": "every threshold against its source: 0.8/1.6/2.4 against 0.8 x share_admission.DEADLINE_S (asserted at import); the dry episodic constant 0.394966 s against costs.episodic_cloud_latency_s; the alert exceedance counts against d230_guard_107.json rather than re-derived",
+  "2_physical_plausibility": "no rate is claimed by this build; the dry constants are read out of the committed cost curves themselves",
+  "3_distribution_sanity": "the dry episodic channel is a CONSTANT where a distribution is expected, and that is reported as the headline limitation rather than buried: it is why proof 3 cannot be run here",
+  "4_definition_audit": {
+   "alert lag": "latency_estimate_s['episodic'], alpha 0.3 EWMA of ttft_s over kind 'monitor'",
+   "assistance lag": "latency_estimate_s['assistance'], NEW: alpha 0.3 EWMA of ttft_s over completions on asst* devices. It HAD NO COMMITTED DEFINITION before this build; d230_guard_107.json constructed one and declared it a proxy.",
+   "decision period": "0.1 s, coordinator decision_period_s",
+   "exceeds": "the code uses >=; D178 (3) and D230 (2) say 'exceeds'. On continuous float EWMAs the two differed in no epoch of 47,997 in the measurement.",
+   "recall lag": "latency_estimate_s['recall'], UNCHANGED and still a mixture. Same name, same definition as every committed cell."
+  },
+  "5_claim_linkage": "this bears on D178 (3) and D166 (3) and on nothing in research/CLAIMS.md; it is an operational freeze-gate build. It touches no FORMULATION.md scoping (no KV portability, no cross-tier transfer).",
+  "6_proxy_validity": "one proxy: the assistance channel is defined over ALL completions on asst* devices, which is what the measurement sized it on. It is not a clean 'assistance question' channel, and it is not used for any bar.",
+  "7_validate_the_control": "see BARS_OPERATIONALISED.THE_COMPARATOR_MUST_BE_AUDITED_NOT_ASSUMED"
+ },
+ "limitations_declared_in_advance": [
+  "The recall channel is STILL A MIXTURE. D230 (2) asked for a THIRD class and that is what is built, so 'recall' remains every non-monitor completion: recall questions, assistance questions, warm pieces and touches. The 2.4 s recall threshold is therefore applied to a contaminated signal. Adding a clean robot-only channel is a FOURTH class and is not in this brief; it is named here so the limitation is a recorded choice.",
+  "No latency in any dry cell is a measurement. The dry path sends no HTTP and has no engine; service time is the committed cost curve.",
+  "The proofs are at seed 4 only, n 16, 1200 s, 1x, which is the cell D230 (2) names. No other seed, size or memory level is claimed."
+ ],
+ "mechanism_verification": {
+  "step_0_what_would_invalidate_this_run": [
+   "The dry instrument cannot exercise the alert channel (checked BEFORE the proofs ran, by computing coordinator._dry_service_s's own constants: episodic 0.394966 s, recall_ttft_s 0.08 to 1.71 s over the observed token range). This is WHY proof 3 is split into a reachability control plus a pre-registered s4 check instead of being reported as a count.",
+   "The comparator is about to change: rung 3's 1x cells are committed but their SCORED per-seed numbers are not, so the bars freeze a definition and a source, not a number.",
+   "A default about to be restored: every new switch defaults OFF, and proof 1 is run against a BEFORE tree that is a git archive of the origin sha verified blob by blob.",
+   "Tree contamination: all 33 edits are applied by a script that asserts each anchor is unique AND inside its intended enclosing def/class, and the tree is diffed against 281f29c7 so that exactly six declared files differ and nothing else.",
+   "A push landing on a live cell: held. D231 (3) item 5 lifts the embargo but keeps the no-push-while-a-cell-runs rule, and this session asks before pushing experiments/."
+  ],
+  "step_1_causal_chain": "If the saturation guard's entry test is per type against 80 pct of that type's own deadline (D178 (3)) rather than a single 2.0 s bar over two channels, and if assistance has a lag channel of its own at the write site (the absent link d230_guard_107.json found), then the guard can enter on an alert channel that reaches 0.8 s but never 2.0 s - which the measurement shows is the actual regime at s6 and s7, where the episodic EWMA peaked at 1.879 s and 0.964 s while alert lag exceeded 0.8 s in 92 and 48 periods. Entering earlier sheds BACKGROUND WARMING earlier (arms_v5rules2.py:282-290) and defers state actions (arms_v6state.py:382-386) and the counterfactual (arms_v6cf.py:442-446), so speculative prefill work stops being added to a queue that alert requests are waiting in, which should raise per-episode alert attainment. The latch (D166 (3)) stops the guard re-deciding from scratch every 100 ms, so a signal sitting on its threshold cannot toggle the warming channel at 10 Hz. THE COST SIDE IS THE RISK AND IS NAMED: warming shed is warming not done, so robot recall on-time can fall, which is exactly what bar 2 is for.",
+  "step_2_link_instantiation": "the table is in the proofs JSON's guard_stats and guard log columns",
+  "step_2b": "proof 2, run BEFORE any GPU cell",
+  "step_3_traced_unit": "the per-period guard log IS the traced unit, and it now reaches a committed file: guard_state.jsonl.gz carries t, lag_s, backlog, by_lag, by_backlog, active, lag_s_by_class, fired_classes, latched, entry and below_exit for every decision period",
+  "step_4_negative_controls": "proof 4, controls A and B",
+  "step_5_alternative_explanation": "A difference between ptg and rung 3 could be produced by (a) the per-type entry test letting the guard enter on a channel the single bar could not reach [the claimed mechanism], or (b) the RECALL bar simply moving from 2.0 s to 2.4 s, which makes the guard enter LESS often and shed LESS warming, a change in the opposite direction that has nothing to do with per-type protection, or (c) the latch alone holding the guard active longer after any entry. THESE ARE DISTINGUISHED, and that is why the one-factor arms exist: ptg-hystonly isolates (c) over the committed 2.0 s bar, ptg-nohyst isolates (a)+(b), and the per-class `fired_classes` column in the guard log separates (a) from (b) by naming WHICH channel entered in each period. On the dry cell the whole difference is (b): the alert and assistance channels cannot reach their thresholds, so every entry is recall. On the s4 cell a reader must check fired_classes before attributing anything to (a)."
+ },
+ "posting": "D231 (3) item 4: 1x s4 runs AFTER both rung-4 kv0.5r s4 cells (the pass-1 _ms cell and the DEVICE_ANSWERS cell after it). THE USER POSTS IT. This session does not edit a gated list.",
+ "source_commit_built_on": "281f29c7b5c86ac51a7b77a9127852608bd89753",
+ "study": "covex-v6-fair-final-ptg: the per-type saturation guard with D166 (3) exit hysteresis"
+}

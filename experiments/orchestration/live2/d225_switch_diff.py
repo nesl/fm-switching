@@ -76,6 +76,16 @@ ATTRIBUTION: Dict[str, str] = {
     "guard": "D160 (2), D178 (3)",
     "guard_backlog": "D178 (3)",
     "guard_lag_s": "D166 (3), D178 (3)",
+    # D230 (2): the per-type guard. These three differ only between `covex-v6-fair-final` and
+    # its labelled `-ptg` variant, which is not an ADJACENT-RUNG pair and so does not appear in
+    # this script's diff at all. The rows are here so that a session which does add the
+    # variant to RUNGS gets an attribution instead of a DEFECT it has to adjudicate.
+    "guard_per_type": "D230 (2), D178 (3)",
+    "guard_hysteresis": "D166 (3), D178 (3), D231 (3)",
+    "guard_exit_factor": "D166 (3)",
+    "guard_exit_hold_s": "D166 (3)",
+    "guard_log": "D230 (2) limitation 1",
+    "GUARD_LOG_CAP": "D230 (2) limitation 1",
     "slice_tokens": "D160 (1)",
     "arm_version": "D172 (naming); not a mechanism",
     "name": "D172 (naming); not a mechanism",
@@ -146,6 +156,9 @@ NOT_SWITCHES = {
     # A pure memo key: written and compared only to invalidate a cache, never to pick a branch.
     # The read site is named so this exemption is checkable: arms_v6cf.py:203-204.
     "_pd_rows_key",
+    # D166 (3) latch STATE, not switches: the latched flag, the exit clock and the
+    # once-per-period key. Read sites arms_v5rules2.py, inside `guard_state`.
+    "_g_latched", "_g_below_since", "_g_last_t", "_guard_log_last_t",
 }
 
 SCALAR = (bool, int, float, str, type(None))

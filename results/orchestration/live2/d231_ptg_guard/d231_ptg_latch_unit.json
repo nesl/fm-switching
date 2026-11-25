@@ -1,0 +1,361 @@
+{
+ "study": "D166 (3) latch and D178 (3) per-type entry: UNIT branch coverage",
+ "register": "UNIT, constructed observation; not evidence of reachability in a cell",
+ "thresholds_under_test": {
+  "episodic": 0.8,
+  "recall": 2.4,
+  "assistance": 1.6
+ },
+ "exit_factor": 0.5,
+ "exit_hold_s": 2.0,
+ "A_per_type_entry_each_channel_alone": [
+  {
+   "channel": "assistance",
+   "threshold_s": 1.6,
+   "lag_s": 1.61,
+   "case": "just OVER",
+   "by_lag": true,
+   "active": true,
+   "fired_classes": [
+    "assistance"
+   ]
+  },
+  {
+   "channel": "assistance",
+   "threshold_s": 1.6,
+   "lag_s": 1.59,
+   "case": "just UNDER",
+   "by_lag": false,
+   "active": false,
+   "fired_classes": []
+  },
+  {
+   "channel": "episodic",
+   "threshold_s": 0.8,
+   "lag_s": 0.81,
+   "case": "just OVER",
+   "by_lag": true,
+   "active": true,
+   "fired_classes": [
+    "episodic"
+   ]
+  },
+  {
+   "channel": "episodic",
+   "threshold_s": 0.8,
+   "lag_s": 0.79,
+   "case": "just UNDER",
+   "by_lag": false,
+   "active": false,
+   "fired_classes": []
+  },
+  {
+   "channel": "recall",
+   "threshold_s": 2.4,
+   "lag_s": 2.41,
+   "case": "just OVER",
+   "by_lag": true,
+   "active": true,
+   "fired_classes": [
+    "recall"
+   ]
+  },
+  {
+   "channel": "recall",
+   "threshold_s": 2.4,
+   "lag_s": 2.39,
+   "case": "just UNDER",
+   "by_lag": false,
+   "active": false,
+   "fired_classes": []
+  }
+ ],
+ "A_PASS": true,
+ "A_control_the_committed_guard_on_the_same_signals": [
+  {
+   "channel": "assistance",
+   "lag_s": 1.61,
+   "committed_2.0s_guard_fires": false
+  },
+  {
+   "channel": "episodic",
+   "lag_s": 0.81,
+   "committed_2.0s_guard_fires": false
+  },
+  {
+   "channel": "recall",
+   "lag_s": 2.41,
+   "committed_2.0s_guard_fires": true
+  }
+ ],
+ "A_control_note": "The committed guard fires on the recall channel at 2.41 s because 2.41 >= 2.0, and does NOT fire on alert at 0.81 s or assistance at 1.61 s. The assistance row is the absent link d230_guard_107.json found: the committed guard has no assistance channel to read at all, so it cannot fire on it at ANY value.",
+ "A_control_committed_guard_blind_to_assistance_at_100s": false,
+ "B_latch_trace": [
+  {
+   "t": 0.0,
+   "alert_lag_s": 0.0,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": false,
+   "below_exit": true,
+   "below_since": 0.0,
+   "latched": false,
+   "active": false,
+   "why": "quiet"
+  },
+  {
+   "t": 0.1,
+   "alert_lag_s": 0.85,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": true,
+   "below_exit": false,
+   "below_since": null,
+   "latched": true,
+   "active": true,
+   "why": "ENTRY: alert over 0.8"
+  },
+  {
+   "t": 0.2,
+   "alert_lag_s": 0.6,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": false,
+   "below_exit": false,
+   "below_since": null,
+   "latched": true,
+   "active": true,
+   "why": "BAND: under entry 0.8, over exit 0.4"
+  },
+  {
+   "t": 0.3,
+   "alert_lag_s": 0.6,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": false,
+   "below_exit": false,
+   "below_since": null,
+   "latched": true,
+   "active": true,
+   "why": "BAND again"
+  },
+  {
+   "t": 0.4,
+   "alert_lag_s": 0.3,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": false,
+   "below_exit": true,
+   "below_since": 0.4,
+   "latched": true,
+   "active": true,
+   "why": "BELOW EXIT 0.4: clock starts"
+  },
+  {
+   "t": 1.0,
+   "alert_lag_s": 0.3,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": false,
+   "below_exit": true,
+   "below_since": 0.4,
+   "latched": true,
+   "active": true,
+   "why": "below exit, 0.6 s elapsed"
+  },
+  {
+   "t": 2.3,
+   "alert_lag_s": 0.3,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": false,
+   "below_exit": true,
+   "below_since": 0.4,
+   "latched": true,
+   "active": true,
+   "why": "below exit, 1.9 s elapsed: still latched"
+  },
+  {
+   "t": 2.4,
+   "alert_lag_s": 0.3,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": false,
+   "below_exit": true,
+   "below_since": null,
+   "latched": false,
+   "active": false,
+   "why": "below exit, 2.0 s elapsed: EXIT"
+  },
+  {
+   "t": 2.5,
+   "alert_lag_s": 0.3,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": false,
+   "below_exit": true,
+   "below_since": 2.5,
+   "latched": false,
+   "active": false,
+   "why": "stays out"
+  },
+  {
+   "t": 2.6,
+   "alert_lag_s": 0.85,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": true,
+   "below_exit": false,
+   "below_since": null,
+   "latched": true,
+   "active": true,
+   "why": "ENTRY again"
+  },
+  {
+   "t": 2.7,
+   "alert_lag_s": 0.3,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": false,
+   "below_exit": true,
+   "below_since": 2.7,
+   "latched": true,
+   "active": true,
+   "why": "below exit, clock restarts"
+  },
+  {
+   "t": 3.0,
+   "alert_lag_s": 0.6,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": false,
+   "below_exit": false,
+   "below_since": null,
+   "latched": true,
+   "active": true,
+   "why": "BAND: clock RESET, so the 2 s must start over"
+  },
+  {
+   "t": 3.1,
+   "alert_lag_s": 0.3,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": false,
+   "below_exit": true,
+   "below_since": 3.1,
+   "latched": true,
+   "active": true,
+   "why": "below exit, clock starts again"
+  },
+  {
+   "t": 5.2,
+   "alert_lag_s": 0.3,
+   "entry_bar": 0.8,
+   "exit_bar": 0.4,
+   "entry": false,
+   "below_exit": true,
+   "below_since": null,
+   "latched": false,
+   "active": false,
+   "why": "2.1 s below exit: EXIT"
+  }
+ ],
+ "B_expected_latched": [
+  false,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  false,
+  false,
+  true,
+  true,
+  true,
+  true,
+  false
+ ],
+ "B_observed_latched": [
+  false,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  false,
+  false,
+  true,
+  true,
+  true,
+  true,
+  false
+ ],
+ "B_PASS": true,
+ "B_counters": {
+  "guard_log_periods": 14,
+  "guard_hyst_entries": 2,
+  "guard_hyst_held_in_band": 3,
+  "guard_hyst_active_without_entry": 8,
+  "guard_hyst_exits": 2
+ },
+ "C_repeat_reads_in_one_period": {
+  "_why": "guard_state is read up to four times per decision period by one rung. A latch advancing per READ would make the 2 s hold mean 2 s on rung 1 and 0.5 s on rung 4, and the per-period log's denominator would be the number of consumers.",
+  "three_reads_identical": true,
+  "log_rows_written": 1,
+  "repeat_reads_counted": 2,
+  "hyst_repeat_reads_counted": 2
+ },
+ "C_PASS": true,
+ "D_backlog_latch": [
+  {
+   "t": 0.1,
+   "backlog": 100,
+   "by_backlog": true,
+   "latched": true,
+   "active": true,
+   "why": "ENTRY on backlog at the committed 100"
+  },
+  {
+   "t": 0.2,
+   "backlog": 60,
+   "by_backlog": false,
+   "latched": true,
+   "active": true,
+   "why": "BAND: under 100, over the exit bar 50"
+  },
+  {
+   "t": 0.3,
+   "backlog": 49,
+   "by_backlog": false,
+   "latched": true,
+   "active": true,
+   "why": "below exit 50: clock starts"
+  },
+  {
+   "t": 2.4,
+   "backlog": 49,
+   "by_backlog": false,
+   "latched": false,
+   "active": false,
+   "why": "2.1 s below: EXIT"
+  }
+ ],
+ "D_PASS": true,
+ "ALL_PASS": true,
+ "_provenance": {
+  "git_commit": "281f29c7b5c86ac51a7b77a9127852608bd89753",
+  "script": "d231_ptg_latch_unit.py",
+  "model": "n/a (scheduling-policy build; no model inference)",
+  "timestamp": "2026-11-24T12:58:01.801694",
+  "device": "a6000",
+  "n": 4,
+  "seed": 4,
+  "git_commit_register": "the LOCAL worktree HEAD. The build is based on origin/main 281f29c7b5c86ac51a7b77a9127852608bd89753, verified file by file against its blobs; the six edited files were unchanged upstream at 071c0adc, so the patch applies cleanly on that tip.",
+  "source_commit_built_on": "281f29c7b5c86ac51a7b77a9127852608bd89753",
+  "n_definition": "4 unit parts (per-type entry, the latch trace, within-period idempotence, backlog latch)",
+  "is_measurement": false,
+  "caching": "NO prefix cache and NO ENGINE: every cell is dry and sends no HTTP. Service time is the committed cost curve via coordinator._dry_service_s, so no latency in any of these files is a measurement."
+ }
+}

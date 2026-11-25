@@ -1,0 +1,41 @@
+D231 (3) PRE-REGISTRATION. FROZEN BEFORE ANY covex-v6-fair-final-ptg GPU CELL.
+file: results/orchestration/live2/d231_ptg_guard/d231_ptg_prereg.json
+
+FROZEN CONTENT sha256 (the file with `_provenance` removed, dumped indent=1 sort_keys=True,
+which is how it is produced): c908e140c44e1405cae8ee2356367becb81fb3423f811b56db102fc9c1162307
+whole-file sha256 as committed: 6676dcc2de27e1670b565d9c2cdfa15cbb501241e6c2058fe720a0d9e6684383
+
+WHY TWO HASHES. The `_provenance` stamp CLAUDE.md requires changes the file's bytes but not one
+word of what was pre-registered. The FROZEN CONTENT hash is the load-bearing one: it covers
+every bar, comparator, brief-item state and pre-registered check, and it does not move when
+provenance is stamped. The whole-file hash lets a reader verify the committed bytes.
+
+built on: 281f29c7b5c86ac51a7b77a9127852608bd89753. None of the six edited files had moved
+upstream as of c81b4a43, so the patch applies cleanly at -p1 on that tip.
+cell line: covex-v6-fair-final-ptg 16 4 _L3_epg_rq30
+
+AMENDMENT HISTORY. ALL THREE AMENDMENTS PREDATE ANY GPU CELL OF THIS VARIANT; NONE FOLLOWS ONE.
+Each supersedes text that is KEPT VERBATIM in the file (D185 (2) convention).
+  1. content sha256 93249ecdd29051004dd7f5c0a8625b3b413662c87ac0ef2322c37dd1c9b9a159
+     froze the bars' DEFINITION, COMPARATOR CELL and SCORER, and recorded that rung 3's scored
+     per-seed numbers were not in the committed record.
+  2. content sha256 04de6c75ae512a57c3a89a6d3a1dcc101f7ae10b4bba0448b26b14d707ca9149
+     recorded the committed 1x s4 comparator numbers the D231 row supplied when it landed at
+     b0767b46: rung 3 robot on-time 126, base 35, so bar 2 at s4 is >= 116.9.
+  3. content sha256 c908e140c44e1405cae8ee2356367becb81fb3423f811b56db102fc9c1162307
+     D232-era facts close BOTH flags this pre-registration had raised, and add one warning:
+       (a) robot correct-by-deadline 0.628788 is NOT a stuck value (a genuine three-way
+           coincidence; base 62/132; corpus span 0.144 to 0.629), so BAR 2 IS READABLE. Caveat
+           carried: the DEVICE half of that predicate is inert in 244 of 244 cells, so the
+           metric is numerically identical to correct_any_time and all its discrimination is
+           the CLOUD on-time gate. One quantity, two names.
+       (b) rung 3's alert attainment EXISTS: 0.619234 at 1x s4, from
+           d179_rung2_verdict._alert_episode_block imported unmodified, committed at b0767b46.
+           BAR 1 AT s4 IS NOW EXPLICIT: ptg attainment >= 0.619234.
+       (c) *** WARNING: the committed scorer's OWN check 1 compares attainment to the BASE
+           (0.442), NOT to rung 3. On the rung-4 cell that reads 0.609 >= 0.442 = PASS where the
+           ruling says FAIL. The scorer's printed verdict is NOT bar 1. Compare to 0.619234 by
+           hand and ignore check 1's line for this purpose. ***
+       (d) rung 4 is now covex-v6-final-nqd (D232 removed question deferral on its own evidence,
+           Rule 2 'fired and did not help'). This variant's posting order is unchanged in
+           substance: ptg 1x s4 after BOTH rung-4 cells, now the -nqd pair.

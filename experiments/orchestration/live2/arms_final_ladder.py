@@ -75,6 +75,10 @@ LADDER_VERSION = "covex-v6-final-ladder-1.0"
 RUNG2 = "covex-v6-state-final"
 RUNG3 = "covex-v6-fair-final"
 RUNG4 = "covex-v6-final"
+# D230 (2): the per-type saturation guard, built on rung 3 AS A LABELLED VARIANT. It is the
+# SAME CLASS and the SAME constructor as RUNG3 with one switch flipped, so a difference
+# between the two cells is attributable to that switch and to nothing else.
+RUNG3_PTG = "covex-v6-fair-final-ptg"
 
 # The committed arm each final rung is built FROM, for the mapping row the user asked for.
 BUILT_FROM = {RUNG2: "covex-v6-state-uo-c5attr",
@@ -167,13 +171,103 @@ def _build_rung3_final() -> Any:
 V6FairFinal = _build_rung3_final()
 
 
+def _set_per_type_guard(arm: Any, thresholds=None) -> None:
+    """Turn the D230 (2) / D178 (3) per-type guard on for THIS INSTANCE and read it back.
+
+    SET ON BOTH OBJECTS, and that is not belt-and-braces. `guard_state` is defined on
+    `V5Rules2Arm` and every rung-2+ consumer calls it as `self._rules.guard_state(obs)`
+    (arms_v6state.py:382, arms_v6cf.py:442, arms_v6cfr3.py:371), so `self` at the READ is the
+    composed `_rules` object and the switch must be there. The arm itself is set too, because
+    `V6StateArm.__getattr__` makes the arm answer for `_rules` and a switch that disagreed
+    between the two is `d225_switch_diff`'s SHADOWED case: the value a reader gets would then
+    depend on which object it asked. `arms_v5rules2.py:112-118` records the same lesson for
+    `over_limit_infeasible`, which was the switch that taught it.
+    """
+    import arms_v5rules2 as R2                                             # noqa: PLC0415
+    thr = dict(R2.GUARD_LAG_S_BY_CLASS_D178 if thresholds is None else thresholds)
+    rules = vars(arm).get("_rules")
+    if rules is None:                                                      # pragma: no cover
+        raise LadderSwitchError(
+            "%s has no `_rules`, so there is no object holding `guard_state` to switch. The\n"
+            "per-type guard would have been set on an arm that never reads it, which is the\n"
+            "write-only field CLAUDE.md Step 2 is about." % (type(arm).__name__,))
+    for obj in (rules, arm):
+        object.__setattr__(obj, R2.GUARD_PER_TYPE_SWITCH, True)
+        object.__setattr__(obj, "guard_lag_s_by_class", dict(thr))
+    # read back THROUGH THE STRICT READER, on the object the read site actually runs against
+    for obj in (rules, arm):
+        if not R2.guard_per_type_enabled(obj):                             # pragma: no cover
+            raise LadderSwitchError(
+                "%s did not take on %s, so the variant would have run the committed single\n"
+                "2.0 s guard under a name that says it does not."
+                % (R2.GUARD_PER_TYPE_SWITCH, type(obj).__name__))
+        got = dict(getattr(obj, "guard_lag_s_by_class", {}) or {})
+        if got != thr:                                                     # pragma: no cover
+            raise LadderSwitchError(
+                "the per-type thresholds did not take on %s: reads %r, expected %r"
+                % (type(obj).__name__, got, thr))
+
+
+def _set_hysteresis(arm: Any) -> None:
+    """D166 (3) / D231 (3). Set on BOTH objects and read back, for the reason
+    `_set_per_type_guard` gives: `guard_state` runs against the composed `_rules`."""
+    import arms_v5rules2 as R2                                             # noqa: PLC0415
+    rules = vars(arm).get("_rules")
+    if rules is None:                                                      # pragma: no cover
+        raise LadderSwitchError("no `_rules` to hold the hysteresis latch")
+    for obj in (rules, arm):
+        object.__setattr__(obj, R2.GUARD_HYSTERESIS_SWITCH, True)
+        object.__setattr__(obj, "guard_exit_factor", float(R2.GUARD_EXIT_FACTOR_D166))
+        object.__setattr__(obj, "guard_exit_hold_s", float(R2.GUARD_EXIT_HOLD_S_D166))
+    for obj in (rules, arm):
+        if not R2.guard_hysteresis_enabled(obj):                           # pragma: no cover
+            raise LadderSwitchError(
+                "%s did not take on %s, so the variant would have run the memoryless guard "
+                "under a name that says it latches."
+                % (R2.GUARD_HYSTERESIS_SWITCH, type(obj).__name__))
+    # the LATCH STATE must be ONE object, not two: `guard_state` runs against `_rules`, and a
+    # second copy on the arm would be a dead latch that no period ever advances.
+    if "_g_latched" in vars(arm):                                           # pragma: no cover
+        raise LadderSwitchError(
+            "%s carries its OWN `_g_latched`, which would SHADOW the latch `guard_state`\n"
+            "actually advances on `_rules`: the arm would answer from a latch no period ever\n"
+            "moved. There must be exactly one." % (type(arm).__name__,))
+
+
+def _set_guard_log(arm: Any) -> None:
+    """D230 (2) limitation 1. Logging only; `coordinator.write_guard_log` is the writer."""
+    import arms_v5rules2 as R2                                             # noqa: PLC0415
+    rules = vars(arm).get("_rules")
+    if rules is None:                                                      # pragma: no cover
+        raise LadderSwitchError("no `_rules` to hold the guard log")
+    for obj in (rules, arm):
+        object.__setattr__(obj, "guard_log", True)
+        object.__setattr__(obj, "GUARD_LOG_CAP", int(R2.GUARD_LOG_CAP_DEFAULT))
+    # the rows list lives on `_rules`, which is the object `guard_state` appends from, and on
+    # the arm, which is what `coordinator.write_guard_log` reads. ONE list, two references.
+    rows: List[Dict[str, Any]] = []
+    for obj in (rules, arm):
+        object.__setattr__(obj, "guard_log_rows", rows)
+        object.__setattr__(obj, "_guard_log_last_t", None)
+    if arm.guard_log_rows is not rules.guard_log_rows:                      # pragma: no cover
+        raise LadderSwitchError("the guard log list is not shared, so the written file would "
+                                "be the empty one the coordinator happens to hold")
+
+
 def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                recheck_types: Any = RRARM.RECHECK_TYPES,
                deficit_feed: bool = True, gain: float = GAIND.GAIN,
                ordering: bool = True, split: bool = True,
                planner_reads_feed: bool = True, qcache_key_fix: bool = True,
+               per_type_guard: bool = False, guard_lag_s_by_class: Any = None,
+               hysteresis: Any = None, guard_log: Any = None,
                **kw: Any) -> Any:
-    """Build rung 3. Four switches, each set on the instance and each read back."""
+    """Build rung 3. Four switches, each set on the instance and each read back.
+
+    D230 (2) adds a fifth, `per_type_guard`, DEFAULT OFF (D187): `make_rung3()` with no
+    arguments is still exactly `covex-v6-fair-final`. `guard_log` defaults to None meaning
+    "follow the guard switch", so the labelled variant logs and rung 3 does not.
+    """
     arm = V6FairFinal(name=name, **kw)
     if qcache_key_fix:
         _set_qcache_fix(arm)
@@ -193,6 +287,17 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         raise RRARM.PrerequisiteNotMet(
             "%s enables %s without live2_d162_pricing, which the coordinator refuses"
             % (name, RR.SWITCH_ATTR))
+    # D230 (2) / D178 (3). After `_fairfeed_init`, so `_rules` exists to be switched.
+    if per_type_guard:
+        _set_per_type_guard(arm, guard_lag_s_by_class)
+    # D231 (3): the variant carries BOTH halves of freeze-gate row 10.7. `hysteresis=None`
+    # means "follow the per-type switch", so `covex-v6-fair-final-ptg` latches and
+    # `covex-v6-fair-final` does not; an explicit False is how the Step 4 controls separate
+    # the two mechanisms.
+    if (per_type_guard if hysteresis is None else bool(hysteresis)):
+        _set_hysteresis(arm)
+    if (per_type_guard if guard_log is None else bool(guard_log)):
+        _set_guard_log(arm)
     arm._planner_reads_feed_declared = bool(planner_reads_feed)
     if planner_reads_feed:
         # wire it NOW rather than lazily, so a wiring failure raises in construction
@@ -292,6 +397,34 @@ def make_rung4(name: str = RUNG4, *, protect_defer: bool = True, request_defer: 
 FINAL_LADDER_ARMS: Dict[str, Any] = {
     RUNG2: (lambda **kw: make_rung2(RUNG2, **kw)),
     RUNG3: (lambda **kw: make_rung3(RUNG3, **kw)),
+    # D230 (2): rung 3 with the D178 (3) per-type guard. The ONLY difference from RUNG3.
+    RUNG3_PTG: (lambda **kw: make_rung3(RUNG3_PTG, per_type_guard=True, **kw)),
+    # CLAUDE.md Step 4 negative control, as a NAMED ARM so the control is a cell and not a
+    # code edit: the per-type machinery fully live with all three thresholds set to the
+    # committed single 2.0 s bar. It must collapse to `covex-v6-fair-final` EXACTLY.
+    # D231 (3): this control disables BOTH mechanisms the variant adds, because the variant
+    # now adds two. Thresholds at the committed 2.0 s bar AND the latch off: that is the only
+    # setting that can collapse to `covex-v6-fair-final` exactly, and a control that left the
+    # latch on would fail for a reason that is not the thing being controlled.
+    RUNG3_PTG + "-ctl20": (lambda **kw: make_rung3(
+        RUNG3_PTG + "-ctl20", per_type_guard=True, hysteresis=False,
+        guard_lag_s_by_class={"episodic": 2.0, "recall": 2.0, "assistance": 2.0}, **kw)),
+    # THE TWO ONE-FACTOR ARMS, so a difference against rung 3 is attributable. Addendum 12
+    # item 5: "a combined count that cannot be attributed is not a pass".
+    # -nohyst: the per-type THRESHOLDS alone (this is what the build was before D231 (3)).
+    RUNG3_PTG + "-nohyst": (lambda **kw: make_rung3(RUNG3_PTG + "-nohyst",
+                                                    per_type_guard=True, hysteresis=False,
+                                                    **kw)),
+    # -hystonly: the LATCH alone, over the committed 2.0 s bar on all three channels.
+    RUNG3_PTG + "-hystonly": (lambda **kw: make_rung3(
+        RUNG3_PTG + "-hystonly", per_type_guard=True, hysteresis=True,
+        guard_lag_s_by_class={"episodic": 2.0, "recall": 2.0, "assistance": 2.0}, **kw)),
+    # Proof 5's control: the variant WITHOUT the per-period log, so "adding the log does not
+    # change decisions" is a cell-versus-cell comparison and not an argument from reading.
+    RUNG3_PTG + "-nolog": (lambda **kw: make_rung3(RUNG3_PTG + "-nolog",
+                                                   per_type_guard=True, guard_log=False, **kw)),
+    # And rung 3 itself WITH the log and nothing else, which is the other half of that proof.
+    RUNG3 + "-glog": (lambda **kw: make_rung3(RUNG3 + "-glog", guard_log=True, **kw)),
     RUNG4: (lambda **kw: make_rung4(RUNG4, **kw)),
 }
 
