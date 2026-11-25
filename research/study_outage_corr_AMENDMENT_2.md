@@ -1,0 +1,114 @@
+# AMENDMENT 2 to StudyOUTAGE-CORR: THE D244 GRID, AND TWO CONFLICTS WITH THE STANDING PRE-REGISTRATION THAT ARE FLAGGED RATHER THAN RESOLVED HERE
+
+**Status: PROVISIONAL, written before any cell runs, per user ruling D244 (2026-11-25 07:08).** This
+amendment registers the grid the ruling names and records, in advance, two places where that grid departs
+from `study_outage_corr_prereg.md`. **Neither departure is applied silently and neither is reversed by me:
+the ruling governs, and the conflicts are stated so a reader of the results knows they were known
+beforehand.**
+
+## The registered grid, as ruled
+
+| field | value |
+|---|---|
+| outage | correlated multi-robot, **1x memory only** (D240: never at kv0.5r) |
+| k | **{3, 5}** |
+| D | **120 s**, one window per episode, mid-episode, deterministic from the seed |
+| arms | `covex-v6-fair-final`, `covex-v6-fair-final-stateoff`, `llf`, `mooncake`, `simplestream` |
+| seeds | **4 and 5** |
+| cells | **5 arms x 2 k x 2 seeds = 20** (arithmetic checked: matches the ruling's figure) |
+| tag | `_L3_epg_rq30_out-k3-d120` form, so outage cells NEVER pool with no-outage cells |
+| excluded | the `-outage` and `-outage-fifo` ordering arms are NOT in this run, per the ruling |
+
+**Prediction on the record, from the Orin screen `f07c3d8f` ("D242 correlated multi-robot outage screen",
+2026-11-24 21:33, which resolves in this clone):** **rung 3 keeps offline histories; the baselines and
+`-stateoff` lose them.**
+**Per-robot reporting, as ruled and additional to the attainment metrics: history cached at the FIRST
+POST-RECONNECT QUESTION, and the number of DEVICE-ONLY QUESTIONS during the window.**
+
+## *** CONFLICT 1, AND IT IS THE ONE THAT MATTERS: THE RULING'S PRIMARY METRIC IS THE ONE THE PRE-REGISTRATION SAYS CANNOT WORK ***
+
+**The standing prereg's metrics section is titled "Metrics, and the one that cannot work", and it says:**
+> **PRIMARY: robot correct-by-deadline**, because it counts device answers.
+> *** SECONDARY AND NOT SUFFICIENT ALONE: robot cloud on-time. `robot_value.n_cloud_standing` counts rows
+> whose `source == "cloud"`, so it is BLIND TO DEVICE ANSWERS BY CONSTRUCTION. An outage forces questions
+> device-only, which depresses that number for EVERY arm identically whatever the policy does. Quoting it
+> alone would show an outage effect and no policy effect, on any arm. ***
+
+**D244 makes robot cloud on-time the PRIMARY metric, with correct-by-deadline beside it and the device half
+noted as inert.** **So the two documents disagree about which robot metric can carry this experiment, and
+they disagree for mechanical reasons on both sides:**
+- **the prereg's reason:** cloud on-time cannot see device answers, and an outage pushes questions
+  device-only, so it falls for every arm identically.
+- **the ruling's reason:** during an outage the device half of correct-by-deadline is inert, so that metric
+  is compromised too.
+*** IF BOTH REASONS HOLD, THEN BOTH ROBOT ATTAINMENT METRICS ARE COMPROMISED UNDER OUTAGE, AND NEITHER CAN
+DISCRIMINATE THE ARMS. That is a real risk to the run and it is recorded here before the run, not after. ***
+
+**WHAT I RECOMMEND, AND IT IS A RECOMMENDATION, NOT A CHANGE I HAVE MADE.** **The ruling already orders the
+quantity that tests the prediction directly: "history cached at the first post-reconnect question", per
+robot.** **That is an OBSERVABLE OF THE THING PREDICTED, not a proxy for it** - the prediction is that rung
+3 keeps offline histories and the baselines lose them, and a per-robot cached/not-cached count at the first
+post-reconnect question measures exactly that. **I therefore recommend that the history-cached observable
+be the PRIMARY measure for the headline prediction, with cloud on-time and correct-by-deadline both
+reported and neither load-bearing alone.** **Under the ruling as written, cloud on-time stays primary; this
+amendment does not override it and the cells will be scored as ruled.** **The user's ruling is requested on
+this point and the run can proceed either way, because every one of these quantities is reported regardless
+of which is called primary.**
+
+## CONFLICT 2: THE PRE-REGISTERED NEGATIVE CONTROL k = 1 IS NOT IN THE GRID, AND SOMETHING ELSE MUST SERVE
+
+**The standing prereg says of k = 1: "k = 1 should show no ordering pressure at all, and is therefore a
+negative control rather than a data point."** **The D244 grid is k in {3, 5}, so that control is absent.**
+*** BUT ITS ROLE DOES NOT TRANSFER, AND THE REASON IS CLEAN: k = 1 was a control for ORDERING PRESSURE, and
+the ordering arms are explicitly excluded from this run. A control for a mechanism that is not being tested
+is not a control this run needs. ***
+**The negative control this run DOES need is the OUTAGES-OFF condition, and it is already proved rather
+than owed:** with outages off, all five arms are byte-identical to their unpatched selves, proved at the
+300 s cell and at the posted 1,200 s cell, with a positive control (`llf`) showing the check can fail.
+**That is recorded as this study's Step 4 control.** **It is a stronger control than k = 1 would have been,
+because it is an identity rather than an expected-null.**
+
+## *** AND A FINDING THAT RESOLVES BOTH OF D242's BLOCKERS RATHER THAN LEAVING THEM PENDING ***
+
+**D242 was reported blocked on two grounds. BOTH DISSOLVE UNDER THIS GRID, and the reason is the same for
+each: both concerned the ORDERING ARMS, which this run excludes.**
+- **Blocker 1, "the ordering is a pure permutation":** no gate refuses on KV tokens at 1x, so reordering
+  reconnection service changes no admission decision. **That is a statement about `-outage` versus
+  `-outage-fifo`, and neither arm is in this run.**
+- **Blocker 2, the unsupported 55,000-token history premise (AMENDMENT 1):** it mattered because ORDERING
+  pressure requires the pool to be exceeded, and AMENDMENT 1 found that on an empty pool all three k values
+  fit, leaving the grid with no positive condition. **This run does not need the pool to be exceeded at
+  all: it asks whether histories SURVIVE a disconnection, which does not depend on pool pressure.**
+*** SO THE D244 REDESIGN DOES NOT WORK AROUND THE TWO BLOCKERS, IT MAKES THEM INAPPLICABLE. I am recording
+that explicitly because I reported those blockers as open four hours ago and a reader should not have to
+reconcile the two statements themselves. ***
+
+## Carried forward from the standing prereg, unchanged and binding
+
+- **Dose beside every delta.** Every outage cell reports its characteristic-decision count. **A cell with a
+  low count is a weak-dose condition and is labelled one; a ZERO count makes the cell an ABSENT LINK, never
+  a negative.** *(Precedent on these exact two seeds: a one-factor ablation fired 2,966 times at s4 and 140
+  at s5, a 21-fold difference, with the sign flipping between them. A delta at low dose is not an effect
+  size.)*
+- **Denominators are read from each cell's own sweep row and never carried between seeds** (robot 132 at s4
+  and 127 at s5; single-shot 357 and 356; dashcam instants 11,764 and 11,769). *(This rule was broken three
+  times in the session that wrote this amendment, each time by carrying one seed's denominator onto
+  another's figure.)*
+- **Episodes may NOT be pooled across seeds**, because episode structure is invariant within a seed and not
+  across seeds.
+- **Channel identity: "alert" IS the dashcam devices** (`PREFIX_TO_TYPE` maps `dash` to `alert`), so alert
+  attainment and dashcam on-time are one quantity and only one needs quoting.
+- **No 0.25x. Never seeds 1 to 3. Disk refusal below 15 GB. Outage work at 1x only, never stacked with
+  reduced memory (D240).**
+
+## What would invalidate a run of this grid, declared in advance
+
+1. **A zero characteristic-decision count in any cell**: that cell is an ABSENT LINK and is not a negative.
+2. **No frames withheld during the window, or no burst at reconnect, or no device-only questions**: the
+   outage did not fire and the cell is void. **This is why the ruling orders a dry run per arm BEFORE the
+   20 cells, and that dry run is a gate, not a formality.**
+3. **An outage cell pooled with a no-outage cell**: the tag exists to prevent it and any pooled figure is
+   withdrawn rather than corrected.
+4. **Both robot metrics moving identically across all five arms**: that is the failure Conflict 1 predicts,
+   and if it occurs the run has measured the outage and not the policy. **In that case the history-cached
+   observable is the only thing that can rescue the study, which is the second reason to collect it.**
