@@ -1438,3 +1438,11 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | model/device | none; offline CPU on `jetson_orin`; read-only, no images; D240 1x and kv0.5r separate |
 | headline | oracle LP transportation core built and UNIT-TESTED (6 hand-checked cases PASS: value maximization, Step-2b capacity-bind, fractional serving, disjoint windows, greedy<=LP, negative-value dropped). Stage 1 (trace W_q digest MATCH) and Stage 2 (W_q<=logged, 0 violations: ss 356/356, recall 54/54, dashcam 9743/9743 at s4 1x) verified. NO bound emitted yet; remaining stages = recall acc_cloud wiring, dashcam max-over-subsets (D197), FAIR+HINDSIGHT, per-arm shares + clustered bootstrap, s4-s7 x {1x,kv0.5r}, STOP gate. |
 | old name | none; staged build |
+
+## StudyROBOT-IDLE-SURVIVAL headline CORRECTION (D251, 2026-11-25)
+
+| field | value |
+|---|---|
+| result files | `reports/study_robot_idle_survival.md` (headline corrected), `experiments/analysis/robot_idle/robot_idle_report.py` |
+| correction | the warm survival is PER-TYPE HOST RETENTION, not touches. The one-factor TOUCH ablation covex-v6-fair-final-notouch (touches OFF) has the same survival: kv0.5r 30-60s P(cold)=0.02 (n100) vs fair-final 0.0101. Turning touches off does not make histories cold; baselines (llf 1x) go fully cold by 30-60s. Underlying survival numbers unchanged; only the headline interpretation is corrected. |
+| old name | corrects the prior headline that credited touches |
