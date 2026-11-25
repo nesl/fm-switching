@@ -293,6 +293,27 @@ is not one finding. **SO THE ELEVEN BASELINE ROWS IN THE FIGURE DATA ARE SOUND O
 remaining open question about them is the H100's own hypothesis, explicitly not a claim: timing-bound
 (few on-time answers, neutral) against representation-bound (SimpleStream: full delivery, BELOW the
 floor) failure modes. That needs per-arm causes before it is written.
+- *** "Two other agents were stopped with no recoverable output (the `evicted`/`peak_tokens` code read, and
+  the pair-2 attainment floor)" (`ops/track.log`, 2026-11-24 ~20:10) -> FALSE. BOTH LANDED. *** The code
+  read is on origin at **`defc43c1`** as
+  `results/orchestration/live2/d233_stateoff/memory_pressure_constant_code_read.md`, and the pair-2 floor at
+  **`6112e368`** as `results/orchestration/live2/d234_noise_floor/d234_pair2_in_condition_floor.md`, each
+  with its `results/INDEX.md` row. Six commits of that block were checked by `merge-base --is-ancestor` and
+  **all six are ancestors of origin/main** (`ca74579d`, `d995ed78`, `34db6a59`, `defc43c1`, `1aca4007`,
+  `6112e368`). **A session that is killed mid-turn cannot write its own completion note, so its last log
+  line understates what reached origin. Check origin, not the log.** (restart 1-2/12, 2026-11-25 04:1x.)
+- *** THE WATCHDOG'S RESTART SIGNAL IS A DEAD FILE. `ops/heartbeat` IS 0 BYTES WITH MTIME 2026-11-23
+  21:55:37 - over 30 HOURS STALE AND PREDATING ALL OF 2026-11-24'S WORK. *** So
+  "heartbeat STALE at 80064s" and the `RESTART 1/12` and `RESTART 2/12` decisions at 04:00 and 04:10 rest on
+  a file **nothing writes**. The staleness is not evidence that work stopped; it has been true throughout
+  every productive hour of the project. **This is the "a probe that cannot fire returns the reassuring
+  answer" family, in the operations layer: here it returns the ALARMING answer, always, so the restart
+  loop's trigger carries no information about whether a session is alive.** Note the shape: the watchdog's
+  OTHER test, "session `fmsw-overnight` absent", is a real test and did fire correctly. **The restart was
+  right for the second reason and would have been taken anyway for the first, which is how a dead instrument
+  survives: it never disagrees with a live one in a way anyone notices.** (restart 1-2/12, 2026-11-25
+  04:1x.)
+
 
 *** EXTENDED AT RESTART 15: ALL THREE OF `READINESS.md`'s STATED GAPS ARE STALE, AND ALL THREE
 UNDERSTATE WHAT IS AVAILABLE. CHECKED AGAINST ORIGIN, NOT AGAINST THE FILE. ***
