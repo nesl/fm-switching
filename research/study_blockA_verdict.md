@@ -236,6 +236,30 @@ carries it (`state_decisions` 40,844 / 39,965 / 37,137 / 29,212 at s4 to s7, `co
 ON and not stalled, ON and stalled, OFF and stalled, and ABSENT and stalled.**
 **CAUSE NOT DIAGNOSED, NEEDS ENGINE TIMING: bounded and declined, not missed.**
 
+## `-notouch` AGAINST ITS SAME-SEED COMPARATOR: THE FOUR ROWS, WITH NO TRADEOFF STATEMENT
+
+**All four re-read from the cells. `cbd` is shown as COUNTS as well as the stored fraction, so the table
+checks itself.**
+| cell | den | cbd notouch / comp | d cbd | robot cloud on-time | d robot | dashcam | d dashcam |
+|---|---|---|---|---|---|---|---|
+| kv0.5r s5 | 127 | 58 / 57 (0.456693 / 0.448819) | **+1** | 114 / 119 | -5 | 6,363 / 6,597 | **-234** |
+| kv0.5r s6 | 121 | 58 / 55 (0.479339 / 0.454545) | **+3** | 107 / 104 | **+3** | 7,035 / 6,889 | **+146** |
+| kv0.5r s7 | 105 | 50 / 50 (0.476190 / 0.476190) | **0** | 83 / 84 | -1 | 7,177 / 6,804 | **+373** |
+| 1x s4 | 132 | 84 / 85 (0.636364 / 0.643939) | **-1** | 124 / 127 | -3 | 8,568 / 8,323 | **+245** |
+
+*** NO TRADEOFF OR COST STATEMENT IS SUPPORTED BY THESE ROWS, AND NONE IS MADE. ***
+**What the data support, and only this: `-notouch`'s DASHCAM difference is POSITIVE at 3 of 4 cells, the
+exception being `s5`, the LOWEST-DOSE seed. Its ROBOT differences are SMALL, MIXED IN SIGN, and inside or
+near the only floor available (a same-code robot floor of 2 opportunities, n = 1 pair, kv0.5r).**
+**In counts the headline robot metric moves by +1, +3, 0 and -1, so only s6 reaches that floor at all.**
+*** TWO EARLIER READINGS OF THESE SAME ROWS ARE WITHDRAWN. *** **"Touches buy robot attainment and cost
+dashcam attainment" was wrong. Its replacement, "the cost is consistent and the benefit is not" - offered
+as the MORE CONSERVATIVE version - was ALSO wrong, and wrong twice over: it was built from memory of the
+s6 cell rather than from the rows, and it used robot CLOUD ON-TIME, the secondary metric, in place of
+`correct_by_deadline`, the headline one.** **`cloud on-time` is down at 3 of 4; `correct_by_deadline` is UP
+at s5 and s6, TIED at s7 and DOWN at 1x s4. The two metrics disagree in sign on the same cells, which is
+why the metric must be named before the direction.**
+
 ## What this does NOT establish
 
 - **No settled finding for either arm.** `-stateoff` clears the bar at two of three seeds and declines into
