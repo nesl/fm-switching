@@ -1526,3 +1526,12 @@ fractions 0.483607 to 0.575573. **Reported, not worked around: F8.csv is not edi
 | model/device | none; CPU on `jetson_orin`; read-only; D240 separate; NOT the bound file (oracle not usable yet) |
 | headline | (1) covex-v6-fair-final (rung 3) added as a scored arm, 8 cells (1x+kv0.5r s4-7). (2) Pooled HINDSIGHT share<0 ROOT CAUSE: the dashcam oracle used episode-LEVEL thresholds + my crossing model (device-only v_dev=523/712) but the committed arm scorer DC.score_cell uses INSTANT-level thresholds + a standing walk (rung3=425/712, fraction 0.597); two different dashcam models put policy below floor. Plus my dash_cit read wrong score_cell keys (det/nocrash_correct are None; real keys n_detected/n_false_alarm/fraction_episodes_correct). share<0 now FAILS the control. FIX PENDING: rebuild the dashcam oracle on the committed score_cell model. (3) simplestream recall FAIR 1.0 vs HINDSIGHT -0.52 explained: FAIR credits type-level acc_cloud 0.652 to all 132 served answers including the 113 actually WRONG; realized 19/132 < device floor 49. recall+single-shot shares now all in [0,1] (valid); dashcam/pooled await the rebuild. |
 | old name | supersedes oracle_shares.json point computation |
+
+## StudyORACLE D268 conditioned FAIR accuracy table (pooled across arms, 2026-11-25, Orin)
+
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/oracle_fair_table.json`; module `experiments/analysis/oracle/oracle_fair_table.py` |
+| model/device | none; CPU on `jetson_orin`; read-only; pooled across arms (never per-arm) |
+| headline | FAIR now conditioned on serving state (D268). Table (type,location,state)->acc,n: recall cloud WARM 0.5569 (n8442), recall cloud COLD 0.4342 (n7229), recall device 0.2577 (n970), single_shot cloud COLD 0.6219 (n1042), single_shot device 0.5480 (n1042). State: WARM iff cached_tokens/prompt_tokens>=0.8 (request.jsonl.gz); single-shot always COLD (stateless). Fixes simplestream: stateless cold answers credited 0.434 not 0.557. dashcam portion + oracle rebuild on score_cell model pending in the same effort. |
+| old name | amends D263 flat per-type acc_cloud |

@@ -1,0 +1,39 @@
+{
+ "_what": "D268 conditioned FAIR expected-accuracy table (pooled across arms). Each served query credited acc[(type, location, state)]; identical table applied to oracle and every policy. serving_state WARM_WITH_HISTORY iff cached_tokens/prompt_tokens >= 0.8 (recall), single-shot always COLD (stateless). dashcam on score_cell model (reported in the rebuild).",
+ "warm_threshold_cached_over_prompt": 0.8,
+ "table": {
+  "recall|cloud|WARM": {
+   "n": 8442,
+   "k": 4701,
+   "acc": 0.556859
+  },
+  "recall|cloud|COLD": {
+   "n": 7229,
+   "k": 3139,
+   "acc": 0.434223
+  },
+  "recall|device|NA": {
+   "n": 970,
+   "k": 250,
+   "acc": 0.257732
+  },
+  "single_shot|cloud|COLD": {
+   "n": 1042,
+   "k": 648,
+   "acc": 0.621881
+  },
+  "single_shot|device|NA": {
+   "n": 1042,
+   "k": 571,
+   "acc": 0.547985
+  }
+ },
+ "state_field": "cached_tokens / prompt_tokens in runs/<cell>/request.jsonl.gz; correctness from cell.json score.robot_rows.cloud_correct / SS2 box",
+ "_provenance": {
+  "git_commit": "a909386794da70b92d65a8ed682bf80e42e90ab9",
+  "script": "oracle_fair_table.py",
+  "model": "qwen3vl32b",
+  "timestamp": "2026-11-25T12:32:51.318044",
+  "device": "jetson_orin"
+ }
+}
