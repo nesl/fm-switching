@@ -1,5 +1,57 @@
 # H100 overnight handoff (D187), 2026-11-22
 
+## D238, USER RULING 2026-11-24, PROVISIONAL, revisit later (recorded first, before relaying): THE OVERNIGHT POLICY BLOCK, 28 CELLS
+
+**Order, AFTER the three replicates now running (kv0.5r s4 `_rep2`, kv0.5r s4 `_rep3`, 1x s4 `_rep2`).**
+
+**BLOCK A, the same-code 0.5x block: 9 cells, `kv0.5r_L3_epg_rq30`, seeds 5, 6, 7, INTERLEAVED BY SEED.**
+Per seed, in this order: `covex-v6-fair-final` **`_rep2`**, then `covex-v6-fair-final-stateoff`, then
+`covex-v6-fair-final-notouch`. So s5 three cells, then s6 three, then s7 three.
+*Why interleaved by seed and not grouped by arm, since it matters if a cell fails:* interleaving puts each
+seed's three arms adjacent in time, so a seed's comparison is internally same-code even if the tip moves
+between seeds, and **a failure costs one seed rather than one arm across all seeds**. Grouping by arm would
+make every comparison depend on the tip holding across the whole block.
+*What block A is for:* **every ablation verdict on origin is seed 4 only, one cell per arm.** Three more
+seeds with the comparator run beside the ablations, same code, is what turns three single-cell readings
+into a per-seed distribution. It also supplies **same-seed comparator deltas**, which is the only way the
+0.5x verdicts at 1.19x and 1.02x of the floor become decidable.
+**If the per-type guard (`ptg`) cell is PROOF-READY, insert it DIRECTLY AFTER block A. If it is not,
+SKIP IT AND REPORT; do not hold the queue for it.** Its bar 1 is the amended three-valued one
+(`results/orchestration/live2/d231_ptg_guard/AMENDMENT_4_bar1_tolerance.md`): PASS, NO DIFFERENCE, or FAIL
+against the max observed 0.027752, and **bars 2 and 3 do NOT inherit that floor.**
+
+**BLOCK B, the 0.5x baseline sweep already queued: 8 cells.** `confidence-cascade` s6 and s7;
+`covex-v6-base` s6 and s7; and s7 for `simplestream`, `llf`, `mooncake` and `eco-llm`.
+
+**BLOCK C, the 0.5x ladder: 7 cells.** `covex-v6-rules` s5, s6, s7; `covex-v6-state-final` s4, s5, s6, s7.
+
+**BLOCK D, `covex-v6-fair-final-notouch` at 1x (`L3_epg_rq30`): 4 cells, s4 to s7.**
+
+**RULES.**
+1. **NO PUSHES TO ANY FILE ON THE RUN PATH (`experiments/`) UNTIL BLOCK A FINISHES.** This binds flash,
+   the Orin and every other session, not only the H100. **Record, for EVERY cell, the `experiments/` tree
+   hash plus the blob hashes of `arms_final_ladder.py`, `arms_v6state.py` and `scorer/score.py`.** A pair
+   counts as **same-code ONLY when all four match**; otherwise it is **stratum B and must be labelled so.**
+   *This rule exists because it already cost us a floor today:* original versus `_rep2` is stratum B
+   precisely because `arms_v6state.py` moved (the `-stateoff` and `-notouch` appends) and
+   `arms_final_ladder.py` moved (ptg's `42aa4fb`). **And "same-code by construction" is not available as
+   an argument: the driver pulls origin before every cell, so any session's push moves the tip. Verify by
+   hash, never by construction.**
+2. **Every cell needs a `source_agreement` verdict AND `metrics_health`.** **INVALID cells are EXCLUDED and
+   rerun ONCE at the end of the block they belong to.** `run_meta.run_valid` is **TRUE** on torn cells, so
+   it does not catch this class; read `header.source_agreement.verdict`.
+3. **Gates as before. No 0.25x cells. Never seeds 1 to 3. Refuse any build or proof below 15 GB free. No
+   code push inside a cell's start-up window. Never `pkill -f`. GPU 2 is exclusive.**
+4. **SCORING: score each cell AS IT LANDS, but issue NO VERDICT on block A or block D until every seed in
+   that block is in.** Then report **per seed AND pooled**, against the D234 floor and against the
+   `_rep2`/`_rep3` pair. *The reason the verdict waits:* a per-seed reading published early becomes the
+   number everyone quotes, and four attainment verdicts were already voided today for sitting inside a
+   floor. **Pooling across seeds is also the only thing that can distinguish a real effect from the
+   seed-level variation that one cell per arm cannot separate.**
+5. **Git identity from the existing config only; no AI attribution; no force-push, reset, stash or amend.**
+
+**REPORT: the queue with ETAs, and any INVALID, saturated or failed cell AS IT HAPPENS, not at the end.**
+
 ## D232, user ruling 2026-11-24, revisit later (recorded first, before acting)
 
 1. Alert bar: rung 4's 1x comparator is same-code covex-v6-fair-final (0.619). Rung-4 pass 1 1x s4 is
