@@ -46,3 +46,13 @@ is evidence about the other.**
 | rung 3, D250 s4 (SA OK) | 72 | 49 | 23 (60) | 72 | 0.681 | 311 | 6,112 (0.454) |
 (1) cbd 77 >= 75: PASS (+5). (2) dashcam +647, bar 154: PASS. **Cloud-only +15 correct, +19 on-time: the pass is cloud-earned** (device share 13 of 77 against 23 of 72).
 **Scope: ONE SEED, ONE CONDITION.** It is the opposite sign from the 1x gate (`3ce9ba27`, FAIL at -4). Nothing here changes that failure and nothing extends this pass to other seeds or conditions.
+
+## RESULT, GATE (b) `_c3-11-2` s4, scored 2026-11-26T00:25Z, as reported by the H100 and re-checked here
+**PASS on condition 1; condition 2 UNFLOORED.** Post-push, valid (SA OK, 0 errors). Reachability met: TOUCH 3,420 (P3 1,398), `d249_queued_ahead_reads` 96,701 (absent on P3), priced 72,784, capped 3,450.
+| | cbd | cloud-correct | device (standing) | on-time | acc | SS | dashcam (worst) |
+|---|---|---|---|---|---|---|---|
+| `-q` | **136**/229 | 116 | 20 (44) | 185 | 0.627 | 216 | 4,737 (0.793) |
+| P3 (SA OK) | 127 | 107 | 20 (53) | 176 | 0.608 | 222 | 4,770 (0.796) |
+(1) cbd +9 > 2: PASS, cloud-earned (+9 cloud-correct, device 20 against 20). (2) dashcam -33, but P3 has NO same-code replicate, so the bar is UNFLOORED: not called a difference, and not demonstrated to hold either. SS -6.
+**Direction note: in this mix `-q` touches 2.4x MORE than P3, the opposite direction to the 1x cell (906 against 2,674) and gate (a) (787 against 1,434). The touch delta is not a criterion and is recorded only.**
+**Across the three `-q` gates, one seed each: 1x FAIL (-4), halved memory PASS (+5), robot-heavy PASS (+9). Nothing here extends any one result to another seed.**
