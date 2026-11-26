@@ -82,3 +82,41 @@ Under `live2_book_belief_uncached`, robot-recall booking is now `max(prompt toke
 With P set to the OLD (no admission) model the totals are better: n16 1x 2.4 / 1.1, n16 3:11:2 10.2 / 4.5, halved 7.5 / 10.2, n24 7.4 / 8.5, n32 11.2 / 19.2. **Bar: holds at n16 1x; at n24 over holds but under (12.7) misses with the faithful P, and BOTH hold with the old P (7.4 / 8.5); halved over holds, under misses (11.1; 10.2 old P); n16 3:11:2 over 10.6 misses (faithful; 10.2 old) with under holding; n32 misses both (16.7 / 23.6 faithful; 11.2 / 19.2 old).** Mechanism of the remaining misses: P's prediction misses on pieces at n32 (the false-warm and false-cold above) and the alert under-booking at halved memory (6.5 percent, a kind 0b does not touch). The new recall rule roughly halves recall's error where it helps (n24 11.9 / 10.8 to 3.7 / 6.3) and is flat at n32 (10.7 / 12.1 to 10.5 / 7.5).
 **Window (not pushed):** predictive_belief.py (A), book_belief_uncached.py (A), coordinator.py (M), arms_final_ladder.py (M) vs 6446a042; subtree 648 to 650 files.
 **OPEN FOR THE USER:** (1) the P default: `admission = True` (faithful to the scheduler source, WORSE validation: halved 0.909 / n32 0.749) or `admission = False` (the previous behaviour; 4 of 5 cells pass); (2) an engine probe for the halved false-warm group (the external-hit rule, mixed GPU/host touch).
+
+## UPDATE 2026-11-26T21:54Z: vLLM SCHEDULER LIMITS READ AND THE FAITHFUL VARIANT RE-RUN WITH THEM (CPU; scripts scratchpad pbf/ chunked_pb.py, replay_pf.py, drive.py, occ.py, outputs out_noadm.txt, out_adm_whole_seqs1024.txt, out_adm_chunked.txt, out_occupancy.txt); P default for step 1 is NO ADMISSION (PROVISIONAL APPROXIMATION); the faithful model stays an option, default OFF
+**The engine start-up logs are NOT committed** (header.json `server.log` points at `logs/study_x_server_32BI_*.log`, absent from the repo; no `SchedulerConfig(...)` or "Initializing a V1 LLM engine" line is committed for the live2 cells).
+| item | value | source |
+|---|---|---|
+| max_num_batched_tokens | **8192 (logged)** | `log_max_num_batched_tokens: "8192"` in results/cost/study_slice1/slice1_live_run_meta_h100nvl.json:919 (same model, flags and H100 NVL); "chunked prefill on, max_num_batched_tokens 8192" in reports/study_e10e_partial_prefill.md:128 |
+| max_num_seqs | **1024 (derived, not logged)** | arg_utils.py:2868-2876 (device memory >= 70 GiB and not "a100", OPENAI_API_SERVER: 8192 and 1024), applied at :3053-3060; the logged 8192 confirms the branch |
+| device class | H100 NVL, about 94 GB | host_counters gpu2 86,348 MiB in use; thresholds 160 GiB (:2858) and 70 GiB (:2868), via nvml (platforms/cuda.py:821-824) |
+| engine args | no max-num-seqs, max-num-batched-tokens, chunked-prefill or scheduler flags | slice1 non_default_args and the cell .stdout argv |
+| chunked prefill | on | config/scheduler.py:135 |
+| long_prefill_token_threshold | 0 (off) | config/scheduler.py:80 |
+| scheduler_reserve_full_isl | True | config/scheduler.py:191, used at scheduler.py:1218 |
+| watermark | 0.0 | config/scheduler.py:197 |
+| policy | fcfs; v1 preemption is recompute only | header.json server.scheduling_policy |
+| async scheduling | resolved True (derived; not logged; the KV-offload connector's compatibility not checked) | config/vllm.py:1576-1635 |
+| block size | 16 (62,944 / 16 = 3,934 blocks) | config/cache.py:71 |
+| max_model_len | 32768 at 1x; 31472 halved (last argv wins) | header.json flags_set_twice |
+| KV cache size (.stdout) | 1x 62,944 tokens, max concurrency 1.92; halved 31,488 tokens, concurrency 1.0 (31,488 / 31,472 = 1.0005; at 32,768 the 1,968-block pool is below the 2,048 blocks needed for one request, which explains the 31472 argument) | cell .stdout "server up" line |
+`--num-gpu-blocks-override 1968` changes only the pool and the printed concurrency; max_num_seqs and the token budget are unchanged. **NOT logged anywhere: num_cpu_blocks, preemption count, running-request count.**
+**CORRECTION OF AN EARLIER STATEMENT: max_num_seqs = 1024 was NOT wrong (I called it a guess; it is derived from arg_utils.py and the logged 8192 confirms the branch). What the earlier faithful run lacked was STRUCTURE (no chunked prefill and no per-step token budget: the whole prompt held at admission and prefilled serially); adding both with the real values barely changes the result: the inputs were not what degraded the faithful model.**
+**Re-run (MAE / cold accuracy (false-cold, false-warm), all robot requests; ChunkedPB: a step budget of 8,192 tokens minus one per decoding request; running prefills first, then the head of the FCFS waiting queue, which needs the full prompt's new blocks to fit; blocks allocated chunk by chunk; step time tokens / 5,600; completion = the engine's real t_done):**
+| cell | tier belief | (a) no admission (DEFAULT) | (b) whole-prompt, seqs 1,024 | chunked, 8,192 tokens, seqs 1,024 |
+|---|---|---|---|---|
+| n16 1x | 0.023 / 0.985 (9, 36) | 0.002 / 0.998 (3, 2) | 0.002 / 0.998 (3, 2) | 0.002 / 0.999 (2, 2) |
+| n16 3:11:2 | 0.069 / 0.944 (27, 75) | 0.019 / 0.979 (29, 10) | 0.019 / 0.979 (30, 9) | 0.021 / 0.978 (31, 9) |
+| halved | 0.065 / 0.937 (32, 70) | 0.027 / 0.968 (40, 12) | 0.086 / 0.909 (133, 15) | 0.078 / 0.917 (120, 14) |
+| n24 | 0.209 / 0.806 (89, 107) | 0.049 / 0.951 (27, 23) | 0.072 / 0.934 (28, 39) | 0.079 / 0.938 (32, 31) |
+| n32 | 0.290 / 0.735 (135, 135) | 0.114 / 0.882 (47, 73) | 0.240 / 0.749 (161, 95) | 0.252 / 0.739 (178, 88) |
+Chunked strata (recall, piece): n16 1x 0.013 / 0.992, 0.021 / 0.979; n16 3:11:2 0.086 / 0.923, 0.095 / 0.893; halved 0.175 / 0.806, 0.182 / 0.773; n24 0.144 / 0.857, 0.082 / 0.920; n32 0.277 / 0.706, 0.161 / 0.821 (no-admission strata in out_noadm.txt: halved 0.15 / 0.837 and 0.172 / 0.779; n32 0.119 / 0.872 and 0.162 / 0.836).
+**Shadow GPU occupancy (pinned plus partial, over capacity) against the engine's kv_cache_usage_perc, medians (p90), sampled at the host_counters times (run start = the first counter sample, error under 1 s):**
+| cell | engine | no admission | whole-prompt admission | chunked admission |
+|---|---|---|---|---|
+| n16 1x | 0.223 (0.41) | 0.265 | 0.211 | 0.217 |
+| n16 3:11:2 | 0.017 (0.34) | 0.081 | 0.065 | 0.065 |
+| halved | 0.358 (0.77) | 0.506, max 3.34 | 0.316 | 0.321 |
+| n24 | 0.203 (0.59) | 0.327 | 0.182 | 0.154 (p90 0.64) |
+| n32 | 0.282 (0.63) | 1.255, max 3.55 | 0.405 (p90 0.89) | 0.353 (p90 0.91) |
+**Mechanism verdict (no variant chosen; the user said: choose by mechanism once inputs are correct, not by validation score):** no admission exceeds 100 percent occupancy at halved, n24 and n32, which the engine cannot do; admission tracks the engine at n16 1x, halved and n24 to within about 0.05 and is the only variant that respects the pool cap; at n32 it is high (p90 0.9 against 0.63) and n16 3:11:2 is too low for every variant (engine 0.017, shadow 0.065); **the shadow still pins more than the pool at n24 and n32 under the chunked variant (pb_pinned_overshoot 2,914 at n24 and 12,106 at n32) and runs behind the engine at high load (pb_queue_stale 414 of 1,019 requests at n32: the engine had already finished a request the shadow still queued); the shadow never fails to grow a running prefill (pb_growth_fail 0 in every cell), so the preemption path is never reached.** **The faithful model is MORE consistent with the engine than no admission on pool occupancy, but it is still not consistent at n24 and n32 and its accuracy is worse at halved, n24 and n32; its mismatch at high load comes from the UNMODELLED mechanisms, not from wrong limits.** Unmodelled: preemption (recompute of the latest running request, scheduler.py:766-811; the count is in no committed log); async scheduling (one step of lookahead, freed blocks reusable a step later; derived on, not logged); multimodal chunk alignment (an image cannot be split across chunks; the encoder budget is not modelled); the KV-offload connector (external hits arrive asynchronously, load_kv_async, scheduler.py:1190-1215; the shadow treats host hits as instant local hits); partial hits beyond the longest-contiguous-run assumption; decode (steps and time not charged beyond one token of budget per decoding request; completion times are the engine's own t_done); the prefill clock (only PREFILL_TOK_S["32BI"] = 5,600 tok/s, no fit).
