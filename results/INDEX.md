@@ -1600,3 +1600,9 @@ E-id: **StudyD258-DEVLAT** (research/EXPERIMENTS.md). Commits 6dfbb8c4 (rescore)
 |---|---|
 | result files | `results/orchestration/live2/oracle/dashcam_shift_step1.json`; `results/orchestration/live2/oracle/dashcam_brier_aprime.json`; scripts `dashcam_shift_step1.py`, `dashcam_brier_aprime.py`; `reports/study_dashcam_diagnosis.md` |
 | headline | Step 1: 47,126 paired pairs, mean live-minus-SH-EP -0.32. COLD-path requests send a median of 3 frames against 11 in SH-EP (body defect; WARM difference is the designed append). A-prime: G1 fail (improvement +0.00033, CI lower -0.00058), G2 fail (rho 0.72, CI -0.54 to 0.83). Stopped. |
+
+## StudyDASH-DIAG headline dashcam share (challenge mAP, cloud-every-instant ceiling): STOP (2026-11-25, Orin)
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/dashcam_share_headline.json`; `experiments/analysis/early1/dashcam_share_headline.py`; `reports/study_dashcam_diagnosis.md` |
+| headline | Control passes (device-only 0.627985 reproduced). Ceiling 0.6657 vs device 0.6280, gap 0.0377, SE 0.0394; 5,038 clips needed vs 300. Three arms share above 1 (base 1.13, state-shares-r1 1.17, fair-c5attr-rr 1.03): the cloud-every-instant stream is not an upper bound. STOP. The COLD-path body-defect label is withdrawn (8d19ad8d). |

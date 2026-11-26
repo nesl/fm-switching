@@ -195,10 +195,11 @@ Paired on identical (clip, t): 47,126 pairs, 155 clips, 24 arms, seeds 4 to 7, 1
 - Not checkable from committed data: JPEG bytes (the live record stores frame identifiers, not bytes),
   and the on-device tier request body (device-local, not recorded).
 
-Classification (pre-registered rule): BODY DEFECT on the COLD path. The model receives a truncated
-context on a cold cache (about 3 frames against about 11). The WARM difference is expected and does not
-on its own explain the shift. The score shift on the COLD path is consistent with the lost history. The
-frame bucket trend is confounded with cache path and is not used as a separate cause.
+Classification (pre-registered rule), CORRECTED: NOT a body defect. The first reading classified the COLD
+path as a body defect. Flash verification (commit 8d19ad8d) found zero mid-episode truncations across 127
+cells. Short cold requests are episode starts and cap restarts, and the gap to SH-EP is a context definition
+shared by all arms (SH-EP pre-roll), not a live-path defect. No COLD-body fix is made. The pre-registered
+frame-count rule fired on a context-definition difference, so the rule's label is withdrawn, not the data.
 
 ## Candidate A-prime: GATE FAILED (2026-11-25), STOP
 
@@ -212,6 +213,34 @@ and seeds, Brier improvement of cloud over device. Script `dashcam_brier_aprime.
   because the CI includes zero.
 
 Both gates fail. No oracle shares computed. The dashcam oracle is not replaced. The dashcam headline stays
-the Nexar challenge metric (D199). The COLD-path body defect is the concrete finding to fix before any
-dashcam measure is re-tested: rebuild the cold request with the full history, then rerun the same
-pre-registered diagnostic and gates.
+the Nexar challenge metric (D199). The COLD-path "body defect" label is withdrawn (see 8d19ad8d); no body fix is made.
+
+
+## CORRECTION (2026-11-25): the COLD-path body defect label is withdrawn
+Flash verification (commit 8d19ad8d) found zero mid-episode truncations across 127 cells. Short cold requests
+are episode starts and cap restarts. The live-versus-SH-EP gap is a context definition (SH-EP pre-roll)
+shared by all arms. No COLD-body fix is made.
+
+## Headline dashcam oracle (Nexar challenge mAP): ceiling gives STOP, not a bound
+
+Method: share = (arm mAP minus device-only mAP) divided by (ceiling mAP minus device-only mAP). Ceiling =
+cloud-every-instant delivered stream (dense simplestream cloud through the cloud Platt map at every trace
+instant, DSMAP Part 2 method). 1x seeds 4 to 7 pooled, one value per source clip, paired clip-cluster
+bootstrap (2000 resamples, seed 0). Script `experiments/analysis/early1/dashcam_share_headline.py`; output
+`results/orchestration/live2/oracle/dashcam_share_headline.json`.
+
+- Positive control passes: device-only mAP reproduces the committed DSMAP value exactly (0.627985).
+- Device-only 0.6280, ceiling 0.6657, gap 0.0377, SE of gap 0.0394. The gap is not resolved.
+- Clips needed to resolve the gap at 95%: about 5,038. Available: 300 (150 positive, 150 negative).
+- Three arms exceed the ceiling, share above 1: base (1.13), state-shares-r1 (1.17), fair-c5attr-rr (1.03).
+  Base mAP 0.6705 is above the ceiling 0.6657. The "cloud every instant" stream is therefore not an upper
+  bound on challenge mAP. AP ranks clips across the stream, so mixing device and cloud scores can beat
+  all-cloud. Under D270 a share above 1 is a hard STOP.
+- Only simplestream has a share CI excluding zero (+0.90, CI +0.01 to +1.83).
+- Minimum detectable difference (2 x 1.96 x SE of share) runs from 31 to 1,719 share units, so no
+  per-arm share is informative at this clip count.
+
+Decision: STOP. The headline dashcam oracle cannot be a cloud-every-instant ceiling. A valid ceiling needs
+a per-instant or per-clip best-of-both choice, which is not deliverable, and it would still need the clip
+count above to resolve the gap. The dashcam headline stays challenge mAP with arm-versus-device-only
+differences reported, not shares.
