@@ -249,6 +249,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 - eco-llm_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
 - eco-llm_n16_s4_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - eco-llm_n16_s5_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
+- eco-llm_n16_s6_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - eco-llm_n8_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - edf_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - edf_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
@@ -267,6 +268,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 - mooncake_n16_s4_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - mooncake_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - mooncake_n16_s5_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
+- mooncake_n16_s6_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - mooncake_n8_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - querystream-proactive_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - querystream-proactive_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30: name did not match the rq30 cell pattern
@@ -285,7 +287,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 
 ## Provenance
 
-- runs dir last commit: be30ac4d
+- runs dir last commit: 5bc9db84
 - scorer score.py last commit: cb9120cc
 - d179_rung2_verdict.py last commit: cd580554
 - build time is deliberately NOT stamped here: the output is byte-deterministic given the input. The git commit of this file is the build time of record.
