@@ -21,3 +21,13 @@ Built and proved on CPU (dry, constructed). **Switch `live2_q2_inflight_exclusio
 **Port-rule counters (arm stats, ABSENT on `-q` and rung 3): `q2_hbwarm_evals` and `q2_inflight_excluded_evals`; the latter must be non-zero in `-q2`.** Dry values: 114 and 112.
 Proofs: positive control rung 3 14,539 / 5a03c2807da3681a and `-q` 12,555 / 41724e38cfaa2eb4; 13 Tier A arms byte-identical at 1,200 s (0 positional, 0 setwise) and `-q` unchanged; `-q2` switch OFF identical to `-q`; switch ON 18,927 rows / be0d89c156910feb, TOUCH 7,353, HOLD_BACK 1, which reproduces the earlier monkeypatch counterfactual exactly. **Dry only, no engine telemetry; the live effect is untested.**
 Push: 4 changed paths (`arms_final_ladder.py`, `arms_v6cfr3.py`, `arms_v6state.py`, `d249_queue_visibility.py`), live2 `5edd1245...` to `5fcf8a2515ea5ea90aa00f3ad4d0e6400eddfc1f` (reproduced independently on the current tip), baselines subtree unchanged `e784d873...`.
+
+## RESULT, GATE (a) 1x s4, scored 2026-11-26T01:56:39Z against the bars above, as reported by the H100 (SA OK, valid; 2 robot kind-2 ReadErrors, robo001 and robo005)
+**FAIL on BOTH conditions.** Reachability met: `q2_inflight_excluded_evals` 105 (>0), `q2_hbwarm_evals` 107, d249 reads 65,777, TOUCH **10,446**, HOLD_BACK **6** (rung 3: 2; `-q`: 87).
+| | cbd | cloud-correct | on-time | acc | SS | dashcam (worst) |
+|---|---|---|---|---|---|---|
+| `-q2` | 82 | 78 | 121/132 | 0.645 | 343 | 7,303 (0.589) |
+| rung 3 (SA OK) | 83 | 82 | 126 | 0.651 | 351 | 8,377 |
+| `-q` | 79 | | 118 | | | 8,719 |
+(1) cbd 82 against the required 86: FAIL (-1; within the replicate spread of 2 but the bar is 86). (2) dashcam -1,074 against a bar of 54: FAIL. Against `-q`: +3 cbd, cloud-correct and on-time; dashcam -1,416.
+**Against the prediction recorded above: HOLD_BACK fell sharply (6 against 87), as predicted; TOUCH rose and OVER-touched (10,446 against rung 3's 2,674, 3.9x; the dry replay predicted 7,353 against 2,954, 2.5x), as flagged. Inference, not tested: the dashcam loss follows the over-touching. Per the prediction the margin is the next suspect and it is NOT re-derived (D259 stands).** One seed, one condition; gate (b) is still running.

@@ -102,6 +102,88 @@ Pre-registration `research/study_q2_stage1_gates_prereg.md`. Report each gate wi
 
 ## USER RULING (2026-11-26T01:26Z): `-q` PRESSURE SEEDS s5-s7 ARE HELD until the two `-q2` gates are read. If `-q2` passes both, `-q2`'s seeds run instead; otherwise the user decides. Keep the `-q` s5-s7 lines `#PENDING-GATE`. The pressure-gate prereg is now `research/study_d276_q_pressure_gates_prereg.md` (the H100 list name `D275_Q_CELLS` is unchanged).
 
+## LINKSYNC DEV BUILD RUNNABLE (2026-11-26T01:56:39Z). WINDOW REQUEST: the boundary AFTER the `-q2` `_kv0.5r_h0.5` cell (ends ~18:15), so both `-q2` cells run on identical code. D265-style protocol, YOU verify.
+```
+PUSH = 29 paths (15 added, 14 modified). BEFORE -> AFTER subtrees under experiments/orchestration:
+  live2          5fcf8a2515ea5ea90aa00f3ad4d0e6400eddfc1f -> ed93608b434938204b49aded2a2cd93e9d7201ea
+  baselines      e784d87321966d4307b7dad418a8d7b8f0b88732 -> 41c430d75ce8ec1fdf8db7fb687bb44733a31d32
+  orchestration  90b2133147c2d2279c6ced0d467091fc2137c8d9 -> 4728683f203e39a0f0e55b2cc6b6b80d178de48f
+Switches link_events and link_sync default OFF, so every existing cell stays byte-identical (light proofs: 15 arms x both mixes at 300 s, 0 positional 0 setwise).
+Install driver v43 (experiments/orchestration/study_frozen_grid_driver_v43.sh, new in this push) at the window as you did v41/v42.
+THEN queue FIRST (jumping the queue), the 9 gate cells:
+covex-v6-fair-final-q-sync 16 4 _c3-11-2_L3_epg_rq30_out-k1-d120_evid-t4800_link_sync
+covex-v6-fair-final-q-sync 16 4 _c3-11-2_L3_epg_rq30_out-k3-d120_evid-t4800_link_sync
+covex-v6-fair-final-q-sync 16 4 _c3-11-2_L3_epg_rq30_out-k5-d120_evid-t4800_link_sync
+covex-v6-fair-final-q-sync-d177 16 4 _c3-11-2_L3_epg_rq30_out-k1-d120_evid-t4800_link_sync
+covex-v6-fair-final-q-sync-d177 16 4 _c3-11-2_L3_epg_rq30_out-k3-d120_evid-t4800_link_sync
+covex-v6-fair-final-q-sync-d177 16 4 _c3-11-2_L3_epg_rq30_out-k5-d120_evid-t4800_link_sync
+covex-v6-fair-final-q-sync-ctl 16 4 _c3-11-2_L3_epg_rq30_out-k1-d120_evid-t4800_link_sync
+covex-v6-fair-final-q-sync-ctl 16 4 _c3-11-2_L3_epg_rq30_out-k3-d120_evid-t4800_link_sync
+covex-v6-fair-final-q-sync-ctl 16 4 _c3-11-2_L3_epg_rq30_out-k5-d120_evid-t4800_link_sync
+```
+Paths:
+```
+experiments/analysis/robot_idle/d262_abandon_check.py
+
+experiments/analysis/robot_idle/d262_dose_readings.py
+
+experiments/analysis/robot_idle/d262_outage_history_cached.py
+
+experiments/analysis/robot_idle/d273_matched_power.py
+
+experiments/analysis/robot_idle/d273_per_question_readout.py
+
+experiments/analysis/robot_idle/d273_true_outage_proofs.py
+
+experiments/analysis/robot_idle/link_e2_window_rule_a.py
+
+experiments/analysis/robot_idle/link_sync_readout.py
+
+experiments/orchestration/baselines/interface.py
+
+experiments/orchestration/live2/arms_final_ladder.py
+
+experiments/orchestration/live2/arms_v6cfr3.py
+
+experiments/orchestration/live2/bridge.py
+
+experiments/orchestration/live2/coordinator.py
+
+experiments/orchestration/live2/cstate.py
+
+experiments/orchestration/live2/d223_dry_digest_identity.py
+
+experiments/orchestration/live2/d262_nested_switch_proofs.py
+
+experiments/orchestration/live2/fleet/emulator.py
+
+experiments/orchestration/live2/fleet/events.py
+
+experiments/orchestration/live2/fleet/trace.py
+
+experiments/orchestration/live2/hybrid/test_hybrid.py
+
+experiments/orchestration/live2/link_read.py
+
+experiments/orchestration/live2/link_sync.py
+
+experiments/orchestration/live2/procsplit.py
+
+experiments/orchestration/live2/run_live2_real.py
+
+experiments/orchestration/live2/schema.py
+
+experiments/orchestration/live2/tests/test_link_events.py
+
+experiments/orchestration/study_frozen_grid_driver_v42.sh
+
+experiments/orchestration/study_frozen_grid_driver_v43.sh
+
+results/orchestration/live2/link/e2_window_rule_a.json
+
+```
+Report per the pre-registration `research/study_linksync_s4_gate_prereg.md` (disclosure above its cells). Port rule: non-zero `link_` sync counter in the main arm, ZERO early releases in the ablation (expected), FIFO order in the control.
+
 ## *** OVERNIGHT RULES UNTIL 08:00 PST 2026-11-26 (user ruling, 2026-11-26T01:55:25Z). THE USER AND THE PLANNER ARE OFFLINE; NOBODY ANSWERS QUESTIONS TONIGHT. ***
 **OPERATIONS (H100 box):** re-enable the watchdog's Claude relaunch for the night (D229); extend `ops/STANDDOWN` through 2026-11-26 23:59 PST (epoch `1795766340`); ONE Claude session on this box, and a resumed session first checks for and ends any older one (NEVER `pkill -f`; use `ps -C` plus grep -v grep); Sonnet by default; poll no faster than every 15 min; terse reports; no em dashes. GPU never idles. An INVALID cell is rerun ONCE at the end of its block. Any STOP: record it and continue with the next unaffected item. NO methodological change overnight: anything needing one is recorded as `OVERNIGHT DECISION, PROVISIONAL` and WAITS.
 **BASE QUEUE (order unchanged):** `-q2` gates (1x s4 then `_kv0.5r_h0.5` s4); D250 s5-s7 (18 cells, rung 3 first per seed); D262 s5 confirm; D257 n20; D262 s4 regime check; D244 s4 remainder; filler.
