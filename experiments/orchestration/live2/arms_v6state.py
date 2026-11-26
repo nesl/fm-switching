@@ -277,6 +277,7 @@ class V6StateArm:
                              ("d261_margin_scope.MARGIN_CF_D259_METHOD_A (arm-scoped)"
                               if self._d249_on() else "cf_margin.MARGIN_CF")),
                      d261_margin_scope=__import__("d261_margin_scope").describe(self),
+                     q4_avoided_rebuild_credit=self._q4_describe(),
                      scorable=not self.dry,
                      d249_queue_visibility=(dict(QV.describe(), enabled=True)
                                             if self._d249_on() else
@@ -287,6 +288,17 @@ class V6StateArm:
                                                       "zero queued-ahead tokens, exactly as "
                                                       "rung 3 prices it")})),
                  source=self.live2_source)
+        return d
+
+    def _q4_describe(self) -> Dict[str, Any]:
+        import q4_avoided_rebuild as _Q4                                       # noqa: PLC0415
+        on = self._q4_on()
+        d: Dict[str, Any] = {"switch": _Q4.Q4_SWITCH, "enabled": bool(on)}
+        if on:
+            d.update(edges_s=list(_Q4.EDGES_S), cold_cached_frac=_Q4.COLD_CACHED_FRAC,
+                     prior_alpha_beta=[_Q4.PRIOR_ALPHA, _Q4.PRIOR_BETA],
+                     harm="_harm_warm(est_tokens_by_session): D162 per-queue-token, counters.weight, D256 cap",
+                     margin_base_on_time=float(self._cf_engine()._margin().value))
         return d
 
     # ---- the warm / cold delivery pair plan_state is scored on -------------------------------
@@ -309,6 +321,38 @@ class V6StateArm:
             on = bool(QV.q2_arm_enables(self)) and self._d249_on()
             self.__dict__["_q2_resolved"] = on
         return bool(on)
+
+    def _q4_on(self) -> bool:
+        """q4 avoided-rebuild credit switch, resolved once per instance and memoised. READ SITE of
+        the credit: `decide` below (computes it and passes `touch_credit` to `plan_state`)."""
+        import q4_avoided_rebuild as _Q4                                       # noqa: PLC0415
+        return _Q4.enabled_cached(self)
+
+    def _q4_credit(self, obs: Observation, sid: str, est_tokens: int) -> float:
+        """credit = P(cold | idle gap) x harm of a cold rebuild of `est_tokens` to the requests
+        queued behind it (`_harm_warm`: D162 per-queue-token coefficient, counters.weight, D256
+        cap). Zero, and counted, when the session has no completed request yet (no idle gap)."""
+        import q4_avoided_rebuild as _Q4                                       # noqa: PLC0415
+        t = _Q4.credit_terms(self, sid, float(obs.now_s))
+        if t is None:
+            self.stats["q4_credit_no_gap"] += 1
+            return 0.0
+        p, b, _gap = t
+        h = self._harm_warm(obs, sid, int(est_tokens))
+        credit = float(p) * float(h)
+        if getattr(self, _Q4.FORCE_ZERO_ATTR, False) is True:
+            credit = 0.0
+        self.stats["q4_credit_n"] += 1
+        self.stats["q4_credit_bin%d_n" % b] += 1
+        self.stats["q4_pcold_bin%d_micro_last" % b] = int(round(p * 1e6))
+        if credit > 0.0:
+            m = int(round(credit * 1000.0))
+            self.stats["q4_credit_nonzero"] += 1
+            self.stats["q4_credit_bin%d_nonzero" % b] += 1
+            self.stats["q4_credit_sum_milli"] += m
+            self.stats["q4_credit_bin%d_milli_sum" % b] += m
+            self.stats["q4_credit_max_milli"] = max(int(self.stats.get("q4_credit_max_milli", 0)), m)
+        return credit
 
     def _d249_inflight(self, obs: Observation) -> tuple:
         """`obs.cloud.in_flight_work`, defensively: () on any arm or harness that does not carry
@@ -563,6 +607,32 @@ class V6StateArm:
                 int(self.stats.get("harm_warm_max_milli", 0)), int(round(h.total * 1000.0)))
         return float(h.total)
 
+    def _q4_record(self, d: Any, credit: float) -> None:
+        """Per-decision record of the margin actually compared and of the credit's effect."""
+        import q4_avoided_rebuild as _Q4                                       # noqa: PLC0415
+        s = self.stats
+        if d.margin is not None:
+            mm = int(round(float(d.margin) * 1e6))
+            s["q4_margin_n"] += 1
+            s["q4_margin_micro_min"] = mm if s.get("q4_margin_micro_min") is None else min(
+                int(s["q4_margin_micro_min"]), mm)
+            s["q4_margin_micro_max"] = max(int(s.get("q4_margin_micro_max", 0)), mm)
+        if d.margin_effective is not None:
+            me = int(round(float(d.margin_effective) * 1e6))
+            s["q4_margin_effective_micro_sum"] += me
+            s["q4_margin_effective_micro_last"] = me
+            s["q4_margin_effective_micro_min"] = me if s.get("q4_margin_effective_micro_min") is None \
+                else min(int(s["q4_margin_effective_micro_min"]), me)
+            s["q4_margin_effective_micro_max"] = max(int(s.get("q4_margin_effective_micro_max", 0)), me)
+        if credit > 0.0 and d.margin_effective is not None:
+            wo = _Q4.would_choose_without(d.candidates, credit, float(d.margin_effective))
+            if d.chosen == "TOUCH":
+                s["q4_touch_chosen_with_credit"] += 1
+                if wo != "TOUCH":
+                    s["q4_touch_added_by_credit"] += 1
+            if d.chosen != wo:
+                s["q4_choice_moved_by_credit"] += 1
+
     def _p_question(self, device_id: str, now_s: float) -> Dict[str, float]:
         """The causal per-session question-rate estimate the rules arm already keeps (D11, D48).
 
@@ -645,6 +715,13 @@ class V6StateArm:
             self.stats["state_decisions"] += 1
             self.stats["state_decisions_with_a_rebuild" if warming
                        else "state_decisions_without_a_rebuild"] += 1
+            # q4: only where a touch can be emitted (a session being rebuilt this epoch keeps
+            # -q2m's WARM / HOLD_BACK / SLICE competition bit for bit). Absent kw when off.
+            _q4kw: Dict[str, Any] = {}
+            _q4c = 0.0
+            if self._q4_on() and not warming:
+                _q4c = self._q4_credit(obs, sid, int(est.get(sid, b) or b))
+                _q4kw["touch_credit"] = _q4c
             d = cf.plan_state(
                 decision_id="st:%s:%d" % (sid, self.stats["state_decisions"]),
                 device_id=str(did),
@@ -656,7 +733,9 @@ class V6StateArm:
                 harm_touch=self._harm_warm(obs, sid, TP_TOUCH_UNCACHED),
                 warm_expressible=bool(warming), host_warm=host_warm,
                 tokens_to_build=u,
-                slice_tokens=getattr(self._rules, "slice_tokens", None))
+                slice_tokens=getattr(self._rules, "slice_tokens", None), **_q4kw)
+            if self._q4_on():
+                self._q4_record(d, _q4c)
             CP.note_abandon(self.stats, d, float(getattr(cf, "budget_ms", 0.0)))
             self.stats["state_chosen_" + str(d.chosen)] += 1
             if d.delta is not None:

@@ -644,7 +644,8 @@ class Counterfactual:
                    harm_warm: float = 0.0, harm_touch: float = 0.0,
                    warm_expressible: Optional[bool] = None,
                    host_warm: bool = False, slice_tokens: Optional[int] = None,
-                   tokens_to_build: int = 0) -> Decision:
+                   tokens_to_build: int = 0,
+                   touch_credit: Optional[float] = None) -> Decision:
         """Warm, touch, keep, reload, hold back or slice (D150's four levers plus keep and reload).
 
         Scored by `w * p_question * (p_warm - p_cold) - harm`, a count of expected ON-TIME CLOUD
@@ -705,16 +706,25 @@ class Counterfactual:
             # 1,438 touches, 12,824 budget refusals and a dashcam collapse from 6,167 on-time to
             # 1,786. The caller now supplies `harm_touch` from the SAME D162 price source the
             # coordinator charges (user ruling, 2026-11-21).
+            _tv = gain(p_on_time_warm, p_on_time_cold, harm_touch)
+            _td = {"lever": "KEEP_GPU_WARM, not a pin",
+                   "harm_source": ("cf_objective.harm_warm_from_queue_"
+                                   "delay on the touch's own uncached "
+                                   "tokens; the coordinator charges the "
+                                   "same model")}
+            # q4 (study_q4_avoided_rebuild_credit_prereg): THE ONE READ OF THE CREDIT. It is ADDED
+            # to the TOUCH value, so it enters `delta = best.value - KEEP.value` and is compared to
+            # `m_eff` at the `deviated` line below. None / 0.0 (every arm but -q4) adds nothing and
+            # leaves `_tv` the identical float.
+            if touch_credit:
+                _tv = _tv + float(touch_credit)
+                _td["avoided_rebuild_credit"] = float(touch_credit)
             cands.append(Candidate("TOUCH",
-                                   value=gain(p_on_time_warm, p_on_time_cold, harm_touch),
+                                   value=_tv,
                                    gain=gain(p_on_time_warm, p_on_time_cold, 0.0),
                                    harm=float(harm_touch),
                                    scored=True,
-                                   detail={"lever": "KEEP_GPU_WARM, not a pin",
-                                           "harm_source": ("cf_objective.harm_warm_from_queue_"
-                                                           "delay on the touch's own uncached "
-                                                           "tokens; the coordinator charges the "
-                                                           "same model")}))
+                                   detail=_td))
             cands.append(Candidate("KEEP", value=0.0, gain=0.0, harm=0.0, scored=True,
                                    detail={"lever": "do nothing; the reference option"}))
             cands.append(Candidate("RELOAD", value=(gain(p_on_time_warm, p_on_time_cold, harm_warm)

@@ -309,6 +309,11 @@ class DeficitFeedMixin:
         return super().decide(obs)                                         # type: ignore[misc]
 
     def live2_completed(self, rec: Dict[str, Any]) -> None:
+        # q4: the in-run cold-fraction estimator learns from THIS arm's own completions. One memoised
+        # instance lookup when off.
+        import q4_avoided_rebuild as _Q4                                       # noqa: PLC0415
+        if _Q4.enabled_cached(self):
+            _Q4.observe(self, rec)
         if getattr(self, "_feed_on", False):
             self._feed.observe_completion(
                 device_id=rec.get("device_id"), kind=rec.get("kind"),
