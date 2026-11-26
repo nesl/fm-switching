@@ -37,3 +37,12 @@ cloud-correct, device-correct and cloud accuracy on served beside it; an unfloor
 UNFLOORED; A FAIL IS A FAIL, with the margin, quantile and bins untouched.**
 **Scope: one seed per condition. The 1x failure is not evidence about either pressure condition, and neither
 is evidence about the other.**
+
+## RESULT, GATE (a) `_kv0.5r_h0.5` s4, scored 2026-11-26T00:03Z against the rule above, as reported by the H100 and re-checked here
+**PASS.** Post-push, valid (SA OK, 0 errors). Reachability met: TOUCH 787 (rung 3 1,434), `d249_queued_ahead_reads` 60,738 (absent on rung 3), priced 57,719, capped 2,151.
+| | cbd | cloud-correct | device (standing) | on-time | acc served | SS | dashcam (worst) |
+|---|---|---|---|---|---|---|---|
+| `-q` | **77** | 64 | 13 (41) | 91/132 | 0.703 | 320 | 6,759 (0.541) |
+| rung 3, D250 s4 (SA OK) | 72 | 49 | 23 (60) | 72 | 0.681 | 311 | 6,112 (0.454) |
+(1) cbd 77 >= 75: PASS (+5). (2) dashcam +647, bar 154: PASS. **Cloud-only +15 correct, +19 on-time: the pass is cloud-earned** (device share 13 of 77 against 23 of 72).
+**Scope: ONE SEED, ONE CONDITION.** It is the opposite sign from the 1x gate (`3ce9ba27`, FAIL at -4). Nothing here changes that failure and nothing extends this pass to other seeds or conditions.
