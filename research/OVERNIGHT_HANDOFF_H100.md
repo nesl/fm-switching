@@ -102,6 +102,17 @@ Pre-registration `research/study_q2_stage1_gates_prereg.md`. Report each gate wi
 
 ## USER RULING (2026-11-26T01:26Z): `-q` PRESSURE SEEDS s5-s7 ARE HELD until the two `-q2` gates are read. If `-q2` passes both, `-q2`'s seeds run instead; otherwise the user decides. Keep the `-q` s5-s7 lines `#PENDING-GATE`. The pressure-gate prereg is now `research/study_d276_q_pressure_gates_prereg.md` (the H100 list name `D275_Q_CELLS` is unchanged).
 
+## *** OVERNIGHT RULES UNTIL 08:00 PST 2026-11-26 (user ruling, 2026-11-26T01:55:25Z). THE USER AND THE PLANNER ARE OFFLINE; NOBODY ANSWERS QUESTIONS TONIGHT. ***
+**OPERATIONS (H100 box):** re-enable the watchdog's Claude relaunch for the night (D229); extend `ops/STANDDOWN` through 2026-11-26 23:59 PST (epoch `1795766340`); ONE Claude session on this box, and a resumed session first checks for and ends any older one (NEVER `pkill -f`; use `ps -C` plus grep -v grep); Sonnet by default; poll no faster than every 15 min; terse reports; no em dashes. GPU never idles. An INVALID cell is rerun ONCE at the end of its block. Any STOP: record it and continue with the next unaffected item. NO methodological change overnight: anything needing one is recorded as `OVERNIGHT DECISION, PROVISIONAL` and WAITS.
+**BASE QUEUE (order unchanged):** `-q2` gates (1x s4 then `_kv0.5r_h0.5` s4); D250 s5-s7 (18 cells, rung 3 first per seed); D262 s5 confirm; D257 n20; D262 s4 regime check; D244 s4 remainder; filler.
+**BRANCHES (decide yourself, no one to ask):**
+1. `-q2` gates against the pre-registered bars in `research/study_q2_stage1_gates_prereg.md`, `-q`'s result beside each. IF both PASS: queue `-q2` s5-s7 at 1x and at `_kv0.5r_h0.5` (6 cells) right after D250 s5-s7. ELSE IF 1x FAILS and h0.5 PASSES: queue nothing for `-q2`, write the readout. ELSE: queue nothing, write the readout. Flash scores the gates; you report the figures.
+2. LINKSYNC: flash will send a WINDOW REQUEST when the sync arm passes its light checks. Then push at the next cell boundary with YOU verifying the subtree hashes (hold lists, stop pusher, WINDOW OPEN from your single session). Then the s4 gate, 9 cells, JUMPS THE QUEUE (prereg `research/study_linksync_s4_gate_prereg.md`). No further LINKSYNC cells. Device accuracy in the main currency stays 0.257732.
+3. D258 deadline cells (13): IF the gate report is clean, queue after D244 (sensitivity only); ELSE hold.
+4. D262 seeds 5-7 (17): IF the s4 regime check passes its rule, queue after D258; ELSE hold.
+5. D244 seed 5: HOLD in all cases.
+**REPORT** only state changes, results and failures, in seed batches for D250. **MORNING:** contribute the cell list and any STOP or INVALID to flash by 06:30 so `research/MORNING_SUMMARY_2026-11-26.md` can be written by 07:00.
+
 ## FLASH STATE (2026-11-26T00:32:06Z): `-q2` stage 1 is being built on flash (new arm, in-flight rows excluded from the HOLD_BACK harm). Two gate cells at s4 (1x and `_kv0.5r_h0.5`) will JUMP THE QUEUE once proven and pushed through a D265-style window; I will send the lines and a window request then. Nothing for the H100 now. Pre-registration: `research/study_q2_stage1_gates_prereg.md`.
 
 ## USER RULINGS (2026-11-26T00:05Z): NESTOUT HELD. FILL THE ACCELERATOR WITH THE D258 GATE, THEN D250 s5-s7.
