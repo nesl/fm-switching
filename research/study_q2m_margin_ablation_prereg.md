@@ -40,3 +40,8 @@ Reachability: TOUCH 1,336 (rung 3 2,674; `-q` 906; `-q2` 10,446), HOLD_BACK 3 (2
 | `-q` | 79 | | 118 | | | 8,719 | 906 | 87 |
 | `-q2` | 82 | 78 | 121 | 0.645 | 343 | 7,303 | 10,446 | 6 |
 **Observations:** the margin alone took TOUCH from 10,446 to 1,336 (7.8x down, below rung 3's 2,674; the dry predicted 1,667), restored dashcam to within 12 of rung 3 (8,365 against 7,303), and put cbd at 85, tying rung 3's own replicate (`_rep2` 85) and 1 under the pre-registered bar of 86. A fail is a fail: the bar was fixed before the cell. Gate (b) is running (ends about 20:09); the D285 branch applies after it.
+
+## AMENDMENT D286, 2026-11-26T03:58:19Z, BEFORE THE `_kv0.5r_h0.5` CELL ENDS (about 20:09) AND BEFORE ITS RESULT IS KNOWN (user ruling)
+1. **The 1x verdict STANDS as a FAIL under its pre-registered bar (cbd 85 against 86).** It is recorded as a TIE with rung 3 at 1x (rung 3 83, its `_rep2` 85); nothing is re-scored.
+2. **Branch for `-q2m` ONLY (replaces the D285 branch for this arm):** IF the `_kv0.5r_h0.5` cell PASSES its pre-registered bar (cbd >= 75 AND dashcam not worse than 6,112 beyond 154), queue `-q2m` s5, s6, s7 at 1x and at `_kv0.5r_h0.5` (6 cells) AFTER the D250 s5-s7 block, with PER-SEED readouts beside rung 3 at the same seeds. **The 1x seeds are labelled a "no worse than rung 3" CHECK, not a gate.** IF it FAILS, queue NOTHING and rung 3 stays the candidate. In every case the `-q` pressure seeds stay held.
+3. **The live margin must be CONFIRMED from the `-q2m` decision log (MARGIN read 0.6582) and stated in the morning summary** (the 1x live cell's margin was not readable from the outputs the H100 sees; the dry census is the only proof so far).
