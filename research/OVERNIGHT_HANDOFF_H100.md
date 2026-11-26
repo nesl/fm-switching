@@ -91,7 +91,7 @@ the headline at plotting time.**
 
 ## FLASH STATE NOTE (2026-11-25T23:58Z). NOTHING FOR THE H100 UNLESS STATED.
 **Task:** user ruled a new dev line: live link state (`NetworkState.connected`, connectivity events) plus policy-controlled post-outage sync, so NESTOUT tests a policy that can see and respond to an outage. It SUPERSEDES D273 "frames lost". Flash is scoping it (hours A to F, reuse of the NESTOUT build, new dose, design choices not stated); no build before the user rules if it exceeds 12 h or needs an unstated choice.
-**Open (user):** (1) hold or keep the NESTOUT true-outage push and scope A, now that the new line supersedes its semantics and will touch trace.py again (recommend hold, one window later); (2) scope A lacks the k=1 control cell; (3) baselines already read `connected` at many sites, so a live `connected` changes their behaviour in outage cells: live for all arms or ours only.
+**Open (user):** (1) hold or keep the NESTOUT true-outage push and scope A, now that the new line supersedes its semantics and will touch trace.py again (recommend hold, one window later); (2) scope A lacks the k=1 control cell; (3) CORRECTED: baselines read `connected` only on DASHCAM streams (`cstate.py:660`, robots are not in `obs.streams`), so with a robot-only outage a live link signal changes no baseline; a robot link needs a new Observation field. Scoping: about 55 h, `research/study_linkstate_sync_scope.md`; staged A+E first.
 **H100:** no WINDOW REQUEST for NESTOUT will be sent at 16:15 unless the user says so. Queue as ruled stands.
 
 ## QUEUE RE-PRIORITISED (user ruling, 2026-11-25T23:46:42Z). SUPERSEDES THE ORDER BELOW WHERE THEY DISAGREE.
