@@ -1,4 +1,6 @@
-# D275 PRE-REGISTRATION: THE TWO `-q` PRESSURE GATES, FIXED BEFORE EITHER CELL RUNS
+# D276 PRE-REGISTRATION: THE TWO `-q` PRESSURE GATES, FIXED BEFORE EITHER CELL RUNS
+
+**RENAMED 2026-11-26T01:26Z by user ruling from `study_d275_q_pressure_gates_prereg.md`: the policy log numbers the 1x gate pass-rule amendment D275 and the pressure-gate test D276. Content unchanged. Commit messages and the H100 list name `D275_Q_CELLS` keep the old label and are not rewritten.**
 
 **Committed 2026-11-25T23:29:03Z. NEITHER CELL HAS RUN AND NO FIGURE FROM EITHER EXISTS.**
 **The 1x gate failure stands (`3ce9ba27`) and `-q` s5 to s7 at 1x DO NOT RUN.**

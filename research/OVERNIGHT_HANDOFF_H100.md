@@ -100,6 +100,8 @@ AFTER  live2 5fcf8a2515ea5ea90aa00f3ad4d0e6400eddfc1f  baselines e784d87321966d4
 ```
 Pre-registration `research/study_q2_stage1_gates_prereg.md`. Report each gate with `q2_inflight_excluded_evals` non-zero, `state_chosen_TOUCH`, the HOLD_BACK count, and `-q`'s own result beside it.
 
+## USER RULING (2026-11-26T01:26Z): `-q` PRESSURE SEEDS s5-s7 ARE HELD until the two `-q2` gates are read. If `-q2` passes both, `-q2`'s seeds run instead; otherwise the user decides. Keep the `-q` s5-s7 lines `#PENDING-GATE`. The pressure-gate prereg is now `research/study_d276_q_pressure_gates_prereg.md` (the H100 list name `D275_Q_CELLS` is unchanged).
+
 ## FLASH STATE (2026-11-26T00:32:06Z): `-q2` stage 1 is being built on flash (new arm, in-flight rows excluded from the HOLD_BACK harm). Two gate cells at s4 (1x and `_kv0.5r_h0.5`) will JUMP THE QUEUE once proven and pushed through a D265-style window; I will send the lines and a window request then. Nothing for the H100 now. Pre-registration: `research/study_q2_stage1_gates_prereg.md`.
 
 ## USER RULINGS (2026-11-26T00:05Z): NESTOUT HELD. FILL THE ACCELERATOR WITH THE D258 GATE, THEN D250 s5-s7.
