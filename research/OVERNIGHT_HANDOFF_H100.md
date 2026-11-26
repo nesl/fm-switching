@@ -89,6 +89,17 @@ counts that let either reading be computed later. That is D251 working as intend
 the headline at plotting time.**
 **Item 4 means the push no longer needs a user decision. It needs the D265 proof to pass and your window.**
 
+## `-q2` STAGE 1 PROVEN (2026-11-26T01:10:06Z). WINDOW REQUEST: next boundary, D265 protocol. Gate cells jump the queue AFTER the push.
+```
+GATE LINES (queue after the push, both s4, in this order):
+  covex-v6-fair-final-q2 16 4 _L3_epg_rq30
+  covex-v6-fair-final-q2 16 4 _kv0.5r_h0.5_L3_epg_rq30
+PUSH: 4 paths, experiments/orchestration/live2/{arms_final_ladder,arms_v6cfr3,arms_v6state,d249_queue_visibility}.py
+BEFORE live2 5edd1245654e56539474ff7fb39cd25f13beaf94  baselines e784d87321966d4307b7dad418a8d7b8f0b88732
+AFTER  live2 5fcf8a2515ea5ea90aa00f3ad4d0e6400eddfc1f  baselines e784d87321966d4307b7dad418a8d7b8f0b88732 (unchanged)
+```
+Pre-registration `research/study_q2_stage1_gates_prereg.md`. Report each gate with `q2_inflight_excluded_evals` non-zero, `state_chosen_TOUCH`, the HOLD_BACK count, and `-q`'s own result beside it.
+
 ## FLASH STATE (2026-11-26T00:32:06Z): `-q2` stage 1 is being built on flash (new arm, in-flight rows excluded from the HOLD_BACK harm). Two gate cells at s4 (1x and `_kv0.5r_h0.5`) will JUMP THE QUEUE once proven and pushed through a D265-style window; I will send the lines and a window request then. Nothing for the H100 now. Pre-registration: `research/study_q2_stage1_gates_prereg.md`.
 
 ## USER RULINGS (2026-11-26T00:05Z): NESTOUT HELD. FILL THE ACCELERATOR WITH THE D258 GATE, THEN D250 s5-s7.

@@ -15,3 +15,9 @@ The dry replay of this exact change (scratch monkeypatch, 40:40:20 posted dry ce
 
 ## Unchanged
 A fail is a fail; the margin, quantile and bins are untouched; an unfloored dashcam delta is reported as unfloored; robot on-time is never quoted alone. Proofs required before any cell: every other arm byte-identical to main; `-q2` with the switch off identical to `-q`; Step 2b decision diff; negative control; push only through a D265-style window.
+
+## AMENDMENT 2026-11-26T01:10:06Z, BEFORE ANY `-q2` CELL EXISTS: build record and the named counters
+Built and proved on CPU (dry, constructed). **Switch `live2_q2_inflight_exclusion`** (instance-level, default OFF; a truthy class attribute raises). **READ SITE:** `arms_v6state.py` `_queued_behind` branch at `:518` (`if not include_inflight and self._q2_on()`), called with include_inflight=False from the HOLD_BACK/WARM call at `:640`; the TOUCH harm call is unchanged and still includes the in-flight rows.
+**Port-rule counters (arm stats, ABSENT on `-q` and rung 3): `q2_hbwarm_evals` and `q2_inflight_excluded_evals`; the latter must be non-zero in `-q2`.** Dry values: 114 and 112.
+Proofs: positive control rung 3 14,539 / 5a03c2807da3681a and `-q` 12,555 / 41724e38cfaa2eb4; 13 Tier A arms byte-identical at 1,200 s (0 positional, 0 setwise) and `-q` unchanged; `-q2` switch OFF identical to `-q`; switch ON 18,927 rows / be0d89c156910feb, TOUCH 7,353, HOLD_BACK 1, which reproduces the earlier monkeypatch counterfactual exactly. **Dry only, no engine telemetry; the live effect is untested.**
+Push: 4 changed paths (`arms_final_ladder.py`, `arms_v6cfr3.py`, `arms_v6state.py`, `d249_queue_visibility.py`), live2 `5edd1245...` to `5fcf8a2515ea5ea90aa00f3ad4d0e6400eddfc1f` (reproduced independently on the current tip), baselines subtree unchanged `e784d873...`.
