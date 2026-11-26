@@ -95,6 +95,8 @@ RUNG3_Q2M = "covex-v6-fair-final-q2m"
 # q4 (study_q4_avoided_rebuild_credit_prereg): `-q2m` plus the avoided-rebuild credit on TOUCH
 # (`q4_avoided_rebuild.Q4_SWITCH`). SAME CLASS and constructor as RUNG3_Q2M with one more switch.
 RUNG3_Q4 = "covex-v6-fair-final-q4"
+# q4b (D290 iteration 2): `-q4` plus the next-question basis (`q4_avoided_rebuild.Q4B_SWITCH`).
+RUNG3_Q4B = "covex-v6-fair-final-q4b"
 # link_events line: `-q` plus the arm-side READ of `Observation.device_links` (decision-neutral).
 RUNG3_LINK = "covex-v6-fair-final-q-link"
 # link_sync line: `-q` plus post-outage sync control. "ours" = priority release (form iv) and the
@@ -332,6 +334,17 @@ def _set_q4(arm: Any) -> None:
                                 % (_Q4.Q4_SWITCH, type(arm).__name__))
 
 
+def _set_q4b(arm: Any) -> None:
+    import q4_avoided_rebuild as _Q4                                       # noqa: PLC0415
+    if not _Q4.arm_enables(arm):
+        raise LadderSwitchError("q4b requires the q4 switch on the same instance")
+    object.__setattr__(arm, _Q4.Q4B_SWITCH, True)
+    arm.__dict__.pop("_q4b_resolved", None)
+    if _Q4.q4b_arm_enables(arm) is not True or not arm._q4b_on():         # pragma: no cover
+        raise LadderSwitchError("%s did not take on the instance of %s"
+                                % (_Q4.Q4B_SWITCH, type(arm).__name__))
+
+
 def _set_cold_unlatch(arm: Any) -> None:
     """Turn D261 (a rejection is not proof of cold) on for THIS INSTANCE and read it back.
 
@@ -357,6 +370,7 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                q2_inflight_exclusion: bool = False,
                q2m_margin: bool = False,
                q4_credit: bool = False,
+               q4b_basis: bool = False,
                cold_unlatch: Any = None,
                link_read: bool = False,
                link_sync: Any = None, link_currency: str = "acc", link_tiebreak: str = "hold",
@@ -407,6 +421,8 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         _set_q2m(arm)
     if q4_credit:
         _set_q4(arm)
+    if q4b_basis:
+        _set_q4b(arm)
     # D261 (user ruling 2026-11-25 item 2), DEV LINE ONLY. `cold_unlatch=None` means "follow the
     # D249 switch", so `covex-v6-fair-final-q` carries it and `covex-v6-fair-final` does not:
     # `make_rung3()` with no arguments is still exactly rung 3. An explicit False is how the

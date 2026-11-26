@@ -212,3 +212,83 @@ def would_choose_without(cands: Any, credit: float, m_eff: float) -> str:
     if best_v is None or best_n == "KEEP":
         return "KEEP"
     return best_n if best_v - 0.0 > float(m_eff) else "KEEP"
+
+
+# ---------------------------------------------------------------------------------------------
+# q4b (iteration 2, user ruling D290): the credit's BASIS, nothing else. Switch default OFF,
+# instance-level, requires the q4 switch. Every constant above is unchanged.
+#   (a) harm is priced against the EXPECTED queue at question time: the running mean, within this
+#       run, of the harm a cold rebuild of the asking session would do to the rows queued at each
+#       ROBOT QUESTION ARRIVAL (`arms_v6state._q4b_observe_arrivals`, from `obs.recall`, first
+#       sight of a query id). The same `_harm_warm` function, coefficient, weights and cap as q4.
+#       The mean queued-ahead uncached tokens at those instants (`_d249_tok_sum`) is recorded
+#       beside it. The credit does NOT read the current queue. No arrival yet: credit 0, counted.
+#   (b) P(cold) is evaluated at the PREDICTED gap to the next question = idle so far + the
+#       device's expected time to next question, `max(next_question_s - now_s, 0)` from
+#       `_p_question` (the D11/D48 per-device causal EWMA `_rules._gap_ewma` and `_last_q_t`).
+Q4B_SWITCH = "live2_q4b_next_question_basis"
+
+
+class Q4bSwitchError(RuntimeError):
+    """The q4b switch was a truthy CLASS attribute, a non-bool, or on without q4."""
+
+
+def q4b_arm_enables(arm: Any) -> bool:
+    try:
+        own = vars(arm)
+    except TypeError:                                                          # pragma: no cover
+        own = {}
+    if Q4B_SWITCH not in own:
+        for klass in type(arm).__mro__:
+            if bool(klass.__dict__.get(Q4B_SWITCH, False)):
+                raise Q4bSwitchError("%s is ON as a CLASS attribute of %s; q4b requires an "
+                                     "arm-scoped INSTANCE attribute" % (Q4B_SWITCH, klass.__name__))
+    v = own.get(Q4B_SWITCH, False)
+    if not isinstance(v, bool):
+        raise Q4bSwitchError("%s must be a bool, got %r" % (Q4B_SWITCH, type(v).__name__))
+    if v and not arm_enables(arm):
+        raise Q4bSwitchError("q4b requires the q4 switch on the same instance")
+    return v
+
+
+def q4b_enabled_cached(arm: Any) -> bool:
+    d = vars(arm)
+    v = d.get("_q4b_resolved")
+    if v is None:
+        v = q4b_arm_enables(arm)
+        d["_q4b_resolved"] = v
+    return bool(v)
+
+
+class ArrivalMean:
+    """Running mean of the per-arrival harm and of the queued-ahead uncached tokens."""
+
+    def __init__(self) -> None:
+        self.n = 0
+        self.harm_sum = 0.0
+        self.tok_sum = 0
+        self.seen: set = set()
+
+    def add(self, qid: str, harm: float, tokens: int) -> bool:
+        if qid in self.seen:
+            return False
+        self.seen.add(qid)
+        self.n += 1
+        self.harm_sum += float(harm)
+        self.tok_sum += int(tokens)
+        return True
+
+    def mean_harm(self) -> Optional[float]:
+        return (self.harm_sum / self.n) if self.n else None
+
+    def mean_tokens(self) -> Optional[float]:
+        return (self.tok_sum / self.n) if self.n else None
+
+
+def arrivals_of(arm: Any) -> ArrivalMean:
+    d = vars(arm)
+    a = d.get("_q4b_arrivals")
+    if a is None:
+        a = ArrivalMean()
+        d["_q4b_arrivals"] = a
+    return a

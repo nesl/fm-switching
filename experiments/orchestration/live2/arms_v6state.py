@@ -328,17 +328,58 @@ class V6StateArm:
         import q4_avoided_rebuild as _Q4                                       # noqa: PLC0415
         return _Q4.enabled_cached(self)
 
-    def _q4_credit(self, obs: Observation, sid: str, est_tokens: int) -> float:
+    def _q4b_on(self) -> bool:
+        import q4_avoided_rebuild as _Q4                                       # noqa: PLC0415
+        return _Q4.q4b_enabled_cached(self)
+
+    def _q4b_observe_arrivals(self, obs: Observation, est: Dict[str, Any], built: Dict[str, Any]) -> None:
+        """q4b (a): at each ROBOT question's first appearance in `obs.recall`, record the harm a
+        cold rebuild of its session would do to the rows queued at that instant, and the queued-ahead
+        uncached tokens. READ by `_q4_credit` through `arrivals_of(self).mean_harm()`."""
+        import q4_avoided_rebuild as _Q4                                       # noqa: PLC0415
+        arr = _Q4.arrivals_of(self)
+        roster = getattr(self._rules, "_roster", None) or {}
+        devs = roster.get("devices") or {}
+        sdev = roster.get("session_device") or {}
+        for qy in (obs.recall or ()):
+            qid = str(getattr(qy, "query_id", ""))
+            sid = str(getattr(qy, "session_id", ""))
+            if not qid or qid in arr.seen:
+                continue
+            if str((devs.get(sdev.get(sid)) or {}).get("type")) != "robot":
+                continue
+            tok = int(self._d249_tok_sum(obs))
+            h = self._harm_warm(obs, sid, int(est.get(sid, built.get(sid, 0)) or built.get(sid, 0) or 0))
+            if arr.add(qid, h, tok):
+                self.stats["q4b_arrivals_n"] += 1
+                self.stats["q4b_arrival_tok_sum"] += tok
+                self.stats["q4b_arrival_harm_milli_sum"] += int(round(h * 1000.0))
+
+    def _q4_credit(self, obs: Observation, sid: str, est_tokens: int, horizon_s: Optional[float] = None) -> float:
         """credit = P(cold | idle gap) x harm of a cold rebuild of `est_tokens` to the requests
         queued behind it (`_harm_warm`: D162 per-queue-token coefficient, counters.weight, D256
         cap). Zero, and counted, when the session has no completed request yet (no idle gap)."""
         import q4_avoided_rebuild as _Q4                                       # noqa: PLC0415
-        t = _Q4.credit_terms(self, sid, float(obs.now_s))
-        if t is None:
-            self.stats["q4_credit_no_gap"] += 1
-            return 0.0
-        p, b, _gap = t
-        h = self._harm_warm(obs, sid, int(est_tokens))
+        if horizon_s is None:
+            t = _Q4.credit_terms(self, sid, float(obs.now_s))
+            if t is None:
+                self.stats["q4_credit_no_gap"] += 1
+                return 0.0
+            p, b, _gap = t
+            h = self._harm_warm(obs, sid, int(est_tokens))
+        else:
+            # q4b: P(cold) at the PREDICTED gap to the next question; harm = running mean over robot
+            # question arrivals (NOT the current queue).
+            t = _Q4.credit_terms(self, sid, float(obs.now_s) + float(horizon_s))
+            if t is None:
+                self.stats["q4_credit_no_gap"] += 1
+                return 0.0
+            p, b, _gap = t
+            mh = _Q4.arrivals_of(self).mean_harm()
+            if mh is None:
+                self.stats["q4b_credit_no_arrival"] += 1
+                return 0.0
+            h = float(mh)
         credit = float(p) * float(h)
         if getattr(self, _Q4.FORCE_ZERO_ATTR, False) is True:
             credit = 0.0
@@ -658,6 +699,10 @@ class V6StateArm:
         act = self._rules.decide(obs)
         if not self.plan_state:
             return act
+        if self._q4b_on():
+            _r0 = getattr(self._rules, "_roster", None) or {}
+            self._q4b_observe_arrivals(obs, _r0.get("est_tokens_by_session") or {},
+                                       _r0.get("built_tokens_by_session") or {})
         g = self._rules.guard_state(obs)
         if g["active"]:
             # Same obligation as v5-full's: the guard has just shed background warming, so this
@@ -720,7 +765,11 @@ class V6StateArm:
             _q4kw: Dict[str, Any] = {}
             _q4c = 0.0
             if self._q4_on() and not warming:
-                _q4c = self._q4_credit(obs, sid, int(est.get(sid, b) or b))
+                if self._q4b_on():
+                    _q4c = self._q4_credit(obs, sid, int(est.get(sid, b) or b),
+                                           horizon_s=max(float(q["next_question_s"]) - float(obs.now_s), 0.0))
+                else:
+                    _q4c = self._q4_credit(obs, sid, int(est.get(sid, b) or b))
                 _q4kw["touch_credit"] = _q4c
             d = cf.plan_state(
                 decision_id="st:%s:%d" % (sid, self.stats["state_decisions"]),
