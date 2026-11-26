@@ -616,3 +616,6 @@ Carried forward from the standing prereg and AMENDMENT 2, unchanged and binding,
 **Every result file this study writes goes under `results/orchestration/live2/robot_idle/` or the frozen-test run
 tree, with a `_provenance` stamp, and is indexed in `results/INDEX.md` with its E-id row in
 `research/EXPERIMENTS.md`.**
+
+## AMENDMENT 2026-11-26T00:05Z, BEFORE ANY SCOPE A CELL: scope A INCLUDES THE k=1 RUNG (user ruling).
+Scope A is now 2 arms x k{1,3,5} x s{4,5} = **12 cells**, not 8 (about 4.3 h at 1,295 s). Reason: the census needs the k=1 control cell for 2 of the 7 matched questions, so without it only 5 are matched and a 5-of-5 flip would be required. The scope is HELD pending the link-state and sync build, and the semantics will be superseded by it; this amendment fixes the cell set for whichever semantics runs. The two arms are not named in the original text and are still to be fixed by the user.

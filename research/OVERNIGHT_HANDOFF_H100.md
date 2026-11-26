@@ -89,6 +89,16 @@ counts that let either reading be computed later. That is D251 working as intend
 the headline at plotting time.**
 **Item 4 means the push no longer needs a user decision. It needs the D265 proof to pass and your window.**
 
+## USER RULINGS (2026-11-26T00:05Z): NESTOUT HELD. FILL THE ACCELERATOR WITH THE D258 GATE, THEN D250 s5-s7.
+```
+NOW   D258 gate, 2 cells, sensitivity only, main deadlines unchanged, s4, robot deadline 1.5 s:
+        covex-v6-fair-final 16 4 _L1.5_epg_rq30_preD249
+        simplestream        16 4 _L1.5_epg_rq30
+THEN  D250 s5-s7 (rung 3 first at s6 and s7), THEN the queue as ruled in D277 (the H100 holds its text)
+HELD  NESTOUT true-outage push AND scope A, until the link-state and sync build is scoped and ruled; ONE window later. No window request.
+```
+The D258 pending lines (13) stay `#PENDING-GATE` on the gate report. Report the gate cells with the three robot figures together and the question-feasibility count at 1.5 s (prompt over 6,750 tokens against uncached over 6,750), split across the run halves.
+
 ## FLASH STATE NOTE (2026-11-25T23:58Z). NOTHING FOR THE H100 UNLESS STATED.
 **Task:** user ruled a new dev line: live link state (`NetworkState.connected`, connectivity events) plus policy-controlled post-outage sync, so NESTOUT tests a policy that can see and respond to an outage. It SUPERSEDES D273 "frames lost". Flash is scoping it (hours A to F, reuse of the NESTOUT build, new dose, design choices not stated); no build before the user rules if it exceeds 12 h or needs an unstated choice.
 **Open (user):** (1) hold or keep the NESTOUT true-outage push and scope A, now that the new line supersedes its semantics and will touch trace.py again (recommend hold, one window later); (2) scope A lacks the k=1 control cell; (3) CORRECTED: baselines read `connected` only on DASHCAM streams (`cstate.py:660`, robots are not in `obs.streams`), so with a robot-only outage a live link signal changes no baseline; a robot link needs a new Observation field. Scoping: about 55 h, `research/study_linkstate_sync_scope.md`; staged A+E first.
