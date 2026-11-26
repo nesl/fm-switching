@@ -142,6 +142,12 @@ def build_parser() -> argparse.ArgumentParser:
                          "--outage-placement evidence; same value for every k at a seed")
     ap.add_argument("--outage-t0-derivation", default="",
                     help="E1: free text recorded in the trace meta (how t0 was chosen)")
+    # PER-DEVICE UPLINK RATE (D75 default 13.6 Mbps for every device). DEFAULT None = unchanged.
+    ap.add_argument("--robot-uplink-mbps", type=float, default=None,
+                    help="uplink rate in Mbps for EVERY robot device (ids robo*), for the WHOLE run, "
+                         "independent of any outage; every other device keeps the D75 default 13.6. "
+                         "At n16 _c3-11-2 the 11 robots equal the k=11 outage victim set. It is an "
+                         "emulator setting and does NOT enter the trace directory name. None = off")
     # link_events switch: DEFAULT OFF. On, the emulator emits `connectivity` events from the
     # trace's outage meta and the coordinator keeps a per-device link table published as
     # `Observation.device_links`. Meaningless without an outage (no events then, byte-identical).
@@ -489,6 +495,7 @@ def run(a) -> Dict[str, Any]:
                           if tmeta.get("outage") else None),
         # link_events: present in the header ONLY when on, so an off header is the old header.
         **({} if not a.link_events else dict(link_events=True)),
+        **({} if a.robot_uplink_mbps is None else dict(robot_uplink_mbps=float(a.robot_uplink_mbps))),
         **({} if not getattr(a, "_sync_on", False) else dict(link_sync=True)))
     (rdir / "header.json").write_text(json.dumps(header, indent=1, default=str) + "\n")
 
@@ -779,6 +786,16 @@ def _emulator(EM, tdir: Path, br, a):
         kw["link_events"] = True
     if getattr(a, "_sync_on", False):
         kw["link_sync_hold"] = True
+    if a.robot_uplink_mbps is not None:
+        import links as LK
+        rate = float(a.robot_uplink_mbps)
+        if not rate > 0.0:
+            raise SystemExit("--robot-uplink-mbps must be > 0; refused")
+        robots = sorted({str(r.get("device_id")) for r in map(json.loads, open(Path(tdir) / "trace.jsonl"))
+                         if str(r.get("device_id", "")).startswith("robo")})
+        if not robots:
+            raise SystemExit("--robot-uplink-mbps given but the trace holds no robo* device; refused")
+        kw["link_by_device"] = {d: LK.LinkSpec(uplink_mbps=rate) for d in robots}
     return EM.FleetEmulator(tdir, br, a.mode, realtime=True, drain_s=a.drain_s, **kw)
 
 
