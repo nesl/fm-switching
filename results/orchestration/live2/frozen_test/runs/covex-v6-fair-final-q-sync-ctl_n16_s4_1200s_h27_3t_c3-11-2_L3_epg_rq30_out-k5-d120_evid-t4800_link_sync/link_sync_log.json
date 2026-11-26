@@ -1,0 +1,334 @@
+{
+ "counts": {
+  "link_sync_pulls_sent": 5
+ },
+ "arm_link_counters": {
+  "link_epochs_read": 11999,
+  "link_epochs_with_records": 11998,
+  "link_offline_epochs": 1200,
+  "link_reconnects_seen": 5,
+  "link_backlog_frames_seen": 297,
+  "link_backlog_tokens_seen": 26730,
+  "link_first_events": [
+   {
+    "now_s": 480.03,
+    "epoch": "stream_arrival",
+    "device_id": "robo001",
+    "connected": false,
+    "offline_since": 480.0,
+    "back_online_at": null,
+    "backlog_frames": 0,
+    "backlog_tokens": 0
+   },
+   {
+    "now_s": 480.03,
+    "epoch": "stream_arrival",
+    "device_id": "robo003",
+    "connected": false,
+    "offline_since": 480.0,
+    "back_online_at": null,
+    "backlog_frames": 0,
+    "backlog_tokens": 0
+   },
+   {
+    "now_s": 480.03,
+    "epoch": "stream_arrival",
+    "device_id": "robo004",
+    "connected": false,
+    "offline_since": 480.0,
+    "back_online_at": null,
+    "backlog_frames": 0,
+    "backlog_tokens": 0
+   },
+   {
+    "now_s": 480.03,
+    "epoch": "stream_arrival",
+    "device_id": "robo009",
+    "connected": false,
+    "offline_since": 480.0,
+    "back_online_at": null,
+    "backlog_frames": 0,
+    "backlog_tokens": 0
+   },
+   {
+    "now_s": 480.03,
+    "epoch": "stream_arrival",
+    "device_id": "robo010",
+    "connected": false,
+    "offline_since": 480.0,
+    "back_online_at": null,
+    "backlog_frames": 0,
+    "backlog_tokens": 0
+   },
+   {
+    "now_s": 600.03,
+    "epoch": "recall_arrival",
+    "device_id": "robo001",
+    "connected": true,
+    "offline_since": 480.0,
+    "back_online_at": 600.0,
+    "backlog_frames": 60,
+    "backlog_tokens": 5400
+   },
+   {
+    "now_s": 600.03,
+    "epoch": "recall_arrival",
+    "device_id": "robo003",
+    "connected": true,
+    "offline_since": 480.0,
+    "back_online_at": 600.0,
+    "backlog_frames": 60,
+    "backlog_tokens": 5400
+   },
+   {
+    "now_s": 600.03,
+    "epoch": "recall_arrival",
+    "device_id": "robo004",
+    "connected": true,
+    "offline_since": 480.0,
+    "back_online_at": 600.0,
+    "backlog_frames": 59,
+    "backlog_tokens": 5310
+   },
+   {
+    "now_s": 600.03,
+    "epoch": "recall_arrival",
+    "device_id": "robo009",
+    "connected": true,
+    "offline_since": 480.0,
+    "back_online_at": 600.0,
+    "backlog_frames": 59,
+    "backlog_tokens": 5310
+   },
+   {
+    "now_s": 600.03,
+    "epoch": "recall_arrival",
+    "device_id": "robo010",
+    "connected": true,
+    "offline_since": 480.0,
+    "back_online_at": 600.0,
+    "backlog_frames": 59,
+    "backlog_tokens": 5310
+   }
+  ]
+ },
+ "sync_counters": {
+  "link_sync_epochs": 11999,
+  "link_sync_reconnects_seen": 5,
+  "link_sync_releases": 5,
+  "link_sync_holds_serial": 34,
+  "link_sync_holds_harm": 0,
+  "link_sync_questions_before_catchup": 0,
+  "link_sync_plan_calls": 0,
+  "link_sync_choice_QUESTION_FIRST": 0,
+  "link_sync_choice_WAIT": 0,
+  "link_sync_choice_LEAVE_TO_DEVICE": 0,
+  "link_sync_acc_choice_QUESTION_FIRST": 0,
+  "link_sync_acc_choice_WAIT": 0,
+  "link_sync_acc_choice_DEVICE": 0,
+  "link_sync_acted_defer": 0,
+  "link_sync_acted_device": 0,
+  "link_sync_forced_release": 0,
+  "link_sync_plan_errors": 0,
+  "link_sync_harm_nonzero": 0,
+  "link_sync_gain_positive": 0,
+  "link_sync_value_model": "STATED MODELLING ASSUMPTION (D281): question-first accuracy = (1-m)*0.568799 + m*0.212222, m = missing seconds / history seconds read from the link record and the session history span; accuracy interpolates LINEARLY in m between two committed values that are POOLED over all recall questions, not measured on outage-affected ones. Committed rows (oracle_fair_table.json): recall|cloud|WITH_HISTORY 0.568799 (n 12660, k 7201); recall|cloud|WITHOUT_HISTORY 0.212222 (n 3011, k 639); device option recall|device|NA 0.257732 (n 970, k 250), flash's choice, flagged.",
+  "link_sync_mode": "fifo",
+  "link_sync_currency": "acc",
+  "link_sync_tiebreak": "hold"
+ },
+ "sync_log": [
+  {
+   "ev": "reconnect_seen",
+   "t": 600.03,
+   "device_id": "robo001",
+   "reconnect": 600.0,
+   "backlog_frames": 60,
+   "backlog_tokens": 5400,
+   "next_q_estimates": {
+    "robo001": 600.03
+   },
+   "gap_has_estimate": {
+    "robo001": true
+   }
+  },
+  {
+   "ev": "reconnect_seen",
+   "t": 600.03,
+   "device_id": "robo003",
+   "reconnect": 600.0,
+   "backlog_frames": 60,
+   "backlog_tokens": 5400,
+   "next_q_estimates": {
+    "robo001": 600.03,
+    "robo003": 600.03
+   },
+   "gap_has_estimate": {
+    "robo001": true,
+    "robo003": true
+   }
+  },
+  {
+   "ev": "reconnect_seen",
+   "t": 600.03,
+   "device_id": "robo004",
+   "reconnect": 600.0,
+   "backlog_frames": 59,
+   "backlog_tokens": 5310,
+   "next_q_estimates": {
+    "robo001": 600.03,
+    "robo003": 600.03,
+    "robo004": 600.03
+   },
+   "gap_has_estimate": {
+    "robo001": true,
+    "robo003": true,
+    "robo004": true
+   }
+  },
+  {
+   "ev": "reconnect_seen",
+   "t": 600.03,
+   "device_id": "robo009",
+   "reconnect": 600.0,
+   "backlog_frames": 59,
+   "backlog_tokens": 5310,
+   "next_q_estimates": {
+    "robo001": 600.03,
+    "robo003": 600.03,
+    "robo004": 600.03,
+    "robo009": 600.03
+   },
+   "gap_has_estimate": {
+    "robo001": true,
+    "robo003": true,
+    "robo004": true,
+    "robo009": true
+   }
+  },
+  {
+   "ev": "reconnect_seen",
+   "t": 600.03,
+   "device_id": "robo010",
+   "reconnect": 600.0,
+   "backlog_frames": 59,
+   "backlog_tokens": 5310,
+   "next_q_estimates": {
+    "robo001": 600.03,
+    "robo003": 600.03,
+    "robo004": 600.03,
+    "robo009": 600.03,
+    "robo010": 600.03
+   },
+   "gap_has_estimate": {
+    "robo001": true,
+    "robo003": true,
+    "robo004": true,
+    "robo009": true,
+    "robo010": true
+   }
+  },
+  {
+   "ev": "release",
+   "t": 600.03,
+   "device_id": "robo001",
+   "why": "fifo",
+   "est_done": 600.941,
+   "reconnect": 600.0,
+   "order_index": 1
+  },
+  {
+   "ev": "release",
+   "t": 601.03,
+   "device_id": "robo003",
+   "why": "fifo",
+   "est_done": 601.941,
+   "reconnect": 600.0,
+   "order_index": 2
+  },
+  {
+   "ev": "release",
+   "t": 602.03,
+   "device_id": "robo004",
+   "why": "fifo",
+   "est_done": 602.927,
+   "reconnect": 600.0,
+   "order_index": 3
+  },
+  {
+   "ev": "release",
+   "t": 602.93,
+   "device_id": "robo009",
+   "why": "fifo",
+   "est_done": 603.827,
+   "reconnect": 600.0,
+   "order_index": 4
+  },
+  {
+   "ev": "release",
+   "t": 603.83,
+   "device_id": "robo010",
+   "why": "fifo",
+   "est_done": 604.727,
+   "reconnect": 600.0,
+   "order_index": 5
+  },
+  {
+   "ev": "caught_up_est",
+   "t": 638.43,
+   "device_id": "robo003"
+  },
+  {
+   "ev": "caught_up_est",
+   "t": 717.13,
+   "device_id": "robo009"
+  },
+  {
+   "ev": "caught_up_est",
+   "t": 723.93,
+   "device_id": "robo001"
+  },
+  {
+   "ev": "caught_up_est",
+   "t": 862.83,
+   "device_id": "robo004"
+  },
+  {
+   "ev": "caught_up_est",
+   "t": 1139.34,
+   "device_id": "robo010"
+  }
+ ],
+ "sync_pulls": [
+  {
+   "kind": "sync_pull",
+   "device_id": "robo001",
+   "t_sent": 600.0299999995993,
+   "n_frames": 0
+  },
+  {
+   "kind": "sync_pull",
+   "device_id": "robo003",
+   "t_sent": 601.0299999995984,
+   "n_frames": 0
+  },
+  {
+   "kind": "sync_pull",
+   "device_id": "robo004",
+   "t_sent": 602.0299999995975,
+   "n_frames": 0
+  },
+  {
+   "kind": "sync_pull",
+   "device_id": "robo009",
+   "t_sent": 602.9299999995967,
+   "n_frames": 0
+  },
+  {
+   "kind": "sync_pull",
+   "device_id": "robo010",
+   "t_sent": 603.8299999995959,
+   "n_frames": 0
+  }
+ ]
+}
