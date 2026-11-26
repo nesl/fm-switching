@@ -31,3 +31,8 @@ Push: 4 changed paths (`arms_final_ladder.py`, `arms_v6cfr3.py`, `arms_v6state.p
 | `-q` | 79 | | 118 | | | 8,719 |
 (1) cbd 82 against the required 86: FAIL (-1; within the replicate spread of 2 but the bar is 86). (2) dashcam -1,074 against a bar of 54: FAIL. Against `-q`: +3 cbd, cloud-correct and on-time; dashcam -1,416.
 **Against the prediction recorded above: HOLD_BACK fell sharply (6 against 87), as predicted; TOUCH rose and OVER-touched (10,446 against rung 3's 2,674, 3.9x; the dry replay predicted 7,353 against 2,954, 2.5x), as flagged. Inference, not tested: the dashcam loss follows the over-touching. Per the prediction the margin is the next suspect and it is NOT re-derived (D259 stands).** One seed, one condition; gate (b) is still running.
+
+## RESULT, GATE (b) `_kv0.5r_h0.5` s4, scored 2026-11-26T02:18Z, as reported by the H100 (SA OK, valid; 2 kind-2 ReadErrors, dash002 and robo002), post-push on live2 5fcf8a25
+**FAIL on both conditions.** Reachability met: `q2_inflight_excluded_evals` 113, TOUCH 5,257 (rung 3 1,434; `-q` 787), HOLD_BACK 4 (rung 3 4; `-q` 93), d249 reads 40,634.
+`-q2`: cbd 65 = cloud 48 + device 17 (standing 61), on-time 71/132, acc 0.676, SS 272, dashcam 4,234 (worst 0.279). Rung 3: 72, 6,112 (0.454). `-q`: 77, 6,759 (0.541).
+(1) cbd 65 against the required 75: FAIL (-10 against the bar, -7 against rung 3). (2) dashcam -1,878 against a bar of 154: FAIL. **Branch rule (b fails): queue nothing for `-q2`; `-q` s5-s7 stay held for the user.** Readout: `research/study_q2_stage1_readout.md`.
