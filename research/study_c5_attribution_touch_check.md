@@ -1,0 +1,16 @@
+# C5 ATTRIBUTION RULE (D184): DO TOUCHES COUNT AS ROBOT WORK? (2026-11-26T03:29Z). CPU, committed s4 cells, as reported by the analysis agent (not re-run); read at origin 2eb22ccb. No build. Open-loop reconstruction, one seed.
+**Code (hybrid_arm.py, coordinator.py):** halving is skipped by `_attr_suppresses` (hybrid_arm.py:714-731) when every slow monitor (first-token lag above 0.8 s) overlapped a coordinator-released prefill; `_aimd` calls it at :738 and counts `c5_attr_suppressed_decrease` at :742. The overlap flag is set in `Coordinator._self_released_overlap` (coordinator.py:2024-2051). **The size predicate is coordinator.py:2043: `if int(sp["uncached"]) < C5ATTR_UNCACHED_MIN: continue` (constant 200 at :84)**, on the coordinator's CHARGED prediction (`_uncached_last_charged`, written at :1823-1825 for every non-monitor request), not the engine's count.
+**TOUCH: NO.** A touch is recorded but is charged `TOUCH_UNCACHED_TOKENS = 15` (touch_policy.py:107), below 200, so line 2043 skips every touch (engine agrees: rung 3 1x, 2,674 touches, max 15 uncached). **WARM: YES, by size only** (a release_piece or release_whole build counts if its charged uncached is 200 or more). Recall: YES if charged 200 or more (:1687). So committed behaviour is the "threshold applied" variant and touches never count.
+**Open-loop replay on committed s4 cells (variants: base = committed rule; recall-only; A = base plus every touch regardless of size; A+ = every non-monitor request regardless of size):**
+| cell | variant | halvings | suppressed | cap below 8 (s) | episodes | NR in reduced state | NR upper bound avoided |
+|---|---|---|---|---|---|---|---|
+| rung 3 1x (851 NR) | base | 3 | 224 | 60.0 | 3 | 113 | 0 |
+| | A | 2 | 233 | 40.0 | 2 | 72 | 41 |
+| `-q2` 1x (1,644 NR) | base | 20 | 748 | 258.2 | 8 | 907 | 0 |
+| | recall-only | 31 | 651 | 312.4 | 7 | 1,021 | 0 |
+| | **A (touches counted)** | **1** | 854 | **20.0** | 1 | **0** | **907** |
+| | A+ | 1 | 854 | 20.0 | 1 | 0 | 907 |
+| rung 3 halved (1,844 NR) | base / A / A+ | 22 / 14 / 12 | | 349.7 / 277.1 / 259.9 | | 824 / 620 / 575 | 0 / 204 / 249 |
+| `-q2` halved (3,302 NR) | base / A / A+ | 62 / 17 / 16 | | 614.0 / 277.4 / 262.3 | | 2,379 / 954 / 907 | 0 / 1,425 / 1,472 |
+The base replay reproduces the logged counters (3 and 20 halvings, 60 s and 258 s).
+**Reading, observations only:** counting touches would remove almost all of `-q2`'s reduced-cap time at 1x (20 halvings to 1, 258 s to 20 s) and changes rung 3 little at 1x (3 to 2); the committed rule's 200-token floor is why touches, which are 15 tokens each, never explain a slow monitor, although `-q2` issues about 87 per 10 s and slow monitors overlapping a self-released prefill are common. **The "NR upper bound avoided" is a loose UPPER BOUND, not an estimate: it assumes every held instant in the intervals where the cap would stay at 8 gets released; 907 exceeds the whole `-q2`-minus-rung-3 NR gap (793), and the closed-loop run would change touches, lag and everything downstream.** Not computed: the share of slow monitors that overlap a touch. The replay uses engine uncached counts where the coordinator uses its charged prediction. No build, and the ordering after subtracting the bound is not claimable.
