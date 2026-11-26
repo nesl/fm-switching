@@ -395,6 +395,48 @@ class V6StateArm:
             self.stats["q4_credit_max_milli"] = max(int(self.stats.get("q4_credit_max_milli", 0)), m)
         return credit
 
+    def _q5_on(self) -> bool:
+        import q5_queue_aware_holdback as _Q5                                  # noqa: PLC0415
+        return _Q5.enabled_cached(self)
+
+    def _q5_inflight_harm(self, obs: Observation, sid: str, u: int, ctx: int) -> float:
+        """q5 (ii): on-time value lost by the in-flight deadline rows of OTHER devices to the
+        decode-step interference of a held-back prefill of `u` tokens over `ctx` cached tokens
+        (committed StudyENG1 step model). READ by `decide` (added to the HOLD_BACK harm)."""
+        import q5_queue_aware_holdback as _Q5                                  # noqa: PLC0415
+        rows = self._d249_rows(obs, sid, force=True)
+        if not rows:
+            self.stats["q5_inflight_no_rows"] += 1
+            return 0.0
+        dt = _Q5.interference_s(int(u), int(ctx))
+        try:
+            import cf_cost as CC
+            import cf_objective as CO
+            cf = self._cf_engine()
+            tab = cf.table
+            # the delay as its per-queue-token equivalent, so the SAME function (weights, cap, slack)
+            # prices it; u_eq x QUEUE_TOKEN_S == dt
+            u_eq = int(round(dt / CO.QUEUE_TOKEN_S))
+            h = CO.harm_warm_from_queue_delay(
+                u_eq, rows,
+                p_on_time=(lambda eng, slack: CC.p_on_time(cf.residuals, eng, slack)),
+                acc_cloud=float(tab["cloud_D2"]), acc_device=float(tab["device"]),
+                counters=cf.counters)
+        except Exception:                                                      # noqa: BLE001
+            self.stats["q5_inflight_unpriced"] += 1
+            return 0.0
+        val = float(h.total)
+        if getattr(self, _Q5.FORCE_ZERO_ATTR, False) is True:
+            val = 0.0
+        self.stats["q5_inflight_evals"] += 1
+        self.stats["q5_interference_ms_sum"] += int(round(dt * 1000.0))
+        if val > 0.0:
+            self.stats["q5_inflight_nonzero"] += 1
+            self.stats["q5_inflight_term_milli_sum"] += int(round(val * 1000.0))
+            self.stats["q5_inflight_term_max_milli"] = max(
+                int(self.stats.get("q5_inflight_term_max_milli", 0)), int(round(val * 1000.0)))
+        return val
+
     def _d249_inflight(self, obs: Observation) -> tuple:
         """`obs.cloud.in_flight_work`, defensively: () on any arm or harness that does not carry
         it, so this method is safe on an observation built by an older tree."""
@@ -426,7 +468,7 @@ class V6StateArm:
                 int(self.stats.get("d249_queued_ahead_max", 0)), int(tot))
         return int(tot)
 
-    def _d249_rows(self, obs: Observation, session_id: str) -> List[Dict[str, Any]]:
+    def _d249_rows(self, obs: Observation, session_id: str, force: bool = False) -> List[Dict[str, Any]]:
         """The D249 harm rows: one per IN-FLIGHT DEADLINE REQUEST of another device.
 
         THIS IS THE ROW SOURCE THE D245 ESTIMATE SAID WAS MISSING. `obs.recall` is the
@@ -451,7 +493,7 @@ class V6StateArm:
         That approximation is stated here and counted below; it is an over-estimate for the
         request at the head of the queue and an under-estimate for none.
         """
-        if not self._d249_on():
+        if not self._d249_on() and not force:
             return []
         rows_in = [r for r in self._d249_inflight(obs) if bool(getattr(r, "has_deadline", True))]
         if not rows_in:
@@ -648,6 +690,25 @@ class V6StateArm:
                 int(self.stats.get("harm_warm_max_milli", 0)), int(round(h.total * 1000.0)))
         return float(h.total)
 
+    def _q5_record(self, d: Any, warming: bool, queued: float, inflight: float) -> None:
+        s = self.stats
+        if d.margin_effective is not None:
+            me = int(round(float(d.margin_effective) * 1e6))
+            s["q5_margin_effective_micro_n"] += 1
+            s["q5_margin_effective_micro_last"] = me
+            s["q5_margin_effective_micro_min"] = me if s.get("q5_margin_effective_micro_min") is None \
+                else min(int(s["q5_margin_effective_micro_min"]), me)
+            s["q5_margin_effective_micro_max"] = max(int(s.get("q5_margin_effective_micro_max", 0)), me)
+        if d.margin is not None:
+            s["q5_margin_micro_last"] = int(round(float(d.margin) * 1e6))
+        if warming:
+            s["q5_holdback_evals"] += 1
+            s["q5_queued_term_milli_sum"] += int(round(queued * 1000.0))
+            if d.chosen == "HOLD_BACK":
+                s["q5_holdback_chosen"] += 1
+                if inflight > 0.0 and queued < float(d.margin_effective or 0.0) <= queued + inflight:
+                    s["q5_holdback_decided_by_inflight"] += 1
+
     def _q4_record(self, d: Any, credit: float) -> None:
         """Per-decision record of the margin actually compared and of the credit's effect."""
         import q4_avoided_rebuild as _Q4                                       # noqa: PLC0415
@@ -753,6 +814,16 @@ class V6StateArm:
                 u = int(getattr(act_now, "target_tokens", 0) or u) - b
                 u = max(u, 0)
             hw = self._harm_warm(obs, sid, u, include_inflight=False) if warming else 0.0
+            _q5q = hw
+            _q5i = 0.0
+            if warming and self._q5_on():
+                # MATERIALIZE carries target_tokens = a 10**9 "build everything" sentinel, so `u`
+                # is about 10**9 - b and rung 3's queue term is always at the D256 cap. The step
+                # interference is priced on the REAL remaining history (the planner's own
+                # est_tokens_by_session), never on the sentinel.
+                _q5u = min(int(u), max(int(est.get(sid, b) or b) - int(b), 0))
+                _q5i = self._q5_inflight_harm(obs, sid, _q5u, b)
+                hw = hw + _q5i
             if not warming and act_now is not None:
                 # some other session action this epoch; a second one is not expressible
                 self.stats["state_skipped_rules_acting"] += 1
@@ -785,6 +856,8 @@ class V6StateArm:
                 slice_tokens=getattr(self._rules, "slice_tokens", None), **_q4kw)
             if self._q4_on():
                 self._q4_record(d, _q4c)
+            if self._q5_on():
+                self._q5_record(d, warming, _q5q, _q5i)
             CP.note_abandon(self.stats, d, float(getattr(cf, "budget_ms", 0.0)))
             self.stats["state_chosen_" + str(d.chosen)] += 1
             if d.delta is not None:

@@ -95,6 +95,9 @@ RUNG3_Q2M = "covex-v6-fair-final-q2m"
 # q4 (study_q4_avoided_rebuild_credit_prereg): `-q2m` plus the avoided-rebuild credit on TOUCH
 # (`q4_avoided_rebuild.Q4_SWITCH`). SAME CLASS and constructor as RUNG3_Q2M with one more switch.
 RUNG3_Q4 = "covex-v6-fair-final-q4"
+# q5 (study_q5_queue_aware_holdback_prereg): RUNG 3 plus the queue-aware HOLD_BACK harm only
+# (`q5_queue_aware_holdback.Q5_SWITCH`). D249, q2, q2m and q4* are all OFF.
+RUNG3_Q5 = "covex-v6-fair-final-q5"
 # q4b (D290 iteration 2): `-q4` plus the next-question basis (`q4_avoided_rebuild.Q4B_SWITCH`).
 RUNG3_Q4B = "covex-v6-fair-final-q4b"
 # link_events line: `-q` plus the arm-side READ of `Observation.device_links` (decision-neutral).
@@ -345,6 +348,18 @@ def _set_q4b(arm: Any) -> None:
                                 % (_Q4.Q4B_SWITCH, type(arm).__name__))
 
 
+def _set_q5(arm: Any) -> None:
+    """Turn the q5 queue-aware HOLD_BACK on for THIS INSTANCE and read it back. Loads the committed
+    step model now so a missing file fails at construction and not mid-cell."""
+    import q5_queue_aware_holdback as _Q5                                  # noqa: PLC0415
+    _Q5.step_model()
+    object.__setattr__(arm, _Q5.Q5_SWITCH, True)
+    arm.__dict__.pop("_q5_resolved", None)
+    if _Q5.arm_enables(arm) is not True or not arm._q5_on():              # pragma: no cover
+        raise LadderSwitchError("%s did not take on the instance of %s"
+                                % (_Q5.Q5_SWITCH, type(arm).__name__))
+
+
 def _set_cold_unlatch(arm: Any) -> None:
     """Turn D261 (a rejection is not proof of cold) on for THIS INSTANCE and read it back.
 
@@ -370,6 +385,7 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                q2_inflight_exclusion: bool = False,
                q2m_margin: bool = False,
                q4_credit: bool = False,
+               q5_holdback: bool = False,
                q4b_basis: bool = False,
                cold_unlatch: Any = None,
                link_read: bool = False,
@@ -421,6 +437,8 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         _set_q2m(arm)
     if q4_credit:
         _set_q4(arm)
+    if q5_holdback:
+        _set_q5(arm)
     if q4b_basis:
         _set_q4b(arm)
     # D261 (user ruling 2026-11-25 item 2), DEV LINE ONLY. `cold_unlatch=None` means "follow the

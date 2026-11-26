@@ -365,7 +365,10 @@ class Live2Coordinator:
         # submissions for the device and the deadline. W is the right register: submit to first
         # token, uncached PROMPT tokens, which is the regressor the D162 queue coefficient was
         # fitted on. `_uncached_in_flight` is the WRONG one here and is not read by this path.
-        self._d249_queue_visibility = QV.arm_enables(arm)
+        # q5: the in-flight rows are published for the q5 arm too (data only; the q5 term in
+        # `arms_v6state._q5_inflight_harm` is their one reader). D249's own switch stays OFF there.
+        import q5_queue_aware_holdback as _Q5                               # noqa: PLC0415
+        self._d249_queue_visibility = QV.arm_enables(arm) or _Q5.arm_enables(arm)
         # ---- D261 (user ruling 2026-11-25 item 2): A REJECTION IS NOT PROOF OF COLD.
         # ARM-SCOPED, DEFAULT OFF, read from the INSTANCE exactly as D249's switch is. It is
         # meaningless without the belief corrector in APPLY mode, because the provisional mark is
