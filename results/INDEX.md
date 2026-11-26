@@ -1606,3 +1606,9 @@ E-id: **StudyD258-DEVLAT** (research/EXPERIMENTS.md). Commits 6dfbb8c4 (rescore)
 |---|---|
 | result files | `results/orchestration/live2/oracle/dashcam_share_headline.json`; `experiments/analysis/early1/dashcam_share_headline.py`; `reports/study_dashcam_diagnosis.md` |
 | headline | Control passes (device-only 0.627985 reproduced). Ceiling 0.6657 vs device 0.6280, gap 0.0377, SE 0.0394; 5,038 clips needed vs 300. Three arms share above 1 (base 1.13, state-shares-r1 1.17, fair-c5attr-rr 1.03): the cloud-every-instant stream is not an upper bound. STOP. The COLD-path body-defect label is withdrawn (8d19ad8d). |
+
+## StudyDASH-REPORT: dashcam challenge-mAP differences, attainment, robot and single-shot pooled share (2026-11-25, Orin)
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/dashcam_reporting.json`; `results/orchestration/live2/oracle/oracle_results.json` (scope + robot/single-shot pooled block); scripts `dashcam_reporting.py`, `bound_scope.py` |
+| headline | Every arm's challenge-mAP difference from device-only (0.627985) is underpowered at 300 clips (all CIs include zero; MDD 0.025 to 0.15). Attainment: rung 3 mean 0.718 (0.877 of episodes at or above 0.25); simplestream 0.949. Bound pooled share recomputed over robot and single-shot only; no arm above 1. |

@@ -244,3 +244,31 @@ Decision: STOP. The headline dashcam oracle cannot be a cloud-every-instant ceil
 a per-instant or per-clip best-of-both choice, which is not deliverable, and it would still need the clip
 count above to resolve the gap. The dashcam headline stays challenge mAP with arm-versus-device-only
 differences reported, not shares.
+
+## Dashcam reporting, 1x seeds 4-7 (the dashcam oracle share is dropped, 82f5d019)
+
+Script `experiments/analysis/early1/dashcam_reporting.py`; output `results/orchestration/live2/oracle/dashcam_reporting.json`.
+
+(1) Challenge-mAP difference from device-only (device 0.627985, 150 positive and 150 negative clips). Paired
+clip-cluster bootstrap, 2000 resamples, seed 0. Every arm is labelled UNDERPOWERED at 300 clips: each 95% CI
+includes zero. Minimum detectable difference runs from 0.025 (warm-all-lru, lmcache, attentionstore-prefetch
+family) to 0.15 (simplestream, state-shares-r1). Largest pooled point differences: base +0.043 (CI -0.020 to
++0.088), state-shares-r1 +0.044, fair-c5attr-rr +0.039, state-shares +0.033, simplestream +0.034. Per seed
+values are in the JSON.
+
+(2) Per-episode on-time attainment (canon.dash_attainment, D179 (6) definition; target 0.25 per D71):
+
+| arm | mean attainment (seeds 4-7) | fraction of episodes at or above 0.25 |
+|---|---|---|
+| fair-final-rung3 | 0.718 | 0.877 |
+| simplestream | 0.949 | 0.999 |
+| base | 0.528 | 0.651 |
+| edf | 0.272 | 0.361 |
+| state-uo | 0.223 | 0.338 |
+| always-cloud-fcfs | 0.080 | 0.094 |
+
+Per-seed attainment for all 24 arms is in the JSON.
+
+Pooled share scope (oracle_results.json): the pooled block now covers robot and single-shot only, recorded in
+the file's `scope` field and in `pooled_over_seeds_robot_single_shot_1x`. No arm exceeds 1. Examples (FAIR /
+HINDSIGHT): rung 3 0.944 / 0.475, base 0.551 / 0.313, state-uo 0.916 / 0.460, simplestream 0.326 / 0.147.
