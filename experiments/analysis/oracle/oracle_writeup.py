@@ -10,7 +10,7 @@ Output: results/orchestration/live2/oracle/oracle_robot_ss_figdata.csv and .json
 reports/oracle_results_provisional.md.
 """
 from __future__ import annotations
-import argparse, csv, json, sys
+import argparse, csv, json, os, sys
 from pathlib import Path
 import numpy as np
 
@@ -23,8 +23,13 @@ import dashcam_episodic as DC  # noqa: E402
 from _provenance import stamp  # noqa: E402
 
 SEEDS = [4, 5, 6, 7]
-# paper baselines (ruling set); confidence-cascade is flagged superseded (D205)
-PAPER = {"base", "confidence-cascade", "llf", "mooncake", "eco-llm", "simplestream"}
+# paper baseline set = D213. Ladder rungs and ablations (covex-v6-*, rules, state-*, fair-*) are NOT baselines.
+# device-only (offline by design, D217 (3)) and cascade-routing (port-rule fail, D217 (2)) are not scored here.
+PAPER = {"always-cloud-fcfs", "attentionstore-prefetch", "b7-edf-feasibility", "confidence-cascade", "eco-llm",
+         "edf", "llf", "lmcache", "mooncake", "querystream-proactive", "simplestream", "streamscout",
+         "warm-all-lru", "kvflow-prefetch"}
+NOT_IN_BLOCK = {"device-only": "offline by design (D217 (3)); scored by the Orin, not in this block",
+                "cascade-routing": "reported, port-rule fail (D217 (2)); not counted as a baseline"}
 OUT = REPO / "results/orchestration/live2/oracle"
 
 
@@ -60,6 +65,11 @@ def main():
                 continue
             by_seed[s][disp] = [u for u in units if u[1] in ("recall", "single_shot")]
     rows = []
+    cell_of = {}
+    for disp, raw in OB.ARMS:
+        for s in SEEDS:
+            p = OB._cell(raw, s, "")
+            cell_of[(disp, s)] = os.path.basename(p) if p else None
     arms = sorted({d for s in by_seed for d in by_seed[s]})
     policy_disp = None
     for disp, raw in OB.ARMS:
@@ -69,18 +79,23 @@ def main():
         pooled = [u for s in SEEDS for u in by_seed[s].get(disp, [])]
         role = role_of(disp, policy_disp)
         row = {"arm": disp, "role": role, "seeds": "4-7 pooled",
+               "cell": "; ".join(f"s{s}={cell_of.get((disp, s)) or 'MISSING'}" for s in SEEDS),
                "s6_flag": "s6 recall device acc from 20-25 questions (single-question basis)"}
         row.update(share_row(pooled))
         row["n_units"] = len(pooled)
         rows.append(row)
         for s in SEEDS:
             u = by_seed[s].get(disp, [])
-            r = {"arm": disp, "role": role_of(disp, policy_disp), "seeds": f"s{s}",
+            cell = cell_of.get((disp, s))
+            r = {"arm": disp, "role": role, "seeds": f"s{s}", "cell": cell or "MISSING",
                  "s6_flag": "yes" if s == 6 else "no"}
-            r.update(share_row(u))
+            if u:
+                r.update(share_row(u))
+            else:
+                r.update({k: None for k in ("FAIR", "FAIR_lo", "FAIR_hi", "HIND", "HIND_lo", "HIND_hi")})
             r["n_units"] = len(u)
             rows.append(r)
-    fields = ["arm", "role", "seeds", "n_units", "FAIR", "FAIR_lo", "FAIR_hi", "HIND", "HIND_lo", "HIND_hi", "s6_flag"]
+    fields = ["arm", "role", "seeds", "cell", "n_units", "FAIR", "FAIR_lo", "FAIR_hi", "HIND", "HIND_lo", "HIND_hi", "s6_flag"]
     OUT.mkdir(parents=True, exist_ok=True)
     with open(OUT / "oracle_robot_ss_figdata.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
@@ -89,11 +104,12 @@ def main():
             w.writerow({k: (round(v, 4) if isinstance(v, float) else v) for k, v in r.items()})
     payload = {"status": a.status, "policy_arm": a.policy_arm, "policy_row": policy_disp,
                "scope": "robot (recall) and single-shot only; dashcam excluded (82f5d019, b84a9f1d)",
+               "not_in_block": NOT_IN_BLOCK,
                "rows": rows, "_provenance": stamp(script="oracle_writeup.py", model="none", device="jetson_orin")}
     (OUT / "oracle_robot_ss_figdata.json").write_text(json.dumps(payload, indent=1, default=float))
     pol = next((r for r in rows if r["arm"] == policy_disp and r["seeds"] == "4-7 pooled"), None)
-    best = max((r for r in rows if r["role"] == "paper baseline" and r["seeds"] == "4-7 pooled"),
-               key=lambda r: r["FAIR"] or -9)
+    best = max((r for r in rows if r["role"] == "paper baseline" and r["seeds"] == "4-7 pooled"
+                and r["FAIR"] is not None), key=lambda r: r["FAIR"])
     note = [f"# StudyORACLE results, {a.status} (robot and single-shot scope)", "",
             f"**{a.status}: recomputed on the {'frozen' if a.status=='FROZEN' else 'current'} policy arm `{a.policy_arm}` "
             f"(row `{policy_disp}`).** 1x, seeds 4-7 pooled. Dashcam excluded (oracle share dropped, "
@@ -105,7 +121,12 @@ def main():
             continue
         note.append(f"| {r['arm']} | {r['role']} | {r['FAIR']:.3f} ({r['FAIR_lo']:.3f}, {r['FAIR_hi']:.3f}) | "
                     f"{r['HIND']:.3f} ({r['HIND_lo']:.3f}, {r['HIND_hi']:.3f}) | {r['n_units']} |")
-    note += ["", f"Policy arm `{policy_disp}` FAIR {pol['FAIR']:.3f}, best paper baseline by FAIR: `{best['arm']}` "
+    note += ["", "Paper baseline set is D213; ladder rungs and ablations are labelled 'other arm (ablation)'.",
+             "Not in this block: " + "; ".join(f"`{k}` ({v})" for k, v in NOT_IN_BLOCK.items()) + ".",
+             "confidence-cascade uses its post-D205 `_rerun` cells (cloud-served robot share 0.11 to 0.22 per seed, "
+             "against 0 to 0.02 pre-fix): " + ", ".join(f"s{s} {cell_of.get(('confidence-cascade', s)) or 'MISSING'}"
+                                                         for s in SEEDS) + ".", "",
+             f"Policy arm `{policy_disp}` FAIR {pol['FAIR']:.3f}, best paper baseline by FAIR: `{best['arm']}` "
              f"{best['FAIR']:.3f}." if pol else "Policy arm not found in the arm list.", "",
              "Limits: s6 recall device accuracy rests on 20 to 25 distinct questions per seed (flagged in every "
              "per-seed row). Capacity T does not bind in value (oracle_lp_d270.json). The FAIR table is pooled "
