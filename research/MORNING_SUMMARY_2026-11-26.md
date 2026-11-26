@@ -1,0 +1,35 @@
+# MORNING SUMMARY 2026-11-26 (written 2026-11-26T14:26Z, before the 07:00 PST deadline; H100 cell list requested for 06:40). Everything is s4 unless stated; one seed per cell; H100 scoring is as reported, not re-scored, unless stated. Records are committed on origin; paths below.
+
+## 1. Cells completed overnight (since about 17:50 PST), all VALID as reported (SA OK, 0 ENOSPC; a few kind-2 ReadErrors, none INVALID)
+q2 pair (2), LINKSYNC gate (9), q2m pair (2), q4 pair (2), q4b pair (2), q5 pair (2), q5b pair (2), q5c pair (2), D250 s5 (7) and s6 (7): **37 cells**. D250 s7 (7 cells) started 06:14, batch ends about 08:36. Full list with per-cell validity: see the H100 section at the end (added when received).
+
+## 2. The -q2 line and its ablations: nothing passes the written bars; rung 3 stays the candidate
+| s4 | arm | 1x cbd / dashcam | halved cbd / dashcam | verdict |
+|---|---|---|---|---|
+| | rung 3 | 83 / 8,377 | 72 / 6,112 | comparator (misses the halved cbd bar of 75 itself) |
+| | -q | 79 / 8,719 (fail) | 77 / 6,759 (PASS) | earlier ruling |
+| | -q2 | 82 / 7,303 FAIL | 65 / 4,234 FAIL | over-touching: margin 0.331566 |
+| | -q2m (margin 0.6582 only) | 85 / 8,365 FAIL by 1 (tie with rung 3) | 69 / 5,475 FAIL | margin WAS the cause of the over-touching |
+| | -q4, -q4b (avoided-rebuild credit) | 85 / 6,420 and 82 / 7,116 FAIL | 67 / 2,701 and 63 / 4,294 FAIL | credit premise falsified: +9,900 touches, cold robot questions unchanged (13.0 vs 13.6 percent) |
+| | -q5 (rung 3 touches + queue-aware HOLD_BACK, whole-rebuild pricing) | 73 / 8,856 FAIL cbd | 63 / 7,582 FAIL cbd | HOLD_BACK 77 and 73: blanket brake, 11 recall REJECTs latched |
+| | -q5b (price the released piece) | **83 / 8,427 PASS** | 70 / 6,175 FAIL cbd | rung-3-like |
+| | -q5c (q5b + existing D261 unlatch) | **83 / 8,645 PASS** | **74 / 6,029 FAIL cbd by 1** | best candidate; passes dashcam both |
+Details: research/study_q2_stage1_readout.md, study_q2m_readout.md, study_q4_avoided_rebuild_credit_prereg.md (all iterations), study_q5_queue_aware_holdback_prereg.md (q5 to q5c, diagnoses, loop stop). Live margin of -q2m was bounded and inferred (0.65824 confirmed by counter in -q4 and later). **Loop stopped at iteration 5** (10 s4 cells used by the loop beyond -q, -q2, -q2m): the only mechanism that could explain 2 or more instants (pieces displacing warm prefixes) needs a displacement-pricing coefficient no committed model supplies; the one-instant halved gap is not separable from noise (h0.5 per-question flips between cells 8 to 18; no halved replicate exists). s4 passes are SELECTIONS: only s5 to s7 can support a claim, and none are queued.
+
+## 3. D250 per-seed verdicts (rung 3 against the best baseline; research/study_d250_overnight_seed_verdicts.md)
+| seed | cbd rung 3 | best baseline cbd | cloud-correct | dashcam against the cbd winner | H100 verdict |
+|---|---|---|---|---|---|
+| s4 | earlier | | | | PASS (earlier record) |
+| s5 | 52 | 42 (base and mooncake tie) | 30 (simplestream 38 best) | base -96, mooncake +203 (inside 154 / above) | PASS |
+| s6 | 41 | 24 (base) | 36 (best of all) | base +885 | PASS; FLAG device-correct fraction low in every arm (0.06 to 0.09 against about 0.37 at s4 and s5: question mix, unexplained) |
+| s7 | pending | | | | batch ends about 08:36 |
+Per seed, the cbd winners and the cloud-on-time and dashcam losses to simplestream and llf, on cloud-only and dashcam, are as in the seed file: simplestream wins cloud on-time and dashcam and loses only on correctness (cbd 39 and 16 against rung 3's 52 and 41). Same code across the arms (live2 152b47d4).
+
+## 4. LINKSYNC (D278, dev loop)
+**Hours:** the scoping estimated 55 h (minimal subset 48.5 h); the actual dev-loop build took about 0.3 h wall plus one window and 9 gate cells (about 7 h of GPU interleaved with the q-family). **Push:** 09121e79 (29 paths, switches default OFF, existing cells byte-identical on the light proofs). **Gate:** 9 cells (3 arms x k = 1, 3, 5, s4, rule A window), readout research/study_linksync_s4_gate_prereg.md (RESULT section d9f345ad) and the H100's research/study_linksync_s4_gate_readout.md (b69735f1, corrected by the CPU re-run). **Verdict: INCONCLUSIVE (Rule 2), not a result against LINKSYNC:** the mechanism fired (main released 1, 3, 5; control FIFO; ablation 0 releases) but at s4 no victim is urgent (earliest first question 38.3 s, catch-up ends within 5 s), so the item-1 benefit could not be tested; items 1, 2, 4 unexercised or cancelled by geometry; item 3 unscorable (tied estimates); the ablation's question-first branch fired and did not help (39 against 40 correct at k=5; no negative control). **No further LINKSYNC cells (ruling); device accuracy stays 0.257732.**
+
+## 5. STOP / INVALID / anomalies
+No INVALID cell reported. No STOP triggered. The overnight prereg-before-cell discipline held for every iteration. Anomalies: (a) a stray 5-byte untracked file in experiments/orchestration/ on the H100 box (name starts "atchers run in the MAIN shell"; created 09:34 yesterday; ownership unconfirmed; not staged, harmless); (b) header.json git_commit differs per LINKSYNC cell and is not ed93608b (probably the launch-time HEAD, unverified); (c) `-q5c` 1x TOUCH collapsed 647 to 32 with D261 firing 0 times: cause not identified; (d) the live -q2m margin is bounded, not read, in that cell. Bookkeeping OWED: results/INDEX.md rows, the research/EXPERIMENTS.md rows for the q2m, q4, q5 lines, STATUS.md date; none done overnight.
+
+## 6. DECISIONS WAITING FOR YOU (none applied)
+1. **q5c at s5 to s7 (6 cells) or a halved-memory replicate of q5c and rung 3**, to separate the one-instant halved miss from noise; the pass rule queues nothing. 2. **The halved cbd bar of 75 (from -q's pass) when rung 3 itself scores 72**: keep, or re-set (a bar change is yours). 3. **Displacement-pricing work** (cost of pieces evicting warm prefixes; no committed model) as new work. 4. **-q pressure seeds s5 to s7** (held; -q2 and -q2m did not pass). 5. **LINKSYNC**: t0 chosen so at least one victim's first question falls within 30 s of reconnect would make item 1 testable (methodological change, not applied). 6. The D250 s6 device-correct anomaly. 7. NESTOUT scope A and D244 seed 5 remain held. 8. The Orin relay of the dashcam finding is yours.
