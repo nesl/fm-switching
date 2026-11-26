@@ -1,0 +1,105 @@
+{
+ "counts": {
+  "link_sync_pulls_sent": 1
+ },
+ "arm_link_counters": {
+  "link_epochs_read": 11998,
+  "link_epochs_with_records": 11997,
+  "link_offline_epochs": 1200,
+  "link_reconnects_seen": 1,
+  "link_backlog_frames_seen": 60,
+  "link_backlog_tokens_seen": 5400,
+  "link_first_events": [
+   {
+    "now_s": 480.07,
+    "epoch": "stream_arrival",
+    "device_id": "robo001",
+    "connected": false,
+    "offline_since": 480.0,
+    "back_online_at": null,
+    "backlog_frames": 0,
+    "backlog_tokens": 0
+   },
+   {
+    "now_s": 600.07,
+    "epoch": "connectivity_change",
+    "device_id": "robo001",
+    "connected": true,
+    "offline_since": 480.0,
+    "back_online_at": 600.0,
+    "backlog_frames": 60,
+    "backlog_tokens": 5400
+   }
+  ]
+ },
+ "sync_counters": {
+  "link_sync_epochs": 11998,
+  "link_sync_reconnects_seen": 1,
+  "link_sync_releases": 1,
+  "link_sync_holds_serial": 0,
+  "link_sync_holds_harm": 0,
+  "link_sync_questions_before_catchup": 0,
+  "link_sync_plan_calls": 0,
+  "link_sync_choice_QUESTION_FIRST": 0,
+  "link_sync_choice_WAIT": 0,
+  "link_sync_choice_LEAVE_TO_DEVICE": 0,
+  "link_sync_acc_choice_QUESTION_FIRST": 0,
+  "link_sync_acc_choice_WAIT": 0,
+  "link_sync_acc_choice_DEVICE": 0,
+  "link_sync_acted_defer": 0,
+  "link_sync_acted_device": 0,
+  "link_sync_forced_release": 0,
+  "link_sync_plan_errors": 0,
+  "link_sync_harm_nonzero": 0,
+  "link_sync_gain_positive": 1,
+  "link_sync_value_model": "STATED MODELLING ASSUMPTION (D281): question-first accuracy = (1-m)*0.568799 + m*0.212222, m = missing seconds / history seconds read from the link record and the session history span; accuracy interpolates LINEARLY in m between two committed values that are POOLED over all recall questions, not measured on outage-affected ones. Committed rows (oracle_fair_table.json): recall|cloud|WITH_HISTORY 0.568799 (n 12660, k 7201); recall|cloud|WITHOUT_HISTORY 0.212222 (n 3011, k 639); device option recall|device|NA 0.257732 (n 970, k 250), flash's choice, flagged.",
+  "link_sync_mode": "ours",
+  "link_sync_currency": "acc",
+  "link_sync_tiebreak": "hold"
+ },
+ "sync_log": [
+  {
+   "ev": "reconnect_seen",
+   "t": 600.07,
+   "device_id": "robo001",
+   "reconnect": 600.0,
+   "backlog_frames": 60,
+   "backlog_tokens": 5400,
+   "next_q_estimates": {
+    "robo001": 600.07
+   },
+   "gap_has_estimate": {
+    "robo001": true
+   }
+  },
+  {
+   "ev": "release",
+   "t": 600.07,
+   "device_id": "robo001",
+   "why": "priority",
+   "est_done": 600.981,
+   "reconnect": 600.0,
+   "order_index": 1,
+   "net": 0.002109718,
+   "gain": 0.002109718,
+   "harm": 0.0,
+   "next_q_est": 600.07,
+   "pending_order": [
+    "robo001"
+   ]
+  },
+  {
+   "ev": "caught_up_est",
+   "t": 723.97,
+   "device_id": "robo001"
+  }
+ ],
+ "sync_pulls": [
+  {
+   "kind": "sync_pull",
+   "device_id": "robo001",
+   "t_sent": 600.0699999995993,
+   "n_frames": 0
+  }
+ ]
+}
