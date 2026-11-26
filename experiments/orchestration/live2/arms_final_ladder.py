@@ -100,6 +100,8 @@ RUNG3_Q4 = "covex-v6-fair-final-q4"
 RUNG3_Q5 = "covex-v6-fair-final-q5"
 # q5b (iteration 4): `-q5` with the in-flight term priced on the piece actually released.
 RUNG3_Q5B = "covex-v6-fair-final-q5b"
+# q5c (iteration 5): `-q5b` plus the EXISTING D261 clear-on-reject switch. Composition only.
+RUNG3_Q5C = "covex-v6-fair-final-q5c"
 # q4b (D290 iteration 2): `-q4` plus the next-question basis (`q4_avoided_rebuild.Q4B_SWITCH`).
 RUNG3_Q4B = "covex-v6-fair-final-q4b"
 # link_events line: `-q` plus the arm-side READ of `Observation.device_links` (decision-neutral).
