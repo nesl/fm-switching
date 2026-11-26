@@ -760,6 +760,11 @@ def _final_ladder_lazy() -> Dict[str, Any]:
         return FL.make_rung3(FL.RUNG3_Q2, d249_queue_visibility=True,
                              q2_inflight_exclusion=True, **kw)
 
+    def r3q2m(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_Q2M, d249_queue_visibility=True,
+                             q2_inflight_exclusion=True, q2m_margin=True, **kw)
+
     def r3link(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3_LINK, d249_queue_visibility=True, link_read=True, **kw)
@@ -797,6 +802,7 @@ def _final_ladder_lazy() -> Dict[str, Any]:
             # POSTED cell naming an arm `arms.make_arm` cannot resolve dies at launch.
             "covex-v6-fair-final-q": r3d249,
             "covex-v6-fair-final-q2": r3q2,
+            "covex-v6-fair-final-q2m": r3q2m,
             "covex-v6-fair-final-q-link": r3link,
             "covex-v6-fair-final-q-sync": r3sync,
             "covex-v6-fair-final-q-sync-free": r3syncfree,

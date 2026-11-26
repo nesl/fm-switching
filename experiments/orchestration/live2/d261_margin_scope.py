@@ -72,9 +72,52 @@ def assert_unit_relation(a_d2_dev: float) -> float:
     return MARGIN_CF_D259_METHOD_A
 
 
+# q2m ABLATION (user ruling D282): the D259 value is NOT replaced. `covex-v6-fair-final-q2m` is
+# `-q2` with the margin set to rung 3's committed value, in both registers. Declared under names
+# that are not `MARGIN_CF` for the same audit reason as above.
+Q2M_SWITCH = "live2_q2m_rung3_margin"
+MARGIN_CF_Q2M_RUNG3: float = 0.16456
+MARGIN_CF_ON_TIME_Q2M_RUNG3: float = 0.65824
+
+
+class Q2MSwitchError(RuntimeError):
+    """The q2m switch was declared as a truthy CLASS attribute, a non-bool, or without `-q2`."""
+
+
+def q2m_arm_enables(arm: Any) -> bool:
+    """Is the q2m margin ablation on for THIS ARM INSTANCE? Default False.
+
+    Instance-dict lookup only; a truthy CLASS attribute RAISES, and so does a non-bool. It is read
+    at `margin_override_for` below, which `arms_v6state._cf_engine` calls once per planner build.
+    """
+    try:
+        own = vars(arm)
+    except TypeError:                                                          # pragma: no cover
+        own = {}
+    if Q2M_SWITCH not in own:
+        for klass in type(arm).__mro__:
+            if bool(klass.__dict__.get(Q2M_SWITCH, False)):
+                raise Q2MSwitchError(
+                    "%s is ON as a CLASS attribute of %s and the instance declares nothing; q2m "
+                    "requires an arm-scoped INSTANCE attribute" % (Q2M_SWITCH, klass.__name__))
+    v = own.get(Q2M_SWITCH, False)
+    if not isinstance(v, bool):
+        raise Q2MSwitchError("%s must be a bool, got %r" % (Q2M_SWITCH, type(v).__name__))
+    return v
+
+
 def margin_override_for(arm: Any) -> Optional[float]:
     """The margin this ARM's planner must use, in CORRECTNESS units, or None for the committed
-    default. None is the answer for every arm but `covex-v6-fair-final-q`."""
+    default. None is the answer for every arm but `-q`, `-q2` (D259 value) and `-q2m` (rung 3's
+    committed value, read back from `cf_margin.MARGIN_CF`)."""
+    if q2m_arm_enables(arm):
+        import cf_margin as _CM                                                # noqa: PLC0415
+        if not (QV.arm_enables(arm) and QV.q2_arm_enables(arm)):
+            raise Q2MSwitchError("q2m requires D249 and q2 on the same instance")
+        if _CM.MARGIN_CF is None or abs(float(_CM.MARGIN_CF) - MARGIN_CF_Q2M_RUNG3) > 1e-12:
+            raise Q2MSwitchError("cf_margin.MARGIN_CF is %r, not rung 3's %r"
+                                 % (_CM.MARGIN_CF, MARGIN_CF_Q2M_RUNG3))
+        return MARGIN_CF_Q2M_RUNG3
     return MARGIN_CF_D259_METHOD_A if QV.arm_enables(arm) else None
 
 

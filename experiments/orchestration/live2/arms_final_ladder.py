@@ -90,6 +90,8 @@ RUNG3_D249 = "covex-v6-fair-final-q"
 # q2 stage 1: `-q` plus the in-flight rows EXCLUDED from the HOLD_BACK/WARM harm (TOUCH harm keeps them).
 # SAME CLASS and constructor as RUNG3_D249 with one extra switch (`QV.Q2_SWITCH`) flipped.
 RUNG3_Q2 = "covex-v6-fair-final-q2"
+# q2m ablation (user ruling D282): `-q2` with the margin at rung 3's committed 0.6582 (MS.Q2M_SWITCH).
+RUNG3_Q2M = "covex-v6-fair-final-q2m"
 # link_events line: `-q` plus the arm-side READ of `Observation.device_links` (decision-neutral).
 RUNG3_LINK = "covex-v6-fair-final-q-link"
 # link_sync line: `-q` plus post-outage sync control. "ours" = priority release (form iv) and the
@@ -303,6 +305,17 @@ def _set_q2(arm: Any) -> None:
                                 % (QV.Q2_SWITCH, type(arm).__name__))
 
 
+def _set_q2m(arm: Any) -> None:
+    """Turn the q2m margin (rung 3's committed value) on for THIS INSTANCE and read it back."""
+    import d261_margin_scope as _MS                                        # noqa: PLC0415
+    if not (QV.arm_enables(arm) and QV.q2_arm_enables(arm)):
+        raise LadderSwitchError("q2m requires D249 and q2 on the same instance")
+    object.__setattr__(arm, _MS.Q2M_SWITCH, True)
+    if _MS.q2m_arm_enables(arm) is not True:                               # pragma: no cover
+        raise LadderSwitchError("%s did not take on the instance of %s"
+                                % (_MS.Q2M_SWITCH, type(arm).__name__))
+
+
 def _set_cold_unlatch(arm: Any) -> None:
     """Turn D261 (a rejection is not proof of cold) on for THIS INSTANCE and read it back.
 
@@ -326,6 +339,7 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                hysteresis: Any = None, guard_log: Any = None,
                d249_queue_visibility: bool = False,
                q2_inflight_exclusion: bool = False,
+               q2m_margin: bool = False,
                cold_unlatch: Any = None,
                link_read: bool = False,
                link_sync: Any = None, link_currency: str = "acc", link_tiebreak: str = "hold",
@@ -372,6 +386,8 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         _set_d249(arm)
     if q2_inflight_exclusion:
         _set_q2(arm)
+    if q2m_margin:
+        _set_q2m(arm)
     # D261 (user ruling 2026-11-25 item 2), DEV LINE ONLY. `cold_unlatch=None` means "follow the
     # D249 switch", so `covex-v6-fair-final-q` carries it and `covex-v6-fair-final` does not:
     # `make_rung3()` with no arguments is still exactly rung 3. An explicit False is how the
