@@ -121,3 +121,27 @@ floor definition unchanged (device-only). HINDSIGHT >= FAIR oracle is checked po
 the clustered bootstrap CI. A failure is blocking only when the gap exceeds the CI. Both threshold modes
 pass pooled and for every seed (1x). D270 is not in the repo log. This implementation matches the
 context-sent conditioning recorded as D268 corrected, so no new valuation was introduced.
+
+## Candidate A dashcam measure: GATE FAILED (2026-11-25), STOP, no substitute
+
+Measure: per-instant Platt crash probability per tier (raw score; 5-fold cross-fit by clip, committed
+fold rule), labels 0.5 to 3.0 s lead window vs no-crash, value = Brier improvement of the cloud
+probability over the device probability. Script `experiments/analysis/oracle/dashcam_brier.py`; output
+`results/orchestration/live2/oracle/dashcam_brier_candidateA.json`. Gate pre-registered in the script header.
+
+- G1 (cloud-only beats device-only): FAIL. Device Brier 0.0974, cloud Brier 0.1116, mean improvement
+  -0.0142 (CI -0.0206 to -0.0079); log-loss improvement -0.0276. n = 25,622 labelled live instants
+  (1,817 positive, 23,805 negative), seeds 4 to 7, 1x.
+- G2 (arm ordering agrees with DSMAP challenge mAP): FAIL. Spearman rho = -0.63 (CI -0.71 to -0.55)
+  across 23 arms. The realised cloud gain orders arms opposite to challenge mAP.
+
+Reading: on the live trace the cloud probability is worse than the device probability for the same
+instants, and the arms that serve cloud more score worse on this measure while scoring better on the
+challenge metric. This matches the threshold finding above: the cloud score tail on live no-crash
+instants is heavier than the SH-EP calibration sample. The calibration source here is SH-EP (all 300
+clips, cross-fitted), so the live-versus-calibration transfer is the likely cause, not a fold leak (folds
+are by clip, and each clip is scored by a map from the other folds). This is a diagnosis, not verified.
+
+Per the gate, no oracle shares were computed with this measure and the dashcam oracle is not replaced.
+Candidate A cannot be used for the dashcam oracle as specified. The dashcam headline stays the Nexar
+challenge metric (D199).

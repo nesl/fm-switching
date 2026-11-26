@@ -1588,3 +1588,9 @@ E-id: **StudyD258-DEVLAT** (research/EXPERIMENTS.md). Commits 6dfbb8c4 (rescore)
 |---|---|
 | result files | `results/orchestration/live2/oracle/dashcam_thresholds_live_dev.json`; `oracle_shares_v2_live_dev.json`; `oracle_lp_d270.json`, `oracle_lp_d270_live_dev.json`; `reports/study_dashcam_diagnosis.md` |
 | headline | Live-DEV recalibrated thresholds (device -0.0335, cloud -0.3869) collapse crash accuracy (5.1 and 2.8 percent) and make the episodic dashcam shares uninterpretable (FAIR -2 to -5, denominator near zero). Dashcam headline stays challenge mAP. h0.5 T-LP: capacity does not move the value at 11619.8 or 17945.2 tok/s. D270 control passes, pooled and per seed. |
+
+## StudyDASH-DIAG candidate A dashcam measure: GATE FAILED, stop (2026-11-25, Orin)
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/dashcam_brier_candidateA.json`; `experiments/analysis/oracle/dashcam_brier.py`; `reports/study_dashcam_diagnosis.md` |
+| headline | G1 fail: cloud Brier 0.1116 vs device 0.0974 on 25,622 live instants (mean improvement -0.0142, CI -0.0206 to -0.0079). G2 fail: Spearman rho -0.63 (CI -0.71 to -0.55) vs DSMAP challenge mAP. No oracle shares computed; dashcam oracle not replaced. |

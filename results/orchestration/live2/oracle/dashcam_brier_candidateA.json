@@ -1,0 +1,86 @@
+{
+ "_what": "Dashcam oracle measure candidate A (per-instant Brier improvement over device). Gate pre-registered in this file's header.",
+ "calibration_rows": {
+  "device": 3153,
+  "cloud": 3153
+ },
+ "maps_by_fold": {
+  "device": {
+   "0": [
+    0.05794497022295533,
+    -0.4548377783998022
+   ],
+   "1": [
+    0.07038553490691002,
+    -0.3340934698468995
+   ],
+   "2": [
+    0.08078747844204459,
+    -0.2764173057161438
+   ],
+   "3": [
+    0.05301177243201123,
+    -0.5380589878519011
+   ],
+   "4": [
+    0.04748643837044763,
+    -0.5466018827012733
+   ]
+  },
+  "cloud": {
+   "0": [
+    0.12797758959565195,
+    0.7366057166476022
+   ],
+   "1": [
+    0.12417361241092813,
+    0.6990399083532834
+   ],
+   "2": [
+    0.1295433904542424,
+    0.7633255608743709
+   ],
+   "3": [
+    0.11463290676192578,
+    0.520773537714447
+   ],
+   "4": [
+    0.09749054891780062,
+    0.32849556551628273
+   ]
+  }
+ },
+ "G1": {
+  "mean_brier_improvement": -0.014211,
+  "ci95": [
+   -0.020562,
+   -0.007881
+  ],
+  "mean_logloss_improvement": -0.027619,
+  "device_brier": 0.097405,
+  "cloud_brier": 0.111616,
+  "n_labelled_instants": 25622,
+  "n_pos": 1817,
+  "n_neg": 23805,
+  "criterion": "mean Brier improvement > 0 and CI lower > 0",
+  "pass": false
+ },
+ "G2": {
+  "spearman_rho": -0.6294,
+  "ci95": [
+   -0.7095,
+   -0.5504
+  ],
+  "n_arms": 23,
+  "criterion": "Spearman rho > 0 and CI lower > 0",
+  "pass": false
+ },
+ "gate_pass": false,
+ "_provenance": {
+  "git_commit": "86f5c4e93b0142e061907a03d533e96d3a48a5d6",
+  "script": "dashcam_brier.py",
+  "model": "none",
+  "timestamp": "2026-11-25T16:24:47.590743",
+  "device": "jetson_orin"
+ }
+}
