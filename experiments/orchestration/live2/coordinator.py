@@ -261,8 +261,19 @@ class Live2Coordinator:
                  targets: Optional[Dict[str, Any]] = None, on_pull=None,
                  gpu_budget_s: Optional[float] = None,
                  max_wall_s: Optional[float] = None,
-                 frame_cache: Any = None, defer_images: bool = False) -> None:
+                 frame_cache: Any = None, defer_images: bool = False,
+                 link_events: bool = False, link_sync: bool = False) -> None:
         self.arm = arm
+        # link_sync switch, DEFAULT OFF, needs link_events and an arm that declares sync control
+        # (`link_sync.arm_controls_sync`). The arm queues release requests on `link_sync_out`;
+        # `_link_sync_flush` is the one READ of that queue and turns each into a `sync_pull`.
+        self._link_sync = bool(link_sync)
+        if self._link_sync and not link_events:
+            raise ValueError("link_sync requires link_events")
+        self.sync_pulls: List[Dict[str, Any]] = []
+        # link_events switch, DEFAULT OFF, set by the launch args (`--link-events`), never by an
+        # arm. Off, a `connectivity` event is refused in `_ingest` and the link table stays empty.
+        self._link_events = bool(link_events)
         # D164: per-request host-offload controls are POLICY actions, so only an arm that
         # declares the capability emits them; every baseline keeps vLLM's defaults and so
         # keeps byte-identical bodies. Read once here, never re-read, so it cannot drift.
@@ -415,6 +426,7 @@ class Live2Coordinator:
                                 host_tier_tokens=int(host_tier_tokens),
                                 upload_mode=upload_mode,
                                 targets=dict(targets or CS.TARGETS))
+        self.st.link_events = self._link_events
         # D102: the GPU budget is an explicit INPUT, equal by default to one GPU's time over
         # the run (window length x 1 GPU-second per second), identical for every arm and
         # recorded in the header. It is the PHYSICAL CAPACITY, so it never binds artificially
@@ -602,6 +614,8 @@ class Live2Coordinator:
         self._epoch_wall0 = t0
         try:
             act = self.arm(obs)                  # scrub + validate_action + apply_defaults
+            if self._link_sync:
+                self._link_sync_flush(t)
             # D115: the DECIDING THREAD's CPU time over the same call (time.thread_time, so the
             # I/O loop's thread in the same process is not counted), read INSIDE the wall interval
             # so cpu <= wall by construction; and the candidates priced: the delta of the arm's own
@@ -619,6 +633,32 @@ class Live2Coordinator:
             # a submission made OUTSIDE an epoch (a chained recall released by a completion in
             # `_settle`) is stamped at the instant it is made, not charged this epoch's delay
             self._epoch_wall0 = None
+
+    def write_link_log(self, rdir: Path) -> None:
+        """link_events: the arm's link counters and sync controller log, the coordinator's own
+        `link_*` counters and every sync_pull sent. Written only when the switch is on."""
+        if not self._link_events:
+            return
+        ctl = getattr(self.arm, "link_sync", None)
+        lc = getattr(self.arm, "link_counters", None)
+        doc = dict(counts={k: v for k, v in sorted(self.counts.items()) if k.startswith("link_")},
+                   arm_link_counters=({k: v for k, v in lc.items() if k != "_last"} if lc else None),
+                   sync_counters=(dict(ctl.c) if ctl is not None else None),
+                   sync_log=(list(ctl.log) if ctl is not None else None),
+                   sync_pulls=list(self.sync_pulls))
+        import json as _json
+        (Path(rdir) / "link_sync_log.json").write_text(_json.dumps(doc, indent=1, default=str) + "\n")
+
+    def _link_sync_flush(self, now: float) -> None:
+        """link_sync: THE READ of the arm's release queue. One `sync_pull` per request."""
+        out = getattr(self.arm, "link_sync_out", None)
+        if not out:
+            return
+        while out:
+            d, n = out.pop(0)
+            self.sync_pulls.append(SC.make_link_event("sync_pull", device_id=str(d),
+                                                      t_sent=float(now), n_frames=int(n)))
+            self.counts["link_sync_pulls_sent"] += 1
 
     def _d249_inflight_rows(self, now: float) -> Tuple[Any, ...]:
         """D249 (a): one `InFlightWork` row per DEADLINE request the engine is already working on.
@@ -819,6 +859,18 @@ class Live2Coordinator:
             self.st.recall_question(ev)
             self._roster()
             return "recall_arrival"
+        if k == "sync_release":
+            if not self._link_sync:
+                raise RuntimeError("a sync_release arrived but link_sync is off; refused")
+            self.st.link_sync_release(ev)
+            return None
+        if k == "connectivity":
+            # link_events (A2): the epoch kind the interface declared and nothing emitted.
+            if not self._link_events:
+                raise RuntimeError("a connectivity event arrived but link_events is off for "
+                                   "this run; refused")
+            self.st.link_event(ev)
+            return "connectivity_change"
         raise KeyError(f"the coordinator has no handler for event kind {k!r}")
 
     def _take_episode(self, o, ev: Dict[str, Any]) -> None:

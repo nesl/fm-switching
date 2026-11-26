@@ -101,7 +101,7 @@ def collect(tree: Path, arm: str, a: Any) -> Dict[str, Any]:
     """One deterministic dry run of `arm`, with every module taken from `tree`."""
     src = _CHILD % {"selfdir": str(HERE)}
     cmd = [sys.executable, "-c", src, str(tree), arm, str(a.seed), str(a.n), str(a.run_s),
-           json.dumps(WORKLOAD)]
+           json.dumps(getattr(a, "_workload", None) or WORKLOAD)]
     p = subprocess.run(cmd, capture_output=True, text=True, cwd="/")
     tail = (p.stderr or "")[-1500:]
     line = next((l for l in (p.stdout or "").splitlines() if l.startswith("@@D223@@")), None)
@@ -146,8 +146,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument("--seed", type=int, default=4)
     ap.add_argument("--n", type=int, default=16)
     ap.add_argument("--run-s", type=float, default=300.0)
+    # D266 item 2: the identity claim is made per MIX, because a mix the proof never ran is a mix
+    # the proof says nothing about. 40:40:20 is the committed default and the committed claim.
+    ap.add_argument("--ratio", default=WORKLOAD["ratio"],
+                    help="fleet composition; the default is the committed 40:40:20 workload")
     a = ap.parse_args(argv)
+    workload = dict(WORKLOAD, ratio=a.ratio)
 
+    a._workload = workload
     before, after = Path(a.before).resolve(), Path(a.after).resolve()
     arms = tuple(a.arm) if a.arm else DEFAULT_ARMS
 
@@ -223,7 +229,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                         "why the realtime cell instrument was rejected and what this one does not "
                         "reach (the procsplit hand-off)."),
         "sha_before": os.environ.get("D223_SHA_BEFORE"),
-        "workload": WORKLOAD,
+        "workload": workload,
         "cell": {"seed": a.seed, "n_devices": a.n, "run_s": a.run_s},
         "control_instrument_determinism": ctl,
         "arms": per_arm,

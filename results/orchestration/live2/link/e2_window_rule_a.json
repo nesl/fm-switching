@@ -1,0 +1,82 @@
+{
+ "_rule": "A: argmax over t0 on a 0.5 s grid in [270, 810] of the distinct robot questions of the full k=5 permutation prefix, asked at or after t0, whose evidence interval overlaps [t0, t0+120); earliest t0 on ties; same t0 for all k",
+ "_caveat": "reads the trace's future questions (legal for scenario design, the policy never sees it) and picks the window that maximises dose: the dose is by construction and is not an effect size",
+ "seeds": {
+  "4": {
+   "victim_permutation": [
+    "robo001",
+    "robo003",
+    "robo009",
+    "robo010",
+    "robo004",
+    "robo007",
+    "robo008",
+    "robo006",
+    "robo002",
+    "robo000",
+    "robo005"
+   ],
+   "n_questions_joined": 229,
+   "n_unjoined": 0,
+   "t0": 480.0,
+   "k5_prefix_distinct": 5,
+   "plateau_start": 480.0,
+   "plateau_end": 482.0,
+   "plateau_contiguous": true,
+   "n_grid": 1081,
+   "n_grid_with_nonzero_at_both_pairs": 162,
+   "doses_at_t0": {
+    "k1": 1,
+    "k1_to_3": 2,
+    "k3_to_5": 2,
+    "k5_prefix": 5
+   },
+   "centre_t0": 540.0,
+   "doses_at_centre": {
+    "k1": 1,
+    "k1_to_3": 1,
+    "k3_to_5": 2,
+    "k5_prefix": 4
+   }
+  },
+  "5": {
+   "victim_permutation": [
+    "robo003",
+    "robo009",
+    "robo007",
+    "robo008",
+    "robo006",
+    "robo010",
+    "robo002",
+    "robo000",
+    "robo004",
+    "robo001",
+    "robo005"
+   ],
+   "n_questions_joined": 182,
+   "n_unjoined": 0,
+   "t0": 545.0,
+   "k5_prefix_distinct": 7,
+   "plateau_start": 545.0,
+   "plateau_end": 576.0,
+   "plateau_contiguous": true,
+   "n_grid": 1081,
+   "n_grid_with_nonzero_at_both_pairs": 435,
+   "doses_at_t0": {
+    "k1": 2,
+    "k1_to_3": 2,
+    "k3_to_5": 3,
+    "k5_prefix": 7
+   },
+   "centre_t0": 540.0,
+   "doses_at_centre": {
+    "k1": 2,
+    "k1_to_3": 1,
+    "k3_to_5": 3,
+    "k5_prefix": 6
+   }
+  }
+ },
+ "matched_total_ruleA": 9,
+ "matched_total_centre": 7
+}

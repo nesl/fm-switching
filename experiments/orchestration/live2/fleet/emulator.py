@@ -244,7 +244,27 @@ class FleetEmulator:
     def __init__(self, trace_dir: Path, coordinator: Coordinator, mode: str,
                  link_by_device: Optional[Dict[str, LK.LinkSpec]] = None,
                  tick_s: float = DEFAULT_TICK_S, realtime: bool = True,
-                 drain_s: float = 5.0) -> None:
+                 drain_s: float = 5.0, link_events: bool = False,
+                 link_sync_hold: bool = False) -> None:
+        # link_events switch, DEFAULT OFF: with it off `_plan` adds nothing and `run` never sees a
+        # `connectivity` action, so the heap, the wire and every digest are what they were.
+        self.link_events = bool(link_events)
+        self.n_link_events = 0
+        # link_sync switch, DEFAULT OFF, needs link_events. On, the device's buffered backlog is
+        # HELD at the device after the reconnect (live frames upload first) and goes up only when
+        # the coordinator sends `sync_pull`. An arm that does not declare sync control never runs
+        # with this on, so a baseline's backlog auto-releases exactly as before (FIFO by capture
+        # time, the committed D242 behaviour).
+        self.link_sync_hold = bool(link_sync_hold)
+        if self.link_sync_hold and not self.link_events:
+            raise ValueError("link_sync_hold requires link_events")
+        self.held: Dict[str, List[Dict[str, Any]]] = {}
+        self._held_ids: Dict[str, Dict[str, Any]] = {}
+        self._held_by_sess: Dict[str, List[Dict[str, Any]]] = {}
+        self._released: set = set()
+        self._latest_cum: Dict[str, int] = {}
+        self._gap_from: Dict[str, int] = {}
+        self.link_log: List[Dict[str, Any]] = []
         self.dir = Path(trace_dir)
         self.records = [json.loads(l) for l in open(self.dir / "trace.jsonl")]
         self.meta = json.loads((self.dir / "trace_meta.json").read_text())
@@ -315,7 +335,25 @@ class FleetEmulator:
         self._seq += 1
         heapq.heappush(self._heap, (float(t), self._seq, what, payload))
 
+    def _load_held_marks(self) -> None:
+        o = self.meta.get("outage")
+        if not o:
+            return
+        for rid, per in (o.get("deferred_per_robot") or {}).items():
+            marks = per.get("deferred")
+            if per.get("frames", 0) and marks is None:
+                raise ValueError("link_sync_hold: the trace meta carries no deferred-batch "
+                                 "marks for %s; regenerate the trace with link marks on" % rid)
+            for m in sorted(marks or (), key=lambda m: (m["t_captured"], m["cum_tokens"])):
+                self._held_ids[m["batch_id"]] = dict(m, device_id=rid)
+                self._held_by_sess.setdefault(m["session_id"], []).append(self._held_ids[m["batch_id"]])
+                self._gap_from[m["session_id"]] = min(
+                    self._gap_from.get(m["session_id"], 1 << 60),
+                    int(m["cum_tokens"]) - int(m["own_tokens"]))
+
     def _plan(self) -> None:
+        if self.link_sync_hold:
+            self._load_held_marks()
         for r in self.records:
             k = r["kind"]
             if k == "device_register":
@@ -325,13 +363,44 @@ class FleetEmulator:
             elif k == "history_preload":
                 self._push(r["t"], "history_preload", r)
             elif k == "history_batch":
-                self._push(r["t"], "history_batch", r)
+                if self.link_sync_hold and r["batch_id"] in self._held_ids:
+                    self._push(r["t"], "history_held", r)
+                else:
+                    self._push(r["t"], "history_batch", r)
             elif k == "monitor_opportunity":
                 self._push(r["t"], "monitor_opportunity", r)
             elif k == "recall_question":
                 self._push(r["t"], "recall_question", r)
             else:
                 raise ValueError(f"unknown trace record kind {k!r}")
+        if self.link_events:
+            self._plan_link_events()
+
+    def _plan_link_events(self) -> None:
+        """link_events (A1): one `connectivity` event per victim at outage start and at its end.
+
+        Read from the trace's own outage meta, pushed AFTER every trace action so the sequence
+        numbers of all other actions are unchanged. No outage in the meta means no events.
+        Start carries nothing about the future (no end, backlog 0); end carries the victim's
+        deferred history frames and their D2 tokens (D242 buffered semantics only).
+        """
+        EV.check_link_against_schema()
+        o = self.meta.get("outage")
+        if not o:
+            return
+        if o.get("semantics", "buffered") != "buffered":
+            raise ValueError("link_events is built on the device-buffered semantics; the "
+                             "superseded 'true' (lost) semantics is refused")
+        t0, t1 = float(o["t_start"]), float(o["t_end"])
+        per = o.get("deferred_per_robot") or {}
+        for rid in o["robots"]:
+            fr = int(per.get(rid, {}).get("frames", 0))
+            self._push(t0, "connectivity", dict(
+                device_id=rid, t=t0, connected=False, offline_since=t0, back_online_at=None,
+                backlog_frames=0, backlog_tokens=0))
+            self._push(t1, "connectivity", dict(
+                device_id=rid, t=t1, connected=True, offline_since=t0, back_online_at=t1,
+                backlog_frames=fr, backlog_tokens=fr * DS.D2_TOK_PER_IMG))
 
     # -- wire -------------------------------------------------------------
     def _to_coord(self, ev: Dict[str, Any], t: float) -> None:
@@ -345,6 +414,11 @@ class FleetEmulator:
         if k == "pull_request":
             t_arrive = float(reply["t_sent"]) + LK.pull_s(self.link(reply["device_id"]).rtt_ms)
             self._push(t_arrive, "pull_arrived", reply)
+        elif k == "sync_pull":
+            if not self.link_sync_hold:
+                raise ValueError("a sync_pull arrived at an emulator with link_sync_hold off")
+            t_arrive = float(reply["t_sent"]) + LK.pull_s(self.link(reply["device_id"]).rtt_ms)
+            self._push(t_arrive, "sync_pull_arrived", reply)
         elif k == "cloud_answer":
             spec = self.link(reply["device_id"])
             t_del = float(reply["t_done"]) + LK.deliver_s(
@@ -353,6 +427,62 @@ class FleetEmulator:
             self._push(t_del, "answer_delivered", reply)
         else:
             raise ValueError(f"coordinator sent an unknown event kind {k!r}")
+
+    def _on_sync_pull(self, pull: Dict[str, Any], t: float) -> None:
+        """Release the device's held backlog OLDEST-FIRST through its own uplink queue.
+
+        `n_frames` 0 means all; otherwise whole records are released until at least that many
+        frames are covered. A pull for a device with nothing held is counted and does nothing.
+        """
+        rid = pull["device_id"]
+        q = self.held.get(rid, [])
+        want = int(pull.get("n_frames", 0))
+        got = 0
+        n_rec = 0
+        while q and (want <= 0 or got < want):
+            rec = q.pop(0)
+            m = self._held_ids[rec["batch_id"]]
+            tr = self._upload(rec, "history_batch", rec["batch_id"], int(rec["frame_bytes"]), t)
+            self._push(tr.t_arrive, "history_arrived", dict(rec=rec, t_arrive=tr.t_arrive,
+                                                            released=True))
+            got += int(m["frames"])
+            n_rec += 1
+            self.link_log.append(dict(t=t, ev="release", device_id=rid, batch_id=rec["batch_id"],
+                                      t_offer=t, t_arrive=tr.t_arrive, queue_s=tr.queue_s,
+                                      frames=m["frames"]))
+        self.link_log.append(dict(t=t, ev="pull_arrived", device_id=rid, requested=want,
+                                  released_records=n_rec, released_frames=got,
+                                  still_held=sum(self._held_ids[x["batch_id"]]["frames"]
+                                                 for x in q)))
+
+    def _history_arrived_held(self, r: Dict[str, Any], payload: Dict[str, Any], t: float) -> None:
+        """link_sync: forward a history record with the CLOUD'S BELIEF, not the capture total.
+
+        `cum_tokens` counts every frame the device captured. While part of the history is still
+        held at the device the cloud has not received it, so the believed total is the latest
+        capture total seen among ARRIVED records minus the tokens of the records still held. On
+        a record with nothing held it is exactly `cum_tokens`, which is the committed value.
+        """
+        sid = r["session_id"]
+        m = self._held_ids.get(r["batch_id"])
+        released = bool(payload.get("released"))
+        if released:
+            self._released.add(r["batch_id"])
+            self.link_log.append(dict(t=t, ev="arrived", device_id=r["device_id"],
+                                      batch_id=r["batch_id"], frames=m["frames"],
+                                      t_arrive=payload["t_arrive"]))
+            self._to_coord(EV.make_link_kind(
+                "sync_release", device_id=r["device_id"], session_id=sid, t=float(t),
+                from_tokens=int(self._gap_from[sid]), n_frames=int(m["frames"]),
+                n_tokens=int(m["frames"]) * DS.D2_TOK_PER_IMG), t)
+        self._latest_cum[sid] = max(self._latest_cum.get(sid, 0), _cumulative_tokens(r))
+        lc = self._latest_cum[sid]
+        believed = lc - sum(int(x["own_tokens"]) for x in self._held_by_sess.get(sid, ())
+                            if x["batch_id"] not in self._released and int(x["cum_tokens"]) <= lc)
+        self._to_coord(EV.make("history_append", device_id=r["device_id"],
+                               session_id=sid, batch_id=r["batch_id"],
+                               t_arrive=payload["t_arrive"], frame_refs=r["frame_refs"],
+                               est_tokens=believed), t)
 
     def _upload(self, r: Dict[str, Any], kind: str, ref: str, nbytes: int,
                 t_offer: float) -> LK.UplinkTransfer:
@@ -524,6 +654,9 @@ class FleetEmulator:
                                                                 t_arrive=tr.t_arrive))
             elif what == "history_arrived":
                 r = payload["rec"]
+                if self.link_sync_hold:
+                    self._history_arrived_held(r, payload, t)
+                    continue
                 # THE FIX (2026-11-18). This forwarded the PER-BATCH increment
                 # (`r["est_tokens"]`, which `trace.py:391` sets to that batch's `tok`) and threw
                 # away the cumulative total the trace carries beside it (`cum_tokens`, the
@@ -585,6 +718,20 @@ class FleetEmulator:
                 o.t_delivered = t
                 o.cloud_payload = payload["payload"]
                 o.within_L = (t - o.t_opportunity) <= o.deadline_s + 1e-9
+            elif what == "history_held":
+                self.presented.append(payload)
+                m = self._held_ids[payload["batch_id"]]
+                self.held.setdefault(m["device_id"], []).append(payload)
+                self.link_log.append(dict(t=t, ev="held", device_id=m["device_id"],
+                                          batch_id=payload["batch_id"], frames=m["frames"],
+                                          tokens=m["frames"] * DS.D2_TOK_PER_IMG))
+            elif what == "sync_pull_arrived":
+                self._on_sync_pull(payload, t)
+            elif what == "connectivity":
+                self.n_link_events += 1
+                self.wire_sent += 1
+                for reply in (self.coord.on_event(EV.make_link(**payload), t) or ()):
+                    self._handle_reply(reply, t)
             else:
                 raise ValueError(f"unknown scheduled action {what!r}")
         wall = time.monotonic() - t0
@@ -628,6 +775,8 @@ class FleetEmulator:
             n_served=sum(1 for o in self.outcomes.values() if o.t_delivered is not None),
             n_within_L=sum(1 for o in self.outcomes.values() if o.within_L),
             wire_events_to_coordinator=self.wire_sent,
+            **({} if not self.link_events else dict(link_events=True,
+                                                    n_link_events=self.n_link_events)),
             wire_events_from_coordinator=self.wire_received,
             uplink_queue_p99_s_median=(qp99[len(qp99) // 2] if qp99 else None),
             uplink=up,
@@ -642,6 +791,12 @@ class FleetEmulator:
                 for r in self.coord.requests:
                     fh.write(json.dumps(r, sort_keys=True, separators=(",", ":")) + "\n")
         (out_dir / "run_meta.json").write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n")
+        if self.link_events:
+            (out_dir / "link_events.json").write_text(json.dumps(
+                dict(outage=self.meta.get("outage") and {
+                         k: self.meta["outage"].get(k) for k in
+                         ("robots", "t_start", "t_end", "placement", "deferred_per_robot")},
+                     link_log=self.link_log, n_link_events=self.n_link_events), default=str) + "\n")
         if sent_digest != trace_digest:
             raise RuntimeError(
                 "FAIRNESS DIGEST != TRACE DIGEST for this mode; the emulator did not present "

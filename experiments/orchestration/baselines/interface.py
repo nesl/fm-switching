@@ -260,6 +260,30 @@ class CloudState:
 
 
 @dataclass(frozen=True)
+class DeviceLink:
+    """One device's link state as the cloud has been TOLD it (link_events switch, default OFF).
+
+    Robots are not in `Observation.streams` (`cstate.observation` builds streams from dashcams
+    only), so a robot link signal cannot ride on `EpisodicStream.network`; this record is the
+    per-device channel and it covers every registered device.
+
+    PRESENT-TIME, NOT FUTURE. Every field is something the device could have reported by `now_s`:
+    `offline_since` is when the link dropped, `back_online_at` is when it came back and is None
+    while the device is offline (the end of an outage is never known in advance), and the backlog
+    counts are what the device had buffered AT the reconnect. They are 0 while offline, because
+    the buffer is still filling and the coordinator has not been told its size. `Observation`
+    validates all of that, so an event that smuggled a future instant in would raise rather than
+    reach a policy.
+    """
+    device_id: str
+    connected: bool
+    offline_since: Optional[float] = None
+    back_online_at: Optional[float] = None
+    backlog_frames: int = 0
+    backlog_tokens: int = 0
+
+
+@dataclass(frozen=True)
 class Observation:
     now_s: float
     epoch: str                               # in EPOCH_KINDS
@@ -273,10 +297,43 @@ class Observation:
     # exists, it has uploaded, and nothing about it is in the future. Naming it is therefore not a
     # future-knowledge leak, which is what `known_sessions` in `validate_action` guards against.
     live_sessions: Tuple[str, ...] = ()
+    # link_events switch, DEFAULT EMPTY: with the switch off no record is ever built, so every
+    # existing construction of Observation stays valid and every arm sees what it saw before.
+    device_links: Tuple[DeviceLink, ...] = ()
 
     def __post_init__(self) -> None:
         if self.epoch not in EPOCH_KINDS:
             raise ValueError(f"unknown epoch {self.epoch!r}")
+        for lk in self.device_links:
+            _validate_link(lk, self.now_s)
+
+
+def _validate_link(lk: DeviceLink, now_s: float) -> None:
+    eps = 1e-6
+    if not isinstance(lk.connected, bool):
+        raise ValueError(f"DeviceLink {lk.device_id}: connected must be a bool, got "
+                         f"{type(lk.connected).__name__}")
+    if lk.backlog_frames < 0 or lk.backlog_tokens < 0:
+        raise ValueError(f"DeviceLink {lk.device_id}: negative backlog")
+    for nm in ("offline_since", "back_online_at"):
+        v = getattr(lk, nm)
+        if v is not None and v > now_s + eps:
+            raise ValueError(f"DeviceLink {lk.device_id}: {nm}={v} is after now_s={now_s}; "
+                             f"a link record may not carry a future instant")
+    if lk.connected:
+        if lk.back_online_at is not None and lk.offline_since is None:
+            raise ValueError(f"DeviceLink {lk.device_id}: back_online_at without offline_since")
+        if (lk.back_online_at is not None and lk.offline_since is not None
+                and lk.back_online_at < lk.offline_since - eps):
+            raise ValueError(f"DeviceLink {lk.device_id}: back online before it went offline")
+    else:
+        if lk.offline_since is None:
+            raise ValueError(f"DeviceLink {lk.device_id}: offline with no offline_since")
+        if lk.back_online_at is not None:
+            raise ValueError(f"DeviceLink {lk.device_id}: offline but back_online_at is set")
+        if lk.backlog_frames or lk.backlog_tokens:
+            raise ValueError(f"DeviceLink {lk.device_id}: an offline device reports no backlog "
+                             f"size; it is told to the cloud at the reconnect")
 
 
 def scrub(obs: Observation) -> Observation:

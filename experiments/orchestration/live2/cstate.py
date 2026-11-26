@@ -43,7 +43,7 @@ for _p in (str(ROOT / "experiments/orchestration/baselines"),
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from interface import (CloudState, EpisodicStream, EvidenceItem, NetworkState,  # noqa: E402
+from interface import (CloudState, DeviceLink, EpisodicStream, EvidenceItem, NetworkState,  # noqa: E402
                        Observation, RecallQuery)
 
 try:
@@ -329,7 +329,39 @@ class CoordState:
                       uplink_mbps=float(ev["uplink_mbps"]), rtt_ms=float(ev["rtt_ms"]),
                       start_t=float(ev["start_t"]), salt=salt)
         self.devices[d.device_id] = d
+        if self.link_events:
+            self.links[d.device_id] = DeviceLink(device_id=d.device_id, connected=True)
         return d
+
+    def link_event(self, ev: Dict[str, Any]) -> DeviceLink:
+        """link_events (A3): apply one `connectivity` event to the link table.
+
+        Refused (raises) when the switch is off, when the device is unknown, when an event goes
+        backwards in time for its device, or when a start carries an end or a backlog.
+        """
+        if not self.link_events:
+            raise RuntimeError("a connectivity event reached a coordinator whose link_events "
+                               "switch is off")
+        did = ev["device_id"]
+        prev = self.links.get(did)
+        if prev is None:
+            raise KeyError(f"connectivity event for unregistered device {did!r}")
+        t = float(ev["t"])
+        if ev["connected"]:
+            if prev.connected or prev.offline_since is None:
+                raise ValueError(f"{did}: reconnect with no outage open")
+            lk = DeviceLink(device_id=did, connected=True, offline_since=prev.offline_since,
+                            back_online_at=t, backlog_frames=int(ev["backlog_frames"]),
+                            backlog_tokens=int(ev["backlog_tokens"]))
+        else:
+            if not prev.connected:
+                raise ValueError(f"{did}: outage start while already offline")
+            if ev.get("back_online_at") is not None or ev["backlog_frames"] or ev["backlog_tokens"]:
+                raise ValueError(f"{did}: an outage start must not carry the end or a backlog")
+            lk = DeviceLink(device_id=did, connected=False, offline_since=t)
+        self.links[did] = lk
+        self.counts["link_events_applied"] += 1
+        return lk
 
     def session_start(self, ev: Dict[str, Any]) -> SessionRec:
         # D101: a robot joins its first session PART-WAY, and the `history_preload` that declares
@@ -392,6 +424,19 @@ class CoordState:
         s.est_tokens = int(ev["est_tokens"]) if ev.get("est_tokens") \
             else len(s.frames) * D2_TOK_PER_IMG + D2_HEADER_TOK
         return s
+
+    def link_sync_release(self, ev: Dict[str, Any]) -> None:
+        """link_sync: a held record older than frames the cloud already holds has arrived, so the
+        session's cached prefix is valid only up to the first held record. Idempotent."""
+        s = self.sessions.get(ev["session_id"])
+        if s is None:
+            return
+        ft = int(ev["from_tokens"])
+        if s.built_tokens > ft:
+            self.counts["link_sync_prefix_invalidations"] += 1
+            self.counts["link_sync_prefix_tokens_invalidated"] += s.built_tokens - ft
+            s.built_tokens = ft
+        self.counts["link_sync_release_events"] += 1
 
     def monitor_offer(self, ev: Dict[str, Any]) -> Opportunity:
         o = Opportunity(opp_id=ev["opportunity_id"], device_id=ev["device_id"], kind="monitor",
@@ -496,6 +541,12 @@ class CoordState:
     # switch is on, which is what keeps every committed arm's observation byte-identical: an
     # empty tuple reaches `CloudState.in_flight_work`, whose default is also empty.
     inflight_work: Tuple[Any, ...] = ()
+    # ---- link_events switch (DEFAULT OFF): the per-device LINK TABLE ---------------------------
+    # Written by `link_event` (the coordinator's `_ingest` of a `connectivity` wire event), read
+    # by `observation`, which publishes it as `Observation.device_links`. Off, the table is never
+    # populated and `observation` builds exactly what it built before.
+    link_events: bool = False
+    links: Dict[str, DeviceLink] = field(default_factory=dict)
 
     def enact_placement(self, now: float) -> Dict[str, int]:
         """Read `desired_tier` and enact it. The one shared steering path (D133 Part A).
@@ -674,7 +725,9 @@ class CoordState:
                 device_episode_ids=(None if d.device_score_unknown else
                                     tuple(e for _t, _v, e in d.delivered_device)),
                 cadence_s=d.cadence_s, frame_count=d.frame_count, on_cloud=d.on_cloud,
-                network=NetworkState(connected=True, uplink_bps=d.uplink_mbps * 1e6 / 8.0,
+                network=NetworkState(connected=(True if not self.link_events
+                                                else self.links[d.device_id].connected),
+                                     uplink_bps=d.uplink_mbps * 1e6 / 8.0,
                                      rtt_s=d.rtt_ms / 1000.0)))
         queries = []
         for o in rec:
@@ -718,7 +771,9 @@ class CoordState:
                            budget_remaining_gpu_s=(self.budget.remaining_gpu_s()
                                                    if self.budget is not None else 0.0),
                            live_sessions=tuple(sorted(k for k, v in self.sessions.items()
-                                                      if v.open)))
+                                                      if v.open)),
+                           device_links=(tuple(self.links[k] for k in sorted(self.links))
+                                         if self.link_events else ()))
 
     def _host_fraction(self) -> float:
         if self.host_tier_tokens <= 0:

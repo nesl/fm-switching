@@ -29,7 +29,10 @@ STRIP = ("arm", "decision_latency_ms", "decision_id")
 def dry(arm_name, seed, n, run_s=120.0, ratio="50:50", patch=None,
         robot_question_set="eval", ss_question_set="ss1",
         dashcam_format="oneframe", dashcam_min_frames=None,
-        robot_upload="batch-30s", robot_reask_mean_s=0.0):
+        robot_upload="batch-30s", robot_reask_mean_s=0.0,
+        outage_robots_k=0, outage_duration_s=0.0, outage_seed_offset=0,
+        outage_placement="band", outage_semantics="buffered",
+        outage_t0_s=None, link_events=False, link_sync=False, keep_dir=None):
     import arms as A
     import cachekeys as CK
     import cstate as CS
@@ -56,8 +59,26 @@ def dry(arm_name, seed, n, run_s=120.0, ratio="50:50", patch=None,
             _kw["robot_upload"] = robot_upload
         if float(robot_reask_mean_s) > 0.0:
             _kw["robot_reask_mean_s"] = float(robot_reask_mean_s)
+        # D242 A / D266 item 2: passed ONLY when the outage is on, and the placement passed only
+        # when it is not the committed default, so a defaulted call is the committed call argument
+        # for argument and the off-by-default identity proof is not weakened by this forwarding.
+        if int(outage_robots_k) > 0 and float(outage_duration_s) > 0.0:
+            _kw["outage_robots_k"] = int(outage_robots_k)
+            _kw["outage_duration_s"] = float(outage_duration_s)
+            _kw["outage_seed_offset"] = int(outage_seed_offset)
+            if outage_placement != "band":
+                _kw["outage_placement"] = str(outage_placement)
+            if outage_semantics != "buffered":
+                _kw["outage_semantics"] = str(outage_semantics)
+            if outage_placement == "evidence":
+                _kw["outage_t0_s"] = float(outage_t0_s)
+            if link_events:
+                _kw["outage_link_marks"] = True
         TR.write_trace(d / "t", TR.generate_trace(seed, n, ratio, run_s, "A", **_kw))
         arm = A.make_arm(arm_name)
+        if link_sync:
+            import link_sync as _LS
+            link_sync = bool(_LS.arm_controls_sync(arm))
         if patch is not None:
             patch(arm)
         arm.live2_configure(gpu_kv_tokens=GPU_KV, host_tier_gib=HOST_GIB, host_tier_tokens=HOST_TOK,
@@ -65,10 +86,20 @@ def dry(arm_name, seed, n, run_s=120.0, ratio="50:50", patch=None,
         logs = Logs(d / "r").open()
         co = Live2Coordinator(arm, None, [], gpu_kv_tokens=GPU_KV, host_tier_gib=HOST_GIB,
                               host_tier_tokens=HOST_TOK, upload_mode="A", window_s=run_s, drain_s=5.0,
-                              seed=seed, logs=logs, run_tag=CK.run_tag(seed, "x"), dry_run=True)
+                              seed=seed, logs=logs, run_tag=CK.run_tag(seed, "x"), dry_run=True,
+                              **({} if not link_events else dict(link_events=True)),
+                              **({} if not link_sync else dict(link_sync=True)))
         br = EmulatorBridge(co)
         br.kind = "stub"
-        EM.FleetEmulator(d / "t", br, "A", realtime=False, drain_s=5.0).run(d / "r")
+        em = EM.FleetEmulator(d / "t", br, "A", realtime=False, drain_s=5.0,
+                              **({} if not link_events else dict(link_events=True)),
+                              **({} if not link_sync else dict(link_sync_hold=True)))
+        em.run(d / "r")
+        if keep_dir is not None:
+            co.write_link_log(d / "r")
+            import shutil
+            shutil.copytree(d / "r", keep_dir, dirs_exist_ok=True)
+        dry.last = dict(arm=arm, co=co, em=em, trace_meta=em.meta)
         logs.close()
         rows = [json.loads(l) for l in open(d / "r" / "decision.jsonl")]
     return [{k: v for k, v in r.items() if k not in STRIP} for r in rows], getattr(arm, "stats", None)

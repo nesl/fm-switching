@@ -220,6 +220,60 @@ class CloudAnswer:
     payload: Any
 
 
+@dataclass
+class Connectivity:
+    """link_events switch (default OFF): one device's link going down or coming back.
+
+    A separate table (`LINK_FIELDS`), NOT a row of `FIELDS`: the committed event vocabulary, the
+    fleet's own copy of it and every test that iterates `FIELDS` are untouched by construction.
+    Start event: connected False, back_online_at None, backlog 0 and 0 (the end of an outage and
+    the size of the buffer are not known while it is happening). End event: connected True,
+    back_online_at = t, backlog = what the device had buffered at the reconnect.
+    """
+    device_id: str
+    t: float
+    connected: bool
+    offline_since: Optional[float]
+    back_online_at: Optional[float]
+    backlog_frames: int
+    backlog_tokens: int
+
+
+@dataclass
+class SyncRelease:
+    """link_sync: a held backlog record has reached the cloud; the session's cached prefix is
+    valid only up to `from_tokens` (the tokens before the first record the device held)."""
+    device_id: str
+    session_id: str
+    t: float
+    from_tokens: int
+    n_frames: int
+    n_tokens: int
+
+
+@dataclass
+class SyncPull:
+    """link_sync, COORDINATOR -> FLEET: release the device's held backlog, oldest first.
+    `n_frames` 0 means all of it."""
+    device_id: str
+    t_sent: float
+    n_frames: int
+
+
+LINK_FIELDS: Dict[str, tuple] = {
+    "connectivity": ("device_id", "t", "connected", "offline_since", "back_online_at",
+                     "backlog_frames", "backlog_tokens"),
+    "sync_release": ("device_id", "session_id", "t", "from_tokens", "n_frames", "n_tokens"),
+    "sync_pull": ("device_id", "t_sent", "n_frames"),
+}
+LINK_EVENT_CLASSES = {"connectivity": Connectivity, "sync_release": SyncRelease,
+                      "sync_pull": SyncPull}
+for _k, _c in LINK_EVENT_CLASSES.items():
+    if tuple(f.name for f in dc_fields(_c)) != LINK_FIELDS[_k]:
+        raise RuntimeError(f"schema.py internal mismatch for {_k}")
+del _k, _c
+
+
 EVENT_CLASSES = {
     "device_register": DeviceRegister,
     "session_start": SessionStart,
@@ -265,6 +319,8 @@ OPTIONAL_FIELDS: Dict[str, tuple] = {
 
 def make(kind: str, **kw: Any) -> Dict[str, Any]:
     """Build one wire event, rejecting a missing or unknown field outright."""
+    if kind in LINK_FIELDS:
+        return _make_link(kind, **kw)
     want = FIELDS.get(kind)
     if want is None:
         raise KeyError(f"unknown event kind {kind!r}")
@@ -279,9 +335,30 @@ def make(kind: str, **kw: Any) -> Dict[str, Any]:
     return dict(kind=kind, **kw)
 
 
+def _make_link(kind: str, **kw: Any) -> Dict[str, Any]:
+    want = LINK_FIELDS[kind]
+    missing = [f for f in want if f not in kw]
+    extra = [f for f in kw if f not in want]
+    if missing or extra:
+        raise ValueError(f"{kind}: missing={missing} extra={extra}")
+    LINK_EVENT_CLASSES[kind](**kw)
+    return dict(kind=kind, **kw)
+
+
+def make_link_event(kind: str, **kw: Any) -> Dict[str, Any]:
+    return _make_link(kind, **kw)
+
+
 def parse(rec: Mapping[str, Any]):
     """Turn a wire dict back into its dataclass, rejecting anything off-schema."""
     kind = rec.get("kind")
+    if kind in LINK_FIELDS:
+        body = {k: v for k, v in rec.items() if k != "kind"}
+        missing = [f for f in LINK_FIELDS[kind] if f not in body]
+        extra = [f for f in body if f not in LINK_FIELDS[kind]]
+        if missing or extra:
+            raise ValueError(f"{kind}: missing={missing} extra={extra}")
+        return LINK_EVENT_CLASSES[kind](**body)
     cls = EVENT_CLASSES.get(kind)
     if cls is None:
         raise KeyError(f"unknown event kind {kind!r}")
@@ -296,7 +373,7 @@ def parse(rec: Mapping[str, Any]):
 
 
 def to_wire(obj) -> Dict[str, Any]:
-    for kind, cls in EVENT_CLASSES.items():
+    for kind, cls in {**EVENT_CLASSES, **LINK_EVENT_CLASSES}.items():
         if isinstance(obj, cls):
             return dict(kind=kind, **asdict(obj))
     raise TypeError(f"{type(obj).__name__} is not a live2 wire event")

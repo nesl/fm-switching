@@ -760,6 +760,30 @@ def _final_ladder_lazy() -> Dict[str, Any]:
         return FL.make_rung3(FL.RUNG3_Q2, d249_queue_visibility=True,
                              q2_inflight_exclusion=True, **kw)
 
+    def r3link(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_LINK, d249_queue_visibility=True, link_read=True, **kw)
+
+    def r3sync(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_SYNC, d249_queue_visibility=True, link_sync="ours",
+                             link_currency="acc", **kw)
+
+    def r3syncd177(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_SYNC_D177, d249_queue_visibility=True, link_sync="ours",
+                             link_currency="d177", **kw)
+
+    def r3syncfree(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_SYNC_FREE, d249_queue_visibility=True, link_sync="ours",
+                             link_currency="d177", link_tiebreak="free", **kw)
+
+    def r3syncctl(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_SYNC_CTL, d249_queue_visibility=True, link_sync="fifo",
+                             link_currency="acc", gain=0.0, **kw)
+
     def r3glog(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3 + "-glog", guard_log=True, **kw)
@@ -773,6 +797,11 @@ def _final_ladder_lazy() -> Dict[str, Any]:
             # POSTED cell naming an arm `arms.make_arm` cannot resolve dies at launch.
             "covex-v6-fair-final-q": r3d249,
             "covex-v6-fair-final-q2": r3q2,
+            "covex-v6-fair-final-q-link": r3link,
+            "covex-v6-fair-final-q-sync": r3sync,
+            "covex-v6-fair-final-q-sync-free": r3syncfree,
+            "covex-v6-fair-final-q-sync-d177": r3syncd177,
+            "covex-v6-fair-final-q-sync-ctl": r3syncctl,
             "covex-v6-fair-final-ptg-ctl20": r3ptg_ctl20,
             "covex-v6-fair-final-ptg-nohyst": r3ptg_nohyst,
             "covex-v6-fair-final-ptg-hystonly": r3ptg_hystonly,

@@ -79,6 +79,41 @@ FIELDS: Dict[str, tuple] = {
 }
 
 
+# link_events switch (default OFF): the one event kind the emulator emits only when the switch is
+# set. A SEPARATE table, so `FIELDS`, `make` for every committed kind and `check_against_schema`'s
+# comparison of `FIELDS` are unchanged; `check_link_against_schema` compares this table to
+# `schema.LINK_FIELDS` and RAISES on a difference, as the main check does.
+LINK_FIELDS: Dict[str, tuple] = {
+    "connectivity": ("device_id", "t", "connected", "offline_since", "back_online_at",
+                     "backlog_frames", "backlog_tokens"),
+    "sync_release": ("device_id", "session_id", "t", "from_tokens", "n_frames", "n_tokens"),
+    "sync_pull": ("device_id", "t_sent", "n_frames"),
+}
+
+
+def make_link_kind(kind: str, **kw: Any) -> Dict[str, Any]:
+    """Build one link wire event, rejecting a missing or unknown field outright."""
+    want = LINK_FIELDS[kind]
+    missing = [f for f in want if f not in kw]
+    extra = [f for f in kw if f not in want]
+    if missing or extra:
+        raise ValueError(f"{kind}: missing={missing} extra={extra}")
+    return dict(kind=kind, **kw)
+
+
+def make_link(**kw: Any) -> Dict[str, Any]:
+    """Build one `connectivity` wire event."""
+    return make_link_kind("connectivity", **kw)
+
+
+def check_link_against_schema() -> None:
+    mod = _load_schema_module()
+    theirs = getattr(mod, "LINK_FIELDS", None) if mod is not None else None
+    if theirs is None or {k: tuple(v) for k, v in theirs.items()} != LINK_FIELDS:
+        raise RuntimeError("SCHEMA MISMATCH between live2/fleet/events.py LINK_FIELDS and "
+                           "live2/schema.py LINK_FIELDS; a link_events run is refused")
+
+
 # Fields a caller MAY omit. `category` was added to `recall_question` for D134 and every
 # pre-existing caller predates it, so requiring it would break them for a field that is
 # genuinely optional: an event without a category simply carries None, which is what the

@@ -227,6 +227,87 @@ JOIN_FRAC_MAX = 0.5                         # D101: join ~ U[0, 0.5 x session du
 OUTAGE_PLACEMENT_LO = 0.25
 OUTAGE_PLACEMENT_HI = 0.75
 
+# D266 item 2 (user ruling 2026-11-25 12:25): a SECOND placement rule, selected by
+# `outage_placement` and OFF unless asked for by name. "band" is the committed D242 rule above and
+# is unchanged, verbatim, including its single RNG stream and its draw order. "centre" is the
+# ruling's rule and differs in THREE ways, each of which exists to remove one confound:
+#   (1) THE WINDOW IS FIXED, not drawn: t_start = CENTRE_FRAC x (run_s - D), the exact centre of
+#       the committed band. At run_s = 1200 and D = 120 that is 540.0 s, window 540.0 to 660.0 s,
+#       inside the committed [0.25, 0.75] x (run_s - D) = [270, 810], so it is a point of the
+#       existing rule and not an extrapolation.
+#   (2) THE WINDOW IS SETTLED BEFORE THE VICTIMS ARE CHOSEN. In the band rule the window is drawn
+#       from the SAME stream as the victims, AFTER the victim draw has consumed k values, so
+#       taking k out of the stream key alone would nest the victims and STILL MOVE THE WINDOW.
+#       Here the window does not come off the victim stream at all, which is stronger than
+#       ordering the two draws.
+#   (3) THE VICTIMS ARE A PREFIX OF ONE EXPLICIT k-INDEPENDENT PERMUTATION, recorded in the meta
+#       as `victim_permutation`. `random.sample(population, k)` happens to be prefix-consistent in
+#       k at this fleet size, but that is an UNDOCUMENTED CPython internal and not a contract, so
+#       nesting here is by construction and auditable from the artefact rather than inherited from
+#       an implementation detail: for k1 < k2 the k1 victims are a subset of the k2 victims
+#       BECAUSE both are prefixes of one list, and a reader can check it from the recorded order.
+# NOT CHANGED by this rule: the outage is still off by default, still robot-only (`rob_ids`), still
+# one window per run, still not keyed on the arm, and it still moves only `history_batch` offer
+# times and `recall_question` `t_offer`.
+# D273 (1) (user ruling 2026-11-25): THE OUTAGE SEMANTICS. "buffered" is the committed D242
+# behaviour and the DEFAULT: a victim's in-window history offers are RE-TIMED to the reconnect
+# instant, so the evidence is DELAYED and the committed UplinkQueue produces the burst. "true" is
+# this ruling's semantics: those frames are LOST TO THE CLOUD and never arrive at all.
+#
+# WHY THE RULING CHANGED IT, recorded here because the alternative is closed and not wrong. Under
+# "buffered" the mechanism the design exists to test is CLOSED BY THE HARNESS: the deferred frames
+# are 60 records and 1,449,630 bytes per victim, which serialise in 0.853 s on the committed
+# 13.6 Mbps uplink, so the whole backlog has landed 0.87 to 0.89 s after reconnect. Measured at the
+# ruled design point, not one question whose evidence lies inside the window is asked inside that
+# sub-second interval, so the missed-evidence dose BOUNDED BY THE DRAIN is zero at every k and both
+# seeds. The buffered variant is recorded as the CLOSED ALTERNATIVE at commit 722c449f.
+#
+# WHAT "LOST TO THE CLOUD" MEANS HERE, EXACTLY, AND WHAT IT DELIBERATELY DOES NOT TOUCH:
+#   LOST: the victim's `history_batch` records whose offer time falls in the window are REMOVED
+#         from the trace, and the cloud-side accounting is corrected so it does not claim frames
+#         that never arrived - every LATER `history_batch` of that session has its `cum_tokens`
+#         reduced by the lost tokens (read at `fleet/emulator.py:233-240`, which forwards it to the
+#         coordinator as the session's history size), and every LATER `recall_question` of that
+#         device has its `history_tokens` reduced by the lost tokens at or before its own ask time.
+#   NOT TOUCHED, AND THIS IS THE HALF THAT COULD SILENTLY GO WRONG: the DEVICE still holds its own
+#         history. `device_answers` is a SEPARATE list, built before this block runs and never
+#         read by it, so every device answer and every `device_latency_s` is unchanged. A switch
+#         that also shortened the device history would have broken the device rather than the
+#         uplink and would have passed an off-by-default identity proof while invalidating every
+#         cell, which is why that half is proved on the artefact and not argued.
+#   NOT TOUCHED: `history_preload` (D101) is cloud-side before the clock starts and never crosses
+#         the uplink, so an outage cannot lose it; if a victim session's preload falls inside the
+#         window the meta says so rather than leaving the reader to wonder.
+OUTAGE_SEMANTICS = ("buffered", "true")
+OUTAGE_TRUE_NOTE = (
+    "D273 (1): TRUE OUTAGE. A victim's `history_batch` records offered inside the window are "
+    "REMOVED, so those frames never reach the cloud and no reconnect drains them. The cloud-side "
+    "accounting is corrected with them: later `cum_tokens` and later `recall_question` "
+    "`history_tokens` of the same session drop by the lost tokens. THE DEVICE IS UNTOUCHED: "
+    "`device_answers` is built before this block and never read by it, so the device's own history "
+    "and every `device_latency_s` are complete. `recall_question` ask times and `opportunity_id`s "
+    "are unchanged, exactly as under the buffered rule.")
+
+OUTAGE_PLACEMENTS = ("band", "centre", "evidence")
+OUTAGE_EVIDENCE_NOTE = (
+    "E1 (scenario switch): the window start is an EXPLICIT t0 supplied by the caller "
+    "(`outage_t0_s`), identical for every k at a seed, so it carries no k. The victims are the "
+    "first k of the SAME k-independent permutation the 'centre' rule uses (stream key "
+    "'outage-perm|seed|offset|D'), recorded as `victim_permutation`, so victims stay nested in k "
+    "and equal the centre rule's victims. THE PLACEMENT RULE IS IN THE TRACE-DIRECTORY TOKEN "
+    "together with t0, or a stale trace would be served. The t0 may be chosen by reading the "
+    "trace's future questions (legal for scenario design: the policy never sees it); a t0 "
+    "chosen that way maximises dose by construction and the dose is not an effect size.")
+OUTAGE_PLACEMENT_CENTRE_FRAC = 0.5
+OUTAGE_CENTRE_NOTE = (
+    "D266 item 2: FIXED window at the centre of the committed band, t_start = %.2f x (run_s - D), "
+    "settled BEFORE the victims are chosen and carrying no k. Victims are the first k of ONE "
+    "k-INDEPENDENT permutation of the robot ids, drawn from a dedicated stream keyed on "
+    "(seed, outage_seed_offset, D) with NO k, and the whole permutation is recorded as "
+    "`victim_permutation`, so for k1 < k2 the k1 victim set is a SUBSET of the k2 set and the two "
+    "windows are IDENTICAL, by construction and not by a `random.sample` internal. Everything "
+    "else is the band rule's behaviour, unchanged." % OUTAGE_PLACEMENT_CENTRE_FRAC)
+
 OUTAGE_NOTE = (
     "D242 item A (PROVISIONAL, placement awaiting a ruling): `outage_robots_k` robots drawn "
     "from a dedicated RNG stream keyed on (seed, outage_seed_offset, k, D) lose the uplink "
@@ -420,7 +501,12 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                    robot_reask_mean_s: float = 0.0,
                    outage_robots_k: int = 0,
                    outage_duration_s: float = 0.0,
-                   outage_seed_offset: int = 0) -> Dict[str, Any]:
+                   outage_seed_offset: int = 0,
+                   outage_placement: str = "band",
+                   outage_semantics: str = "buffered",
+                   outage_t0_s: Optional[float] = None,
+                   outage_t0_derivation: str = "",
+                   outage_link_marks: bool = False) -> Dict[str, Any]:
     """Build one run's opportunity trace. Returns {records, device_answers, meta, stats}.
 
     `dashcam_format="epg"` is D153's append-only episode context (D148). It adds the episode
@@ -434,6 +520,16 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
     `outage_robots_k`, `outage_duration_s` and `outage_seed_offset` are D242 item A's correlated
     multi-robot outage (see OUTAGE_NOTE). OFF by default, and off means the block below does not
     run at all: no record moves, no stats attribute is set and no meta key is added.
+
+    `outage_semantics` selects what happens to the frames and has no effect unless the outage is
+    on. "buffered" is the committed D242 behaviour and the default, so every committed trace and
+    every defaulted call is unchanged. "true" is D273 (1): the frames are LOST TO THE CLOUD and the
+    device keeps its own history (see OUTAGE_TRUE_NOTE).
+
+    `outage_placement` selects the placement rule and has no effect at all unless the outage is on.
+    "band" is the committed D242 rule and is the default, so every committed trace and every
+    defaulted call is unchanged. "centre" is D266 item 2's nested-victim fixed-window rule
+    (see OUTAGE_CENTRE_NOTE); it changes WHICH robots and WHEN, and nothing else.
 
     Deterministic in `seed` alone given (n_devices, ratio, run_s, stagger_s): the same seed
     produces a byte-identical trace, which is what makes the arms paired (D79).
@@ -455,6 +551,21 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
         raise ValueError(f"robot_upload {robot_upload!r} not in {ROBOT_UPLOADS} (D154 (4))")
     if int(outage_robots_k) < 0 or float(outage_duration_s) < 0.0:
         raise ValueError("outage_robots_k and outage_duration_s must be non-negative (D242 A)")
+    if outage_placement not in OUTAGE_PLACEMENTS:
+        raise ValueError(f"outage_placement {outage_placement!r} not in {OUTAGE_PLACEMENTS} "
+                         "(D266 item 2)")
+    if outage_semantics not in OUTAGE_SEMANTICS:
+        raise ValueError(f"outage_semantics {outage_semantics!r} not in {OUTAGE_SEMANTICS} "
+                         "(D273 (1))")
+    if outage_placement == "evidence":
+        if outage_t0_s is None:
+            raise ValueError("outage_placement 'evidence' requires an explicit outage_t0_s; "
+                             "refused rather than defaulted")
+        if float(outage_t0_s) < 0.0 or float(outage_t0_s) + float(outage_duration_s) > float(run_s):
+            raise ValueError("outage_t0_s %g does not leave the window inside run_s %g"
+                             % (float(outage_t0_s), float(run_s)))
+    elif outage_t0_s is not None:
+        raise ValueError("outage_t0_s is meaningful only with outage_placement 'evidence'")
     per_frame = robot_upload == "per-frame"
     epg = dashcam_format == "epg"
     floor = int(dashcam_min_frames)
@@ -952,17 +1063,46 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
         if d_out >= float(run_s):
             raise ValueError("outage_duration_s %g does not fit inside run_s %g"
                              % (d_out, float(run_s)))
-        # A DEDICATED RNG STREAM, keyed on (seed, offset, k, D) and never the generator's own,
-        # so turning the outage on cannot perturb one other draw in the trace.
-        rng_out = random.Random("outage|%d|%d|%d|%.6f"
-                                % (int(seed), int(outage_seed_offset), k_out, d_out))
-        victims = sorted(rng_out.sample(sorted(rob_ids), k_out))
         span = float(run_s) - d_out
-        t_out0 = rng_out.uniform(OUTAGE_PLACEMENT_LO * span, OUTAGE_PLACEMENT_HI * span)
+        victim_perm: Optional[List[str]] = None
+        if outage_placement == "band":
+            # THE COMMITTED D242 PATH, VERBATIM, including the draw ORDER and the single stream:
+            # a dedicated RNG stream keyed on (seed, offset, k, D) and never the generator's own,
+            # so turning the outage on cannot perturb one other draw in the trace. Its victims and
+            # its window both move with k, which is the confound D266 item 2 removes; it is kept
+            # unchanged so every committed outage cell stays reproducible from this file.
+            stream_key = "outage|%d|%d|%d|%.6f" % (int(seed), int(outage_seed_offset),
+                                                   k_out, d_out)
+            rng_out = random.Random(stream_key)
+            victims = sorted(rng_out.sample(sorted(rob_ids), k_out))
+            t_out0 = rng_out.uniform(OUTAGE_PLACEMENT_LO * span, OUTAGE_PLACEMENT_HI * span)
+            placement_rule = ("seeded uniform draw in [%.2f, %.2f] x (run_s - D); PROVISIONAL, "
+                              "see OUTAGE_NOTE"
+                              % (OUTAGE_PLACEMENT_LO, OUTAGE_PLACEMENT_HI))
+        else:
+            # D266 item 2. THE WINDOW IS SETTLED FIRST AND CARRIES NO k: it is not drawn from the
+            # victim stream, so no number of victim draws can move it.
+            t_out0 = (OUTAGE_PLACEMENT_CENTRE_FRAC * span if outage_placement == "centre"
+                      else float(outage_t0_s))
+            # THEN the victims, as an EXPLICIT k-INDEPENDENT PERMUTATION PREFIX. The stream key
+            # omits k, the permutation is of the WHOLE robot id list, and `victims` is its first
+            # k entries, so nesting in k holds by construction. `shuffle` of the full list is used
+            # rather than `sample(pop, k)` precisely so that nothing rests on `sample`'s
+            # prefix behaviour, which is an undocumented internal.
+            stream_key = "outage-perm|%d|%d|%.6f" % (int(seed), int(outage_seed_offset), d_out)
+            victim_perm = sorted(rob_ids)
+            random.Random(stream_key).shuffle(victim_perm)
+            victims = sorted(victim_perm[:k_out])
+            placement_rule = (OUTAGE_CENTRE_NOTE if outage_placement == "centre"
+                              else OUTAGE_EVIDENCE_NOTE)
         t_out1 = t_out0 + d_out
         vset = set(victims)
         n_def_rec = n_def_frames = n_def_est_tokens = 0
-        per_robot: Dict[str, Dict[str, int]] = {v: dict(records=0, frames=0) for v in victims}
+        # D273 (1): the records to remove, collected in the SAME pass that the buffered rule uses
+        # to re-time them, so the two semantics select over one traversal and cannot diverge in
+        # which records they consider in-window.
+        lost_marks: List[Dict[str, Any]] = []
+        per_robot: Dict[str, Dict[str, Any]] = {v: dict(records=0, frames=0) for v in victims}
         for r in records:
             if str(r.get("device_id")) not in vset:
                 continue
@@ -970,16 +1110,32 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
             if not (t_out0 <= t_r < t_out1):
                 continue
             if r["kind"] == "history_batch":
-                # `t` IS the offer time for a history record (the generator's own `t_offer`), so
-                # moving it to the reconnect instant is the WHOLE change on this path: the
-                # committed UplinkQueue then takes t_start = max(offer, free_at) and records the
-                # queueing delay it imposed. Nothing here models a burst.
-                r["t"] = round(t_out1, 6)
+                # `t` IS the offer time for a history record (the generator's own `t_offer`). Under
+                # the committed BUFFERED rule, moving it to the reconnect instant is the WHOLE
+                # change on this path: the committed UplinkQueue then takes
+                # t_start = max(offer, free_at) and records the queueing delay it imposed. Nothing
+                # here models a burst. Under D273 (1)'s TRUE rule the record is instead marked for
+                # REMOVAL and its tokens are taken out of the cloud's accounting below.
+                if outage_semantics == "true":
+                    lost_marks.append(r)
+                else:
+                    r["t"] = round(t_out1, 6)
                 n_def_rec += 1
                 n_def_frames += len(r.get("frame_refs") or ())
                 n_def_est_tokens += int(r["est_tokens"])
                 per_robot[str(r["device_id"])]["records"] += 1
                 per_robot[str(r["device_id"])]["frames"] += len(r.get("frame_refs") or ())
+                if outage_link_marks:
+                    # link_events/link_sync marks, META ONLY: the records themselves are not
+                    # touched, so trace.jsonl and its fairness digest are what they were. The
+                    # emulator needs to know WHICH records were buffered by the device, and
+                    # `t == t_end` cannot tell it (a live capture can land on the grid point).
+                    per_robot[str(r["device_id"])].setdefault("deferred", []).append(dict(
+                        batch_id=r["batch_id"], session_id=r["session_id"],
+                        t_captured=float(t_r),
+                        frames=len(r.get("frame_refs") or ()), own_tokens=int(r["est_tokens"]),
+                        cum_tokens=int(r["cum_tokens"]),
+                        frame_bytes=int(r["frame_bytes"])))
             elif r["kind"] == "recall_question":
                 # `t` is the ASK time and the deadline anchor and MUST NOT move. Only the OFFER
                 # moves, in its own field, and the READ that makes it causal is
@@ -987,15 +1143,124 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                 # UplinkQueue.send in place of the event time.
                 r["t_offer"] = round(t_out1, 6)
                 outage_q_keys.append(r["opportunity_key"])
+        # ---------------------------------------------------- D273 (1): LOSE THEM, AND RE-ACCOUNT
+        lost_info: Dict[str, Any] = {}
+        if outage_semantics == "true" and lost_marks:
+            ids = {id(r) for r in lost_marks}
+            # per session: the lost (capture-time-ordered) token amounts, so a later record's
+            # cumulative total and a later question's history can each be reduced by exactly the
+            # tokens that never arrived and by nothing else.
+            lost_by_sess: Dict[str, List[Dict[str, Any]]] = {}
+            header_lost: List[str] = []
+            for r in lost_marks:
+                sid_l = str(r.get("session_id"))
+                nfr_r = len(r.get("frame_refs") or ())
+                # THE CUT IS PER FRAME, never the record's own `est_tokens`: a record that carried
+                # the session's one-off D2 header holds 31 tokens that are NOT a frame, and the
+                # ruling asks for exactly the frames to be missing.
+                lost_by_sess.setdefault(sid_l, []).append(
+                    {"t": float(r["t"]), "tokens": nfr_r * DS.D2_TOK_PER_IMG,
+                     "est_tokens_on_the_record": int(r["est_tokens"]),
+                     "batch_id": r.get("batch_id"), "frames": nfr_r})
+                if int(r["est_tokens"]) > nfr_r * DS.D2_TOK_PER_IMG:
+                    header_lost.append(sid_l)
+            for v in lost_by_sess.values():
+                v.sort(key=lambda x: x["t"])
+            records[:] = [r for r in records if id(r) not in ids]
+            # RE-ATTRIBUTE THE HEADER. For a session whose header-carrying batch was lost, the
+            # cloud still receives a D2 prompt header with whatever does arrive, so the header goes
+            # to that session's FIRST SURVIVING batch. This also preserves the committed invariant
+            # that a session's `cum_tokens` is the running sum of its `est_tokens`.
+            header_moved: Dict[str, Any] = {}
+            for sid_h in sorted(set(header_lost)):
+                surv = sorted((r for r in records
+                               if r["kind"] == "history_batch"
+                               and str(r.get("session_id")) == sid_h),
+                              key=lambda r: float(r["t"]))
+                if not surv:
+                    header_moved[sid_h] = "no surviving batch: the header is lost with the session"
+                    continue
+                hdr = DS.D2_HEADER_TOK
+                surv[0]["est_tokens"] = int(surv[0]["est_tokens"]) + hdr
+                header_moved[sid_h] = {"to_batch_id": surv[0].get("batch_id"),
+                                       "tokens": hdr, "t": surv[0]["t"]}
+            # the cloud's cumulative history for a session: reduce every LATER history record by
+            # the tokens lost at or before its own offer time.
+            for r in records:
+                sid_l = str(r.get("session_id"))
+                lost = lost_by_sess.get(sid_l)
+                if not lost:
+                    continue
+                if r["kind"] == "history_batch":
+                    cut = sum(x["tokens"] for x in lost if x["t"] <= float(r["t"]) + 1e-9)
+                    if cut:
+                        r["cum_tokens"] = int(r["cum_tokens"]) - cut
+                elif r["kind"] == "recall_question" and r.get("t_ask_session") is not None:
+                    # the question's own session clock: a frame lost at run time x corresponds to
+                    # session time x - (t - t_ask_session), and only frames the cloud would
+                    # otherwise already hold at the ask are subtracted.
+                    sess0 = float(r["t"]) - float(r["t_ask_session"])
+                    cut = sum(x["tokens"] for x in lost
+                              if x["t"] - sess0 <= float(r["t_ask_session"]) + 1e-9)
+                    if cut:
+                        r["history_tokens"] = int(r["history_tokens"]) - cut
+            lost_info = dict(
+                lost_history_records=len(lost_marks),
+                lost_history_frames=sum(len(r.get("frame_refs") or ()) for r in lost_marks),
+                lost_history_tokens=sum(x["tokens"] for v2 in lost_by_sess.values()
+                                        for x in v2),
+                lost_tokens_rule=("%d per lost FRAME; the one-off D2 header is NOT a frame and is "
+                                  "re-attributed, so the cloud is short exactly the frames"
+                                  % DS.D2_TOK_PER_IMG),
+                lost_per_session={k2: {"records": len(v2),
+                                       "tokens": sum(x["tokens"] for x in v2),
+                                       "frames": sum(x["frames"] for x in v2)}
+                                  for k2, v2 in sorted(lost_by_sess.items())},
+                sessions_whose_header_batch_was_lost=sorted(set(header_lost)),
+                header_reattributed_to=header_moved,
+                _header_note=("the D2 header is charged once per session on its first batch. At "
+                              "the ruled design point some victim sessions START INSIDE the "
+                              "window, so that batch is itself lost; the header is then moved to "
+                              "the first surviving batch rather than dropped, because a header is "
+                              "not a frame and the ruling asks for exactly the frames to go."),
+                victim_session_preloads_inside_window=sorted(
+                    str(r.get("session_id")) for r in records
+                    if r["kind"] == "history_preload" and str(r.get("device_id")) in vset
+                    and t_out0 <= float(r.get("t", -1)) < t_out1),
+                _preload_note=("D101 preload frames are cloud-side before the clock starts and "
+                               "never cross the uplink, so an outage cannot lose them. Any "
+                               "victim preload falling inside the window is listed rather than "
+                               "dropped."),
+                device_side_untouched=("`device_answers` is built before this block and never read "
+                                       "by it, so the device's own history, every device answer "
+                                       "and every `device_latency_s` are complete"))
         outage_meta = dict(
             args=dict(outage_robots_k=k_out, outage_duration_s=d_out,
                       outage_seed_offset=int(outage_seed_offset)),
             robots=victims, n_robots_total=len(rob_ids),
             t_start=round(t_out0, 6), t_end=round(t_out1, 6), duration_s=d_out,
-            placement_rule=("seeded uniform draw in [%.2f, %.2f] x (run_s - D); PROVISIONAL, "
-                            "see OUTAGE_NOTE" % (OUTAGE_PLACEMENT_LO, OUTAGE_PLACEMENT_HI)),
-            rng_stream_key="outage|%d|%d|%d|%.6f" % (int(seed), int(outage_seed_offset),
-                                                     k_out, d_out),
+            placement=outage_placement,
+            placement_rule=placement_rule,
+            semantics=outage_semantics,
+            semantics_rule=(OUTAGE_TRUE_NOTE if outage_semantics == "true"
+                            else "D242 item A: the in-window history offers are RE-TIMED to the "
+                                 "reconnect instant and the committed UplinkQueue drains them; "
+                                 "nothing is lost"),
+            **({} if not lost_info else dict(lost=lost_info)),
+            rng_stream_key=stream_key,
+            **({} if outage_placement != "evidence"
+               else dict(t0_explicit=float(outage_t0_s),
+                         t0_derivation=str(outage_t0_derivation))),
+            # D266 item 2: present ONLY on the "centre" rule, and it is what makes nesting
+            # AUDITABLE FROM THE ARTEFACT: `robots` must equal sorted(victim_permutation[:k]) and
+            # the permutation must be identical across k at one (seed, offset, D).
+            **({} if victim_perm is None
+               else dict(victim_permutation=list(victim_perm),
+                         victims_nested_in_k=True,
+                         nesting_proof=("robots == sorted(victim_permutation[:outage_robots_k]); "
+                                        "the permutation stream key carries NO k, so for k1 < k2 "
+                                        "the k1 victim set is a subset of the k2 victim set and "
+                                        "t_start is bit-identical"))),
             deferred_history_records=n_def_rec, deferred_history_frames=n_def_frames,
             deferred_history_est_tokens=n_def_est_tokens,
             backlog_tokens_d2=n_def_frames * DS.D2_TOK_PER_IMG,
@@ -1012,6 +1277,9 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
         st.outage_deferred_history_frames = n_def_frames
         st.outage_backlog_tokens_d2 = n_def_frames * DS.D2_TOK_PER_IMG
         st.outage_device_only_questions = len(outage_q_keys)
+        st.outage_semantics = outage_semantics
+        st.outage_lost_history_records = int(lost_info.get("lost_history_records", 0))
+        st.outage_lost_history_tokens = int(lost_info.get("lost_history_tokens", 0))
 
     records.sort(key=lambda r: (round(float(r.get("t", 0.0)), 6),
                                 TRACE_KINDS.index(r["kind"]), r["device_id"],
@@ -1190,6 +1458,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     help="D153: 'epg' is the append-only episode context of D148")
     ap.add_argument("--dashcam-min-frames", type=int, default=EPG_MIN_FRAMES,
                     help="D153's minimum-frame floor; epg only")
+    ap.add_argument("--outage-semantics", default="buffered", choices=list(OUTAGE_SEMANTICS),
+                    help="D273 (1): 'true' loses the in-window frames to the cloud; 'buffered' is "
+                         "the committed D242 re-timing and the default")
+    ap.add_argument("--outage-placement", default="band", choices=list(OUTAGE_PLACEMENTS),
+                    help="D266 item 2: 'centre' is the nested-victim fixed-window rule; "
+                         "'band' is the committed D242 draw and the default")
+    ap.add_argument("--outage-t0-s", type=float, default=None,
+                    help="E1: explicit window start; required by, and only valid with, "
+                         "--outage-placement evidence")
     ap.add_argument("--outage-robots-k", type=int, default=0,
                     help="D242 A: robots that lose the uplink together; 0 is off")
     ap.add_argument("--outage-duration-s", type=float, default=0.0,
@@ -1206,7 +1483,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                        # committed trace to keep byte-identical; the defaults are the off values.
                        outage_robots_k=a.outage_robots_k,
                        outage_duration_s=a.outage_duration_s,
-                       outage_seed_offset=a.outage_seed_offset)
+                       outage_seed_offset=a.outage_seed_offset,
+                       outage_placement=a.outage_placement,
+                       outage_semantics=a.outage_semantics,
+                       outage_t0_s=a.outage_t0_s)
     meta = write_trace(Path(a.out), b)
     print(json.dumps(meta, indent=2, sort_keys=True))
     return 0

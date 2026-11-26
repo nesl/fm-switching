@@ -68,6 +68,8 @@ import arms_v6rr as RRARM                                                      #
 import arms_v6state as VS                                                      # noqa: E402
 import d249_queue_visibility as QV                                             # noqa: E402
 import d261_cold_unlatch as CU                                                 # noqa: E402
+import link_read as LR                                                         # noqa: E402
+import link_sync as LS                                                         # noqa: E402
 import deficit_gain_d178 as GAIND                                              # noqa: E402
 import planner_deficit_weights as PDW                                          # noqa: E402
 import release_recheck as RR                                                   # noqa: E402
@@ -88,6 +90,17 @@ RUNG3_D249 = "covex-v6-fair-final-q"
 # q2 stage 1: `-q` plus the in-flight rows EXCLUDED from the HOLD_BACK/WARM harm (TOUCH harm keeps them).
 # SAME CLASS and constructor as RUNG3_D249 with one extra switch (`QV.Q2_SWITCH`) flipped.
 RUNG3_Q2 = "covex-v6-fair-final-q2"
+# link_events line: `-q` plus the arm-side READ of `Observation.device_links` (decision-neutral).
+RUNG3_LINK = "covex-v6-fair-final-q-link"
+# link_sync line: `-q` plus post-outage sync control. "ours" = priority release (form iv) and the
+# question-first / wait / device choice; the control = FIFO release, deficit gain 0 (D226).
+# THE GATE ARMS ARE THE D177 CURRENCY, AS RULED (accuracy not read; question-first accuracy 0.568799
+# PROVISIONAL, reporting only). The `-acc` pair carries a MODELLED value (a stand-in missing-evidence
+# accuracy and a uniform evidence share) and is NOT for a gate cell without a user ruling.
+RUNG3_SYNC = "covex-v6-fair-final-q-sync"                 # MAIN: accuracy-weighted (D281)
+RUNG3_SYNC_D177 = "covex-v6-fair-final-q-sync-d177"       # ABLATION: on-time only
+RUNG3_SYNC_CTL = "covex-v6-fair-final-q-sync-ctl"         # naive recovery: FIFO, deficit gain 0
+RUNG3_SYNC_FREE = "covex-v6-fair-final-q-sync-free"       # extra: d177 plus release-when-free
 
 # The committed arm each final rung is built FROM, for the mapping row the user asked for.
 BUILT_FROM = {RUNG2: "covex-v6-state-uo-c5attr",
@@ -314,6 +327,8 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                d249_queue_visibility: bool = False,
                q2_inflight_exclusion: bool = False,
                cold_unlatch: Any = None,
+               link_read: bool = False,
+               link_sync: Any = None, link_currency: str = "acc", link_tiebreak: str = "hold",
                **kw: Any) -> Any:
     """Build rung 3. Four switches, each set on the instance and each read back.
 
@@ -369,6 +384,11 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         arm._cf_engine()
         if getattr(arm._planner_w_source, "IS_DECLARED_CONSTANT", True):   # pragma: no cover
             raise LadderSwitchError("the rung-3 planner limb kept the declared constant")
+    if link_read:
+        LR.install(arm)
+    if link_sync is not None:
+        LR.install(arm)
+        LS.install(arm, str(link_sync), str(link_currency), str(link_tiebreak))
     return arm
 
 
@@ -468,6 +488,17 @@ FINAL_LADDER_ARMS: Dict[str, Any] = {
     RUNG3_D249: (lambda **kw: make_rung3(RUNG3_D249, d249_queue_visibility=True, **kw)),
     RUNG3_Q2: (lambda **kw: make_rung3(RUNG3_Q2, d249_queue_visibility=True,
                                        q2_inflight_exclusion=True, **kw)),
+    RUNG3_LINK: (lambda **kw: make_rung3(RUNG3_LINK, d249_queue_visibility=True,
+                                         link_read=True, **kw)),
+    RUNG3_SYNC: (lambda **kw: make_rung3(RUNG3_SYNC, d249_queue_visibility=True,
+                                         link_sync="ours", link_currency="acc", **kw)),
+    RUNG3_SYNC_D177: (lambda **kw: make_rung3(RUNG3_SYNC_D177, d249_queue_visibility=True,
+                                              link_sync="ours", link_currency="d177", **kw)),
+    RUNG3_SYNC_FREE: (lambda **kw: make_rung3(RUNG3_SYNC_FREE, d249_queue_visibility=True,
+                                              link_sync="ours", link_currency="d177",
+                                              link_tiebreak="free", **kw)),
+    RUNG3_SYNC_CTL: (lambda **kw: make_rung3(RUNG3_SYNC_CTL, d249_queue_visibility=True,
+                                             link_sync="fifo", link_currency="acc", gain=0.0, **kw)),
     # CLAUDE.md Step 4 negative control, as a NAMED ARM so the control is a cell and not a
     # code edit: the per-type machinery fully live with all three thresholds set to the
     # committed single 2.0 s bar. It must collapse to `covex-v6-fair-final` EXACTLY.

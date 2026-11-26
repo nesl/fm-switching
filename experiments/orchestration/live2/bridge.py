@@ -29,6 +29,7 @@ class EmulatorBridge:
         self.co = co
         self._sent = 0
         self._pulls = 0
+        self._syncs = 0
         self.n_events = 0
         self.n_ticks = 0
         self.n_decisions = 0
@@ -46,6 +47,17 @@ class EmulatorBridge:
     def on_event(self, event: Dict[str, Any], t: float) -> Sequence[Dict[str, Any]]:
         self.n_events += 1
         SC.parse(event)                      # an off-schema event fails here, not three calls on
+        if event.get("kind") == "sync_release":
+            self.co._ingest(event, float(t))
+            return self._drain()
+        if event.get("kind") == "connectivity":
+            # link_events: applied to the link table and surfaced as the pending epoch kind, but
+            # it does NOT force a decision, `_collect` or `_expire` at its own off-grid instant:
+            # the next tick decides and its observation carries the record. That keeps an
+            # outage-on run's decision schedule the one an outage-off-events run has.
+            epoch = self.co._ingest(event, float(t)) or "tick"
+            self._pending_epoch = epoch
+            return self._drain()
         self.co.st.now = float(t)
         self.co._collect(float(t))
         epoch = self.co._ingest(event, float(t)) or "tick"
@@ -83,6 +95,10 @@ class EmulatorBridge:
         if len(self.co.pulls) > self._pulls:
             out += list(self.co.pulls[self._pulls:])
             self._pulls = len(self.co.pulls)
+        sp = getattr(self.co, "sync_pulls", None)
+        if sp and len(sp) > self._syncs:
+            out += list(sp[self._syncs:])
+            self._syncs = len(sp)
         if len(self.co.cloud_answers) > self._sent:
             # StudyLIVE2-harness addendum: an answer the I/O layer already forwarded at stream
             # end is recorded but not sent again.

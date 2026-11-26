@@ -356,7 +356,9 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
                           frames_root=(Path(store) if store else None), frame_cache=cache,
                           defer_images=bool(cfg.get("defer_images", True)),
                           dry_run=not bool(cfg.get("server_url")),
-                          gpu_budget_s=cfg.get("gpu_budget_s"), targets=CS.TARGETS)
+                          gpu_budget_s=cfg.get("gpu_budget_s"), targets=CS.TARGETS,
+                          link_events=bool(cfg.get("link_events", False)),
+                          link_sync=bool(cfg.get("link_sync", False)))
     co.st.kv_capacity_enforced = bool(cfg.get("kv_capacity_enforced", False))   # runner flag --kv-capacity-enforced
     _mp_tot = _instrument_placement(co.st)
     br = EmulatorBridge(co)
@@ -513,6 +515,7 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
             res["completion_to_forward_ms"] = _qstats(fwd_gaps_ms)
             res["first_token_to_forward_ms"] = _qstats(ft_gaps_ms)
             co.write_decision_times(rdir / "decision_time.jsonl.gz")      # D115
+            co.write_link_log(rdir)
             logs.close()
             if be is not None:
                 be.close()

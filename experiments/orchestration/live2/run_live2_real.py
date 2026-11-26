@@ -131,6 +131,33 @@ def build_parser() -> argparse.ArgumentParser:
                     help="D242 A: the outage window D in seconds; 0 is off")
     ap.add_argument("--outage-seed-offset", type=int, default=0,
                     help="D242 A: offsets the dedicated outage RNG stream only")
+    # D266 item 2: the placement rule. DEFAULTS TO THE COMMITTED BAND DRAW, so a run that does not
+    # name it is the run the committed cells made.
+    ap.add_argument("--outage-placement", default="band", choices=("band", "centre", "evidence"),
+                    help="D266 item 2: 'centre' fixes the window at the centre of the committed "
+                         "band and nests the victims across k; 'band' is the committed D242 draw; "
+                         "E1 'evidence' takes the window start from --outage-t0-s (required)")
+    ap.add_argument("--outage-t0-s", type=float, default=None,
+                    help="E1: explicit outage start, required by and only valid with "
+                         "--outage-placement evidence; same value for every k at a seed")
+    ap.add_argument("--outage-t0-derivation", default="",
+                    help="E1: free text recorded in the trace meta (how t0 was chosen)")
+    # link_events switch: DEFAULT OFF. On, the emulator emits `connectivity` events from the
+    # trace's outage meta and the coordinator keeps a per-device link table published as
+    # `Observation.device_links`. Meaningless without an outage (no events then, byte-identical).
+    ap.add_argument("--link-events", action="store_true",
+                    help="emit and apply connectivity events (default OFF)")
+    # link_sync switch: DEFAULT OFF. Needs --link-events. On, an arm that DECLARES sync control
+    # (link_sync.arm_controls_sync) runs with the device backlog held until it sends `sync_pull`;
+    # any other arm in the same run is unaffected (auto-release, the committed FIFO behaviour).
+    ap.add_argument("--link-sync", action="store_true",
+                    help="hold the post-outage backlog for a sync-controlling arm (default OFF)")
+    # D273 (1): what happens to the frames. DEFAULTS TO THE COMMITTED BUFFERED RE-TIMING, so a run
+    # that does not name it is the run the committed cells made.
+    ap.add_argument("--outage-semantics", default="buffered", choices=("buffered", "true"),
+                    help="D273 (1): 'true' loses the in-window frames to the cloud and leaves the "
+                         "device's own history complete; 'buffered' is the committed D242 "
+                         "re-timing and the default")
     ap.add_argument("--frames-root", default=None)
     ap.add_argument("--server", default=None, help="OpenAI-compatible base URL; omit to send nothing")
     ap.add_argument("--server-kind", default="vllm")
@@ -198,7 +225,15 @@ def _arm_kwargs(a) -> Dict[str, Any]:
                 impl=a.impl, cap_k=a.cap_k)
 
 
+def _check_link_args(a) -> None:
+    if a.outage_placement == "evidence" and a.outage_t0_s is None:
+        raise SystemExit("--outage-placement evidence requires --outage-t0-s; refused")
+    if a.outage_placement != "evidence" and a.outage_t0_s is not None:
+        raise SystemExit("--outage-t0-s is only valid with --outage-placement evidence; refused")
+
+
 def _trace(a, work: Path) -> Path:
+    _check_link_args(a)
     import data_sources as _DS
     import trace as TR
     if a.trace_dir:
@@ -234,6 +269,31 @@ def _trace(a, work: Path) -> Path:
         extra += "_outk%dd%g" % (int(a.outage_robots_k), float(a.outage_duration_s))
         if int(a.outage_seed_offset) != 0:
             extra += "o%d" % int(a.outage_seed_offset)
+        # D266 item 2, and it is the ONE failure here that would silently produce wrong cells
+        # rather than refusing: THE PLACEMENT RULE IS PART OF THE CACHE KEY. Before this line the
+        # directory name carried seed, n, run_s, mode, ratio, question sets, L, epg, perframe, rq
+        # and outk<K>d<D> AND NOTHING ABOUT THE PLACEMENT, while the regeneration test below is
+        # only `if not (tdir / "trace.jsonl").exists()`. So the first `centre` cell run at a
+        # (seed, n, ratio, k, D) that already has a `band` trace on disk would have SERVED THE OLD
+        # PLACEMENT - old victims, old window - and every gate would have passed, because the
+        # driver's assertion and the trace_meta it reads cover only k and D, and both of those are
+        # correct in the stale meta. The default rule adds nothing to the name, which is what
+        # keeps every committed trace addressable.
+        if a.outage_placement != "band":
+            extra += "p%s" % str(a.outage_placement)
+        # E1: the explicit t0 is part of the cache key as well as the rule, or a trace built at
+        # another t0 would be served.
+        if a.outage_placement == "evidence":
+            extra += "t%g" % float(a.outage_t0_s)
+        # link_events: the trace META then carries the deferred-batch marks, so it is a different
+        # trace directory (a marks-less trace served to a link cell would hold nothing back).
+        if a.link_events:
+            extra += "_lnk"
+        # D273 (1), and the hazard is identical to the placement one above: a BUFFERED trace served
+        # from the directory cache to a TRUE-outage cell would pass every gate, because k, D and
+        # the placement are all correct in the stale meta. The default adds nothing to the name.
+        if a.outage_semantics != "buffered":
+            extra += "s%s" % str(a.outage_semantics)
     tdir = work / "traces" / f"seed{a.seed}_n{a.n_devices}_{int(a.run_s)}s_{a.mode}{extra}"
     if not (tdir / "trace.jsonl").exists():
         TR.write_trace(tdir, TR.generate_trace(
@@ -252,7 +312,18 @@ def _trace(a, work: Path) -> Path:
             **({} if not (int(a.outage_robots_k) > 0 and float(a.outage_duration_s) > 0.0)
                else dict(outage_robots_k=int(a.outage_robots_k),
                          outage_duration_s=float(a.outage_duration_s),
-                         outage_seed_offset=int(a.outage_seed_offset)))))
+                         outage_seed_offset=int(a.outage_seed_offset),
+                         # passed only when it is NOT the default, for the same reason as every
+                         # switch above: the defaulted call must be the call the committed traces
+                         # were built with, argument for argument.
+                         **({} if a.outage_placement == "band"
+                            else dict(outage_placement=str(a.outage_placement))),
+                         **({} if not a.link_events else dict(outage_link_marks=True)),
+                         **({} if a.outage_placement != "evidence"
+                            else dict(outage_t0_s=float(a.outage_t0_s),
+                                      outage_t0_derivation=str(a.outage_t0_derivation))),
+                         **({} if a.outage_semantics == "buffered"
+                            else dict(outage_semantics=str(a.outage_semantics)))))))
     return tdir
 
 
@@ -295,6 +366,13 @@ def run(a) -> Dict[str, Any]:
     # first, and the expensive, resource-holding one second.
     import hybrid  # noqa: F401  (registers the hybrid-* arms; D138)
     arm = A.make_arm(a.arm, **_arm_kwargs(a))
+    import link_sync as LS                                                 # noqa: PLC0415
+    a._sync_on = bool(a.link_sync and LS.arm_controls_sync(arm))
+    if a.link_sync and not a.link_events:
+        raise SystemExit("--link-sync requires --link-events; refused")
+    if LS.arm_controls_sync(arm) and not a.link_sync:
+        raise SystemExit("arm %s controls post-outage sync and needs --link-sync (and "
+                         "--link-events) in the launch arguments; refused" % a.arm)
     if a.c_inflight is not None:
         if not hasattr(arm, "c_inflight"):
             raise SystemExit(f"--c-inflight given but arm {a.arm} has no c_inflight")
@@ -399,7 +477,19 @@ def run(a) -> Dict[str, Any]:
         dashcam_min_frames=tmeta.get("dashcam_min_frames"),
         epg_cap_frames=tmeta.get("epg_cap_frames"),
         epg_refresh_rule=tmeta.get("epg_refresh_rule"),
-        model=a.model, split_processes=bool(a.split), is_measurement=False)
+        model=a.model, split_processes=bool(a.split), is_measurement=False,
+        # D266 item 2: the RESOLVED trace directory, so a validator never has to glob for it, and
+        # the outage exactly as the generator recorded it, so the cell carries its own victims,
+        # window and placement rule without a second file being located first.
+        trace_dir=str(tdir),
+        outage=tmeta.get("outage"),
+        outage_placement=((tmeta.get("outage") or {}).get("placement")
+                          if tmeta.get("outage") else None),
+        outage_semantics=((tmeta.get("outage") or {}).get("semantics")
+                          if tmeta.get("outage") else None),
+        # link_events: present in the header ONLY when on, so an off header is the old header.
+        **({} if not a.link_events else dict(link_events=True)),
+        **({} if not getattr(a, "_sync_on", False) else dict(link_sync=True)))
     (rdir / "header.json").write_text(json.dumps(header, indent=1, default=str) + "\n")
 
     cfg = dict(run_dir=str(rdir), arm=a.arm, arm_kwargs=_arm_kwargs(a), mode=a.mode,
@@ -419,6 +509,8 @@ def run(a) -> Dict[str, Any]:
                forward_on_completion=bool(a.forward_on_completion),
                c_inflight=a.c_inflight, kv_capacity_enforced=bool(a.kv_capacity_enforced),
                metrics_scrape=bool(a.metrics_scrape),
+               **({} if not a.link_events else dict(link_events=True)),
+               **({} if not a._sync_on else dict(link_sync=True)),
                scheduling_policy=(a.scheduling_policy if sends else None),
                forward_at_first_token=(a.forward_at == "first"),
                # D223 (2): the limit read above travels to the coordinator PROCESS, which is where
@@ -683,6 +775,10 @@ def _emulator(EM, tdir: Path, br, a):
     kw = {}
     if a.tick_s is not None:
         kw["tick_s"] = a.tick_s
+    if a.link_events:
+        kw["link_events"] = True
+    if getattr(a, "_sync_on", False):
+        kw["link_sync_hold"] = True
     return EM.FleetEmulator(tdir, br, a.mode, realtime=True, drain_s=a.drain_s, **kw)
 
 
@@ -710,7 +806,9 @@ def _inprocess(a, tdir: Path, rdir: Path, cfg, htok, arm, EM):
                           frames_root=(Path(a.frames_root) if a.frames_root else None),
                           frame_cache=cache, defer_images=True,
                           dry_run=not bool(a.server), gpu_budget_s=a.gpu_budget_s,
-                          targets=cfg.get("targets"))
+                          targets=cfg.get("targets"),
+                          link_events=bool(a.link_events),
+                          link_sync=bool(getattr(a, "_sync_on", False)))
     co.st.kv_capacity_enforced = bool(a.kv_capacity_enforced)
     _mp_tot = _instrument_placement(co.st)
     br = EmulatorBridge(co)
@@ -726,6 +824,7 @@ def _inprocess(a, tdir: Path, rdir: Path, cfg, htok, arm, EM):
     res = co._result(cpu0, _t.time() - t0)
     res["memory_pressure"] = _memory_pressure(co.st, _mp_tot)          # output only (split mode: procsplit)
     co.write_decision_times(rdir / "decision_time.jsonl.gz")          # D115
+    co.write_link_log(rdir)
     logs.close()
     if be is not None:
         res["backend"] = be.metrics() if hasattr(be, "metrics") else None
