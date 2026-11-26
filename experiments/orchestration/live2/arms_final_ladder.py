@@ -102,6 +102,9 @@ RUNG3_Q5 = "covex-v6-fair-final-q5"
 RUNG3_Q5B = "covex-v6-fair-final-q5b"
 # q5c (iteration 5): `-q5b` plus the EXISTING D261 clear-on-reject switch. Composition only.
 RUNG3_Q5C = "covex-v6-fair-final-q5c"
+# unlatch (PROVISIONAL user test): rung 3 plus ONLY the D261 clear-on-reject switch, passed
+# explicitly (cold_unlatch=True) with D249 OFF. No q, q2, q2m, q4 or q5 term.
+RUNG3_UNLATCH = "covex-v6-fair-final-unlatch"
 # q4b (D290 iteration 2): `-q4` plus the next-question basis (`q4_avoided_rebuild.Q4B_SWITCH`).
 RUNG3_Q4B = "covex-v6-fair-final-q4b"
 # link_events line: `-q` plus the arm-side READ of `Observation.device_links` (decision-neutral).

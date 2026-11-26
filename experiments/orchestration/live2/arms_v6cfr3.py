@@ -788,6 +788,10 @@ def _final_ladder_lazy() -> Dict[str, Any]:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3_Q5C, q5_holdback=True, q5b_piece=True, cold_unlatch=True, **kw)
 
+    def r3unlatch(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_UNLATCH, cold_unlatch=True, **kw)
+
     def r3link(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3_LINK, d249_queue_visibility=True, link_read=True, **kw)
@@ -830,6 +834,7 @@ def _final_ladder_lazy() -> Dict[str, Any]:
             "covex-v6-fair-final-q5": r3q5,
             "covex-v6-fair-final-q5b": r3q5b,
             "covex-v6-fair-final-q5c": r3q5c,
+            "covex-v6-fair-final-unlatch": r3unlatch,
             "covex-v6-fair-final-q4b": r3q4b,
             "covex-v6-fair-final-q-link": r3link,
             "covex-v6-fair-final-q-sync": r3sync,
