@@ -297,7 +297,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 
 ## Provenance
 
-- runs dir last commit: 56b8d0ae
+- runs dir last commit: b2d064b9
 - scorer score.py last commit: cb9120cc
 - d179_rung2_verdict.py last commit: cd580554
 - build time is deliberately NOT stamped here: the output is byte-deterministic given the input. The git commit of this file is the build time of record.
