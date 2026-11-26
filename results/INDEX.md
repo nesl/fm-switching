@@ -1570,3 +1570,15 @@ E-id: **StudyD258-DEVLAT** (research/EXPERIMENTS.md). Commits 6dfbb8c4 (rescore)
 | result files | `results/device/study_devlat/devlat_rescore.json`; module `experiments/analysis/devlat_rescore.py`; report `reports/study_devlat_rescore.md` |
 | model/device | none; CPU on `jetson_orin`; read-only; re-derived from committed cell.json + request.jsonl; committed scorer unchanged |
 | headline | Measured per-item device latency charged to each deadline. Recall device-late=0 in all 177 cells (latency 0.146-0.221s vs 3s), robot cbd IDENTICAL committed vs rescored. Single-shot rescored device-late == committed in every cell (already charged; 126/1042 q over 2s). Dashcam EP-G append max 0.366s < 1s, device-late=0. D250 margin (robot cbd rung3 0.5455 - best baseline covex-v6-base 0.4621) = +0.0833 under both; NO winner changes anywhere. |
+
+## StudyORACLE h0.5 (_kv0.5r_h0.5, s4, capacity-unconstrained per-unit; 2026-11-25, Orin)
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/oracle_h05_shares.json`; driver `experiments/analysis/oracle/oracle_h05.py`; capacity `oracle_capacity_window.py` |
+| headline | T(h0.5)=11619.8 tok/s measured from h0.5 cells (validated: reproduces T(1x) 17945.2 and committed T(0.5x) 15569.8 only on the `_kv0.5` cell). Control PASS; 12 share<0 reported. Pooled FAIR: rung3 0.427, confidence-cascade 0.174, simplestream 0.146. Open: T-constrained LP not run; FAR table pooled 1x+kv0.5r; rung3 h0.5 cell is _preD249. |
+
+## StudyDASH-DIAG: dashcam below device-only diagnosis (2026-11-25, Orin)
+| field | value |
+|---|---|
+| result files | `reports/study_dashcam_diagnosis.md`; `experiments/analysis/oracle/dashcam_diagnosis.py` |
+| headline | Negative dashcam shares come from the cloud tier operating point, not mixing, ranking or arithmetic. Cloud per-instant no-crash FA live 2.34% vs SH-EP EVAL 0.24% (device transfers: 0.63% vs 0.77%). Challenge mAP ranks arms above device; episode correctness ranks them below. |

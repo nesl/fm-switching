@@ -41,7 +41,12 @@ from _provenance import stamp  # noqa: E402
 SEEDS = [4, 5, 6, 7]
 HIST_TOK = 2000
 NB, BSEED = 2000, 0
-ARMS = list(E.ARMS) + [("fair-final-rung3", "covex-v6-fair-final")]
+# confidence-cascade was dropped from E.ARMS under D205 (delivered_scores constant 0.0 reader). Re-added
+# for the table as requested; its s4 1x cell serves cloud on 3 of 132 robot questions, consistent with
+# that defect, so it is FLAGGED superseded and is not eligible as a live baseline.
+FLAGGED = {"confidence-cascade"}
+ARMS = list(E.ARMS) + [("confidence-cascade", "confidence-cascade"),
+                       ("fair-final-rung3", "covex-v6-fair-final")]
 FT = json.load(open(REPO / "results/orchestration/live2/oracle/oracle_fair_table.json"))["table"]
 A_RC_H = FT["recall|cloud|WITH_HISTORY"]["acc"]
 A_RC_N = FT["recall|cloud|WITHOUT_HISTORY"]["acc"]
@@ -53,7 +58,9 @@ TH_DEV, TH_CLOUD = THR["device"], THR["cloud"]   # INSTANT thresholds (match com
 
 
 def _cell(arm, seed, tag):
-    for suf in ("_rerun", ""):
+    # h0.5 cells: fair-final exists only as _preD249 (committed D250 cell); 1x and kv0.5r unchanged
+    sufs = ("_rerun", "", "_preD249") if tag == "_kv0.5r_h0.5" else ("_rerun", "")
+    for suf in sufs:
         d = RUNS / (f"{arm}_n16_s{seed}_1200s_h27_3t{tag}_L3_epg_rq30" + suf)
         if (d / "cell.json").exists():
             return str(d)
@@ -261,7 +268,8 @@ def main():
                 units = arm_units(raw, s, tag, rc, dash_pre, dta)
                 if units is None:
                     continue
-                cellout["arms"][disp] = shares_block(units, rng)
+                # per-arm generator: CI must not depend on which arms precede it (point shares unaffected)
+                cellout["arms"][disp] = shares_block(units, np.random.default_rng(BSEED))
                 pooled[disp].extend(units)
                 if ctrl_units is None or len(units) > len(ctrl_units):
                     ctrl_units = units           # highest-coverage arm for arm-independent oracle cols
@@ -284,7 +292,7 @@ def main():
         rng = np.random.default_rng(BSEED)
         for disp in [a for a, _ in ARMS]:
             if pooled.get(disp):
-                out[mem]["pooled_over_seeds"][disp] = shares_block(pooled[disp], rng)
+                out[mem]["pooled_over_seeds"][disp] = shares_block(pooled[disp], np.random.default_rng(BSEED))
         out["oracle_control"][mem]["pooled"] = oracle_control(ctrl_pool, np.random.default_rng(BSEED))
         ocfails = [f"{mem} {ty}" for ty, v in out["oracle_control"][mem]["pooled"].items() if v["fail"]]
         print(f"{mem}: STOP(share>1)={len(out['stop_share_gt_1'])} "
