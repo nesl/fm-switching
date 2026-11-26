@@ -15,3 +15,16 @@
 
 ## Unchanged
 A fail is a fail; an unfloored dashcam delta is reported as unfloored; robot on-time is never quoted alone; check 7 on each comparator with `source_agreement` read from `header.json`; the push goes through a cell-boundary window with the H100 verifying hashes; light checks only (300 s switch-off identity on the default mix, one dry run showing the margin read is 0.6582, unit tests).
+
+## AMENDMENT 2026-11-26T03:02:42Z, BEFORE ANY CELL: build record, dry prediction, reachability (build agent's report; the 4-path window values were independently re-staged on origin)
+**Build:** switch `live2_q2m_rung3_margin` default OFF (instance-level, class attribute raises, raises without D249 and q2); READ site `d261_margin_scope.py:113` -> `arms_v6state.py:221` -> `v5/cf_planner.py:440`. D259 constants untouched: `-q` and `-q2` still return 0.0828915. Light checks: 300 s dry default mix, 235 of 235 constructible arms digest-identical to main, `-q2` unchanged (3,314 rows, ce07874fb5c39585); 20 unit checks pass. **Margin census over 1,200 s: `-q2m` 0.65824 on 60,920 decisions; `-q2` 0.331566 on 60,934; rung 3 0.65824; `-q` 0.331566. q2_ counters non-zero and identical in `-q2` and `-q2m` (q2_hbwarm_evals 114, q2_inflight_excluded_evals 112).**
+**DRY PREDICTION (s4, 1x posted knobs; positive control passed: `-q2` reproduced TOUCH 7,353, HOLD_BACK 1, 18,927 rows, be0d89c156910feb):**
+| arm | margin | TOUCH | HOLD_BACK | WARM | pieces | rows |
+|---|---|---|---|---|---|---|
+| rung 3 | 0.6582 | 2,954 | 0 | 6 | 163 | 14,539 |
+| `-q` | 0.3316 | 1,175 | 74 | 0 | 88 | 12,555 |
+| `-q2` | 0.3316 | 7,353 | 1 | 14 | 162 | 18,927 |
+| `-q2m` | 0.6582 | 1,667 | 0 | 3 | 163 | 13,252 |
+**Prediction: at 1x `-q2m` touches about 4.4x less than `-q2`, below rung 3 and near `-q`; HOLD_BACK about 0. This is a mechanism prediction (TOUCH and HOLD_BACK counts); NO cbd or dashcam prediction is claimed. Reachability: TOUCH 1,667 > 0.**
+**Halved memory: NO prediction.** The dry harness can enforce the logical pool and it was run (31,472 tokens), but the pool essentially never binds in the dry (over cap in 5 of 12,001 epochs) and all four digests equal their 1x digests; the live effect (pinned 1,968 blocks, real eviction) is not modelled.
+**Gate line caveat:** a `_kv0.5r` cell is refused by driver v43 (ENGINE ARGS MISMATCH) unless its line in the gated list carries `--num-gpu-blocks-override 1968 --max-model-len 31472` and the list sha is in `V6_GATE_OK`; the poster must include them. Lines: `covex-v6-fair-final-q2m 16 4 _L3_epg_rq30` and `covex-v6-fair-final-q2m 16 4 _kv0.5r_h0.5_L3_epg_rq30`. Window: 4 paths (3 M, 1 A), live2 ed93608b -> f0c4625f, orchestration 0a167349 -> 3dbdafa5, baselines 41c430d7 unchanged.
