@@ -25,3 +25,5 @@ A fleet robot cbd, or a matched-question count, quoted as the verdict is withdra
 - **Control: the naive-recovery control (FIFO catch-up, deficit gain 0, D226).** All three arms see the identical trace at each k, so comparisons are paired.
 - **Urgent-victim definition (first post-reconnect question within 30 s) ACCEPTED by the user.** The primary readout and the expectation above stand, applied to the MAIN arm; the ablation is read against both.
 - **Cell count: the ruling says 12; I count 3 arms x k {1,3,5} = 9 at s4. The extra 3 are NOT queued until the user says what they are (e.g. a fourth arm, or a no-outage reference).** Arm names and the exact lines are fixed by a further timestamped amendment before any cell.
+
+## CONFIRMED BY THE USER 2026-11-26T01:52:22Z, before any cell: (1) device accuracy in the main currency stays 0.257732 from the same oracle table; the 0.37 live-cell figure is NOT mixed in. (2) The cell count is 9 (3 arms x k 1,3,5 at s4); the ruling's 12 was a planner miscount.
