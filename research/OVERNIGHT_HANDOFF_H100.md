@@ -184,6 +184,14 @@ results/orchestration/live2/link/e2_window_rule_a.json
 ```
 Report per the pre-registration `research/study_linksync_s4_gate_prereg.md` (disclosure above its cells). Port rule: non-zero `link_` sync counter in the main arm, ZERO early releases in the ablation (expected), FIFO order in the control.
 
+## -q2m PAIR RULING (user D285, 2026-11-26T03:20:38Z). `-q3` is PARKED: not gated, not re-staged tonight.
+Push the 4 `-q2m` paths at the next boundary (values in the prereg amendment 99dd13a3), then run `-q2m` 1x then `_kv0.5r_h0.5` ahead of the remaining LINKSYNC cells; report each result as it lands, 1x first.
+AFTER BOTH ARE SCORED against the bars in `research/study_q2m_margin_ablation_prereg.md` (1x cbd >= 86 and dashcam within 54 of 8,377; h0.5 cbd >= 75 and dashcam not worse than 6,112 beyond 154):
+- BOTH PASS: queue `-q2m` s5-s7 at 1x and `_kv0.5r_h0.5` (6 cells) AFTER the D250 s5-s7 block. From the same two cells also report touch timing against rung 3: share of touches sent while dashcam requests were queued, and robot questions arriving cold.
+- 1x FAILS and h0.5 PASSES: queue nothing; write the readout.
+- BOTH FAIL: queue nothing; rung 3 stays the candidate; write the readout.
+In every case the `-q` pressure seeds stay HELD. The rest of the overnight rules stand.
+
 ## *** OVERNIGHT RULES UNTIL 08:00 PST 2026-11-26 (user ruling, 2026-11-26T01:55:25Z). THE USER AND THE PLANNER ARE OFFLINE; NOBODY ANSWERS QUESTIONS TONIGHT. ***
 **OPERATIONS (H100 box):** re-enable the watchdog's Claude relaunch for the night (D229); extend `ops/STANDDOWN` through 2026-11-26 23:59 PST (epoch `1795766340`); ONE Claude session on this box, and a resumed session first checks for and ends any older one (NEVER `pkill -f`; use `ps -C` plus grep -v grep); Sonnet by default; poll no faster than every 15 min; terse reports; no em dashes. GPU never idles. An INVALID cell is rerun ONCE at the end of its block. Any STOP: record it and continue with the next unaffected item. NO methodological change overnight: anything needing one is recorded as `OVERNIGHT DECISION, PROVISIONAL` and WAITS.
 **BASE QUEUE (order unchanged):** `-q2` gates (1x s4 then `_kv0.5r_h0.5` s4); D250 s5-s7 (18 cells, rung 3 first per seed); D262 s5 confirm; D257 n20; D262 s4 regime check; D244 s4 remainder; filler.
