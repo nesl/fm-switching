@@ -399,6 +399,10 @@ class V6StateArm:
         import q5_queue_aware_holdback as _Q5                                  # noqa: PLC0415
         return _Q5.enabled_cached(self)
 
+    def _q5b_on(self) -> bool:
+        import q5_queue_aware_holdback as _Q5                                  # noqa: PLC0415
+        return _Q5.q5b_enabled_cached(self)
+
     def _q5_inflight_harm(self, obs: Observation, sid: str, u: int, ctx: int) -> float:
         """q5 (ii): on-time value lost by the in-flight deadline rows of OTHER devices to the
         decode-step interference of a held-back prefill of `u` tokens over `ctx` cached tokens
@@ -822,6 +826,13 @@ class V6StateArm:
                 # interference is priced on the REAL remaining history (the planner's own
                 # est_tokens_by_session), never on the sentinel.
                 _q5u = min(int(u), max(int(est.get(sid, b) or b) - int(b), 0))
+                if self._q5b_on():
+                    # q5b READ SITE: the piece `coordinator._advance_build` releases this epoch,
+                    # `min(slice_tokens, shortfall)` capped at one chunk, not the whole shortfall.
+                    import q5_queue_aware_holdback as _Q5B                     # noqa: PLC0415
+                    _q5u = _Q5B.released_unit_tokens(_q5u, getattr(self._rules, "slice_tokens", None))
+                    self.stats["q5b_pieces_priced"] += 1
+                    self.stats["q5b_piece_tokens_sum"] += int(_q5u)
                 _q5i = self._q5_inflight_harm(obs, sid, _q5u, b)
                 hw = hw + _q5i
             if not warming and act_now is not None:

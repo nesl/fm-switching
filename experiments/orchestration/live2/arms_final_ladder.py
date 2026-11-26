@@ -98,6 +98,8 @@ RUNG3_Q4 = "covex-v6-fair-final-q4"
 # q5 (study_q5_queue_aware_holdback_prereg): RUNG 3 plus the queue-aware HOLD_BACK harm only
 # (`q5_queue_aware_holdback.Q5_SWITCH`). D249, q2, q2m and q4* are all OFF.
 RUNG3_Q5 = "covex-v6-fair-final-q5"
+# q5b (iteration 4): `-q5` with the in-flight term priced on the piece actually released.
+RUNG3_Q5B = "covex-v6-fair-final-q5b"
 # q4b (D290 iteration 2): `-q4` plus the next-question basis (`q4_avoided_rebuild.Q4B_SWITCH`).
 RUNG3_Q4B = "covex-v6-fair-final-q4b"
 # link_events line: `-q` plus the arm-side READ of `Observation.device_links` (decision-neutral).
@@ -360,6 +362,17 @@ def _set_q5(arm: Any) -> None:
                                 % (_Q5.Q5_SWITCH, type(arm).__name__))
 
 
+def _set_q5b(arm: Any) -> None:
+    import q5_queue_aware_holdback as _Q5                                  # noqa: PLC0415
+    if not _Q5.arm_enables(arm):
+        raise LadderSwitchError("q5b requires the q5 switch on the same instance")
+    object.__setattr__(arm, _Q5.Q5B_SWITCH, True)
+    arm.__dict__.pop("_q5b_resolved", None)
+    if _Q5.q5b_arm_enables(arm) is not True or not arm._q5b_on():         # pragma: no cover
+        raise LadderSwitchError("%s did not take on the instance of %s"
+                                % (_Q5.Q5B_SWITCH, type(arm).__name__))
+
+
 def _set_cold_unlatch(arm: Any) -> None:
     """Turn D261 (a rejection is not proof of cold) on for THIS INSTANCE and read it back.
 
@@ -386,6 +399,7 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                q2m_margin: bool = False,
                q4_credit: bool = False,
                q5_holdback: bool = False,
+               q5b_piece: bool = False,
                q4b_basis: bool = False,
                cold_unlatch: Any = None,
                link_read: bool = False,
@@ -439,6 +453,8 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         _set_q4(arm)
     if q5_holdback:
         _set_q5(arm)
+    if q5b_piece:
+        _set_q5b(arm)
     if q4b_basis:
         _set_q4b(arm)
     # D261 (user ruling 2026-11-25 item 2), DEV LINE ONLY. `cold_unlatch=None` means "follow the

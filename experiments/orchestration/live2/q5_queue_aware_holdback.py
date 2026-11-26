@@ -124,3 +124,54 @@ def interference_s(uncached_tokens: int, ctx_tokens: int) -> float:
         left -= n
         ctx += n
     return tot / 1000.0
+
+
+# ---------------------------------------------------------------------------------------------
+# q5b (iteration 4): price the piece the arm ACTUALLY RELEASES, not the whole remaining shortfall.
+# The arm releases ONE piece per session per epoch: `coordinator._advance_build` takes
+# `piece = min(slice_tokens, target - built)`, with `slice_tokens` = the rules arm's
+# `engine_actions.WARM_AHEAD_SLICE_TOKENS` (1,024), the same attribute `decide` already passes to
+# `plan_state` (`getattr(self._rules, "slice_tokens", None)`). A None slice means the remainder in
+# one request; then only the first CHUNK_TOKENS chunk is charged (the cap: one chunk's step is the
+# most a running request waits behind before its own first token). Same step model, same formula,
+# same constants as q5; nothing new.
+Q5B_SWITCH = "live2_q5b_released_piece_pricing"
+
+
+class Q5bSwitchError(RuntimeError):
+    """The q5b switch was a truthy CLASS attribute, a non-bool, or on without q5."""
+
+
+def q5b_arm_enables(arm: Any) -> bool:
+    try:
+        own = vars(arm)
+    except TypeError:                                                          # pragma: no cover
+        own = {}
+    if Q5B_SWITCH not in own:
+        for klass in type(arm).__mro__:
+            if bool(klass.__dict__.get(Q5B_SWITCH, False)):
+                raise Q5bSwitchError("%s is ON as a CLASS attribute of %s; q5b requires an "
+                                     "arm-scoped INSTANCE attribute" % (Q5B_SWITCH, klass.__name__))
+    v = own.get(Q5B_SWITCH, False)
+    if not isinstance(v, bool):
+        raise Q5bSwitchError("%s must be a bool, got %r" % (Q5B_SWITCH, type(v).__name__))
+    if v and not arm_enables(arm):
+        raise Q5bSwitchError("q5b requires the q5 switch on the same instance")
+    return v
+
+
+def q5b_enabled_cached(arm: Any) -> bool:
+    d = vars(arm)
+    v = d.get("_q5b_resolved")
+    if v is None:
+        v = q5b_arm_enables(arm)
+        d["_q5b_resolved"] = v
+    return bool(v)
+
+
+def released_unit_tokens(shortfall: int, slice_tokens: Optional[int]) -> int:
+    """The tokens of the ONE request the arm releases this epoch for a session short by
+    `shortfall`, capped at the first chunk."""
+    s = max(int(shortfall), 0)
+    unit = s if slice_tokens is None else min(int(slice_tokens), s)
+    return min(unit, CHUNK_TOKENS)
