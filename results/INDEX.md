@@ -1582,3 +1582,9 @@ E-id: **StudyD258-DEVLAT** (research/EXPERIMENTS.md). Commits 6dfbb8c4 (rescore)
 |---|---|
 | result files | `reports/study_dashcam_diagnosis.md`; `experiments/analysis/oracle/dashcam_diagnosis.py` |
 | headline | Negative dashcam shares come from the cloud tier operating point, not mixing, ranking or arithmetic. Cloud per-instant no-crash FA live 2.34% vs SH-EP EVAL 0.24% (device transfers: 0.63% vs 0.77%). Challenge mAP ranks arms above device; episode correctness ranks them below. |
+
+## StudyDASH-DIAG rulings: live-DEV dashcam recalibration, h0.5 T-LP, D270 control (2026-11-25, Orin)
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/dashcam_thresholds_live_dev.json`; `oracle_shares_v2_live_dev.json`; `oracle_lp_d270.json`, `oracle_lp_d270_live_dev.json`; `reports/study_dashcam_diagnosis.md` |
+| headline | Live-DEV recalibrated thresholds (device -0.0335, cloud -0.3869) collapse crash accuracy (5.1 and 2.8 percent) and make the episodic dashcam shares uninterpretable (FAIR -2 to -5, denominator near zero). Dashcam headline stays challenge mAP. h0.5 T-LP: capacity does not move the value at 11619.8 or 17945.2 tok/s. D270 control passes, pooled and per seed. |

@@ -70,3 +70,54 @@ This is a calibration/transfer finding for a decision, not a fix made here.
 - The live cloud score source is the dense simplestream trace, not a per-arm request stream.
 - Context-dependence of the cloud tail is a hypothesis; it would need a fresh-context vs warm-context
   score comparison on the same instants to confirm.
+
+## Rulings applied (2026-11-25)
+
+### 1. Dashcam thresholds recalibrated on live DEV clips (D6), both tiers
+Rule = D197 (k-th largest no-crash episode max, k = ceil(0.10 n)). Clips: SH-EP DEV split, negatives only,
+one episode per clip (max over instants and seeds 4 to 7). EVAL not read.
+- Device theta = -0.0335 (D197 -0.2014; instant -2.5789). Cloud theta = -0.3869 (D197 -2.9298; instant -6.8760).
+- Achieved DEV episode FAR 11.1% (5 of 45), D197 rule.
+
+Shares beside the current ones (pooled over seeds, 1x; FAIR / HINDSIGHT):
+
+| arm | instant (current) | live DEV (recalibrated) |
+|---|---|---|
+| fair-final-rung3 | -0.402 / -0.152 | -4.505 / -0.244 |
+| base | -0.292 / -0.082 | -4.003 / -0.064 |
+| state-uo | -0.157 / -0.076 | -3.188 / -0.051 |
+| simplestream | -0.455 / -0.080 | -4.668 / -0.090 |
+| confidence-cascade (flagged superseded) | -0.077 / +0.164 | -2.740 / +0.013 |
+
+Live DEV crash-episode accuracy under the recalibrated thresholds is 5.1% device and 2.8% cloud, against
+0.247 and 0.377 at the instant thresholds. The FAIR dashcam shares of -2 to -5 come from a denominator
+near zero: the oracle gain on crash episodes is zero when cloud is worse than device there, so the
+per-type share is not interpretable. The HINDSIGHT dashcam oracle falls from 63 to 2 units.
+
+Why the recalibrated thresholds collapse: the pre-event maxima of DEV positives agree with SH-EP
+(live device median -3.95 against -3.53; cloud -6.0 against -7.5). The threshold moves because it is an
+order statistic over 45 negatives, k = 5, so it sits in a noisy top tail. That tail is near zero for
+live device scores, where the crash maxima sit near -4. So the episode dashcam measure has little
+crash separation at a 10% FAR operating point under either threshold set.
+
+Headline for dashcam is the Nexar challenge metric (D199, committed DSMAP, Platt-calibrated, unaffected
+by these thresholds): device-only 0.628, base 0.671, fair-c5attr 0.662, state-uo 0.635. Most arms rank
+above device-only on challenge mAP.
+
+### 2. h0.5 T-constrained LP
+Driver `experiments/analysis/oracle/oracle_lp_d270.py`, D270 valuation (recall FAIR gain
+acc[recall, cloud, WITH_HISTORY] minus acc[recall, device]; single-shot unchanged; dashcam per mode).
+- Per type, capacity does not bind at T: 1x T = 17945.2 and h0.5 T = 11619.8 give identical values to 1.10T.
+- The pooled LP reports capacity_binds = True, but its value is 94.314 for every T from 1000 tok/s up to 1e9.
+  The flag marks a tight constraint, not a moved objective. The oracle value first falls below about
+  1000 tok/s. Mean demand is about 380 tok/s (456k uncached tokens over 1200 s).
+- So the T-constrained oracle equals the per-unit oracle at both T. The h0.5 shares in
+  `oracle_h05_shares.json` stand under the same valuation.
+- kv0.5r is retired. Its T mismatch (15569.8 measured on `_kv0.5`, applied to `_kv0.5r`) is flagged, not fixed.
+
+### 3. D270 control (as implemented)
+FAIR conditioned on context sent. Dashcam share<0 reported, not blocking. Share>1 is a hard STOP. Dashcam
+floor definition unchanged (device-only). HINDSIGHT >= FAIR oracle is checked pooled and per seed against
+the clustered bootstrap CI. A failure is blocking only when the gap exceeds the CI. Both threshold modes
+pass pooled and for every seed (1x). D270 is not in the repo log. This implementation matches the
+context-sent conditioning recorded as D268 corrected, so no new valuation was introduced.

@@ -1,0 +1,25 @@
+{
+ "_what": "Dashcam episode thresholds recalibrated on LIVE scores, DEV clips only, both tiers (D6). Rule = D197 (k-th largest no-crash episode max, k=ceil(0.10 n)). EVAL not read.",
+ "far_target": 0.1,
+ "tiers": {
+  "device": {
+   "theta": -0.033492,
+   "n_negative_dev_clips": 45,
+   "k_allowed": 5,
+   "achieved_dev_episode_far": 0.1111
+  },
+  "cloud": {
+   "theta": -0.38686,
+   "n_negative_dev_clips": 45,
+   "k_allowed": 5,
+   "achieved_dev_episode_far": 0.1111
+  }
+ },
+ "_provenance": {
+  "git_commit": "6c73a7b03ae1bfdce2edd2912261d3c7709a7e95",
+  "script": "dashcam_recalibrate.py",
+  "model": "none",
+  "timestamp": "2026-11-25T16:06:42.027559",
+  "device": "jetson_orin"
+ }
+}

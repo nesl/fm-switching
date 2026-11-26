@@ -1,0 +1,10846 @@
+{
+ "_what": "StudyORACLE bound (D268-corrected): FAIR conditioned on CONTEXT SENT, dashcam on instant-threshold score_cell model (verified: same thresholds/instants both tiers, 0 imputed device scores, cloud false-alarm excess confirmed per seed). Control: share>1 a hard STOP; share<0 REPORTED, not blocking (genuine worse-than-device); HIND oracle>=FAIR oracle checked per seed AND pooled, a failure only if the gap exceeds the bootstrap CI. rung 3 scored. D240 separate; s6 flagged (20-25 distinct robot questions/seed, single-question basis).",
+ "fair_recall_cloud_with_history": 0.568799,
+ "fair_recall_cloud_without_history": 0.212222,
+ "fair_recall_device": 0.257732,
+ "single_shot_cloud": 0.621881,
+ "single_shot_device": 0.547985,
+ "dashcam_tier_acc": {
+  "device|crash": 0.051105,
+  "cloud|crash": 0.027624,
+  "device|nocrash": 0.967105,
+  "cloud|nocrash": 0.968515
+ },
+ "n_bootstrap": 2000,
+ "bootstrap_seed": 0,
+ "cells_used_rung3": [
+  "1x s4: covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30",
+  "1x s5: covex-v6-fair-final_n16_s5_1200s_h27_3t_L3_epg_rq30",
+  "1x s6: covex-v6-fair-final_n16_s6_1200s_h27_3t_L3_epg_rq30",
+  "1x s7: covex-v6-fair-final_n16_s7_1200s_h27_3t_L3_epg_rq30",
+  "kv0.5r s4: covex-v6-fair-final_n16_s4_1200s_h27_3t_kv0.5r_L3_epg_rq30",
+  "kv0.5r s5: covex-v6-fair-final_n16_s5_1200s_h27_3t_kv0.5r_L3_epg_rq30",
+  "kv0.5r s6: covex-v6-fair-final_n16_s6_1200s_h27_3t_kv0.5r_L3_epg_rq30",
+  "kv0.5r s7: covex-v6-fair-final_n16_s7_1200s_h27_3t_kv0.5r_L3_epg_rq30"
+ ],
+ "stop_share_gt_1": [],
+ "reported_share_lt_0": [
+  "1x s4 base dashcam FAIR: -3.2998",
+  "1x s4 base dashcam HINDSIGHT: -0.2667",
+  "1x s4 rules dashcam FAIR: -1.1108",
+  "1x s4 state-uo dashcam FAIR: -2.498",
+  "1x s4 state-uo dashcam HINDSIGHT: -0.2667",
+  "1x s4 state-uo-c5attr dashcam FAIR: -2.8755",
+  "1x s4 state-uo-c5attr dashcam HINDSIGHT: -0.0667",
+  "1x s4 state-shares dashcam FAIR: -4.0541",
+  "1x s4 state-shares dashcam HINDSIGHT: -0.3333",
+  "1x s4 state-shares-r1 dashcam FAIR: -4.0831",
+  "1x s4 state-shares-r1 dashcam HINDSIGHT: -0.4667",
+  "1x s4 state-shares-r2 dashcam FAIR: -3.9924",
+  "1x s4 state-shares-r2 dashcam HINDSIGHT: -0.4667",
+  "1x s4 fair-c5attr dashcam FAIR: -3.805",
+  "1x s4 fair-c5attr dashcam HINDSIGHT: -0.2667",
+  "1x s4 fair-c5attr-gain0 dashcam FAIR: -2.6825",
+  "1x s4 fair-c5attr-gain0 dashcam HINDSIGHT: -0.2667",
+  "1x s4 edf single_shot HINDSIGHT: -0.0164",
+  "1x s4 edf dashcam FAIR: -2.7281",
+  "1x s4 edf dashcam HINDSIGHT: -0.1333",
+  "1x s4 edf pooled HINDSIGHT: -0.0078",
+  "1x s4 llf dashcam FAIR: -3.8148",
+  "1x s4 llf dashcam HINDSIGHT: -0.6",
+  "1x s4 b7-edf-feasibility dashcam FAIR: -0.6896",
+  "1x s4 always-cloud-fcfs dashcam FAIR: -0.6588",
+  "1x s4 mooncake dashcam FAIR: -0.6569",
+  "1x s4 attentionstore-prefetch single_shot HINDSIGHT: -0.0328",
+  "1x s4 attentionstore-prefetch dashcam FAIR: -0.6588",
+  "1x s4 lmcache single_shot HINDSIGHT: -0.0328",
+  "1x s4 lmcache dashcam FAIR: -0.6606",
+  "1x s4 kvflow-prefetch dashcam FAIR: -0.6569",
+  "1x s4 simplestream recall FAIR: -0.1463",
+  "1x s4 simplestream recall HINDSIGHT: -0.4906",
+  "1x s4 simplestream dashcam FAIR: -4.307",
+  "1x s4 simplestream dashcam HINDSIGHT: -0.6",
+  "1x s4 simplestream pooled HINDSIGHT: -0.1008",
+  "1x s4 streamscout recall FAIR: -0.1463",
+  "1x s4 streamscout recall HINDSIGHT: -0.5849",
+  "1x s4 streamscout dashcam FAIR: -4.3181",
+  "1x s4 streamscout dashcam HINDSIGHT: -0.4667",
+  "1x s4 streamscout pooled HINDSIGHT: -0.124",
+  "1x s4 querystream-proactive single_shot HINDSIGHT: -0.0164",
+  "1x s4 querystream-proactive dashcam FAIR: -0.6588",
+  "1x s4 eco-llm dashcam FAIR: -0.6569",
+  "1x s4 warm-all-lru dashcam FAIR: -0.4959",
+  "1x s4 fair-c5attr-rr dashcam FAIR: -3.998",
+  "1x s4 fair-c5attr-rr dashcam HINDSIGHT: -0.6667",
+  "1x s4 confidence-cascade dashcam FAIR: -2.6295",
+  "1x s4 confidence-cascade dashcam HINDSIGHT: -0.4667",
+  "1x s4 fair-final-rung3 dashcam FAIR: -4.0325",
+  "1x s4 fair-final-rung3 dashcam HINDSIGHT: -0.4",
+  "1x s5 base dashcam FAIR: -4.4104",
+  "1x s5 rules dashcam FAIR: -1.8619",
+  "1x s5 state-uo dashcam FAIR: -3.4137",
+  "1x s5 state-uo-c5attr dashcam FAIR: -3.6861",
+  "1x s5 state-shares dashcam FAIR: -4.938",
+  "1x s5 state-shares-r1 dashcam FAIR: -4.7785",
+  "1x s5 state-shares-r1 dashcam HINDSIGHT: -0.0909",
+  "1x s5 state-shares-r2 dashcam FAIR: -4.825",
+  "1x s5 state-shares-r2 dashcam HINDSIGHT: -0.0455",
+  "1x s5 fair-c5attr dashcam FAIR: -4.5182",
+  "1x s5 fair-c5attr dashcam HINDSIGHT: -0.1364",
+  "1x s5 fair-c5attr-gain0 dashcam FAIR: -3.5956",
+  "1x s5 edf recall HINDSIGHT: -0.0238",
+  "1x s5 edf dashcam FAIR: -2.5861",
+  "1x s5 edf dashcam HINDSIGHT: -0.0909",
+  "1x s5 edf pooled HINDSIGHT: -0.016",
+  "1x s5 llf dashcam FAIR: -4.8384",
+  "1x s5 llf dashcam HINDSIGHT: -0.0455",
+  "1x s5 b7-edf-feasibility single_shot HINDSIGHT: -0.0328",
+  "1x s5 b7-edf-feasibility dashcam FAIR: -0.4881",
+  "1x s5 always-cloud-fcfs single_shot HINDSIGHT: -0.0164",
+  "1x s5 always-cloud-fcfs dashcam FAIR: -0.4996",
+  "1x s5 mooncake dashcam FAIR: -0.4862",
+  "1x s5 attentionstore-prefetch single_shot HINDSIGHT: -0.0492",
+  "1x s5 attentionstore-prefetch dashcam FAIR: -0.4677",
+  "1x s5 lmcache single_shot HINDSIGHT: -0.0492",
+  "1x s5 lmcache dashcam FAIR: -0.5015",
+  "1x s5 lmcache pooled HINDSIGHT: -0.016",
+  "1x s5 kvflow-prefetch single_shot HINDSIGHT: -0.0328",
+  "1x s5 kvflow-prefetch dashcam FAIR: -0.4639",
+  "1x s5 simplestream recall FAIR: -0.1452",
+  "1x s5 simplestream dashcam FAIR: -5.1262",
+  "1x s5 streamscout recall FAIR: -0.1452",
+  "1x s5 streamscout dashcam FAIR: -5.13",
+  "1x s5 streamscout dashcam HINDSIGHT: -0.1364",
+  "1x s5 querystream-proactive single_shot HINDSIGHT: -0.0492",
+  "1x s5 querystream-proactive dashcam FAIR: -0.4192",
+  "1x s5 querystream-proactive pooled HINDSIGHT: -0.016",
+  "1x s5 warm-all-lru single_shot HINDSIGHT: -0.0492",
+  "1x s5 warm-all-lru dashcam FAIR: -0.4269",
+  "1x s5 warm-all-lru pooled HINDSIGHT: -0.008",
+  "1x s5 fair-c5attr-rr dashcam FAIR: -4.9054",
+  "1x s5 fair-c5attr-rr dashcam HINDSIGHT: -0.2727",
+  "1x s5 confidence-cascade recall HINDSIGHT: -0.0476",
+  "1x s5 confidence-cascade dashcam FAIR: -3.0973",
+  "1x s5 fair-final-rung3 dashcam FAIR: -5.0337",
+  "1x s5 fair-final-rung3 dashcam HINDSIGHT: -0.2727",
+  "1x s6 base dashcam FAIR: -3.7453",
+  "1x s6 base dashcam HINDSIGHT: -0.1429",
+  "1x s6 rules dashcam FAIR: -1.8699",
+  "1x s6 rules dashcam HINDSIGHT: -0.1905",
+  "1x s6 state-uo dashcam FAIR: -3.0965",
+  "1x s6 state-uo dashcam HINDSIGHT: -0.2381",
+  "1x s6 state-uo-c5attr dashcam FAIR: -3.0761",
+  "1x s6 state-uo-c5attr dashcam HINDSIGHT: -0.2381",
+  "1x s6 state-shares dashcam FAIR: -4.1216",
+  "1x s6 state-shares-r1 dashcam FAIR: -3.9887",
+  "1x s6 state-shares-r2 dashcam FAIR: -4.1395",
+  "1x s6 state-shares-r2 dashcam HINDSIGHT: -0.0952",
+  "1x s6 fair-c5attr dashcam FAIR: -3.6285",
+  "1x s6 fair-c5attr dashcam HINDSIGHT: -0.4286",
+  "1x s6 fair-c5attr-gain0 dashcam FAIR: -2.9018",
+  "1x s6 fair-c5attr-gain0 dashcam HINDSIGHT: -0.1429",
+  "1x s6 edf dashcam FAIR: -2.1473",
+  "1x s6 edf dashcam HINDSIGHT: -0.1429",
+  "1x s6 llf dashcam FAIR: -4.1216",
+  "1x s6 llf dashcam HINDSIGHT: -0.0476",
+  "1x s6 b7-edf-feasibility dashcam FAIR: -2.4915",
+  "1x s6 b7-edf-feasibility dashcam HINDSIGHT: -0.1429",
+  "1x s6 always-cloud-fcfs dashcam FAIR: -0.8077",
+  "1x s6 always-cloud-fcfs dashcam HINDSIGHT: -0.1429",
+  "1x s6 mooncake dashcam FAIR: -2.4606",
+  "1x s6 mooncake dashcam HINDSIGHT: -0.1429",
+  "1x s6 attentionstore-prefetch single_shot HINDSIGHT: -0.0323",
+  "1x s6 attentionstore-prefetch dashcam FAIR: -0.8095",
+  "1x s6 attentionstore-prefetch dashcam HINDSIGHT: -0.1429",
+  "1x s6 attentionstore-prefetch pooled HINDSIGHT: -0.0127",
+  "1x s6 lmcache single_shot HINDSIGHT: -0.0161",
+  "1x s6 lmcache dashcam FAIR: -0.8095",
+  "1x s6 lmcache dashcam HINDSIGHT: -0.1429",
+  "1x s6 lmcache pooled HINDSIGHT: -0.0064",
+  "1x s6 kvflow-prefetch dashcam FAIR: -0.8404",
+  "1x s6 kvflow-prefetch dashcam HINDSIGHT: -0.0476",
+  "1x s6 simplestream recall FAIR: -0.1463",
+  "1x s6 simplestream dashcam FAIR: -4.3477",
+  "1x s6 streamscout recall FAIR: -0.1463",
+  "1x s6 streamscout dashcam FAIR: -4.3514",
+  "1x s6 querystream-proactive single_shot HINDSIGHT: -0.0161",
+  "1x s6 querystream-proactive dashcam FAIR: -0.8386",
+  "1x s6 querystream-proactive dashcam HINDSIGHT: -0.1429",
+  "1x s6 querystream-proactive pooled HINDSIGHT: -0.0064",
+  "1x s6 eco-llm dashcam FAIR: -2.4223",
+  "1x s6 eco-llm dashcam HINDSIGHT: -0.1905",
+  "1x s6 warm-all-lru single_shot HINDSIGHT: -0.0161",
+  "1x s6 warm-all-lru dashcam FAIR: -0.5345",
+  "1x s6 warm-all-lru dashcam HINDSIGHT: -0.0952",
+  "1x s6 warm-all-lru pooled HINDSIGHT: -0.0064",
+  "1x s6 fair-c5attr-rr dashcam FAIR: -4.1271",
+  "1x s6 fair-c5attr-rr dashcam HINDSIGHT: -0.0476",
+  "1x s6 confidence-cascade dashcam FAIR: -2.4341",
+  "1x s6 fair-final-rung3 dashcam FAIR: -4.1364",
+  "1x s6 fair-final-rung3 dashcam HINDSIGHT: -0.1429",
+  "1x s7 base dashcam FAIR: -4.584",
+  "1x s7 rules dashcam FAIR: -1.721",
+  "1x s7 rules dashcam HINDSIGHT: -0.1",
+  "1x s7 state-uo dashcam FAIR: -3.7631",
+  "1x s7 state-uo-c5attr dashcam FAIR: -3.6316",
+  "1x s7 state-shares dashcam FAIR: -4.7717",
+  "1x s7 state-shares dashcam HINDSIGHT: -0.2",
+  "1x s7 state-shares-r1 dashcam FAIR: -4.8292",
+  "1x s7 state-shares-r1 dashcam HINDSIGHT: -0.25",
+  "1x s7 state-shares-r2 dashcam FAIR: -4.8456",
+  "1x s7 state-shares-r2 dashcam HINDSIGHT: -0.1",
+  "1x s7 fair-c5attr dashcam FAIR: -4.4841",
+  "1x s7 fair-c5attr dashcam HINDSIGHT: -0.15",
+  "1x s7 fair-c5attr-gain0 dashcam FAIR: -3.746",
+  "1x s7 edf dashcam FAIR: -3.2707",
+  "1x s7 llf dashcam FAIR: -4.6061",
+  "1x s7 b7-edf-feasibility dashcam FAIR: -4.4215",
+  "1x s7 always-cloud-fcfs recall FAIR: -0.0016",
+  "1x s7 always-cloud-fcfs single_shot HINDSIGHT: -0.0484",
+  "1x s7 always-cloud-fcfs dashcam FAIR: -0.3735",
+  "1x s7 always-cloud-fcfs dashcam HINDSIGHT: -0.05",
+  "1x s7 always-cloud-fcfs pooled HINDSIGHT: -0.0348",
+  "1x s7 mooncake dashcam FAIR: -4.7894",
+  "1x s7 mooncake dashcam HINDSIGHT: -0.05",
+  "1x s7 attentionstore-prefetch single_shot HINDSIGHT: -0.0323",
+  "1x s7 attentionstore-prefetch dashcam FAIR: -0.3046",
+  "1x s7 attentionstore-prefetch dashcam HINDSIGHT: -0.05",
+  "1x s7 attentionstore-prefetch pooled HINDSIGHT: -0.0261",
+  "1x s7 lmcache single_shot HINDSIGHT: -0.0484",
+  "1x s7 lmcache dashcam FAIR: -0.3103",
+  "1x s7 lmcache dashcam HINDSIGHT: -0.05",
+  "1x s7 lmcache pooled HINDSIGHT: -0.0348",
+  "1x s7 kvflow-prefetch single_shot HINDSIGHT: -0.0323",
+  "1x s7 kvflow-prefetch dashcam FAIR: -0.3103",
+  "1x s7 kvflow-prefetch dashcam HINDSIGHT: -0.05",
+  "1x s7 kvflow-prefetch pooled HINDSIGHT: -0.0261",
+  "1x s7 simplestream recall FAIR: -0.1463",
+  "1x s7 simplestream recall HINDSIGHT: -0.2121",
+  "1x s7 simplestream dashcam FAIR: -4.912",
+  "1x s7 streamscout recall FAIR: -0.1212",
+  "1x s7 streamscout recall HINDSIGHT: -0.0303",
+  "1x s7 streamscout dashcam FAIR: -4.912",
+  "1x s7 querystream-proactive single_shot HINDSIGHT: -0.0323",
+  "1x s7 querystream-proactive dashcam FAIR: -0.3084",
+  "1x s7 querystream-proactive dashcam HINDSIGHT: -0.05",
+  "1x s7 querystream-proactive pooled HINDSIGHT: -0.0261",
+  "1x s7 eco-llm recall FAIR: -0.0132",
+  "1x s7 eco-llm dashcam FAIR: -4.7357",
+  "1x s7 warm-all-lru dashcam FAIR: -0.3198",
+  "1x s7 fair-c5attr-rr dashcam FAIR: -4.7495",
+  "1x s7 fair-c5attr-rr dashcam HINDSIGHT: -0.1",
+  "1x s7 confidence-cascade dashcam FAIR: -2.8112",
+  "1x s7 fair-final-rung3 dashcam FAIR: -4.8425",
+  "1x s7 fair-final-rung3 dashcam HINDSIGHT: -0.2",
+  "kv0.5r s4 llf dashcam FAIR: -3.3762",
+  "kv0.5r s4 llf dashcam HINDSIGHT: -0.5333",
+  "kv0.5r s4 mooncake dashcam FAIR: -3.055",
+  "kv0.5r s4 mooncake dashcam HINDSIGHT: -0.2",
+  "kv0.5r s4 simplestream recall FAIR: -0.1463",
+  "kv0.5r s4 simplestream recall HINDSIGHT: -0.4906",
+  "kv0.5r s4 simplestream dashcam FAIR: -4.3088",
+  "kv0.5r s4 simplestream dashcam HINDSIGHT: -0.6",
+  "kv0.5r s4 simplestream pooled HINDSIGHT: -0.1008",
+  "kv0.5r s4 eco-llm recall HINDSIGHT: -0.2264",
+  "kv0.5r s4 eco-llm dashcam FAIR: -2.9779",
+  "kv0.5r s4 eco-llm dashcam HINDSIGHT: -0.2667",
+  "kv0.5r s4 eco-llm pooled HINDSIGHT: -0.0078",
+  "kv0.5r s4 confidence-cascade dashcam FAIR: -2.5696",
+  "kv0.5r s4 confidence-cascade dashcam HINDSIGHT: -0.4667",
+  "kv0.5r s4 fair-final-rung3 dashcam FAIR: -3.4484",
+  "kv0.5r s4 fair-final-rung3 dashcam HINDSIGHT: -0.4667",
+  "kv0.5r s5 llf dashcam FAIR: -4.7785",
+  "kv0.5r s5 llf dashcam HINDSIGHT: -0.0455",
+  "kv0.5r s5 mooncake dashcam FAIR: -4.4531",
+  "kv0.5r s5 simplestream recall FAIR: -0.1452",
+  "kv0.5r s5 simplestream dashcam FAIR: -5.1262",
+  "kv0.5r s5 simplestream dashcam HINDSIGHT: -0.1818",
+  "kv0.5r s5 eco-llm dashcam FAIR: -4.2362",
+  "kv0.5r s5 confidence-cascade recall HINDSIGHT: -0.0476",
+  "kv0.5r s5 confidence-cascade dashcam FAIR: -3.0634",
+  "kv0.5r s5 fair-final-rung3 dashcam FAIR: -4.2635",
+  "kv0.5r s6 llf dashcam FAIR: -4.0956",
+  "kv0.5r s6 mooncake dashcam FAIR: -3.4469",
+  "kv0.5r s6 mooncake dashcam HINDSIGHT: -0.0952",
+  "kv0.5r s6 simplestream recall FAIR: -0.1463",
+  "kv0.5r s6 simplestream dashcam FAIR: -4.3477",
+  "kv0.5r s6 eco-llm dashcam FAIR: -3.5229",
+  "kv0.5r s6 eco-llm dashcam HINDSIGHT: -0.0476",
+  "kv0.5r s6 confidence-cascade dashcam FAIR: -2.4724",
+  "kv0.5r s6 fair-final-rung3 dashcam FAIR: -3.7323",
+  "kv0.5r s7 llf dashcam FAIR: -4.6352",
+  "kv0.5r s7 llf dashcam HINDSIGHT: -0.15",
+  "kv0.5r s7 mooncake dashcam FAIR: -4.6522",
+  "kv0.5r s7 mooncake dashcam HINDSIGHT: -0.15",
+  "kv0.5r s7 simplestream recall FAIR: -0.1463",
+  "kv0.5r s7 simplestream recall HINDSIGHT: -0.2258",
+  "kv0.5r s7 simplestream dashcam FAIR: -4.912",
+  "kv0.5r s7 eco-llm recall FAIR: -0.0362",
+  "kv0.5r s7 eco-llm recall HINDSIGHT: -0.0968",
+  "kv0.5r s7 eco-llm dashcam FAIR: -4.2705",
+  "kv0.5r s7 eco-llm dashcam HINDSIGHT: -0.1",
+  "kv0.5r s7 confidence-cascade dashcam FAIR: -2.8485",
+  "kv0.5r s7 fair-final-rung3 dashcam FAIR: -4.3628",
+  "kv0.5r s7 fair-final-rung3 dashcam HINDSIGHT: -0.1"
+ ],
+ "oracle_control": {
+  "1x": {
+   "per_seed": {
+    "s4": {
+     "recall": {
+      "fair_oracle": 3.7541,
+      "hind_oracle": 5.1,
+      "fair_minus_hind_ci95": [
+       -2.7202,
+       0.3024
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7087,
+      "fair_minus_hind_ci95": [
+       -0.1316,
+       -0.0392
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.7469,
+      "hind_oracle": 0.7725,
+      "fair_minus_hind_ci95": [
+       -0.0349,
+       -0.0177
+      ],
+      "fail": false
+     }
+    },
+    "s5": {
+     "recall": {
+      "fair_oracle": 2.8895,
+      "hind_oracle": 3.2,
+      "fair_minus_hind_ci95": [
+       -1.3293,
+       0.8004
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7107,
+      "fair_minus_hind_ci95": [
+       -0.1365,
+       -0.0438
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.7218,
+      "hind_oracle": 0.7479,
+      "fair_minus_hind_ci95": [
+       -0.0385,
+       -0.0152
+      ],
+      "fail": false
+     }
+    },
+    "s6": {
+     "recall": {
+      "fair_oracle": 3.4412,
+      "hind_oracle": 4.05,
+      "fair_minus_hind_ci95": [
+       -1.9006,
+       0.7097
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7087,
+      "fair_minus_hind_ci95": [
+       -0.1316,
+       -0.0392
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.7456,
+      "hind_oracle": 0.7739,
+      "fair_minus_hind_ci95": [
+       -0.0398,
+       -0.0176
+      ],
+      "fail": false
+     }
+    },
+    "s7": {
+     "recall": {
+      "fair_oracle": 2.7147,
+      "hind_oracle": 2.9091,
+      "fair_minus_hind_ci95": [
+       -1.3437,
+       1.0143
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7103,
+      "fair_minus_hind_ci95": [
+       -0.1331,
+       -0.0383
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.7282,
+      "hind_oracle": 0.7535,
+      "fair_minus_hind_ci95": [
+       -0.036,
+       -0.0163
+      ],
+      "fail": false
+     }
+    }
+   },
+   "pooled": {
+    "recall": {
+     "fair_oracle": 4.8398,
+     "hind_oracle": 5.7368,
+     "fair_minus_hind_ci95": [
+      -2.1532,
+      0.3081
+     ],
+     "fail": false
+    },
+    "single_shot": {
+     "fair_oracle": 2.4754,
+     "hind_oracle": 2.8245,
+     "fair_minus_hind_ci95": [
+      -0.5309,
+      -0.1548
+     ],
+     "fail": false
+    },
+    "dashcam": {
+     "fair_oracle": 0.7413,
+     "hind_oracle": 0.7678,
+     "fair_minus_hind_ci95": [
+      -0.0318,
+      -0.0216
+     ],
+     "fail": false
+    }
+   }
+  },
+  "kv0.5r": {
+   "per_seed": {
+    "s4": {
+     "recall": {
+      "fair_oracle": 3.7541,
+      "hind_oracle": 5.1,
+      "fair_minus_hind_ci95": [
+       -2.7202,
+       0.3024
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7087,
+      "fair_minus_hind_ci95": [
+       -0.1316,
+       -0.0392
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.7469,
+      "hind_oracle": 0.7725,
+      "fair_minus_hind_ci95": [
+       -0.0349,
+       -0.0177
+      ],
+      "fail": false
+     }
+    },
+    "s5": {
+     "recall": {
+      "fair_oracle": 2.8895,
+      "hind_oracle": 3.2,
+      "fair_minus_hind_ci95": [
+       -1.3293,
+       0.8004
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7107,
+      "fair_minus_hind_ci95": [
+       -0.1365,
+       -0.0438
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.7218,
+      "hind_oracle": 0.7479,
+      "fair_minus_hind_ci95": [
+       -0.0385,
+       -0.0152
+      ],
+      "fail": false
+     }
+    },
+    "s6": {
+     "recall": {
+      "fair_oracle": 3.4412,
+      "hind_oracle": 4.05,
+      "fair_minus_hind_ci95": [
+       -1.9006,
+       0.7097
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7087,
+      "fair_minus_hind_ci95": [
+       -0.1316,
+       -0.0392
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.7456,
+      "hind_oracle": 0.7739,
+      "fair_minus_hind_ci95": [
+       -0.0398,
+       -0.0176
+      ],
+      "fail": false
+     }
+    },
+    "s7": {
+     "recall": {
+      "fair_oracle": 2.7147,
+      "hind_oracle": 2.8182,
+      "fair_minus_hind_ci95": [
+       -1.1765,
+       1.0439
+      ],
+      "fail": false
+     },
+     "single_shot": {
+      "fair_oracle": 0.6219,
+      "hind_oracle": 0.7103,
+      "fair_minus_hind_ci95": [
+       -0.1331,
+       -0.0383
+      ],
+      "fail": false
+     },
+     "dashcam": {
+      "fair_oracle": 0.7282,
+      "hind_oracle": 0.7535,
+      "fair_minus_hind_ci95": [
+       -0.036,
+       -0.0163
+      ],
+      "fail": false
+     }
+    }
+   },
+   "pooled": {
+    "recall": {
+     "fair_oracle": 4.8398,
+     "hind_oracle": 5.7018,
+     "fair_minus_hind_ci95": [
+      -2.1184,
+      0.3207
+     ],
+     "fail": false
+    },
+    "single_shot": {
+     "fair_oracle": 2.4754,
+     "hind_oracle": 2.8245,
+     "fair_minus_hind_ci95": [
+      -0.5309,
+      -0.1548
+     ],
+     "fail": false
+    },
+    "dashcam": {
+     "fair_oracle": 0.7413,
+     "hind_oracle": 0.7678,
+     "fair_minus_hind_ci95": [
+      -0.0318,
+      -0.0216
+     ],
+     "fail": false
+    }
+   }
+  }
+ },
+ "1x": {
+  "s4": {
+   "s6_outlier_flag": false,
+   "arms": {
+    "base": {
+     "recall": {
+      "FAIR": {
+       "share": 0.2652,
+       "ci95": [
+        0.1714,
+        0.3437
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2453,
+       "ci95": [
+        0.0882,
+        0.3667
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9552,
+       "ci95": [
+        0.9328,
+        0.9748
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3443,
+       "ci95": [
+        0.0392,
+        0.5601
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.2998,
+       "ci95": [
+        -4.0936,
+        -2.636
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2667,
+       "ci95": [
+        -1.4547,
+        0.2668
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.4923,
+       "ci95": [
+        0.4257,
+        0.5853
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2326,
+       "ci95": [
+        0.0582,
+        0.3778
+       ]
+      }
+     }
+    },
+    "rules": {
+     "recall": {
+      "FAIR": {
+       "share": 0.2879,
+       "ci95": [
+        0.1842,
+        0.3899
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.283,
+       "ci95": [
+        0.125,
+        0.45
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.7423,
+       "ci95": [
+        0.6947,
+        0.7871
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2295,
+       "ci95": [
+        -0.0536,
+        0.4375
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -1.1108,
+       "ci95": [
+        -1.5285,
+        -0.7173
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2667,
+       "ci95": [
+        0.0587,
+        0.5264
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.448,
+       "ci95": [
+        0.3758,
+        0.5425
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2558,
+       "ci95": [
+        0.1096,
+        0.38
+       ]
+      }
+     }
+    },
+    "state-uo": {
+     "recall": {
+      "FAIR": {
+       "share": 0.8939,
+       "ci95": [
+        0.8319,
+        0.9451
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.6038,
+       "ci95": [
+        0.0,
+        0.8438
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9692,
+       "ci95": [
+        0.9496,
+        0.986
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3443,
+       "ci95": [
+        0.0577,
+        0.5652
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.498,
+       "ci95": [
+        -3.1589,
+        -1.9094
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2667,
+       "ci95": [
+        -1.0,
+        0.1429
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8852,
+       "ci95": [
+        0.8461,
+        0.9168
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3798,
+       "ci95": [
+        0.1052,
+        0.5647
+       ]
+      }
+     }
+    },
+    "state-uo-c5attr": {
+     "recall": {
+      "FAIR": {
+       "share": 0.8864,
+       "ci95": [
+        0.824,
+        0.9431
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.566,
+       "ci95": [
+        -0.0715,
+        0.8202
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9608,
+       "ci95": [
+        0.9384,
+        0.9804
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3279,
+       "ci95": [
+        0.0416,
+        0.5556
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.8755,
+       "ci95": [
+        -3.5978,
+        -2.2524
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0667,
+       "ci95": [
+        -0.7694,
+        0.3333
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8732,
+       "ci95": [
+        0.8319,
+        0.9084
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3798,
+       "ci95": [
+        0.1068,
+        0.5691
+       ]
+      }
+     }
+    },
+    "state-shares": {
+     "recall": {
+      "FAIR": {
+       "share": 0.4545,
+       "ci95": [
+        0.3009,
+        0.625
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.434,
+       "ci95": [
+        0.1944,
+        0.7097
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9636,
+       "ci95": [
+        0.944,
+        0.9804
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.377,
+       "ci95": [
+        0.0806,
+        0.5847
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.0541,
+       "ci95": [
+        -4.9781,
+        -3.2843
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.3333,
+       "ci95": [
+        -1.7143,
+        0.2778
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.6011,
+       "ci95": [
+        0.5008,
+        0.717
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3178,
+       "ci95": [
+        0.1238,
+        0.4779
+       ]
+      }
+     }
+    },
+    "state-shares-r1": {
+     "recall": {
+      "FAIR": {
+       "share": 0.7197,
+       "ci95": [
+        0.5648,
+        0.8519
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.434,
+       "ci95": [
+        -0.0953,
+        0.7143
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9944,
+       "ci95": [
+        0.986,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3607,
+       "ci95": [
+        0.0612,
+        0.5782
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.0831,
+       "ci95": [
+        -4.9814,
+        -3.3221
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.4667,
+       "ci95": [
+        -2.0,
+        0.1876
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.7723,
+       "ci95": [
+        0.6862,
+        0.8492
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2946,
+       "ci95": [
+        0.0306,
+        0.493
+       ]
+      }
+     }
+    },
+    "state-shares-r2": {
+     "recall": {
+      "FAIR": {
+       "share": 0.5985,
+       "ci95": [
+        0.4204,
+        0.7802
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3774,
+       "ci95": [
+        -0.1669,
+        0.6719
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9776,
+       "ci95": [
+        0.9608,
+        0.9916
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3279,
+       "ci95": [
+        0.0363,
+        0.5484
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.9924,
+       "ci95": [
+        -4.8799,
+        -3.2171
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.4667,
+       "ci95": [
+        -2.0,
+        0.2002
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.6939,
+       "ci95": [
+        0.59,
+        0.8017
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2558,
+       "ci95": [
+        -0.0191,
+        0.4505
+       ]
+      }
+     }
+    },
+    "fair-c5attr": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9242,
+       "ci95": [
+        0.8812,
+        0.9619
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.6415,
+       "ci95": [
+        0.0665,
+        0.8778
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9496,
+       "ci95": [
+        0.9244,
+        0.972
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3443,
+       "ci95": [
+        0.0612,
+        0.5606
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.805,
+       "ci95": [
+        -4.6683,
+        -3.0788
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2667,
+       "ci95": [
+        -1.3333,
+        0.2778
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8813,
+       "ci95": [
+        0.845,
+        0.9097
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3953,
+       "ci95": [
+        0.1111,
+        0.5801
+       ]
+      }
+     }
+    },
+    "fair-c5attr-gain0": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9015,
+       "ci95": [
+        0.8421,
+        0.9546
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.6038,
+       "ci95": [
+        0.0,
+        0.8438
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9524,
+       "ci95": [
+        0.9299,
+        0.972
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3443,
+       "ci95": [
+        0.0612,
+        0.5606
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.6825,
+       "ci95": [
+        -3.3377,
+        -2.0682
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2667,
+       "ci95": [
+        -1.0,
+        0.1201
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8812,
+       "ci95": [
+        0.8402,
+        0.915
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3798,
+       "ci95": [
+        0.0982,
+        0.5644
+       ]
+      }
+     }
+    },
+    "edf": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0379,
+       "ci95": [
+        0.008,
+        0.071
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0377,
+       "ci95": [
+        0.0,
+        0.0883
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.1625,
+       "ci95": [
+        0.1261,
+        0.1989
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0164,
+       "ci95": [
+        -0.1228,
+        0.0806
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.7281,
+       "ci95": [
+        -3.4033,
+        -2.131
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1333,
+       "ci95": [
+        -0.7778,
+        0.25
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0552,
+       "ci95": [
+        0.0305,
+        0.0814
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0078,
+       "ci95": [
+        -0.0857,
+        0.0579
+       ]
+      }
+     }
+    },
+    "llf": {
+     "recall": {
+      "FAIR": {
+       "share": 0.053,
+       "ci95": [
+        0.0144,
+        0.0952
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0566,
+       "ci95": [
+        0.0,
+        0.14
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.479,
+       "ci95": [
+        0.4285,
+        0.5322
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1311,
+       "ci95": [
+        -0.1053,
+        0.3189
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.8148,
+       "ci95": [
+        -4.6676,
+        -3.0708
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.6,
+       "ci95": [
+        -1.8,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.1746,
+       "ci95": [
+        0.1275,
+        0.2355
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0155,
+       "ci95": [
+        -0.121,
+        0.1406
+       ]
+      }
+     }
+    },
+    "b7-edf-feasibility": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0379,
+       "ci95": [
+        0.0,
+        0.0918
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0952,
+       "ci95": [
+        0.0672,
+        0.1289
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.0976,
+        0.087
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.6896,
+       "ci95": [
+        -1.0245,
+        -0.3979
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1333,
+       "ci95": [
+        -0.1252,
+        0.4
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0519,
+       "ci95": [
+        0.0264,
+        0.0853
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0155,
+       "ci95": [
+        -0.0397,
+        0.0698
+       ]
+      }
+     }
+    },
+    "always-cloud-fcfs": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0379,
+       "ci95": [
+        0.0,
+        0.0918
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0952,
+       "ci95": [
+        0.0672,
+        0.1289
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.0976,
+        0.087
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.6588,
+       "ci95": [
+        -1.0,
+        -0.3716
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1333,
+       "ci95": [
+        -0.1252,
+        0.4
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0523,
+       "ci95": [
+        0.0268,
+        0.0856
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0155,
+       "ci95": [
+        -0.0397,
+        0.0698
+       ]
+      }
+     }
+    },
+    "mooncake": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0379,
+       "ci95": [
+        0.0,
+        0.0918
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0952,
+       "ci95": [
+        0.0672,
+        0.1289
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.0976,
+        0.087
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.6569,
+       "ci95": [
+        -1.0006,
+        -0.3665
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1333,
+       "ci95": [
+        -0.1252,
+        0.4
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0523,
+       "ci95": [
+        0.0268,
+        0.0856
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0155,
+       "ci95": [
+        -0.0397,
+        0.0698
+       ]
+      }
+     }
+    },
+    "attentionstore-prefetch": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0303,
+       "ci95": [
+        0.0,
+        0.0839
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0784,
+       "ci95": [
+        0.0532,
+        0.1065
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0328,
+       "ci95": [
+        -0.1207,
+        0.0448
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.6588,
+       "ci95": [
+        -1.0017,
+        -0.3687
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1333,
+       "ci95": [
+        -0.1252,
+        0.4
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0412,
+       "ci95": [
+        0.0176,
+        0.0731
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.051,
+        0.05
+       ]
+      }
+     }
+    },
+    "lmcache": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0227,
+       "ci95": [
+        0.0,
+        0.0774
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0756,
+       "ci95": [
+        0.0504,
+        0.1036
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0328,
+       "ci95": [
+        -0.1207,
+        0.0448
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.6606,
+       "ci95": [
+        -1.0048,
+        -0.3723
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1333,
+       "ci95": [
+        -0.1252,
+        0.4
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0356,
+       "ci95": [
+        0.0131,
+        0.0686
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.051,
+        0.05
+       ]
+      }
+     }
+    },
+    "kvflow-prefetch": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0455,
+       "ci95": [
+        0.0,
+        0.1167
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0896,
+       "ci95": [
+        0.0616,
+        0.1204
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.0963,
+        0.087
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.6569,
+       "ci95": [
+        -0.9981,
+        -0.368
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0667,
+       "ci95": [
+        -0.1669,
+        0.2857
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0547,
+       "ci95": [
+        0.0244,
+        0.0952
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0078,
+       "ci95": [
+        -0.0424,
+        0.0593
+       ]
+      }
+     }
+    },
+    "simplestream": {
+     "recall": {
+      "FAIR": {
+       "share": -0.1463,
+       "ci95": [
+        -0.1463,
+        -0.1463
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.4906,
+       "ci95": [
+        -2.4086,
+        0.2334
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9972,
+       "ci95": [
+        0.9916,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3607,
+       "ci95": [
+        0.0612,
+        0.5782
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.307,
+       "ci95": [
+        -5.2821,
+        -3.4831
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.6,
+       "ci95": [
+        -2.3083,
+        0.125
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2496,
+       "ci95": [
+        0.145,
+        0.4026
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1008,
+       "ci95": [
+        -0.593,
+        0.2358
+       ]
+      }
+     }
+    },
+    "streamscout": {
+     "recall": {
+      "FAIR": {
+       "share": -0.1463,
+       "ci95": [
+        -0.1463,
+        -0.1463
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.5849,
+       "ci95": [
+        -2.5004,
+        0.1077
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3607,
+       "ci95": [
+        0.0612,
+        0.5782
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.3181,
+       "ci95": [
+        -5.2898,
+        -3.4938
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.4667,
+       "ci95": [
+        -1.875,
+        0.1668
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2505,
+       "ci95": [
+        0.1463,
+        0.4037
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.124,
+       "ci95": [
+        -0.6001,
+        0.2105
+       ]
+      }
+     }
+    },
+    "querystream-proactive": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0379,
+       "ci95": [
+        0.0,
+        0.0918
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0896,
+       "ci95": [
+        0.0588,
+        0.1205
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0164,
+       "ci95": [
+        -0.1091,
+        0.0635
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.6588,
+       "ci95": [
+        -1.0018,
+        -0.3669
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1333,
+       "ci95": [
+        -0.1252,
+        0.4
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0501,
+       "ci95": [
+        0.025,
+        0.0832
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0078,
+       "ci95": [
+        -0.0476,
+        0.0598
+       ]
+      }
+     }
+    },
+    "eco-llm": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0379,
+       "ci95": [
+        0.0,
+        0.0918
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0952,
+       "ci95": [
+        0.0672,
+        0.1289
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.0976,
+        0.087
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.6569,
+       "ci95": [
+        -0.9981,
+        -0.3669
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1333,
+       "ci95": [
+        -0.1252,
+        0.4
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0523,
+       "ci95": [
+        0.0268,
+        0.0856
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0155,
+       "ci95": [
+        -0.0397,
+        0.0698
+       ]
+      }
+     }
+    },
+    "warm-all-lru": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0227,
+       "ci95": [
+        0.0,
+        0.0614
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.07,
+       "ci95": [
+        0.0448,
+        0.098
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.0862,
+        0.0794
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.4959,
+       "ci95": [
+        -0.787,
+        -0.2572
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1333,
+       "ci95": [
+        -0.1252,
+        0.4
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0352,
+       "ci95": [
+        0.0157,
+        0.0598
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0155,
+       "ci95": [
+        -0.0313,
+        0.0667
+       ]
+      }
+     }
+    },
+    "fair-c5attr-rr": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9545,
+       "ci95": [
+        0.901,
+        0.9878
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.6604,
+       "ci95": [
+        0.0624,
+        0.9057
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9888,
+       "ci95": [
+        0.9748,
+        0.9972
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3607,
+       "ci95": [
+        0.0725,
+        0.5797
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.998,
+       "ci95": [
+        -4.8837,
+        -3.2156
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.6667,
+       "ci95": [
+        -2.2857,
+        0.04
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.9125,
+       "ci95": [
+        0.8725,
+        0.9412
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3643,
+       "ci95": [
+        0.0526,
+        0.5676
+       ]
+      }
+     }
+    },
+    "confidence-cascade": {
+     "recall": {
+      "FAIR": {
+       "share": 0.1742,
+       "ci95": [
+        0.0513,
+        0.3229
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2642,
+       "ci95": [
+        -0.1091,
+        0.5231
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.4538,
+       "ci95": [
+        0.4034,
+        0.5042
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1311,
+       "ci95": [
+        -0.1095,
+        0.3291
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.6295,
+       "ci95": [
+        -3.3222,
+        -2.0374
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.4667,
+       "ci95": [
+        -1.8889,
+        0.1787
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2511,
+       "ci95": [
+        0.1686,
+        0.347
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1163,
+       "ci95": [
+        -0.1048,
+        0.2905
+       ]
+      }
+     }
+    },
+    "fair-final-rung3": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9545,
+       "ci95": [
+        0.901,
+        0.9878
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.6415,
+       "ci95": [
+        0.0,
+        0.8939
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9832,
+       "ci95": [
+        0.9664,
+        0.9944
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3443,
+       "ci95": [
+        0.0566,
+        0.5692
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.0325,
+       "ci95": [
+        -4.9399,
+        -3.2542
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.4,
+       "ci95": [
+        -1.75,
+        0.2381
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.91,
+       "ci95": [
+        0.8696,
+        0.9396
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3798,
+       "ci95": [
+        0.0794,
+        0.5833
+       ]
+      }
+     }
+    }
+   }
+  },
+  "s5": {
+   "s6_outlier_flag": false,
+   "arms": {
+    "base": {
+     "recall": {
+      "FAIR": {
+       "share": 0.2126,
+       "ci95": [
+        0.1111,
+        0.3204
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.119,
+       "ci95": [
+        -0.1725,
+        0.3333
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9719,
+       "ci95": [
+        0.9522,
+        0.9888
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3607,
+       "ci95": [
+        0.0727,
+        0.5803
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.4104,
+       "ci95": [
+        -5.3906,
+        -3.5002
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0455,
+       "ci95": [
+        -0.4668,
+        0.3638
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.4616,
+       "ci95": [
+        0.3803,
+        0.5637
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.224,
+       "ci95": [
+        0.0538,
+        0.3739
+       ]
+      }
+     }
+    },
+    "rules": {
+     "recall": {
+      "FAIR": {
+       "share": 0.2913,
+       "ci95": [
+        0.1716,
+        0.3967
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0952,
+       "ci95": [
+        -0.3125,
+        0.3333
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.7669,
+       "ci95": [
+        0.7218,
+        0.809
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2295,
+       "ci95": [
+        -0.0417,
+        0.4478
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -1.8619,
+       "ci95": [
+        -2.4454,
+        -1.3688
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0909,
+       "ci95": [
+        0.0,
+        0.2274
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.4555,
+       "ci95": [
+        0.3821,
+        0.5311
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.16,
+       "ci95": [
+        -0.0078,
+        0.2971
+       ]
+      }
+     }
+    },
+    "state-uo": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9055,
+       "ci95": [
+        0.8211,
+        0.9609
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.381,
+       "ci95": [
+        -0.5228,
+        0.7692
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.986,
+       "ci95": [
+        0.9719,
+        0.9972
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3279,
+       "ci95": [
+        0.0336,
+        0.5594
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.4137,
+       "ci95": [
+        -4.2497,
+        -2.707
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0909,
+       "ci95": [
+        -0.174,
+        0.3333
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8895,
+       "ci95": [
+        0.8372,
+        0.927
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.304,
+       "ci95": [
+        0.036,
+        0.5042
+       ]
+      }
+     }
+    },
+    "state-uo-c5attr": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9055,
+       "ci95": [
+        0.823,
+        0.9652
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.381,
+       "ci95": [
+        -0.5335,
+        0.7778
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9775,
+       "ci95": [
+        0.9607,
+        0.9916
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3279,
+       "ci95": [
+        0.0325,
+        0.5556
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.6861,
+       "ci95": [
+        -4.5596,
+        -2.9134
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1364,
+       "ci95": [
+        -0.2381,
+        0.4286
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8832,
+       "ci95": [
+        0.8308,
+        0.9192
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.312,
+       "ci95": [
+        0.0476,
+        0.5143
+       ]
+      }
+     }
+    },
+    "state-shares": {
+     "recall": {
+      "FAIR": {
+       "share": 0.5984,
+       "ci95": [
+        0.4609,
+        0.7228
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3571,
+       "ci95": [
+        -0.1875,
+        0.6471
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9663,
+       "ci95": [
+        0.9466,
+        0.9831
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3115,
+       "ci95": [
+        0.0,
+        0.5373
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.938,
+       "ci95": [
+        -5.9505,
+        -3.9991
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0455,
+       "ci95": [
+        -0.6,
+        0.4231
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.6826,
+       "ci95": [
+        0.5977,
+        0.7643
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.28,
+       "ci95": [
+        0.0537,
+        0.4476
+       ]
+      }
+     }
+    },
+    "state-shares-r1": {
+     "recall": {
+      "FAIR": {
+       "share": 0.8898,
+       "ci95": [
+        0.7886,
+        0.9613
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3333,
+       "ci95": [
+        -0.7097,
+        0.7759
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9888,
+       "ci95": [
+        0.9775,
+        0.9972
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3443,
+       "ci95": [
+        0.0385,
+        0.5679
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.7785,
+       "ci95": [
+        -5.7989,
+        -3.8762
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0909,
+       "ci95": [
+        -0.7694,
+        0.3333
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8662,
+       "ci95": [
+        0.8017,
+        0.9131
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.264,
+       "ci95": [
+        -0.0306,
+        0.4832
+       ]
+      }
+     }
+    },
+    "state-shares-r2": {
+     "recall": {
+      "FAIR": {
+       "share": 0.8898,
+       "ci95": [
+        0.7876,
+        0.963
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3095,
+       "ci95": [
+        -0.7275,
+        0.75
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9888,
+       "ci95": [
+        0.9775,
+        0.9972
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3443,
+       "ci95": [
+        0.0385,
+        0.5679
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.825,
+       "ci95": [
+        -5.8123,
+        -3.8795
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0455,
+       "ci95": [
+        -0.7143,
+        0.3462
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8657,
+       "ci95": [
+        0.8025,
+        0.9128
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.264,
+       "ci95": [
+        -0.0278,
+        0.4842
+       ]
+      }
+     }
+    },
+    "fair-c5attr": {
+     "recall": {
+      "FAIR": {
+       "share": 0.8976,
+       "ci95": [
+        0.8151,
+        0.9573
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.381,
+       "ci95": [
+        -0.4595,
+        0.7458
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9691,
+       "ci95": [
+        0.9494,
+        0.986
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2787,
+       "ci95": [
+        -0.0233,
+        0.5135
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.5182,
+       "ci95": [
+        -5.4779,
+        -3.6434
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1364,
+       "ci95": [
+        -0.7504,
+        0.2335
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.866,
+       "ci95": [
+        0.8121,
+        0.9037
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.24,
+       "ci95": [
+        -0.0309,
+        0.439
+       ]
+      }
+     }
+    },
+    "fair-c5attr-gain0": {
+     "recall": {
+      "FAIR": {
+       "share": 0.8976,
+       "ci95": [
+        0.8151,
+        0.9542
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.381,
+       "ci95": [
+        -0.5228,
+        0.7692
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9831,
+       "ci95": [
+        0.9691,
+        0.9944
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3279,
+       "ci95": [
+        0.0196,
+        0.5556
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.5956,
+       "ci95": [
+        -4.4999,
+        -2.8524
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1818,
+       "ci95": [
+        -0.1333,
+        0.4348
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8818,
+       "ci95": [
+        0.8297,
+        0.919
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.32,
+       "ci95": [
+        0.0574,
+        0.5188
+       ]
+      }
+     }
+    },
+    "edf": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0315,
+       "ci95": [
+        0.0,
+        0.0714
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0238,
+       "ci95": [
+        -0.1071,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.1938,
+       "ci95": [
+        0.1545,
+        0.2331
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0164,
+       "ci95": [
+        -0.1373,
+        0.1475
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.5861,
+       "ci95": [
+        -3.2931,
+        -1.9718
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0909,
+       "ci95": [
+        -0.5714,
+        0.2222
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0667,
+       "ci95": [
+        0.04,
+        0.0979
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.016,
+       "ci95": [
+        -0.1204,
+        0.0775
+       ]
+      }
+     }
+    },
+    "llf": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0394,
+       "ci95": [
+        0.0,
+        0.1143
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.5253,
+       "ci95": [
+        0.4747,
+        0.5758
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2131,
+       "ci95": [
+        -0.0179,
+        0.403
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.8384,
+       "ci95": [
+        -5.885,
+        -3.9143
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0455,
+       "ci95": [
+        -0.6876,
+        0.3333
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.1775,
+       "ci95": [
+        0.1269,
+        0.2423
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.096,
+       "ci95": [
+        -0.043,
+        0.2223
+       ]
+      }
+     }
+    },
+    "b7-edf-feasibility": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0394,
+       "ci95": [
+        0.0,
+        0.096
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0238,
+       "ci95": [
+        0.0,
+        0.0702
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0927,
+       "ci95": [
+        0.0618,
+        0.1236
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0328,
+       "ci95": [
+        -0.125,
+        0.0455
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.4881,
+       "ci95": [
+        -0.7653,
+        -0.2365
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0909,
+       "ci95": [
+        0.0,
+        0.2273
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0546,
+       "ci95": [
+        0.0291,
+        0.0897
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.008,
+       "ci95": [
+        -0.0427,
+        0.0534
+       ]
+      }
+     }
+    },
+    "always-cloud-fcfs": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0472,
+       "ci95": [
+        0.0078,
+        0.1046
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0476,
+       "ci95": [
+        0.0,
+        0.1176
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0927,
+       "ci95": [
+        0.0645,
+        0.1236
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0164,
+       "ci95": [
+        -0.1091,
+        0.0678
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.4996,
+       "ci95": [
+        -0.776,
+        -0.2462
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0909,
+       "ci95": [
+        0.0,
+        0.2273
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0592,
+       "ci95": [
+        0.0322,
+        0.0954
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.024,
+       "ci95": [
+        -0.0291,
+        0.0729
+       ]
+      }
+     }
+    },
+    "mooncake": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0394,
+       "ci95": [
+        0.0,
+        0.096
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0238,
+       "ci95": [
+        0.0,
+        0.0702
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0927,
+       "ci95": [
+        0.0618,
+        0.1236
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.0834,
+        0.0755
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.4862,
+       "ci95": [
+        -0.7636,
+        -0.2328
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0909,
+       "ci95": [
+        0.0,
+        0.2273
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0546,
+       "ci95": [
+        0.0291,
+        0.0892
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.024,
+       "ci95": [
+        -0.0248,
+        0.069
+       ]
+      }
+     }
+    },
+    "attentionstore-prefetch": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0472,
+       "ci95": [
+        0.0078,
+        0.1046
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0476,
+       "ci95": [
+        0.0,
+        0.1176
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0506,
+       "ci95": [
+        0.0281,
+        0.0758
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0492,
+       "ci95": [
+        -0.1187,
+        0.0
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.4677,
+       "ci95": [
+        -0.7363,
+        -0.2298
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0455,
+       "ci95": [
+        0.0,
+        0.15
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0429,
+       "ci95": [
+        0.0168,
+        0.0775
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.0426,
+        0.0345
+       ]
+      }
+     }
+    },
+    "lmcache": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0315,
+       "ci95": [
+        0.0,
+        0.0874
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0562,
+       "ci95": [
+        0.0337,
+        0.0815
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0492,
+       "ci95": [
+        -0.1187,
+        0.0
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.5015,
+       "ci95": [
+        -0.7764,
+        -0.2487
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0455,
+       "ci95": [
+        0.0,
+        0.15
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0354,
+       "ci95": [
+        0.0122,
+        0.0671
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.016,
+       "ci95": [
+        -0.0521,
+        0.0142
+       ]
+      }
+     }
+    },
+    "kvflow-prefetch": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0472,
+       "ci95": [
+        0.0078,
+        0.1046
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0476,
+       "ci95": [
+        0.0,
+        0.1176
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0815,
+       "ci95": [
+        0.0534,
+        0.1124
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0328,
+       "ci95": [
+        -0.125,
+        0.0455
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.4639,
+       "ci95": [
+        -0.7342,
+        -0.2273
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0455,
+       "ci95": [
+        0.0,
+        0.15
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0551,
+       "ci95": [
+        0.0283,
+        0.091
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.008,
+       "ci95": [
+        -0.0424,
+        0.0523
+       ]
+      }
+     }
+    },
+    "simplestream": {
+     "recall": {
+      "FAIR": {
+       "share": -0.1452,
+       "ci95": [
+        -0.1463,
+        -0.1422
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.6765,
+        0.3335
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3607,
+       "ci95": [
+        0.0625,
+        0.5873
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -5.1262,
+       "ci95": [
+        -6.1763,
+        -4.1248
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.7143,
+        0.4231
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2525,
+       "ci95": [
+        0.1609,
+        0.3875
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.176,
+       "ci95": [
+        -0.0684,
+        0.3669
+       ]
+      }
+     }
+    },
+    "streamscout": {
+     "recall": {
+      "FAIR": {
+       "share": -0.1452,
+       "ci95": [
+        -0.1463,
+        -0.1422
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.8261,
+        0.4386
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3607,
+       "ci95": [
+        0.0625,
+        0.5873
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -5.13,
+       "ci95": [
+        -6.1763,
+        -4.1321
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1364,
+       "ci95": [
+        -0.8825,
+        0.2857
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2524,
+       "ci95": [
+        0.1608,
+        0.3875
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.152,
+       "ci95": [
+        -0.1124,
+        0.365
+       ]
+      }
+     }
+    },
+    "querystream-proactive": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0236,
+       "ci95": [
+        0.0,
+        0.0797
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0646,
+       "ci95": [
+        0.0393,
+        0.0927
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0492,
+       "ci95": [
+        -0.1187,
+        0.0
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.4192,
+       "ci95": [
+        -0.6789,
+        -0.19
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0455,
+       "ci95": [
+        0.0,
+        0.15
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0349,
+       "ci95": [
+        0.0131,
+        0.0664
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.016,
+       "ci95": [
+        -0.0521,
+        0.0142
+       ]
+      }
+     }
+    },
+    "eco-llm": {
+     "dashcam": {
+      "FAIR": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "warm-all-lru": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0315,
+       "ci95": [
+        0.0,
+        0.0889
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0238,
+       "ci95": [
+        0.0,
+        0.0702
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.059,
+       "ci95": [
+        0.0365,
+        0.0871
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0492,
+       "ci95": [
+        -0.1373,
+        0.0169
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.4269,
+       "ci95": [
+        -0.6888,
+        -0.1979
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0455,
+       "ci95": [
+        0.0,
+        0.15
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0373,
+       "ci95": [
+        0.0135,
+        0.0704
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.008,
+       "ci95": [
+        -0.0536,
+        0.0336
+       ]
+      }
+     }
+    },
+    "fair-c5attr-rr": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9528,
+       "ci95": [
+        0.8737,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4286,
+       "ci95": [
+        -0.5385,
+        0.8442
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.986,
+       "ci95": [
+        0.9719,
+        0.9972
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3115,
+       "ci95": [
+        0.0,
+        0.5373
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.9054,
+       "ci95": [
+        -5.9041,
+        -3.9763
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2727,
+       "ci95": [
+        -1.0627,
+        0.1715
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.9011,
+       "ci95": [
+        0.8467,
+        0.9357
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.248,
+       "ci95": [
+        -0.0566,
+        0.4671
+       ]
+      }
+     }
+    },
+    "confidence-cascade": {
+     "recall": {
+      "FAIR": {
+       "share": 0.1102,
+       "ci95": [
+        0.0171,
+        0.2377
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0476,
+       "ci95": [
+        -0.3125,
+        0.1111
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.4635,
+       "ci95": [
+        0.4101,
+        0.514
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1475,
+       "ci95": [
+        -0.1129,
+        0.3492
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.0973,
+       "ci95": [
+        -3.8868,
+        -2.4027
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1818,
+       "ci95": [
+        -0.3333,
+        0.52
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2144,
+       "ci95": [
+        0.1464,
+        0.3042
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.088,
+       "ci95": [
+        -0.0696,
+        0.2319
+       ]
+      }
+     }
+    },
+    "fair-final-rung3": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9528,
+       "ci95": [
+        0.8737,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4286,
+       "ci95": [
+        -0.5385,
+        0.8442
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9916,
+       "ci95": [
+        0.9803,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3279,
+       "ci95": [
+        0.0196,
+        0.5556
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -5.0337,
+       "ci95": [
+        -6.0473,
+        -4.0764
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2727,
+       "ci95": [
+        -1.0625,
+        0.1852
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.9019,
+       "ci95": [
+        0.8479,
+        0.9365
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.256,
+       "ci95": [
+        -0.046,
+        0.4741
+       ]
+      }
+     }
+    }
+   }
+  },
+  "s6": {
+   "s6_outlier_flag": true,
+   "arms": {
+    "base": {
+     "recall": {
+      "FAIR": {
+       "share": 0.3388,
+       "ci95": [
+        0.2079,
+        0.4584
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3108,
+       "ci95": [
+        0.1538,
+        0.434
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9916,
+       "ci95": [
+        0.9804,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3871,
+       "ci95": [
+        0.08,
+        0.5965
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.7453,
+       "ci95": [
+        -4.5875,
+        -2.9314
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1429,
+       "ci95": [
+        -0.7223,
+        0.2381
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.5568,
+       "ci95": [
+        0.4704,
+        0.6586
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2803,
+       "ci95": [
+        0.1235,
+        0.4028
+       ]
+      }
+     }
+    },
+    "rules": {
+     "recall": {
+      "FAIR": {
+       "share": 0.2645,
+       "ci95": [
+        0.1468,
+        0.384
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1622,
+       "ci95": [
+        0.0,
+        0.3
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.7619,
+       "ci95": [
+        0.7171,
+        0.8067
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3226,
+       "ci95": [
+        0.0526,
+        0.5254
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -1.8699,
+       "ci95": [
+        -2.4296,
+        -1.3528
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1905,
+       "ci95": [
+        -0.4668,
+        -0.0385
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.442,
+       "ci95": [
+        0.3611,
+        0.5417
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1783,
+       "ci95": [
+        0.0333,
+        0.297
+       ]
+      }
+     }
+    },
+    "state-uo": {
+     "recall": {
+      "FAIR": {
+       "share": 0.8843,
+       "ci95": [
+        0.8202,
+        0.9343
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.7162,
+       "ci95": [
+        0.2895,
+        0.8919
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9664,
+       "ci95": [
+        0.9468,
+        0.9832
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0784,
+        0.5807
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.0965,
+       "ci95": [
+        -3.8082,
+        -2.4177
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2381,
+       "ci95": [
+        -0.5335,
+        -0.0455
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.871,
+       "ci95": [
+        0.8323,
+        0.902
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4522,
+       "ci95": [
+        0.1981,
+        0.6109
+       ]
+      }
+     }
+    },
+    "state-uo-c5attr": {
+     "recall": {
+      "FAIR": {
+       "share": 0.8678,
+       "ci95": [
+        0.8041,
+        0.9256
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.6622,
+       "ci95": [
+        0.2424,
+        0.8334
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9216,
+       "ci95": [
+        0.8936,
+        0.9496
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3548,
+       "ci95": [
+        0.0588,
+        0.5634
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.0761,
+       "ci95": [
+        -3.8243,
+        -2.3776
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2381,
+       "ci95": [
+        -0.6,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8434,
+       "ci95": [
+        0.8012,
+        0.8798
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4204,
+       "ci95": [
+        0.1774,
+        0.5746
+       ]
+      }
+     }
+    },
+    "state-shares": {
+     "recall": {
+      "FAIR": {
+       "share": 0.5207,
+       "ci95": [
+        0.3544,
+        0.6617
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4054,
+       "ci95": [
+        0.1607,
+        0.5617
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9804,
+       "ci95": [
+        0.9636,
+        0.9944
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3871,
+       "ci95": [
+        0.0961,
+        0.5968
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.1216,
+       "ci95": [
+        -5.0038,
+        -3.2781
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.626,
+        0.3889
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.6534,
+       "ci95": [
+        0.5611,
+        0.7472
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3439,
+       "ci95": [
+        0.1589,
+        0.4756
+       ]
+      }
+     }
+    },
+    "state-shares-r1": {
+     "recall": {
+      "FAIR": {
+       "share": 0.7603,
+       "ci95": [
+        0.55,
+        0.9098
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.6351,
+       "ci95": [
+        0.1394,
+        0.8673
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9832,
+       "ci95": [
+        0.9692,
+        0.9944
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0689,
+        0.5797
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.9887,
+       "ci95": [
+        -4.8398,
+        -3.1672
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1905,
+       "ci95": [
+        -0.4167,
+        0.5417
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.7954,
+       "ci95": [
+        0.6746,
+        0.8813
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4713,
+       "ci95": [
+        0.2119,
+        0.64
+       ]
+      }
+     }
+    },
+    "state-shares-r2": {
+     "recall": {
+      "FAIR": {
+       "share": 0.7603,
+       "ci95": [
+        0.5566,
+        0.8915
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.5405,
+       "ci95": [
+        0.04,
+        0.7921
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9804,
+       "ci95": [
+        0.9664,
+        0.9944
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0799,
+        0.5857
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.1395,
+       "ci95": [
+        -5.0184,
+        -3.3075
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0952,
+       "ci95": [
+        -0.8333,
+        0.3333
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.7925,
+       "ci95": [
+        0.693,
+        0.8736
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3885,
+       "ci95": [
+        0.125,
+        0.5692
+       ]
+      }
+     }
+    },
+    "fair-c5attr": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9008,
+       "ci95": [
+        0.8522,
+        0.9423
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.7162,
+       "ci95": [
+        0.2895,
+        0.8919
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9552,
+       "ci95": [
+        0.93,
+        0.9748
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3871,
+       "ci95": [
+        0.0961,
+        0.5883
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.6285,
+       "ci95": [
+        -4.4618,
+        -2.8285
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.4286,
+       "ci95": [
+        -1.0,
+        -0.08
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8698,
+       "ci95": [
+        0.8354,
+        0.8982
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4331,
+       "ci95": [
+        0.1695,
+        0.5941
+       ]
+      }
+     }
+    },
+    "fair-c5attr-gain0": {
+     "recall": {
+      "FAIR": {
+       "share": 0.876,
+       "ci95": [
+        0.8085,
+        0.9297
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.6757,
+       "ci95": [
+        0.2498,
+        0.8514
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9496,
+       "ci95": [
+        0.9272,
+        0.972
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3548,
+       "ci95": [
+        0.0577,
+        0.5676
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.9018,
+       "ci95": [
+        -3.6164,
+        -2.2402
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1429,
+       "ci95": [
+        -0.4286,
+        0.0476
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8617,
+       "ci95": [
+        0.821,
+        0.895
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4395,
+       "ci95": [
+        0.1999,
+        0.5973
+       ]
+      }
+     }
+    },
+    "edf": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0413,
+       "ci95": [
+        0.0,
+        0.1225
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0676,
+       "ci95": [
+        0.0,
+        0.2034
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.1933,
+       "ci95": [
+        0.1541,
+        0.2381
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0484,
+       "ci95": [
+        -0.0816,
+        0.1791
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.1473,
+       "ci95": [
+        -2.7875,
+        -1.5681
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1429,
+       "ci95": [
+        -0.4286,
+        0.0455
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0775,
+       "ci95": [
+        0.0406,
+        0.1291
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0318,
+       "ci95": [
+        -0.0489,
+        0.1151
+       ]
+      }
+     }
+    },
+    "llf": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0744,
+       "ci95": [
+        0.0172,
+        0.1557
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0676,
+       "ci95": [
+        0.0,
+        0.1967
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.591,
+       "ci95": [
+        0.5406,
+        0.6415
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1613,
+       "ci95": [
+        -0.0877,
+        0.3684
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.1216,
+       "ci95": [
+        -4.9847,
+        -3.2751
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0476,
+       "ci95": [
+        -0.6475,
+        0.3333
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2356,
+       "ci95": [
+        0.1782,
+        0.3115
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0892,
+       "ci95": [
+        -0.0389,
+        0.2087
+       ]
+      }
+     }
+    },
+    "b7-edf-feasibility": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0579,
+       "ci95": [
+        0.0088,
+        0.1271
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0541,
+       "ci95": [
+        0.0,
+        0.1563
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.4874,
+       "ci95": [
+        0.4342,
+        0.5378
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1774,
+       "ci95": [
+        -0.0328,
+        0.3594
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.4915,
+       "ci95": [
+        -3.1506,
+        -1.8974
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1429,
+       "ci95": [
+        -0.6842,
+        0.2
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2029,
+       "ci95": [
+        0.1483,
+        0.2727
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0764,
+       "ci95": [
+        -0.0329,
+        0.1712
+       ]
+      }
+     }
+    },
+    "always-cloud-fcfs": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0248,
+       "ci95": [
+        0.0,
+        0.0896
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0405,
+       "ci95": [
+        0.0,
+        0.1429
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.1513,
+       "ci95": [
+        0.1148,
+        0.1877
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0161,
+       "ci95": [
+        -0.1,
+        0.1217
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.8077,
+       "ci95": [
+        -1.1536,
+        -0.4744
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1429,
+       "ci95": [
+        -0.3686,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0665,
+       "ci95": [
+        0.0377,
+        0.1073
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0064,
+       "ci95": [
+        -0.0588,
+        0.0693
+       ]
+      }
+     }
+    },
+    "mooncake": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0579,
+       "ci95": [
+        0.0088,
+        0.1271
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0541,
+       "ci95": [
+        0.0,
+        0.1563
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.4902,
+       "ci95": [
+        0.4398,
+        0.5406
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1774,
+       "ci95": [
+        -0.0328,
+        0.3594
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.4606,
+       "ci95": [
+        -3.1141,
+        -1.8687
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1429,
+       "ci95": [
+        -0.6842,
+        0.2
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2044,
+       "ci95": [
+        0.1489,
+        0.2758
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0764,
+       "ci95": [
+        -0.0329,
+        0.1712
+       ]
+      }
+     }
+    },
+    "attentionstore-prefetch": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0248,
+       "ci95": [
+        0.0,
+        0.0896
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0405,
+       "ci95": [
+        0.0,
+        0.1429
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.1289,
+       "ci95": [
+        0.0952,
+        0.1625
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0323,
+       "ci95": [
+        -0.1404,
+        0.0635
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.8095,
+       "ci95": [
+        -1.1599,
+        -0.4824
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1429,
+       "ci95": [
+        -0.3686,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0574,
+       "ci95": [
+        0.0296,
+        0.0973
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0127,
+       "ci95": [
+        -0.0763,
+        0.0464
+       ]
+      }
+     }
+    },
+    "lmcache": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0248,
+       "ci95": [
+        0.0,
+        0.0896
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0405,
+       "ci95": [
+        0.0,
+        0.1429
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.1261,
+       "ci95": [
+        0.0924,
+        0.1597
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0161,
+       "ci95": [
+        -0.1186,
+        0.0741
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.8095,
+       "ci95": [
+        -1.1531,
+        -0.4793
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1429,
+       "ci95": [
+        -0.3686,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0562,
+       "ci95": [
+        0.0289,
+        0.0951
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0064,
+       "ci95": [
+        -0.0695,
+        0.0535
+       ]
+      }
+     }
+    },
+    "kvflow-prefetch": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0331,
+       "ci95": [
+        0.0,
+        0.1194
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0541,
+       "ci95": [
+        0.0,
+        0.1905
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.1541,
+       "ci95": [
+        0.1176,
+        0.1905
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0161,
+       "ci95": [
+        -0.1,
+        0.1217
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.8404,
+       "ci95": [
+        -1.1932,
+        -0.5125
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0476,
+       "ci95": [
+        -0.3044,
+        0.1429
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0721,
+       "ci95": [
+        0.0384,
+        0.1209
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0255,
+       "ci95": [
+        -0.0438,
+        0.1006
+       ]
+      }
+     }
+    },
+    "simplestream": {
+     "recall": {
+      "FAIR": {
+       "share": -0.1463,
+       "ci95": [
+        -0.1463,
+        -0.1463
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1216,
+       "ci95": [
+        -0.2038,
+        0.3226
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0555,
+        0.5858
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.3477,
+       "ci95": [
+        -5.284,
+        -3.449
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0476,
+       "ci95": [
+        -0.7333,
+        0.4645
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2712,
+       "ci95": [
+        0.1658,
+        0.4235
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2102,
+       "ci95": [
+        0.0225,
+        0.379
+       ]
+      }
+     }
+    },
+    "streamscout": {
+     "recall": {
+      "FAIR": {
+       "share": -0.1463,
+       "ci95": [
+        -0.1463,
+        -0.1463
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1757,
+       "ci95": [
+        -0.0968,
+        0.3726
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9972,
+       "ci95": [
+        0.9916,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0555,
+        0.5858
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.3514,
+       "ci95": [
+        -5.288,
+        -3.4561
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2381,
+       "ci95": [
+        -0.3501,
+        0.5769
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.27,
+       "ci95": [
+        0.1656,
+        0.4225
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2611,
+       "ci95": [
+        0.0988,
+        0.4182
+       ]
+      }
+     }
+    },
+    "querystream-proactive": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0248,
+       "ci95": [
+        0.0,
+        0.0896
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0405,
+       "ci95": [
+        0.0,
+        0.1429
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.1429,
+       "ci95": [
+        0.1092,
+        0.1793
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0161,
+       "ci95": [
+        -0.1291,
+        0.082
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.8386,
+       "ci95": [
+        -1.1896,
+        -0.5007
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1429,
+       "ci95": [
+        -0.3686,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0627,
+       "ci95": [
+        0.0344,
+        0.1031
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0064,
+       "ci95": [
+        -0.069,
+        0.056
+       ]
+      }
+     }
+    },
+    "eco-llm": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0288,
+       "ci95": [
+        -0.0328,
+        0.1014
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1351,
+       "ci95": [
+        0.0333,
+        0.2728
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.4902,
+       "ci95": [
+        0.4398,
+        0.5406
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1935,
+       "ci95": [
+        0.0,
+        0.3715
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.4223,
+       "ci95": [
+        -3.0671,
+        -1.8372
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1905,
+       "ci95": [
+        -0.7333,
+        0.143
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.188,
+       "ci95": [
+        0.1283,
+        0.2623
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1146,
+       "ci95": [
+        0.0072,
+        0.2174
+       ]
+      }
+     }
+    },
+    "warm-all-lru": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0165,
+       "ci95": [
+        0.0,
+        0.0597
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.027,
+       "ci95": [
+        0.0,
+        0.0952
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.084,
+       "ci95": [
+        0.056,
+        0.1149
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0161,
+       "ci95": [
+        -0.1017,
+        0.0606
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.5345,
+       "ci95": [
+        -0.8235,
+        -0.2688
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0952,
+       "ci95": [
+        -0.2778,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0376,
+       "ci95": [
+        0.0178,
+        0.0643
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0064,
+       "ci95": [
+        -0.0566,
+        0.0402
+       ]
+      }
+     }
+    },
+    "fair-c5attr-rr": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9091,
+       "ci95": [
+        0.8585,
+        0.9479
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.7297,
+       "ci95": [
+        0.294,
+        0.9079
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.986,
+       "ci95": [
+        0.972,
+        0.9972
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3871,
+       "ci95": [
+        0.0816,
+        0.5932
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.1271,
+       "ci95": [
+        -5.0065,
+        -3.2791
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0476,
+       "ci95": [
+        -0.6926,
+        0.3479
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8813,
+       "ci95": [
+        0.847,
+        0.9096
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4904,
+       "ci95": [
+        0.2321,
+        0.6489
+       ]
+      }
+     }
+    },
+    "confidence-cascade": {
+     "recall": {
+      "FAIR": {
+       "share": 0.2149,
+       "ci95": [
+        0.0902,
+        0.3443
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2297,
+       "ci95": [
+        0.0444,
+        0.4134
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.4286,
+       "ci95": [
+        0.3782,
+        0.4818
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1129,
+       "ci95": [
+        -0.127,
+        0.3056
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.4341,
+       "ci95": [
+        -3.0857,
+        -1.8256
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1429,
+       "ci95": [
+        -0.3529,
+        0.4783
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2708,
+       "ci95": [
+        0.195,
+        0.357
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.172,
+       "ci95": [
+        0.0236,
+        0.3
+       ]
+      }
+     }
+    },
+    "fair-final-rung3": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9174,
+       "ci95": [
+        0.8679,
+        0.9543
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.7297,
+       "ci95": [
+        0.294,
+        0.9079
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.986,
+       "ci95": [
+        0.972,
+        0.9972
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3871,
+       "ci95": [
+        0.0816,
+        0.5932
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.1364,
+       "ci95": [
+        -5.0354,
+        -3.2732
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1429,
+       "ci95": [
+        -0.7694,
+        0.25
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.886,
+       "ci95": [
+        0.8509,
+        0.9134
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4777,
+       "ci95": [
+        0.2148,
+        0.6405
+       ]
+      }
+     }
+    }
+   }
+  },
+  "s7": {
+   "s6_outlier_flag": false,
+   "arms": {
+    "base": {
+     "recall": {
+      "FAIR": {
+       "share": 0.181,
+       "ci95": [
+        0.0864,
+        0.2879
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2727,
+       "ci95": [
+        0.1026,
+        0.5834
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9916,
+       "ci95": [
+        0.9805,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0667,
+        0.5915
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.584,
+       "ci95": [
+        -5.5661,
+        -3.6955
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.05,
+       "ci95": [
+        -0.5835,
+        0.4545
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.4807,
+       "ci95": [
+        0.3775,
+        0.603
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.287,
+       "ci95": [
+        0.0925,
+        0.4622
+       ]
+      }
+     }
+    },
+    "rules": {
+     "recall": {
+      "FAIR": {
+       "share": 0.219,
+       "ci95": [
+        0.1272,
+        0.3433
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.303,
+       "ci95": [
+        0.1026,
+        0.625
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.7772,
+       "ci95": [
+        0.7326,
+        0.8189
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1613,
+       "ci95": [
+        -0.1429,
+        0.3824
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -1.721,
+       "ci95": [
+        -2.2594,
+        -1.2387
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1,
+       "ci95": [
+        -0.2859,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.442,
+       "ci95": [
+        0.3494,
+        0.551
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1565,
+       "ci95": [
+        -0.0217,
+        0.3084
+       ]
+      }
+     }
+    },
+    "state-uo": {
+     "recall": {
+      "FAIR": {
+       "share": 0.7905,
+       "ci95": [
+        0.5425,
+        0.9669
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.5758,
+       "ci95": [
+        -0.3752,
+        0.8
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9916,
+       "ci95": [
+        0.9805,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3548,
+       "ci95": [
+        0.0416,
+        0.5758
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.7631,
+       "ci95": [
+        -4.606,
+        -2.9757
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.15,
+       "ci95": [
+        -0.1766,
+        0.4139
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8231,
+       "ci95": [
+        0.663,
+        0.9216
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3826,
+       "ci95": [
+        0.129,
+        0.5526
+       ]
+      }
+     }
+    },
+    "state-uo-c5attr": {
+     "recall": {
+      "FAIR": {
+       "share": 0.7905,
+       "ci95": [
+        0.5425,
+        0.9669
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.5758,
+       "ci95": [
+        -0.3752,
+        0.8
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9777,
+       "ci95": [
+        0.961,
+        0.9916
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3387,
+       "ci95": [
+        0.0217,
+        0.5588
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.6316,
+       "ci95": [
+        -4.4587,
+        -2.8762
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1,
+       "ci95": [
+        -0.2727,
+        0.381
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8185,
+       "ci95": [
+        0.6599,
+        0.9167
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3652,
+       "ci95": [
+        0.1111,
+        0.5411
+       ]
+      }
+     }
+    },
+    "state-shares": {
+     "recall": {
+      "FAIR": {
+       "share": 0.3524,
+       "ci95": [
+        0.1795,
+        0.5114
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4545,
+       "ci95": [
+        0.1111,
+        0.6501
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9805,
+       "ci95": [
+        0.9638,
+        0.9944
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3871,
+       "ci95": [
+        0.0925,
+        0.5921
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.7717,
+       "ci95": [
+        -5.8067,
+        -3.8715
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2,
+       "ci95": [
+        -0.9167,
+        0.231
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.5669,
+       "ci95": [
+        0.4537,
+        0.6798
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3043,
+       "ci95": [
+        0.0889,
+        0.4562
+       ]
+      }
+     }
+    },
+    "state-shares-r1": {
+     "recall": {
+      "FAIR": {
+       "share": 0.7238,
+       "ci95": [
+        0.4598,
+        0.9321
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.5758,
+       "ci95": [
+        -0.3752,
+        0.8
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0612,
+        0.5938
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.8292,
+       "ci95": [
+        -5.8901,
+        -3.9229
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.25,
+       "ci95": [
+        -1.1429,
+        0.2402
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.7772,
+       "ci95": [
+        0.6182,
+        0.889
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3217,
+       "ci95": [
+        0.0374,
+        0.5133
+       ]
+      }
+     }
+    },
+    "state-shares-r2": {
+     "recall": {
+      "FAIR": {
+       "share": 0.7143,
+       "ci95": [
+        0.4545,
+        0.9216
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.5758,
+       "ci95": [
+        -0.3752,
+        0.8
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9944,
+       "ci95": [
+        0.9861,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0689,
+        0.5891
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.8456,
+       "ci95": [
+        -5.8863,
+        -3.9298
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1,
+       "ci95": [
+        -0.9232,
+        0.3636
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.7694,
+       "ci95": [
+        0.6122,
+        0.8808
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3478,
+       "ci95": [
+        0.066,
+        0.5345
+       ]
+      }
+     }
+    },
+    "fair-c5attr": {
+     "recall": {
+      "FAIR": {
+       "share": 0.8,
+       "ci95": [
+        0.5565,
+        0.9746
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.5758,
+       "ci95": [
+        -0.3752,
+        0.8
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9861,
+       "ci95": [
+        0.9721,
+        0.9972
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3548,
+       "ci95": [
+        0.0483,
+        0.5769
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.4841,
+       "ci95": [
+        -5.481,
+        -3.5985
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.15,
+       "ci95": [
+        -0.9232,
+        0.3078
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8169,
+       "ci95": [
+        0.6533,
+        0.9148
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3304,
+       "ci95": [
+        0.0556,
+        0.52
+       ]
+      }
+     }
+    },
+    "fair-c5attr-gain0": {
+     "recall": {
+      "FAIR": {
+       "share": 0.7905,
+       "ci95": [
+        0.5486,
+        0.9661
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.5758,
+       "ci95": [
+        -0.3752,
+        0.8
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9833,
+       "ci95": [
+        0.9694,
+        0.9944
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3387,
+       "ci95": [
+        0.0217,
+        0.5588
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.746,
+       "ci95": [
+        -4.5914,
+        -2.9629
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.4615,
+        0.3126
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8196,
+       "ci95": [
+        0.6588,
+        0.9164
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3478,
+       "ci95": [
+        0.0779,
+        0.5246
+       ]
+      }
+     }
+    },
+    "edf": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0108,
+       "ci95": [
+        0.0,
+        0.0337
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.234,
+       "ci95": [
+        0.1922,
+        0.2786
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0323,
+       "ci95": [
+        -0.1229,
+        0.1667
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.2707,
+       "ci95": [
+        -4.0969,
+        -2.568
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.15,
+       "ci95": [
+        -0.2222,
+        0.4375
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0727,
+       "ci95": [
+        0.0444,
+        0.108
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0435,
+       "ci95": [
+        -0.0575,
+        0.1397
+       ]
+      }
+     }
+    },
+    "llf": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0381,
+       "ci95": [
+        0.0,
+        0.0889
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0606,
+       "ci95": [
+        0.0,
+        0.2727
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.5738,
+       "ci95": [
+        0.5209,
+        0.6267
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0323,
+       "ci95": [
+        -0.1936,
+        0.2223
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.6061,
+       "ci95": [
+        -5.6117,
+        -3.738
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.05,
+       "ci95": [
+        -0.6923,
+        0.4738
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2177,
+       "ci95": [
+        0.1601,
+        0.2939
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0435,
+       "ci95": [
+        -0.1124,
+        0.1818
+       ]
+      }
+     }
+    },
+    "b7-edf-feasibility": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0762,
+       "ci95": [
+        0.0179,
+        0.1457
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0909,
+       "ci95": [
+        0.0,
+        0.2308
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.8607,
+       "ci95": [
+        0.8217,
+        0.8942
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2903,
+       "ci95": [
+        -0.0189,
+        0.5139
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.4215,
+       "ci95": [
+        -5.4354,
+        -3.5567
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.7861,
+        0.4376
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.3677,
+       "ci95": [
+        0.2793,
+        0.487
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1826,
+       "ci95": [
+        -0.0086,
+        0.36
+       ]
+      }
+     }
+    },
+    "always-cloud-fcfs": {
+     "recall": {
+      "FAIR": {
+       "share": -0.0016,
+       "ci95": [
+        -0.006,
+        0.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0947,
+       "ci95": [
+        0.0668,
+        0.1253
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0484,
+       "ci95": [
+        -0.1429,
+        0.0312
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.3735,
+       "ci95": [
+        -0.6264,
+        -0.1457
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.05,
+       "ci95": [
+        -0.1905,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0394,
+       "ci95": [
+        0.0237,
+        0.062
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0348,
+       "ci95": [
+        -0.0938,
+        0.0122
+       ]
+      }
+     }
+    },
+    "mooncake": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0762,
+       "ci95": [
+        0.0202,
+        0.1475
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1212,
+       "ci95": [
+        0.0,
+        0.3636
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.883,
+       "ci95": [
+        0.8468,
+        0.9164
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3065,
+       "ci95": [
+        0.0,
+        0.5238
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.7894,
+       "ci95": [
+        -5.8083,
+        -3.8702
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.05,
+       "ci95": [
+        -0.8186,
+        0.4
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.373,
+       "ci95": [
+        0.2816,
+        0.4945
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1913,
+       "ci95": [
+        -0.0071,
+        0.3689
+       ]
+      }
+     }
+    },
+    "attentionstore-prefetch": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0808,
+       "ci95": [
+        0.0529,
+        0.1114
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0323,
+       "ci95": [
+        -0.1167,
+        0.0417
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.3046,
+       "ci95": [
+        -0.5462,
+        -0.0932
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.05,
+       "ci95": [
+        -0.1905,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0349,
+       "ci95": [
+        0.0199,
+        0.0547
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0261,
+       "ci95": [
+        -0.0824,
+        0.0187
+       ]
+      }
+     }
+    },
+    "lmcache": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0919,
+       "ci95": [
+        0.0641,
+        0.1253
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0484,
+       "ci95": [
+        -0.1404,
+        0.0308
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.3103,
+       "ci95": [
+        -0.554,
+        -0.1052
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.05,
+       "ci95": [
+        -0.1905,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0406,
+       "ci95": [
+        0.0239,
+        0.0638
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0348,
+       "ci95": [
+        -0.093,
+        0.0102
+       ]
+      }
+     }
+    },
+    "kvflow-prefetch": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0975,
+       "ci95": [
+        0.0669,
+        0.1309
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0323,
+       "ci95": [
+        -0.1321,
+        0.0476
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.3103,
+       "ci95": [
+        -0.556,
+        -0.0928
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.05,
+       "ci95": [
+        -0.1875,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0431,
+       "ci95": [
+        0.0265,
+        0.0669
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0261,
+       "ci95": [
+        -0.086,
+        0.0242
+       ]
+      }
+     }
+    },
+    "simplestream": {
+     "recall": {
+      "FAIR": {
+       "share": -0.1463,
+       "ci95": [
+        -0.1463,
+        -0.1463
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2121,
+       "ci95": [
+        -2.4167,
+        0.4615
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0612,
+        0.5938
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.912,
+       "ci95": [
+        -5.9867,
+        -4.0058
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.05,
+       "ci95": [
+        -0.8182,
+        0.5
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.302,
+       "ci95": [
+        0.1878,
+        0.4646
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1478,
+       "ci95": [
+        -0.1881,
+        0.3967
+       ]
+      }
+     }
+    },
+    "streamscout": {
+     "recall": {
+      "FAIR": {
+       "share": -0.1212,
+       "ci95": [
+        -0.1463,
+        -0.0856
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0303,
+       "ci95": [
+        -1.9304,
+        0.7143
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0612,
+        0.5938
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.912,
+       "ci95": [
+        -5.9867,
+        -4.0058
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1,
+       "ci95": [
+        -0.6,
+        0.5
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.3157,
+       "ci95": [
+        0.206,
+        0.4762
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2087,
+       "ci95": [
+        -0.1111,
+        0.4537
+       ]
+      }
+     }
+    },
+    "querystream-proactive": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.0947,
+       "ci95": [
+        0.0669,
+        0.1253
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0323,
+       "ci95": [
+        -0.1273,
+        0.0508
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.3084,
+       "ci95": [
+        -0.5515,
+        -0.0952
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.05,
+       "ci95": [
+        -0.1905,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0415,
+       "ci95": [
+        0.025,
+        0.0645
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0261,
+       "ci95": [
+        -0.0857,
+        0.0258
+       ]
+      }
+     }
+    },
+    "eco-llm": {
+     "recall": {
+      "FAIR": {
+       "share": -0.0132,
+       "ci95": [
+        -0.0894,
+        0.0812
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0303,
+       "ci95": [
+        -1.0835,
+        0.5386
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.8858,
+       "ci95": [
+        0.8496,
+        0.9192
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2903,
+       "ci95": [
+        -0.0189,
+        0.5139
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.7357,
+       "ci95": [
+        -5.7736,
+        -3.8238
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.05,
+       "ci95": [
+        -0.6843,
+        0.4668
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.3262,
+       "ci95": [
+        0.2197,
+        0.4664
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1739,
+       "ci95": [
+        -0.0686,
+        0.379
+       ]
+      }
+     }
+    },
+    "warm-all-lru": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0108,
+       "ci95": [
+        0.0,
+        0.04
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.078,
+       "ci95": [
+        0.0529,
+        0.1086
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.082,
+        0.0746
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -0.3198,
+       "ci95": [
+        -0.5681,
+        -0.1031
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.0381,
+       "ci95": [
+        0.0208,
+        0.0608
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.0455,
+        0.0424
+       ]
+      }
+     }
+    },
+    "fair-c5attr-rr": {
+     "recall": {
+      "FAIR": {
+       "share": 0.8,
+       "ci95": [
+        0.5565,
+        0.9746
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.5758,
+       "ci95": [
+        -0.3752,
+        0.8
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0612,
+        0.5938
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.7495,
+       "ci95": [
+        -5.8016,
+        -3.8525
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1,
+       "ci95": [
+        -1.0,
+        0.381
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8197,
+       "ci95": [
+        0.6588,
+        0.917
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3478,
+       "ci95": [
+        0.0652,
+        0.5315
+       ]
+      }
+     }
+    },
+    "confidence-cascade": {
+     "recall": {
+      "FAIR": {
+       "share": 0.219,
+       "ci95": [
+        0.0756,
+        0.4015
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3333,
+       "ci95": [
+        -0.1429,
+        0.5541
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.4596,
+       "ci95": [
+        0.4094,
+        0.5097
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1129,
+       "ci95": [
+        -0.129,
+        0.3108
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.8112,
+       "ci95": [
+        -3.5575,
+        -2.1494
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.05,
+       "ci95": [
+        -0.6364,
+        0.45
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.288,
+       "ci95": [
+        0.1996,
+        0.3904
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1652,
+       "ci95": [
+        -0.0345,
+        0.3223
+       ]
+      }
+     }
+    },
+    "fair-final-rung3": {
+     "recall": {
+      "FAIR": {
+       "share": 0.8,
+       "ci95": [
+        0.5565,
+        0.9746
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.5758,
+       "ci95": [
+        -0.3752,
+        0.8
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0612,
+        0.5938
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.8425,
+       "ci95": [
+        -5.9194,
+        -3.9124
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2,
+       "ci95": [
+        -1.0667,
+        0.2727
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8186,
+       "ci95": [
+        0.6556,
+        0.9163
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3304,
+       "ci95": [
+        0.0506,
+        0.5215
+       ]
+      }
+     }
+    }
+   }
+  },
+  "pooled_over_seeds": {
+   "base": {
+    "recall": {
+     "FAIR": {
+      "share": 0.2515,
+      "ci95": [
+       0.1788,
+       0.3267
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.2475,
+      "ci95": [
+       0.1172,
+       0.3532
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9776,
+      "ci95": [
+       0.9691,
+       0.9847
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3659,
+      "ci95": [
+       0.0803,
+       0.5731
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -4.0031,
+      "ci95": [
+       -4.4497,
+       -3.5608
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0641,
+      "ci95": [
+       -0.3433,
+       0.1563
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.4978,
+      "ci95": [
+       0.4417,
+       0.5623
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.2567,
+      "ci95": [
+       0.1071,
+       0.3746
+      ]
+     }
+    }
+   },
+   "rules": {
+    "recall": {
+     "FAIR": {
+      "share": 0.268,
+      "ci95": [
+       0.1939,
+       0.3376
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.203,
+      "ci95": [
+       0.073,
+       0.3047
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.7621,
+      "ci95": [
+       0.7367,
+       0.7867
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.2358,
+      "ci95": [
+       -0.0046,
+       0.4156
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -1.6385,
+      "ci95": [
+       -1.9016,
+       -1.3867
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0,
+      "ci95": [
+       -0.0959,
+       0.0833
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.4471,
+      "ci95": [
+       0.3989,
+       0.5035
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1882,
+      "ci95": [
+       0.0647,
+       0.2816
+      ]
+     }
+    }
+   },
+   "state-uo": {
+    "recall": {
+     "FAIR": {
+      "share": 0.8722,
+      "ci95": [
+       0.7965,
+       0.9263
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.5941,
+      "ci95": [
+       0.2586,
+       0.7703
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9783,
+      "ci95": [
+       0.9707,
+       0.9853
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3496,
+      "ci95": [
+       0.0678,
+       0.5589
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -3.1875,
+      "ci95": [
+       -3.5583,
+       -2.821
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0513,
+      "ci95": [
+       -0.2174,
+       0.0882
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.8684,
+      "ci95": [
+       0.8253,
+       0.9008
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.384,
+      "ci95": [
+       0.1852,
+       0.5182
+      ]
+     }
+    }
+   },
+   "state-uo-c5attr": {
+    "recall": {
+     "FAIR": {
+      "share": 0.866,
+      "ci95": [
+       0.79,
+       0.9209
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.5644,
+      "ci95": [
+       0.2174,
+       0.7417
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9594,
+      "ci95": [
+       0.9498,
+       0.9686
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3374,
+      "ci95": [
+       0.0596,
+       0.5457
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -3.3124,
+      "ci95": [
+       -3.6953,
+       -2.9223
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0128,
+      "ci95": [
+       -0.2055,
+       0.1463
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.8557,
+      "ci95": [
+       0.814,
+       0.8896
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3726,
+      "ci95": [
+       0.1706,
+       0.5078
+      ]
+     }
+    }
+   },
+   "state-shares": {
+    "recall": {
+     "FAIR": {
+      "share": 0.4866,
+      "ci95": [
+       0.392,
+       0.5743
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.4109,
+      "ci95": [
+       0.2342,
+       0.5325
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9727,
+      "ci95": [
+       0.9641,
+       0.9812
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3659,
+      "ci95": [
+       0.0904,
+       0.572
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -4.4657,
+      "ci95": [
+       -4.9466,
+       -3.9902
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1026,
+      "ci95": [
+       -0.4225,
+       0.1354
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.6272,
+      "ci95": [
+       0.5708,
+       0.6872
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3137,
+      "ci95": [
+       0.1521,
+       0.4282
+      ]
+     }
+    }
+   },
+   "state-shares-r1": {
+    "recall": {
+     "FAIR": {
+      "share": 0.7753,
+      "ci95": [
+       0.6741,
+       0.8582
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.5099,
+      "ci95": [
+       0.1488,
+       0.7037
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9916,
+      "ci95": [
+       0.9867,
+       0.9958
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3618,
+      "ci95": [
+       0.0752,
+       0.5753
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -4.4145,
+      "ci95": [
+       -4.8955,
+       -3.9429
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1282,
+      "ci95": [
+       -0.4688,
+       0.1279
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.8033,
+      "ci95": [
+       0.7471,
+       0.8519
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.346,
+      "ci95": [
+       0.138,
+       0.4829
+      ]
+     }
+    }
+   },
+   "state-shares-r2": {
+    "recall": {
+     "FAIR": {
+      "share": 0.7402,
+      "ci95": [
+       0.6324,
+       0.83
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.4554,
+      "ci95": [
+       0.0948,
+       0.6505
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9853,
+      "ci95": [
+       0.979,
+       0.9909
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3537,
+      "ci95": [
+       0.0722,
+       0.5654
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -4.4452,
+      "ci95": [
+       -4.9322,
+       -3.9737
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1538,
+      "ci95": [
+       -0.5075,
+       0.101
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.78,
+      "ci95": [
+       0.7209,
+       0.8362
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3175,
+      "ci95": [
+       0.1105,
+       0.4534
+      ]
+     }
+    }
+   },
+   "fair-c5attr": {
+    "recall": {
+     "FAIR": {
+      "share": 0.8845,
+      "ci95": [
+       0.8092,
+       0.9355
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.604,
+      "ci95": [
+       0.2756,
+       0.7713
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.965,
+      "ci95": [
+       0.9552,
+       0.9748
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3415,
+      "ci95": [
+       0.0611,
+       0.5469
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -4.1034,
+      "ci95": [
+       -4.5642,
+       -3.6513
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.2436,
+      "ci95": [
+       -0.5304,
+       -0.0105
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.8596,
+      "ci95": [
+       0.817,
+       0.8916
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3555,
+      "ci95": [
+       0.149,
+       0.4923
+      ]
+     }
+    }
+   },
+   "fair-c5attr-gain0": {
+    "recall": {
+     "FAIR": {
+      "share": 0.8701,
+      "ci95": [
+       0.7932,
+       0.9234
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.5792,
+      "ci95": [
+       0.2478,
+       0.7556
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9671,
+      "ci95": [
+       0.958,
+       0.9761
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3415,
+      "ci95": [
+       0.0613,
+       0.5514
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -3.2254,
+      "ci95": [
+       -3.593,
+       -2.8297
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0385,
+      "ci95": [
+       -0.2174,
+       0.116
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.8622,
+      "ci95": [
+       0.8199,
+       0.8947
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3764,
+      "ci95": [
+       0.1794,
+       0.51
+      ]
+     }
+    }
+   },
+   "edf": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0317,
+      "ci95": [
+       0.0108,
+       0.057
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0297,
+      "ci95": [
+       -0.0097,
+       0.0847
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.1959,
+      "ci95": [
+       0.1712,
+       0.2209
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0203,
+      "ci95": [
+       -0.0692,
+       0.0978
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -2.6805,
+      "ci95": [
+       -3.0439,
+       -2.3258
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0513,
+      "ci95": [
+       -0.2456,
+       0.1072
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0677,
+      "ci95": [
+       0.0506,
+       0.0883
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0133,
+      "ci95": [
+       -0.039,
+       0.0616
+      ]
+     }
+    }
+   },
+   "llf": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0515,
+      "ci95": [
+       0.0257,
+       0.0797
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0495,
+      "ci95": [
+       0.0119,
+       0.0951
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.5423,
+      "ci95": [
+       0.516,
+       0.5682
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1341,
+      "ci95": [
+       -0.0371,
+       0.2718
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -4.3396,
+      "ci95": [
+       -4.805,
+       -3.8699
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1282,
+      "ci95": [
+       -0.4329,
+       0.1171
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.2005,
+      "ci95": [
+       0.1667,
+       0.2401
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0627,
+      "ci95": [
+       -0.0343,
+       0.1426
+      ]
+     }
+    }
+   },
+   "b7-edf-feasibility": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0515,
+      "ci95": [
+       0.0206,
+       0.0902
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0396,
+      "ci95": [
+       0.0129,
+       0.0714
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.3849,
+      "ci95": [
+       0.3622,
+       0.4081
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1098,
+      "ci95": [
+       -0.0194,
+       0.2148
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -2.0208,
+      "ci95": [
+       -2.318,
+       -1.7284
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0128,
+      "ci95": [
+       -0.1791,
+       0.1829
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.1632,
+      "ci95": [
+       0.136,
+       0.1954
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0684,
+      "ci95": [
+       0.0,
+       0.1291
+      ]
+     }
+    }
+   },
+   "always-cloud-fcfs": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0294,
+      "ci95": [
+       0.0064,
+       0.0593
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0248,
+      "ci95": [
+       0.0,
+       0.0591
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.1085,
+      "ci95": [
+       0.082,
+       0.1372
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0122,
+      "ci95": [
+       -0.1,
+       0.0672
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.5868,
+      "ci95": [
+       -0.7427,
+       -0.4425
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0,
+      "ci95": [
+       -0.0864,
+       0.0779
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0549,
+      "ci95": [
+       0.0363,
+       0.0751
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0038,
+      "ci95": [
+       -0.04,
+       0.0434
+      ]
+     }
+    }
+   },
+   "mooncake": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0515,
+      "ci95": [
+       0.0211,
+       0.0897
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0446,
+      "ci95": [
+       0.0146,
+       0.0803
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.3912,
+      "ci95": [
+       0.3683,
+       0.4149
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.122,
+      "ci95": [
+       -0.0123,
+       0.2292
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -2.0953,
+      "ci95": [
+       -2.3981,
+       -1.7968
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0,
+      "ci95": [
+       -0.197,
+       0.1688
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.1649,
+      "ci95": [
+       0.1374,
+       0.1986
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0741,
+      "ci95": [
+       0.0063,
+       0.1339
+      ]
+     }
+    }
+   },
+   "attentionstore-prefetch": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0277,
+      "ci95": [
+       0.0047,
+       0.0577
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0248,
+      "ci95": [
+       0.0,
+       0.0591
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.0847,
+      "ci95": [
+       0.0624,
+       0.1093
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0366,
+      "ci95": [
+       -0.1096,
+       0.0252
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.5624,
+      "ci95": [
+       -0.7111,
+       -0.4237
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0128,
+      "ci95": [
+       -0.0968,
+       0.0625
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0444,
+      "ci95": [
+       0.0276,
+       0.0635
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0095,
+      "ci95": [
+       -0.0488,
+       0.0232
+      ]
+     }
+    }
+   },
+   "lmcache": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0214,
+      "ci95": [
+       0.0,
+       0.0507
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0149,
+      "ci95": [
+       0.0,
+       0.0502
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.0875,
+      "ci95": [
+       0.0637,
+       0.1137
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0366,
+      "ci95": [
+       -0.1116,
+       0.0248
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.5725,
+      "ci95": [
+       -0.7183,
+       -0.428
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0128,
+      "ci95": [
+       -0.0984,
+       0.0641
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0419,
+      "ci95": [
+       0.0252,
+       0.0617
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0133,
+      "ci95": [
+       -0.0515,
+       0.0202
+      ]
+     }
+    }
+   },
+   "kvflow-prefetch": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0342,
+      "ci95": [
+       0.0074,
+       0.0706
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0297,
+      "ci95": [
+       0.0,
+       0.0773
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.1057,
+      "ci95": [
+       0.0792,
+       0.1345
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0122,
+      "ci95": [
+       -0.1018,
+       0.0659
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.5702,
+      "ci95": [
+       -0.7199,
+       -0.4259
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0,
+      "ci95": [
+       -0.0845,
+       0.0789
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0568,
+      "ci95": [
+       0.0368,
+       0.0811
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0057,
+      "ci95": [
+       -0.0388,
+       0.0464
+      ]
+     }
+    }
+   },
+   "simplestream": {
+    "recall": {
+     "FAIR": {
+      "share": -0.146,
+      "ci95": [
+       -0.1463,
+       -0.1452
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1188,
+      "ci95": [
+       -0.691,
+       0.2028
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9993,
+      "ci95": [
+       0.9979,
+       1.0
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3659,
+      "ci95": [
+       0.0755,
+       0.5828
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -4.6681,
+      "ci95": [
+       -5.1689,
+       -4.175
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0897,
+      "ci95": [
+       -0.4603,
+       0.1721
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.2678,
+      "ci95": [
+       0.1915,
+       0.3662
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1122,
+      "ci95": [
+       -0.1274,
+       0.2918
+      ]
+     }
+    }
+   },
+   "streamscout": {
+    "recall": {
+     "FAIR": {
+      "share": -0.1406,
+      "ci95": [
+       -0.146,
+       -0.1299
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0941,
+      "ci95": [
+       -0.6669,
+       0.2173
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9993,
+      "ci95": [
+       0.9979,
+       1.0
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3659,
+      "ci95": [
+       0.0755,
+       0.5828
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -4.6728,
+      "ci95": [
+       -5.1753,
+       -4.1792
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0385,
+      "ci95": [
+       -0.3729,
+       0.2001
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.2709,
+      "ci95": [
+       0.1952,
+       0.3679
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1293,
+      "ci95": [
+       -0.1044,
+       0.3059
+      ]
+     }
+    }
+   },
+   "querystream-proactive": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0235,
+      "ci95": [
+       0.0022,
+       0.0535
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0149,
+      "ci95": [
+       0.0,
+       0.0474
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.098,
+      "ci95": [
+       0.073,
+       0.1252
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0285,
+      "ci95": [
+       -0.1065,
+       0.0379
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.5588,
+      "ci95": [
+       -0.7082,
+       -0.4185
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0128,
+      "ci95": [
+       -0.0968,
+       0.0625
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.0475,
+      "ci95": [
+       0.03,
+       0.0673
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0095,
+      "ci95": [
+       -0.0518,
+       0.0235
+      ]
+     }
+    }
+   },
+   "eco-llm": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0198,
+      "ci95": [
+       -0.0235,
+       0.0646
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0688,
+      "ci95": [
+       -0.0535,
+       0.1685
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.4911,
+      "ci95": [
+       0.4669,
+       0.5154
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1622,
+      "ci95": [
+       0.006,
+       0.2885
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -1.953,
+      "ci95": [
+       -2.2431,
+       -1.6807
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0128,
+      "ci95": [
+       -0.2064,
+       0.1464
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.1822,
+      "ci95": [
+       0.1424,
+       0.2283
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0946,
+      "ci95": [
+       0.0054,
+       0.1714
+      ]
+     }
+    }
+   },
+   "warm-all-lru": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0211,
+      "ci95": [
+       0.0021,
+       0.0507
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0149,
+      "ci95": [
+       0.0,
+       0.038
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.0728,
+      "ci95": [
+       0.0498,
+       0.098
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0163,
+      "ci95": [
+       -0.0846,
+       0.0455
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -0.4451,
+      "ci95": [
+       -0.5723,
+       -0.3238
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0128,
+      "ci95": [
+       -0.0548,
+       0.079
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.037,
+      "ci95": [
+       0.0213,
+       0.0557
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0,
+      "ci95": [
+       -0.0346,
+       0.0333
+      ]
+     }
+    }
+   },
+   "fair-c5attr-rr": {
+    "recall": {
+     "FAIR": {
+      "share": 0.9093,
+      "ci95": [
+       0.8314,
+       0.9591
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.6238,
+      "ci95": [
+       0.2804,
+       0.8053
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9902,
+      "ci95": [
+       0.9852,
+       0.9951
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3577,
+      "ci95": [
+       0.0708,
+       0.5719
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -4.4394,
+      "ci95": [
+       -4.9239,
+       -3.966
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.2436,
+      "ci95": [
+       -0.613,
+       0.0241
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.8804,
+      "ci95": [
+       0.8367,
+       0.9119
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3707,
+      "ci95": [
+       0.1495,
+       0.5112
+      ]
+     }
+    }
+   },
+   "confidence-cascade": {
+    "recall": {
+     "FAIR": {
+      "share": 0.1773,
+      "ci95": [
+       0.0962,
+       0.2702
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.198,
+      "ci95": [
+       0.015,
+       0.348
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.4514,
+      "ci95": [
+       0.4032,
+       0.501
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.126,
+      "ci95": [
+       -0.1079,
+       0.3245
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -2.7397,
+      "ci95": [
+       -3.097,
+       -2.3988
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0128,
+      "ci95": [
+       -0.2817,
+       0.234
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.2551,
+      "ci95": [
+       0.2033,
+       0.3208
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1369,
+      "ci95": [
+       -0.0041,
+       0.2483
+      ]
+     }
+    }
+   },
+   "fair-final-rung3": {
+    "recall": {
+     "FAIR": {
+      "share": 0.9113,
+      "ci95": [
+       0.8333,
+       0.9609
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.6188,
+      "ci95": [
+       0.2677,
+       0.8008
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9902,
+      "ci95": [
+       0.9853,
+       0.9951
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3577,
+      "ci95": [
+       0.0707,
+       0.5699
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -4.505,
+      "ci95": [
+       -4.9982,
+       -4.0342
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.2436,
+      "ci95": [
+       -0.5863,
+       0.0125
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.8808,
+      "ci95": [
+       0.8363,
+       0.9127
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3688,
+      "ci95": [
+       0.1467,
+       0.5115
+      ]
+     }
+    }
+   }
+  }
+ },
+ "kv0.5r": {
+  "s4": {
+   "s6_outlier_flag": false,
+   "arms": {
+    "llf": {
+     "recall": {
+      "FAIR": {
+       "share": 0.053,
+       "ci95": [
+        0.0,
+        0.1164
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0189,
+       "ci95": [
+        0.0,
+        0.0556
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.4762,
+       "ci95": [
+        0.4258,
+        0.5294
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1967,
+       "ci95": [
+        -0.0004,
+        0.3704
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.3762,
+       "ci95": [
+        -4.2144,
+        -2.6793
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.5333,
+       "ci95": [
+        -1.8576,
+        0.091
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.1784,
+       "ci95": [
+        0.1313,
+        0.2398
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0388,
+       "ci95": [
+        -0.0918,
+        0.1677
+       ]
+      }
+     }
+    },
+    "mooncake": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0833,
+       "ci95": [
+        0.037,
+        0.1377
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0377,
+       "ci95": [
+        0.0,
+        0.0909
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.6387,
+       "ci95": [
+        0.5882,
+        0.6863
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2787,
+       "ci95": [
+        0.0192,
+        0.4861
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.055,
+       "ci95": [
+        -3.7776,
+        -2.3832
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2,
+       "ci95": [
+        -1.3333,
+        0.3333
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2631,
+       "ci95": [
+        0.21,
+        0.3432
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.124,
+       "ci95": [
+        -0.0233,
+        0.2647
+       ]
+      }
+     }
+    },
+    "simplestream": {
+     "recall": {
+      "FAIR": {
+       "share": -0.1463,
+       "ci95": [
+        -0.1463,
+        -0.1463
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.4906,
+       "ci95": [
+        -2.4086,
+        0.2334
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9972,
+       "ci95": [
+        0.9916,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3607,
+       "ci95": [
+        0.0612,
+        0.5782
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.3088,
+       "ci95": [
+        -5.284,
+        -3.4866
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.6,
+       "ci95": [
+        -2.3344,
+        0.1365
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2495,
+       "ci95": [
+        0.145,
+        0.4025
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1008,
+       "ci95": [
+        -0.593,
+        0.2421
+       ]
+      }
+     }
+    },
+    "eco-llm": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0159,
+       "ci95": [
+        -0.0428,
+        0.0985
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2264,
+       "ci95": [
+        -0.9698,
+        0.0725
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.5994,
+       "ci95": [
+        0.5518,
+        0.6499
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2459,
+       "ci95": [
+        0.0,
+        0.4483
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.9779,
+       "ci95": [
+        -3.7157,
+        -2.3175
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2667,
+       "ci95": [
+        -1.2006,
+        0.2309
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2082,
+       "ci95": [
+        0.1455,
+        0.296
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0078,
+       "ci95": [
+        -0.25,
+        0.1799
+       ]
+      }
+     }
+    },
+    "confidence-cascade": {
+     "recall": {
+      "FAIR": {
+       "share": 0.1742,
+       "ci95": [
+        0.0542,
+        0.3217
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.283,
+       "ci95": [
+        -0.0477,
+        0.5278
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.451,
+       "ci95": [
+        0.3978,
+        0.5014
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0984,
+       "ci95": [
+        -0.1522,
+        0.3043
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.5696,
+       "ci95": [
+        -3.2717,
+        -1.9721
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.4667,
+       "ci95": [
+        -1.8889,
+        0.1787
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2507,
+       "ci95": [
+        0.1681,
+        0.346
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1085,
+       "ci95": [
+        -0.1048,
+        0.2836
+       ]
+      }
+     }
+    },
+    "fair-final-rung3": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9167,
+       "ci95": [
+        0.8774,
+        0.9531
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.6226,
+       "ci95": [
+        0.0585,
+        0.8533
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9356,
+       "ci95": [
+        0.9104,
+        0.958
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2787,
+       "ci95": [
+        -0.0211,
+        0.5002
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.4484,
+       "ci95": [
+        -4.279,
+        -2.7336
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.4667,
+       "ci95": [
+        -1.8,
+        0.1429
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8753,
+       "ci95": [
+        0.8423,
+        0.9005
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3333,
+       "ci95": [
+        0.0322,
+        0.5294
+       ]
+      }
+     }
+    }
+   }
+  },
+  "s5": {
+   "s6_outlier_flag": false,
+   "arms": {
+    "llf": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0394,
+       "ci95": [
+        0.0,
+        0.0974
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.5253,
+       "ci95": [
+        0.4719,
+        0.5758
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1148,
+       "ci95": [
+        -0.1305,
+        0.3226
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.7785,
+       "ci95": [
+        -5.801,
+        -3.8781
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0455,
+       "ci95": [
+        -0.6876,
+        0.3448
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.1782,
+       "ci95": [
+        0.1299,
+        0.2376
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.048,
+       "ci95": [
+        -0.1031,
+        0.1855
+       ]
+      }
+     }
+    },
+    "mooncake": {
+     "recall": {
+      "FAIR": {
+       "share": 0.1102,
+       "ci95": [
+        0.05,
+        0.1885
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0714,
+       "ci95": [
+        -0.1111,
+        0.2334
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.7865,
+       "ci95": [
+        0.7416,
+        0.8258
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2951,
+       "ci95": [
+        0.0189,
+        0.5135
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.4531,
+       "ci95": [
+        -5.4246,
+        -3.5961
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0455,
+       "ci95": [
+        -0.5333,
+        0.4091
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.3271,
+       "ci95": [
+        0.2614,
+        0.415
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.176,
+       "ci95": [
+        0.0163,
+        0.3125
+       ]
+      }
+     }
+    },
+    "simplestream": {
+     "recall": {
+      "FAIR": {
+       "share": -0.1452,
+       "ci95": [
+        -0.1463,
+        -0.1422
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0476,
+       "ci95": [
+        -0.6297,
+        0.4082
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3607,
+       "ci95": [
+        0.0625,
+        0.5873
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -5.1262,
+       "ci95": [
+        -6.1763,
+        -4.1248
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1818,
+       "ci95": [
+        -1.0,
+        0.2778
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2525,
+       "ci95": [
+        0.1609,
+        0.3875
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.16,
+       "ci95": [
+        -0.0971,
+        0.3582
+       ]
+      }
+     }
+    },
+    "eco-llm": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0317,
+       "ci95": [
+        -0.0424,
+        0.1234
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0714,
+       "ci95": [
+        -0.6154,
+        0.3834
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.7556,
+       "ci95": [
+        0.7107,
+        0.7978
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2459,
+       "ci95": [
+        -0.0196,
+        0.4688
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.2362,
+       "ci95": [
+        -5.1762,
+        -3.408
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.6003,
+        0.3572
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2707,
+       "ci95": [
+        0.1949,
+        0.3697
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.144,
+       "ci95": [
+        -0.0857,
+        0.322
+       ]
+      }
+     }
+    },
+    "confidence-cascade": {
+     "recall": {
+      "FAIR": {
+       "share": 0.1102,
+       "ci95": [
+        0.0171,
+        0.2377
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0476,
+       "ci95": [
+        -0.3125,
+        0.1111
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.4635,
+       "ci95": [
+        0.4101,
+        0.514
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1475,
+       "ci95": [
+        -0.1132,
+        0.3492
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.0634,
+       "ci95": [
+        -3.8588,
+        -2.3721
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1818,
+       "ci95": [
+        -0.3333,
+        0.52
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2148,
+       "ci95": [
+        0.1464,
+        0.3056
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.088,
+       "ci95": [
+        -0.068,
+        0.232
+       ]
+      }
+     }
+    },
+    "fair-final-rung3": {
+     "recall": {
+      "FAIR": {
+       "share": 0.9606,
+       "ci95": [
+        0.914,
+        0.9931
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.381,
+       "ci95": [
+        -0.6877,
+        0.8027
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9494,
+       "ci95": [
+        0.927,
+        0.9719
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2131,
+       "ci95": [
+        -0.1088,
+        0.4488
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.2635,
+       "ci95": [
+        -5.1781,
+        -3.419
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0455,
+       "ci95": [
+        -0.5,
+        0.3913
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8984,
+       "ci95": [
+        0.8576,
+        0.9264
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.24,
+       "ci95": [
+        -0.0678,
+        0.4589
+       ]
+      }
+     }
+    }
+   }
+  },
+  "s6": {
+   "s6_outlier_flag": true,
+   "arms": {
+    "llf": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0661,
+       "ci95": [
+        0.0107,
+        0.1293
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0811,
+       "ci95": [
+        0.0,
+        0.1731
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.5266,
+       "ci95": [
+        0.4706,
+        0.577
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1129,
+       "ci95": [
+        -0.12,
+        0.3108
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.0956,
+       "ci95": [
+        -4.9732,
+        -3.2409
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0476,
+       "ci95": [
+        -0.4615,
+        0.375
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2048,
+       "ci95": [
+        0.1562,
+        0.27
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0892,
+       "ci95": [
+        -0.0276,
+        0.1926
+       ]
+      }
+     }
+    },
+    "mooncake": {
+     "recall": {
+      "FAIR": {
+       "share": 0.124,
+       "ci95": [
+        0.037,
+        0.2202
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0811,
+       "ci95": [
+        0.0,
+        0.1935
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.7283,
+       "ci95": [
+        0.6835,
+        0.7759
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3226,
+       "ci95": [
+        0.0517,
+        0.5206
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.4469,
+       "ci95": [
+        -4.253,
+        -2.7094
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0952,
+       "ci95": [
+        -0.6667,
+        0.2692
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.3282,
+       "ci95": [
+        0.2544,
+        0.4203
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1529,
+       "ci95": [
+        0.0256,
+        0.275
+       ]
+      }
+     }
+    },
+    "simplestream": {
+     "recall": {
+      "FAIR": {
+       "share": -0.1463,
+       "ci95": [
+        -0.1463,
+        -0.1463
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1216,
+       "ci95": [
+        -0.2038,
+        0.3226
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0555,
+        0.5858
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.3477,
+       "ci95": [
+        -5.284,
+        -3.449
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.8,
+        0.4286
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2712,
+       "ci95": [
+        0.1658,
+        0.4235
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2038,
+       "ci95": [
+        0.0163,
+        0.3691
+       ]
+      }
+     }
+    },
+    "eco-llm": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0921,
+       "ci95": [
+        -0.0217,
+        0.2156
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1486,
+       "ci95": [
+        -0.0477,
+        0.3031
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.7311,
+       "ci95": [
+        0.689,
+        0.7787
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3387,
+       "ci95": [
+        0.0677,
+        0.5417
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.5229,
+       "ci95": [
+        -4.3364,
+        -2.773
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0476,
+       "ci95": [
+        -0.6154,
+        0.3228
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.3099,
+       "ci95": [
+        0.2276,
+        0.4173
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1975,
+       "ci95": [
+        0.0486,
+        0.33
+       ]
+      }
+     }
+    },
+    "confidence-cascade": {
+     "recall": {
+      "FAIR": {
+       "share": 0.2562,
+       "ci95": [
+        0.1065,
+        0.4127
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2432,
+       "ci95": [
+        0.0444,
+        0.4432
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.4314,
+       "ci95": [
+        0.3838,
+        0.4846
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.129,
+       "ci95": [
+        -0.1112,
+        0.3143
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.4724,
+       "ci95": [
+        -3.1127,
+        -1.8617
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0476,
+       "ci95": [
+        -0.5,
+        0.4
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2955,
+       "ci95": [
+        0.2084,
+        0.3911
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.172,
+       "ci95": [
+        0.0148,
+        0.306
+       ]
+      }
+     }
+    },
+    "fair-final-rung3": {
+     "recall": {
+      "FAIR": {
+       "share": 0.8926,
+       "ci95": [
+        0.8317,
+        0.9398
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.7027,
+       "ci95": [
+        0.2701,
+        0.8831
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.972,
+       "ci95": [
+        0.9552,
+        0.9888
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4032,
+       "ci95": [
+        0.1,
+        0.612
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -3.7323,
+       "ci95": [
+        -4.5789,
+        -2.9545
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.5294,
+        0.3478
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8707,
+       "ci95": [
+        0.8331,
+        0.9029
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4904,
+       "ci95": [
+        0.2408,
+        0.645
+       ]
+      }
+     }
+    }
+   }
+  },
+  "s7": {
+   "s6_outlier_flag": false,
+   "arms": {
+    "llf": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0095,
+       "ci95": [
+        0.0,
+        0.0325
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0323,
+       "ci95": [
+        0.0,
+        0.1364
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.5989,
+       "ci95": [
+        0.546,
+        0.649
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1935,
+       "ci95": [
+        -0.0436,
+        0.3819
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.6352,
+       "ci95": [
+        -5.6428,
+        -3.7542
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.15,
+       "ci95": [
+        -1.0,
+        0.3043
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2128,
+       "ci95": [
+        0.1548,
+        0.2902
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0885,
+       "ci95": [
+        -0.0753,
+        0.2323
+       ]
+      }
+     }
+    },
+    "mooncake": {
+     "recall": {
+      "FAIR": {
+       "share": 0.0667,
+       "ci95": [
+        0.0208,
+        0.1149
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0323,
+       "ci95": [
+        0.0,
+        0.1482
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.8774,
+       "ci95": [
+        0.8412,
+        0.9109
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2258,
+       "ci95": [
+        -0.0926,
+        0.4615
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.6522,
+       "ci95": [
+        -5.6871,
+        -3.7518
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.15,
+       "ci95": [
+        -0.9231,
+        0.3104
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.367,
+       "ci95": [
+        0.2808,
+        0.4828
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1062,
+       "ci95": [
+        -0.098,
+        0.2816
+       ]
+      }
+     }
+    },
+    "simplestream": {
+     "recall": {
+      "FAIR": {
+       "share": -0.1463,
+       "ci95": [
+        -0.1463,
+        -0.1463
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.2258,
+       "ci95": [
+        -2.4176,
+        0.4615
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 1.0,
+       "ci95": [
+        1.0,
+        1.0
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.371,
+       "ci95": [
+        0.0612,
+        0.5938
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.912,
+       "ci95": [
+        -5.9867,
+        -4.0058
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0,
+       "ci95": [
+        -0.8464,
+        0.4444
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.302,
+       "ci95": [
+        0.1878,
+        0.4646
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1416,
+       "ci95": [
+        -0.2043,
+        0.3942
+       ]
+      }
+     }
+    },
+    "eco-llm": {
+     "recall": {
+      "FAIR": {
+       "share": -0.0362,
+       "ci95": [
+        -0.0951,
+        0.0385
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.0968,
+       "ci95": [
+        -1.2731,
+        0.3217
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.8217,
+       "ci95": [
+        0.7799,
+        0.8607
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.2258,
+       "ci95": [
+        -0.091,
+        0.4595
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.2705,
+       "ci95": [
+        -5.2388,
+        -3.4257
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1,
+       "ci95": [
+        -0.8464,
+        0.3449
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2911,
+       "ci95": [
+        0.1923,
+        0.4237
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0796,
+       "ci95": [
+        -0.1753,
+        0.2787
+       ]
+      }
+     }
+    },
+    "confidence-cascade": {
+     "recall": {
+      "FAIR": {
+       "share": 0.219,
+       "ci95": [
+        0.0756,
+        0.4015
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3548,
+       "ci95": [
+        -0.1429,
+        0.6002
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.4568,
+       "ci95": [
+        0.4066,
+        0.507
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.0968,
+       "ci95": [
+        -0.1481,
+        0.2973
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -2.8485,
+       "ci95": [
+        -3.6111,
+        -2.1804
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1,
+       "ci95": [
+        -0.5239,
+        0.48
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.2863,
+       "ci95": [
+        0.1978,
+        0.3885
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.1681,
+       "ci95": [
+        -0.0358,
+        0.3279
+       ]
+      }
+     }
+    },
+    "fair-final-rung3": {
+     "recall": {
+      "FAIR": {
+       "share": 0.7905,
+       "ci95": [
+        0.5435,
+        0.9661
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.6129,
+       "ci95": [
+        -0.385,
+        0.8731
+       ]
+      }
+     },
+     "single_shot": {
+      "FAIR": {
+       "share": 0.9638,
+       "ci95": [
+        0.9443,
+        0.9833
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.4032,
+       "ci95": [
+        0.1,
+        0.6197
+       ]
+      }
+     },
+     "dashcam": {
+      "FAIR": {
+       "share": -4.3628,
+       "ci95": [
+        -5.3207,
+        -3.5172
+       ]
+      },
+      "HINDSIGHT": {
+       "share": -0.1,
+       "ci95": [
+        -0.7334,
+        0.2692
+       ]
+      }
+     },
+     "pooled": {
+      "FAIR": {
+       "share": 0.8033,
+       "ci95": [
+        0.6444,
+        0.9026
+       ]
+      },
+      "HINDSIGHT": {
+       "share": 0.3717,
+       "ci95": [
+        0.0964,
+        0.5578
+       ]
+      }
+     }
+    }
+   }
+  },
+  "pooled_over_seeds": {
+   "llf": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0433,
+      "ci95": [
+       0.0163,
+       0.0737
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.04,
+      "ci95": [
+       0.0093,
+       0.0708
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.5318,
+      "ci95": [
+       0.5059,
+       0.5579
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1545,
+      "ci95": [
+       -0.0222,
+       0.2842
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -4.2142,
+      "ci95": [
+       -4.6799,
+       -3.7516
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.141,
+      "ci95": [
+       -0.4531,
+       0.0918
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.1929,
+      "ci95": [
+       0.1597,
+       0.2322
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0668,
+      "ci95": [
+       -0.0258,
+       0.1473
+      ]
+     }
+    }
+   },
+   "mooncake": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0969,
+      "ci95": [
+       0.0556,
+       0.1413
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.06,
+      "ci95": [
+       0.0,
+       0.1286
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.7579,
+      "ci95": [
+       0.7339,
+       0.7809
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.2805,
+      "ci95": [
+       0.0539,
+       0.457
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -3.8928,
+      "ci95": [
+       -4.3345,
+       -3.4646
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0897,
+      "ci95": [
+       -0.3935,
+       0.1279
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.3198,
+      "ci95": [
+       0.2721,
+       0.3791
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1412,
+      "ci95": [
+       0.0153,
+       0.2492
+      ]
+     }
+    }
+   },
+   "simplestream": {
+    "recall": {
+     "FAIR": {
+      "share": -0.146,
+      "ci95": [
+       -0.1463,
+       -0.1452
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.11,
+      "ci95": [
+       -0.691,
+       0.2172
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9993,
+      "ci95": [
+       0.9979,
+       1.0
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3659,
+      "ci95": [
+       0.0755,
+       0.5828
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -4.6685,
+      "ci95": [
+       -5.1689,
+       -4.1759
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1667,
+      "ci95": [
+       -0.5574,
+       0.1183
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.2678,
+      "ci95": [
+       0.1915,
+       0.3662
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.105,
+      "ci95": [
+       -0.1381,
+       0.2861
+      ]
+     }
+    }
+   },
+   "eco-llm": {
+    "recall": {
+     "FAIR": {
+      "share": 0.0278,
+      "ci95": [
+       -0.0265,
+       0.0877
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.005,
+      "ci95": [
+       -0.3143,
+       0.1761
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.7271,
+      "ci95": [
+       0.7018,
+       0.7514
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.2642,
+      "ci95": [
+       0.0381,
+       0.4358
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -3.7447,
+      "ci95": [
+       -4.1732,
+       -3.3152
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.0897,
+      "ci95": [
+       -0.3868,
+       0.1266
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.2688,
+      "ci95": [
+       0.2158,
+       0.3326
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1088,
+      "ci95": [
+       -0.0462,
+       0.2297
+      ]
+     }
+    }
+   },
+   "confidence-cascade": {
+    "recall": {
+     "FAIR": {
+      "share": 0.1876,
+      "ci95": [
+       0.1044,
+       0.2857
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.21,
+      "ci95": [
+       0.0275,
+       0.3653
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.4507,
+      "ci95": [
+       0.4032,
+       0.5007
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1179,
+      "ci95": [
+       -0.1195,
+       0.3148
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -2.7352,
+      "ci95": [
+       -3.085,
+       -2.3906
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.0,
+      "ci95": [
+       -0.2879,
+       0.2209
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.2609,
+      "ci95": [
+       0.2074,
+       0.3277
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.1355,
+      "ci95": [
+       -0.0059,
+       0.2513
+      ]
+     }
+    }
+   },
+   "fair-final-rung3": {
+    "recall": {
+     "FAIR": {
+      "share": 0.8948,
+      "ci95": [
+       0.8222,
+       0.9431
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.6,
+      "ci95": [
+       0.2458,
+       0.784
+      ]
+     }
+    },
+    "single_shot": {
+     "FAIR": {
+      "share": 0.9552,
+      "ci95": [
+       0.9434,
+       0.9658
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3252,
+      "ci95": [
+       0.0422,
+       0.5369
+      ]
+     }
+    },
+    "dashcam": {
+     "FAIR": {
+      "share": -3.9467,
+      "ci95": [
+       -4.3891,
+       -3.4914
+      ]
+     },
+     "HINDSIGHT": {
+      "share": -0.1026,
+      "ci95": [
+       -0.3836,
+       0.1125
+      ]
+     }
+    },
+    "pooled": {
+     "FAIR": {
+      "share": 0.8634,
+      "ci95": [
+       0.8214,
+       0.8937
+      ]
+     },
+     "HINDSIGHT": {
+      "share": 0.3664,
+      "ci95": [
+       0.1505,
+       0.5047
+      ]
+     }
+    }
+   }
+  }
+ },
+ "dash_thresholds": {
+  "mode": "live_dev",
+  "device": -0.033492,
+  "cloud": -0.38686
+ },
+ "verdict": "PASS: no share>1, no pooled oracle-control gap beyond CI. share<0 reported as genuine worse-than-device.",
+ "blocking": [],
+ "_provenance": {
+  "git_commit": "6c73a7b03ae1bfdce2edd2912261d3c7709a7e95",
+  "script": "oracle_bootstrap.py",
+  "model": "qwen3vl32b",
+  "timestamp": "2026-11-25T16:10:16.052215",
+  "device": "jetson_orin"
+ }
+}

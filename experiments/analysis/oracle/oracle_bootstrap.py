@@ -55,6 +55,13 @@ A_SC = FT["single_shot|cloud|COLD"]["acc"]
 A_SD = FT["single_shot|device|NA"]["acc"]
 THR = DC.thresholds()
 TH_DEV, TH_CLOUD = THR["device"], THR["cloud"]   # INSTANT thresholds (match committed score_cell)
+# DASH_THRESH=live_dev: episode thresholds recalibrated on live DEV clips (dashcam_recalibrate.py, D6).
+# Writes separate outputs and never the bound file.
+DASH_MODE = os.environ.get("DASH_THRESH", "instant")
+if DASH_MODE == "live_dev":
+    _t = json.load(open(REPO / "results/orchestration/live2/oracle/dashcam_thresholds_live_dev.json"))["tiers"]
+    TH_DEV, TH_CLOUD = _t["device"]["theta"], _t["cloud"]["theta"]
+OUT_SUFFIX = "" if DASH_MODE == "instant" else "_" + DASH_MODE
 
 
 def _cell(arm, seed, tag):
@@ -297,21 +304,30 @@ def main():
         ocfails = [f"{mem} {ty}" for ty, v in out["oracle_control"][mem]["pooled"].items() if v["fail"]]
         print(f"{mem}: STOP(share>1)={len(out['stop_share_gt_1'])} "
               f"reported(share<0)={len(out['reported_share_lt_0'])} pooled-oracle-ctrl-fail={ocfails}")
+    # D270: share>1 is a hard STOP; share<0 reported; HIND>=FAIR pooled over seeds AND per seed,
+    # a failure only when the gap exceeds the clustered bootstrap CI. kv0.5r is retired (ruling).
     stop = list(out["stop_share_gt_1"])
-    for mem in ("1x", "kv0.5r"):
-        for ty, v in out["oracle_control"][mem]["pooled"].items():
+    for ty, v in out["oracle_control"]["1x"]["pooled"].items():
+        if v["fail"]:
+            stop.append(f"1x pooled oracle-control {ty}: FAIR {v['fair_oracle']} > HIND "
+                        f"{v['hind_oracle']}, CI {v['fair_minus_hind_ci95']}")
+    for sk, blk in out["oracle_control"]["1x"]["per_seed"].items():
+        for ty, v in blk.items():
             if v["fail"]:
-                stop.append(f"{mem} oracle-control {ty}: FAIR {v['fair_oracle']} > HIND "
+                stop.append(f"1x {sk} oracle-control {ty}: FAIR {v['fair_oracle']} > HIND "
                             f"{v['hind_oracle']}, CI {v['fair_minus_hind_ci95']}")
+    out["dash_thresholds"] = {"mode": DASH_MODE, "device": TH_DEV, "cloud": TH_CLOUD}
     out["verdict"] = ("PASS: no share>1, no pooled oracle-control gap beyond CI. share<0 reported as "
                       "genuine worse-than-device." if not stop else f"STOP: {len(stop)} blocking")
     out["blocking"] = stop
     out["_provenance"] = stamp(script="oracle_bootstrap.py", model="qwen3vl32b", device="jetson_orin")
     od = REPO / "results/orchestration/live2/oracle"
-    (od / "oracle_shares_v2.json").write_text(json.dumps(out, indent=1, default=float))
-    if not stop:
+    (od / f"oracle_shares_v2{OUT_SUFFIX}.json").write_text(json.dumps(out, indent=1, default=float))
+    if not stop and DASH_MODE == "instant":
         (od / "oracle_results.json").write_text(json.dumps(out, indent=1, default=float))
         print("wrote oracle_results.json (THE BOUND)")
+    elif not stop:
+        print(f"wrote oracle_shares_v2{OUT_SUFFIX}.json (rescore only; bound file NOT written)")
     print("VERDICT:", out["verdict"])
     print("dashcam_tier_acc:", out["dashcam_tier_acc"])
     for b in stop[:10]:
