@@ -145,3 +145,34 @@ are by clip, and each clip is scored by a map from the other folds). This is a d
 Per the gate, no oracle shares were computed with this measure and the dashcam oracle is not replaced.
 Candidate A cannot be used for the dashcam oracle as specified. The dashcam headline stays the Nexar
 challenge metric (D199).
+
+## PRE-REGISTRATION: live versus SH-EP cloud shift, and candidate A-prime (written before any number)
+
+### Step 1 diagnostic (fix nothing)
+Pairs: (clip, t) matched between the live cloud score (per-arm `cloud_score` in committed dashcam
+outcomes, on-time, seeds 4 to 7, 1x) and the SH-EP 32B EP-G score at the same clip and time. Paired
+difference d = live minus SH-EP. Reported: n, mean, median, IQR, p5 and p95, split by
+(a) cache path (WARM or COLD, from the live request `cache_path`), (b) episode position (live frame
+count in the request, buckets 1-4, 5-8, 9+), (c) arm.
+Body check, one instant per tier: frame count (live `mm_uuids` against SH-EP `n_frames`), frame time
+order, and prompt tokens against SH-EP `prompt_tokens`. JPEG bytes compared where the live record carries them.
+
+Classification rule (fixed now):
+- BODY DEFECT: frame count or frame order differs for the same instant.
+- INPUT ENCODING: frame count and order match, but prompt tokens or frame bytes differ.
+- CACHE-PATH DRIFT: body matches, and the mean paired difference differs between WARM and COLD by more
+  than 0.5 score units and more than 2 standard errors.
+- CONTEXT COMPOSITION: body matches, cache path does not explain the difference, and the mean paired
+  difference changes monotonically with frame count bucket by more than 0.5 score units.
+- Otherwise: UNEXPLAINED, reported as such.
+
+### Step 2 candidate A-prime
+Same measure as candidate A (Brier improvement of the cloud probability over the device probability,
+0.5 to 3.0 s lead window, device as reference, no-crash negatives). The difference is the calibration:
+each tier's Platt map is fitted on LIVE scores (committed 1x seeds 4 to 7, instants labelled by the
+window), cross-fitted by clip with the committed `clip_to_fold` rule. Each clip is scored by a map fitted
+on the other folds. Pooled across arms and seeds.
+Gates (identical to candidate A, pre-registered in `dashcam_brier.py`):
+- G1: mean Brier improvement of cloud over device > 0 with clip-cluster bootstrap CI lower bound > 0.
+- G2: Spearman rho between per-arm realised cloud gain and DSMAP challenge mAP > 0 with CI lower bound > 0.
+A failure of either gate STOPS the step. No substitution.
