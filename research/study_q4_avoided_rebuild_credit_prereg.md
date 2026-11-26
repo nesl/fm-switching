@@ -25,3 +25,13 @@ At most 3 iterations overnight. Each change must follow from a mechanism seen in
 (a) the avoided rebuild happens at the robot's NEXT QUESTION, so its harm is priced against the EXPECTED queue at question time, not the rows queued now: this run's own running mean of queued-ahead tokens observed at robot question arrivals (within-run, no committed data), times the existing harm coefficient, deficit-weighted as now; **the credit must not grow with the current queue**;
 (b) P(cold) is evaluated at the PREDICTED gap to the next question (current idle time plus the device's expected time to next question, the D11/D48 causal estimate), not the gap so far.
 **Keep the margin (0.6582), the bars, the prior Beta(0.1, 1.9) and every other constant. Iteration 2 is written and COMMITTED before its cells. Report touch TIMING (share of touches sent while dashcam requests were queued) beside the counts for both iterations.** Gate bars unchanged.
+
+## ITERATION MAP D291, 2026-11-26T04:58:59Z, BEFORE ANY `-q4` RESULT (user ruling; extends the D290 rule)
+**Each iteration picks ONE remedy by the symptom observed in the previous cell's logs; the choice and its reason are COMMITTED BEFORE the cells; the margin (0.6582), the bars and the prior Beta(0.1, 1.9) are unchanged; at most 3 iterations in total.**
+- **A.** TOUCH above 3x rung 3, or dashcam below its bar with touches high: D290 iteration 2 (question-time queue, gap to the next question).
+- **B.** HOLD_BACK near zero and robots losing under pressure with cold rebuilds at question time: restore the in-flight harm for HOLD_BACK, priced as decode-step slowdown of running requests (step-time interference per prefill token from the committed engine model, D18 and M7), not the full queue delay; queued-behind rows as now.
+- **C.** Dashcam loss with never-released instants concentrated in C5 reduced-cap periods during touch bursts: extend c5attr so TOUCH and background WARM count as robot work, SCOPED to the `-q4` arm only (rung 3 unchanged).
+- **D.** Credit near zero most of the run: also update P(cold) from TOUCH responses' cached tokens; report the estimator update counts.
+- **E.** Touch count fine but cold robot questions persist: apply the credit only within the robot's predicted next-question window (D11 and D48).
+- **ITERATION 3 if A to E do not settle it:** `covex-v6-fair-final-q5` = rung 3's touch logic unchanged (margin 0.6582, no queue term in the touch gain) + queue-aware HOLD_BACK only (queued-behind delay + in-flight decode slowdown) + the scoped c5attr extension. Same gates and bars.
+**Report for EVERY cell:** TOUCH, HOLD_BACK, touch timing (share sent while dashcam requests were queued), cold robot questions, C5 reduced-cap time, estimator update count.
