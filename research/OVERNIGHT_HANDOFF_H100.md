@@ -89,6 +89,8 @@ counts that let either reading be computed later. That is D251 working as intend
 the headline at plotting time.**
 **Item 4 means the push no longer needs a user decision. It needs the D265 proof to pass and your window.**
 
+## FLASH STATE (2026-11-26T00:32:06Z): `-q2` stage 1 is being built on flash (new arm, in-flight rows excluded from the HOLD_BACK harm). Two gate cells at s4 (1x and `_kv0.5r_h0.5`) will JUMP THE QUEUE once proven and pushed through a D265-style window; I will send the lines and a window request then. Nothing for the H100 now. Pre-registration: `research/study_q2_stage1_gates_prereg.md`.
+
 ## USER RULINGS (2026-11-26T00:05Z): NESTOUT HELD. FILL THE ACCELERATOR WITH THE D258 GATE, THEN D250 s5-s7.
 ```
 NOW   D258 gate, 2 cells, sensitivity only, main deadlines unchanged, s4, robot deadline 1.5 s:
