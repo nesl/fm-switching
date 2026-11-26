@@ -33,7 +33,7 @@ For every scorable cell the D179 scorer re-derives the counts from the raw logs.
 
 ## Arm families present (scorable)
 
-always-cloud-fcfs, attentionstore-prefetch, b7-edf-feasibility, base, cascade-routing, covex-v6-fair-c5attr-rr, covex-v6-fair-final, covex-v6-fair-final-notouch, covex-v6-fair-final-ptg, covex-v6-fair-final-q, covex-v6-fair-final-q2, covex-v6-fair-final-q2m, covex-v6-fair-final-stateoff, covex-v6-final, covex-v6-final-nqd, covex-v6-state-final, eco-llm, edf, fair-c5attr, fair-c5attr-gain0, joint-c3, kvflow-prefetch, llf, lmcache, mooncake, querystream-proactive, r3-streaming, rules, shares, shares-r1, shares-r2, simplestream, state, state-uo, state-uo-c5attr, streamscout, v5-rules-old, warm-all-lru
+always-cloud-fcfs, attentionstore-prefetch, b7-edf-feasibility, base, cascade-routing, covex-v6-fair-c5attr-rr, covex-v6-fair-final, covex-v6-fair-final-notouch, covex-v6-fair-final-ptg, covex-v6-fair-final-q, covex-v6-fair-final-q2, covex-v6-fair-final-q2m, covex-v6-fair-final-q4, covex-v6-fair-final-stateoff, covex-v6-final, covex-v6-final-nqd, covex-v6-state-final, eco-llm, edf, fair-c5attr, fair-c5attr-gain0, joint-c3, kvflow-prefetch, llf, lmcache, mooncake, querystream-proactive, r3-streaming, rules, shares, shares-r1, shares-r2, simplestream, state, state-uo, state-uo-c5attr, streamscout, v5-rules-old, warm-all-lru
 
 base and rules each cover two raw arm names at different memory: base = hybrid-F-lhreq-noc3 (1x) and covex-v6-base (0.5x); rules = v5-rules-2 (1x) and covex-v6-rules (0.5x).
 
@@ -272,7 +272,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 
 ## Provenance
 
-- runs dir last commit: 83082e12
+- runs dir last commit: 4e5e26bb
 - scorer score.py last commit: cb9120cc
 - d179_rung2_verdict.py last commit: cd580554
 - build time is deliberately NOT stamped here: the output is byte-deterministic given the input. The git commit of this file is the build time of record.
