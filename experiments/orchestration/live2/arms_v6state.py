@@ -301,6 +301,15 @@ class V6StateArm:
             self.__dict__["_d249_resolved"] = on
         return bool(on)
 
+    def _q2_on(self) -> bool:
+        """q2 in-flight exclusion switch, resolved once per instance and memoised. READ SITE:
+        `_queued_behind` (the `include_inflight` branch). Requires D249 on to have any effect."""
+        on = self.__dict__.get("_q2_resolved")
+        if on is None:
+            on = bool(QV.q2_arm_enables(self)) and self._d249_on()
+            self.__dict__["_q2_resolved"] = on
+        return bool(on)
+
     def _d249_inflight(self, obs: Observation) -> tuple:
         """`obs.cloud.in_flight_work`, defensively: () on any arm or harness that does not carry
         it, so this method is safe on an observation built by an older tree."""
@@ -463,7 +472,8 @@ class V6StateArm:
         except Exception:                                                      # noqa: BLE001
             return None
 
-    def _queued_behind(self, obs: Observation, session_id: str) -> List[Dict[str, Any]]:
+    def _queued_behind(self, obs: Observation, session_id: str,
+                       include_inflight: bool = True) -> List[Dict[str, Any]]:
         """The requests a background warm would sit in front of, with their own predicted service
         time and slack. One `predict` per pending request per epoch, cached, because the harm term
         is evaluated once per session and the pending set does not change inside an epoch.
@@ -505,7 +515,11 @@ class V6StateArm:
         # the committed source and stay exactly as they are, so a difference between this arm and
         # rung 3 is attributable to the rows D249 ADDS. They are not cached with the others
         # because the exclusion is per session and the rows are already built per decision.
-        if self._d249_on():
+        if not include_inflight and self._q2_on():
+            self.stats["q2_hbwarm_evals"] += 1
+            if self._d249_inflight(obs):
+                self.stats["q2_inflight_excluded_evals"] += 1
+        elif self._d249_on():
             add = self._d249_rows(obs, session_id)
             if add:
                 have = {r["req_id"] for r in out}
@@ -514,14 +528,15 @@ class V6StateArm:
                 out = out + add
         return out
 
-    def _harm_warm(self, obs: Observation, session_id: str, uncached_tokens: int) -> float:
+    def _harm_warm(self, obs: Observation, session_id: str, uncached_tokens: int,
+                   include_inflight: bool = True) -> float:
         """`harm_warm`, COMPUTED from the D162 model and never declared.
 
         Pre-registered in `research/prereg_harm_warm_d172.md` before any grid was rerun under it.
         Returns 0.0 only when nothing is queued behind the warm, which is a real zero and is
         counted separately from a refusal to price.
         """
-        others = self._queued_behind(obs, session_id)
+        others = self._queued_behind(obs, session_id, include_inflight)
         if not others:
             self.stats["harm_warm_no_queue"] += 1
             return 0.0
@@ -622,7 +637,7 @@ class V6StateArm:
             if warming:
                 u = int(getattr(act_now, "target_tokens", 0) or u) - b
                 u = max(u, 0)
-            hw = self._harm_warm(obs, sid, u) if warming else 0.0
+            hw = self._harm_warm(obs, sid, u, include_inflight=False) if warming else 0.0
             if not warming and act_now is not None:
                 # some other session action this epoch; a second one is not expressible
                 self.stats["state_skipped_rules_acting"] += 1

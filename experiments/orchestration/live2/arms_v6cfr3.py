@@ -755,6 +755,11 @@ def _final_ladder_lazy() -> Dict[str, Any]:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3_D249, d249_queue_visibility=True, **kw)
 
+    def r3q2(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_Q2, d249_queue_visibility=True,
+                             q2_inflight_exclusion=True, **kw)
+
     def r3glog(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3 + "-glog", guard_log=True, **kw)
@@ -767,6 +772,7 @@ def _final_ladder_lazy() -> Dict[str, Any]:
             # D249 (2026-11-25, PROVISIONAL), on the SAME lazy path and for the same reason: a
             # POSTED cell naming an arm `arms.make_arm` cannot resolve dies at launch.
             "covex-v6-fair-final-q": r3d249,
+            "covex-v6-fair-final-q2": r3q2,
             "covex-v6-fair-final-ptg-ctl20": r3ptg_ctl20,
             "covex-v6-fair-final-ptg-nohyst": r3ptg_nohyst,
             "covex-v6-fair-final-ptg-hystonly": r3ptg_hystonly,

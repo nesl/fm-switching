@@ -85,6 +85,9 @@ RUNG3_PTG = "covex-v6-fair-final-ptg"
 # SAME CLASS and SAME constructor as RUNG3 with one switch flipped, so a difference between the
 # two cells is attributable to that switch and to nothing else.
 RUNG3_D249 = "covex-v6-fair-final-q"
+# q2 stage 1: `-q` plus the in-flight rows EXCLUDED from the HOLD_BACK/WARM harm (TOUCH harm keeps them).
+# SAME CLASS and constructor as RUNG3_D249 with one extra switch (`QV.Q2_SWITCH`) flipped.
+RUNG3_Q2 = "covex-v6-fair-final-q2"
 
 # The committed arm each final rung is built FROM, for the mapping row the user asked for.
 BUILT_FROM = {RUNG2: "covex-v6-state-uo-c5attr",
@@ -276,6 +279,17 @@ def _set_d249(arm: Any) -> None:
             "D249 name with no queue visibility at all" % (QV.D249_SWITCH, type(arm).__name__))
 
 
+def _set_q2(arm: Any) -> None:
+    """Turn the q2 in-flight exclusion on for THIS INSTANCE and read it back strictly. Needs D249."""
+    if not QV.arm_enables(arm):
+        raise LadderSwitchError("q2 requires D249 queue visibility on the same instance")
+    object.__setattr__(arm, QV.Q2_SWITCH, True)
+    arm.__dict__.pop("_q2_resolved", None)
+    if QV.q2_arm_enables(arm) is not True or not arm._q2_on():             # pragma: no cover
+        raise LadderSwitchError("%s did not take on the instance of %s"
+                                % (QV.Q2_SWITCH, type(arm).__name__))
+
+
 def _set_cold_unlatch(arm: Any) -> None:
     """Turn D261 (a rejection is not proof of cold) on for THIS INSTANCE and read it back.
 
@@ -298,6 +312,7 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                per_type_guard: bool = False, guard_lag_s_by_class: Any = None,
                hysteresis: Any = None, guard_log: Any = None,
                d249_queue_visibility: bool = False,
+               q2_inflight_exclusion: bool = False,
                cold_unlatch: Any = None,
                **kw: Any) -> Any:
     """Build rung 3. Four switches, each set on the instance and each read back.
@@ -340,6 +355,8 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
     # `covex-v6-fair-final`, and the only arm that passes True is `covex-v6-fair-final-q`.
     if d249_queue_visibility:
         _set_d249(arm)
+    if q2_inflight_exclusion:
+        _set_q2(arm)
     # D261 (user ruling 2026-11-25 item 2), DEV LINE ONLY. `cold_unlatch=None` means "follow the
     # D249 switch", so `covex-v6-fair-final-q` carries it and `covex-v6-fair-final` does not:
     # `make_rung3()` with no arguments is still exactly rung 3. An explicit False is how the
@@ -449,6 +466,8 @@ FINAL_LADDER_ARMS: Dict[str, Any] = {
     RUNG3_PTG: (lambda **kw: make_rung3(RUNG3_PTG, per_type_guard=True, **kw)),
     # D249: rung 3 plus queue and harm visibility. DEFAULT OFF EVERYWHERE ELSE.
     RUNG3_D249: (lambda **kw: make_rung3(RUNG3_D249, d249_queue_visibility=True, **kw)),
+    RUNG3_Q2: (lambda **kw: make_rung3(RUNG3_Q2, d249_queue_visibility=True,
+                                       q2_inflight_exclusion=True, **kw)),
     # CLAUDE.md Step 4 negative control, as a NAMED ARM so the control is a cell and not a
     # code edit: the per-type machinery fully live with all three thresholds set to the
     # committed single 2.0 s bar. It must collapse to `covex-v6-fair-final` EXACTLY.

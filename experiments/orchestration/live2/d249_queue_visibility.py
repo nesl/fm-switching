@@ -48,6 +48,9 @@ class D249UnitError(RuntimeError):
     """The coefficient applied to a queued-ahead TOKEN count is not `per_queue_token`."""
 
 
+Q2_SWITCH = "live2_q2_inflight_exclusion"
+
+
 class D249SwitchError(RuntimeError):
     """The switch was declared as a truthy CLASS attribute, which this build forbids."""
 
@@ -72,6 +75,29 @@ def arm_enables(arm: Any) -> bool:
                     "D249 requires an arm-scoped INSTANCE attribute"
                     % (D249_SWITCH, klass.__name__))
     return bool(own.get(D249_SWITCH, False))
+
+
+def q2_arm_enables(arm: Any) -> bool:
+    """Is the q2 in-flight exclusion on for THIS ARM INSTANCE? Default False.
+
+    Same shape as `arm_enables`: instance-dict lookup only, and a truthy CLASS attribute RAISES.
+    It is a SEPARATE switch from D249_SWITCH. It excludes the in-flight rows from the HOLD_BACK and
+    WARM harm only (read at `arms_v6state._queued_behind`); it does nothing unless D249 is also on.
+    """
+    try:
+        own = vars(arm)
+    except TypeError:                                                          # pragma: no cover
+        own = {}
+    if Q2_SWITCH not in own:
+        for klass in type(arm).__mro__:
+            if bool(klass.__dict__.get(Q2_SWITCH, False)):
+                raise D249SwitchError(
+                    "%s is ON as a CLASS attribute of %s and the instance declares nothing; "
+                    "q2 requires an arm-scoped INSTANCE attribute" % (Q2_SWITCH, klass.__name__))
+    v = own.get(Q2_SWITCH, False)
+    if not isinstance(v, bool):
+        raise D249SwitchError("%s must be a bool, got %r" % (Q2_SWITCH, type(v).__name__))
+    return v
 
 
 def assert_queue_unit(coefficient_s_per_token: float,
