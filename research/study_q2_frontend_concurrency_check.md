@@ -1,0 +1,16 @@
+# `-q2` 1x DASHCAM LOSS, FRONT-END AND CONCURRENCY CHECK (2026-11-26T03:04Z). CPU, committed s4 cells, as reported by the analysis agent (not re-run). No build, no cell.
+**Neither term explains most of the 1,075-instant gap (rung 3 8,378 against `-q2` 7,303). About 87 percent of the gap (936 of 1,075) is dashcam opportunities for which NO request was ever submitted.**
+**Timestamps (a):** the request log carries only t_submit, t_first_token and t_done; NO field marks engine scheduling or admission, so a true front-end/engine split is NOT observable. The proxy is the residual of first-token time after the solo-request fit (a + b*uncached + c*own frames); it is a residual, not a measured wait. D18: front end 29.6 ms + 20.2 ms per MB, admission stall 12.7 ms + 1.15 ms per image.
+| 1x s4, 11,764 dashcam opportunities | rung 3 | `-q` | `-q2` |
+|---|---|---|---|
+| on-time | 8,378 | 8,719 | 7,303 |
+| no request submitted | 2,882 | 2,672 | 3,818 |
+| of which release_infeasible | 2,028 | 1,907 | 2,171 |
+| of which in no decision (never released) | 851 | 761 | 1,644 |
+| submitted but late | 504 | 373 | 643 |
+`-q2` minus rung 3: +936 with no request (infeasible +143, never released +793), +139 late.
+**(a) Front end:** touch-linked wait is about 7 ms per concurrent touch at `-q2` 1x (CI 4.3 to 8.7; rung 3 -0.3 [-2.9, 2.2]; `-q` +4.1 [-6.5, 10.0]), about 0.06 ms per touch frame, roughly 20x below D18's 1.15 ms per image (touch images are mostly cached). Distinguishable from zero only for `-q2` 1x; halved-memory intervals include zero. Touch count and touch frames correlate 0.93 to 0.99, so they cannot be separated. Removing the term recovers about 63 to 85 late requests (6 to 8 percent of the gap); replacing the whole wait proxy by rung 3's recovers at most about 182 (17 percent, an upper bound including all wait sources).
+**(b) Concurrency (16 or more requests in flight):** fraction of time rung 3 0.013, `-q` 0.001, **`-q2` 0.133 (160 s)**; halved 0.080 / 0.021 / 0.234. On-time rate in those periods 0.22 against 0.68 elsewhere for `-q2` 1x. At 1x 100 percent of the 16-plus time is touch-driven (excluding touches in-flight never reaches 16). Giving `-q2` rung 3's 16-plus fraction recovers +668 (62 percent of the gap), but this is a standardisation by state, not an intervention, and it largely restates the same cause.
+**Where the loss is:** the never-released opportunities are 38 percent of opportunities in the 16-plus periods against 10 percent otherwise. Why they are never released is inferred from the coordinator's `_expire` code and was NOT traced. Left over outside both terms: about 407 (concurrency) or about 890 (front-end bound).
+**Reading, observations only:** the `-q2` 1x dashcam loss is mostly opportunities that never reach the engine, concentrated in touch-burst periods; touch cost (token price, re-prefill, front end) does not account for it. The cause of the bursts is the 10,446 touches themselves (3.9x rung 3), the arm's own policy volume. The two counterfactuals overlap and must not be added.
+**Confounding:** touch volume, in-flight count and load rise together; the in-flight series is self-referential; one seed; the wait proxy comes from only 236 to 568 solo requests.
