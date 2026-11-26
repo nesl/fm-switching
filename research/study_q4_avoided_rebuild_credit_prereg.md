@@ -69,3 +69,13 @@ At most 3 iterations overnight. Each change must follow from a mechanism seen in
 **Decision, recorded now (the D291 map is applied as written, and the diagnosis is recorded as a mechanism the loop will test, not overridden):**
 - **Iteration 2 stays REMEDY A = `-q4b`** exactly as committed in 0082431d: the D291 map names A for TOUCH above 3x rung 3 with dashcam below its bar; `-q4b` is built and tested, and the GPU does not idle while C is built. **PREDICTION, stated before the cells: `-q4b` does NOT fix it; TOUCH stays above 3x rung 3 (above 8,000 at 1x) and the 1x dashcam bar fails, because the credit scale (mean arrival harm x P(cold)) is unchanged and the C5 cascade mechanism is untouched. If `-q4b` passes both bars, this diagnosis is wrong and is recorded as such.**
 - **Iteration 3 = REMEDY C, built now in parallel** behind its own switch (scoped to the arm; rung 3 unchanged; no new coefficient), composable with both credit versions: `-q4c` = `-q4` + C and `-q4bc` = `-q4b` + C; the base for the gate is chosen after the `-q4b` result and the choice is committed before its cells. Margin, bars and prior unchanged.
+
+## RESULT, `-q4` GATE (b) `_kv0.5r_h0.5` s4, scored 2026-11-26T05:41Z as reported by the H100 (SA OK, valid; 2 request errors; 0 ENOSPC), post-push on live2 7a5bf7ae
+**FAIL on both conditions.** (1) cbd 67 against the bar of 75: FAIL. (2) dashcam 2,701 against 5,958: FAIL (-3,257 from the bar; -3,411 from rung 3's 6,112). **`-q4` fails BOTH gates (1x: dashcam; halved: cbd and dashcam).**
+| halved s4 | cbd | cloud + device | on-time | acc | SS | dashcam (worst) | TOUCH | HOLD_BACK |
+|---|---|---|---|---|---|---|---|---|
+| `-q4` | 67 | 47 + 20 (standing 64) | 68/132 | 0.691 | 221 | 2,701 (0.177) | 3,877 | 1 |
+| rung 3 | 72 | 49 + 23 | 72 | 0.681 | 311 | 6,112 (0.454) | 1,434 | 4 |
+| `-q2m` | 69 | | 80 | | 293 | 5,475 | 375 | 2 |
+| `-q` | 77 | | 91 | | 320 | 6,759 | 787 | 93 |
+Counters: c5_decrease 65; c5_attr_suppressed_decrease 4,380; q4_margin_micro min = max = 658240 (0.65824 live); credit n 25,745, non-zero 21,941; estimator obs n 122 (cold 38). TOUCH 3,877 is 2.7x rung 3's 1,434 (below the 3x trigger), yet dashcam is the lowest of every arm and its worst device (0.177) is below the 0.25 target. Cumulative s4 cells used by this loop: 2 (`-q4` 1x and halved). `-q4b` (iteration 2, remedy A as committed) pushed at e9315bbc; its pair is queued next.
