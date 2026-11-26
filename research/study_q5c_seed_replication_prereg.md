@@ -20,3 +20,10 @@
 
 ## SUPERSEDED BY THE USER'S DEV-LOOP PLAN, 2026-11-26T17:07Z: the replacement rule above is NOT EVALUATED
 The user changed the plan (provisional dev loop: one seed per iteration, no multi-seed blocks during development): of the six `-q5c` seed cells only **1x s5 completed** (ended 09:05:21, valid, completed; its result is reported separately by the H100); the other five (halved s5, 1x s6, halved s6, 1x s7, halved s7) are DROPPED (commented #DROPPED-D300 in the driver list). **The per-seed replacement rule needs all six cells, so it cannot be applied and NO verdict on `-q5c` replacing rung 3 is given or implied; the rule stays pre-registered for any future run of those cells.** The unlatch isolation arm (`covex-v6-fair-final-unlatch`, pushed 76a3620f) is reduced to two cells: halved s4 then 1x s4.
+
+## OBSERVATION ONLY, `-q5c` 1x s5 (the one completed seed cell), recorded 2026-11-26T17:08Z as reported by the H100 (valid, SA OK, 0 errors, 0 ENOSPC, live2 152b47d4, pool n = 127); NO rule is applied
+| 1x s5 | cbd | cloud + device (standing) | cloud on-time | acc | SS | dashcam (worst) | TOUCH | HOLD_BACK | recall_REJECT | pieces |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `-q5c` | 53 | 51 + 2 (4) | 123/127 | 0.415 | 353 | 8,393 (0.633) | 0 (absent) | 20 | 0 | 128 |
+| rung 3 (SA key absent) | 56 | 51 + 5 (6) | 121/127 | 0.421 | 353 | 8,311 (0.684) | 176 | 5 | 3 | 143 |
+Deltas: cbd -3 (cloud-correct equal at 51; device-correct -3), cloud on-time +2, dashcam +82 (inside the 154 bar), worst device -0.051. Counters: recall_CLOUD 483 against 480; d261_cold_marked and unlatched both absent (0) in both arms; c5_decrease 5 and 5; c5_attr_suppressed_decrease 64 and 64. **For the rule as pre-registered (cbd >= rung 3 minus 1): 53 against 55 would FAIL this seed; stated as an observation, the rule is NOT evaluated (it needs all six cells).** The 1x s4 result was cbd 83 against 83. Nothing in the logs of this cell was diagnosed.
