@@ -61,6 +61,7 @@ for _p in (str(HERE), str(HERE / "v5"), str(HERE / "fleet"), str(HERE / "hybrid"
         sys.path.insert(0, _p)
 
 import arms_v6c5 as C5                                                         # noqa: E402
+import predictive_belief as PBL                                                # noqa: E402
 import arms_v6cf as VCF                                                        # noqa: E402
 import arms_v6cfr3 as R4                                                       # noqa: E402
 import arms_v6fairfeed as FF                                                   # noqa: E402
@@ -68,6 +69,8 @@ import arms_v6rr as RRARM                                                      #
 import arms_v6state as VS                                                      # noqa: E402
 import d249_queue_visibility as QV                                             # noqa: E402
 import d261_cold_unlatch as CU                                                 # noqa: E402
+import book_belief_uncached as BB                                                 # noqa: E402
+import la_arrival_admission as LAA                                             # noqa: E402
 import link_read as LR                                                         # noqa: E402
 import link_sync as LS                                                         # noqa: E402
 import deficit_gain_d178 as GAIND                                              # noqa: E402
@@ -82,6 +85,8 @@ RUNG4 = "covex-v6-final"
 # D230 (2): the per-type saturation guard, built on rung 3 AS A LABELLED VARIANT. It is the
 # SAME CLASS and the SAME constructor as RUNG3 with one switch flipped, so a difference
 # between the two cells is attributable to that switch and to nothing else.
+# layer P TEST arm (light checks only, not cell-ready): rung 3 plus ONLY `predictive_belief=True`.
+RUNG3_PB = "covex-v6-fair-final-pb"
 RUNG3_PTG = "covex-v6-fair-final-ptg"
 # D249 (2026-11-25, PROVISIONAL): rung 3 with queue and harm visibility in the state planner.
 # SAME CLASS and SAME constructor as RUNG3 with one switch flipped, so a difference between the
@@ -105,6 +110,11 @@ RUNG3_Q5C = "covex-v6-fair-final-q5c"
 # unlatch (PROVISIONAL user test): rung 3 plus ONLY the D261 clear-on-reject switch, passed
 # explicitly (cold_unlatch=True) with D249 OFF. No q, q2, q2m, q4 or q5 term.
 RUNG3_UNLATCH = "covex-v6-fair-final-unlatch"
+# layer 0b TEST arm (light checks only, not cell-ready): rung 3 plus ONLY `book_belief=True`.
+RUNG3_0B = "covex-v6-fair-final-0b"
+# la (load-aware arrival admission, dev): RUNG 3 plus layer P plus layer 0b-from-P plus the b7 arrival
+# gate priced by the D162 first-token model with the queued-ahead term (`LAA.LA_SWITCH`).
+RUNG3_LA = "covex-v6-fair-final-la"
 # q4b (D290 iteration 2): `-q4` plus the next-question basis (`q4_avoided_rebuild.Q4B_SWITCH`).
 RUNG3_Q4B = "covex-v6-fair-final-q4b"
 # link_events line: `-q` plus the arm-side READ of `Observation.device_links` (decision-neutral).
@@ -392,6 +402,32 @@ def _set_cold_unlatch(arm: Any) -> None:
             "a name that says it clears" % (CU.D261_SWITCH, type(arm).__name__))
 
 
+def _set_predictive_belief(arm: Any) -> None:
+    """Turn layer P on for THIS INSTANCE and read it back; the coordinator is the only reader."""
+    object.__setattr__(arm, PBL.SWITCH, True)
+    if not PBL.arm_enables(arm):                                           # pragma: no cover
+        raise LadderSwitchError("%s did not take on the instance of %s"
+                                % (PBL.SWITCH, type(arm).__name__))
+
+
+def _set_book_belief(arm: Any) -> None:
+    """Turn layer 0b on for THIS INSTANCE and read it back; the coordinator is the only reader."""
+    object.__setattr__(arm, BB.SWITCH, True)
+    if not BB.arm_enables(arm):                                            # pragma: no cover
+        raise LadderSwitchError("%s did not take on the instance of %s"
+                                % (BB.SWITCH, type(arm).__name__))
+
+
+def _set_la(arm: Any) -> None:
+    """Turn load-aware arrival admission on and read it back from EVERY instance that reads it: the
+    ladder wrapper (`coordinator.__init__` publishes the in-flight rows and P's prediction),
+    `arm._rules` and `arm._rules._base`, the HybridArm whose `decide` runs the arrival gate."""
+    for o in (arm, arm._rules, arm._rules._base):
+        object.__setattr__(o, LAA.LA_SWITCH, True)
+        if LAA.arm_enables(o) is not True:                                 # pragma: no cover
+            raise LadderSwitchError("%s did not take on %s" % (LAA.LA_SWITCH, type(o).__name__))
+
+
 def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                recheck_types: Any = RRARM.RECHECK_TYPES,
                deficit_feed: bool = True, gain: float = GAIND.GAIN,
@@ -407,8 +443,11 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                q5b_piece: bool = False,
                q4b_basis: bool = False,
                cold_unlatch: Any = None,
+               book_belief: bool = False,
                link_read: bool = False,
                link_sync: Any = None, link_currency: str = "acc", link_tiebreak: str = "hold",
+               predictive_belief: bool = False,
+               la_arrival: bool = False,
                **kw: Any) -> Any:
     """Build rung 3. Four switches, each set on the instance and each read back.
 
@@ -468,6 +507,10 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
     # switch-off control separates this mechanism from D249 inside ONE tree.
     if (d249_queue_visibility if cold_unlatch is None else bool(cold_unlatch)):
         _set_cold_unlatch(arm)
+    if not isinstance(book_belief, bool):
+        raise LadderSwitchError("book_belief must be a bool, got %r" % (book_belief,))
+    if book_belief:
+        _set_book_belief(arm)
     arm._planner_reads_feed_declared = bool(planner_reads_feed)
     if planner_reads_feed:
         # wire it NOW rather than lazily, so a wiring failure raises in construction
@@ -479,6 +522,14 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
     if link_sync is not None:
         LR.install(arm)
         LS.install(arm, str(link_sync), str(link_currency), str(link_tiebreak))
+    if not isinstance(predictive_belief, bool):
+        raise LadderSwitchError("predictive_belief must be a bool, got %r" % (predictive_belief,))
+    if predictive_belief:
+        _set_predictive_belief(arm)
+    if la_arrival:
+        if not (predictive_belief and book_belief):
+            raise LadderSwitchError("la_arrival requires predictive_belief and book_belief")
+        _set_la(arm)
     return arm
 
 
@@ -614,7 +665,9 @@ FINAL_LADDER_ARMS: Dict[str, Any] = {
     RUNG3_PTG + "-nolog": (lambda **kw: make_rung3(RUNG3_PTG + "-nolog",
                                                    per_type_guard=True, guard_log=False, **kw)),
     # And rung 3 itself WITH the log and nothing else, which is the other half of that proof.
+    RUNG3_PB: (lambda **kw: make_rung3(RUNG3_PB, predictive_belief=True, **kw)),
     RUNG3 + "-glog": (lambda **kw: make_rung3(RUNG3 + "-glog", guard_log=True, **kw)),
+    RUNG3_0B: (lambda **kw: make_rung3(RUNG3_0B, book_belief=True, predictive_belief=True, **kw)),
     RUNG4: (lambda **kw: make_rung4(RUNG4, **kw)),
 }
 

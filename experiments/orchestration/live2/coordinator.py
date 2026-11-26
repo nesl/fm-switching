@@ -59,8 +59,10 @@ import release_recheck as RR                                            # noqa: 
 # ---- END D179 (4) -----------------------------------------------------------------------------
 # ---- D179 (1) to (3) SHARE ADMISSION (session A), import. BEGIN --------------------------------
 import share_admission as SA                                             # noqa: E402
+import predictive_belief as PBL                                         # noqa: E402
 import d249_queue_visibility as QV                                       # noqa: E402
 import d261_cold_unlatch as CU                                           # noqa: E402
+import book_belief_uncached as BB                                        # noqa: E402
 from share_capacity import FLOORS_TOKENS as SCAP_FLOORS                  # noqa: E402
 from share_capacity import W_MAX_TOKENS as SCAP_W_MAX                    # noqa: E402
 # ---- END D179 (1) to (3) ----------------------------------------------------------------------
@@ -368,7 +370,14 @@ class Live2Coordinator:
         # q5: the in-flight rows are published for the q5 arm too (data only; the q5 term in
         # `arms_v6state._q5_inflight_harm` is their one reader). D249's own switch stays OFF there.
         import q5_queue_aware_holdback as _Q5                               # noqa: PLC0415
-        self._d249_queue_visibility = QV.arm_enables(arm) or _Q5.arm_enables(arm)
+        import la_arrival_admission as _LA                                     # noqa: PLC0415
+        # la: the in-flight rows are published for the la arm too (data only; the b7 arrival gate in
+        # `hybrid/hybrid_arm.py` is their one reader). D249's own switch stays OFF there.
+        self._d249_queue_visibility = (QV.arm_enables(arm) or _Q5.arm_enables(arm)
+                                       or _LA.arm_enables(arm))
+        self._la_on = _LA.arm_enables(arm)
+        if self._la_on and not (PBL.arm_enables(arm) and BB.arm_enables(arm)):
+            raise RuntimeError("%s needs %s and %s on the same arm" % (_LA.LA_SWITCH, PBL.SWITCH, BB.SWITCH))
         # ---- D261 (user ruling 2026-11-25 item 2): A REJECTION IS NOT PROOF OF COLD.
         # ARM-SCOPED, DEFAULT OFF, read from the INSTANCE exactly as D249's switch is. It is
         # meaningless without the belief corrector in APPLY mode, because the provisional mark is
@@ -377,6 +386,25 @@ class Live2Coordinator:
         # nothing can mark anything. (`_belief_apply` is assigned further down this method, so the
         # conjunction is written at each use site rather than here.)
         self._d261_cold_unlatch = CU.arm_enables(arm)
+        # LAYER P (A1): shadow of the engine prefix cache. ARM-SCOPED INSTANCE attribute, default
+        # OFF. OBSERVE-ONLY: read at `_submit` and `_collect` below, which only RECORD; no decision
+        # reads `_pb` in A1 (A2/A3 consumers call `_pb.p_cached_fraction`).
+        self._pb_on = PBL.arm_enables(arm)
+        # LAYER 0b (now READING P): book the predicted uncached prefix of a build piece from the
+        # shadow of the engine prefix cache. ARM-SCOPED INSTANCE attribute, default OFF; read at
+        # `_advance_build` below. Refuses without layer P and without D162 pricing.
+        self._book_belief_uncached = BB.arm_enables(arm)
+        if self._book_belief_uncached and not self._pb_on:
+            raise RuntimeError("%s needs %s on the same arm: the booked prefix is read from P"
+                               % (BB.SWITCH, PBL.SWITCH))
+        if self._book_belief_uncached and not DP.arm_enables(arm):
+            raise RuntimeError("%s needs live2_d162_pricing on the same arm: the booked piece is "
+                               "priced by D162 only under it" % BB.SWITCH)
+        self._book0b_extra_s = 0.0
+        self._pb = None
+        self._pb_last: Dict[Any, Any] = {}
+        self._pb_log: List[Dict[str, Any]] = []
+        self._booking_rows: List[Dict[str, Any]] = []     # sidecar: booked uncached tokens per request
         self._d261_unlatch_log: List[Dict[str, Any]] = []
         self._share_held_instants: Dict[str, set] = {t: set() for t in SA.TYPES}
         self._share_events: List[Dict[str, Any]] = []
@@ -430,6 +458,12 @@ class Live2Coordinator:
                                 upload_mode=upload_mode,
                                 targets=dict(targets or CS.TARGETS))
         self.st.link_events = self._link_events
+        if self._pb_on:
+            # capacities are INPUTS from the engine config, no fitted constant: blocks of 16 tokens
+            self._pb = PBL.PredictiveBelief(max(int(gpu_kv_tokens) // PBL.BLOCK, 1),
+                                            max(int(host_tier_tokens) // PBL.BLOCK, 1),
+                                            offload_controls=self._offload_controls,
+                                            prefill_s_per_token=None)
         # D102: the GPU budget is an explicit INPUT, equal by default to one GPU's time over
         # the run (window length x 1 GPU-second per second), identical for every arm and
         # recorded in the header. It is the PHYSICAL CAPACITY, so it never binds artificially
@@ -783,6 +817,17 @@ class Live2Coordinator:
                          "`gate` field says which. If n_rows equals cap the log is truncated and "
                          "the aggregate counters in arm_stats are the complete census.")}
 
+    def write_booking_log(self) -> None:
+        """SIDECAR `booking.jsonl.gz`: the uncached tokens BOOKED at submit, one row per request of
+        EVERY kind, written ALWAYS (switch on or off). A NEW file: no existing output changes."""
+        if self.logs is None:
+            return
+        import gzip
+        import json
+        with gzip.open(Path(self.logs.out_dir) / "booking.jsonl.gz", "wt") as f:
+            for r in self._booking_rows:
+                f.write(json.dumps(r, sort_keys=True) + "\n")
+
     def write_guard_log(self):
         """D230 (2) limitation 1: COMMIT `guard_state`'s per-decision-period signal.
 
@@ -1048,7 +1093,24 @@ class Live2Coordinator:
                               getattr(s, "last_telemetry_cached_tokens", 0) or 0),
                           readiness=str(s.residency_readiness()))
                 for sid, s in self.st.sessions.items()},
-        ))
+            **self._la_roster_extra(now)))
+
+    def _la_roster_extra(self, now: float) -> Dict[str, Any]:
+        """la (data only): layer P's PRE-SEND cached-token estimate for each session's whole history,
+        so the b7 arrival gate can price `u = tokens x (1 - P cached fraction)`. Empty unless the la
+        switch AND layer P are on, so every other arm's roster is unchanged. Recall-type (robot)
+        sessions are keyed by session in P; single-shot sessions are not (P keys them per request),
+        so their cached estimate is 0, which is what P predicts for a first send."""
+        if not (self._la_on and self._pb_on and self._pb is not None):
+            return {}
+        out: Dict[str, Any] = {}
+        for sid, s in self.st.sessions.items():
+            n = max(int(s.est_tokens), 0)
+            c = 0
+            if n > 0 and SA.type_of_device(s.device_id) == "recall":
+                c = int(self._pb.p_cached_fraction(sid, n, now, None)[1])
+            out[sid] = dict(tokens=n, cached=c)
+        return dict(pb_cached_by_session=out)
 
     # ---------------------------------------------------------------- enactment
     def _enact(self, act, t: float, dt_ms: float) -> None:
@@ -1521,10 +1583,16 @@ class Live2Coordinator:
             self.counts["state_priced_build_" + _pr["predicted_tier"]] += 1
         else:
             cost = C.recall_gpu_s(max(piece, 1), "COLD")
+        _booked, _x, _cold = max(int(piece), 1), 0, False
         if self._d162_pricing:
-            # a build prefills exactly its piece, so the piece IS the uncached count
-            cost = DP.price_gpu_s(max(int(piece), 1), self._uncached_in_flight,
-                                   self._charge_mode)
+            # a build prefills exactly its piece, so the piece IS the uncached count, UNLESS the
+            # session's prefix has left the engine's KV. Layer 0b (READ SITE of
+            # `_book_belief_uncached`) adds the presented prefix when the arm's own belief is COLD.
+            if self._book_belief_uncached:
+                _pfx = int(already * CS.D2_TOK_PER_IMG)
+                _pf, _ptok = self._pb.p_cached_fraction(s.session_id, _pfx, self.st.now, _pfx)
+                _booked, _x, _cold = BB.booked_uncached(_pfx, _ptok, piece)
+            cost = DP.price_gpu_s(_booked, self._uncached_in_flight, self._charge_mode)
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
             self.counts["budget_refusal_build"] += 1
@@ -1540,8 +1608,19 @@ class Live2Coordinator:
                               key="build:" + str(getattr(s, "session_id", ""))):
             return None
         # ---- END D179 (1) to (3) block --------------------------------------------------------
-        self._uncached_in_flight += max(int(piece), 1)
-        self._uncached_last_charged = max(int(piece), 1)
+        if self._book_belief_uncached:
+            _st = getattr(self.arm, "stats", None)
+            if _st is not None:
+                _st["book0b_pieces"] += 1
+                _st["book0b_cold_pieces"] += int(_cold)
+                _st["book0b_extra_tokens_sum"] += int(_x)
+                if _x:
+                    self._book0b_extra_s += (DP.price_gpu_s(_booked, 0, self._charge_mode)
+                                             - DP.price_gpu_s(max(int(piece), 1), 0,
+                                                              self._charge_mode))
+                _st["book0b_extra_gpu_s_milli"] = int(round(1000.0 * self._book0b_extra_s))
+        self._uncached_in_flight += _booked
+        self._uncached_last_charged = _booked
         kind = "piece" if slice_tokens is not None else "whole"
         did = self._log_decision(t, "release_piece" if kind == "piece" else "release_whole",
                                  [], piece_tokens=int(piece), latency_ms=dt_ms, preds=preds,
@@ -1612,6 +1691,18 @@ class Live2Coordinator:
                      else max(int(tokens)
                               - max(int(getattr(s, "built_tokens", 0) or 0),
                                     int(getattr(s, "last_telemetry_cached_tokens", 0) or 0)), 0))
+        if self._book_belief_uncached and SA.type_of_device(o.device_id) == "recall":
+            # LAYER 0b, ROBOT RECALL (READ SITE of `_book_belief_uncached`): the uncached tokens the
+            # recall will prefill = prompt tokens x (1 - P cached fraction), PRE-SEND, from the
+            # shadow; replaces `prompt - max(built, telemetry)`. Assistance stays as booked.
+            _pf, _ptok = self._pb.p_cached_fraction(s.session_id, int(tokens), t, None)
+            _old_unc = int(_uncached)
+            _uncached = max(int(tokens) - int(_ptok), 1)
+            _st = getattr(self.arm, "stats", None)
+            if _st is not None:
+                _st["book0b_recalls"] += 1
+                _st["book0b_recall_tokens_old_sum"] += _old_unc
+                _st["book0b_recall_tokens_new_sum"] += int(_uncached)
         if self._d162_pricing:
             cost = DP.price_gpu_s(_uncached, self._uncached_in_flight, self._charge_mode)
         # ---- D179 (4) RELEASE RE-CHECK, RECALL AND ASSISTANCE PATHS (session B). BEGIN block --
@@ -1771,6 +1862,10 @@ class Live2Coordinator:
         # Decision-neutral by construction: under D162 pricing the condition was already true, and
         # without it no other site reads the field. Proved on a digest for one arm of each kind.
         self._uncached_pending[rid] = int(self._uncached_last_charged)
+        self._booking_rows.append(dict(request_id=rid, kind=kind, device_id=device_id,
+                                       session_id=session_id, decision_id=decision_id,
+                                       t_submit=round(float(t), 6), est_tokens=int(est_tokens),
+                                       booked_uncached=int(self._uncached_last_charged)))
         # ---- D179 (1) to (3) SHARE ADMISSION, W TRACKING. BEGIN contiguous block --------------
         # Tracked HERE, at the single point where a request id exists for every kind, rather than
         # at the four release sites, so the id W is keyed on is exactly the id the drain pops.
@@ -1821,6 +1916,8 @@ class Live2Coordinator:
                                         **self._priority_for(kind, device_id, session_id, opportunity_id)))
         self.st.in_flight[kind] += 1
         self.counts["submitted_" + kind] += 1
+        if self._pb_on:
+            self._pb_observe_send(sub, kind, device_id, session_id)
         if kind != "monitor":
             # the uncached count THIS request was charged: every release path sets
             # `_uncached_last_charged` immediately before calling `_submit`
@@ -1843,6 +1940,31 @@ class Live2Coordinator:
         else:
             self.futures.append((self.be.submit_live2(sub), sub))
         return rid
+
+    def _pb_observe_send(self, sub, kind: str, device_id: str, session_id: Optional[str]) -> None:
+        """READ SITE of `_pb_on` (layer P). Records the send; no decision reads the result."""
+        if SA.type_of_device(device_id) == "recall" and session_id is not None:
+            key = session_id
+        elif kind == "monitor":
+            key = "dev:" + device_id
+        else:
+            key = "u:" + sub.request_id
+        n = int(sub.est_tokens)
+        prev = self._pb_last.get(key)
+        sh = PBL.shared_prefix_tokens(prev[0], prev[1], sub.mm_uuids) if prev else 0
+        pf, ptok = self._pb.p_cached_fraction(key, n, sub.sent_s, sh)
+        self._pb.observe_send(sub.request_id, key, n, sub.sent_s, sh,
+                              robot=(self.st.devices[device_id].type == "robot"))
+        self._pb_last[key] = (list(sub.mm_uuids), n)
+        if session_id is not None and key == session_id:
+            tier = self.st.sessions[session_id].believed_tier()
+            self._pb_log.append(dict(t=float(sub.sent_s), session=session_id, kind=kind, tokens=n,
+                                     p_frac=round(pf, 4), p_tokens=ptok, tier=tier,
+                                     tier_frac=0.0 if tier == "cold" else 1.0))
+        _as = getattr(self.arm, "stats", None)
+        if _as is not None:
+            for _k, _v in self._pb.stats.items():
+                _as[_k] = _v
 
     # ---- D179 (1) to (3) SHARE ADMISSION (session A), the one gate. BEGIN contiguous block ----
     def _mirror_d179_stats(self) -> None:
@@ -2065,6 +2187,8 @@ class Live2Coordinator:
             ct = cached_tokens_of(usage)
             pt = prompt_tokens_of(usage)
             path, frac = SC.cache_path_of(ct, pt)
+            if self._pb_on:
+                self._pb.observe_completion(sub.request_id, ct, t)
             # D150 / spec v5 section 8: the engine's OWN per-request cached-token count corrects
             # the residency belief. Until this read existed the belief was a prediction with no
             # correction, which is the write-only shape CLAUDE.md names. The corrector refuses to
@@ -2523,6 +2647,7 @@ class Live2Coordinator:
         # D230 (2) limitation 1, same placement and the same reason as `rd_log` above: every
         # caller of `_result` gets it, and it is a no-op for every arm without a guard log.
         guard_log = self.write_guard_log()
+        self.write_booking_log()
         return dict(
             arm=self.arm.name, arm_version=getattr(self.arm, "arm_version", "unversioned"),
             is_measurement=False,

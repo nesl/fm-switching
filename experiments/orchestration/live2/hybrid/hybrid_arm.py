@@ -43,6 +43,7 @@ for p in (LIVE2, LIVE2 / "fleet", REPO / "experiments/orchestration",
         sys.path.insert(0, str(p))
 
 import costs as C
+import la_arrival_admission as LA                                        # noqa: E402
 # `hybrid` is imported BOTH as a package (the live harness puts live2/ on sys.path but NOT
 # live2/hybrid/) and as a flat module directory (flash's proofs put live2/hybrid/ on sys.path).
 # A bare `import value_reader` works only in the second case, and it killed every live run on the
@@ -418,6 +419,9 @@ class HybridArm:
                 work = est + self._unbuilt_rebuild_s(q)
                 laxity = qs - work
                 risk = self.sw["c2"] and (laxity < self._k_r_for(q))
+            est_gate = est
+            if LA.arm_enables(self):                      # READ SITE of live2_la_arrival_admission
+                est_gate = self._la_gate_est(q, obs, now, est, qs)
             over_limit = (self.over_limit_infeasible
                           and int(getattr(q, "readiness_tokens", 0) or 0) > CL.limit_tokens())
             if over_limit:
@@ -429,9 +433,9 @@ class HybridArm:
                 self.stats["over_limit_tokens_max"] = max(
                     int(self.stats.get("over_limit_tokens_max", 0)),
                     int(getattr(q, "readiness_tokens", 0) or 0))
-            elif est <= qs:
+            elif est_gate <= qs:
                 d = RecallAction(q.query_id, "CLOUD")
-            elif est <= qs + self._b7.defer_s:
+            elif est_gate <= qs + self._b7.defer_s:
                 d = RecallAction(q.query_id, "DEFER", defer_s=self._b7.defer_s)
             else:
                 d = RecallAction(q.query_id, "REJECT")
@@ -533,6 +537,38 @@ class HybridArm:
                 recall.append(d)
         self.stats["decisions"] += 1
         return Action(streams=streams, recall=recall, order="EDF", notes={"hybrid": self.name})
+
+    def _la_gate_est(self, q, obs, now: float, est_iso: float, qs: float) -> float:
+        """Load-aware arrival estimate (la_arrival_admission). Counts, logs and returns the estimate
+        the unchanged comparator then uses in place of the isolated one."""
+        roster = self._roster or {}
+        u, rule = LA.uncached_for(q, roster)
+        ahead = LA.queued_ahead(obs)
+        est_la = LA.loadaware_est(u, ahead)
+        dfr = self._b7.defer_s
+        o_iso, o_la = LA.outcome(est_iso, qs, dfr), LA.outcome(est_la, qs, dfr)
+        st = self.stats
+        st["la_arrival_evals"] += 1
+        st["la_est_isolated_milli_sum"] += int(round(est_iso * 1000.0))
+        st["la_est_loadaware_milli_sum"] += int(round(est_la * 1000.0))
+        st["la_queued_ahead_tokens_sum"] += int(ahead)
+        st["la_rule_" + rule] += 1
+        if ahead > 0:
+            st["la_queued_ahead_positive"] += 1
+        if est_la > est_iso:
+            st["la_est_greater"] += 1
+        if o_iso != o_la:
+            st["la_decision_changed_vs_isolated"] += 1
+            st["la_changed_%s_to_%s" % (o_iso, o_la)] += 1
+            log = self.__dict__.setdefault("_la_log", [])
+            if len(log) < 400:
+                log.append(dict(t=round(float(now), 3), query_id=q.query_id, device=str(q.session_id),
+                                iso=o_iso, la=o_la, est_iso=round(est_iso, 4), est_la=round(est_la, 4),
+                                slack_s=round(qs, 4), u=int(u), queued_ahead=int(ahead), rule=rule))
+        samp = self.__dict__.setdefault("_la_est_samples", [])
+        if len(samp) < 20000:
+            samp.append((round(est_la, 4), int(ahead), int(u)))
+        return est_la
 
     def _unbuilt_rebuild_s(self, q) -> float:
         """v2 laxity: the cold rebuild of the believed UN-BUILT part of the history. A COLD history's rebuild is
