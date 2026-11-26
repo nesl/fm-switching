@@ -62,3 +62,14 @@ Counters: q5_holdback_evals 102, chosen 73, decided_by_inflight 71, inflight_non
 Counters: q5_holdback_evals 101, chosen 17, decided_by_inflight 15; q5b_pieces_priced 101, q5b_piece_tokens_sum 103,424; pieces completed 129 (rung 3 144); n_built 10,118; state_skipped_nothing_built 1,205; c5_decrease 5 (rung 3 3); c5_attr_suppressed_decrease 74 (rung 3 215); recall_REJECT absent (0).
 **Against the prediction committed in d2d6ccae (stated plainly, not repaired):** REJECT near 0: HELD. TOUCH at most about 4,000: HELD (647, 0.24x rung 3). HOLD_BACK at most about 10: MISSED (17 against 2 for rung 3). Pieces about 163: MISSED (130 submitted; the prediction used the dry's 163 where the live rung 3 submitted 145). Robot columns match rung 3 exactly.
 **Reading, observations only (one seed):** the released-piece pricing removed the `-q5` failure (cbd 73 to 83, REJECTs to 0) and the arm is rung-3-LIKE at 1x: it passes the 1x bars by being no worse than rung 3, with fewer touches (647 against 2,674) and more HOLD_BACK (17 against 2), neither of which cost anything measurable on this seed. This is a no-worse result, not an improvement; a pass at s4 is a SELECTION (6 queue-aware loop cells used before this one, 7 with it). `-q5b` halved is running (ends about 00:48); the loop stops only on a pass at BOTH conditions, then s5-s7 (6 cells) after the D250 s5-s7 block.
+
+## RESULT, `-q5b` GATE (b) `_kv0.5r_h0.5` s4, scored 2026-11-26T08:56Z against the bars above, as reported by the H100 (SA OK, valid, 0 errors, 0 ENOSPC), live2 1dbe19c3
+**FAIL on cbd by 5; dashcam PASSES. `-q5b`: 1x PASS on both bars; halved FAIL on cbd.** (1) cbd 70 against 75: FAIL (-5; -2 against rung 3's 72). (2) dashcam 6,175 against 5,958: PASS (+217 from the bar; +63 against rung 3's 6,112, inside the 154 spread, not a difference; worst device 0.463 against 0.454).
+| halved s4 | cbd | cloud + device | on-time | acc | SS | dashcam (worst) | TOUCH | HOLD_BACK | recall_REJECT |
+|---|---|---|---|---|---|---|---|---|---|
+| `-q5b` | 70 | 46 + 24 (standing 64) | 68/132 | 0.676 | 312 | 6,175 (0.463) | 1,029 | 11 | 33 |
+| rung 3 | 72 | 49 + 23 (60) | 72 | 0.681 | 311 | 6,112 (0.454) | 1,434 | 4 | 34 |
+| `-q5` | 63 | | 86 | | 335 | 7,582 | 0 | 73 | |
+| `-q` | 77 | | 91 | | 320 | 6,759 | 787 | 93 | |
+Counters: q5b_pieces_priced 111, piece_tokens_sum 113,664; pieces submitted 145 (rung 3 155); c5_decrease 17 (19), suppressed 1,533 (1,773).
+**FLAG FOR THE USER: rung 3 ITSELF does not meet the halved cbd bar (72 against 75, at s4).** The halved bar was fixed from `-q`'s pass (77); "as well as rung 3" and "the bars as written" therefore diverge at halved memory: `-q5b` is within 2 of rung 3 on cbd and above it on dashcam, yet fails the written bar by 5. The stop condition stays the bars as written (D292); the loop continues; this is recorded, not re-interpreted. Cumulative s4 cells used by the queue-aware loop: 8 (`-q4` x2, `-q4b` x2, `-q5` x2, `-q5b` x2).
