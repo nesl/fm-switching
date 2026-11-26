@@ -36,3 +36,16 @@
 
 ## CORRECTION OF CONDITION AND CLUSTERED READING, 2026-11-26T15:50Z (research/study_question_sampling_clustered_bootstrap.md)
 **The D250 seed batches (s5, s6, s7) are the HALVED-MEMORY condition (`_kv0.5r_h0.5`, rung 3 cells carry the name-only `_preD249` label), as at s4 (rung 3 cbd 72): the rung 3 cbd of 52 (s5), 41 (s6) and 40 (s7) in this file are halved-memory figures; the corresponding 1x rung 3 cells are 56, 61 and 50.** The s6 device-correct section above used the 1x cells (device-correct 7 at s6), the same question set at the same seed. **The pool is the 69 EVAL LH-REQ questions in 51 sessions, not 97 (the "97" in the s6 section is the full LH-REQ count including 28 DEV).** Clustered by question id, rung 3 minus `base` at `_kv0.5r_h0.5` is: s4 +11 (2, 22), s5 +10 (-3, 23), s6 +17 (3, 33), **s7 -1 (-8, 7)**: so the s5 PASS is not distinguishable from zero at the question level and s7 is flat against `base` (the s7 batch is still running; its verdict is the H100's to report and the count rule is unchanged). The H100's count-form rule counts asks; the clustered interval is reported beside it, not instead of it.
+
+## SEED 7, recorded 2026-11-26T16:44Z (HALVED-MEMORY condition, `_kv0.5r_h0.5`; 7 cells, post-push live2 152b47d4, all valid, SA OK, 0 ENOSPC; 2 dashcam kind-2 ReadErrors on eco-llm; robot pool n = 105), as reported by the H100
+| arm | cbd | cloud-correct | device-correct (standing) | cloud on-time | acc | SS | dashcam (worst) |
+|---|---|---|---|---|---|---|---|
+| rung 3 | **40** | 30 | 10 (55) | 50 | 0.600 | 305 | 5,530 (0.407) |
+| base | **41** | 15 | 26 (84) | 21 | 0.714 | 355 | 6,541 (0.534) |
+| cascade | 38 | 8 | 30 (95) | 10 | 0.800 | 152 | 1,896 (0.113) |
+| simplestream | 24 | 24 | 0 (0) | 105 | 0.229 | 359 | 11,192 (0.947) |
+| llf | 31 | 0 | 31 (105) | 0 | n/a | 187 | 9,358 (0.781) |
+| mooncake | 32 | 3 | 29 (100) | 5 | 0.600 | 281 | 7,944 (0.658) |
+| eco-llm | 28 | 20 | 8 (33) | 72 | 0.278 | 277 | 7,700 (0.629) |
+**H100 verdict: FAIL on the ruled metric.** (1) The best baseline on cbd is `covex-v6-base` 41; rung 3 40 = -1 (the rule needs more than +2): FAIL. (2) Dashcam against `base`: 5,530 against 6,541 = -1,011, beyond the 154 bar: FAIL. Cloud-only: rung 3 is the best cloud-correct arm (30; simplestream 24, eco-llm 20, base 15): +15 against the cbd winner; cloud on-time: simplestream 105 against 50. Dashcam beaten beyond 154 by base (+1,011), mooncake (+2,414), llf (+3,828), eco-llm (+2,170), simplestream (+5,662).
+**D250 BLOCK COMPLETE: per-seed rung 3 minus best baseline cbd: s4 +11, s5 +10, s6 +17 (PASS), s7 -1 (FAIL).** The clustered question-level CI computed beforehand (rung 3 minus `base` at `_kv0.5r_h0.5`: s4 +11 (2, 22), s5 +10 (-3, 23), s6 +17 (3, 33), s7 -1 (-8, 7)) matches the point values: **3 of 4 seeds pass the count rule, and only s4 and s6 have clustered intervals above 0**; s7's pool (105 asks, 22 questions, the smallest) has the fewest cloud-useful questions. Rung 3 is again the best cloud-correct arm at s7 and loses on cbd because `base`'s device fallback pays more (device-correct 26 against 10, standing 84 against 55), the same direction as the s6 question-mix flag. Cumulative: the D250 rule is a count rule per seed; the seed-level outcome is mixed, not a clean sweep. The six `-q5c` seed cells start now.
