@@ -176,3 +176,42 @@ Gates (identical to candidate A, pre-registered in `dashcam_brier.py`):
 - G1: mean Brier improvement of cloud over device > 0 with clip-cluster bootstrap CI lower bound > 0.
 - G2: Spearman rho between per-arm realised cloud gain and DSMAP challenge mAP > 0 with CI lower bound > 0.
 A failure of either gate STOPS the step. No substitution.
+
+## Step 1 result: live versus SH-EP shift (fixes nothing)
+
+Paired on identical (clip, t): 47,126 pairs, 155 clips, 24 arms, seeds 4 to 7, 1x. Output
+`results/orchestration/live2/oracle/dashcam_shift_step1.json`, script `dashcam_shift_step1.py`.
+
+- Paired difference (live minus SH-EP 32B): mean -0.32, median 0.00, IQR -1.25 to 0.88, p5 -5.1, p95 3.4.
+- By cache path: WARM n = 43,684, mean -0.29. COLD n = 3,437, mean -0.62. Five requests had no path.
+- By frame bucket (live frames in request): 1 to 4 mean -0.59; 5 to 8 mean -0.64; 9+ mean -0.07.
+- By arm: means from -0.25 (mooncake) to -0.70 (attentionstore-prefetch).
+- Body, same instant, live against SH-EP: frame count matches in 411 of 47,126 pairs.
+  - COLD: live median 3 frames (3,211 of 3,437 at most 3) against SH-EP median 11 frames with about 3,392
+    cached tokens. The COLD live request carries no cached prefix and only the new frames.
+  - WARM: live median 10 frames against SH-EP median 16 frames. The prefix sits in the server cache by
+    design (append-only, D148), so this difference is the designed path.
+  - Frame time order is sorted in all live requests.
+- Not checkable from committed data: JPEG bytes (the live record stores frame identifiers, not bytes),
+  and the on-device tier request body (device-local, not recorded).
+
+Classification (pre-registered rule): BODY DEFECT on the COLD path. The model receives a truncated
+context on a cold cache (about 3 frames against about 11). The WARM difference is expected and does not
+on its own explain the shift. The score shift on the COLD path is consistent with the lost history. The
+frame bucket trend is confounded with cache path and is not used as a separate cause.
+
+## Candidate A-prime: GATE FAILED (2026-11-25), STOP
+
+Live-fitted Platt per tier, clip cross-fit with the committed `clip_to_fold` rule, pooled across arms
+and seeds, Brier improvement of cloud over device. Script `dashcam_brier_aprime.py`; output
+`results/orchestration/live2/oracle/dashcam_brier_aprime.json`.
+
+- G1 (cloud beats device): mean improvement +0.00033, clip-cluster CI [-0.00058, +0.00129]. FAIL,
+  because the lower bound is below zero. The point estimate is positive but indistinguishable from zero.
+- G2 (arm ordering agrees with challenge mAP): Spearman rho +0.72, CI [-0.54, +0.83] across 23 arms. FAIL,
+  because the CI includes zero.
+
+Both gates fail. No oracle shares computed. The dashcam oracle is not replaced. The dashcam headline stays
+the Nexar challenge metric (D199). The COLD-path body defect is the concrete finding to fix before any
+dashcam measure is re-tested: rebuild the cold request with the full history, then rerun the same
+pre-registered diagnostic and gates.

@@ -1,0 +1,103 @@
+{
+ "_what": "Candidate A-prime: live-fitted, clip-cross-fitted (committed clip_to_fold) Platt maps; Brier improvement of cloud over device; gates G1 and G2 pre-registered.",
+ "maps_by_fold": {
+  "device": {
+   "0": [
+    0.1032159765501119,
+    -1.4338631745739372
+   ],
+   "1": [
+    0.0627498492291064,
+    -1.9429973560266038
+   ],
+   "2": [
+    0.104866790212606,
+    -1.4050476818206572
+   ],
+   "3": [
+    0.09011482060927874,
+    -1.643664419919576
+   ],
+   "4": [
+    0.058509897749992615,
+    -1.9722965731956843
+   ]
+  },
+  "cloud": {
+   "0": [
+    0.10156648500205398,
+    -1.1932807618875119
+   ],
+   "1": [
+    0.07122557822159296,
+    -1.666518457915458
+   ],
+   "2": [
+    0.09911232870587149,
+    -1.2229165915416689
+   ],
+   "3": [
+    0.10467501386352059,
+    -1.2048597514516115
+   ],
+   "4": [
+    0.06785986973736709,
+    -1.6980328459240075
+   ]
+  }
+ },
+ "G1": {
+  "mean_brier_improvement": 0.00033,
+  "ci95": [
+   -0.000583,
+   0.001291
+  ],
+  "device_brier": 0.066004,
+  "cloud_brier": 0.065674,
+  "n_labelled_instants": 25622,
+  "n_clips": 296,
+  "pass": false
+ },
+ "G2": {
+  "spearman_rho": 0.7184,
+  "ci95": [
+   -0.5386,
+   0.8281
+  ],
+  "n_arms": 23,
+  "arms": [
+   "base",
+   "rules",
+   "state-uo",
+   "state-uo-c5attr",
+   "state-shares",
+   "state-shares-r1",
+   "state-shares-r2",
+   "fair-c5attr",
+   "fair-c5attr-gain0",
+   "edf",
+   "llf",
+   "b7-edf-feasibility",
+   "always-cloud-fcfs",
+   "mooncake",
+   "attentionstore-prefetch",
+   "lmcache",
+   "kvflow-prefetch",
+   "simplestream",
+   "streamscout",
+   "querystream-proactive",
+   "eco-llm",
+   "warm-all-lru",
+   "fair-c5attr-rr"
+  ],
+  "pass": false
+ },
+ "gate_pass": false,
+ "_provenance": {
+  "git_commit": "96b4a241d98cf27a5c704a5de00ef1022c15739b",
+  "script": "dashcam_brier_aprime.py",
+  "model": "none",
+  "timestamp": "2026-11-25T16:46:55.860583",
+  "device": "jetson_orin"
+ }
+}

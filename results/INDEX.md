@@ -1594,3 +1594,9 @@ E-id: **StudyD258-DEVLAT** (research/EXPERIMENTS.md). Commits 6dfbb8c4 (rescore)
 |---|---|
 | result files | `results/orchestration/live2/oracle/dashcam_brier_candidateA.json`; `experiments/analysis/oracle/dashcam_brier.py`; `reports/study_dashcam_diagnosis.md` |
 | headline | G1 fail: cloud Brier 0.1116 vs device 0.0974 on 25,622 live instants (mean improvement -0.0142, CI -0.0206 to -0.0079). G2 fail: Spearman rho -0.63 (CI -0.71 to -0.55) vs DSMAP challenge mAP. No oracle shares computed; dashcam oracle not replaced. |
+
+## StudyDASH-DIAG Step 1 and candidate A-prime (2026-11-25, Orin)
+| field | value |
+|---|---|
+| result files | `results/orchestration/live2/oracle/dashcam_shift_step1.json`; `results/orchestration/live2/oracle/dashcam_brier_aprime.json`; scripts `dashcam_shift_step1.py`, `dashcam_brier_aprime.py`; `reports/study_dashcam_diagnosis.md` |
+| headline | Step 1: 47,126 paired pairs, mean live-minus-SH-EP -0.32. COLD-path requests send a median of 3 frames against 11 in SH-EP (body defect; WARM difference is the designed append). A-prime: G1 fail (improvement +0.00033, CI lower -0.00058), G2 fail (rho 0.72, CI -0.54 to 0.83). Stopped. |
