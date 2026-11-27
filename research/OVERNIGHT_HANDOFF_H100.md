@@ -2006,3 +2006,4 @@ file so a reader can find the evidence rather than only the state.
 - 04:13 D258 llf n16 s4 L2 (03:51:50 to 04:13:10): valid, 1 err, 11,625 requests. Boundary 04:13: GPU 3 busy (79,870 MiB, 100 percent): probe not started. Next llf L5 started 04:13:21 (ends ~04:35).
 - 04:35 D258 llf n16 s4 L5 (04:13:21 to 04:34:44): valid, 0 err, 8,568 requests. Boundary 04:35: GPU 3 busy: probe not started.
 - 04:56 D258 mooncake n16 s4 L1.5 (04:34:53 to 04:56:16): valid, 1 err, 12,123 requests. Boundary 04:56: GPU 3 busy: probe not started. Next mooncake L2 started 04:56:27 (ends ~05:18).
+- 05:18 D258 mooncake n16 s4 L2 (04:56:27 to 05:17:49): valid, 1 err, 12,136 requests. Boundary 05:18: GPU 3 busy: probe not started.
