@@ -445,7 +445,7 @@ def _set_la(arm: Any) -> None:
             raise LadderSwitchError("%s did not take on %s" % (LAA.LA_SWITCH, type(o).__name__))
 
 
-def _set_catchup(arm: Any, paced: bool = False) -> None:
+def _set_catchup(arm: Any, paced: bool = False, busyx: bool = False) -> None:
     """Turn catch-up prefill on for THIS INSTANCE of the rules arm (`arm._rules`, whose `decide` is
     the one reader) and read it back. Default OFF everywhere."""
     r = arm._rules
@@ -458,6 +458,10 @@ def _set_catchup(arm: Any, paced: bool = False) -> None:
         object.__setattr__(r, "_cup_w_of", lambda did, _a=arm: R4._weight_of(_a, did))
         if CUP.arm_paced(r) is not True:                                   # pragma: no cover
             raise LadderSwitchError("%s did not take on %s" % (CUP.PACED_SWITCH, type(r).__name__))
+    if busyx:
+        object.__setattr__(r, CUP.BUSYX_SWITCH, True)
+        if CUP.arm_busyx(r) is not True:                                   # pragma: no cover
+            raise LadderSwitchError("%s did not take on %s" % (CUP.BUSYX_SWITCH, type(r).__name__))
 
 
 def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
@@ -485,6 +489,7 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                pb_host_engine_model: bool = False,
                catchup_prefill: bool = False,
                catchup_pace: bool = False,
+               catchup_busyx: bool = False,
                **kw: Any) -> Any:
     """Build rung 3. Four switches, each set on the instance and each read back.
 
@@ -590,11 +595,15 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         if not (predictive_belief and book_belief and la_arrival):
             raise LadderSwitchError(
                 "catchup_prefill requires predictive_belief, book_belief and la_arrival")
-        _set_catchup(arm, paced=catchup_pace)
+        _set_catchup(arm, paced=catchup_pace, busyx=catchup_busyx is True and catchup_pace)
     elif catchup_pace:
         raise LadderSwitchError("catchup_pace requires catchup_prefill")
     if not isinstance(catchup_pace, bool):
         raise LadderSwitchError("catchup_pace must be a bool, got %r" % (catchup_pace,))
+    if not isinstance(catchup_busyx, bool):
+        raise LadderSwitchError("catchup_busyx must be a bool, got %r" % (catchup_busyx,))
+    if catchup_busyx and not catchup_pace:
+        raise LadderSwitchError("catchup_busyx requires catchup_pace")
     return arm
 
 

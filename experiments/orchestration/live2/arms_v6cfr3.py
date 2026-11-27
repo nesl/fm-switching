@@ -830,6 +830,12 @@ def _final_ladder_lazy() -> Dict[str, Any]:
                              la_arrival=True, engine_resync=True, catchup_prefill=True,
                              catchup_pace=True, **kw)
 
+    def r3laercupx(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_LA + "-er-cupx", predictive_belief=True, book_belief=True,
+                             la_arrival=True, engine_resync=True, catchup_prefill=True,
+                             catchup_pace=True, catchup_busyx=True, **kw)
+
     def r3link(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3_LINK, d249_queue_visibility=True, link_read=True, **kw)
@@ -877,6 +883,7 @@ def _final_ladder_lazy() -> Dict[str, Any]:
             "covex-v6-fair-final-la-er": r3laer,
             "covex-v6-fair-final-la-er-cu": r3laercu,
             "covex-v6-fair-final-la-er-cup": r3laercup,
+            "covex-v6-fair-final-la-er-cupx": r3laercupx,
             # TEST ARM: P rebuild (engine host model + wire prompt size) DID NOT MEET ITS PRE-REGISTERED
             # RULE (robo003 asks); not part of the candidate.
             "covex-v6-fair-final-la-er-pwire": r3laerpwire,

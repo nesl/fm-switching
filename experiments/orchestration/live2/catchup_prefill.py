@@ -28,6 +28,10 @@ ceil(backlog / chunk_tokens) per window, the number of ordinary chunk-edge asks 
 is worth, spent by catch-up asks AND ordinary asks, (3) the hybrid core's C5 cap is at its ceiling,
 (4) the core's C2 epoch record shows no dashcam row and no single-shot row at risk this epoch.
 Order: deficit weight (`_pd_w_of`, the rung-3 feed's `weight_device`) descending, then the gap order.
+BUSY-X MODE (`live2_catchup_prefill_busyx`, arm `-la-er-cupx`, requires the paced mode): in addition
+to the same-device piece/whole test, no catch-up ask while ANY deadline-bearing single-shot
+(`qtype == "assistance"`) or dashcam (`qtype == "alert"`) request, of any device, is in flight, nor
+while a piece/whole of ANY device with an open catch-up window is in flight. Same rows, same fields.
 
 READ SITES: `arms_v5rules2.V5Rules2Arm.decide` (`observe`, `candidates`, `account`); the decision it
 changes is the MATERIALIZE list `act.sessions`, enacted at `coordinator._enact` (MATERIALIZE branch)
@@ -41,6 +45,7 @@ import book_belief_uncached as BB
 
 SWITCH = "live2_catchup_prefill"
 PACED_SWITCH = "live2_catchup_prefill_paced"
+BUSYX_SWITCH = "live2_catchup_prefill_busyx"
 LOG_CAP = 4000
 
 
@@ -84,6 +89,27 @@ def arm_paced(arm: Any) -> bool:
         raise CatchupSwitchError("%s must be a bool, got %r" % (PACED_SWITCH, type(v).__name__))
     if v and not arm_enables(arm):
         raise CatchupSwitchError("%s requires %s" % (PACED_SWITCH, SWITCH))
+    return v
+
+
+def arm_busyx(arm: Any) -> bool:
+    """Is the WIDENED BUSY CHECK on for THIS INSTANCE? Default False; instance dict only, strict
+    bool, and it requires the paced mode."""
+    try:
+        own = vars(arm)
+    except TypeError:                                                          # pragma: no cover
+        own = {}
+    if BUSYX_SWITCH not in own:
+        for klass in type(arm).__mro__:
+            if bool(klass.__dict__.get(BUSYX_SWITCH, False)):
+                raise CatchupSwitchError(
+                    "%s is ON as a CLASS attribute of %s and the instance declares nothing; "
+                    "it requires an arm-scoped INSTANCE attribute" % (BUSYX_SWITCH, klass.__name__))
+    v = own.get(BUSYX_SWITCH, False)
+    if not isinstance(v, bool):
+        raise CatchupSwitchError("%s must be a bool, got %r" % (BUSYX_SWITCH, type(v).__name__))
+    if v and not arm_paced(arm):
+        raise CatchupSwitchError("%s requires %s" % (BUSYX_SWITCH, PACED_SWITCH))
     return v
 
 
@@ -146,6 +172,13 @@ def candidates(arm: Any, obs: Any, roster: Dict[str, Any], ordinary: set) -> Lis
     busy = {str(r.device_id) for r in rows if str(r.kind) in ("piece", "whole")}
     out: List[str] = []
     paced = arm_paced(arm)
+    busyx = arm_busyx(arm) if paced else False
+    if busyx:
+        ss_fl = any(str(r.qtype) == "assistance" and bool(r.has_deadline) for r in rows)
+        dash_fl = any(str(r.qtype) == "alert" and bool(r.has_deadline) for r in rows)
+        win_dev = {w[2] for w in cu.win.values()}
+        cu_fl = {str(r.device_id) for r in rows if str(r.kind) in ("piece", "whole")
+                 and str(r.device_id) in win_dev}
     blocked = None
     if paced:
         core = _core(arm)
@@ -201,6 +234,16 @@ def candidates(arm: Any, obs: Any, roster: Dict[str, Any], ordinary: set) -> Lis
         if did in busy:
             arm.stats["catchup_epochs_paced_one_in_flight"] += 1
             continue
+        if busyx:
+            if ss_fl:
+                arm.stats["catchup_paced_skip_busy_ss"] += 1
+                continue
+            if dash_fl:
+                arm.stats["catchup_paced_skip_busy_dash"] += 1
+                continue
+            if cu_fl:
+                arm.stats["catchup_paced_skip_busy_cu_global"] += 1
+                continue
         if b > 0 and BB.booked_uncached(b, int((pb.get(sid) or {}).get("cached", 0)),
                                         1)[2]:
             arm.stats["catchup_epochs_prefix_not_resident"] += 1
