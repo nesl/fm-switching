@@ -210,6 +210,15 @@ def render(out, rows, pooled_n):
     fig, ratio = _figure(rows, "pgf", out)
     pgf = OUTDIR / "F01_intro_teaser.pgf"
     fig.savefig(pgf)
+    # Right-align y labels independently of the pgf 'right' anchor (Overleaf placed cited labels at different edges):
+    # each label becomes a zero-width box right-aligned at the same left point, so its right edge is fixed.
+    import re as _re
+    src = pgf.read_text()
+    src, n = _re.subn(r"\\pgftext\[x=([\d.]+in),y=([\d.]+in),right,\]\{(.*)\}%",
+                      lambda m: "\\pgftext[x=%s,y=%s,left,]{\\makebox[0pt][r]{%s}}%%" % (m.group(1), m.group(2), m.group(3)),
+                      src)
+    assert n > 0, "no right-anchored labels found in pgf"
+    pgf.write_text(src)
     fig_p, _ = _figure(rows, "agg", out)
     png = OUTDIR / "F01_intro_teaser.png"
     fig_p.savefig(png, dpi=300)
