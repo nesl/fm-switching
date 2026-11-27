@@ -141,11 +141,9 @@ def render(out, rows, pooled_n):
             col, hatch, ec = C_STATE, None, "none"
         ax.barh(y, r["diff"], height=0.66, color=col, edgecolor=ec, hatch=hatch, linewidth=0.0)
         lo, hi = r["ci95"]
-        ax.plot([lo, hi], [y, y], color=INK, lw=0.6, solid_capstyle="butt", zorder=3)
-        for xx in (lo, hi):
-            ax.plot([xx, xx], [y - 0.14, y + 0.14], color=INK, lw=0.6, zorder=3)
+        # error bars removed (ruling: figure shows values only; paired CIs are in the rows JSON)
         label = f"{r['diff']:+d}".replace("+-", "-")
-        x_lab = max(hi, r["diff"]) + 8
+        x_lab = r["diff"] + 8
         ax.text(x_lab, y, label, va="center", ha="left", fontsize=7, color=INK,
                 fontweight="bold" if r["class"] == "covex" else "normal")
     ax.set_yticks(ys)
