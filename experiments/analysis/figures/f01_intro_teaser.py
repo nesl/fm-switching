@@ -172,7 +172,7 @@ def render(out, rows, pooled_n):
     ratio = cov["diff"] / base["diff"]
     ax.text((cov["diff"] + base["diff"]) / 2, yA + 0.12, f"{ratio:.1f}\u00d7", ha="center", va="bottom",
             fontsize=7, color=INK, fontweight="bold")
-    handles = [Patch(facecolor=C_COVEX, edgecolor="none", label="COVEX"),
+    handles = [Patch(facecolor=C_COVEX, edgecolor="none", label="COVEX (ours)"),
                Patch(facecolor=C_STATE, edgecolor="none", label="Stateless baselines"),
                Patch(facecolor=C_STATEFUL, edgecolor=HATCH, hatch="//", linewidth=0,
                      label="Stateful baselines")]
@@ -215,7 +215,7 @@ def main():
     dev_sum = sum(f1[DEVICE][s] for s in seeds)
     systems = {}
     covex_seeds = [s for s in seeds if s in f1[a.covex_arm]]
-    systems[a.covex_arm] = {"display": "COVEX", "class": "covex", "seeds": covex_seeds,
+    systems[a.covex_arm] = {"display": "COVEX (ours)", "class": "covex", "seeds": covex_seeds,
                             "class_ref": "experiments/orchestration/live2/arms_final_ladder.py (rung 3 arm)",
                             "class_basis": "COVEX (this paper's policy)"}
     for arm, (disp, cls, ref, basis) in BASELINES.items():
