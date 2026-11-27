@@ -114,7 +114,7 @@ def render(out, rows, pooled_n):
     import matplotlib.pyplot as plt
     from matplotlib import font_manager
     from matplotlib.patches import Patch
-    plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42, "font.size": 7,
+    plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42, "font.size": 7, "hatch.linewidth": 0.8,
                          "font.family": "sans-serif",
                          "font.sans-serif": ["Linux Biolinum O", "Libertinus Sans", "DejaVu Sans"]})
     fam = None
@@ -127,7 +127,7 @@ def render(out, rows, pooled_n):
     plt.rcParams["font.sans-serif"] = [fam]
     out["font"] = fam
     C_COVEX, C_STATE, C_STATEFUL = "#285B91", "#8C8C8C", "#BDBDBD"
-    INK, SEC, HATCH = "#1A1A1A", "#555555", "#8C8C8C"
+    INK, SEC, HATCH = "#1A1A1A", "#555555", "#6E6E6E"
     n = len(rows)
     fig = plt.figure(figsize=(3.33, 2.45))
     ax = fig.add_axes([0.355, 0.215, 0.6, 0.72])
@@ -136,7 +136,7 @@ def render(out, rows, pooled_n):
         if r["class"] == "covex":
             col, hatch, ec = C_COVEX, None, "none"
         elif r["class"] == "stateful":
-            col, hatch, ec = C_STATEFUL, "////", HATCH
+            col, hatch, ec = C_STATEFUL, "//", HATCH
         else:
             col, hatch, ec = C_STATE, None, "none"
         ax.barh(y, r["diff"], height=0.66, color=col, edgecolor=ec, hatch=hatch, linewidth=0.0)
@@ -166,7 +166,7 @@ def render(out, rows, pooled_n):
     ax.spines["bottom"].set_color(INK); ax.spines["bottom"].set_linewidth(0.6)
     ax.set_xlabel("Additional correct answers by deadline\nover on-device answers alone",
                   fontsize=7.5, color=INK, labelpad=2)
-    # ratio arrow above the top (COVEX) bar, from the strongest baseline's value to COVEX's
+    # ratio arrow above the top (COVEX) bar, from the highest non-COVEX value (ties are equal values) to COVEX's
     cov = rows[0]; base = max((r for r in rows if r["class"] != "covex"), key=lambda r: r["diff"])
     yA = n - 1 + 0.78
     ax.annotate("", xy=(cov["diff"], yA), xytext=(base["diff"], yA),
@@ -176,7 +176,7 @@ def render(out, rows, pooled_n):
             fontsize=7, color=INK, fontweight="bold")
     handles = [Patch(facecolor=C_COVEX, edgecolor="none", label="COVEX"),
                Patch(facecolor=C_STATE, edgecolor="none", label="Stateless baselines"),
-               Patch(facecolor=C_STATEFUL, edgecolor=HATCH, hatch="////", linewidth=0,
+               Patch(facecolor=C_STATEFUL, edgecolor=HATCH, hatch="//", linewidth=0,
                      label="Stateful baselines")]
     ax.legend(handles=handles, loc="lower right", frameon=False, fontsize=6.5, handlelength=1.1,
               handletextpad=0.4, borderaxespad=0.2, labelcolor=INK)
@@ -188,6 +188,21 @@ def render(out, rows, pooled_n):
     fig.savefig(png, dpi=300)
     out["outputs"] = {"pdf": str(pdf.relative_to(REPO)), "png": str(png.relative_to(REPO))}
     return ratio, base, fam
+
+
+def paired_covex(arm, covex_arm, units):
+    """COVEX minus this arm on the same (seed, question) units; question-clustered bootstrap, 2,000, seed 0."""
+    a = units[covex_arm]; b = units[arm]
+    keys = [k for k in b if k in a]
+    d = np.array([a[k] - b[k] for k in keys], float)
+    qids = sorted({k[1] for k in keys}); idx = {q: i for i, q in enumerate(qids)}
+    cl = np.array([idx[k[1]] for k in keys])
+    cs = np.bincount(cl, weights=d, minlength=len(qids))
+    rng = np.random.default_rng(BSEED)
+    dr = rng.integers(0, len(qids), size=(NBOOT, len(qids)))
+    bs = cs[dr].sum(axis=1)
+    return {"diff": int(d.sum()), "ci95": [float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5))],
+            "n_units": len(keys), "excludes_zero": bool(np.percentile(bs, 2.5) > 0)}
 
 
 def main():
@@ -222,18 +237,23 @@ def main():
                      "class_ref": info["class_ref"], "class_basis": info["class_basis"],
                      "diff": int(round(res["diff"])), "ci95": [round(x, 2) for x in res["ci95"]],
                      "n_units": res["n_units"]})
+    for r in rows:
+        if r["arm"] != a.covex_arm:
+            r["paired_covex_minus_this"] = paired_covex(r["arm"], a.covex_arm, units)
     rows.sort(key=lambda r: -r["diff"])
     covex = next(r for r in rows if r["arm"] == a.covex_arm)
-    strongest = max((r for r in rows if r["arm"] != a.covex_arm), key=lambda r: r["diff"])
+    top_base_val = max(r["diff"] for r in rows if r["arm"] != a.covex_arm)
+    tied_top = [r["display"] for r in rows if r["arm"] != a.covex_arm and r["diff"] == top_base_val]
     n_neg = sum(1 for r in rows if r["arm"] != a.covex_arm and r["diff"] < 0)
-    ratio = covex["diff"] / strongest["diff"]
+    ratio = covex["diff"] / top_base_val
     pooled_n = 0
     for r in csv.DictReader(open(F1)):
         if r["arm"] == a.covex_arm and r["seed"] in seeds and r["pooled_n"]:
             pooled_n += int(r["pooled_n"])
     out = {"figure": "F01_intro_teaser", "covex_arm": a.covex_arm, "seeds": seeds,
-           "device_only_pooled_correct": dev_sum, "rows": rows, "ratio_covex_over_strongest": round(ratio, 2),
-           "strongest_baseline": strongest["display"], "n_baselines_below_device": n_neg,
+           "device_only_pooled_correct": dev_sum, "rows": rows, "ratio_covex_over_highest_baseline_value": round(ratio, 2),
+           "highest_baseline_value": top_base_val, "highest_baseline_value_tied_with": tied_top,
+           "n_baselines_below_device": n_neg,
            "covex_pooled_n": pooled_n, "device_only_sum_check": dev_sum,
            "git_sha": git_sha(), "F1_csv_sha256": sha(F1), "F1_units_sha256": sha(UNITS),
            "font": None, "placeholder": ("PLACEHOLDER: this figure is regenerated after the freeze on the evaluation "
@@ -241,11 +261,15 @@ def main():
            "eco_llm_seeds": "4, 6, 7 (seed 5 has no canon-scorable cell; its valid cell is not chosen by canon)",
            "confidence_cascade": "post-D205 _rerun cells, seeds 4 to 7, scored with canon.collect_units (rows added to F1.csv 2026-11-27)"}
     OUTDIR.mkdir(parents=True, exist_ok=True)
+    base_rows = [r for r in rows if r["arm"] != a.covex_arm]
+    out["caption_claim_all_paired_ci_exclude_zero"] = all(r["paired_covex_minus_this"]["excludes_zero"] for r in base_rows)
+    out["caption_claim_text"] = ("COVEX exceeds every baseline (paired 95% CI excludes 0)"
+                                 if out["caption_claim_all_paired_ci_exclude_zero"] else None)
     ratio, base, fam = render(out, rows, pooled_n)
     out["ratio_plotted"] = round(ratio, 2)
     (OUTDIR / "F01_intro_teaser.rows.json").write_text(json.dumps(out, indent=1))
     print(json.dumps({"rows": [(r["display"], r["diff"], r["ci95"], r["seeds"]) for r in rows],
-                      "ratio": out["ratio_covex_over_strongest"], "below_device": n_neg,
+                      "ratio": out["ratio_covex_over_highest_baseline_value"], "below_device": n_neg,
                       "covex_pooled_n": pooled_n}, indent=1))
 
 

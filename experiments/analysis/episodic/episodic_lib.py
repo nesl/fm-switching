@@ -47,17 +47,28 @@ ARMS = [
 ]
 
 
-def cell_dir(raw_arm, seed):
-    """Full-memory final cell for (raw_arm, seed), preferring a valid _rerun directory.
+def _scorable(path):
+    """A committed cell is scorable only if its own record says it ran valid with no error. A refused or
+    aborted launch (run_valid not true, or an err) is never selected (implementation fix 2026-11-27)."""
+    try:
+        with open(os.path.join(path, "cell.json")) as fh:
+            c = json.load(fh)
+    except Exception:
+        return False
+    return c.get("run_valid") is True and c.get("err") in (None, "")
 
-    Returns (path, used_rerun) or (None, False) if no scorable cell exists.
+
+def cell_dir(raw_arm, seed):
+    """Full-memory final cell for (raw_arm, seed), preferring a valid _rerun directory, else the valid plain one.
+
+    Returns (path, used_rerun) or (None, False) if no scorable cell exists. Invalid or refused cells are skipped.
     """
     base = f"{raw_arm}_n16_s{seed}_1200s_h27_3t_L3_epg_rq30"
     rerun = os.path.join(RUNS, base + "_rerun")
     plain = os.path.join(RUNS, base)
-    if os.path.isdir(rerun) and os.path.exists(os.path.join(rerun, "cell.json")):
+    if os.path.isdir(rerun) and _scorable(rerun):
         return rerun, True
-    if os.path.isdir(plain) and os.path.exists(os.path.join(plain, "cell.json")):
+    if os.path.isdir(plain) and _scorable(plain):
         return plain, False
     return None, False
 
