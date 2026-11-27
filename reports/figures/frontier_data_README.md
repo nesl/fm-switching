@@ -227,6 +227,8 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 - covex-v6-base_n20_s5_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-base_n8_s4_1200s_h27_3t_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-fair-final-la_n16_s4_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
+- covex-v6-fair-final-la_n20_s4_1200s_h27_3t_c3-11-2_L3_epg_rq30: name did not match the rq30 cell pattern
+- covex-v6-fair-final-la_n32_s4_1200s_h27_3t_c3-11-2_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-fair-final-notouch_n16_s4_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-fair-final-q2_n16_s4_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
 - covex-v6-fair-final-q2m_n16_s4_1200s_h27_3t_kv0.5r_h0.5_L3_epg_rq30: name did not match the rq30 cell pattern
@@ -299,7 +301,7 @@ any 1x value change is a bug). They are listed here for a separate decision, not
 
 ## Provenance
 
-- runs dir last commit: 011c413c
+- runs dir last commit: c51a7d6d
 - scorer score.py last commit: cb9120cc
 - d179_rung2_verdict.py last commit: cd580554
 - build time is deliberately NOT stamped here: the output is byte-deterministic given the input. The git commit of this file is the build time of record.
