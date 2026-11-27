@@ -106,3 +106,27 @@ rung3: B=99 decision kinds on the opportunity: {('release_infeasible',): 91, ():
    control released these B instants to cloud: 99 of 99
    window instants with no cloud request: outage 222, control 190 of 797
    >=200-token non-monitor prefill tokens in flight at B instants: outage mean 13580 (share with >0: 0.80) | control same time mean 381 (share >0: 0.28)
+
+== decomposition of in-flight work at B instants (decomp.py)
+== F0: B=137 of 148 lost; ref = median in-flight uncached tokens at control released instants = 0 (n=698)
+  mean per B instant, tokens(n in flight): S2 8328 (8.09) | recall 2529 (0.49) | piece_other 0 (0.00) | touch 23 (3.36) | other 0 (0.00)
+  mean total 10880 median 8513; S2 share of tokens 76.5%
+  B with any S2 in flight 76 (55.5%); S2 >= half of in-flight tokens 62 (45.3%)
+  B with in-flight > ref: now 133; after removing S2 89 (so 44 of 137 B would fall to/below ref: 32.1% of B, 29.7% of all lost)
+== eager: B=395 of 450 lost; ref = median in-flight uncached tokens at control released instants = 0 (n=698)
+  mean per B instant, tokens(n in flight): S2 8297 (8.58) | recall 795 (0.26) | piece_other 0 (0.00) | touch 856 (10.54) | other 0 (0.00)
+  mean total 9948 median 9205; S2 share of tokens 83.4%
+  B with any S2 in flight 353 (89.4%); S2 >= half of in-flight tokens 317 (80.3%)
+  B with in-flight > ref: now 392; after removing S2 349 (so 43 of 395 B would fall to/below ref: 10.9% of B, 9.6% of all lost)
+== rung3 (S2 label = outage-robot burst pieces): B=99 of 109 lost; ref = median in-flight uncached tokens at control released instants = 0 (n=607)
+  mean per B instant, tokens(n in flight): S2 10055 (10.47) | recall 3278 (1.36) | piece_other 0 (0.00) | touch 11 (2.15) | other 0 (0.00)
+  mean total 13343 median 9635; S2 share of tokens 75.4%
+  B with any S2 in flight 69 (69.7%); S2 >= half of in-flight tokens 58 (58.6%)
+  B with in-flight > ref: now 82; after removing S2 64 (so 18 of 99 B would fall to/below ref: 18.2% of B, 16.5% of all lost)
+sensitivity (control in-flight reference percentiles):
+F0 thr p90=1005: B above thr 96, after removing S2 43, resolved by S2 removal 53 (38.7% of B)
+F0 thr max=3180: B above thr 77, after removing S2 33, resolved by S2 removal 44 (32.1% of B)
+eager thr p90=1005: B above thr 301, after removing S2 63, resolved by S2 removal 238 (60.3% of B)
+eager thr max=3180: B above thr 251, after removing S2 38, resolved by S2 removal 213 (53.9% of B)
+rung3 thr p90=1008: B above thr 72, after removing S2 45, resolved by S2 removal 27 (27.3% of B)
+rung3 thr max=11694: B above thr 46, after removing S2 4, resolved by S2 removal 42 (42.4% of B)
