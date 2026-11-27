@@ -504,5 +504,393 @@
   "model": "none",
   "timestamp": "2026-11-27T09:51:08.550965",
   "device": "jetson_orin"
+ },
+ "revision_1": {
+  "_what": "Network scenario design revision 1 (D325). Design only: no cells. Burst from the measured 30 s throughput; background-adjusted burst; exposure by type; rebuild share; placement by exposure ranking (maximises dose by construction).",
+  "host_tier_tokens": 110592.0,
+  "throughput": {
+   "n16_rung3": {
+    "cell": "covex-v6-fair-final_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "1s": {
+     "best_mean_tok_s": 7023.5,
+     "window_start_s": 794,
+     "window_s": 1
+    },
+    "10s": {
+     "best_mean_tok_s": 5009.8,
+     "window_start_s": 37,
+     "window_s": 10
+    },
+    "30s": {
+     "best_mean_tok_s": 4778.2,
+     "window_start_s": 69,
+     "window_s": 30
+    }
+   },
+   "n16_always_cloud": {
+    "cell": "always-cloud-fcfs_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "1s": {
+     "best_mean_tok_s": 9549.9,
+     "window_start_s": 166,
+     "window_s": 1
+    },
+    "10s": {
+     "best_mean_tok_s": 8732.9,
+     "window_start_s": 160,
+     "window_s": 10
+    },
+    "30s": {
+     "best_mean_tok_s": 8497.6,
+     "window_start_s": 418,
+     "window_s": 30
+    }
+   },
+   "n20_rung3": {
+    "cell": "covex-v6-fair-final_n20_s4_1200s_h27_3t_c3-11-2_L3_epg_rq30",
+    "1s": {
+     "best_mean_tok_s": 12277.4,
+     "window_start_s": 1046,
+     "window_s": 1
+    },
+    "10s": {
+     "best_mean_tok_s": 9273.0,
+     "window_start_s": 1045,
+     "window_s": 10
+    },
+    "30s": {
+     "best_mean_tok_s": 6080.2,
+     "window_start_s": 1031,
+     "window_s": 30
+    }
+   },
+   "n20_cand_qp": {
+    "cell": "covex-v6-fair-final-cand_n20_s4_1200s_h27_3t_c3-11-2_L3_epg_rq30_qp",
+    "1s": {
+     "best_mean_tok_s": 11441.2,
+     "window_start_s": 968,
+     "window_s": 1
+    },
+    "10s": {
+     "best_mean_tok_s": 7287.2,
+     "window_start_s": 968,
+     "window_s": 10
+    },
+    "30s": {
+     "best_mean_tok_s": 4900.1,
+     "window_start_s": 995,
+     "window_s": 30
+    }
+   },
+   "n32_rung3": {
+    "cell": "covex-v6-fair-final_n32_s4_1200s_h27_3t_c3-11-2_L3_epg_rq30",
+    "1s": {
+     "best_mean_tok_s": 17368.3,
+     "window_start_s": 994,
+     "window_s": 1
+    },
+    "10s": {
+     "best_mean_tok_s": 11602.5,
+     "window_start_s": 373,
+     "window_s": 10
+    },
+    "30s": {
+     "best_mean_tok_s": 7860.2,
+     "window_start_s": 373,
+     "window_s": 30
+    }
+   },
+   "n32_cand_qp": {
+    "cell": "covex-v6-fair-final-cand_n32_s4_1200s_h27_3t_c3-11-2_L3_epg_rq30_qp",
+    "1s": {
+     "best_mean_tok_s": 17468.8,
+     "window_start_s": 997,
+     "window_s": 1
+    },
+    "10s": {
+     "best_mean_tok_s": 12239.2,
+     "window_start_s": 1060,
+     "window_s": 10
+    },
+    "30s": {
+     "best_mean_tok_s": 7866.1,
+     "window_start_s": 1056,
+     "window_s": 30
+    }
+   },
+   "n16_la-er-cu_outage": {
+    "cell": "covex-v6-fair-final-la-er-cu_n16_s4_1200s_h27_3t_c3-11-2_L3_epg_rq30_out-k11-d188_evid-t5355_link_up2.219_qp",
+    "mean_uncached_tok_s_in_723.5_753.5": 4125.8,
+    "30s_best": {
+     "best_mean_tok_s": 4544.8,
+     "window_start_s": 789,
+     "window_s": 30
+    }
+   }
+  },
+  "design_rate_tok_s": {
+   "n32_30s_best_rung3": 7860.2,
+   "n20_30s_best_rung3": 6080.2
+  },
+  "C2": {
+   "label": "C2 n32 all 22 robots d188 (primary)",
+   "n_devices": 32,
+   "d_s": 188.0,
+   "design_rate_tok_s": 7860.2,
+   "accepted_starts": 945,
+   "burst_design_B_s": {
+    "median": 23.672043968346863,
+    "p10": 23.64201928704104,
+    "p90": 23.69122923080838,
+    "n": 945
+   },
+   "burst_bg_adjusted_B_s": {
+    "median": 55.16653606618037,
+    "p10": 38.67143265050855,
+    "p90": 70.06855871227174,
+    "n": 945
+   },
+   "background_mean_tok_s": {
+    "median": 4488.679018027365,
+    "p10": 3046.309677214134,
+    "p90": 5204.7048020827315,
+    "n": 945
+   },
+   "exposed_single_shot": {
+    "median": 22.0,
+    "p10": 16.0,
+    "p90": 28.0,
+    "n": 945
+   },
+   "exposed_robot_followups": {
+    "median": 19.0,
+    "p10": 14.0,
+    "p90": 31.0,
+    "n": 945
+   },
+   "exposed_dash_frames": {
+    "median": 548.0,
+    "p10": 384.0,
+    "p90": 694.6,
+    "n": 945
+   },
+   "exposed_sq_plus_fu": {
+    "median": 41.0,
+    "p10": 29.0,
+    "p90": 58.0,
+    "n": 945
+   },
+   "backlog_total_tokens": {
+    "median": 186067.0,
+    "p10": 185831.0,
+    "p90": 186217.8,
+    "n": 945
+   },
+   "excess_over_host_tier_tokens": {
+    "median": 75475.0,
+    "p10": 75239.0,
+    "p90": 75625.8,
+    "n": 945
+   },
+   "rebuild_extra_burst_s": {
+    "median": 16.769333333333332,
+    "p10": 16.717777777777776,
+    "p90": 16.802711111111112,
+    "n": 945
+   },
+   "top10_starts": [
+    {
+     "t0": 164.0,
+     "sq_plus_fu": 82,
+     "dash": 862
+    },
+    {
+     "t0": 531.0,
+     "sq_plus_fu": 75,
+     "dash": 819
+    },
+    {
+     "t0": 530.0,
+     "sq_plus_fu": 75,
+     "dash": 818
+    },
+    {
+     "t0": 532.0,
+     "sq_plus_fu": 75,
+     "dash": 817
+    },
+    {
+     "t0": 533.0,
+     "sq_plus_fu": 75,
+     "dash": 806
+    },
+    {
+     "t0": 163.0,
+     "sq_plus_fu": 75,
+     "dash": 776
+    },
+    {
+     "t0": 51.0,
+     "sq_plus_fu": 74,
+     "dash": 843
+    },
+    {
+     "t0": 528.0,
+     "sq_plus_fu": 74,
+     "dash": 824
+    },
+    {
+     "t0": 534.0,
+     "sq_plus_fu": 74,
+     "dash": 796
+    },
+    {
+     "t0": 529.0,
+     "sq_plus_fu": 73,
+     "dash": 818
+    }
+   ],
+   "proposed_t0": 529.5,
+   "proposed_token": "_evid-t5295",
+   "bar_design_pass": true
+  },
+  "C1": {
+   "label": "C1 n20 all 14 robots d188",
+   "n_devices": 20,
+   "d_s": 188.0,
+   "design_rate_tok_s": 6080.2,
+   "accepted_starts": 946,
+   "burst_design_B_s": {
+    "median": 19.475017269168777,
+    "p10": 19.460708529324695,
+    "p90": 19.485707706983323,
+    "n": 946
+   },
+   "burst_bg_adjusted_B_s": {
+    "median": 51.95180163968284,
+    "p10": 42.62289420501496,
+    "p90": 63.28150951617539,
+    "n": 946
+   },
+   "background_mean_tok_s": {
+    "median": 3800.8173138902803,
+    "p10": 3300.9015668448637,
+    "p90": 4209.448161678625,
+    "n": 946
+   },
+   "exposed_single_shot": {
+    "median": 10.0,
+    "p10": 8.0,
+    "p90": 12.0,
+    "n": 946
+   },
+   "exposed_robot_followups": {
+    "median": 13.0,
+    "p10": 5.0,
+    "p90": 23.0,
+    "n": 946
+   },
+   "exposed_dash_frames": {
+    "median": 342.0,
+    "p10": 283.0,
+    "p90": 419.0,
+    "n": 946
+   },
+   "exposed_sq_plus_fu": {
+    "median": 24.0,
+    "p10": 14.0,
+    "p90": 36.0,
+    "n": 946
+   },
+   "backlog_total_tokens": {
+    "median": 118412.0,
+    "p10": 118325.0,
+    "p90": 118477.0,
+    "n": 946
+   },
+   "excess_over_host_tier_tokens": {
+    "median": 7820.0,
+    "p10": 7733.0,
+    "p90": 7885.0,
+    "n": 946
+   },
+   "rebuild_extra_burst_s": {
+    "median": 1.735555555555556,
+    "p10": 1.7162222222222223,
+    "p90": 1.7520000000000004,
+    "n": 946
+   },
+   "top10_starts": [
+    {
+     "t0": 786.0,
+     "sq_plus_fu": 55,
+     "dash": 621
+    },
+    {
+     "t0": 778.0,
+     "sq_plus_fu": 55,
+     "dash": 592
+    },
+    {
+     "t0": 784.0,
+     "sq_plus_fu": 54,
+     "dash": 609
+    },
+    {
+     "t0": 785.0,
+     "sq_plus_fu": 54,
+     "dash": 609
+    },
+    {
+     "t0": 787.0,
+     "sq_plus_fu": 53,
+     "dash": 617
+    },
+    {
+     "t0": 788.0,
+     "sq_plus_fu": 53,
+     "dash": 605
+    },
+    {
+     "t0": 789.0,
+     "sq_plus_fu": 50,
+     "dash": 572
+    },
+    {
+     "t0": 793.0,
+     "sq_plus_fu": 49,
+     "dash": 569
+    },
+    {
+     "t0": 791.0,
+     "sq_plus_fu": 48,
+     "dash": 560
+    },
+    {
+     "t0": 794.0,
+     "sq_plus_fu": 48,
+     "dash": 559
+    }
+   ],
+   "proposed_t0": 787.5,
+   "proposed_token": "_evid-t7875",
+   "bar_design_pass": true
+  },
+  "controls": {
+   "paired_control_C2": "covex-v6-fair-final_n32_s4_1200s_h27_3t_c3-11-2_L3_epg_rq30",
+   "paired_control_C1": "covex-v6-fair-final_n20_s4_1200s_h27_3t_c3-11-2_L3_epg_rq30",
+   "candidate_3_n20": "covex-v6-fair-final-cand_n20_s4_1200s_h27_3t_c3-11-2_L3_epg_rq30_qp",
+   "candidate_4_n32": "covex-v6-fair-final-cand_n32_s4_1200s_h27_3t_c3-11-2_L3_epg_rq30_qp",
+   "candidate_3_4_valid_paired_controls": false,
+   "reason": "each candidate carries _qp (question priority on the uplink queue, driver v45), which changes the arm's queue order with no outage; the driver refuses _link and _sync without an outage (driver lines 318-338), so the paired control is the plain cell at the same n with the outage tokens removed",
+   "C2_outage_cell_line": "covex-v6-fair-final_n32 32 4 _c3-11-2_L3_epg_rq30_out-k22-d188_evid-t5295_link_sync",
+   "C1_outage_cell_line": "covex-v6-fair-final_n20 20 4 _c3-11-2_L3_epg_rq30_out-k14-d188_evid-t7875_link_sync"
+  },
+  "_provenance": {
+   "git_commit": "c59cdd160b13d2e246faf14c829c73445203b844",
+   "script": "network_pressure_rev1.py",
+   "model": "none",
+   "timestamp": "2026-11-27T10:01:20.374894",
+   "device": "jetson_orin"
+  }
  }
 }

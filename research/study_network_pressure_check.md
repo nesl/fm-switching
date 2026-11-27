@@ -81,3 +81,75 @@ The no-outage trace has no robot question over 32,768 tokens, so every over-32k 
 - One seed (seed 4), one mix (3:11:2).
 - Li et al. figures are per device; applying them to a whole site is the scenario's stated assumption.
 - The FAST and SLOW bursts are computed from the trace's own backlog, not from a per-token estimate.
+
+## Revision 1 (D325): scenario design, no cells run
+
+Script `experiments/analysis/network/network_pressure_rev1.py`; results under the key `revision_1` in `results/orchestration/live2/network_pressure/network_pressure_check.json` (the original keys are unchanged). CPU, committed request logs and trace code only. Nothing queued.
+
+### R1.1 Measured sustained uncached prefill throughput (tok/s)
+
+Each request's uncached tokens (prompt_tokens minus cached_tokens) are spread uniformly over [t_submit, t_first_token] and binned per second. The table gives the best windowed mean and its start second.
+
+| cell | 1 s best | 10 s best | 30 s best |
+|---|---|---|---|
+| n16 rung 3 (s4, 1x) | 7,024 @794 | 5,010 @37 | 4,778 @69 |
+| n16 always-cloud-fcfs (s4) | 9,550 @166 | 8,733 @160 | 8,498 @418 |
+| n20 rung 3 (c3-11-2, s4) | 12,277 @1046 | 9,273 @1045 | 6,080 @1031 |
+| n20 candidate, _qp (c3-11-2, s4) | 11,441 @968 | 7,287 @968 | 4,900 @995 |
+| n32 rung 3 (c3-11-2, s4) | 17,368 @994 | 11,603 @373 | 7,860 @373 |
+| n32 candidate, _qp (c3-11-2, s4) | 17,469 @997 | 12,239 @1060 | 7,866 @1056 |
+| n16 la-er-cu outage cell, mean over [723.5, 753.5] | 4,126 (30 s best 4,545) | | |
+
+Design rates: n32 = 7,860 tok/s (rung 3, 30 s best; the candidate is the same, 7,866); n20 = 6,080 tok/s (rung 3). The 1 s peak (about 17,400 at n32) is not used.
+
+### R1.2 Background-adjusted burst and exposure, C2 (n32, 22 robots, d 188) and C1 (n20, 14 robots, d 188)
+
+Effective drain rate = design rate minus the mean uncached rate of the same fleet's committed no-outage rung 3 cell over [R, R + B] (fixed point in B). Starts: t0 in 1 s steps with t0 + d + B <= 1200.
+
+| quantity (median, p10, p90 over accepted starts) | C2 (n32) | C1 (n20) |
+|---|---|---|
+| accepted starts | 945 | 946 |
+| backlog total tokens | 186,067 (185,831, 186,218) | 118,412 (118,325, 118,478) |
+| burst, design rate only (s) | 23.7 (23.6, 23.7) | 19.5 (19.5, 19.5) |
+| burst, background-adjusted (s) | **55.2 (38.7, 70.1)** | **52.0 (42.6, 63.3)** |
+| background mean over the burst (tok/s) | 4,489 (3,046, 5,205) | 3,801 (3,301, 4,209) |
+| exposed single-shot | 22 (16, 28) | 10 (8, 12) |
+| exposed robot follow-ups | 19 (14, 31) | 13 (5, 23) |
+| exposed dashcam frames | 548 (384, 695) | 342 (283, 419) |
+| single-shot + follow-ups | **41 (29, 58)** | **24 (14, 36)** |
+| design bar (burst >= 4.0 s, sq + fu >= 15) | met | met |
+
+The design bar is met by both conditions at the background-adjusted burst. It is a design guide, not a pass or fail on a result.
+
+### R1.3 Rebuild share (host tier 27 GiB = 110,592 tokens at 262,144 B per token)
+
+| quantity (median, p10, p90) | C2 (n32) | C1 (n20) |
+|---|---|---|
+| backlog above the host tier, tokens (cannot stay resident; upper bound, host tier taken as free for the backlog) | 75,475 (75,239, 75,626), about 18.4 GiB | 7,820 (7,733, 7,885), about 1.9 GiB |
+| extra burst seconds if those tokens are rebuilt cold at the committed nearest-size rate | **16.8 (16.7, 16.8)** | 1.7 (1.7, 1.8) |
+
+C2's backlog (about 46 GiB of KV) is far above the host tier, so most of it cannot stay resident, and rebuilding it cold adds about 17 s to the burst. C1's backlog is only slightly above the host tier.
+
+### R1.4 Placement (maximises dose by construction)
+
+Starts are ranked by exposure (single-shot + robot follow-ups, then dashcam frames). The proposed t0 is the median of the top 10 (the committed evidence rule applied to that ranking), so it selects for dose by construction. It is not a neutral placement and should not be read as one.
+
+- C2 top 10 t0: 51, 163, 164, 528, 529, 530, 531, 532, 533, 534. **Proposed t0 = 529.5 s, token `_evid-t5295`.**
+- C1 top 10 t0: 778, 784, 785, 786, 787, 788, 789, 791, 793, 794. **Proposed t0 = 787.5 s, token `_evid-t7875`.**
+
+### R1.5 Cell lines and control validity
+
+Outage lines (proposed, not queued):
+- C2: `covex-v6-fair-final_n32 32 4 _c3-11-2_L3_epg_rq30_out-k22-d188_evid-t5295_link_sync`
+- C1: `covex-v6-fair-final_n20 20 4 _c3-11-2_L3_epg_rq30_out-k14-d188_evid-t7875_link_sync`
+
+Paired controls: the plain rung-3 cell at the same n, with the outage tokens removed: `covex-v6-fair-final_n32_s4 … _c3-11-2_L3_epg_rq30` and `covex-v6-fair-final_n20_s4 … _c3-11-2_L3_epg_rq30`.
+
+Candidate cells (3) `covex-v6-fair-final-cand_n20 … _qp` and (4) `covex-v6-fair-final-cand_n32 … _qp` are **not valid paired controls**. Each carries `_qp` (question priority on the uplink queue, driver v45), which changes the arm's queue order with no outage. The driver also refuses `_link` and `_sync` without an outage (driver lines 318 to 338), so those tokens cannot be in a control. A `_link` or `_sync` token therefore has no effect on a no-outage cell: it is not allowed there.
+
+### R1.6 Caveats
+
+- Revision 1 is a design. The bar and the exposure numbers are from the trace and throughput, not from a cell.
+- The background-adjusted burst assumes the no-outage rung-3 cell's uncached rate is the competing load. It is one seed.
+- The rebuild share takes the host tier as free for the backlog. The resident amount depends on other sessions' KV, which is not modelled here.
+- Placement by top-10 exposure selects the high-dose starts by construction.
