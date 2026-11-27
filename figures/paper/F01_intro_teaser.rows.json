@@ -1,0 +1,314 @@
+{
+ "figure": "F01_intro_teaser",
+ "covex_arm": "covex-v6-fair-final",
+ "seeds": [
+  "4",
+  "5",
+  "6",
+  "7"
+ ],
+ "device_only_pooled_correct": 893,
+ "rows": [
+  {
+   "arm": "covex-v6-fair-final",
+   "display": "COVEX",
+   "class": "covex",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/live2/arms_final_ladder.py (rung 3 arm)",
+   "class_basis": "COVEX (this paper's policy)",
+   "diff": 213,
+   "ci95": [
+    134.97,
+    296.0
+   ],
+   "n_units": 1914
+  },
+  {
+   "arm": "streamscout",
+   "display": "StreamScout",
+   "class": "stateless",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/baselines/streamscout_adapted.py:46,98-110",
+   "class_basis": "per-query representation choice; sends the history-carrying representation, keeps no cross-question state",
+   "diff": 71,
+   "ci95": [
+    -9.0,
+    156.02
+   ],
+   "n_units": 1914
+  },
+  {
+   "arm": "confidence-cascade",
+   "display": "Confidence cascade",
+   "class": "stateless",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/baselines/cascade_adapted.py:42",
+   "class_basis": "per-query confidence cascade routing",
+   "diff": 71,
+   "ci95": [
+    15.0,
+    127.0
+   ],
+   "n_units": 1914
+  },
+  {
+   "arm": "simplestream",
+   "display": "SimpleStream",
+   "class": "stateless",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/baselines/simplestream_adapted.py:38,86",
+   "class_basis": "no history reuse; recent window per question",
+   "diff": 66,
+   "ci95": [
+    -13.0,
+    152.0
+   ],
+   "n_units": 1914
+  },
+  {
+   "arm": "llf",
+   "display": "LLF",
+   "class": "stateless",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/live2/arms.py:293",
+   "class_basis": "least-laxity-first scheduling",
+   "diff": 43,
+   "ci95": [
+    -2.0,
+    87.0
+   ],
+   "n_units": 1914
+  },
+  {
+   "arm": "eco-llm",
+   "display": "ECO-LLM (3 seeds)",
+   "class": "stateless",
+   "seeds": [
+    "4",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/baselines/ecollm_adapted.py:46",
+   "class_basis": "per-query edge-cloud routing",
+   "diff": 41,
+   "ci95": [
+    8.98,
+    73.0
+   ],
+   "n_units": 1431
+  },
+  {
+   "arm": "mooncake",
+   "display": "Mooncake",
+   "class": "stateful",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/baselines/mooncake_adapted.py:32",
+   "class_basis": "KVCache-centric placement and reuse",
+   "diff": 39,
+   "ci95": [
+    6.0,
+    73.0
+   ],
+   "n_units": 1914
+  },
+  {
+   "arm": "b7-edf-feasibility",
+   "display": "EDF + feasibility",
+   "class": "stateless",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/baselines/constructed.py:163",
+   "class_basis": "EDF with feasibility test per query",
+   "diff": 35,
+   "ci95": [
+    2.0,
+    68.0
+   ],
+   "n_units": 1914
+  },
+  {
+   "arm": "edf",
+   "display": "EDF",
+   "class": "stateless",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/live2/arms.py:576",
+   "class_basis": "earliest-deadline-first scheduling",
+   "diff": 11,
+   "ci95": [
+    -9.02,
+    32.0
+   ],
+   "n_units": 1902
+  },
+  {
+   "arm": "kvflow-prefetch",
+   "display": "KVFlow",
+   "class": "stateful",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/baselines/kvflow_adapted.py:34",
+   "class_basis": "prefetch and retain KV across queries",
+   "diff": 3,
+   "ci95": [
+    -18.0,
+    24.0
+   ],
+   "n_units": 1897
+  },
+  {
+   "arm": "always-cloud-fcfs",
+   "display": "Always-cloud FCFS",
+   "class": "stateless",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/live2/arms.py:102",
+   "class_basis": "every query to cloud, first come first served",
+   "diff": 2,
+   "ci95": [
+    -19.0,
+    23.0
+   ],
+   "n_units": 1900
+  },
+  {
+   "arm": "warm-all-lru",
+   "display": "Warm-all LRU",
+   "class": "stateful",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/live2/arms_warmall.py:72",
+   "class_basis": "keeps every session warm under LRU eviction",
+   "diff": -1,
+   "ci95": [
+    -18.0,
+    16.0
+   ],
+   "n_units": 1902
+  },
+  {
+   "arm": "querystream-proactive",
+   "display": "QueryStream",
+   "class": "stateless",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/baselines/querystream_adapted.py:47,83",
+   "class_basis": "proactive half only; per-session size memory for defer rule, no KV management",
+   "diff": -4,
+   "ci95": [
+    -22.0,
+    13.0
+   ],
+   "n_units": 1898
+  },
+  {
+   "arm": "attentionstore-prefetch",
+   "display": "AttentionStore",
+   "class": "stateful",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/baselines/attentionstore_adapted.py:28",
+   "class_basis": "retains KV across rounds, prefetches",
+   "diff": -4,
+   "ci95": [
+    -21.0,
+    12.0
+   ],
+   "n_units": 1898
+  },
+  {
+   "arm": "lmcache",
+   "display": "LMCache",
+   "class": "stateful",
+   "seeds": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "class_ref": "experiments/orchestration/baselines/lmcache_adapted.py:26",
+   "class_basis": "KV cache offload, reuse and eviction",
+   "diff": -6,
+   "ci95": [
+    -24.0,
+    10.0
+   ],
+   "n_units": 1896
+  }
+ ],
+ "ratio_covex_over_strongest": 3.0,
+ "strongest_baseline": "StreamScout",
+ "n_baselines_below_device": 4,
+ "covex_pooled_n": 1914,
+ "device_only_sum_check": 893,
+ "git_sha": "220c32505ab3c4c10c07f91a6484aba3e2fe3602",
+ "F1_csv_sha256": "7474bc996d7fbe4fb520065239b029756f2d92bd7a85d3f496fac0f18b442052",
+ "F1_units_sha256": "d0cf8609071bb2eca452969f88a0e2a3cd931611a0f2733d0ef38da6e2cd0668",
+ "font": "DejaVu Sans",
+ "placeholder": "PLACEHOLDER: this figure is regenerated after the freeze on the evaluation seed set (seeds 1 to 3 for every baseline still to run).",
+ "eco_llm_seeds": "4, 6, 7 (seed 5 has no canon-scorable cell; its valid cell is not chosen by canon)",
+ "confidence_cascade": "post-D205 _rerun cells, seeds 4 to 7, scored with canon.collect_units (rows added to F1.csv 2026-11-27)",
+ "outputs": {
+  "pdf": "figures/paper/F01_intro_teaser.pdf",
+  "png": "figures/paper/F01_intro_teaser.png"
+ },
+ "ratio_plotted": 3.0
+}
