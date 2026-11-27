@@ -228,7 +228,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 _SWITCH_KEYS = ("live2_predictive_belief", "live2_pb_engine_resync", "live2_book_belief_uncached",
-                "live2_la_arrival_admission", "live2_value_aware_admission", "live2_catchup_prefill")
+                "live2_la_arrival_admission", "live2_value_aware_admission", "live2_catchup_prefill",
+                "live2_pb_wire_tokens", "live2_pb_host_engine_model")
+_SWITCH_KEYS_ON_ONLY = ("live2_catchup_prefill_paced",)
 
 
 def _switch_record(arm) -> Dict[str, bool]:
@@ -241,6 +243,9 @@ def _switch_record(arm) -> Dict[str, bool]:
         insts += [rules, getattr(rules, "_base", None)]
     owns = [vars(o) for o in insts if o is not None]
     rec = {k: any(bool(own.get(k, False)) for own in owns) for k in _SWITCH_KEYS}
+    for k in _SWITCH_KEYS_ON_ONLY:
+        if any(bool(own.get(k, False)) for own in owns):
+            rec[k] = True
     return rec if any(rec.values()) else {}
 
 

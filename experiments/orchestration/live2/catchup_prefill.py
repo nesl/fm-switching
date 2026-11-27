@@ -21,8 +21,13 @@ and the state leg's HOLD_BACK. A session whose built prefix layer P believes mos
 skipped (the 0b `prefix_mostly_uncached` test): that rebuild is the state leg's decision, not a
 catch-up. Ordering: the catch-up asks are appended AFTER the ordinary warm-ahead asks, sorted by the
 arm's own predicted next-question time (`_last_q_t + _gap_ewma`), unknown last, session id last.
-NOT IMPLEMENTED: a deficit-weight ordering (the deficit weight already scales the harm term the
-state leg prices each catch-up piece with).
+PACED MODE (`live2_catchup_prefill_paced`, arm `-la-er-cup`, requires the switch above): a session
+is asked only while (1) its device's predicted next question is inside the warm horizon (the JIT
+test: now >= last_q + gap - `_horizon_s(gap)`, prediction known), (2) it still has ask credit,
+ceil(backlog / chunk_tokens) per window, the number of ordinary chunk-edge asks that much material
+is worth, spent by catch-up asks AND ordinary asks, (3) the hybrid core's C5 cap is at its ceiling,
+(4) the core's C2 epoch record shows no dashcam row and no single-shot row at risk this epoch.
+Order: deficit weight (`_pd_w_of`, the rung-3 feed's `weight_device`) descending, then the gap order.
 
 READ SITES: `arms_v5rules2.V5Rules2Arm.decide` (`observe`, `candidates`, `account`); the decision it
 changes is the MATERIALIZE list `act.sessions`, enacted at `coordinator._enact` (MATERIALIZE branch)
@@ -35,6 +40,7 @@ from typing import Any, Dict, List, Tuple
 import book_belief_uncached as BB
 
 SWITCH = "live2_catchup_prefill"
+PACED_SWITCH = "live2_catchup_prefill_paced"
 LOG_CAP = 4000
 
 
@@ -60,10 +66,45 @@ def arm_enables(arm: Any) -> bool:
     return v
 
 
+def arm_paced(arm: Any) -> bool:
+    """Is the PACED mode on for THIS INSTANCE? Default False; instance dict only, strict bool, and
+    it requires the catch-up switch itself."""
+    try:
+        own = vars(arm)
+    except TypeError:                                                          # pragma: no cover
+        own = {}
+    if PACED_SWITCH not in own:
+        for klass in type(arm).__mro__:
+            if bool(klass.__dict__.get(PACED_SWITCH, False)):
+                raise CatchupSwitchError(
+                    "%s is ON as a CLASS attribute of %s and the instance declares nothing; "
+                    "it requires an arm-scoped INSTANCE attribute" % (PACED_SWITCH, klass.__name__))
+    v = own.get(PACED_SWITCH, False)
+    if not isinstance(v, bool):
+        raise CatchupSwitchError("%s must be a bool, got %r" % (PACED_SWITCH, type(v).__name__))
+    if v and not arm_enables(arm):
+        raise CatchupSwitchError("%s requires %s" % (PACED_SWITCH, SWITCH))
+    return v
+
+
+def _core(arm: Any) -> Any:
+    """The object that owns the C5 cap and the C2 epoch record (the hybrid core of `_base`)."""
+    o = getattr(arm, "_base", None)
+    for _ in range(8):
+        if o is None:
+            return None
+        if "cap_ceiling" in getattr(o, "__dict__", {}):
+            return o
+        o = getattr(o, "_base", None) or getattr(o, "_inner", None)
+    return None
+
+
 class State:
     def __init__(self) -> None:
+        self.credit: Dict[str, int] = {}                 # paced: asks left in the window
         self.seen: Dict[str, float] = {}                 # device -> back_online_at already latched
         self.win: Dict[str, Tuple[int, int, str]] = {}   # session -> (est0, backlog_tokens, device)
+        self.supp: Dict[str, set] = {}
         self.log: List[Dict[str, Any]] = []
 
 
@@ -86,6 +127,8 @@ def observe(arm: Any, obs: Any, roster: Dict[str, Any]) -> None:
         for sid, did in sdev.items():
             if did == lk.device_id and str((devs.get(did) or {}).get("type")) == "robot":
                 cu.win[sid] = (int(est.get(sid, 0)), int(lk.backlog_tokens), str(did))
+                if arm_paced(arm):
+                    cu.credit[sid] = -(-int(lk.backlog_tokens) // int(arm.chunk_tokens))
                 arm.stats["catchup_windows_opened"] += 1
                 if len(cu.log) < LOG_CAP:
                     cu.log.append(dict(t=round(float(obs.now_s), 4), ev="open", sid=sid,
@@ -102,6 +145,22 @@ def candidates(arm: Any, obs: Any, roster: Dict[str, Any], ordinary: set) -> Lis
     rows = getattr(getattr(obs, "cloud", None), "in_flight_work", None) or ()
     busy = {str(r.device_id) for r in rows if str(r.kind) in ("piece", "whole")}
     out: List[str] = []
+    paced = arm_paced(arm)
+    blocked = None
+    if paced:
+        core = _core(arm)
+        now = float(obs.now_s)
+        if core is None:
+            arm.stats["catchup_paced_core_missing"] += 1
+            blocked = "core"
+        elif int(core.cap) < int(core.cap_ceiling):
+            blocked = "c5"
+        else:
+            ep = core.c2_epoch
+            if ep is None or ep[0] != now:
+                arm.stats["catchup_paced_c2_epoch_stale"] += 1
+            elif ep[1] > 0 or ep[2] > 0:
+                blocked = "c2"
     for sid, (est0, backlog, did) in sorted(cu.win.items()):
         e = int(est.get(sid, 0))
         b = int(built.get(sid, 0) or 0)
@@ -121,7 +180,24 @@ def candidates(arm: Any, obs: Any, roster: Dict[str, Any], ordinary: set) -> Lis
             continue
         if sid in ordinary:
             arm.stats["catchup_epochs_ordinary_ask_already"] += 1
+            if paced:
+                cu.credit[sid] = cu.credit.get(sid, 0) - 1
             continue
+        if paced:
+            if blocked is not None:
+                arm.stats["catchup_paced_suppressed_" + blocked] += 1
+                cu.supp.setdefault(blocked, set()).add(sid)
+                continue
+            last, gap = arm._last_q_t.get(did), arm._gap_ewma.get(did)
+            if last is None or gap is None:
+                arm.stats["catchup_paced_skip_no_prediction"] += 1
+                continue
+            if float(obs.now_s) < last + gap - arm._horizon_s(gap):
+                arm.stats["catchup_paced_skip_beyond_horizon"] += 1
+                continue
+            if cu.credit.get(sid, 0) <= 0:
+                arm.stats["catchup_paced_skip_no_credit"] += 1
+                continue
         if did in busy:
             arm.stats["catchup_epochs_paced_one_in_flight"] += 1
             continue
@@ -134,7 +210,7 @@ def candidates(arm: Any, obs: Any, roster: Dict[str, Any], ordinary: set) -> Lis
     return out
 
 
-def order(arm: Any, sids: List[str]) -> List[str]:
+def order(arm: Any, sids: List[str], now_s: float = 0.0) -> List[str]:
     """Earliest predicted next question first (the arm's own `_last_q_t + _gap_ewma`), unknown
     last, session id last. `roster.session_device` maps the session to its device."""
     sdev = (arm._roster or {}).get("session_device") or {}
@@ -144,6 +220,12 @@ def order(arm: Any, sids: List[str]) -> List[str]:
         last, gap = arm._last_q_t.get(did), arm._gap_ewma.get(did)
         nxt = (last + gap) if (last is not None and gap is not None) else float("inf")
         return (nxt, sid)
+    if arm_paced(arm):
+        wf = arm._cup_w_of
+
+        def pkey(sid: str):
+            return (-float(wf(sdev.get(sid))),) + key(sid)
+        return sorted(sids, key=pkey)
     return sorted(sids, key=key)
 
 
@@ -153,6 +235,8 @@ def account(arm: Any, plan: Any, extra: List[str], now_s: float) -> None:
     for sid in extra:
         if sid in legal:
             arm.stats["catchup_emitted"] += 1
+            if arm_paced(arm):
+                cu.credit[sid] = cu.credit.get(sid, 0) - 1
             if len(cu.log) < LOG_CAP:
                 cu.log.append(dict(t=round(float(now_s), 4), ev="ask", sid=sid))
         else:

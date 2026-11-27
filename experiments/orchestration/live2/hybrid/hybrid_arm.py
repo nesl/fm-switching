@@ -289,6 +289,8 @@ class HybridArm:
         self._ss_values = _ss_values(self._ss_tbl)
         self._ss_placeholder = bool(self._ss_tbl.get("_placeholder"))
         self.cap, self._last_adj = 8, None
+        self.cap_ceiling = self.cap
+        self.c2_epoch = None
         # ---- C5 ATTRIBUTION, a CANDIDATE and DEFAULT OFF (user ruling 2026-11-22 addendum) ----
         # An INSTANCE attribute, not a class attribute and not a module global. Both of the
         # others have cost real cells here: a module global that defaulted ON once cost a whole
@@ -403,6 +405,7 @@ class HybridArm:
                               value=(self.values or {}).get("dashcam", 0.09)))
         rec_dec: Dict[str, RecallAction] = {}
         pending_risk: List[Any] = []
+        _ss_risk_n = 0
         c6_recall = bool(obs.recall)
         if c6_recall and self.c6_robot_only and not self.c6_mirror_all_periods:
             c6_recall = any(getattr(q, "category", None) not in self._ss_types for q in obs.recall)
@@ -446,6 +449,7 @@ class HybridArm:
                 self.stats["ss_seen"] += 1
                 if risk:
                     self.stats["ss_at_risk"] += 1
+                    _ss_risk_n += 1
             # D142 item 3, C2 for single-shot. The SAME laxity test and the SAME k_r as the robot flag (no new
             # threshold), consumed by the SAME dashcam throttle, which is the one C2 consumer D141 proved moves
             # decisions (3,570) where the reserved slot was an ABSENT LINK (0 at both k_r). An SS request near
@@ -493,6 +497,7 @@ class HybridArm:
                                   work=float(C.recall_gpu_s(max(q.readiness_tokens, 1), q.readiness)),
                                   value=(self._ss_values.get(q.category, 1e-3) if is_ss
                                          else (self.values or {}).get("recall", 0.1))))
+        self.c2_epoch = (float(now), sum(1 for it in items if it["kind"] == "dash" and it["risk"]), _ss_risk_n)
         # order
         def idx(it):
             return it["value"] * (1.0 / max(it["slack"], 0.1)) / max(it["work"], 1e-3)

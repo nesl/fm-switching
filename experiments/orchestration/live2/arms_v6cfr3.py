@@ -811,10 +811,24 @@ def _final_ladder_lazy() -> Dict[str, Any]:
         return FL.make_rung3(FL.RUNG3_LA + "-er", predictive_belief=True, book_belief=True,
                              la_arrival=True, engine_resync=True, **kw)
 
+    def r3laerpwire(**kw: Any) -> Any:
+        """TEST ARM (label in the name): P rebuild (engine host model + wire prompt size) DID NOT MEET
+        ITS PRE-REGISTERED RULE (robo003 asks); not part of the candidate. = -la-er + both switches ON."""
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_LA + "-er-pwire", predictive_belief=True, book_belief=True,
+                             la_arrival=True, engine_resync=True, pb_wire_tokens=True,
+                             pb_host_engine_model=True, **kw)
+
     def r3laercu(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3_LA + "-er-cu", predictive_belief=True, book_belief=True,
                              la_arrival=True, engine_resync=True, catchup_prefill=True, **kw)
+
+    def r3laercup(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_LA + "-er-cup", predictive_belief=True, book_belief=True,
+                             la_arrival=True, engine_resync=True, catchup_prefill=True,
+                             catchup_pace=True, **kw)
 
     def r3link(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
@@ -862,6 +876,10 @@ def _final_ladder_lazy() -> Dict[str, Any]:
             "covex-v6-fair-final-la": r3la,
             "covex-v6-fair-final-la-er": r3laer,
             "covex-v6-fair-final-la-er-cu": r3laercu,
+            "covex-v6-fair-final-la-er-cup": r3laercup,
+            # TEST ARM: P rebuild (engine host model + wire prompt size) DID NOT MEET ITS PRE-REGISTERED
+            # RULE (robo003 asks); not part of the candidate.
+            "covex-v6-fair-final-la-er-pwire": r3laerpwire,
             "covex-v6-fair-final-0b": r30b,
             "covex-v6-fair-final-0b-er": r30ber,
             "covex-v6-fair-final-q4b": r3q4b,

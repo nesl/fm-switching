@@ -412,6 +412,13 @@ def _set_predictive_belief(arm: Any) -> None:
                                 % (PBL.SWITCH, type(arm).__name__))
 
 
+def _set_pb_switch(arm: Any, name: str, reader: Any) -> None:
+    """Turn a default-OFF P switch on for THIS INSTANCE and read it back."""
+    object.__setattr__(arm, name, True)
+    if reader(arm) is not True:                                            # pragma: no cover
+        raise LadderSwitchError("%s did not take on the instance of %s" % (name, type(arm).__name__))
+
+
 def _set_engine_resync(arm: Any) -> None:
     """Turn the P engine-resync fix on for THIS INSTANCE and read it back (default OFF everywhere)."""
     object.__setattr__(arm, PBL.ENGINE_RESYNC_SWITCH, True)
@@ -438,7 +445,7 @@ def _set_la(arm: Any) -> None:
             raise LadderSwitchError("%s did not take on %s" % (LAA.LA_SWITCH, type(o).__name__))
 
 
-def _set_catchup(arm: Any) -> None:
+def _set_catchup(arm: Any, paced: bool = False) -> None:
     """Turn catch-up prefill on for THIS INSTANCE of the rules arm (`arm._rules`, whose `decide` is
     the one reader) and read it back. Default OFF everywhere."""
     r = arm._rules
@@ -446,6 +453,11 @@ def _set_catchup(arm: Any) -> None:
     object.__setattr__(r, "_cu_state", CUP.State())
     if CUP.arm_enables(r) is not True:                                     # pragma: no cover
         raise LadderSwitchError("%s did not take on %s" % (CUP.SWITCH, type(r).__name__))
+    if paced:
+        object.__setattr__(r, CUP.PACED_SWITCH, True)
+        object.__setattr__(r, "_cup_w_of", lambda did, _a=arm: R4._weight_of(_a, did))
+        if CUP.arm_paced(r) is not True:                                   # pragma: no cover
+            raise LadderSwitchError("%s did not take on %s" % (CUP.PACED_SWITCH, type(r).__name__))
 
 
 def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
@@ -469,7 +481,10 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                predictive_belief: bool = False,
                la_arrival: bool = False,
                engine_resync: bool = False,
+               pb_wire_tokens: bool = False,
+               pb_host_engine_model: bool = False,
                catchup_prefill: bool = False,
+               catchup_pace: bool = False,
                **kw: Any) -> Any:
     """Build rung 3. Four switches, each set on the instance and each read back.
 
@@ -554,6 +569,17 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         if not predictive_belief:
             raise LadderSwitchError("engine_resync requires predictive_belief")
         _set_engine_resync(arm)
+    for _nm, _v in (("pb_wire_tokens", pb_wire_tokens), ("pb_host_engine_model", pb_host_engine_model)):
+        if not isinstance(_v, bool):
+            raise LadderSwitchError("%s must be a bool, got %r" % (_nm, _v))
+    if pb_wire_tokens:
+        if not predictive_belief:
+            raise LadderSwitchError("pb_wire_tokens requires predictive_belief")
+        _set_pb_switch(arm, PBL.WIRE_TOKENS_SWITCH, PBL.wire_tokens_enables)
+    if pb_host_engine_model:
+        if not (predictive_belief and engine_resync):
+            raise LadderSwitchError("pb_host_engine_model requires predictive_belief and engine_resync")
+        _set_pb_switch(arm, PBL.HOST_ENGINE_SWITCH, PBL.host_engine_enables)
     if la_arrival:
         if not (predictive_belief and book_belief):
             raise LadderSwitchError("la_arrival requires predictive_belief and book_belief")
@@ -564,7 +590,11 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         if not (predictive_belief and book_belief and la_arrival):
             raise LadderSwitchError(
                 "catchup_prefill requires predictive_belief, book_belief and la_arrival")
-        _set_catchup(arm)
+        _set_catchup(arm, paced=catchup_pace)
+    elif catchup_pace:
+        raise LadderSwitchError("catchup_pace requires catchup_prefill")
+    if not isinstance(catchup_pace, bool):
+        raise LadderSwitchError("catchup_pace must be a bool, got %r" % (catchup_pace,))
     return arm
 
 

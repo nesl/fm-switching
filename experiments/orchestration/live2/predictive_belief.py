@@ -66,6 +66,59 @@ def engine_resync_enables(arm: Any) -> bool:
     return v
 
 
+WIRE_TOKENS_SWITCH = "live2_pb_wire_tokens"
+HOST_ENGINE_SWITCH = "live2_pb_host_engine_model"
+
+
+def host_engine_enables(arm: Any) -> bool:
+    """Same contract as `engine_resync_enables`: arm-scoped INSTANCE bool, DEFAULT OFF, a class
+    attribute or a non-bool raises. ON: P models the engine's host tier (`host_engine_model`)."""
+    try:
+        own = vars(arm)
+    except TypeError:                                                          # pragma: no cover
+        own = {}
+    if HOST_ENGINE_SWITCH not in own:
+        for klass in type(arm).__mro__:
+            if HOST_ENGINE_SWITCH in klass.__dict__ and bool(klass.__dict__[HOST_ENGINE_SWITCH]):
+                raise PredictiveBeliefSwitchError(
+                    "%s is ON as a CLASS attribute of %s; it requires an arm-scoped INSTANCE attribute"
+                    % (HOST_ENGINE_SWITCH, klass.__name__))
+        return False
+    v = own[HOST_ENGINE_SWITCH]
+    if not isinstance(v, bool):
+        raise PredictiveBeliefSwitchError("%s must be a bool, got %r (%s)"
+                                          % (HOST_ENGINE_SWITCH, v, type(v).__name__))
+    return v
+
+
+
+def wire_tokens_enables(arm: Any) -> bool:
+    """Same contract as `engine_resync_enables`: arm-scoped INSTANCE bool, DEFAULT OFF, a class
+    attribute or a non-bool raises. ON: P is told a PIECE request's prompt size from the frames its
+    wire body carries (frames[:already] + new) x D2_TOK_PER_IMG + D2_HEADER_TOK, not the cumulative
+    `built_tokens + piece` (which excludes frames submitted but not yet completed)."""
+    try:
+        own = vars(arm)
+    except TypeError:                                                          # pragma: no cover
+        own = {}
+    if WIRE_TOKENS_SWITCH not in own:
+        for klass in type(arm).__mro__:
+            if WIRE_TOKENS_SWITCH in klass.__dict__ and bool(klass.__dict__[WIRE_TOKENS_SWITCH]):
+                raise PredictiveBeliefSwitchError(
+                    "%s is ON as a CLASS attribute of %s; it requires an arm-scoped INSTANCE attribute"
+                    % (WIRE_TOKENS_SWITCH, klass.__name__))
+        return False
+    v = own[WIRE_TOKENS_SWITCH]
+    if not isinstance(v, bool):
+        raise PredictiveBeliefSwitchError("%s must be a bool, got %r (%s)"
+                                          % (WIRE_TOKENS_SWITCH, v, type(v).__name__))
+    return v
+
+
+def wire_prompt_tokens(n_frames: int, tok_per_img: int, header_tok: int) -> int:
+    return int(n_frames) * int(tok_per_img) + int(header_tok)
+
+
 class PredictiveBeliefSwitchError(RuntimeError):
     """The switch was declared on a class, or with a non-bool value."""
 
@@ -93,7 +146,12 @@ class PredictiveBelief:
     def __init__(self, gpu_blocks: int, host_blocks: int, gpu_only: bool = False,
                  offload_controls: bool = True, max_num_seqs: int = 1024,
                  prefill_s_per_token: Optional[float] = None, admission: bool = False,
-                 engine_resync: bool = False) -> None:
+                 engine_resync: bool = False, host_engine_model: bool = False) -> None:
+        if not isinstance(host_engine_model, bool):
+            raise PredictiveBeliefSwitchError("host_engine_model must be a bool, got %r" % (host_engine_model,))
+        self.host_engine = host_engine_model
+        self._touch: Dict[str, List[Tuple[Hashable, int]]] = {}
+        self._protect: set = set()
         self.admission = bool(admission)
         self.engine_resync = bool(engine_resync)
         self._rob: Dict[str, bool] = {}
@@ -153,6 +211,20 @@ class PredictiveBelief:
             self.stats["pb_evictions_shadow"] += 1
 
     def _host_put(self, b: Tuple[Hashable, int]) -> None:
+        if self.host_engine:
+            if b in self._host:
+                return
+            if len(self._host) >= self.host_cap:
+                for v in self._host:
+                    if v not in self._protect:
+                        del self._host[v]
+                        self.stats["pb_host_evictions"] += 1
+                        break
+                else:
+                    self.stats["pb_host_dropped"] = self.stats.get("pb_host_dropped", 0) + 1
+                    return
+            self._host[b] = None
+            return
         if b in self._host:
             self._host.move_to_end(b)
             return
@@ -225,6 +297,10 @@ class PredictiveBelief:
 
     def _start(self, rid, key, n, nb, h, robot) -> None:
         self._last_nb[key] = nb
+        g = 0
+        if self.host_engine:
+            while g < h and ((key, g) in self._pin or (key, g) in self._free):
+                g += 1
         for i in range(h - 1, -1, -1):
             b = (key, i)
             if b in self._pin:
@@ -235,9 +311,24 @@ class PredictiveBelief:
                 else:
                     self._alloc_gpu()
                 self._pin[b] = 1
-            if b in self._host:
+            if b in self._host and not self.host_engine:
                 self._host.move_to_end(b)
-        for i in range(nb - 1, h - 1, -1):
+        if self.host_engine:
+            hl = list(range(g, h))
+            store = robot or not self.offload_controls
+            for i in range(nb - 1, h - 1, -1):
+                b = (key, i)
+                self._alloc_gpu()
+                self._pin[b] = 1
+            first = h if hl else 0
+            offer = [(key, i) for i in range(first, nb)] if store else []
+            self._protect = set(offer)
+            for b in offer:
+                self._host_put(b)
+            self._protect = set()
+            self._touch[rid] = [(key, i) for i in hl if (key, i) not in set(offer)] + offer
+        else:
+          for i in range(nb - 1, h - 1, -1):
             b = (key, i)
             self._alloc_gpu()
             self._pin[b] = 1
@@ -314,6 +405,15 @@ class PredictiveBelief:
                         self._host.pop((key, i), None)
                     for i in range(ch, h):
                         self._host_put((key, i))
+        if self.host_engine:
+            tk = self._touch.pop(rid, [])
+            if er and cached_tokens is not None and int(cached_tokens) // BLOCK < h:
+                tk = tk + [(key, i) for i in range(int(cached_tokens) // BLOCK, min(h, cap))]
+            seen = set()
+            tk = [b for b in sorted(set(tk), key=lambda b: b[1])]
+            for b in reversed(tk):
+                if b in self._host:
+                    self._host.move_to_end(b)
         for i in range(nb - 1, -1, -1):
             b = (key, i)
             c = self._pin.get(b)

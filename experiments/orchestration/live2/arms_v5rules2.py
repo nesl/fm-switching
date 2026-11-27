@@ -521,7 +521,7 @@ class V5Rules2Arm:
         cands = self._candidates(obs)
         _cu_extra: List[str] = []
         if _cu:
-            _cu_extra = CU.order(self, CU.candidates(self, obs, self._roster, set(cands)))
+            _cu_extra = CU.order(self, CU.candidates(self, obs, self._roster, set(cands)), float(obs.now_s))
         if not cands and not _cu_extra:
             return act
         # advance the chunk edge for every session we are about to ask for, so the next ask needs

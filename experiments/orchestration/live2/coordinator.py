@@ -461,13 +461,21 @@ class Live2Coordinator:
         self._pb_engine_resync = PBL.engine_resync_enables(arm)
         if self._pb_engine_resync and not self._pb_on:
             raise RuntimeError("%s needs %s on the same arm" % (PBL.ENGINE_RESYNC_SWITCH, PBL.SWITCH))
+        self._pb_wire_tokens = PBL.wire_tokens_enables(arm)
+        if self._pb_wire_tokens and not self._pb_on:
+            raise RuntimeError("%s needs %s on the same arm" % (PBL.WIRE_TOKENS_SWITCH, PBL.SWITCH))
+        self._pb_host_engine = PBL.host_engine_enables(arm)
+        if self._pb_host_engine and not (self._pb_on and self._pb_engine_resync):
+            raise RuntimeError("%s needs %s and %s on the same arm"
+                               % (PBL.HOST_ENGINE_SWITCH, PBL.SWITCH, PBL.ENGINE_RESYNC_SWITCH))
         if self._pb_on:
             # capacities are INPUTS from the engine config, no fitted constant: blocks of 16 tokens
             self._pb = PBL.PredictiveBelief(max(int(gpu_kv_tokens) // PBL.BLOCK, 1),
                                             max(int(host_tier_tokens) // PBL.BLOCK, 1),
                                             offload_controls=self._offload_controls,
                                             prefill_s_per_token=None,
-                                            engine_resync=self._pb_engine_resync)
+                                            engine_resync=self._pb_engine_resync,
+                                            host_engine_model=self._pb_host_engine)
         # D102: the GPU budget is an explicit INPUT, equal by default to one GPU's time over
         # the run (window length x 1 GPU-second per second), identical for every arm and
         # recorded in the header. It is the PHYSICAL CAPACITY, so it never binds artificially
@@ -1971,6 +1979,8 @@ class Live2Coordinator:
         else:
             key = "u:" + sub.request_id
         n = int(sub.est_tokens)
+        if self._pb_wire_tokens and kind in ("piece", "whole"):
+            n = PBL.wire_prompt_tokens(len(sub.mm_uuids), CS.D2_TOK_PER_IMG, CS.D2_HEADER_TOK)
         prev = self._pb_last.get(key)
         sh = PBL.shared_prefix_tokens(prev[0], prev[1], sub.mm_uuids) if prev else 0
         pf, ptok = self._pb.p_cached_fraction(key, n, sub.sent_s, sh)
