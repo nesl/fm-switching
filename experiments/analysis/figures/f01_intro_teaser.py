@@ -108,52 +108,71 @@ def system_diff(arm, seeds_arm, units, covex_key):
             "ci95": [float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))]}
 
 
-def render(out, rows, pooled_n):
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    from matplotlib import font_manager
+# LaTeX tick labels (pgf output): citations resolve in the paper's bibliography.
+TEX_NAMES = {
+    "COVEX (ours)": r"\textbf{COVEX (ours)}",
+    "StreamScout": r"StreamScout~\cite{streamscout2026}",
+    "Confidence cascade": r"Confidence cascade~\cite{chen2024frugalgpt}",
+    "SimpleStream": r"SimpleStream~\cite{simplestream2026}",
+    "LLF": r"LLF~\cite{mok1983llf}",
+    "ECO-LLM": r"ECO-LLM~\cite{ecollm2025}",
+    "Mooncake": r"Mooncake~\cite{mooncake2025}",
+    "EDF + feasibility": r"EDF + feasibility~\cite{liu1973edf}",
+    "EDF": r"EDF~\cite{liu1973edf}",
+    "KVFlow": r"KVFlow~\cite{kvflow2025}",
+    "Always-cloud FCFS": "Always-cloud FCFS",
+    "Warm-all LRU": "Warm-all LRU",
+    "QueryStream": r"QueryStream~\cite{querystream2026}",
+    "AttentionStore": r"AttentionStore~\cite{cachedattention2024}",
+    "LMCache": r"LMCache~\cite{lmcache2025}",
+}
+
+
+def _plain(s):
+    """Plain-text label for the agg preview: drop LaTeX commands and citations."""
+    import re
+    s = re.sub(r"~?\\cite\{[^}]*\}", "", s)
+    s = s.replace("\\textbf{", "").replace("}", "").replace("~", " ")
+    return s
+
+
+def _figure(rows, mode, out):
+    from matplotlib.figure import Figure
     from matplotlib.patches import Patch
-    plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42, "font.size": 7, "hatch.linewidth": 0.8,
-                         "font.family": "sans-serif",
-                         "font.sans-serif": ["Linux Biolinum O", "Libertinus Sans", "DejaVu Sans"]})
-    fam = None
-    for cand in ("Linux Biolinum O", "Libertinus Sans", "DejaVu Sans"):
-        try:
-            font_manager.findfont(cand, fallback_to_default=False)
-            fam = cand; break
-        except Exception:
-            continue
-    plt.rcParams["font.sans-serif"] = [fam]
-    out["font"] = fam
-    C_COVEX, C_STATE, C_STATEFUL = "#285B91", "#C8C8C8", "#7A7A7A"   # stateless light, stateful mid grey; no hatch
-    INK, SEC, HATCH = "#1A1A1A", "#555555", "#6E6E6E"
+    if mode == "pgf":
+        from matplotlib.backends.backend_pgf import FigureCanvasPgf as Canvas
+    else:
+        from matplotlib.backends.backend_agg import FigureCanvasAgg as Canvas
+    C_COVEX, C_STATEFUL, C_STATELESS = "#285B91", "#7A7A7A", "#C8C8C8"
+    INK = "#1A1A1A"
     n = len(rows)
-    fig = plt.figure(figsize=(3.33, 2.45))
-    ax = fig.add_axes([0.355, 0.215, 0.6, 0.72])
+    fig = Figure(figsize=(3.33, 1.95))
+    Canvas(fig)
+    ax = fig.add_axes([0.385, 0.165, 0.585, 0.70])
     ys = np.arange(n)[::-1]
+    pitch = 1.0
     for y, r in zip(ys, rows):
+        col = C_COVEX if r["class"] == "covex" else (C_STATEFUL if r["class"] == "stateful" else C_STATELESS)
+        ax.barh(y, r["diff"], height=0.6, color=col, edgecolor="none", linewidth=0)
+        val = f"+{r['diff']}" if r["diff"] >= 0 else f"$-${abs(r['diff'])}"
+        if mode == "agg":
+            val = f"+{r['diff']}" if r["diff"] >= 0 else f"-{abs(r['diff'])}"
         if r["class"] == "covex":
-            col, hatch, ec = C_COVEX, None, "white"
-        elif r["class"] == "stateful":
-            col, hatch, ec = C_STATEFUL, None, "white"
-        else:
-            col, hatch, ec = C_STATE, None, "white"
-        ax.barh(y, r["diff"], height=0.9, color=col, edgecolor="none", linewidth=0)   # 0.8 pt vertical gap from row pitch
-        lo, hi = r["ci95"]
-        # error bars removed (ruling: figure shows values only; paired CIs are in the rows JSON)
-        label = f"{r['diff']:+d}".replace("+-", "-")
-        x_lab = r["diff"] + 8
-        ax.text(x_lab, y, label, va="center", ha="left", fontsize=7, color=INK,
+            val = r"\textbf{" + val + "}" if mode == "pgf" else val
+        ax.text(r["diff"] + 8, y, val, va="center", ha="left", fontsize=7, color=INK,
                 fontweight="bold" if r["class"] == "covex" else "normal")
+    labels = [TEX_NAMES.get(r["display"].split(" (")[0] if r["display"] != "COVEX (ours)" else r["display"],
+                            r["display"]) for r in rows]
+    if mode == "agg":
+        labels = [_plain(s) for s in labels]
     ax.set_yticks(ys)
-    ax.set_yticklabels([r["display"] for r in rows], fontsize=7, color=INK)
+    ax.set_yticklabels(labels, fontsize=7, color=INK)
     for lbl, r in zip(ax.get_yticklabels(), rows):
         if r["class"] == "covex":
             lbl.set_fontweight("bold")
     ax.axvline(0, color=INK, lw=0.6, zorder=2)
     ax.set_xlim(-45, 360)
-    ax.set_ylim(-0.7, n - 0.2 + 0.75)
+    ax.set_ylim(-0.6, n - 0.4 + 0.9)
     ax.set_xticks([0, 100, 200, 300])
     ax.tick_params(axis="both", length=0, labelsize=7, colors=INK)
     ax.tick_params(axis="x", length=2, color=INK)
@@ -162,29 +181,41 @@ def render(out, rows, pooled_n):
     for s in ("top", "right", "left"):
         ax.spines[s].set_visible(False)
     ax.spines["bottom"].set_color(INK); ax.spines["bottom"].set_linewidth(0.6)
-    ax.set_xlabel("Additional correct answers by deadline\nover on-device answers alone",
-                  fontsize=7.5, color=INK, labelpad=2)
-    # ratio arrow above the top (COVEX) bar, from the highest non-COVEX value (ties are equal values) to COVEX's
-    cov = rows[0]; base = max((r for r in rows if r["class"] != "covex"), key=lambda r: r["diff"])
-    yA = n - 1 + 0.78
-    ax.annotate("", xy=(cov["diff"], yA), xytext=(base["diff"], yA),
+    xl = ("Additional correct answers over the on-device model")
+    fig.text(0.5, 0.012, xl, ha="center", va="bottom", fontsize=7.5, color=INK)   # centred on the figure, not the axes
+    cov = rows[0]
+    base_val = max(r["diff"] for r in rows if r["class"] != "covex")
+    yA = n - 1 + 0.72
+    ax.annotate("", xy=(cov["diff"], yA), xytext=(base_val, yA),
                 arrowprops=dict(arrowstyle="<->", color=INK, lw=0.6, shrinkA=0, shrinkB=0))
-    ratio = cov["diff"] / base["diff"]
-    ax.text((cov["diff"] + base["diff"]) / 2, yA + 0.12, f"{ratio:.1f}\u00d7", ha="center", va="bottom",
-            fontsize=7, color=INK, fontweight="bold")
+    ratio = cov["diff"] / base_val
+    rtxt = f"{ratio:.1f}$\\times$" if mode == "pgf" else f"{ratio:.1f}x"
+    ax.text((cov["diff"] + base_val) / 2, yA + 0.12, rtxt, ha="center", va="bottom", fontsize=7,
+            color=INK, fontweight="bold")
     handles = [Patch(facecolor=C_COVEX, edgecolor="none", label="COVEX (ours)"),
-               Patch(facecolor=C_STATEFUL, edgecolor="none", label="Stateful baselines"),
-               Patch(facecolor=C_STATE, edgecolor="none", label="Stateless baselines")]
-    ax.legend(handles=handles, loc="lower right", frameon=False, fontsize=6.5, handlelength=1.1,
-              handletextpad=0.4, borderaxespad=0.2, labelcolor=INK)
-    fig.set_size_inches(3.33, 2.45)
+               Patch(facecolor=C_STATEFUL, edgecolor="none", label="Stateful"),
+               Patch(facecolor=C_STATELESS, edgecolor="none", label="Stateless")]
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.6, 0.995), ncol=3, frameon=False,
+               fontsize=6.5, handlelength=1.0, columnspacing=1.2, handletextpad=0.4, labelcolor=INK)
+    return fig, ratio
+
+
+def render(out, rows, pooled_n):
+    import matplotlib
+    from matplotlib import rcParams
+    rcParams.update({"pgf.texsystem": "pdflatex", "pgf.rcfonts": False, "text.usetex": False,
+                     "font.size": 7, "pdf.fonttype": 42, "ps.fonttype": 42})
     OUTDIR.mkdir(parents=True, exist_ok=True)
-    pdf = OUTDIR / "F01_intro_teaser.pdf"
+    fig, ratio = _figure(rows, "pgf", out)
+    pgf = OUTDIR / "F01_intro_teaser.pgf"
+    fig.savefig(pgf)
+    fig_p, _ = _figure(rows, "agg", out)
     png = OUTDIR / "F01_intro_teaser.png"
-    fig.savefig(pdf)
-    fig.savefig(png, dpi=300)
-    out["outputs"] = {"pdf": str(pdf.relative_to(REPO)), "png": str(png.relative_to(REPO))}
-    return ratio, base, fam
+    fig_p.savefig(png, dpi=300)
+    out["font"] = "document font (pgf, rcfonts False); preview PNG rendered with DejaVu Sans; LaTeX not installed here"
+    out["outputs"] = {"pgf": str(pgf.relative_to(REPO)), "preview_png": str(png.relative_to(REPO)),
+                      "preview_note": "agg preview, plain labels; not the LaTeX-typeset preview"}
+    return ratio, None, "pgf"
 
 
 def paired_covex(arm, covex_arm, units):
@@ -256,7 +287,9 @@ def main():
            "font": None, "placeholder": ("PLACEHOLDER: this figure is regenerated after the freeze on the evaluation "
                                          "seed set (seeds 1 to 3 for every baseline still to run)."),
            "eco_llm_seeds": "4, 6, 7 (seed 5 has no canon-scorable cell; its valid cell is not chosen by canon)",
-           "confidence_cascade": "post-D205 _rerun cells, seeds 4 to 7, scored with canon.collect_units (rows added to F1.csv 2026-11-27)"}
+           "confidence_cascade": "post-D205 _rerun cells, seeds 4 to 7, scored with canon.collect_units (rows added to F1.csv 2026-11-27)",
+           "confidence_cascade_card": "experiments/orchestration/baselines/cards/cascade.md: FrugalGPT (Chen, Zaharia, Zou, TMLR 2024, arXiv:2305.05176) and AutoMix (Aggarwal et al., NeurIPS 2024, arXiv:2310.12963); cite key chen2024frugalgpt",
+           "placeholder_notes": "PLACEHOLDER: regenerated after the freeze on seeds 1 to 3 for every baseline still to run. Preview PNG is agg with plain labels; the typeset preview is figures/paper/preview/F01_preview.pdf (LaTeX, acmart sigconf, stub refs)."}
     OUTDIR.mkdir(parents=True, exist_ok=True)
     base_rows = [r for r in rows if r["arm"] != a.covex_arm]
     out["caption_claim_all_paired_ci_exclude_zero"] = all(r["paired_covex_minus_this"]["excludes_zero"] for r in base_rows)
