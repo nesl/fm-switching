@@ -1,0 +1,223 @@
+{
+ "label": "FROZEN_TEST_THREE_TYPE dashcam-EP-G upload-pf rq30 reask-device-PROVISIONAL llf_n16_s4_1200s_h27_3t_L1.5_epg_rq30 [robot-upload=per-frame]",
+ "git_commit": "394526c715d6d1047d2d476b76f477dfa6d3a89c",
+ "arm": "llf",
+ "arm_version": "live2-arm-1.0",
+ "flags": {},
+ "gpu_kv_tokens": 62944,
+ "host_tier_gib": 27.0,
+ "host_tier_tokens": 110630,
+ "cost_model": null,
+ "calibration_file": "results/orchestration/live2/calibration/live2_calibration_dense_jpeg.json",
+ "calibration_label": "FINAL",
+ "fairness_digest": "5a8141552b64cece6779ee21eb2e3342fb683807169bc5c024ea3d23fe516cea",
+ "live1_trace_digest": null,
+ "seed": 4,
+ "targets": {
+  "dashcam": {
+   "L_s": 1.0,
+   "p": 0.25,
+   "scope": "per_device",
+   "min_opportunities": 200
+  },
+  "robot": {
+   "L_s": 5.0,
+   "p": 0.9,
+   "scope": "pooled",
+   "min_opportunities": 20
+  }
+ },
+ "upload_mode": "A",
+ "robot_question_set": "lh_req",
+ "ss_question_set": "ss2",
+ "robot_deadline_s": 1.5,
+ "mu_mode": null,
+ "H": null,
+ "decision_period_s": 0.1,
+ "ratio": "40:40:20",
+ "n_devices": 16,
+ "run_s": 1200.0,
+ "memory_setting": "tight",
+ "server": {
+  "command": [
+   "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+   "serve",
+   "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "--served-model-name",
+   "32BI",
+   "--port",
+   "8031",
+   "--max-model-len",
+   "32768",
+   "--gpu-memory-utilization",
+   "0.9",
+   "--tensor-parallel-size",
+   "1",
+   "--no-enable-prefix-caching",
+   "--limit-mm-per-prompt",
+   "{\"image\": 16}",
+   "--dtype",
+   "bfloat16",
+   "--seed",
+   "0",
+   "--limit-mm-per-prompt",
+   "{\"image\": 640, \"video\": 1}",
+   "--mm-processor-kwargs",
+   "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}",
+   "--trust-request-mm-kwargs",
+   "--host",
+   "127.0.0.1",
+   "--enable-prefix-caching",
+   "--enable-prompt-tokens-details",
+   "--mm-processor-cache-gb",
+   "128",
+   "--kv-offloading-backend",
+   "native",
+   "--kv-offloading-size",
+   "27",
+   "--enable-log-requests",
+   "--enable-logging-iteration-details"
+  ],
+  "flag_diff": [
+   [
+    "38",
+    "27"
+   ]
+  ],
+  "restart_started": 1795779021.4900725,
+  "up_at": 1795779085.657139,
+  "startup_s": 63.7,
+  "log": "logs/study_x_server_32BI_1127_033021.log",
+  "host_gib": 27.0,
+  "scheduling_policy": "fcfs",
+  "extra_flags": [],
+  "resolved": {
+   "flags_set_twice": {
+    "--enable-prefix-caching": {
+     "occurrences": [
+      {
+       "index": 13,
+       "flag": "--no-enable-prefix-caching",
+       "value": "--no-enable-prefix-caching"
+      },
+      {
+       "index": 27,
+       "flag": "--enable-prefix-caching",
+       "value": "--enable-prefix-caching"
+      }
+     ],
+     "argv_last_wins": {
+      "index": 27,
+      "flag": "--enable-prefix-caching",
+      "value": "--enable-prefix-caching"
+     }
+    },
+    "--limit-mm-per-prompt": {
+     "occurrences": [
+      {
+       "index": 14,
+       "flag": "--limit-mm-per-prompt",
+       "value": "{\"image\": 16}"
+      },
+      {
+       "index": 20,
+       "flag": "--limit-mm-per-prompt",
+       "value": "{\"image\": 640, \"video\": 1}"
+      }
+     ],
+     "argv_last_wins": {
+      "index": 20,
+      "flag": "--limit-mm-per-prompt",
+      "value": "{\"image\": 640, \"video\": 1}"
+     }
+    }
+   },
+   "engine_reported": {
+    "enable_prefix_caching": "True",
+    "non_default_enable_prefix_caching": "True",
+    "non_default_mm_processor_cache_gb": "128.0",
+    "non_default_limit_mm_per_prompt": "{'image': 640, 'video': 1}",
+    "non_default_mm_processor_kwargs": "{'size': {'shortest_edge': 4096, 'longest_edge': 16777216}, 'fps': 1.0, 'do_sample_frames': False}",
+    "non_default_kv_offloading_size": "27.0",
+    "non_default_kv_offloading_backend": null
+   },
+   "note": "record-only; argparse keeps the last occurrence; the pinned flag list is unchanged (user ruling 2026-11-20)"
+  }
+ },
+ "server_url": "http://127.0.0.1:8031",
+ "server_kind": "vllm",
+ "frames_preflight": {
+  "trace_dir": "/home/pragya/data/live2/frozen_grid/work/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2_L1.5_epg_perframe_rq30",
+  "frames_root": "/home/pragya/data/live2/frames_by_ref",
+  "n_refs": 18026,
+  "n_missing": 0,
+  "n_empty": 0,
+  "missing": [],
+  "empty": [],
+  "ok": true,
+  "server_kind": "vllm",
+  "enforced": true
+ },
+ "git_working_tree": {
+  "head": "394526c715d6d1047d2d476b76f477dfa6d3a89c",
+  "dirty": false,
+  "diff_sha256": null,
+  "dirty_files": []
+ },
+ "c_inflight": 8,
+ "scheduling_policy": "fcfs",
+ "server_extra_flags": null,
+ "context_limit": {
+  "context_limit_tokens": 32768,
+  "source": "the started server's argv (header.json server.command)",
+  "configured": true,
+  "flag": "--max-model-len",
+  "argv_occurrences": [
+   {
+    "index": 7,
+    "value": "32768"
+   }
+  ],
+  "rule": "the LAST --max-model-len in the server argv wins, as argparse resolves it",
+  "ruling": "D223 (2); capacities are inputs, D56",
+  "not_this": "gpu_kv_tokens and the engine's kv_cache_tokens are the KV POOL, not the model length: they coincide with the limit at 0.5x and do not at 1x"
+ },
+ "c_inflight_set_by_runner": false,
+ "kv_capacity_enforced": true,
+ "metrics_scrape": false,
+ "robot_upload": "per-frame",
+ "robot_upload_rule": "D154 (4) / D150 SYNC (1): robot history frames upload PER FRAME AS CAPTURED, for ALL arms, replacing D68's fixed 30-s batches. One `history_batch` record per D2 frame, offered at t0 + the frame's session-local capture time, carrying exactly one frame_ref and one frame's bytes. The record KIND, its fields and the D2 token accounting are unchanged, so the emulator, the coordinator, `cstate` and every arm need no change; `cum_tokens` still carries the session's running total and the 31-token D2 header is still charged once per session, on its first holding (the D101 preload where there is one, otherwise the first frame). ONE INTENDED DIFFERENCE BEYOND PACKAGING, named because it is visible in the counts: under batch-30s a window whose END falls after the run horizon is dropped whole, taking frames captured BEFORE the horizon with it; per-frame keeps every frame captured before the horizon, which is the point of the contract. Earlier cells are labelled upload-30s.",
+ "dashcam_format": "epg",
+ "dashcam_min_frames": 3,
+ "epg_cap_frames": 21,
+ "epg_refresh_rule": "PROVISIONAL (flash, 2026-11-20), the LITERAL reading of D153. D153 says 'fresh context after N s with no carry-over', which is NOT StudySH-EP's sliding cap: SH-EP capped EP-G at the last 21 frames and its cap bound exactly at its last instant, so SH-EP never exercised a refresh at all and cannot settle this. Implemented here as a FRESH CONTEXT EVERY 21 FRAMES WITH NO CARRY-OVER, N = 21 frames = 10.5 s at the 0.5 s cadence, matching SH-EP's cap. Measured on the committed seed-4 16-device 1200 s 40:40:20 trace (13,193 monitor instants, 189 plays): the literal refresh gives a median 10 frames per request, excludes 1,429 instants at floor 3 (10.83 percent) and costs 46,260,494 prompt tokens per run, against the sliding cap's median 21, 378 exclusions (2.87 percent) and 80,794,968 tokens. The literal reading is implemented because it is what the D-row says and because it halves the token load, which matters at 32 devices. A ruling for the sliding cap changes one function, `_epg_episode`.",
+ "model": "32BI",
+ "split_processes": true,
+ "is_measurement": false,
+ "trace_dir": "/home/pragya/data/live2/frozen_grid/work/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2_L1.5_epg_perframe_rq30",
+ "outage": null,
+ "outage_placement": null,
+ "outage_semantics": null,
+ "source_agreement": {
+  "runner_loaded_n": 156,
+  "child_loaded_at_start_n": 132,
+  "overlap_n": 130,
+  "runner_only_n": 26,
+  "child_only_at_start_n": 2,
+  "runner_digest": "90fbdd831aba27a7",
+  "child_start_digest": "ebbb48954e2dd13b",
+  "runner_child_mismatch": [],
+  "start_files_n": 505,
+  "start_hash_wall_s": 0.0301,
+  "verdict": "OK",
+  "torn_lazy_import": [],
+  "moved_after_import": [],
+  "child_only_late_n": 2,
+  "tree_files_changed_during_cell": [],
+  "tree_files_changed_during_cell_n": 0,
+  "end_files_n": 505,
+  "end_hash_wall_s": 0.0312,
+  "note": "sha256 of files ON DISK (did the tree move under the cell, not what bytecode executed). Case 1 runner_child_mismatch -> TornTree before running; case 2 moved_after_import -> WARNING, cell kept (an imported module is cached, the change did not execute); case 3 torn_lazy_import -> INVALID. Bounds: a file changed and changed back within a cell is invisible; runner-only files are outside case 1 and are covered by the runner's pre-flight refusal instead (disjoint halves, keep both); repo files only."
+ },
+ "result_status": "received"
+}
