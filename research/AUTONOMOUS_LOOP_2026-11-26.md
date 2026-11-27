@@ -1,9 +1,9 @@
 # Autonomous development loop, 2026-11-26 (user away)
 
-## STATUS (10 lines; updated at every iteration; last update 2026-11-26T23:53Z)
+## STATUS (10 lines; updated at every iteration; last update 2026-11-27T00:12Z)
 1. Ruling: run policy-completion steps 1 to 4 one by one on the H100 at ONE seed (s4), diagnose, fix through a build subagent, rerun, move on. Never seeds 1 to 3. D240 holds.
-2. Step 1 state: cells 1 to 3 of `covex-v6-fair-final-la` scored (n16 1x, halved, n20 3:11:2); n32 landed on the H100 and is being scored; window (P engine_resync fix, stale booked_uncached fix, B per-decision logging, isolating-arm registration, -er arms) in build, to be pushed at the next cell boundary after the 243-arm sweep.
-3. Next cells: (a) isolating arm `-0b-er` halved, (b) `-la-er` halved, (c) rung 3 replicate halved, then `-la-er` at n16 1x, n20 and n32.
+2. Step 1 state: cells 1 to 4 of -la scored (all four recorded); the window (P engine_resync fix, B per-decision logging la_decisions.jsonl.gz, isolating arms -0b, -0b-er, -la-er) is PUSHED (origin 1a83d589, H100 verified); D308_LOOP1_CELLS is running: (a) -0b-er halved ~16:39, (b) -la-er halved ~17:01, (c) rung 3 replicate halved ~17:23, then -la-er n16 1x ~17:45, n20 ~18:07, n32 ~18:29 (PST).
+3. Step 2 build (catch-up prefill, switch live2_catchup_prefill, default OFF, arm -la-er-cu) is in progress on CPU in parallel; it pushes with the question-priority uplink (qp) at a later cell boundary after the step 1 cells.
 4. Fix iterations used: step 1: 0 of 3 (the P fix is user-approved before the loop and does not count).
 5. ESCALATED items: none yet. STOP-AND-LEAVE items: none yet.
 6. Absolute FAIR shares are the re-implementation (no over-32k exclusion, no question dedup), not the committed oracle code.
@@ -16,3 +16,11 @@ One seed s4; push only at cell boundaries; every new switch defaults OFF with li
 
 ## ITERATION LOG
 (entries appended below: step, iteration, cells, result against expectation, diagnosis, fix, commit)
+
+### 2026-11-27T00:12Z STEP 1, iteration 0 (window pushed; no cell yet)
+- Cells 1 to 4 of the earlier -la (no P fix, no per-decision log) scored and recorded in research/study_phaseA_B_validation.md (n16 1x not passed on no-harm; halved +8 cbd; n20 +6; n32 +17 [+3, +33] and on-time 0.127 to 0.254). These four are the baseline for the loop; they are NOT pre-registered tests of the loop expectation.
+- P diagnosis (research/study_phaseA_P_validation.md): the live-versus-offline gap was largely a population measure; the real defect was resync-polluted shadow host (phantom blocks from touches and dashcam monitors, host LRU); fix engine_resync built and user-approved.
+- WINDOW PUSHED: origin 1a83d589 (parent 350557db): 5 paths M under experiments/orchestration/live2/ (arms_final_ladder.py, arms_v6cfr3.py, coordinator.py, hybrid/hybrid_arm.py, predictive_belief.py); live2 ff05d336 to 7acbf66d, orchestration 4f3c9783 to 5b7c34db, baselines 41c430d7 unchanged; H100 verified all three. Light checks: 243 of 243 resolvable registry arms digest-identical with all switches off (covex-v6-cf-pd raises the same BaseNotChosen in both trees), rung 3 300 s digests edb7e94867917ac0 / 3346204b0e99dcbc, -la dry 661c01217779819e unchanged, -0b and -0b-er dry equal (digest dd5717d7221b3c7b), gate lines parse (0 mismatches). A dry cannot exercise the resync path (dry observe calls carry no prompt size): the evidence for the P fix is the live-stream replay.
+- IMPLEMENTATION-BUG ITEM CLOSED AS NOT A DEFECT: the 'stale booked_uncached read at submit' (flagged from sidecar rows where booked exceeded est) was a MISDIAGNOSIS: _uncached_last_charged is written right before each _submit at all four charge sites (the coordinator is synchronous); 244 of 244 piece rows in a 1200 s dry equal that request's own booked value; the 48 'booked exceeds est' rows come from the est_tokens column (completed pieces only) while 0b books the presented prefix (example: est 4096, built 3072, sent 7380, booked 8404 = 7380 + 1024); no code changed. Counts: no iteration cap used.
+- OPEN: piece false-warm rise (9 to 17 in the live replay with the fix) is open, engine-side suspected, no probe now. ESCALATED items so far: none; but the value-aware design note (research/study_valueaware_admission_design.md) lists three rulings that block a V2 build (accuracy in decisions vs D177(2)/D149(1); the D191 margin on admission; per-category accuracy table): if B iterates, only V1 (gain 1) is buildable without the user.
+- EXPECTATION AND READING for the cells (a), (b), (c) and the -er n16 1x, n20, n32 cells: as committed in 6fdbfb77 above, unchanged.
