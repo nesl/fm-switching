@@ -126,7 +126,7 @@ def render(out, rows, pooled_n):
             continue
     plt.rcParams["font.sans-serif"] = [fam]
     out["font"] = fam
-    C_COVEX, C_STATE, C_STATEFUL = "#285B91", "#8C8C8C", "#BDBDBD"
+    C_COVEX, C_STATE, C_STATEFUL = "#285B91", "#C8C8C8", "#7A7A7A"   # stateless light, stateful mid grey; no hatch
     INK, SEC, HATCH = "#1A1A1A", "#555555", "#6E6E6E"
     n = len(rows)
     fig = plt.figure(figsize=(3.33, 2.45))
@@ -134,12 +134,12 @@ def render(out, rows, pooled_n):
     ys = np.arange(n)[::-1]
     for y, r in zip(ys, rows):
         if r["class"] == "covex":
-            col, hatch, ec = C_COVEX, None, "none"
+            col, hatch, ec = C_COVEX, None, "white"
         elif r["class"] == "stateful":
-            col, hatch, ec = C_STATEFUL, "//", HATCH
+            col, hatch, ec = C_STATEFUL, None, "white"
         else:
-            col, hatch, ec = C_STATE, None, "none"
-        ax.barh(y, r["diff"], height=0.66, color=col, edgecolor=ec, hatch=hatch, linewidth=0.0)
+            col, hatch, ec = C_STATE, None, "white"
+        ax.barh(y, r["diff"], height=0.9, color=col, edgecolor="none", linewidth=0)   # 0.8 pt vertical gap from row pitch
         lo, hi = r["ci95"]
         # error bars removed (ruling: figure shows values only; paired CIs are in the rows JSON)
         label = f"{r['diff']:+d}".replace("+-", "-")
@@ -173,9 +173,8 @@ def render(out, rows, pooled_n):
     ax.text((cov["diff"] + base["diff"]) / 2, yA + 0.12, f"{ratio:.1f}\u00d7", ha="center", va="bottom",
             fontsize=7, color=INK, fontweight="bold")
     handles = [Patch(facecolor=C_COVEX, edgecolor="none", label="COVEX (ours)"),
-               Patch(facecolor=C_STATE, edgecolor="none", label="Stateless baselines"),
-               Patch(facecolor=C_STATEFUL, edgecolor=HATCH, hatch="//", linewidth=0,
-                     label="Stateful baselines")]
+               Patch(facecolor=C_STATEFUL, edgecolor="none", label="Stateful baselines"),
+               Patch(facecolor=C_STATE, edgecolor="none", label="Stateless baselines")]
     ax.legend(handles=handles, loc="lower right", frameon=False, fontsize=6.5, handlelength=1.1,
               handletextpad=0.4, borderaxespad=0.2, labelcolor=INK)
     fig.set_size_inches(3.33, 2.45)
