@@ -857,6 +857,12 @@ def _final_ladder_lazy() -> Dict[str, Any]:
                              pb_host_engine_model=True, pb_touch_guard=True,
                              catchup_prefill=True, **kw)
 
+    def _cf3(nm: str) -> Any:
+        def _f(**kw: Any) -> Any:
+            import arms_v6cfstep3 as S3                                    # noqa: PLC0415
+            return S3.ARMS_STEP3[nm](**kw)
+        return _f
+
     def r3laercu(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3_LA + "-er-cu", predictive_belief=True, book_belief=True,
@@ -929,6 +935,18 @@ def _final_ladder_lazy() -> Dict[str, Any]:
             "covex-v6-fair-final-cand-tl": r3candtl,
             "covex-v6-fair-final-cand-tl-sync": r3candtlsync,
             "covex-v6-fair-final-cand-tl-sync-eager": r3candtlsynceager,
+            # STEP 3 ON F0 (D331; default OFF components; see cf_forfeit.py): F0 + protect-and-defer +
+            # forfeit-valued admission + deficit-rotated resident set, and its attribution arms
+            "covex-v6-fair-final-cand-tl-sync-cf": _cf3("covex-v6-fair-final-cand-tl-sync-cf"),
+            "covex-v6-fair-final-cand-tl-sync-cf-a": _cf3("covex-v6-fair-final-cand-tl-sync-cf-a"),
+            "covex-v6-fair-final-cand-tl-sync-cf-r": _cf3("covex-v6-fair-final-cand-tl-sync-cf-r"),
+            "covex-v6-fair-final-cand-tl-sync-cf-pd": _cf3("covex-v6-fair-final-cand-tl-sync-cf-pd"),
+            "covex-v6-fair-final-cand-tl-sync-cf-off": _cf3("covex-v6-fair-final-cand-tl-sync-cf-off"),
+            "covex-v6-fair-final-cand-tl-sync-cf-a0": _cf3("covex-v6-fair-final-cand-tl-sync-cf-a0"),
+            "covex-v6-fair-final-cand-tl-sync-cf-h0": _cf3("covex-v6-fair-final-cand-tl-sync-cf-h0"),
+            "covex-v6-fair-final-cand-tl-sync-cf-w0": _cf3("covex-v6-fair-final-cand-tl-sync-cf-w0"),
+            "covex-v6-fair-final-cand-tl-sync-cf-nonet": _cf3("covex-v6-fair-final-cand-tl-sync-cf-nonet"),
+            "covex-v6-fair-final-cand-tl-sync-cf-claimpiece": _cf3("covex-v6-fair-final-cand-tl-sync-cf-claimpiece"),
             "covex-v6-fair-final-0b": r30b,
             "covex-v6-fair-final-0b-er": r30ber,
             "covex-v6-fair-final-q4b": r3q4b,

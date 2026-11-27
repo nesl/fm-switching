@@ -231,7 +231,10 @@ _SWITCH_KEYS = ("live2_predictive_belief", "live2_pb_engine_resync", "live2_book
                 "live2_la_arrival_admission", "live2_value_aware_admission", "live2_catchup_prefill",
                 "live2_pb_wire_tokens", "live2_pb_host_engine_model")
 _SWITCH_KEYS_ON_ONLY = ("live2_catchup_prefill_paced", "live2_catchup_prefill_busyx", "live2_pb_touch_guard",
-                         "live2_catchup_prefill_value")
+                         "live2_catchup_prefill_value",
+                         # step 3 on F0 (D331): header record only; ON-only, so every other arm is unchanged
+                         "live2_cf_protect_defer", "live2_cf_forfeit_admit", "live2_cf_resident_set",
+                         "live2_cf_harm_arrivals", "live2_cf_s2_netting")
 
 
 def _switch_record(arm) -> Dict[str, bool]:

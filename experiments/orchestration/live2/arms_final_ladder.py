@@ -500,6 +500,7 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                catchup_pace: bool = False,
                catchup_busyx: bool = False,
                catchup_value: bool = False,
+               _cls: Any = None, _cls_kw: Any = None,
                **kw: Any) -> Any:
     """Build rung 3. Four switches, each set on the instance and each read back.
 
@@ -507,7 +508,7 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
     arguments is still exactly `covex-v6-fair-final`. `guard_log` defaults to None meaning
     "follow the guard switch", so the labelled variant logs and rung 3 does not.
     """
-    arm = V6FairFinal(name=name, **kw)
+    arm = (_cls or V6FairFinal)(name=name, **dict(_cls_kw or {}), **kw)
     if qcache_key_fix:
         _set_qcache_fix(arm)
     arm._fairfeed_init(deficit_feed=deficit_feed, gain=gain, ordering=ordering, split=split)

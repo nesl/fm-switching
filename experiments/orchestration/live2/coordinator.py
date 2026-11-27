@@ -877,6 +877,21 @@ class Live2Coordinator:
             for x in rows:
                 f.write(json.dumps(x, sort_keys=True, default=float) + "\n")
 
+    def write_cf_decisions(self) -> None:
+        """SIDECAR `cf_decisions.jsonl.gz` (step 3, `arms_v6cfstep3`): one row per base-REJECTED robot
+        question the forfeit-valued admission looked at, with every term of its rule. LOGGING ONLY,
+        nothing reads it back. No file for any arm that has no step-3 rows."""
+        if self.logs is None:
+            return
+        rows = getattr(self.arm, "cf3_rows", None)
+        if not rows:
+            return
+        import gzip
+        import json
+        with gzip.open(Path(self.logs.out_dir) / "cf_decisions.jsonl.gz", "wt") as f:
+            for x in rows:
+                f.write(json.dumps(x, sort_keys=True, default=float) + "\n")
+
     def write_guard_log(self):
         """D230 (2) limitation 1: COMMIT `guard_state`'s per-decision-period signal.
 
@@ -2724,6 +2739,7 @@ class Live2Coordinator:
         self.write_booking_log()
         self.write_la_decisions()
         self.write_cu_value_decisions()
+        self.write_cf_decisions()
         return dict(
             arm=self.arm.name, arm_version=getattr(self.arm, "arm_version", "unversioned"),
             is_measurement=False,

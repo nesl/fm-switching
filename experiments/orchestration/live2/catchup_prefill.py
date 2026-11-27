@@ -46,7 +46,7 @@ changes is the MATERIALIZE list `act.sessions`, enacted at `coordinator._enact` 
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import book_belief_uncached as BB
 
@@ -169,6 +169,17 @@ class State:
         self.link: Dict[str, Dict[str, Any]] = {}        # session -> {offline_s}
         self.val: Dict[str, float] = {}                  # session -> the net value that released it
         self.vlog: List[Dict[str, Any]] = []             # one row per value evaluation
+        self.rel_t: Optional[float] = None               # the epoch of `rel` (D331 netting read site)
+        self.rel: Dict[str, Tuple[float, str]] = {}      # session -> (net_acc, device) released THIS epoch
+        # D333 EXTENDED NETTING CLAIM (value mode; read only when F1's netting switch is on: empty or
+        # neutral otherwise). S2's claim on a robot's future: opens at the epoch of its first EXECUTED
+        # value release in the window, closes when the catch-up COMPLETES (window close: the committed
+        # `catchup_windows_closed_done` / `_closed_session_gone` signal; the piece-scope alternative
+        # reads the W register). F1's claim: the admitted request's own D324 window.
+        self.first_rel: Dict[str, float] = {}            # session -> epoch of its first executed release
+        self.rel_dev: Dict[str, float] = {}              # device -> epoch of its latest executed release
+        self.f1_claim: Dict[str, Tuple[float, float]] = {}   # device -> (opened, until) F1's admission claim
+        self.claim_log: List[Dict[str, Any]] = []
 
 
 def observe(arm: Any, obs: Any, roster: Dict[str, Any]) -> None:
@@ -244,10 +255,15 @@ def candidates(arm: Any, obs: Any, roster: Dict[str, Any], ordinary: set) -> Lis
         tail = e - b
         if sid not in live:
             del cu.win[sid]
+            cu.first_rel.pop(sid, None)
             arm.stats["catchup_windows_closed_session_gone"] += 1
             continue
         if e - est0 >= backlog and tail < int(arm.chunk_tokens):
             del cu.win[sid]
+            if sid in cu.first_rel and len(cu.claim_log) < 6000:
+                cu.claim_log.append(dict(event="s2_claim_close", t=round(float(obs.now_s), 4), sid=sid,
+                                         opened=round(float(cu.first_rel[sid]), 4)))
+            cu.first_rel.pop(sid, None)
             arm.stats["catchup_windows_closed_done"] += 1
             if len(cu.log) < LOG_CAP:
                 cu.log.append(dict(t=round(float(obs.now_s), 4), ev="close", sid=sid, est=e,
@@ -294,6 +310,15 @@ def candidates(arm: Any, obs: Any, roster: Dict[str, Any], ordinary: set) -> Lis
             continue
         if value:
             import catchup_value as CV
+            if f1_claim_active(cu, str(did), float(obs.now_s)):
+                fc = cu.f1_claim[str(did)]
+                # D333: F1's admission holds this robot's future for its own service window
+                arm.stats["catchup_value_f1_claim_blocked"] += 1
+                if len(cu.claim_log) < 6000:
+                    cu.claim_log.append(dict(event="s2_blocked_by_f1", t=round(float(obs.now_s), 4),
+                                             sid=sid, device_id=str(did), f1_opened=round(float(fc[0]), 4),
+                                             f1_until=round(float(fc[1]), 4)))
+                continue
             try:
                 vd = CV.evaluate(arm, obs, roster, sid, did, tail, (est0, backlog, did), e)
             except Exception:                                                  # noqa: BLE001
@@ -303,6 +328,9 @@ def candidates(arm: Any, obs: Any, roster: Dict[str, Any], ordinary: set) -> Lis
             if not vd["release"]:
                 continue
             cu.val[sid] = float(vd["net_acc"])
+            if cu.rel_t != float(obs.now_s):
+                cu.rel_t, cu.rel = float(obs.now_s), {}
+            cu.rel[sid] = (float(vd["net_acc"]), str(did))
         out.append(sid)
     arm.stats["catchup_candidates"] += len(out)
     return out
@@ -339,12 +367,39 @@ def order(arm: Any, sids: List[str], now_s: float = 0.0) -> List[str]:
 def account(arm: Any, plan: Any, extra: List[str], now_s: float) -> None:
     cu: State = arm._cu_state
     legal = set(plan.legal)
+    sdev0 = (getattr(arm, "_roster", None) or {}).get("session_device") or {}
     for sid in extra:
         if sid in legal:
             arm.stats["catchup_emitted"] += 1
+            if arm_value(arm):
+                cu.first_rel.setdefault(sid, float(now_s))
+                cu.rel_dev[str(sdev0.get(sid))] = float(now_s)
             if arm_paced(arm):
                 cu.credit[sid] = cu.credit.get(sid, 0) - 1
             if len(cu.log) < LOG_CAP:
                 cu.log.append(dict(t=round(float(now_s), 4), ev="ask", sid=sid))
         else:
             arm.stats["catchup_not_emitted"] += 1
+
+
+def f1_claim_active(cu: Any, did: str, now: float) -> bool:
+    """F1's claim on device `did`'s future is held at epoch `now` (the admitted request's own window)."""
+    fc = cu.f1_claim.get(str(did))
+    return fc is not None and float(now) < float(fc[1])
+
+
+def s2_claim(arm: Any, obs: Any, did: str, scope: str = "window") -> Tuple[bool, Optional[float]]:
+    """D333 EXTENDED NETTING: does S2 hold device `did`'s future claim, and since when (the epoch of
+    its first executed release)? `scope="window"`: held from the first executed release until the
+    catch-up window CLOSES (the committed window-close signal: backlog arrived and the tail built).
+    `scope="piece"`: held from a release until the device has no piece/whole in flight (the W
+    register, `obs.cloud.in_flight_work`: the observed completion of the released request). Pure
+    read of state S2 already keeps; no constant."""
+    cu: State = arm._cu_state
+    if scope == "piece":
+        rows = getattr(getattr(obs, "cloud", None), "in_flight_work", None) or ()
+        busy = any(str(r.device_id) == str(did) and str(r.kind) in ("piece", "whole") for r in rows)
+        t = cu.rel_dev.get(str(did))
+        return (bool(busy and t is not None), (t if busy else None))
+    ts = [cu.first_rel[s] for s, w in cu.win.items() if str(w[2]) == str(did) and s in cu.first_rel]
+    return (bool(ts), (min(ts) if ts else None))
