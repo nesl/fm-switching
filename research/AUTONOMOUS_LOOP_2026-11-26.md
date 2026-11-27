@@ -1,6 +1,6 @@
 # Autonomous development loop, 2026-11-26 (user away)
 
-## SIGN-OFF SUMMARY (written about 20:45 PST 2026-11-26; AWAITING THE USER'S APPROVAL OF THE OVERNIGHT PLAN; NOTHING OF THE OVERNIGHT PLAN HAS STARTED; D258 and the filler keep the GPU busy meanwhile)
+## SIGN-OFF SUMMARY (written at 20:25 PST 2026-11-26, ahead of the 20:45 deadline; AWAITING THE USER'S APPROVAL OF THE OVERNIGHT PLAN; NOTHING OF THE OVERNIGHT PLAN HAS STARTED; D258 and the filler keep the GPU busy meanwhile)
 All results are ONE SEED (s4), n = 20 robot questions at n16 (34 at the B2 scenario, 47 at n20, 61 at n32), question-clustered 95% CIs; FAIR shares are the RE-IMPLEMENTATION (no over-32k exclusion, no question dedup), not the committed oracle code; the run-to-run noise floor from the one rung 3 replicate pair is about 15 per-opportunity flips and 2 to 3 cbd at halved (1 flip at 1x): ONE pair is a descriptive spread, not a variance estimate. Iterations used: step 1: 0 of 3; step 2: 1 of 3 (paced catch-up built, dry only).
 
 **STEP 1 (P fix + 0b + B = the carried policy -la-er), result against the committed expectation, one line each:**
