@@ -1,6 +1,6 @@
 # Autonomous development loop, 2026-11-26 (user away)
 
-## STATUS (10 lines; updated at every iteration; last update 2026-11-27T01:57Z)
+## STATUS (10 lines; updated at every iteration; last update 2026-11-27T01:58Z)
 1. Ruling: run policy-completion steps 1 to 4 one by one on the H100 at ONE seed (s4), diagnose, fix through a build subagent, rerun, move on. Never seeds 1 to 3. D240 holds.
 2. Step 1 state: window pushed (origin 1a83d589); D308_LOOP1_CELLS: (a) -0b-er halved DONE (P + 0b: no detectable difference from rung 3); (b) -la-er halved DONE and scored (B total effect on a fixed P: cbd +11 [+2, +22]; whole stack against rung 3: cbd +5 [-4, +12], the committed halved expectation MET at the point estimate, UNREPLICATED); (c) rung 3 replicate halved DONE (noise floor: about 15 flips and 7 cbd-differing opportunities per pair; the la-er minus 0b-er cbd gap and the la-er cold-ask drop clear it); then -la-er n16 1x DONE (NO-HARM NOT MET: cbd -4 and -6, four wrong rejects from a surviving P under-count on robo003: diagnosis running), n20 ~18:07, n32 ~18:29 (PST).
 3. Step 2: catch-up prefill BUILT (switch live2_catchup_prefill, default OFF, arm -la-er-cu; dry checks pass; not pushed; pushes with the question-priority uplink at a later boundary); value-aware admission (live2_value_aware_admission, arm -la-er-va) in build; the user will see its dry result BEFORE any cell.
@@ -94,3 +94,13 @@ Same loop rules; one seed s4; never interrupt a cell; push only at boundaries; D
 **(4) THE P FIX (if pushed): -la-er with the fix at n16 1x. EXPECTATION: the four robo003 wrong rejects (opp0010346, opp0010459, opp0010467, opp0010481) do not recur (all four are sent, or rejected with a logged P cached fraction within 0.2 of the engine's); the n16 1x no-harm reading is met (cbd >= rung 3 - 2 AND the cloud on-time CI includes 0 or is positive).**
 **(5) At about 20:45 write a SIGN-OFF SUMMARY at the TOP of this file:** per item, result against its expectation in one line each, plus a proposed overnight plan (build working-set protection; run the composed policy once at s4; anything else); WAIT for the user's approval of the overnight plan before starting it.
 **Standing user rulings recorded with this plan:** value-aware revised (the user's ruling, 01:18Z): harm counts only requests of the SAME query type as the arriving request (robot from robot rows, single-shot from single-shot rows); dashcam rows enter a robot or single-shot admission only through the existing C5 cap, NOT through H; no new constant; the earlier version (93% of harm from in-flight dashcam monitors, implying a cross-type exchange rate forbidden by D149) is superseded; do NOT queue -la-er-va until its revised dry passes; priority remains the surviving P under-count diagnosis (rejected requests never correct the belief): a fix feeds both -la-er and -la-er-va; the catch-up prefill and value-aware windows merge into one before any push.
+
+### 2026-11-27T01:58Z USER'S OVERNIGHT QUEUE PROPOSAL (to be included in the 20:45 SIGN-OFF SUMMARY; NOT STARTED; waits for the user's approval)
+Policy cells always first. Each block's expected end time assumes a start at 21:00 PST right after approval and about 22 minutes per cell (the observed cell length; baseline and outage cells may differ: to be confirmed on the first cell of each block):
+1. COMPOSED POLICY (only the components the user signs off) at s4: n16 1x, `_kv0.5r_h0.5`, n20 `_c3-11-2`, n32 `_c3-11-2`, B2 outage, B2 control: 6 cells, 132 min, ends about 23:12.
+2. WORKING-SET PROTECTION cells (only if built and light-checked overnight): n20, n32, `_kv0.5r_h0.5`, n16 1x: 4 cells, 88 min, ends about 00:40 (if the build is not ready, this block is skipped and the following blocks move up).
+3. BASELINES at n20 and n32 `_c3-11-2`, s4: streamscout, simplestream, mooncake, confidence-cascade (8 cells; device answers replayed, so cbd is scorable): 176 min, ends about 03:36.
+4. REPLICATES: -la-er `_kv0.5r_h0.5` and n32: 2 cells, 44 min, ends about 04:20.
+5. -0b-er n16 1x: 1 cell, 22 min, ends about 04:42.
+6. D258 REMAINDER (13 cells): 286 min, ends about 09:28.
+Total about 12.5 h (748 min) from the start. Standing rules unchanged: one seed s4, D240 holds, pre-registered expectation committed before each cell, never interrupt a cell, push only at cell boundaries.
