@@ -1,0 +1,27 @@
+# S2 v2 DELTA (D330 item 3 dashcam exclusion; D330 item 4 permissiveness accepted; D332 placement). CPU only; nothing pushed or committed.
+Paths: syncport/tree (v2), syncport/tree_v1 (previous), syncport/diff_v2.patch (the diff), full_s2 = overlay for dry runs (v1 outputs kept as out/v1_*, sweep/full_s2_v1).
+## What changed (catchup_value.py 1.0 -> 1.1, tests; nothing else)
+* `_others()` drops rows with qtype `alert`: dashcam contributes NO pending harm term. Mirrors step 3 (`_cf3_admit` keeps only qtype recall/assistance; arrival rows only recall/assistance). Step 3 does this INLINE in the arm, not through a shared function, so there is no shared function to reuse: same filter, same set of types.
+* The uncommitted 1.0 unit is deleted (`ALERT_GAP_FALLBACK`, the `alert` key of `_gaps()`, the fallback counter and row flag); an unknown type now raises KeyError (cannot occur after the filter).
+* Dashcam tokens STILL count in `queued_ahead` (B's in-flight register, same as step 3); only the harm row is gone.
+## Tests
+12 of 12 in test_catchup_value (11 old, 1 new `test_dashcam_row_contributes_zero_harm`: pending harm 0, no `alert` in harm_by_type, row not counted; `test_units_gaps_committed` now asserts no `alert` gap). catchup_prefill 6, pacing 9, busyx 10, uplink_question_priority 8, touch guard 18: all pass.
+## Dry checks (CPU dry harness, 3:11:2, 1,200 s; digests over the decision log)
+(i) OFF: cand-tl in S2 tree = cand-tl in origin+tl reference: n16 kv 8,000 digest 16641a99a26a3465, 10,680 rows, 0 differ, counts, booking and budget equal. (ii) NO OUTAGE: cand-tl-sync = cand-tl: kv 8,000 (16641a99a26a3465) and kv 0 (9ba393601bf319b4): 0 differ, 0 value evaluations.
+(iii) n32 k22 d188 t0 529.5 (kv 8,000) old v1 -> new v2:
+| | v1 | v2 |
+|---|---|---|
+| evaluations | 2,835 | 2,834 |
+| RELEASES | 91 | 91 (22 of 22 sessions; same count) |
+| holds, net not positive | 2,372 | 2,371 |
+| holds, no question estimate | 372 | 372 |
+| dashcam rows priced | 1,197 | 0 |
+| differing rows vs cand-tl | 6,122, first 7,228 | 6,122, first 7,228 |
+Release set differs by ONE: robo014 s001 releases at 742.5 (net +0.647; v1 held it at net -1.498 because a dashcam row was priced at 1.0) instead of 742.6. Harm moved on the 1,197 dashcam-priced evaluations (down; a few up later from the shifted timeline). Order: 17 of 17 multi-release epochs in descending net. kv 0: 78 released of 4,000 logged (stats 100 releases, v1 99). No release-rate relaxation from removing the unit at this placement (D330 item 4: accepted).
+(iii-b) NEW PLACEMENT n20 `_c3-11-2_L3_epg_rq30_out-k14-d188_evid-t4835_link_qp` (14 robots, d 188, t0 483.5, R 671.5, 13.6 Mbps), kv 8,000, v2 vs cand-tl (13,598 vs 11,284 rows; digests 2d52a73b2c77d18f vs e2cf56575b49b6fe): **87 RELEASES**, 5,819 holds (net not positive), 4 holds (no question estimate), 5,910 evaluations, 14 reconnects, 29 windows opened. **First differing decision: row 5,264, t 671.6** (sync releases a piece at 671.6 where cand-tl's is at 671.7; the reconnect is 671.5); 6,020 rows differ by position. Order: 12 of 12 multi-ask epochs descending net (87 asks). PORT-PROOF: 87 deficit-weighted releases (all with w > 1; w 1.33 to 3.0; 13 of 14 sessions in the logged first 4,000 evaluations). TIMING (first 4,000 evaluations, 40 releases): release t 671.6 to 767.1 (median 676.8); est_loadaware = window 0.27 to 6.1 s (median 3.7) at queued-ahead 0 to 35,660 tokens (median 16,370; dry has no engine latency); released harm median 0.020 (max 0.265) against gain 0.035 (max 0.445); held harm median 0.053 (max 1.82) against gain 0.015. 0 dashcam rows in any harm. kv 0: 79 releases, 6,545 holds, 17 no-estimate, first differing row 5,764.
+(v) OFF SWEEP (300 s, 50:50): 253 identical (digest and rows), 0 differ; sole addition `covex-v6-fair-final-cand-tl-sync`.
+## Caveats
+Dry only (no engine latency; the vlog is capped at 4,000 rows, counts above are the arm stats). The D329 Orin placement replay is NOT run: needed the outage tag (k, d, evid-t) and t0 once the Orin line arrives, then one dry cell via run_dry_s2.sh (N K D T0).
+## F0 push list (base: local origin/main 03019e65, which already carries cand-tl; staging base 05a969d3 is its ancestor; S2 deltas applied to origin/main files are additions only except 2 lines in arms_final_ladder and 1 in run_live2_real). Blob hashes of tree/experiments/orchestration/live2/:
+arms_final_ladder.py 39dc05ffd98d231e874222e1adf90539886dce0e | arms_v6cfr3.py 32191869b7432f77c32342b29fd406b6a05bbd1d | catchup_prefill.py 218efbf827167335e3fc597ce90ddecc2fa2f771 | coordinator.py 4a418eddf50d47e4898ccf54d1751634346afbc5 | run_live2_real.py 3006e65211794b059b9da4d3fa01b37bd373e0e4 | NEW catchup_value.py 545c8940a012badad98f0ed1639896747c3f7477 | NEW future_horizon.py 68776beae11616b7ad4f115ab4a3e416b2342046 | NEW tests/test_catchup_value.py af4fab03a7d478e31729dc3058889539bf9fb553. (cand-tl files are already on origin; no touchfix files needed. Re-check: if origin moved past 03019e65, re-diff these five.)
+Eager arm: scratchpad/eager/tree differs from this tree ONLY in arms_v6cfr3.py (two hunks: factory `r3candtlsynceager` after `r3candtlsync`, and registry line `"covex-v6-fair-final-cand-tl-sync-eager": r3candtlsynceager`); its other 7 files are byte-identical to v2. The eager agent's sweep was still running (empty log), so I did not produce a combined file; merge = apply those two hunks to the v2 arms_v6cfr3.py (disjoint from the S2 lines).
