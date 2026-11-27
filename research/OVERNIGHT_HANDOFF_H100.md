@@ -2009,3 +2009,4 @@ file so a reader can find the evidence rather than only the state.
 - 05:18 D258 mooncake n16 s4 L2 (04:56:27 to 05:17:49): valid, 1 err, 12,136 requests. Boundary 05:18: GPU 3 busy: probe not started.
 - 05:42 D258 mooncake n16 s4 L5 (05:18:00 to 05:41:35, 23.6 min): driver-valid, 58 request errors, 12,122 requests. Boundary 05:42: GPU 3 busy: probe not started.
 - 06:03 D258 confidence-cascade n16 s4 L1.5 (05:41:47 to 06:03:06): valid, 0 err, 3,568 requests. Boundary 06:03: GPU 3 busy: probe not started. Next cascade L2 started 06:03:17 (ends ~06:25).
+- 06:25 D258 confidence-cascade n16 s4 L2 (06:03:17 to 06:24:37): valid, 0 err, 3,568 requests. Boundary 06:25: GPU 3 busy: probe not started.
