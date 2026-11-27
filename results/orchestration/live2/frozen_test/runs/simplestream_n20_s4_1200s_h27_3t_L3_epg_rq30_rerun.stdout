@@ -1,0 +1,15 @@
+[08:04:01] starting vLLM server: /home/pragya/.venvs/fm-switching-vllm/bin/vllm serve /home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb --served-model-name 32BI --port 8031 --max-model-len 32768 --gpu-memory-utilization 0.9 --tensor-parallel-size 1 --no-enable-prefix-caching --limit-mm-per-prompt {"image": 16} --dtype bfloat16 --seed 0 --limit-mm-per-prompt {"image": 640, "video": 1} --mm-processor-kwargs {"size": {"shortest_edge": 4096, "longest_edge": 16777216}, "fps": 1.0, "do_sample_frames": false} --trust-request-mm-kwargs --host 127.0.0.1 --enable-prefix-caching --enable-prompt-tokens-details --mm-processor-cache-gb 128 --kv-offloading-backend native --kv-offloading-size 27 --enable-log-requests --enable-logging-iteration-details
+Traceback (most recent call last):
+  File "/home/pragya/Desktop/fm-switching/experiments/orchestration/live2/run_live2_real.py", line 914, in <module>
+    raise SystemExit(main())
+  File "/home/pragya/Desktop/fm-switching/experiments/orchestration/live2/run_live2_real.py", line 908, in main
+    out = run(a)
+  File "/home/pragya/Desktop/fm-switching/experiments/orchestration/live2/run_live2_real.py", line 413, in run
+    srv, sinfo = _start_server(a)
+  File "/home/pragya/Desktop/fm-switching/experiments/orchestration/live2/run_live2_real.py", line 897, in _start_server
+    srv, sinfo, _M = P.start_server(a.host_tier_gib, scheduling_policy=a.scheduling_policy,
+  File "/home/pragya/Desktop/fm-switching/experiments/orchestration/study_live2_pilot.py", line 174, in start_server
+    info = srv.start()
+  File "/home/pragya/Desktop/fm-switching/experiments/cost/study_x_vllm.py", line 164, in start
+    time.sleep(3)
+KeyboardInterrupt
