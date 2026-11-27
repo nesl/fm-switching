@@ -2011,3 +2011,4 @@ file so a reader can find the evidence rather than only the state.
 - 06:03 D258 confidence-cascade n16 s4 L1.5 (05:41:47 to 06:03:06): valid, 0 err, 3,568 requests. Boundary 06:03: GPU 3 busy: probe not started. Next cascade L2 started 06:03:17 (ends ~06:25).
 - 06:25 D258 confidence-cascade n16 s4 L2 (06:03:17 to 06:24:37): valid, 0 err, 3,568 requests. Boundary 06:25: GPU 3 busy: probe not started.
 - 06:46 D258 confidence-cascade n16 s4 L5 (06:24:57 to 06:46:17): valid, 0 err, 3,568 requests. Boundary 06:46: GPU 3 busy: probe not started. Next D258: mooncake n12 s4 L3 started 06:46:27.
+- 07:08 D258 mooncake n12 s4 L3 (06:46:27 to 07:07:47): valid, 0 err, 10,111 requests. Boundary 07:08: GPU 3 busy (79,872 MiB, 100 percent): probe not started.
