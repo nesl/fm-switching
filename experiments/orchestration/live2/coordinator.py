@@ -458,12 +458,16 @@ class Live2Coordinator:
                                 upload_mode=upload_mode,
                                 targets=dict(targets or CS.TARGETS))
         self.st.link_events = self._link_events
+        self._pb_engine_resync = PBL.engine_resync_enables(arm)
+        if self._pb_engine_resync and not self._pb_on:
+            raise RuntimeError("%s needs %s on the same arm" % (PBL.ENGINE_RESYNC_SWITCH, PBL.SWITCH))
         if self._pb_on:
             # capacities are INPUTS from the engine config, no fitted constant: blocks of 16 tokens
             self._pb = PBL.PredictiveBelief(max(int(gpu_kv_tokens) // PBL.BLOCK, 1),
                                             max(int(host_tier_tokens) // PBL.BLOCK, 1),
                                             offload_controls=self._offload_controls,
-                                            prefill_s_per_token=None)
+                                            prefill_s_per_token=None,
+                                            engine_resync=self._pb_engine_resync)
         # D102: the GPU budget is an explicit INPUT, equal by default to one GPU's time over
         # the run (window length x 1 GPU-second per second), identical for every arm and
         # recorded in the header. It is the PHYSICAL CAPACITY, so it never binds artificially
@@ -827,6 +831,23 @@ class Live2Coordinator:
         with gzip.open(Path(self.logs.out_dir) / "booking.jsonl.gz", "wt") as f:
             for r in self._booking_rows:
                 f.write(json.dumps(r, sort_keys=True) + "\n")
+
+    def write_la_decisions(self) -> None:
+        """SIDECAR `la_decisions.jsonl.gz`: one row per load-aware ARRIVAL evaluation (the gate in
+        hybrid_arm `_la_gate_est`). LOGGING ONLY, nothing reads it back. Written only when the la
+        switch produced rows: no file at all for every arm with the switch off."""
+        if self.logs is None:
+            return
+        a = self.arm
+        r = getattr(getattr(a, "_rules", a), "_base", None) or getattr(a, "_rules", a)
+        rows = r.__dict__.get("_la_dec_rows")
+        if not rows:
+            return
+        import gzip
+        import json
+        with gzip.open(Path(self.logs.out_dir) / "la_decisions.jsonl.gz", "wt") as f:
+            for x in rows:
+                f.write(json.dumps(x, sort_keys=True, default=float) + "\n")
 
     def write_guard_log(self):
         """D230 (2) limitation 1: COMMIT `guard_state`'s per-decision-period signal.
@@ -2188,7 +2209,10 @@ class Live2Coordinator:
             pt = prompt_tokens_of(usage)
             path, frac = SC.cache_path_of(ct, pt)
             if self._pb_on:
-                self._pb.observe_completion(sub.request_id, ct, t)
+                if self._pb_engine_resync:
+                    self._pb.observe_completion(sub.request_id, ct, t, prompt_tokens=pt)
+                else:
+                    self._pb.observe_completion(sub.request_id, ct, t)
             # D150 / spec v5 section 8: the engine's OWN per-request cached-token count corrects
             # the residency belief. Until this read existed the belief was a prediction with no
             # correction, which is the write-only shape CLAUDE.md names. The corrector refuses to
@@ -2648,6 +2672,7 @@ class Live2Coordinator:
         # caller of `_result` gets it, and it is a no-op for every arm without a guard log.
         guard_log = self.write_guard_log()
         self.write_booking_log()
+        self.write_la_decisions()
         return dict(
             arm=self.arm.name, arm_version=getattr(self.arm, "arm_version", "unversioned"),
             is_measurement=False,

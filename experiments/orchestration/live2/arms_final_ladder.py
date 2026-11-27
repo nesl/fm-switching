@@ -110,7 +110,8 @@ RUNG3_Q5C = "covex-v6-fair-final-q5c"
 # unlatch (PROVISIONAL user test): rung 3 plus ONLY the D261 clear-on-reject switch, passed
 # explicitly (cold_unlatch=True) with D249 OFF. No q, q2, q2m, q4 or q5 term.
 RUNG3_UNLATCH = "covex-v6-fair-final-unlatch"
-# layer 0b TEST arm (light checks only, not cell-ready): rung 3 plus ONLY `book_belief=True`.
+# layer P plus layer 0b TEST arm (no load-aware arrival): rung 3 plus `predictive_belief=True` and
+# `book_belief=True`. Reachable on the harness path through `arms_v6cfr3._final_ladder_lazy`.
 RUNG3_0B = "covex-v6-fair-final-0b"
 # la (load-aware arrival admission, dev): RUNG 3 plus layer P plus layer 0b-from-P plus the b7 arrival
 # gate priced by the D162 first-token model with the queued-ahead term (`LAA.LA_SWITCH`).
@@ -410,6 +411,14 @@ def _set_predictive_belief(arm: Any) -> None:
                                 % (PBL.SWITCH, type(arm).__name__))
 
 
+def _set_engine_resync(arm: Any) -> None:
+    """Turn the P engine-resync fix on for THIS INSTANCE and read it back (default OFF everywhere)."""
+    object.__setattr__(arm, PBL.ENGINE_RESYNC_SWITCH, True)
+    if PBL.engine_resync_enables(arm) is not True:                         # pragma: no cover
+        raise LadderSwitchError("%s did not take on the instance of %s"
+                                % (PBL.ENGINE_RESYNC_SWITCH, type(arm).__name__))
+
+
 def _set_book_belief(arm: Any) -> None:
     """Turn layer 0b on for THIS INSTANCE and read it back; the coordinator is the only reader."""
     object.__setattr__(arm, BB.SWITCH, True)
@@ -448,6 +457,7 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                link_sync: Any = None, link_currency: str = "acc", link_tiebreak: str = "hold",
                predictive_belief: bool = False,
                la_arrival: bool = False,
+               engine_resync: bool = False,
                **kw: Any) -> Any:
     """Build rung 3. Four switches, each set on the instance and each read back.
 
@@ -526,6 +536,12 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         raise LadderSwitchError("predictive_belief must be a bool, got %r" % (predictive_belief,))
     if predictive_belief:
         _set_predictive_belief(arm)
+    if not isinstance(engine_resync, bool):
+        raise LadderSwitchError("engine_resync must be a bool, got %r" % (engine_resync,))
+    if engine_resync:
+        if not predictive_belief:
+            raise LadderSwitchError("engine_resync requires predictive_belief")
+        _set_engine_resync(arm)
     if la_arrival:
         if not (predictive_belief and book_belief):
             raise LadderSwitchError("la_arrival requires predictive_belief and book_belief")

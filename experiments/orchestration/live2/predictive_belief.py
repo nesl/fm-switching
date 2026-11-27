@@ -42,6 +42,30 @@ SWITCH = "live2_predictive_belief"
 BLOCK = 16
 
 
+ENGINE_RESYNC_SWITCH = "live2_pb_engine_resync"
+
+
+def engine_resync_enables(arm: Any) -> bool:
+    """Same contract as `arm_enables`: arm-scoped INSTANCE bool, DEFAULT OFF, a class attribute or a
+    non-bool raises."""
+    try:
+        own = vars(arm)
+    except TypeError:                                                          # pragma: no cover
+        own = {}
+    if ENGINE_RESYNC_SWITCH not in own:
+        for klass in type(arm).__mro__:
+            if ENGINE_RESYNC_SWITCH in klass.__dict__ and bool(klass.__dict__[ENGINE_RESYNC_SWITCH]):
+                raise PredictiveBeliefSwitchError(
+                    "%s is ON as a CLASS attribute of %s; it requires an arm-scoped INSTANCE attribute"
+                    % (ENGINE_RESYNC_SWITCH, klass.__name__))
+        return False
+    v = own[ENGINE_RESYNC_SWITCH]
+    if not isinstance(v, bool):
+        raise PredictiveBeliefSwitchError("%s must be a bool, got %r (%s)"
+                                          % (ENGINE_RESYNC_SWITCH, v, type(v).__name__))
+    return v
+
+
 class PredictiveBeliefSwitchError(RuntimeError):
     """The switch was declared on a class, or with a non-bool value."""
 
@@ -68,8 +92,11 @@ def arm_enables(arm: Any) -> bool:
 class PredictiveBelief:
     def __init__(self, gpu_blocks: int, host_blocks: int, gpu_only: bool = False,
                  offload_controls: bool = True, max_num_seqs: int = 1024,
-                 prefill_s_per_token: Optional[float] = None, admission: bool = False) -> None:
+                 prefill_s_per_token: Optional[float] = None, admission: bool = False,
+                 engine_resync: bool = False) -> None:
         self.admission = bool(admission)
+        self.engine_resync = bool(engine_resync)
+        self._rob: Dict[str, bool] = {}
         self.prefill_s = None if prefill_s_per_token is None else float(prefill_s_per_token)
         self._server_free = 0.0
         self.offload_controls = bool(offload_controls)
@@ -221,6 +248,7 @@ class PredictiveBelief:
             self._alloc_gpu()
             self._partial += part
         self._req[rid] = (key, nb, h, part)
+        self._rob[rid] = bool(robot)
 
     def observe_send(self, rid: str, key: Hashable, prompt_tokens: int, now: float = 0.0,
                      shared_tokens: Optional[int] = None, robot: bool = True) -> int:
@@ -234,7 +262,8 @@ class PredictiveBelief:
         rec = self._req.get(rid)
         return rec[2] * BLOCK if rec else 0
 
-    def observe_completion(self, rid: str, cached_tokens: Optional[int], now: float = 0.0) -> None:
+    def observe_completion(self, rid: str, cached_tokens: Optional[int], now: float = 0.0,
+                           prompt_tokens: Optional[int] = None) -> None:
         self._last_event = float(now)
         self._admit(float(now))
         """Unpin the request's blocks into the free queue (tail first); RESYNC from the engine's own
@@ -253,7 +282,29 @@ class PredictiveBelief:
             return
         key, nb, h, part = rec
         self._partial -= part
-        if cached_tokens is not None:
+        er = self.engine_resync
+        robot = self._rob.pop(rid, True)
+        cap = nb
+        if er:
+            # ENGINE RULES at completion (switch `live2_pb_engine_resync`, default OFF): the engine
+            # holds only the blocks of the prompt it actually served (usage.prompt_tokens, not the
+            # coordinator's estimate), and its host tier stores only blocks of requests the per-request
+            # offload control allows (robot; dashcam and assistive send max_offload_tokens 0).
+            if prompt_tokens is not None:
+                cap = min(nb, max(int(prompt_tokens), 0) // BLOCK)
+                self._last_nb[key] = cap
+            if cached_tokens is not None:
+                ch = int(cached_tokens) // BLOCK
+                if ch != h:
+                    self.stats["pb_resyncs"] += 1
+                    if ch < h:
+                        self.stats["pb_resync_changed"] += 1
+                        store = robot or not self.offload_controls
+                        for i in range(ch, min(h, cap)):
+                            self._host.pop((key, i), None)
+                            if store:
+                                self._host_put((key, i))
+        elif cached_tokens is not None:
             ch = int(cached_tokens) // BLOCK
             if ch != h:
                 self.stats["pb_resyncs"] += 1
@@ -272,6 +323,9 @@ class PredictiveBelief:
                 self._pin[b] = c - 1
             else:
                 del self._pin[b]
+                if er and i >= cap:
+                    self._host.pop(b, None)
+                    continue
                 self._free[b] = None
                 self._free.move_to_end(b)
         self._admit(float(now))

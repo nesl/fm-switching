@@ -439,6 +439,8 @@ class HybridArm:
                 d = RecallAction(q.query_id, "DEFER", defer_s=self._b7.defer_s)
             else:
                 d = RecallAction(q.query_id, "REJECT")
+            if LA.arm_enables(self):
+                self._la_dec_final(d.decision, over_limit)
             is_ss = bool(getattr(q, "category", None) in self._ss_types)
             if is_ss:
                 self.stats["ss_seen"] += 1
@@ -565,10 +567,37 @@ class HybridArm:
                 log.append(dict(t=round(float(now), 3), query_id=q.query_id, device=str(q.session_id),
                                 iso=o_iso, la=o_la, est_iso=round(est_iso, 4), est_la=round(est_la, 4),
                                 slack_s=round(qs, 4), u=int(u), queued_ahead=int(ahead), rule=rule))
+        pb = (roster.get("pb_cached_by_session") or {}).get(str(q.session_id))
+        ntok = max(int(q.readiness_tokens), 1)
+        pc = None if pb is None else min(int(pb.get("cached", 0)), ntok)
+        dec = self.__dict__.setdefault("_la_dec_rows", [])
+        seq = self.__dict__.setdefault("_la_dec_seq", {})
+        seq[q.query_id] = seq.get(q.query_id, 0) + 1
+        dec.append(dict(t=round(float(now), 4), device_id=self._device_of(q.session_id),
+                        session_id=str(q.session_id), query_id=q.query_id,
+                        question_id=getattr(q, "question_id", None), eval_seq=seq[q.query_id],
+                        kind=str(getattr(q, "category", None)),
+                        is_single_shot=bool(getattr(q, "category", None) in self._ss_types),
+                        prompt_tokens=ntok, p_cached_tokens=pc,
+                        p_cached_frac=None if pc is None else round(pc / ntok, 6),
+                        uncached_u=int(u), queued_ahead=int(ahead), rule=rule,
+                        est_isolated_s=round(est_iso, 6), est_loadaware_s=round(est_la, 6),
+                        slack_s=round(qs, 6), isolated_decision=o_iso, la_decision=o_la,
+                        decision=o_la, changed=bool(o_iso != o_la), over_limit=False,
+                        deadline_s=round(float(q.deadline_s), 4)))
         samp = self.__dict__.setdefault("_la_est_samples", [])
         if len(samp) < 20000:
             samp.append((round(est_la, 4), int(ahead), int(u)))
         return est_la
+
+    def _la_dec_final(self, decision: str, over_limit: bool) -> None:
+        """Logging only: the decision the gate returned (differs from the comparator outcome only
+        when the over-limit rule fires). A DEFER re-appears as a later row with the same query_id
+        and a higher eval_seq."""
+        rows = self.__dict__.get("_la_dec_rows")
+        if rows:
+            rows[-1]["decision"] = str(decision)
+            rows[-1]["over_limit"] = bool(over_limit)
 
     def _unbuilt_rebuild_s(self, q) -> float:
         """v2 laxity: the cold rebuild of the believed UN-BUILT part of the history. A COLD history's rebuild is
