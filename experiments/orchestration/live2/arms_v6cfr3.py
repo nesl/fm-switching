@@ -819,6 +819,16 @@ def _final_ladder_lazy() -> Dict[str, Any]:
                              la_arrival=True, engine_resync=True, pb_wire_tokens=True,
                              pb_host_engine_model=True, **kw)
 
+    def r3cand(**kw: Any) -> Any:
+        """THE CANDIDATE (user ruling 2026-11-27): rung 3 + P (engine_resync + pb_wire_tokens +
+        pb_host_engine_model) + 0b + B. Same switches as `-la-er-pwire`, registered under its own
+        name so cells are not labelled a test arm. Question priority is the `_qp` tag token, not part
+        of the arm; catch-up prefill stays OFF."""
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3("covex-v6-fair-final-cand", predictive_belief=True, book_belief=True,
+                             la_arrival=True, engine_resync=True, pb_wire_tokens=True,
+                             pb_host_engine_model=True, **kw)
+
     def r3laercu(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3_LA + "-er-cu", predictive_belief=True, book_belief=True,
@@ -887,6 +897,7 @@ def _final_ladder_lazy() -> Dict[str, Any]:
             # TEST ARM: P rebuild (engine host model + wire prompt size) DID NOT MEET ITS PRE-REGISTERED
             # RULE (robo003 asks); not part of the candidate.
             "covex-v6-fair-final-la-er-pwire": r3laerpwire,
+            "covex-v6-fair-final-cand": r3cand,
             "covex-v6-fair-final-0b": r30b,
             "covex-v6-fair-final-0b-er": r30ber,
             "covex-v6-fair-final-q4b": r3q4b,
