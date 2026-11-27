@@ -829,6 +829,14 @@ def _final_ladder_lazy() -> Dict[str, Any]:
                              la_arrival=True, engine_resync=True, pb_wire_tokens=True,
                              pb_host_engine_model=True, **kw)
 
+    def r3candtl(**kw: Any) -> Any:
+        """D319 touch-latch fix: the candidate + `live2_pb_touch_guard` (the touch guard reads P's tier
+        split for a session the D150 flag calls cold). Default arms are unchanged."""
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3("covex-v6-fair-final-cand-tl", predictive_belief=True, book_belief=True,
+                             la_arrival=True, engine_resync=True, pb_wire_tokens=True,
+                             pb_host_engine_model=True, pb_touch_guard=True, **kw)
+
     def r3laercu(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3_LA + "-er-cu", predictive_belief=True, book_belief=True,
@@ -898,6 +906,7 @@ def _final_ladder_lazy() -> Dict[str, Any]:
             # RULE (robo003 asks); not part of the candidate.
             "covex-v6-fair-final-la-er-pwire": r3laerpwire,
             "covex-v6-fair-final-cand": r3cand,
+            "covex-v6-fair-final-cand-tl": r3candtl,
             "covex-v6-fair-final-0b": r30b,
             "covex-v6-fair-final-0b-er": r30ber,
             "covex-v6-fair-final-q4b": r3q4b,

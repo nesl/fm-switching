@@ -153,3 +153,80 @@ Candidate cells (3) `covex-v6-fair-final-cand_n20 … _qp` and (4) `covex-v6-fai
 - The background-adjusted burst assumes the no-outage rung-3 cell's uncached rate is the competing load. It is one seed.
 - The rebuild share takes the host tier as free for the backlog. The resident amount depends on other sessions' KV, which is not modelled here.
 - Placement by top-10 exposure selects the high-dose starts by construction.
+
+## Revision 2 (D329): harmable dose at capacity, B_obs calibration, n32 dropped
+
+Script `experiments/analysis/network/network_scenario_rev2.py`; output under `revision_2` in `results/orchestration/live2/network_pressure/network_pressure_check.json`. CPU, committed cells and trace code only. Nothing queued.
+
+### R2.1 Definitions
+
+- **Harmable** = on time in the committed no-outage control inside [R, R + B], R = t0 + 188. On time = the outcome flag `within_L` (delivered within the deadline), for single-shot, robot follow-ups and dashcam frames. This reproduces the committed control counts in [R, R + 60] at R = 717.5: single-shot 4/24, dashcam 14/601 (the flag `assistive_rows.on_time` gives 3 and is not used).
+- **B_cap** = revision 1 background-adjusted burst with capacity 7,860.2 tok/s (n32 rung 3 30 s best), background = that fleet's control over [R, R+B].
+- **B_own** = the same with the fleet's own control 30 s best: n20 6,080.2 tok/s; n16 **4,043.2 tok/s** (computed from the n16 c3-11-2 control; the 4.8k quoted in the brief is the 1x default-mix n16 cell).
+- Starts: t0 in 1 s steps with t0 + 188 + B_cap <= 1200.
+
+### R2.2 Fleets and controls
+
+- **n20 (14 robots, d 188, 13.6 Mbps):** control = `covex-v6-fair-final_n20_s4 … _c3-11-2_L3_epg_rq30` (committed plain rung 3). Candidate control (3) `covex-v6-fair-final-cand_n20 … _qp` is not a paired control (carries `_qp`).
+- **n16 (11 robots, d 188, 13.6 Mbps):** control = `covex-v6-fair-final_n16_s4 … _c3-11-2_L3_epg_rq30_preD249`, the default-uplink cell, **pre-D249 (flagged)**. No committed n16 `_c3-11-2` cell at 13.6 Mbps without a suffix exists. No n16 `_c3-11-2` candidate exists either (the n16 candidate cells are default-mix or kv0.5r_h0.5).
+- **n32 dropped** (the group-A harm, the saturated control window and the calibration are reported as the reason).
+
+### R2.3 Top-10 starts per fleet (ranked by harmable single-shot + follow-ups, then dashcam)
+
+**n20:**
+
+| t0 (s) | B_cap (s) | B_own (s) | harmable single-shot | harmable follow-ups | harmable dashcam |
+|---|---|---|---|---|---|
+| 483 | 28.7 | 48.9 | 6 | 13 | 112 |
+| 484 | 28.8 | 48.6 | 6 | 13 | 109 |
+| 485 | 28.9 | 48.3 | 6 | 13 | 107 |
+| 487 | 29.2 | 49.4 | 6 | 13 | 106 |
+| 486 | 29.1 | 48.3 | 6 | 13 | 105 |
+| 488 | 29.3 | 49.1 | 6 | 12 | 110 |
+| 478 | 28.2 | 48.2 | 6 | 11 | 126 |
+| 482 | 28.0 | 48.4 | 6 | 11 | 118 |
+| 28 | 32.7 | 57.0 | 8 | 9 | 97 |
+| 29 | 32.8 | 59.5 | 7 | 10 | 91 |
+
+Median of the top 10 = **t0 483.5 s, token `_evid-t4835`**. At 483.5: B_cap 28.7 s, B_own 48.7 s (median of the top ten), harmable single-shot 6, follow-ups 13, dashcam 108. The design guide (harmable sq + fu >= 10 and dashcam >= 100) **is met**. Control on-time rate in the burst: single-shot 6/6 (1.00), follow-ups 13/13 (1.00), dashcam 108/184 (0.59). Relief window [t0, R) at this t0: on-time single-shot 32, follow-ups 16, dashcam 805.
+
+**n16:**
+
+| t0 (s) | B_cap (s) | B_own (s) | harmable single-shot | harmable follow-ups | harmable dashcam |
+|---|---|---|---|---|---|
+| 861 | 22.8 | 45.2 | 5 | 10 | 62 |
+| 538 | 18.7 | 112.8 | 4 | 10 | 74 |
+| 537 | 19.0 | 130.0 | 4 | 10 | 70 |
+| 536 | 19.3 | 125.7 | 4 | 10 | 67 |
+| 535 | 19.0 | 132.9 | 4 | 10 | 65 |
+| 529 | 20.8 | 118.4 | 4 | 10 | 62 |
+| 540 | 17.9 | 119.4 | 4 | 9 | 79 |
+| 541 | 17.7 | 125.5 | 4 | 9 | 79 |
+| 539 | 18.2 | 125.8 | 4 | 9 | 77 |
+| 9 | 18.5 | 69.0 | 4 | 9 | 73 |
+
+Median of the top 10 = **t0 537.5 s, token `_evid-t5375`**. At 537.5: B_cap 19.0 s, harmable single-shot 4, follow-ups 10, dashcam 73. The design guide **is not met** (dashcam 73 < 100). Control on-time rate: single-shot 4/4, follow-ups 10/10, dashcam 73/92 (0.79). Relief window at this t0: on-time single-shot 38, follow-ups 18, dashcam 894.
+
+### R2.4 Proposed cell lines (rung 3, not queued)
+
+- n20: `covex-v6-fair-final_n20 20 4 _c3-11-2_L3_epg_rq30_out-k14-d188_evid-t4835_link_sync`
+- n16: `covex-v6-fair-final_n16 16 4 _c3-11-2_L3_epg_rq30_out-k11-d188_evid-t5375_link_sync`
+
+Both use the default 13.6 Mbps (no `_up` token). The `_link` and `_sync` tokens are legal only with the outage tokens.
+
+### R2.5 Recommendation
+
+**Recommend n20.** It is the only fleet whose top-ranked placement meets the design guide (harmable sq + fu 19, dashcam 108). It has a clean committed control (plain rung 3 at 13.6 Mbps, not pre-D249). The n16 placement falls short on dashcam (73 against 100) and its control is pre-D249 with no candidate, so it is weaker on both counts.
+
+### R2.6 B_obs calibration (group A, rung 3 n32, k22, d188, t0 529.5): FAILED as a calibration
+
+- Predicted (capacity model, the same fleet, 7,860.2 tok/s): **B = 81.7 s**, with backlog 185,856 tokens.
+- Observed, sustained rule (first start after R from which every 30 s window has the group-A uncached mean <= 1.10 x the n32 control mean): **B_obs = 260 s**.
+- Cumulative uncached excess of group A over the control in the 300 s after R: **-35,038 tokens** (group A carries less uncached prefill than the control there, not more).
+- Interpretation: the backlog drain is not visible as extra uncached prefill in the committed cell. Either the backlog is prefilled with cache hits (so it does not appear in uncached tokens) or the relief from the outage dominates. The burst model is therefore **unvalidated**. Designs based on it (B = 19 to 29 s here) are conditional on this gap and should not be read as calibrated.
+
+### R2.7 Caveats
+
+- The design uses B_cap and B_own, not an observed burst. Under the B_obs failure above, these are model predictions only.
+- Top-10 ranking selects maximum dose by construction (see R1.4).
+- One seed; the n16 control is pre-D249.
