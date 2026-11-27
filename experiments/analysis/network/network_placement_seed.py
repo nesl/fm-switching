@@ -26,7 +26,13 @@ import network_pressure_rev1 as R1  # noqa: E402
 import trace as TR  # noqa: E402
 
 RUNS = REPO / "results/orchestration/live2/frozen_test/runs"
-SEED = int(sys.argv[1]) if len(sys.argv) > 1 else 5
+ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
+SEED = int(ARGS[0]) if ARGS else 5
+RULE = "scoring120"
+for a in sys.argv[1:]:
+    if a.startswith("--rule="):
+        RULE = a.split("=", 1)[1]
+SCORE_W = 120.0   # scoring window [R, R + 120 s] (ruling 2026-11-27 ~13:00)
 D = 188.0
 CAP = 7860.2
 N = 20
@@ -90,43 +96,50 @@ def main():
     iss = {"ss": sorted(ix["t_ss"].values()), "rob": sorted(ix["t_rob"].values()),
            "dash": sorted(ix["t_dash"].values())}
     rows = []
-    for t0 in np.arange(0.0, 1200.0, 1.0):
-        t0 = float(t0)
-        bl = NPC.backlog_window(ix, t0, D)
-        tot = sum(bl.values())
-        R = t0 + D
-        B, bg = R1.burst_for_start(bins, tot, CAP, R)
-        if not np.isfinite(B) or t0 + D + B > 1200.0:
-            continue
-        a, b = R, R + B
-        rows.append({"t0": t0, "B_cap_s": B, "ss": cnt(on["ss"], a, b), "fu": cnt(on["rob"], a, b),
-                     "dash": cnt(on["dash"], a, b), "issued_ss": cnt(iss["ss"], a, b),
-                     "issued_fu": cnt(iss["rob"], a, b), "issued_dash": cnt(iss["dash"], a, b)})
+    if RULE == "scoring120":
+        # default (ruled): harmable dose inside the fixed scoring window [R, R + 120], t0 with R + 120 <= 1200
+        for t0 in np.arange(0.0, 1200.0 - D - SCORE_W + 1e-9, 1.0):
+            t0 = float(t0); R = t0 + D; a, b = R, R + SCORE_W
+            rows.append({"t0": t0, "B_cap_s": SCORE_W, "ss": cnt(on["ss"], a, b), "fu": cnt(on["rob"], a, b),
+                         "dash": cnt(on["dash"], a, b), "issued_ss": cnt(iss["ss"], a, b),
+                         "issued_fu": cnt(iss["rob"], a, b), "issued_dash": cnt(iss["dash"], a, b)})
+    elif RULE == "rev2":
+        # option (previous rule): burst window from the background-adjusted capacity burst B_cap
+        for t0 in np.arange(0.0, 1200.0, 1.0):
+            t0 = float(t0)
+            bl = NPC.backlog_window(ix, t0, D)
+            tot = sum(bl.values())
+            R = t0 + D
+            B, bg = R1.burst_for_start(bins, tot, CAP, R)
+            if not np.isfinite(B) or t0 + D + B > 1200.0:
+                continue
+            a, b = R, R + B
+            rows.append({"t0": t0, "B_cap_s": B, "ss": cnt(on["ss"], a, b), "fu": cnt(on["rob"], a, b),
+                         "dash": cnt(on["dash"], a, b), "issued_ss": cnt(iss["ss"], a, b),
+                         "issued_fu": cnt(iss["rob"], a, b), "issued_dash": cnt(iss["dash"], a, b)})
+    else:
+        raise SystemExit("rule must be scoring120 or rev2")
     rank = sorted(rows, key=lambda r: (r["ss"] + r["fu"], r["dash"]), reverse=True)
     top = rank[:10]
     med = float(np.median([r["t0"] for r in top]))
     tok = f"_evid-t{int(round(med * 10))}"
-    # fixed window [R, R+120] for the note (peer ruling): same ranking on counts in that window
-    fixed = []
-    for t0 in np.arange(0.0, 1200.0 - D - 120.0, 1.0):
-        t0 = float(t0); R = t0 + D
-        fixed.append({"t0": t0, "ss": cnt(on["ss"], R, R + 120), "fu": cnt(on["rob"], R, R + 120),
-                      "dash": cnt(on["dash"], R, R + 120)})
-    frank = sorted(fixed, key=lambda r: (r["ss"] + r["fu"], r["dash"]), reverse=True)[:10]
-    out = {"seed": SEED, "control": CONTROL, "control_valid": True, "own_rate_tok_s": own, "capacity_tok_s": CAP,
-           "accepted_starts": len(rows), "robots": len(ix["robots"]) if "robots" in ix else None,
+    ctl = {"ss": sum(r["ss"] for r in top) / max(sum(r["issued_ss"] for r in top), 1),
+           "fu": sum(r["fu"] for r in top) / max(sum(r["issued_fu"] for r in top), 1),
+           "dash": sum(r["dash"] for r in top) / max(sum(r["issued_dash"] for r in top), 1)}
+    a_m = med + D
+    b_m = a_m + (SCORE_W if RULE == "scoring120" else 0.0)
+    cnt_at = {"ss": cnt(on["ss"], a_m, b_m), "fu": cnt(on["rob"], a_m, b_m), "dash": cnt(on["dash"], a_m, b_m)} \
+        if RULE == "scoring120" else None
+    out = {"seed": SEED, "rule": RULE, "control": CONTROL, "control_valid": True, "own_rate_tok_s": own,
+           "capacity_tok_s": CAP, "accepted_starts": len(rows),
            "top10": [{k: round(r[k], 2) for k in ("t0", "B_cap_s", "ss", "fu", "dash")} for r in top],
-           "median_top10_t0": med, "token_revision2": tok,
-           "fixed_window_120_top10_t0": sorted(r["t0"] for r in frank),
-           "fixed_window_120_median_t0": float(np.median([r["t0"] for r in frank])),
-           "control_ontime_rate_top10": {
-               "ss": sum(r["ss"] for r in top) / max(sum(r["issued_ss"] for r in top), 1),
-               "fu": sum(r["fu"] for r in top) / max(sum(r["issued_fu"] for r in top), 1),
-               "dash": sum(r["dash"] for r in top) / max(sum(r["issued_dash"] for r in top), 1)}}
-    dst = REPO / f"results/orchestration/live2/network_pressure/placement_seed{SEED}_n20.json"
+           "median_top10_t0": med, "token": tok,
+           "counts_at_median_t0_in_window": cnt_at,
+           "control_ontime_rate_top10_in_window": ctl}
+    dst = REPO / f"results/orchestration/live2/network_pressure/placement_seed{SEED}_n20_{RULE}.json"
     dst.write_text(json.dumps(out, indent=1, default=float))
-    print(json.dumps({k: out[k] for k in ("seed", "own_rate_tok_s", "accepted_starts", "median_top10_t0",
-                                          "token_revision2", "fixed_window_120_median_t0")}, indent=1))
+    print(json.dumps({k: out[k] for k in ("seed", "rule", "accepted_starts", "median_top10_t0", "token",
+                                          "counts_at_median_t0_in_window", "control_ontime_rate_top10_in_window")}, indent=1))
     for r in top:
         print(f"  t0 {r['t0']:.0f} B_cap {r['B_cap_s']:.1f} ss {r['ss']} fu {r['fu']} dash {r['dash']}")
 
