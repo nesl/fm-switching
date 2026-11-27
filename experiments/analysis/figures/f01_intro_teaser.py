@@ -166,12 +166,11 @@ def _figure(rows, mode, out):
     if mode == "agg":
         labels = [_plain(s) for s in labels]
     ax.set_yticks(ys)
-    ax.set_yticklabels(labels, fontsize=8, color=INK)
-    for lbl in ax.get_yticklabels():
-        lbl.set_horizontalalignment("right")   # right-align every y label
-    for lbl, r in zip(ax.get_yticklabels(), rows):
-        if r["class"] == "covex":
-            lbl.set_fontweight("bold")
+    # y labels drawn as right-aligned texts at a fixed x (pgf ignores tick-label alignment)
+    ax.set_yticks([])
+    for y, lab, r in zip(ys, labels, rows):
+        ax.text(-0.012, y, lab, transform=ax.get_yaxis_transform(), ha="right", va="center",
+                fontsize=8, color=INK, fontweight="bold" if r["class"] == "covex" else "normal", clip_on=False)
     ax.axvline(0, color=INK, lw=0.6, zorder=2)
     ax.set_xlim(-45, 360)
     ax.set_ylim(-0.6, n - 0.4 + 0.5)
