@@ -120,3 +120,52 @@ Do not write: "0.94 of the achievable gain" or "the cloud oracle is capacity-bou
 - At 1x, headline the ideal-resource bound. It is an upper bound, it equals B_feas here, and the warm capacity bound is non-binding, so the ideal is also the tightest bound this data supports.
 - Under pressure (n32, B2 outage), keep the ideal as the upper bound, but report the feasibility count beside it. The ideal is loose under pressure, and the honest measure of unreachable headroom is the cold-tier count, not a cold-charged capacity bound, which is invalid.
 - Do not headline a capacity-window bound until a measured cold-path prefix-hit rate exists for the policies, so that the cold scenario becomes a real bound on them.
+
+## 9. Generalised populations: n20, n32 (tag c3-11-2) and the B2 arms
+
+Method: `experiments/analysis/oracle/oracle_feasible_pop.py N TAG SEEDS`. The cell pattern, the trace call and the trace device mix are read from the cell (tag c3-11-2 is device mix 3:11:2, confirmed by run_meta.json `ratio` and by exact row counts: the trace at N = 20 gives 283 robot and 237 single-shot questions, the rung 3 cell has 283 and 237; at N = 32 the trace gives 417 and 475, the cell 417 and 475). The n16 committed modules are not modified; the substitution is made in the module source at load time.
+
+Scope: n20 and n32 cells exist for seed 4 only, so their shares are seed-4 values. The n16 B2 arms are seed 4 only as well (the arm names listed in section 9.3).
+
+### 9.1 Infeasibility and capacity, per condition
+
+| condition | robot rows | best-tier infeasible | cold-tier sensitivity rows infeasible | capacity alpha, cold greedy (LB) | capacity alpha, cold LP (UB) | capacity alpha, warm LP (UB) |
+|---|---|---|---|---|---|---|
+| n16 1x (s4 to s7, reference) | 12,685 (all arms, 4 seeds) | 0 | 2,433 (seed 4 population) | 0.534 | 0.768 | 1.000 |
+| n20 c3-11-2 (s4) | 283 (rung 3) | 0 | 543 (summed over arm cells) | 0.313 | 0.595 | 1.000 |
+| n32 c3-11-2 (s4) | 417 (rung 3) | 0 | 396 (summed over arm cells) | 0.333 | 0.575 | 1.000 |
+
+The cold-tier counts are the sensitivity only (no cache hit); they are not bounds. Pooled capacity alphas are seed-4 values for n20 and n32. The warm LP is non-binding at every condition; the cold charge binds at every condition, as in section 3.
+
+### 9.2 Shares at n20 c3-11-2 (seed 4): ideal equals B_feas
+
+| arm | pooled FAIR | pooled HIND |
+|---|---|---|
+| covex-v6-fair-final-la-er-pwire | +0.680 | +0.458 |
+| covex-v6-fair-final-la | +0.548 | +0.381 |
+| covex-v6-fair-final-la-er | +0.546 | +0.381 |
+| covex-v6-fair-final | +0.481 | +0.271 |
+| mooncake | +0.307 | +0.232 |
+| confidence-cascade | +0.239 | +0.187 |
+| simplestream | +0.044 | -0.058 |
+
+### 9.3 Shares at n32 c3-11-2 (seed 4): ideal equals B_feas
+
+| arm | pooled FAIR | pooled HIND |
+|---|---|---|
+| covex-v6-fair-final-la | +0.302 | +0.174 |
+| covex-v6-fair-final-la-er | +0.293 | +0.170 |
+| simplestream | +0.098 | +0.008 |
+| covex-v6-fair-final | +0.165 | +0.077 |
+| confidence-cascade | +0.110 | +0.105 |
+| mooncake | +0.025 | -0.004 |
+
+### 9.4 B2 arms at n16 (seed 4 only, default tag)
+
+Rung 3 family, seed 4 only (the four-seed rung 3 pooled share is 0.9438): covex-v6-fair-final-0b-er 0.966; covex-v6-fair-final-la-er 0.939; covex-v6-fair-final-la-er-pwire 0.950; covex-v6-fair-final-la 0.930; covex-v6-fair-final 0.966. B_feas equals ideal for every B2 arm. Full list in `results/orchestration/live2/oracle/oracle_feasible_pop_n16.json`.
+
+Reading. At n20 and n32, the la-er arms and pwire rank above rung 3 on FAIR (n20: pwire 0.680, la-er 0.546, rung 3 0.481). This is a seed-4 comparison of arms on different device mixes and is not a result; it is not yet a paper claim. The feasibility test still changes no question at these conditions at the best tier. Infeasibility at scale appears only through the cache: a cold readiness makes a fraction of robot questions miss the 3 s deadline.
+
+## 10. KV residency (not in the bounds)
+
+Every bound here charges recall prefill as the cheapest committed case: the warm uncached work (ideal and B_cap warm charge) or GPU-WARM first-token time (B_feas). Both assume the robot's prior context is resident in KV memory when the question arrives. None of the bounds models KV capacity, eviction or host-tier spill. The cold-tier sensitivity is the case in which residency fails, and it shows that the gap at scale depends on residency: 2,433 rows at 1x and 396 to 543 rows at n20 and n32 (summed over arm cells) would miss the deadline with no cache hit. The host tier size used elsewhere in this project (27 GiB, 110,592 tokens, from the run addendum for the host-tier turnover study) is not an input to these bounds, so any claim that a bound holds under memory pressure needs the residency study first. The paper should state that the bounds assume residency and that the residency assumption is measured separately.
