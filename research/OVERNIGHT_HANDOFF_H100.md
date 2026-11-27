@@ -2004,3 +2004,4 @@ file so a reader can find the evidence rather than only the state.
 - 03:30 D258 simplestream n16 s4 L5 (03:08:48 to 03:30:09): valid, 0 err; see cell.json. Boundary 03:30: GPU 3 still busy (gaofeng, 79,870 MiB, 100 percent): probe not started. Next D258 cell llf n16 s4 L1.5 started 03:30:20 (ends ~03:52).
 - 03:52 D258 llf n16 s4 L1.5 (03:30:20 to 03:51:39): valid, 0 err, 12,459 requests. Boundary 03:52: GPU 3 busy (79,870 MiB, 100 percent): probe not started.
 - 04:13 D258 llf n16 s4 L2 (03:51:50 to 04:13:10): valid, 1 err, 11,625 requests. Boundary 04:13: GPU 3 busy (79,870 MiB, 100 percent): probe not started. Next llf L5 started 04:13:21 (ends ~04:35).
+- 04:35 D258 llf n16 s4 L5 (04:13:21 to 04:34:44): valid, 0 err, 8,568 requests. Boundary 04:35: GPU 3 busy: probe not started.
