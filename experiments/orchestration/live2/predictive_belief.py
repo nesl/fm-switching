@@ -68,6 +68,30 @@ def engine_resync_enables(arm: Any) -> bool:
 
 WIRE_TOKENS_SWITCH = "live2_pb_wire_tokens"
 HOST_ENGINE_SWITCH = "live2_pb_host_engine_model"
+TOUCH_GUARD_SWITCH = "live2_pb_touch_guard"
+
+
+def touch_guard_enables(arm: Any) -> bool:
+    """D319. Same contract as `host_engine_enables`: arm-scoped INSTANCE bool, DEFAULT OFF, a class
+    attribute or a non-bool raises. ON: the TOUCH guard reads P's tier split of the session's built
+    prefix instead of the one-hot D150 flag, but ONLY for a session the D150 flag calls cold (the
+    exit from the cold latch); every other touch decision is unchanged."""
+    try:
+        own = vars(arm)
+    except TypeError:                                                          # pragma: no cover
+        own = {}
+    if TOUCH_GUARD_SWITCH not in own:
+        for klass in type(arm).__mro__:
+            if TOUCH_GUARD_SWITCH in klass.__dict__ and bool(klass.__dict__[TOUCH_GUARD_SWITCH]):
+                raise PredictiveBeliefSwitchError(
+                    "%s is ON as a CLASS attribute of %s; it requires an arm-scoped INSTANCE attribute"
+                    % (TOUCH_GUARD_SWITCH, klass.__name__))
+        return False
+    v = own[TOUCH_GUARD_SWITCH]
+    if not isinstance(v, bool):
+        raise PredictiveBeliefSwitchError("%s must be a bool, got %r (%s)"
+                                          % (TOUCH_GUARD_SWITCH, v, type(v).__name__))
+    return v
 
 
 def host_engine_enables(arm: Any) -> bool:
@@ -201,6 +225,25 @@ class PredictiveBelief:
         h = self._hit_blocks(key, nb)
         tok = min(h * BLOCK, pt)
         return tok / float(pt), tok
+
+    def tier_split(self, key: Hashable, prefix_tokens: int) -> Tuple[float, float]:
+        """(GPU fraction, host-only fraction) of the first `prefix_tokens` tokens of `key`'s chain that
+        the shadow holds, counted over the CONTIGUOUS hit blocks from block 0 (the same hit rule as
+        `p_cached_fraction`). PURE READ: no stat is touched and no state changes (D319 touch guard)."""
+        pt = int(prefix_tokens)
+        if pt <= 0:
+            return 0.0, 0.0
+        nb = min(pt // BLOCK, max(pt - 1, 0) // BLOCK)
+        n_gpu = n_host = 0
+        for i in range(nb):
+            b = (key, i)
+            if b in self._pin or b in self._free:
+                n_gpu += 1
+            elif (not self.gpu_only) and b in self._host:
+                n_host += 1
+            else:
+                break
+        return n_gpu * BLOCK / float(pt), n_host * BLOCK / float(pt)
 
     def _alloc_gpu(self) -> None:
         while self._used() >= self.gpu_cap:

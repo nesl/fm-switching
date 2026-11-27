@@ -468,6 +468,11 @@ class Live2Coordinator:
         if self._pb_host_engine and not (self._pb_on and self._pb_engine_resync):
             raise RuntimeError("%s needs %s and %s on the same arm"
                                % (PBL.HOST_ENGINE_SWITCH, PBL.SWITCH, PBL.ENGINE_RESYNC_SWITCH))
+        self._pb_touch_guard = PBL.touch_guard_enables(arm)
+        if self._pb_touch_guard and not (self._pb_on and self._pb_engine_resync and self._pb_host_engine):
+            raise RuntimeError("%s needs %s, %s and %s on the same arm"
+                               % (PBL.TOUCH_GUARD_SWITCH, PBL.SWITCH, PBL.ENGINE_RESYNC_SWITCH,
+                                  PBL.HOST_ENGINE_SWITCH))
         if self._pb_on:
             # capacities are INPUTS from the engine config, no fitted constant: blocks of 16 tokens
             self._pb = PBL.PredictiveBelief(max(int(gpu_kv_tokens) // PBL.BLOCK, 1),
@@ -1528,7 +1533,27 @@ class Live2Coordinator:
         """
         built = len(s.confirmed_bytes_for)
         prefix_tokens = int(getattr(s, "built_tokens", 0) or 0)
-        d = TP.should_touch(belief=dict(getattr(s, "belief", {}) or {}),
+        _tbelief = dict(getattr(s, "belief", {}) or {})
+        # ---- D319 TOUCH GUARD READS P, ONLY FOR A SESSION THE D150 FLAG CALLS COLD. BEGIN block ----
+        # D150's zero-reuse read describes the state BEFORE the request that carried it; the request
+        # then rebuilt the prompt in the engine, so the one-hot "cold" is stale from the moment of
+        # completion, a refused touch sends nothing, and nothing else re-reads it: a state with an
+        # entry and no exit. Here the exit is P's tier split of the built prefix, with the SAME M6
+        # rule and the SAME PURE_TIER_MIN_BELIEF (touch_policy.py): a wholly-GPU or wholly-host
+        # prefix is touched, a mixed or partly resident one is not. Every non-cold session keeps the
+        # D150 belief, so with the switch OFF, or on a session D150 calls warm, nothing changes.
+        if (self._pb_touch_guard and self._pb is not None and prefix_tokens > 0
+                and TP.predicted_tier(_tbelief)[0] == "cold"):
+            _g, _h = self._pb.tier_split(s.session_id, prefix_tokens)
+            _pbel = {"gpu": float(_g), "host": float(_h), "cold": max(0.0, 1.0 - float(_g) - float(_h))}
+            self.counts["touch_guard_p_consulted"] += 1
+            if TP.mixed_touch_guard(_pbel)[0]:
+                _tbelief = _pbel
+                self.counts["touch_guard_p_allowed"] += 1
+            else:
+                self.counts["touch_guard_p_kept_cold"] += 1
+        # ---- END D319 block ----------------------------------------------------------------------
+        d = TP.should_touch(belief=_tbelief,
                             prefix_tokens=prefix_tokens, costs=C,
                             budget_ok=self.st.budget.can_spend)
         self.counts["touch_considered"] += 1

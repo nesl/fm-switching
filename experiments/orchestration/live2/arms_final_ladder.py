@@ -487,6 +487,7 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                engine_resync: bool = False,
                pb_wire_tokens: bool = False,
                pb_host_engine_model: bool = False,
+               pb_touch_guard: bool = False,
                catchup_prefill: bool = False,
                catchup_pace: bool = False,
                catchup_busyx: bool = False,
@@ -585,6 +586,12 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         if not (predictive_belief and engine_resync):
             raise LadderSwitchError("pb_host_engine_model requires predictive_belief and engine_resync")
         _set_pb_switch(arm, PBL.HOST_ENGINE_SWITCH, PBL.host_engine_enables)
+    if not isinstance(pb_touch_guard, bool):
+        raise LadderSwitchError("pb_touch_guard must be a bool, got %r" % (pb_touch_guard,))
+    if pb_touch_guard:
+        if not (predictive_belief and engine_resync and pb_host_engine_model):
+            raise LadderSwitchError("pb_touch_guard requires predictive_belief, engine_resync and pb_host_engine_model")
+        _set_pb_switch(arm, PBL.TOUCH_GUARD_SWITCH, PBL.touch_guard_enables)
     if la_arrival:
         if not (predictive_belief and book_belief):
             raise LadderSwitchError("la_arrival requires predictive_belief and book_belief")
