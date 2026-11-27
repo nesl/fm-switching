@@ -146,9 +146,9 @@ def _figure(rows, mode, out):
     C_COVEX, C_STATEFUL, C_STATELESS = "#285B91", "#7A7A7A", "#C8C8C8"
     INK = "#1A1A1A"
     n = len(rows)
-    fig = Figure(figsize=(3.33, 1.95))
+    fig = Figure(figsize=(3.33, 2.35))
     Canvas(fig)
-    ax = fig.add_axes([0.385, 0.165, 0.585, 0.70])
+    ax = fig.add_axes([0.385, 0.19, 0.585, 0.75])
     ys = np.arange(n)[::-1]
     pitch = 1.0
     for y, r in zip(ys, rows):
@@ -159,22 +159,24 @@ def _figure(rows, mode, out):
             val = f"+{r['diff']}" if r["diff"] >= 0 else f"-{abs(r['diff'])}"
         if r["class"] == "covex":
             val = r"\textbf{" + val + "}" if mode == "pgf" else val
-        ax.text(r["diff"] + 8, y, val, va="center", ha="left", fontsize=7, color=INK,
+        ax.text(r["diff"] + 8, y, val, va="center", ha="left", fontsize=8, color=INK,
                 fontweight="bold" if r["class"] == "covex" else "normal")
     labels = [TEX_NAMES.get(r["display"].split(" (")[0] if r["display"] != "COVEX (ours)" else r["display"],
                             r["display"]) for r in rows]
     if mode == "agg":
         labels = [_plain(s) for s in labels]
     ax.set_yticks(ys)
-    ax.set_yticklabels(labels, fontsize=7, color=INK)
+    ax.set_yticklabels(labels, fontsize=8, color=INK)
+    for lbl in ax.get_yticklabels():
+        lbl.set_horizontalalignment("right")   # right-align every y label
     for lbl, r in zip(ax.get_yticklabels(), rows):
         if r["class"] == "covex":
             lbl.set_fontweight("bold")
     ax.axvline(0, color=INK, lw=0.6, zorder=2)
     ax.set_xlim(-45, 360)
-    ax.set_ylim(-0.6, n - 0.4 + 0.9)
+    ax.set_ylim(-0.6, n - 0.4 + 0.5)
     ax.set_xticks([0, 100, 200, 300])
-    ax.tick_params(axis="both", length=0, labelsize=7, colors=INK)
+    ax.tick_params(axis="both", length=0, labelsize=8, colors=INK)
     ax.tick_params(axis="x", length=2, color=INK)
     ax.xaxis.grid(True, color="#E6E6E6", lw=0.4)
     ax.set_axisbelow(True)
@@ -182,7 +184,7 @@ def _figure(rows, mode, out):
         ax.spines[s].set_visible(False)
     ax.spines["bottom"].set_color(INK); ax.spines["bottom"].set_linewidth(0.6)
     xl = ("Additional correct answers over the on-device model")
-    fig.text(0.5, 0.012, xl, ha="center", va="bottom", fontsize=7.5, color=INK)   # centred on the figure, not the axes
+    ax.set_xlabel("Additional correct answers\nover the on-device model", fontsize=8.5, color=INK, labelpad=3)   # under the x axis only, wrapped
     cov = rows[0]
     base_val = max(r["diff"] for r in rows if r["class"] != "covex")
     yA = n - 1 + 0.72
@@ -190,13 +192,13 @@ def _figure(rows, mode, out):
                 arrowprops=dict(arrowstyle="<->", color=INK, lw=0.6, shrinkA=0, shrinkB=0))
     ratio = cov["diff"] / base_val
     rtxt = f"{ratio:.1f}$\\times$" if mode == "pgf" else f"{ratio:.1f}x"
-    ax.text((cov["diff"] + base_val) / 2, yA + 0.12, rtxt, ha="center", va="bottom", fontsize=7,
+    ax.text((cov["diff"] + base_val) / 2, yA + 0.12, rtxt, ha="center", va="bottom", fontsize=8,
             color=INK, fontweight="bold")
     handles = [Patch(facecolor=C_COVEX, edgecolor="none", label="COVEX (ours)"),
                Patch(facecolor=C_STATEFUL, edgecolor="none", label="Stateful"),
                Patch(facecolor=C_STATELESS, edgecolor="none", label="Stateless")]
-    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.6, 0.995), ncol=3, frameon=False,
-               fontsize=6.5, handlelength=1.0, columnspacing=1.2, handletextpad=0.4, labelcolor=INK)
+    ax.legend(handles=handles, loc="lower right", ncol=1, frameon=False, fontsize=7.5, handlelength=1.0,
+              handletextpad=0.4, borderaxespad=0.3, labelcolor=INK)   # inside the figure, bottom right
     return fig, ratio
 
 
