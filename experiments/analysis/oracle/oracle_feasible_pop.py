@@ -32,9 +32,11 @@ OD = REPO / "experiments/analysis/oracle"
 
 def load_mod(name, fname, subs, prelude=None):
     src = open(OD / fname).read()
-    for a, b in subs:
-        if a not in src:
-            raise SystemExit(f"substitution target missing in {fname}: {a!r}")
+    for name_, a, b in subs:
+        n = src.count(a)
+        if n < 1:
+            raise SystemExit(f"substitution pattern {name_!r} matched 0 times in {fname}: {a!r}")
+        print(f"substitution {name_!r} in {fname}: {n} match(es)", file=sys.stderr)
         src = src.replace(a, b)
     mod = types.ModuleType(name)
     mod.__file__ = str(OD / fname)
@@ -44,9 +46,9 @@ def load_mod(name, fname, subs, prelude=None):
     return mod
 
 
-LRN = load_mod("LRN", "oracle_lp_run.py", [("_n16_s", f"_n{N}_s"), ("n_devices=16", f"n_devices={N}"), ('ratio="40:40:20"', f'ratio="{RATIO}"')])
-OBN = load_mod("OBN", "oracle_bootstrap.py", [("_n16_s", f"_n{N}_s"),
-                                              ("import oracle_lp_run as R  # noqa: E402", "R = LRN  # n-substituted")],
+LRN = load_mod("LRN", "oracle_lp_run.py", [("cell-pattern", "_n16_s", f"_n{N}_s"), ("trace-devices", "n_devices=16", f"n_devices={N}"), ("trace-mix", 'ratio="40:40:20"', f'ratio="{RATIO}"')])
+OBN = load_mod("OBN", "oracle_bootstrap.py", [("cell-pattern", "_n16_s", f"_n{N}_s"),
+                                              ("module-link", "import oracle_lp_run as R  # noqa: E402", "R = LRN  # n-substituted")],
                prelude={"LRN": LRN})
 OBN.R = LRN
 
