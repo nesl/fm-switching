@@ -33,7 +33,7 @@ inside the transfer time. `UplinkQueue` is that bookkeeping.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 UPLINK_MBPS = 13.6          # D75, committed (StudyE4 / E9 / CTRL1c)
 RTT_MS = 44.0               # D75, committed (same pair)
@@ -94,6 +94,7 @@ class UplinkTransfer:
     t_start: float            # when the uplink became free for it
     t_arrive: float           # when the last byte has landed at the coordinator
     queue_s: float            # t_start - t_offer: the delay the FIFO imposed
+    cls: int = 1              # service class: 0 = question text, 1 = everything else (frames, history)
 
     def as_dict(self) -> dict:
         return dict(kind=self.kind, ref=self.ref, bytes=self.nbytes,
@@ -101,15 +102,61 @@ class UplinkTransfer:
                     t_arrive=round(self.t_arrive, 6), queue_s=round(self.queue_s, 6))
 
 
-class UplinkQueue:
-    """ONE uplink per device, shared serially FIFO between frames and history batches."""
+QUESTION_KINDS = ("recall_question",)
 
-    def __init__(self, spec: LinkSpec) -> None:
+
+class UplinkQueue:
+    """ONE uplink per device, shared serially FIFO between frames and history batches.
+
+    `question_priority` (DEFAULT OFF; off, `send` is the code below unchanged and every transfer
+    is class 1): a question (class 0) is served ahead of every transfer that has not started
+    by its offer instant, NON-PREEMPTIVELY (a transfer already on the wire completes), FIFO by
+    offer time within a class, class 0 first on a tie. The transfers it jumps are pushed back
+    by its own occupancy only; `on_retime(transfer, old_t_arrive)` is called for each one moved.
+    """
+
+    def __init__(self, spec: LinkSpec, question_priority: bool = False,
+                 on_retime: Optional[Callable[["UplinkTransfer", float], None]] = None) -> None:
         self.spec = spec
         self.free_at = 0.0
         self.log: List[UplinkTransfer] = []
+        self.question_priority = bool(question_priority)
+        self.on_retime = on_retime
+
+    def _occ(self, tr: "UplinkTransfer") -> float:
+        return serialise_s(tr.nbytes, self.spec.uplink_mbps)
+
+    def _send_question(self, kind: str, ref: str, nbytes: int, t_offer: float) -> UplinkTransfer:
+        log = self.log
+        i = len(log)
+        while i > 0 and log[i - 1].t_start >= t_offer:
+            i -= 1
+        while i < len(log) and log[i].cls == 0 and log[i].t_offer <= t_offer:
+            i += 1
+        prev_end = log[i - 1].t_start + self._occ(log[i - 1]) if i > 0 else 0.0
+        t_start = max(t_offer, prev_end)
+        occupancy = serialise_s(nbytes, self.spec.uplink_mbps)
+        tr = UplinkTransfer(kind=kind, ref=ref, nbytes=nbytes, t_offer=t_offer, t_start=t_start,
+                            t_arrive=t_start + occupancy + (self.spec.rtt_ms / 1000.0) / 2.0,
+                            queue_s=t_start - t_offer, cls=0)
+        log.insert(i, tr)
+        end = t_start + occupancy
+        for later in log[i + 1:]:
+            ns = max(later.t_offer, end)
+            if ns != later.t_start:
+                old = later.t_arrive
+                later.t_start = ns
+                later.t_arrive = ns + self._occ(later) + (self.spec.rtt_ms / 1000.0) / 2.0
+                later.queue_s = ns - later.t_offer
+                if self.on_retime is not None:
+                    self.on_retime(later, old)
+            end = later.t_start + self._occ(later)
+        self.free_at = max(self.free_at, end)
+        return tr
 
     def send(self, kind: str, ref: str, nbytes: int, t_offer: float) -> UplinkTransfer:
+        if self.question_priority and kind in QUESTION_KINDS:
+            return self._send_question(kind, ref, nbytes, t_offer)
         t_start = max(t_offer, self.free_at)
         occupancy = serialise_s(nbytes, self.spec.uplink_mbps)
         self.free_at = t_start + occupancy

@@ -53,6 +53,7 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any, Dict, List, Optional
 
+import catchup_prefill as CU
 import engine_actions as EA
 import share_admission as SA
 from interface import Action, Observation
@@ -504,6 +505,9 @@ class V5Rules2Arm:
         self._observe_questions(obs)
         if not self.warm_ahead:
             return act
+        _cu = CU.arm_enables(self)                  # READ SITE of live2_catchup_prefill
+        if _cu:
+            CU.observe(self, obs, self._roster)
         g = self.guard_state(obs)
         self.stats["epochs"] += 1
         if g["active"]:
@@ -515,7 +519,10 @@ class V5Rules2Arm:
             self.stats["guard_shed_warming_epochs"] += 1
             return act
         cands = self._candidates(obs)
-        if not cands:
+        _cu_extra: List[str] = []
+        if _cu:
+            _cu_extra = CU.order(self, CU.candidates(self, obs, self._roster, set(cands)))
+        if not cands and not _cu_extra:
             return act
         # advance the chunk edge for every session we are about to ask for, so the next ask needs
         # another full chunk of new material. Done on the ASK and not on the build, because the
@@ -523,16 +530,23 @@ class V5Rules2Arm:
         est_now = self._roster.get("est_tokens_by_session") or {}
         for sid in cands:
             self._est_at_last_ask[sid] = int(est_now.get(sid, 0))
-        plan = EA.plan_warm_ahead(obs, cands, slice_tokens=self.slice_tokens,
+        plan = EA.plan_warm_ahead(obs, list(cands) + _cu_extra, slice_tokens=self.slice_tokens,
                                   yield_to_deadline=True,
                                   targets=getattr(self._base, "_targets", None))
+        _acts = list(plan.actions)
+        if _cu_extra:
+            CU.account(self, plan, _cu_extra, float(obs.now_s))
+            _x = set(_cu_extra)
+            _acts = ([a for a in _acts if a.session_id not in _x]
+                     + sorted([a for a in _acts if a.session_id in _x],
+                              key=lambda a: _cu_extra.index(a.session_id)))
         self.stats["warm_ahead_wanted"] += len(plan.wanted)
         self.stats["warm_ahead_emitted"] += plan.n_warm_ahead
         self.stats["warm_ahead_unexpressible"] += len(plan.unexpressible)
         if plan.yielded:
             self.stats["warm_ahead_yielded_epochs"] += 1
-        if plan.actions:
-            act.sessions = list(act.sessions) + list(plan.actions)
+        if _acts:
+            act.sessions = list(act.sessions) + _acts
         return act
 
 

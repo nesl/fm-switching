@@ -245,7 +245,7 @@ class FleetEmulator:
                  link_by_device: Optional[Dict[str, LK.LinkSpec]] = None,
                  tick_s: float = DEFAULT_TICK_S, realtime: bool = True,
                  drain_s: float = 5.0, link_events: bool = False,
-                 link_sync_hold: bool = False) -> None:
+                 link_sync_hold: bool = False, uplink_question_priority: bool = False) -> None:
         # link_events switch, DEFAULT OFF: with it off `_plan` adds nothing and `run` never sees a
         # `connectivity` action, so the heap, the wire and every digest are what they were.
         self.link_events = bool(link_events)
@@ -256,6 +256,8 @@ class FleetEmulator:
         # with this on, so a baseline's backlog auto-releases exactly as before (FIFO by capture
         # time, the committed D242 behaviour).
         self.link_sync_hold = bool(link_sync_hold)
+        # uplink_question_priority switch, DEFAULT OFF: see links.UplinkQueue. Off, every queue is the FIFO it was.
+        self.uplink_question_priority = bool(uplink_question_priority)
         if self.link_sync_hold and not self.link_events:
             raise ValueError("link_sync_hold requires link_events")
         self.held: Dict[str, List[Dict[str, Any]]] = {}
@@ -327,8 +329,34 @@ class FleetEmulator:
 
     def queue(self, device_id: str) -> LK.UplinkQueue:
         if device_id not in self.queues:
-            self.queues[device_id] = LK.UplinkQueue(self.link(device_id))
+            self.queues[device_id] = (LK.UplinkQueue(self.link(device_id), True, self._on_retime)
+                                      if self.uplink_question_priority
+                                      else LK.UplinkQueue(self.link(device_id)))
         return self.queues[device_id]
+
+    _ARRIVAL = {"history_batch": ("history_arrived", "batch_id"),
+                "monitor_frame": ("frame_arrived", "opportunity_id"),
+                "recall_question": ("question_arrived", "opportunity_id")}
+
+    def _on_retime(self, tr: LK.UplinkTransfer, old_t_arrive: float) -> None:
+        """A question jumped `tr`: move its arrival event and the records derived from it."""
+        what, key = self._ARRIVAL[tr.kind]
+        hit = [k for k, e in enumerate(self._heap)
+               if e[2] == what and e[3]["rec"][key] == tr.ref and e[3]["t_arrive"] == old_t_arrive]
+        if len(hit) != 1:
+            raise RuntimeError("uplink retime: %d heap entries for %s %s at %r" % (len(hit), what, tr.ref, old_t_arrive))
+        t, seq, w, payload = self._heap[hit[0]]
+        payload["t_arrive"] = tr.t_arrive
+        self._heap[hit[0]] = (float(tr.t_arrive), seq, w, payload)
+        heapq.heapify(self._heap)
+        o = self.outcomes.get(tr.ref)
+        if tr.kind == "monitor_frame" and o is not None:
+            o.t_frame_arrive = tr.t_arrive
+            o.uplink_queue_s = tr.queue_s
+        for ev in self.link_log:
+            if ev.get("ev") == "release" and ev.get("batch_id") == tr.ref and ev.get("t_arrive") == old_t_arrive:
+                ev["t_arrive"] = tr.t_arrive
+                ev["queue_s"] = tr.queue_s
 
     # -- scheduling -------------------------------------------------------
     def _push(self, t: float, what: str, payload: Dict[str, Any]) -> None:

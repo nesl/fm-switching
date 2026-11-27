@@ -70,6 +70,7 @@ import arms_v6state as VS                                                      #
 import d249_queue_visibility as QV                                             # noqa: E402
 import d261_cold_unlatch as CU                                                 # noqa: E402
 import book_belief_uncached as BB                                                 # noqa: E402
+import catchup_prefill as CUP                                            # noqa: E402
 import la_arrival_admission as LAA                                             # noqa: E402
 import link_read as LR                                                         # noqa: E402
 import link_sync as LS                                                         # noqa: E402
@@ -437,6 +438,16 @@ def _set_la(arm: Any) -> None:
             raise LadderSwitchError("%s did not take on %s" % (LAA.LA_SWITCH, type(o).__name__))
 
 
+def _set_catchup(arm: Any) -> None:
+    """Turn catch-up prefill on for THIS INSTANCE of the rules arm (`arm._rules`, whose `decide` is
+    the one reader) and read it back. Default OFF everywhere."""
+    r = arm._rules
+    object.__setattr__(r, CUP.SWITCH, True)
+    object.__setattr__(r, "_cu_state", CUP.State())
+    if CUP.arm_enables(r) is not True:                                     # pragma: no cover
+        raise LadderSwitchError("%s did not take on %s" % (CUP.SWITCH, type(r).__name__))
+
+
 def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                recheck_types: Any = RRARM.RECHECK_TYPES,
                deficit_feed: bool = True, gain: float = GAIND.GAIN,
@@ -458,6 +469,7 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                predictive_belief: bool = False,
                la_arrival: bool = False,
                engine_resync: bool = False,
+               catchup_prefill: bool = False,
                **kw: Any) -> Any:
     """Build rung 3. Four switches, each set on the instance and each read back.
 
@@ -546,6 +558,13 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         if not (predictive_belief and book_belief):
             raise LadderSwitchError("la_arrival requires predictive_belief and book_belief")
         _set_la(arm)
+    if not isinstance(catchup_prefill, bool):
+        raise LadderSwitchError("catchup_prefill must be a bool, got %r" % (catchup_prefill,))
+    if catchup_prefill:
+        if not (predictive_belief and book_belief and la_arrival):
+            raise LadderSwitchError(
+                "catchup_prefill requires predictive_belief, book_belief and la_arrival")
+        _set_catchup(arm)
     return arm
 
 

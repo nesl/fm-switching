@@ -148,6 +148,9 @@ def build_parser() -> argparse.ArgumentParser:
                          "independent of any outage; every other device keeps the D75 default 13.6. "
                          "At n16 _c3-11-2 the 11 robots equal the k=11 outage victim set. It is an "
                          "emulator setting and does NOT enter the trace directory name. None = off")
+    ap.add_argument("--uplink-question-priority", action="store_true",
+                    help="question text (class 0) is served ahead of history and monitor frames "
+                         "(class 1) on every device uplink queue, non-preemptive (default OFF)")
     # link_events switch: DEFAULT OFF. On, the emulator emits `connectivity` events from the
     # trace's outage meta and the coordinator keeps a per-device link table published as
     # `Observation.device_links`. Meaningless without an outage (no events then, byte-identical).
@@ -222,6 +225,23 @@ def build_parser() -> argparse.ArgumentParser:
                     help="H100 only: restart the round-1 server for this cell, as the pilot did")
     ap.set_defaults(split=True, warm_cache=True, score=True, forward_on_completion=True)
     return ap
+
+
+_SWITCH_KEYS = ("live2_predictive_belief", "live2_pb_engine_resync", "live2_book_belief_uncached",
+                "live2_la_arrival_admission", "live2_value_aware_admission", "live2_catchup_prefill")
+
+
+def _switch_record(arm) -> Dict[str, bool]:
+    """The arm-scoped switch values as the instance dicts hold them (the arm, its _rules and
+    _rules._base: catch-up prefill lives on _rules); an absent key is off. Empty unless at least
+    one is on, so the header and cell JSON of every other arm are unchanged."""
+    insts = [arm]
+    rules = getattr(arm, "_rules", None)
+    if rules is not None:
+        insts += [rules, getattr(rules, "_base", None)]
+    owns = [vars(o) for o in insts if o is not None]
+    rec = {k: any(bool(own.get(k, False)) for own in owns) for k in _SWITCH_KEYS}
+    return rec if any(rec.values()) else {}
 
 
 def _arm_kwargs(a) -> Dict[str, Any]:
@@ -445,6 +465,7 @@ def run(a) -> Dict[str, Any]:
             conf["calibration_knots_path"] = knots
     arm.live2_configure(**conf)
 
+    sw_rec = _switch_record(arm)
     header = dict(
         # D154 (4): the contract is appended to the CELL LABEL as well as to the run tag, so a
         # per-frame cell announces itself in every artefact that carries a label.
@@ -496,7 +517,9 @@ def run(a) -> Dict[str, Any]:
         # link_events: present in the header ONLY when on, so an off header is the old header.
         **({} if not a.link_events else dict(link_events=True)),
         **({} if a.robot_uplink_mbps is None else dict(robot_uplink_mbps=float(a.robot_uplink_mbps))),
-        **({} if not getattr(a, "_sync_on", False) else dict(link_sync=True)))
+        **({} if not a.uplink_question_priority else dict(uplink_question_priority=True)),
+        **({} if not getattr(a, "_sync_on", False) else dict(link_sync=True)),
+        **({} if not sw_rec else dict(switches=sw_rec)))
     (rdir / "header.json").write_text(json.dumps(header, indent=1, default=str) + "\n")
 
     cfg = dict(run_dir=str(rdir), arm=a.arm, arm_kwargs=_arm_kwargs(a), mode=a.mode,
@@ -644,6 +667,8 @@ def run(a) -> Dict[str, Any]:
     # trust; it never invents a state the counters do not support.
     import metrics_trust as MT
     out["metrics_health"] = MT.cell_metrics_health(res, dry_run=not bool(a.server))
+    if sw_rec:
+        out["switches"] = sw_rec
     (rdir / "cell.json").write_text(json.dumps(out, indent=1, default=str) + "\n")
     return out
 
@@ -786,6 +811,8 @@ def _emulator(EM, tdir: Path, br, a):
         kw["link_events"] = True
     if getattr(a, "_sync_on", False):
         kw["link_sync_hold"] = True
+    if getattr(a, "uplink_question_priority", False):
+        kw["uplink_question_priority"] = True
     if a.robot_uplink_mbps is not None:
         import links as LK
         rate = float(a.robot_uplink_mbps)

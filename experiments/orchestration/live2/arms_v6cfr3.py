@@ -811,6 +811,11 @@ def _final_ladder_lazy() -> Dict[str, Any]:
         return FL.make_rung3(FL.RUNG3_LA + "-er", predictive_belief=True, book_belief=True,
                              la_arrival=True, engine_resync=True, **kw)
 
+    def r3laercu(**kw: Any) -> Any:
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3(FL.RUNG3_LA + "-er-cu", predictive_belief=True, book_belief=True,
+                             la_arrival=True, engine_resync=True, catchup_prefill=True, **kw)
+
     def r3link(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3_LINK, d249_queue_visibility=True, link_read=True, **kw)
@@ -856,6 +861,7 @@ def _final_ladder_lazy() -> Dict[str, Any]:
             "covex-v6-fair-final-unlatch": r3unlatch,
             "covex-v6-fair-final-la": r3la,
             "covex-v6-fair-final-la-er": r3laer,
+            "covex-v6-fair-final-la-er-cu": r3laercu,
             "covex-v6-fair-final-0b": r30b,
             "covex-v6-fair-final-0b-er": r30ber,
             "covex-v6-fair-final-q4b": r3q4b,
