@@ -845,6 +845,21 @@ class Live2Coordinator:
             for r in self._booking_rows:
                 f.write(json.dumps(r, sort_keys=True) + "\n")
 
+    def write_cu_value_decisions(self) -> None:
+        """SIDECAR `cu_value_decisions.jsonl.gz` (group C S2, `catchup_value`): one row per value
+        evaluation of a catch-up slice (gain, harm, window, net, release). LOGGING ONLY, nothing reads
+        it back. No file for any arm that has no value-gate rows."""
+        if self.logs is None:
+            return
+        st = getattr(getattr(getattr(self.arm, "_rules", None), "__dict__", {}).get("_cu_state"), "vlog", None)
+        if not st:
+            return
+        import gzip
+        import json
+        with gzip.open(Path(self.logs.out_dir) / "cu_value_decisions.jsonl.gz", "wt") as f:
+            for x in st:
+                f.write(json.dumps(x, sort_keys=True, default=float) + "\n")
+
     def write_la_decisions(self) -> None:
         """SIDECAR `la_decisions.jsonl.gz`: one row per load-aware ARRIVAL evaluation (the gate in
         hybrid_arm `_la_gate_est`). LOGGING ONLY, nothing reads it back. Written only when the la
@@ -2708,6 +2723,7 @@ class Live2Coordinator:
         guard_log = self.write_guard_log()
         self.write_booking_log()
         self.write_la_decisions()
+        self.write_cu_value_decisions()
         return dict(
             arm=self.arm.name, arm_version=getattr(self.arm, "arm_version", "unversioned"),
             is_measurement=False,

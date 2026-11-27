@@ -837,6 +837,26 @@ def _final_ladder_lazy() -> Dict[str, Any]:
                              la_arrival=True, engine_resync=True, pb_wire_tokens=True,
                              pb_host_engine_model=True, pb_touch_guard=True, **kw)
 
+    def r3candtlsync(**kw: Any) -> Any:
+        """GROUP C S2 (D327/D328): the touch-latch candidate (`-cand-tl`) + the VALUE-GATED catch-up
+        prefill (`live2_catchup_prefill_value`): a robot's catch-up slice is released only when its
+        deficit-weighted gain exceeds the harm B's own load-aware estimator prices. NOT the uplink hold
+        (`link_sync` is not composed) and NOT `d249_queue_visibility`. Default arms are unchanged."""
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3("covex-v6-fair-final-cand-tl-sync", predictive_belief=True, book_belief=True,
+                             la_arrival=True, engine_resync=True, pb_wire_tokens=True,
+                             pb_host_engine_model=True, pb_touch_guard=True,
+                             catchup_prefill=True, catchup_value=True, **kw)
+
+    def r3candtlsynceager(**kw: Any) -> Any:
+        """D332 item 3 EAGER comparator: `-cand-tl-sync` with the S2 value gate OFF and the UNPACED
+        catch-up prefill ON (as `-la-er-cu`: no pacing, no cross-type busy gate). Same touch guard."""
+        import arms_final_ladder as FL                                     # noqa: PLC0415
+        return FL.make_rung3("covex-v6-fair-final-cand-tl-sync-eager", predictive_belief=True, book_belief=True,
+                             la_arrival=True, engine_resync=True, pb_wire_tokens=True,
+                             pb_host_engine_model=True, pb_touch_guard=True,
+                             catchup_prefill=True, **kw)
+
     def r3laercu(**kw: Any) -> Any:
         import arms_final_ladder as FL                                     # noqa: PLC0415
         return FL.make_rung3(FL.RUNG3_LA + "-er-cu", predictive_belief=True, book_belief=True,
@@ -907,6 +927,8 @@ def _final_ladder_lazy() -> Dict[str, Any]:
             "covex-v6-fair-final-la-er-pwire": r3laerpwire,
             "covex-v6-fair-final-cand": r3cand,
             "covex-v6-fair-final-cand-tl": r3candtl,
+            "covex-v6-fair-final-cand-tl-sync": r3candtlsync,
+            "covex-v6-fair-final-cand-tl-sync-eager": r3candtlsynceager,
             "covex-v6-fair-final-0b": r30b,
             "covex-v6-fair-final-0b-er": r30ber,
             "covex-v6-fair-final-q4b": r3q4b,

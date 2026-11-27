@@ -33,6 +33,13 @@ to the same-device piece/whole test, no catch-up ask while ANY deadline-bearing 
 (`qtype == "assistance"`) or dashcam (`qtype == "alert"`) request, of any device, is in flight, nor
 while a piece/whole of ANY device with an open catch-up window is in flight. Same rows, same fields.
 
+VALUE MODE (`live2_catchup_prefill_value`, arm `-cand-tl-sync`, group C S2, requires the switch above,
+EXCLUDES the paced and busy-x modes): the paced and busy-x gates are replaced by a NET VALUE gate,
+`catchup_value.py`: a robot's slice is asked only while its deficit-weighted gain of being warm at its
+next questions exceeds the harm B's own load-aware estimator prices on the requests it sits in front
+of; order is (-net, predicted next question, session id), the "ours" form of `link_sync._release`.
+The one-in-flight-per-device test and the prefix-not-resident skip are unchanged.
+
 READ SITES: `arms_v5rules2.V5Rules2Arm.decide` (`observe`, `candidates`, `account`); the decision it
 changes is the MATERIALIZE list `act.sessions`, enacted at `coordinator._enact` (MATERIALIZE branch)
 -> `_advance_build` -> `release_piece`.
@@ -46,6 +53,7 @@ import book_belief_uncached as BB
 SWITCH = "live2_catchup_prefill"
 PACED_SWITCH = "live2_catchup_prefill_paced"
 BUSYX_SWITCH = "live2_catchup_prefill_busyx"
+VALUE_SWITCH = "live2_catchup_prefill_value"
 LOG_CAP = 4000
 
 
@@ -113,6 +121,30 @@ def arm_busyx(arm: Any) -> bool:
     return v
 
 
+def arm_value(arm: Any) -> bool:
+    """Is the VALUE GATE on for THIS INSTANCE? Default False; instance dict only, strict bool, it
+    requires the catch-up switch and EXCLUDES the paced and busy-x modes (it replaces their gates)."""
+    try:
+        own = vars(arm)
+    except TypeError:                                                          # pragma: no cover
+        own = {}
+    if VALUE_SWITCH not in own:
+        for klass in type(arm).__mro__:
+            if bool(klass.__dict__.get(VALUE_SWITCH, False)):
+                raise CatchupSwitchError(
+                    "%s is ON as a CLASS attribute of %s and the instance declares nothing; "
+                    "it requires an arm-scoped INSTANCE attribute" % (VALUE_SWITCH, klass.__name__))
+    v = own.get(VALUE_SWITCH, False)
+    if not isinstance(v, bool):
+        raise CatchupSwitchError("%s must be a bool, got %r" % (VALUE_SWITCH, type(v).__name__))
+    if v and not arm_enables(arm):
+        raise CatchupSwitchError("%s requires %s" % (VALUE_SWITCH, SWITCH))
+    if v and (bool(own.get(PACED_SWITCH, False)) or bool(own.get(BUSYX_SWITCH, False))):
+        raise CatchupSwitchError("%s replaces the paced and busy-x gates and cannot be combined "
+                                 "with them" % VALUE_SWITCH)
+    return v
+
+
 def _core(arm: Any) -> Any:
     """The object that owns the C5 cap and the C2 epoch record (the hybrid core of `_base`)."""
     o = getattr(arm, "_base", None)
@@ -132,6 +164,11 @@ class State:
         self.win: Dict[str, Tuple[int, int, str]] = {}   # session -> (est0, backlog_tokens, device)
         self.supp: Dict[str, set] = {}
         self.log: List[Dict[str, Any]] = []
+        # value mode only (empty and untouched otherwise)
+        self.lastq: Dict[str, Dict[str, Any]] = {}       # device -> its last question's shape
+        self.link: Dict[str, Dict[str, Any]] = {}        # session -> {offline_s}
+        self.val: Dict[str, float] = {}                  # session -> the net value that released it
+        self.vlog: List[Dict[str, Any]] = []             # one row per value evaluation
 
 
 def observe(arm: Any, obs: Any, roster: Dict[str, Any]) -> None:
@@ -141,6 +178,9 @@ def observe(arm: Any, obs: Any, roster: Dict[str, Any]) -> None:
     est = roster.get("est_tokens_by_session") or {}
     sdev = roster.get("session_device") or {}
     devs = roster.get("devices") or {}
+    if arm_value(arm):
+        import catchup_value as CV
+        CV.observe_questions(arm, obs, roster)
     for lk in (getattr(obs, "device_links", None) or ()):
         if not lk.connected or lk.back_online_at is None:
             continue
@@ -153,6 +193,9 @@ def observe(arm: Any, obs: Any, roster: Dict[str, Any]) -> None:
         for sid, did in sdev.items():
             if did == lk.device_id and str((devs.get(did) or {}).get("type")) == "robot":
                 cu.win[sid] = (int(est.get(sid, 0)), int(lk.backlog_tokens), str(did))
+                if arm_value(arm):
+                    cu.link[sid] = {"offline_s": (None if lk.offline_since is None else
+                                                  round(float(lk.back_online_at) - float(lk.offline_since), 4))}
                 if arm_paced(arm):
                     cu.credit[sid] = -(-int(lk.backlog_tokens) // int(arm.chunk_tokens))
                 arm.stats["catchup_windows_opened"] += 1
@@ -173,6 +216,7 @@ def candidates(arm: Any, obs: Any, roster: Dict[str, Any], ordinary: set) -> Lis
     out: List[str] = []
     paced = arm_paced(arm)
     busyx = arm_busyx(arm) if paced else False
+    value = arm_value(arm)
     if busyx:
         ss_fl = any(str(r.qtype) == "assistance" and bool(r.has_deadline) for r in rows)
         dash_fl = any(str(r.qtype) == "alert" and bool(r.has_deadline) for r in rows)
@@ -248,6 +292,17 @@ def candidates(arm: Any, obs: Any, roster: Dict[str, Any], ordinary: set) -> Lis
                                         1)[2]:
             arm.stats["catchup_epochs_prefix_not_resident"] += 1
             continue
+        if value:
+            import catchup_value as CV
+            try:
+                vd = CV.evaluate(arm, obs, roster, sid, did, tail, (est0, backlog, did), e)
+            except Exception:                                                  # noqa: BLE001
+                arm.stats["catchup_value_unpriced"] += 1
+                continue
+            CV.record(arm, vd, float(obs.now_s))
+            if not vd["release"]:
+                continue
+            cu.val[sid] = float(vd["net_acc"])
         out.append(sid)
     arm.stats["catchup_candidates"] += len(out)
     return out
@@ -257,6 +312,15 @@ def order(arm: Any, sids: List[str], now_s: float = 0.0) -> List[str]:
     """Earliest predicted next question first (the arm's own `_last_q_t + _gap_ewma`), unknown
     last, session id last. `roster.session_device` maps the session to its device."""
     sdev = (arm._roster or {}).get("session_device") or {}
+    if arm_value(arm):
+        vals = arm._cu_state.val
+
+        def vkey(sid: str):
+            did = sdev.get(sid)
+            last, gap = arm._last_q_t.get(did), arm._gap_ewma.get(did)
+            nxt = (last + gap) if (last is not None and gap is not None) else float("inf")
+            return (-float(vals.get(sid, 0.0)), nxt, sid)
+        return sorted(sids, key=vkey)
 
     def key(sid: str):
         did = sdev.get(sid)

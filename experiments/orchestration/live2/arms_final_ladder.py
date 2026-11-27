@@ -445,7 +445,7 @@ def _set_la(arm: Any) -> None:
             raise LadderSwitchError("%s did not take on %s" % (LAA.LA_SWITCH, type(o).__name__))
 
 
-def _set_catchup(arm: Any, paced: bool = False, busyx: bool = False) -> None:
+def _set_catchup(arm: Any, paced: bool = False, busyx: bool = False, value: bool = False) -> None:
     """Turn catch-up prefill on for THIS INSTANCE of the rules arm (`arm._rules`, whose `decide` is
     the one reader) and read it back. Default OFF everywhere."""
     r = arm._rules
@@ -462,6 +462,14 @@ def _set_catchup(arm: Any, paced: bool = False, busyx: bool = False) -> None:
         object.__setattr__(r, CUP.BUSYX_SWITCH, True)
         if CUP.arm_busyx(r) is not True:                                   # pragma: no cover
             raise LadderSwitchError("%s did not take on %s" % (CUP.BUSYX_SWITCH, type(r).__name__))
+    if value:
+        # group C S2 (D327/D328): the value gate REPLACES the paced and busy-x gates. It reads the live
+        # deficit weight (`_cup_w_of`) and B's estimator through the OUTER arm (`_cu_outer`).
+        object.__setattr__(r, CUP.VALUE_SWITCH, True)
+        object.__setattr__(r, "_cup_w_of", lambda did, _a=arm: R4._weight_of(_a, did))
+        object.__setattr__(r, "_cu_outer", arm)
+        if CUP.arm_value(r) is not True:                                   # pragma: no cover
+            raise LadderSwitchError("%s did not take on %s" % (CUP.VALUE_SWITCH, type(r).__name__))
 
 
 def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
@@ -491,6 +499,7 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
                catchup_prefill: bool = False,
                catchup_pace: bool = False,
                catchup_busyx: bool = False,
+               catchup_value: bool = False,
                **kw: Any) -> Any:
     """Build rung 3. Four switches, each set on the instance and each read back.
 
@@ -602,7 +611,11 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         if not (predictive_belief and book_belief and la_arrival):
             raise LadderSwitchError(
                 "catchup_prefill requires predictive_belief, book_belief and la_arrival")
-        _set_catchup(arm, paced=catchup_pace, busyx=catchup_busyx is True and catchup_pace)
+        if catchup_value is True and (catchup_pace or catchup_busyx):
+            raise LadderSwitchError("catchup_value replaces the paced and busy-x gates and cannot be "
+                                    "combined with catchup_pace or catchup_busyx")
+        _set_catchup(arm, paced=catchup_pace, busyx=catchup_busyx is True and catchup_pace,
+                     value=catchup_value is True)
     elif catchup_pace:
         raise LadderSwitchError("catchup_pace requires catchup_prefill")
     if not isinstance(catchup_pace, bool):
@@ -611,6 +624,10 @@ def make_rung3(name: str = RUNG3, *, release_recheck: bool = True,
         raise LadderSwitchError("catchup_busyx must be a bool, got %r" % (catchup_busyx,))
     if catchup_busyx and not catchup_pace:
         raise LadderSwitchError("catchup_busyx requires catchup_pace")
+    if not isinstance(catchup_value, bool):
+        raise LadderSwitchError("catchup_value must be a bool, got %r" % (catchup_value,))
+    if catchup_value and not catchup_prefill:
+        raise LadderSwitchError("catchup_value requires catchup_prefill")
     return arm
 
 
