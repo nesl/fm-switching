@@ -92,5 +92,85 @@
   "model": "none",
   "timestamp": "2026-11-27T09:10:04.874510",
   "device": "jetson_orin"
+ },
+ "trace_based": {
+  "_what": "Policy-independent: trace robot questions (history_tokens) through the cold-tier test (first token + RTT + upload > 3.0 s). Not dependent on any policy's context.",
+  "conditions": {
+   "n16 1x s4": {
+    "robot_questions": 132,
+    "cold_infeasible": 74,
+    "fraction": 0.5606,
+    "per_seed": {
+     "s4": {
+      "robot_questions": 132,
+      "cold_infeasible": 74,
+      "fraction": 0.5606
+     }
+    }
+   },
+   "n16 1x s4 to s7": {
+    "robot_questions": 485,
+    "cold_infeasible": 297,
+    "fraction": 0.6124,
+    "per_seed": {
+     "s4": {
+      "robot_questions": 132,
+      "cold_infeasible": 74,
+      "fraction": 0.5606
+     },
+     "s5": {
+      "robot_questions": 127,
+      "cold_infeasible": 79,
+      "fraction": 0.622
+     },
+     "s6": {
+      "robot_questions": 121,
+      "cold_infeasible": 66,
+      "fraction": 0.5455
+     },
+     "s7": {
+      "robot_questions": 105,
+      "cold_infeasible": 78,
+      "fraction": 0.7429
+     }
+    }
+   },
+   "h0.5 s4": {
+    "robot_questions": 132,
+    "cold_infeasible": 74,
+    "fraction": 0.5606,
+    "per_seed": {
+     "s4": {
+      "robot_questions": 132,
+      "cold_infeasible": 74,
+      "fraction": 0.5606
+     }
+    }
+   },
+   "n20 s4 (c3-11-2)": {
+    "robot_questions": 283,
+    "cold_infeasible": 185,
+    "fraction": 0.6537,
+    "per_seed": {
+     "s4": {
+      "robot_questions": 283,
+      "cold_infeasible": 185,
+      "fraction": 0.6537
+     }
+    }
+   },
+   "n32 s4 (c3-11-2)": {
+    "robot_questions": 417,
+    "cold_infeasible": 284,
+    "fraction": 0.6811,
+    "per_seed": {
+     "s4": {
+      "robot_questions": 417,
+      "cold_infeasible": 284,
+      "fraction": 0.6811
+     }
+    }
+   }
+  }
  }
 }

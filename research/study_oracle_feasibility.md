@@ -19,7 +19,7 @@ Result (all 106 computed cells, which are the n16 1x and kv0.5r_h0.5 s4 arms):
 - Single-shot: 0 infeasible, 0 unevaluated.
 - Therefore B_feas equals the ideal bound at 1x: no robot question is infeasible on its own at the warm cache tier.
 
-Sensitivity (not the bound): under a cold-tier readiness (no cache hit) the same test marks some robot rows infeasible. The per-condition fraction for rung 3 is in section 2b.
+Sensitivity (not the bound): under a cold-tier readiness (no cache hit) the same test marks some robot rows infeasible. The trace-based and rung-3 fractions per condition are in section 2b.
 
 Robot rows infeasible under the cold-tier sensitivity, rung 3:
 
@@ -33,17 +33,17 @@ Robot rows infeasible under the cold-tier sensitivity, rung 3:
 
 Limit: the test uses first-token time, as specified. Completion adds decode (about 0.1 s at 2 tokens), so the 3.0 s test is slightly optimistic; a completion-based test would only remove rows, not add any.
 
-### 2b. Rung 3 cold-tier fraction per condition
+### 2b. Cold-tier fraction per condition
 
-Robot rows whose cold-tier first token + RTT + upload exceeds 3.0 s, divided by the robot rows of the cell (`results/orchestration/live2/oracle/cold_tier_fractions.json`). Seed 4 unless stated.
+Robot questions whose cold-tier first token + RTT + upload exceeds 3.0 s, divided by the robot questions. The left column is computed from the trace population (trace history_tokens, `trace_cold_fraction.py`) and does not depend on any policy. The right column uses each rung-3 cell's own request prompt_tokens; it depends on the policy's own context choice, and rung 3 sends smaller contexts under pressure, so it understates the policy-independent fraction. Both are in `results/orchestration/live2/oracle/cold_tier_fractions.json` (`trace_based` and `conditions`). Seed 4 unless stated.
 
-| condition | infeasible / robot rows | fraction |
+| condition | trace-based fraction (policy-independent) | rung 3 fraction (depends on the policy's own context choice) |
 |---|---|---|
-| n16 1x s4 | 77 / 132 | 0.583 |
-| n16 1x s4 to s7 | 282 / 485 | 0.581 |
-| h0.5 s4 | 41 / 132 | 0.311 |
-| n20 s4 (c3-11-2) | 123 / 283 | 0.435 |
-| n32 s4 (c3-11-2) | 109 / 417 | 0.261 |
+| n16 1x s4 | 74 / 132 = 0.561 | 77 / 132 = 0.583 |
+| n16 1x s4 to s7 | 297 / 485 = 0.612 | 282 / 485 = 0.581 |
+| h0.5 s4 | 74 / 132 = 0.561 | 41 / 132 = 0.311 |
+| n20 s4 (c3-11-2) | 185 / 283 = 0.654 | 123 / 283 = 0.435 |
+| n32 s4 (c3-11-2) | 284 / 417 = 0.681 | 109 / 417 = 0.261 |
 
 
 ## 3. Capacity-window bound (B_cap)
@@ -122,14 +122,14 @@ Pooled FAIR / HINDSIGHT, ideal and B_feas:
 
 ## 7. Suggested wording (matches the definitions)
 
-Abstract: "Against an ideal-resource bound (every robot and single-shot question answered by the cloud, on time, with no capacity constraint), rung 3 attains 0.94 of the accuracy gain over on-device inference, pooled over robot and single-shot questions at 1x, seeds 4 to 7. The bound is an ideal-resource bound: no committed question is infeasible on its own at the warm cache tier, and the warm-charge capacity bound does not bind. The bound assumes each robot's context stays resident in KV memory, which is not modelled. Without a warm cache, a fraction of rung-3 robot rows would miss the 3 s deadline (section 2b)."
+Abstract: "Against an ideal-resource bound (every robot and single-shot question answered by the cloud, on time, with no capacity constraint), rung 3 attains 0.94 of the accuracy gain over on-device inference, pooled over robot and single-shot questions at 1x, seeds 4 to 7. The bound is an ideal-resource bound: no committed question is infeasible on its own at the warm cache tier, and the warm-charge capacity bound does not bind. The bound assumes each robot's context stays resident in KV memory, which is not modelled. Without a warm cache, a fraction of robot questions (0.56 to 0.68 by trace across the conditions in section 2b) would miss the 3 s deadline."
 
 Results text: "The 0.94 is the FAIR share of the robot-and-single-shot accuracy gain over on-device inference, against an oracle that serves every question from the cloud with its history, on time and without resource limits. The n20, n32 and h0.5 shares are against a bound known to be loose under pressure."
 
 ## 8. Recommendation
 
 - At 1x, headline the ideal-resource bound. It is an upper bound, it equals B_feas here, and the warm capacity bound is non-binding, so the ideal is also the tightest bound this data supports.
-- Under pressure (n32, B2 outage), keep the ideal as the upper bound, but report the feasibility count beside it. The ideal is loose under pressure, and the rung-3 cold-tier fraction in section 2b is the measure of how much of the headroom depends on residency; a cold-charged capacity bound is not valid and is not reported as a bound.
+- Under pressure (n32, B2 outage), keep the ideal as the upper bound, but report the feasibility count beside it. The ideal is loose under pressure, and the trace-based cold-tier fraction in section 2b is the policy-independent measure of how much of the headroom depends on residency; a cold-charged capacity bound is not valid and is not reported as a bound.
 - Do not headline a capacity-window bound until a measured cold-path prefix-hit rate exists for the policies, so that the cold scenario becomes a real bound on them.
 
 ## 9. Generalised populations: n20, n32 (tag c3-11-2) and the B2 arms
@@ -140,11 +140,11 @@ Scope: n20 and n32 cells exist for seed 4 only, so their shares are seed-4 value
 
 ### 9.1 Infeasibility and capacity, per condition
 
-| condition | robot rows | best-tier infeasible | rung 3 cold-tier fraction | capacity alpha, cold greedy (LB) | capacity alpha, cold LP (UB) | capacity alpha, warm LP (UB) |
+| condition | robot rows | best-tier infeasible | trace cold-tier fraction (rung 3 in parentheses) | capacity alpha, cold greedy (LB) | capacity alpha, cold LP (UB) | capacity alpha, warm LP (UB) |
 |---|---|---|---|---|---|---|
-| n16 1x (s4 to s7, reference) | 12,685 (all arms, 4 seeds) | 0 | 0.581 (282 / 485, seeds 4 to 7) | 0.534 | 0.768 | 1.000 |
-| n20 c3-11-2 (s4) | 283 (rung 3) | 0 | 0.435 (123 / 283) | 0.313 | 0.595 | 1.000 |
-| n32 c3-11-2 (s4) | 417 (rung 3) | 0 | 0.261 (109 / 417) | 0.333 | 0.575 | 1.000 |
+| n16 1x (s4 to s7, reference) | 12,685 (all arms, 4 seeds) | 0 | 0.612 (297 / 485; rung 3 0.581) | 0.534 | 0.768 | 1.000 |
+| n20 c3-11-2 (s4) | 283 (rung 3) | 0 | 0.654 (185 / 283; rung 3 0.435) | 0.313 | 0.595 | 1.000 |
+| n32 c3-11-2 (s4) | 417 (rung 3) | 0 | 0.681 (284 / 417; rung 3 0.261) | 0.333 | 0.575 | 1.000 |
 
 The cold-tier counts are the sensitivity only (no cache hit); they are not bounds. Pooled capacity alphas are seed-4 values for n20 and n32. Raw totals in the JSON files, with what each sums over: n16 cold-tier infeasible rows 2,433 summed over 49 arm-cells at seed 4 (oracle_feasible_pop_n16.json); n20 543 summed over 7 arm-cells (oracle_feasible_pop_n20_c3-11-2.json); n32 396 summed over 6 arm-cells (oracle_feasible_pop_n32_c3-11-2.json); 3,598 summed over all 106 computed cells (oracle_feasible_bound.json). The warm LP is non-binding at every condition; the cold charge binds at every condition, as in section 3.
 
@@ -179,4 +179,4 @@ Reading. At n20 and n32, the la-er arms and pwire rank above rung 3 on FAIR (n20
 
 ## 10. KV residency (not in the bounds)
 
-Every bound here charges recall prefill as the cheapest committed case: the warm uncached work (ideal and B_cap warm charge) or GPU-WARM first-token time (B_feas). Both assume the robot's prior context is resident in KV memory when the question arrives. None of the bounds models KV capacity, eviction or host-tier spill. The cold-tier sensitivity is the case in which residency fails, and it shows that the gap at scale depends on residency: without a cache hit, the rung-3 robot rows that miss the deadline are 0.58 of rows at 1x (282 of 485, seeds 4 to 7), 0.33 at h0.5 (41 of 132), 0.43 at n20 (123 of 283) and 0.26 at n32 (109 of 417), all seed 4 except 1x. The host tier size used elsewhere in this project (27 GiB, 110,592 tokens, from the run addendum for the host-tier turnover study) is not an input to these bounds, so any claim that a bound holds under memory pressure needs the residency study first. The paper should state that the bounds assume residency and that the residency assumption is measured separately.
+Every bound here charges recall prefill as the cheapest committed case: the warm uncached work (ideal and B_cap warm charge) or GPU-WARM first-token time (B_feas). Both assume the robot's prior context is resident in KV memory when the question arrives. None of the bounds models KV capacity, eviction or host-tier spill. The cold-tier sensitivity is the case in which residency fails. Without a cache hit, the trace-based fraction of robot questions that miss the 3 s deadline is 0.61 at 1x (297 of 485, seeds 4 to 7), 0.56 at h0.5 seed 4 (74 of 132), 0.65 at n20 (185 of 283) and 0.68 at n32 (284 of 417). The rung-3 fractions in section 2b are lower, because rung 3 sends smaller contexts; they are not evidence of less dependence on residency, and the policy-independent fraction is the one to report. The host tier size used elsewhere in this project (27 GiB, 110,592 tokens, from the run addendum for the host-tier turnover study) is not an input to these bounds, so any claim that a bound holds under memory pressure needs the residency study first. The paper should state that the bounds assume residency and that the residency assumption is measured separately.
