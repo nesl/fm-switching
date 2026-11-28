@@ -91,7 +91,7 @@ def main():
                   columnspacing=0.9, borderaxespad=0.1, labelspacing=0.25)
 
     caption = ("Decision latency of the policy per decision versus fleet size, live runs, 1x memory, 3 s robot deadline. "
-               "Clock plotted: wall clock (decision_wall_ms), not CPU time. Solid lines are p50, dashed lines p99; each point "
+               "Clock plotted: wall clock (decision\\_wall\\_ms), not CPU time. Solid lines are p50, dashed lines p99; each point "
                "is the median over the available seeds of the per-run percentile. COVEX points above 16 devices (hollow) are "
                "single seed 4 runs with the 3:11:2 mix flag, the only committed larger fleets; baselines have no cells "
                "above 16 devices. Each run logs about 12,000 decisions.")
