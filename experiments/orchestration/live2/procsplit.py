@@ -191,7 +191,8 @@ class RemoteCoordinator:
             elif op in ("eof", "closed"):
                 pass
             elif op == "error":
-                raise RuntimeError(f"coordinator process failed: {msg.get('error')}")
+                raise RuntimeError(f"coordinator process failed: {msg.get('error')}"
+                                   f"\n--- child traceback ---\n{msg.get('traceback')}")
         return out
 
     def _origin_of(self, t: float) -> Optional[float]:
@@ -269,6 +270,10 @@ def coordinator_process(sock_path: str, cfg: Dict[str, Any]) -> None:
         _serve(sock, cfg)
     except Exception as e:                                            # noqa: BLE001
         import traceback
+        try:
+            (Path(cfg["run_dir"]) / "coordinator_child_traceback.txt").write_text(traceback.format_exc())
+        except Exception:                                             # noqa: BLE001
+            pass
         try:
             send_msg(sock, {"op": "error",
                             "error": f"{type(e).__name__}: {e}",

@@ -145,7 +145,7 @@ class WTracker:
         second count derived somewhere else; two similar numbers under one name is how an
         in-flight total drifts, which `on_submit`'s comment records.
         """
-        return tuple((rid, v[0], int(v[1]), bool(v[2])) for rid, v in self._per_request.items())
+        return tuple((rid, v[0], int(v[1]), bool(v[2])) for rid, v in list(self._per_request.items()))
 
 
 def allowed(*, qtype: str, uncached: int, kind: str, tracker: WTracker,
