@@ -50,7 +50,7 @@ def main():
         env = "figure*" if width > 5 else "figure"
         parts.append(
             "\\begin{%s}[t]\n\\centering\n{\\fontfamily{LinuxBiolinumT}\\selectfont\n\\input{../%s.pgf}}\n"
-            "\\caption{%s}\n\\label{fig:%s}\n\\end{%s}\n" % (env, stem, caption_tex(cap), stem, env))
+            "\\caption{%s}\n\\label{fig:%s}\n\\end{%s}\n\\clearpage\n" % (env, stem, caption_tex(cap), stem, env))
     parts.append("\\bibliographystyle{ACM-Reference-Format}\n\\bibliography{refs_stub}\n\\end{document}\n")
     P.PREVIEW.mkdir(parents=True, exist_ok=True)
     (P.PREVIEW / "refs_stub.bib").write_text(P.STUB_BIB)

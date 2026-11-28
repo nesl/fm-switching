@@ -31,6 +31,7 @@ FS_TEXT = 7.0        # tick, value and legend text
 FS_AXLABEL = 7.5     # axis labels
 
 # ---- colours (D334). Device-only purple is a PLACEHOLDER until the user supplies the Figure 3 purple. ----
+# TODO(user): replace "device" below with the exact purple from the paper's Figure 3 once it is known; every figure reads it from here.
 COLORS = {
     "covex": "#285B91",
     "stateful": "#7A7A7A",

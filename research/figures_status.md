@@ -12,7 +12,7 @@ NO DATA = empty axes with "NO DATA YET". Data as of 2026-11-27.
 | F1_headline | OLD DATA | F1.csv (standard grid) | COVEX OLD; confidence-cascade has no dashcam cells ("n/a"); eco-llm lacks seed 5 | swap arm; pool extra seeds |
 | F2_ontime_vs_correct | OLD DATA | F2.csv | COVEX OLD; device-only on-time NaN for robot and single-shot; no confidence-cascade rows | swap arm; add seeds |
 | F3_latency_cdf | NO DATA | F3.csv.gz | no device-only rows; no delivered-answer latency field (only standing and cloud latency, each NaN for 16 to 33 percent of requests, plus composite stamps) | producer must add device-only rows and the delivered-answer latency |
-| F4_per_device | OLD DATA | F4.csv (dashcam only) | no device-only per-device rows for robot or single-shot | add device-only per-device rows; robot and single-shot can then be drawn |
+| F4_per_device | OLD DATA | F4.csv (dashcam only) | no device-only per-device rows for robot or single-shot. Device-only dashcam attainment is 0.00 by definition: the metric counts on-time cloud alerts only (canon.py dash_attainment; device alerts are never added), while device-only mAP is 0.63 (F1.csv). Not missing rows, and the metric is not changed here | add device-only per-device rows for robot and single-shot; a device-side dashcam metric would be a definition change for the user to rule on |
 | F05_ablation_ladder | OLD DATA | F1.csv seed 4 (rungs 0 to 3); committed cells via the committed scorer | seed 4 only; +S2 only under outage; counterfactual admission (-cf-a) has no outage cell; eager has no no-outage cell; no P-only or 0b-only arm | add seeds and CIs; swap rung 3 for frozen arm; full +S2 row |
 | F06_timeline | DEV DATA | cand-tl n20 seed 4 normal and outage cells: decision.jsonl.gz, host_counters_d211.log, outcomes.jsonl | seed 4 only; warms and touches are 1:1 (one line); occupancy is engine-measured | swap to frozen arm; several seeds |
 | F07_planner_decisions | NO DATA | F7.csv (0 rows); decision.jsonl has only state_action, touch, release, defer, decline | KEEP, RELOAD, HOLD_BACK and SLICE not logged | per-kind decision log at 1x and 0.5x |
@@ -29,5 +29,6 @@ NO DATA = empty axes with "NO DATA YET". Data as of 2026-11-27.
 
 Notes:
 - Gallery figure numbers are assigned by LaTeX in file order (the caption prefixes read "Figure 1" to "Figure 18"), not by the paper's numbering.
-- The device-only purple #7A4E9C is a PLACEHOLDER until the user supplies the exact Figure 3 purple.
+- The device-only purple #7A4E9C is a PLACEHOLDER until the user supplies the exact Figure 3 purple (TODO in paperstyle.py).
+- Gallery: each figure is on its own page (clearpage), because lost floats left blank pages and missing captions in the first build. 18 of 18 captions verified with pdftotext.
 - Build logs (`figures/paper/preview/*.aux|log|blg|bbl|out`) are not committed.
