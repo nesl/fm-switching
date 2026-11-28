@@ -6,6 +6,8 @@ set -u
 ARM=${1:-mooncake}; N=${2:-20}; RUN_S=${3:-720}; SEED=4
 cd /home/pragya/Desktop/fm-switching
 export CUDA_VISIBLE_DEVICES=GPU-4f1d7e47-e769-a289-4860-e71c0d97267c
+# v3: the same three GPU variables as the frozen-grid driver (lines 60-62), so the harness start check watches GPU 2 (v2 watched GPU 1: study_clean_vllm.py:54 default)
+export F_GPU_UUID=$CUDA_VISIBLE_DEVICES CLEAN_GPU_UUID=$CUDA_VISIBLE_DEVICES
 export HF_TOKEN=$(cat hf-token.txt)
 PY=~/.venvs/fm-switching-vllm/bin/python
 PYSPY=${PYSPY:-$(command -v py-spy || echo ~/.venvs/pyspy/bin/py-spy)}   # pip install py-spy into a SEPARATE venv
@@ -30,6 +32,16 @@ cat > $RAW/ptrace_site/sitecustomize.py <<'PYEOF'
 import ctypes
 try:
     ctypes.CDLL(None).prctl(0x59616d61, ctypes.c_ulong(-1), 0, 0, 0)
+except Exception:
+    pass
+# chain to the system sitecustomize (Debian: the apport hook) that this one shadows, so the harness processes behave as before
+try:
+    import importlib.util as _u, os as _o
+    _p = "/usr/lib/python3.10/sitecustomize.py"
+    if _o.path.exists(_p):
+        _s = _u.spec_from_file_location("_sys_sitecustomize", _p)
+        _m = _u.module_from_spec(_s)
+        _s.loader.exec_module(_m)
 except Exception:
     pass
 PYEOF
