@@ -1,7 +1,9 @@
 import json,hashlib,os
 _D=os.path.dirname(os.path.abspath(__file__))
-PATH=_D+'/oracle_fair_table.json'
 SRC='results/orchestration/live2/oracle/oracle_fair_table.json'
+PATH=_D+'/oracle_fair_table.json'
+if not os.path.exists(PATH):
+    PATH=os.path.join(_D,'..','..','..',SRC)   # repo layout: experiments/analysis/oracle/ -> repo root
 SHA256='f67be762b15762e44d0cb1bbad9924599f896cc07e3bb4b6cf0c91c4b408c562'
 BLOB='947ad92a102581a9fcf0e30f7ac936832a15f511'
 _KEYS={'A_RC_H':'recall|cloud|WITH_HISTORY','A_RC_N':'recall|cloud|WITHOUT_HISTORY','CR':'recall|device|NA','A_SC':'single_shot|cloud|COLD','A_SD':'single_shot|device|NA'}
