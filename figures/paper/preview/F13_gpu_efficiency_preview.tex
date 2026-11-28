@@ -1,0 +1,18 @@
+\documentclass[sigconf]{acmart}
+\usepackage{pgf}
+\usepackage[T1]{fontenc}
+\usepackage{libertine}
+\settopmatter{printacmref=false}
+\pagestyle{empty}
+\begin{document}
+{\fontfamily{LinuxBiolinumT}\selectfont
+\begin{figure}[t]
+  \centering
+  \input{../F13_gpu_efficiency.pgf}
+  \caption{Efficiency of the cloud GPU on the standard grid (16 devices, 1x memory, 3 s robot deadline, seeds 4 to 7): correct answers (robot plus single-shot) per measured GPU-second, GPU busy fraction of the 1200 s per-run budget, and D174 uncached tokens charged per GPU-second. Bars are the mean over the seeds present for the arm; marks show each seed. Arms with no committed GPU metrics (LMCache, Warm-all LRU) are not drawn. Blue is COVEX, dark grey stateful baselines, light grey stateless baselines.}
+  \label{fig:F13_gpu_efficiency}
+\end{figure}
+}
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{refs_stub}
+\end{document}

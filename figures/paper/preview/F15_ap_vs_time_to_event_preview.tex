@@ -1,0 +1,18 @@
+\documentclass[sigconf]{acmart}
+\usepackage{pgf}
+\usepackage[T1]{fontenc}
+\usepackage{libertine}
+\settopmatter{printacmref=false}
+\pagestyle{empty}
+\begin{document}
+{\fontfamily{LinuxBiolinumT}\selectfont
+\begin{figure}[t]
+  \centering
+  \input{../F15_ap_vs_time_to_event.pgf}
+  \caption{Crash-anticipation average precision (Nexar, 300 validation clips) versus time to event for the cloud model (Qwen3-VL-32B) and the on-device model (Qwen3-VL-4B), model-level measurement from StudyEARLY1 with 95 percent bootstrap bands over source videos for the 2 fps episodic format; the one-frame format is dashed. Dotted line is the chance level (0.5 for the 2 fps format). Cloud delivery latency (median 0.69 s) is not charged here.}
+  \label{fig:F15_ap_vs_time_to_event}
+\end{figure}
+}
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{refs_stub}
+\end{document}
