@@ -1,0 +1,94 @@
+{
+  "arm": "covex-v6-fair-final-cand-tl",
+  "n_devices": 20,
+  "mode": "A",
+  "run_s": 1200,
+  "seed": 5,
+  "robot_upload": "per-frame",
+  "split": true,
+  "err": "RuntimeError: coordinator process failed: RuntimeError: dictionary changed size during iteration",
+  "wall_s": 446.969,
+  "run_dir": "/home/pragya/data/live2/frozen_grid/runs/covex-v6-fair-final-cand-tl_n20_s5_1200s_h27_3t_c3-11-2_L3_epg_rq30_qp",
+  "trace_dir": "/home/pragya/data/live2/frozen_grid/work/traces/seed5_n20_1200s_A_r3-11-2_lh_req_ss2_L3_epg_perframe_rq30",
+  "lateness": null,
+  "run_valid": null,
+  "digests_equal": null,
+  "n_requests": null,
+  "n_errors": null,
+  "server_kind": "vllm",
+  "is_measurement": false,
+  "request_log_reconciled": {
+    "checked": false,
+    "reason": "request.jsonl or outcomes.jsonl absent"
+  },
+  "request_log": {
+    "n_requests": null,
+    "request_rows": 2440,
+    "request_rows_abandoned": 0,
+    "rows_match_submitted": false,
+    "outcome_request_ids": 0,
+    "outcome_request_ids_unresolved": 0,
+    "unresolved_first": [],
+    "row_sources": {
+      "completed": 2440
+    },
+    "delivered_resolving_to_abandoned": 0,
+    "delivered_abandoned_first": [],
+    "request_log_complete": false
+  },
+  "flag": "REQUEST_LOG_INCOMPLETE",
+  "result_status": "child_never_sent_result",
+  "flag_result": "COORDINATOR_RESULT_MISSING: child_never_sent_result",
+  "source_agreement": null,
+  "score": {
+    "ok": false,
+    "error": "FileNotFoundError: [Errno 2] No such file or directory: '/home/pragya/data/live2/frozen_grid/runs/covex-v6-fair-final-cand-tl_n20_s5_1200s_h27_3t_c3-11-2_L3_epg_rq30_qp/outcomes.jsonl'"
+  },
+  "metrics_health": {
+    "state": "unknown_no_backend_block",
+    "engine_metrics_trusted": false,
+    "n_scrapes": null,
+    "n_failures": null,
+    "last_success_t": null,
+    "metric_names_found": [],
+    "untrusted_quantities": [
+      "cloud.gpu_kv_fraction",
+      "arm_stats.pd_kv_bound_by_engine_metric",
+      "arm_stats.pd_free_kv_min",
+      "arm_stats.pd_free_kv_max",
+      "arm_stats.pd_free_kv_sum",
+      "backend.engine_metrics"
+    ],
+    "why": "the backend published no metrics_health block, so this cell cannot say whether its scrape ran; it predates E1 or lost its backend block"
+  },
+  "switches": {
+    "live2_predictive_belief": true,
+    "live2_pb_engine_resync": true,
+    "live2_book_belief_uncached": true,
+    "live2_la_arrival_admission": true,
+    "live2_value_aware_admission": false,
+    "live2_catchup_prefill": false,
+    "live2_pb_wire_tokens": true,
+    "live2_pb_host_engine_model": true,
+    "live2_pb_touch_guard": true
+  },
+  "proof_load_d209": {
+    "proof_ran": false,
+    "proof_peak_cores": 0,
+    "host_load_peak": {
+      "loadavg_1m": 4.56,
+      "other_cpu_cores": 3.533
+    },
+    "decision_p99_ms": null,
+    "twin": null,
+    "twin_decision_p99_ms": null,
+    "decision_p99_ratio": null,
+    "flags": {
+      "proof_cores_gt_8": false,
+      "decision_p99_up_gt_10pct": null
+    },
+    "reportable": false,
+    "twin_note": "the twin is the committed 16-device 3 s 1x cell of the same arm and seed (for covex-v6-base / covex-v6-rules it is that arm under its committed name, hybrid-F-lhreq-noc3 / v5-rules-2, per arm_names_v6.OLD_TO_RUNG), so for a 0.25x, 2.5 s or 12/20-device cell the p99 ratio also carries the condition; only a cell with proof_ran = true is reported",
+    "rule": "D209 user ruling 2026-11-23 option 2: proofs unpinned, nice 19, <= 2, never across a boundary"
+  }
+}
