@@ -366,5 +366,17 @@
   "end_files_n": 505,
   "end_hash_wall_s": 0.067,
   "note": "sha256 of files ON DISK (did the tree move under the cell, not what bytecode executed). Case 1 runner_child_mismatch -> TornTree before running; case 2 moved_after_import -> WARNING, cell kept (an imported module is cached, the change did not execute); case 3 torn_lazy_import -> INVALID. Bounds: a file changed and changed back within a cell is invisible; runner-only files are outside case 1 and are covered by the runner's pre-flight refusal instead (disjoint halves, keep both); repo files only."
- }
+ },
+ "wire_events_sent": 22591,
+ "wire_replies_received": 5311,
+ "wire_write_errors": 1,
+ "wire_max_send_backlog": 863,
+ "completion_to_emulator_ms": {
+  "n": 5311,
+  "p50_ms": 4.7183,
+  "p90_ms": 8.8623,
+  "p99_ms": 10.0358,
+  "max_ms": 211.8597
+ },
+ "result_status": "parent_closed_before_result"
 }

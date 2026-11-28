@@ -1,6 +1,6 @@
 {
  "label": "FROZEN_TEST_THREE_TYPE dashcam-EP-G upload-pf rq30 reask-device-PROVISIONAL simplestream_n20_s4_1200s_h27_3t_L3_epg_rq30 [robot-upload=per-frame]",
- "git_commit": "043730abc7fd07f2612e24eb3abb6f52926342a2",
+ "git_commit": "c17f6619ed4e909a6c0fb6502f673e316e4eefa0",
  "arm": "simplestream",
  "arm_version": "live2-arm-1.0",
  "flags": {},
@@ -84,10 +84,10 @@
     "27"
    ]
   ],
-  "restart_started": 1795794971.8403242,
-  "up_at": 1795795038.9489837,
+  "restart_started": 1795856240.3685775,
+  "up_at": 1795856307.5215693,
   "startup_s": 66.7,
-  "log": "logs/study_x_server_32BI_1127_075611.log",
+  "log": "logs/study_x_server_32BI_1128_005720.log",
   "host_gib": 27.0,
   "scheduling_policy": "fcfs",
   "extra_flags": [],
@@ -159,7 +159,7 @@
   "enforced": true
  },
  "git_working_tree": {
-  "head": "043730abc7fd07f2612e24eb3abb6f52926342a2",
+  "head": "c17f6619ed4e909a6c0fb6502f673e316e4eefa0",
   "dirty": false,
   "diff_sha256": null,
   "dirty_files": []
@@ -197,5 +197,27 @@
  "trace_dir": "/home/pragya/data/live2/frozen_grid/work/traces/seed4_n20_1200s_A_r40-40-20_lh_req_ss2_L3_epg_perframe_rq30",
  "outage": null,
  "outage_placement": null,
- "outage_semantics": null
+ "outage_semantics": null,
+ "source_agreement": {
+  "runner_loaded_n": 156,
+  "child_loaded_at_start_n": 132,
+  "overlap_n": 130,
+  "runner_only_n": 26,
+  "child_only_at_start_n": 2,
+  "runner_digest": "90fbdd831aba27a7",
+  "child_start_digest": "ebbb48954e2dd13b",
+  "runner_child_mismatch": [],
+  "start_files_n": 505,
+  "start_hash_wall_s": 0.0298,
+  "verdict": "OK",
+  "torn_lazy_import": [],
+  "moved_after_import": [],
+  "child_only_late_n": 2,
+  "tree_files_changed_during_cell": [],
+  "tree_files_changed_during_cell_n": 0,
+  "end_files_n": 505,
+  "end_hash_wall_s": 0.067,
+  "note": "sha256 of files ON DISK (did the tree move under the cell, not what bytecode executed). Case 1 runner_child_mismatch -> TornTree before running; case 2 moved_after_import -> WARNING, cell kept (an imported module is cached, the change did not execute); case 3 torn_lazy_import -> INVALID. Bounds: a file changed and changed back within a cell is invisible; runner-only files are outside case 1 and are covered by the runner's pre-flight refusal instead (disjoint halves, keep both); repo files only."
+ },
+ "result_status": "parent_closed_before_result"
 }
